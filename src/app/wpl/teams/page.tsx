@@ -437,15 +437,40 @@ function WPLTeamsPageContent() {
                   }}
                 />
                 
-                {/* Interactive mouse-following gradient */}
+                {/* Enhanced animated aurora effect */}
                 <motion.div
-                  className="absolute w-64 h-64 rounded-full blur-2xl pointer-events-none"
-                                style={{
-                                        background: `radial-gradient(circle, ${WPLColors.purpleRGBA[30]}, ${WPLColors.pinkRGBA[20]}, transparent)`,
-                                        left: (mousePosition?.x ?? 0) - 128,
-                                        top: (mousePosition?.y ?? 0) - 128,
-                                    }}
-                  transition={{ type: "spring", stiffness: 500, damping: 28 }}
+                  className="absolute w-[500px] h-[500px] rounded-full blur-[100px] pointer-events-none opacity-40"
+                  style={{
+                    background: `conic-gradient(from 0deg, ${WPLColors.purple}, ${WPLColors.pink}, #06b6d4, ${WPLColors.purple})`,
+                  }}
+                  animate={{
+                    x: ['0%', '40%', '20%', '0%'],
+                    y: ['0%', '20%', '40%', '0%'],
+                    rotate: [0, 180, 360],
+                    scale: [1, 1.2, 0.9, 1],
+                  }}
+                  transition={{
+                    duration: 20,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                  }}
+                />
+                <motion.div
+                  className="absolute w-[400px] h-[400px] rounded-full blur-[80px] pointer-events-none opacity-30"
+                  style={{
+                    background: `conic-gradient(from 180deg, #06b6d4, #8b5cf6, #f472b6, #06b6d4)`,
+                  }}
+                  animate={{
+                    x: ['50%', '10%', '40%', '50%'],
+                    y: ['50%', '30%', '10%', '50%'],
+                    rotate: [360, 180, 0],
+                    scale: [0.9, 1.1, 1, 0.9],
+                  }}
+                  transition={{
+                    duration: 25,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                  }}
                 />
 
                 <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

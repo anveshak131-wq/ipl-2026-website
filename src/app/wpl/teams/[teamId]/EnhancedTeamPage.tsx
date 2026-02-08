@@ -979,26 +979,99 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 flex items-center justify-center">
-        <motion.div
-          animate={{ rotate: 360 }}
-          transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-          className="w-16 h-16 border-4 border-purple-500 border-t-transparent rounded-full"
-        />
+      <div className="min-h-screen flex items-center justify-center relative overflow-hidden" style={{
+        background: 'linear-gradient(145deg, #0a0015 0%, #1a0a2e 30%, #0f172a 60%, #1e1b4b 100%)',
+      }}>
+        {/* Animated background for loading */}
+        <div className="absolute inset-0">
+          <motion.div
+            className="absolute w-[500px] h-[500px] rounded-full blur-[100px] opacity-30"
+            style={{ background: 'conic-gradient(from 0deg, #8b5cf6, #ec4899, #06b6d4, #8b5cf6)' }}
+            animate={{ rotate: 360, scale: [1, 1.2, 1] }}
+            transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
+          />
+        </div>
+        <div className="relative z-10 flex flex-col items-center gap-6">
+          <motion.div
+            className="relative"
+            animate={{ scale: [1, 1.1, 1] }}
+            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+          >
+            <motion.div
+              animate={{ rotate: 360 }}
+              transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
+              className="w-20 h-20 rounded-full"
+              style={{
+                background: 'conic-gradient(from 0deg, #8b5cf6, #ec4899, #06b6d4, transparent)',
+              }}
+            />
+            <div className="absolute inset-2 rounded-full" style={{ background: '#0a0015' }} />
+            <motion.div
+              className="absolute inset-0 flex items-center justify-center text-3xl"
+              animate={{ scale: [1, 1.2, 1] }}
+              transition={{ duration: 1, repeat: Infinity, ease: "easeInOut" }}
+            >
+              🏏
+            </motion.div>
+          </motion.div>
+          <motion.p
+            className="text-white/70 text-lg font-medium tracking-wide"
+            animate={{ opacity: [0.5, 1, 0.5] }}
+            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+          >
+            Loading team details...
+          </motion.p>
+        </div>
       </div>
     );
   }
 
   if (!team) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 flex items-center justify-center">
-        <div className="text-center text-white">
-          <h1 className="text-4xl font-bold mb-4">Team Not Found</h1>
-          <p className="text-xl">The team you're looking for doesn't exist.</p>
-          <Link href="/wpl/teams" className="inline-block mt-6 px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
-            Back to Teams
-          </Link>
+      <div className="min-h-screen flex items-center justify-center relative overflow-hidden" style={{
+        background: 'linear-gradient(145deg, #0a0015 0%, #1a0a2e 30%, #0f172a 60%, #1e1b4b 100%)',
+      }}>
+        <div className="absolute inset-0">
+          <motion.div
+            className="absolute w-[400px] h-[400px] left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full blur-[80px] opacity-20"
+            style={{ background: 'conic-gradient(from 0deg, #ef4444, #f97316, #ef4444)' }}
+            animate={{ rotate: 360 }}
+            transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+          />
         </div>
+        <motion.div 
+          className="text-center relative z-10 px-6"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+        >
+          <motion.div
+            className="text-8xl mb-6"
+            animate={{ rotate: [0, -10, 10, 0], scale: [1, 1.1, 1] }}
+            transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+          >
+            🔍
+          </motion.div>
+          <h1 className="text-5xl font-black mb-4 bg-gradient-to-r from-white via-purple-200 to-pink-200 bg-clip-text text-transparent">
+            Team Not Found
+          </h1>
+          <p className="text-xl text-white/60 mb-8 max-w-md mx-auto">
+            The team you're looking for doesn't exist or has been moved.
+          </p>
+          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            <Link 
+              href="/wpl/teams" 
+              className="inline-flex items-center gap-3 px-8 py-4 rounded-2xl font-bold text-white transition-all duration-300"
+              style={{
+                background: 'linear-gradient(135deg, #8b5cf6, #ec4899)',
+                boxShadow: '0 4px 30px rgba(139, 92, 246, 0.4), 0 0 0 1px rgba(255,255,255,0.1) inset',
+              }}
+            >
+              <span>←</span>
+              <span>Back to Teams</span>
+            </Link>
+          </motion.div>
+        </motion.div>
       </div>
     );
   }
@@ -1033,103 +1106,172 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
   const logoUrl = getLogoUrl();
 
   return (
-    <div ref={containerRef} className="min-h-screen" style={{
-      background: `linear-gradient(135deg, ${WPLColors.base} 0%, ${WPLColors.gradientStart} 25%, ${WPLColors.gradientMid} 50%, ${WPLColors.gradientEnd} 75%, ${WPLColors.base} 100%)`
+    <div ref={containerRef} className="min-h-screen font-sans antialiased" style={{
+      background: `linear-gradient(145deg, #0a0015 0%, #1a0a2e 20%, #0f172a 40%, #1e1b4b 60%, #0a0015 100%)`,
+      fontFamily: "'Inter', 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
     }}>
-      {/* Enhanced Animated Background */}
+      {/* Premium Animated Background with Mesh Gradient */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        {/* Multi-layer animated gradients */}
+        {/* Animated mesh gradient base */}
+        <div className="absolute inset-0" style={{
+          background: `
+            radial-gradient(ellipse 80% 50% at 20% 40%, rgba(124, 58, 237, 0.25) 0%, transparent 50%),
+            radial-gradient(ellipse 60% 60% at 80% 20%, rgba(236, 72, 153, 0.2) 0%, transparent 50%),
+            radial-gradient(ellipse 70% 70% at 50% 90%, rgba(6, 182, 212, 0.15) 0%, transparent 50%),
+            radial-gradient(ellipse 50% 80% at 10% 80%, rgba(139, 92, 246, 0.2) 0%, transparent 50%)
+          `,
+        }} />
+        
+        {/* Animated color waves */}
         <motion.div
           animate={{
             background: [
-              "radial-gradient(circle at 20% 50%, rgba(139, 92, 246, 0.4) 0%, transparent 60%)",
-              "radial-gradient(circle at 80% 50%, rgba(59, 130, 246, 0.4) 0%, transparent 60%)",
-              "radial-gradient(circle at 50% 100%, rgba(236, 72, 153, 0.4) 0%, transparent 60%)",
-              "radial-gradient(circle at 20% 20%, rgba(168, 85, 247, 0.3) 0%, transparent 50%)",
-              "radial-gradient(circle at 80% 80%, rgba(34, 197, 94, 0.3) 0%, transparent 50%)",
+              "radial-gradient(ellipse 100% 100% at 0% 0%, rgba(139, 92, 246, 0.4) 0%, transparent 50%)",
+              "radial-gradient(ellipse 100% 100% at 100% 0%, rgba(236, 72, 153, 0.4) 0%, transparent 50%)",
+              "radial-gradient(ellipse 100% 100% at 100% 100%, rgba(6, 182, 212, 0.4) 0%, transparent 50%)",
+              "radial-gradient(ellipse 100% 100% at 0% 100%, rgba(168, 85, 247, 0.4) 0%, transparent 50%)",
+              "radial-gradient(ellipse 100% 100% at 0% 0%, rgba(139, 92, 246, 0.4) 0%, transparent 50%)",
             ],
           }}
-          transition={{ duration: 15, repeat: Infinity, repeatType: "reverse", ease: "easeInOut" }}
+          transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
           className="absolute inset-0"
         />
         
-        {/* Floating particles */}
-        {[...Array(20)].map((_, i) => (
-          <motion.div
-            key={`particle-${i}`}
-            className="absolute w-2 h-2 bg-white/20 rounded-full blur-sm"
-            style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-            }}
-            animate={{
-              x: [0, Math.random() * 200 - 100],
-              y: [0, Math.random() * 200 - 100],
-              opacity: [0, 1, 0],
-              scale: [0, 1, 0],
-            }}
-            transition={{
-              duration: Math.random() * 10 + 10,
-              repeat: Infinity,
-              delay: Math.random() * 5,
-              ease: "easeInOut"
-            }}
-          />
-        ))}
+        {/* Premium floating particles with glow */}
+        {[...Array(30)].map((_, i) => {
+          const size = Math.random() * 4 + 1;
+          const colors = ['#8b5cf6', '#ec4899', '#06b6d4', '#a855f7', '#f472b6'];
+          const color = colors[i % colors.length];
+          return (
+            <motion.div
+              key={`particle-${i}`}
+              className="absolute rounded-full"
+              style={{
+                width: size,
+                height: size,
+                left: `${Math.random() * 100}%`,
+                top: `${Math.random() * 100}%`,
+                background: color,
+                boxShadow: `0 0 ${size * 3}px ${color}80, 0 0 ${size * 6}px ${color}40`,
+              }}
+              animate={{
+                x: [0, Math.random() * 150 - 75, Math.random() * 100 - 50, 0],
+                y: [0, Math.random() * 150 - 75, Math.random() * 100 - 50, 0],
+                opacity: [0.2, 0.8, 0.4, 0.2],
+                scale: [1, 1.5, 0.8, 1],
+              }}
+              transition={{
+                duration: Math.random() * 15 + 15,
+                repeat: Infinity,
+                delay: Math.random() * 8,
+                ease: "easeInOut"
+              }}
+            />
+          );
+        })}
         
-        {/* Geometric shapes */}
-        {[...Array(8)].map((_, i) => (
-          <motion.div
-            key={`shape-${i}`}
-            className="absolute border border-white/10"
-            style={{
-              width: `${Math.random() * 100 + 50}px`,
-              height: `${Math.random() * 100 + 50}px`,
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-              borderRadius: Math.random() > 0.5 ? '50%' : '10%',
-            }}
-            animate={{
-              rotate: [0, 360],
-              scale: [1, 1.2, 1],
-              opacity: [0.1, 0.3, 0.1],
-            }}
-            transition={{
-              duration: Math.random() * 20 + 20,
-              repeat: Infinity,
-              ease: "linear"
-            }}
-          />
-        ))}
+        {/* Premium geometric shapes with gradient borders */}
+        {[...Array(12)].map((_, i) => {
+          const size = Math.random() * 120 + 60;
+          const isCircle = Math.random() > 0.5;
+          return (
+            <motion.div
+              key={`shape-${i}`}
+              className="absolute"
+              style={{
+                width: size,
+                height: size,
+                left: `${Math.random() * 100}%`,
+                top: `${Math.random() * 100}%`,
+                borderRadius: isCircle ? '50%' : '20%',
+                background: 'transparent',
+                border: '1px solid',
+                borderImage: `linear-gradient(${Math.random() * 360}deg, rgba(139, 92, 246, 0.3), rgba(236, 72, 153, 0.2), rgba(6, 182, 212, 0.3)) 1`,
+              }}
+              animate={{
+                rotate: [0, isCircle ? 360 : 90, isCircle ? 720 : 180],
+                scale: [1, 1.15, 0.9, 1],
+                opacity: [0.15, 0.35, 0.2, 0.15],
+              }}
+              transition={{
+                duration: Math.random() * 25 + 25,
+                repeat: Infinity,
+                ease: "linear"
+              }}
+            />
+          );
+        })}
         
-        {/* Mouse-following gradient */}
+        {/* Enhanced animated aurora effect instead of mouse-following */}
         <motion.div
-          className="absolute w-96 h-96 rounded-full blur-3xl pointer-events-none"
+          className="absolute w-[600px] h-[600px] rounded-full blur-[120px] pointer-events-none opacity-40"
           style={{
-            background: `radial-gradient(circle, ${teamColors.primary}40, ${teamColors.secondary}30, transparent)`,
-            left: ((mousePosition as any)?.x || 0) - 192,
-            top: ((mousePosition as any)?.y || 0) - 192,
+            background: `conic-gradient(from 0deg, ${teamColors.primary}, ${teamColors.secondary}, #ec4899, #8b5cf6, ${teamColors.primary})`,
           }}
-          transition={{ type: "spring", stiffness: 500, damping: 28 }}
+          animate={{
+            x: ['-10%', '60%', '30%', '-10%'],
+            y: ['-10%', '30%', '60%', '-10%'],
+            rotate: [0, 180, 360],
+            scale: [1, 1.2, 0.9, 1],
+          }}
+          transition={{
+            duration: 25,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+        />
+        <motion.div
+          className="absolute w-[500px] h-[500px] rounded-full blur-[100px] pointer-events-none opacity-30"
+          style={{
+            background: `conic-gradient(from 180deg, #06b6d4, #8b5cf6, #f472b6, #06b6d4)`,
+          }}
+          animate={{
+            x: ['70%', '10%', '50%', '70%'],
+            y: ['60%', '20%', '-10%', '60%'],
+            rotate: [360, 180, 0],
+            scale: [0.9, 1.1, 1, 0.9],
+          }}
+          transition={{
+            duration: 30,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
         />
       </div>
 
-      {/* Enhanced Sticky Navigation Bar */}
+      {/* Premium Sticky Navigation Bar */}
       <motion.nav 
-        className="sticky top-0 z-50 backdrop-blur-xl bg-white/10 border-b border-white/20 shadow-2xl"
-        initial={{ y: -100 }}
-        animate={{ y: 0 }}
-        transition={{ type: "spring", stiffness: 100, damping: 20 }}
+        className="sticky top-0 z-50"
+        initial={{ y: -100, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ type: "spring", stiffness: 120, damping: 25 }}
         style={{
-          background: 'rgba(255, 255, 255, 0.08)',
-          backdropFilter: 'blur(20px)',
-          WebkitBackdropFilter: 'blur(20px)',
+          background: 'linear-gradient(180deg, rgba(15, 10, 30, 0.95) 0%, rgba(15, 10, 30, 0.85) 100%)',
+          backdropFilter: 'blur(24px) saturate(180%)',
+          WebkitBackdropFilter: 'blur(24px) saturate(180%)',
+          borderBottom: '1px solid rgba(139, 92, 246, 0.15)',
+          boxShadow: '0 4px 30px rgba(139, 92, 246, 0.1), 0 1px 0 rgba(255, 255, 255, 0.05) inset',
         }}
       >
-        {/* Progress Bar */}
+        {/* Animated Progress Bar */}
         <motion.div
-          className="absolute top-0 left-0 h-1 bg-gradient-to-r from-purple-500 to-pink-500 origin-left"
-          style={{ scaleX }}
+          className="absolute top-0 left-0 h-[2px] origin-left"
+          style={{ 
+            scaleX,
+            background: 'linear-gradient(90deg, #8b5cf6, #ec4899, #06b6d4, #8b5cf6)',
+            backgroundSize: '300% 100%',
+          }}
+        />
+        <motion.div
+          className="absolute top-0 left-0 h-[2px] w-full opacity-50"
+          animate={{
+            backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'],
+          }}
+          transition={{ duration: 5, repeat: Infinity, ease: "linear" }}
+          style={{
+            background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)',
+            backgroundSize: '200% 100%',
+          }}
         />
         
         <div className="container mx-auto px-4">
@@ -1577,15 +1719,22 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
           </div>
         </motion.div>
 
-        {/* Interactive mouse-following gradient */}
+        {/* Enhanced floating orbs animation */}
         <motion.div
-          className="absolute w-96 h-96 rounded-full blur-3xl pointer-events-none"
+          className="absolute w-[400px] h-[400px] rounded-full blur-[80px] pointer-events-none"
           style={{
-            background: `radial-gradient(circle, ${teamColors.primary}40, ${teamColors.secondary}30, transparent)`,
-            left: ((mousePosition as any)?.x || 0) - 192,
-            top: ((mousePosition as any)?.y || 0) - 192,
+            background: `radial-gradient(circle, ${teamColors.primary}50, ${teamColors.secondary}30, transparent)`,
           }}
-          transition={{ type: "spring", stiffness: 500, damping: 28 }}
+          animate={{
+            x: ['0%', '50%', '25%', '0%'],
+            y: ['0%', '25%', '50%', '0%'],
+            scale: [1, 1.3, 0.8, 1],
+          }}
+          transition={{
+            duration: 20,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
         />
         
         <div className="container mx-auto px-4">
