@@ -3294,51 +3294,407 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
               </motion.div>
             )}
 
-            {/* Matches Tab */}
+            {/* Enhanced Matches Tab with Premium Design */}
             {activeTab === 'matches' && (
               <motion.div
                 key="matches"
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
+                exit={{ opacity: 0, y: -30 }}
+                transition={{ duration: 0.5, ease: "easeOut" }}
                 className="space-y-8"
               >
-                <div className="bg-white/10 backdrop-blur-md rounded-2xl p-8 border border-white/20">
-                  <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
-                    <Calendar className="w-6 h-6" />
-                    Match Schedule
-                  </h2>
-                  <div className="space-y-4">
-                    {matches.map((match, index) => (
+                {/* Premium Header Section */}
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.1 }}
+                  className="relative overflow-hidden rounded-3xl p-8"
+                  style={{
+                    background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.15), rgba(236, 72, 153, 0.15))',
+                    backdropFilter: 'blur(20px)',
+                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                    boxShadow: '0 8px 32px rgba(139, 92, 246, 0.2)',
+                  }}
+                >
+                  {/* Animated background pattern */}
+                  <motion.div
+                    className="absolute inset-0 opacity-10"
+                    style={{
+                      backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+                    }}
+                    animate={{
+                      backgroundPosition: ['0% 0%', '100% 100%'],
+                    }}
+                    transition={{
+                      duration: 20,
+                      repeat: Infinity,
+                      ease: "linear"
+                    }}
+                  />
+                  
+                  <div className="relative z-10">
+                    <motion.h2 
+                      className="text-4xl font-black text-white mb-6 flex items-center gap-4"
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.2 }}
+                    >
+                      <motion.div
+                        className="w-14 h-14 rounded-2xl flex items-center justify-center"
+                        style={{
+                          background: 'linear-gradient(135deg, rgba(249, 115, 22, 0.3), rgba(239, 68, 68, 0.3))',
+                          border: '1px solid rgba(249, 115, 22, 0.4)',
+                          boxShadow: '0 8px 24px rgba(249, 115, 22, 0.3)',
+                        }}
+                        animate={{
+                          rotate: [0, 10, -10, 0],
+                          scale: [1, 1.1, 1],
+                        }}
+                        transition={{
+                          duration: 4,
+                          repeat: Infinity,
+                          ease: "easeInOut"
+                        }}
+                      >
+                        <Calendar className="w-7 h-7" style={{ color: WPLColors.warning }} />
+                      </motion.div>
+                      <span className="bg-gradient-to-r from-orange-400 via-red-400 to-pink-500 bg-clip-text text-transparent">
+                        Match Schedule
+                      </span>
+                    </motion.h2>
+                    
+                    {/* Stats Summary */}
+                    <motion.div
+                      className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6"
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.3 }}
+                    >
+                      {[
+                        { label: 'Total', value: matches.length, icon: '📊', color: 'from-blue-500 to-cyan-500', glow: 'rgba(59, 130, 246, 0.3)' },
+                        { label: 'Completed', value: matches.filter(m => m.status === 'completed').length, icon: '✅', color: 'from-green-500 to-emerald-500', glow: 'rgba(16, 185, 129, 0.3)' },
+                        { label: 'Live', value: matches.filter(m => m.status === 'live').length, icon: '🔴', color: 'from-red-500 to-pink-500', glow: 'rgba(239, 68, 68, 0.3)' },
+                        { label: 'Upcoming', value: matches.filter(m => m.status === 'upcoming' || m.status === 'scheduled').length, icon: '⏳', color: 'from-yellow-500 to-orange-500', glow: 'rgba(234, 179, 8, 0.3)' },
+                      ].map((stat, index) => (
+                        <motion.div
+                          key={stat.label}
+                          className="relative group"
+                          initial={{ opacity: 0, scale: 0.8 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          transition={{ delay: 0.4 + index * 0.05 }}
+                          whileHover={{ scale: 1.05, y: -3 }}
+                        >
+                          <div
+                            className="relative overflow-hidden rounded-2xl p-4"
+                            style={{
+                              background: `linear-gradient(135deg, ${stat.color})`,
+                              boxShadow: `0 8px 24px ${stat.glow}`,
+                              border: '1px solid rgba(255, 255, 255, 0.1)',
+                            }}
+                          >
+                            {/* Glossy overlay */}
+                            <div
+                              className="absolute inset-0"
+                              style={{
+                                background: 'linear-gradient(180deg, rgba(255, 255, 255, 0.2) 0%, transparent 50%, rgba(0, 0, 0, 0.1) 100%)',
+                              }}
+                            />
+                            
+                            <div className="relative z-10 flex items-center justify-between">
+                              <div>
+                                <motion.div 
+                                  className="text-3xl font-black text-white mb-1"
+                                  initial={{ opacity: 0 }}
+                                  animate={{ opacity: 1 }}
+                                  transition={{ delay: 0.6 + index * 0.05 }}
+                                >
+                                  {stat.value}
+                                </motion.div>
+                                <div className="text-white/90 text-sm font-semibold">{stat.label}</div>
+                              </div>
+                              <motion.div
+                                className="text-3xl"
+                                animate={{
+                                  scale: [1, 1.2, 1],
+                                  rotate: [0, 10, -10, 0],
+                                }}
+                                transition={{
+                                  duration: 3,
+                                  repeat: Infinity,
+                                  delay: index * 0.2,
+                                  ease: "easeInOut"
+                                }}
+                              >
+                                {stat.icon}
+                              </motion.div>
+                            </div>
+                          </div>
+                        </motion.div>
+                      ))}
+                    </motion.div>
+                  </div>
+                </motion.div>
+                
+                {/* Enhanced Match Cards Grid */}
+                <div className="space-y-6">
+                  {matches.map((match, index) => {
+                    const isLive = match.status === 'live';
+                    const isCompleted = match.status === 'completed';
+                    const isUpcoming = match.status === 'upcoming' || match.status === 'scheduled';
+                    
+                    return (
                       <motion.div
                         key={match.id}
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: index * 0.1 }}
-                        className="bg-white/5 rounded-xl p-6 border border-white/10 hover:bg-white/10 transition-colors"
+                        initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        transition={{ 
+                          delay: 0.5 + index * 0.08,
+                          type: "spring",
+                          stiffness: 200,
+                          damping: 25
+                        }}
+                        whileHover={{ 
+                          scale: 1.02,
+                          y: -5,
+                          transition: { duration: 0.2 }
+                        }}
+                        onClick={() => handleMatchClick(match)}
+                        className="group relative cursor-pointer"
                       >
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-6">
-                            <div className="text-center">
-                              <div className="text-white font-bold">{match.team1?.shortName}</div>
-                              <div className="text-white/60 text-sm">{match.team1?.name}</div>
+                        {/* Match Card Container */}
+                        <div
+                          className="relative overflow-hidden rounded-3xl p-6 md:p-8"
+                          style={{
+                            background: isLive 
+                              ? 'linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(236, 72, 153, 0.15))'
+                              : isCompleted
+                              ? 'linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(6, 182, 212, 0.15))'
+                              : 'linear-gradient(135deg, rgba(139, 92, 246, 0.15), rgba(59, 130, 246, 0.15))',
+                            backdropFilter: 'blur(20px)',
+                            border: '1px solid rgba(255, 255, 255, 0.1)',
+                            boxShadow: isLive 
+                              ? '0 8px 32px rgba(239, 68, 68, 0.2)'
+                              : '0 8px 32px rgba(0, 0, 0, 0.1)',
+                          }}
+                        >
+                          {/* Animated shimmer effect */}
+                          <motion.div
+                            className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                            style={{
+                              background: 'linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent)',
+                              backgroundSize: '200% 100%',
+                            }}
+                            animate={{
+                              backgroundPosition: ['200% 0', '-200% 0'],
+                            }}
+                            transition={{
+                              duration: 1.5,
+                              repeat: Infinity,
+                              ease: "linear"
+                            }}
+                          />
+                          
+                          {/* Live indicator */}
+                          {isLive && (
+                            <motion.div
+                              className="absolute top-4 right-4 flex items-center gap-2 px-4 py-2 rounded-full"
+                              style={{
+                                background: 'linear-gradient(135deg, rgba(239, 68, 68, 0.3), rgba(220, 38, 38, 0.3))',
+                                border: '1px solid rgba(239, 68, 68, 0.5)',
+                                boxShadow: '0 4px 16px rgba(239, 68, 68, 0.4)',
+                              }}
+                              animate={{
+                                scale: [1, 1.05, 1],
+                              }}
+                              transition={{
+                                duration: 2,
+                                repeat: Infinity,
+                                ease: "easeInOut"
+                              }}
+                            >
+                              <motion.div
+                                className="w-2 h-2 rounded-full bg-red-500"
+                                animate={{
+                                  scale: [1, 1.5, 1],
+                                  opacity: [1, 0.5, 1],
+                                }}
+                                transition={{
+                                  duration: 1.5,
+                                  repeat: Infinity,
+                                  ease: "easeInOut"
+                                }}
+                              />
+                              <span className="text-red-300 font-bold text-sm">LIVE</span>
+                            </motion.div>
+                          )}
+                          
+                          {/* Match Content */}
+                          <div className="relative z-10">
+                            {/* Teams Section */}
+                            <div className="grid grid-cols-3 items-center gap-4 md:gap-8 mb-6">
+                              {/* Team 1 */}
+                              <motion.div
+                                className="flex flex-col items-center text-center"
+                                whileHover={{ scale: 1.05 }}
+                              >
+                                <motion.div
+                                  className="w-16 h-16 md:w-20 md:h-20 rounded-2xl mb-3 flex items-center justify-center"
+                                  style={{
+                                    background: `linear-gradient(135deg, ${teamColors.primary}40, ${teamColors.secondary}40)`,
+                                    border: '1px solid rgba(255, 255, 255, 0.2)',
+                                    boxShadow: `0 8px 24px ${teamColors.primary}30`,
+                                  }}
+                                  whileHover={{ rotate: 360 }}
+                                  transition={{ duration: 0.6 }}
+                                >
+                                  <span className="text-3xl md:text-4xl">🏏</span>
+                                </motion.div>
+                                <div className="text-white font-black text-lg md:text-xl mb-1">
+                                  {match.team1?.shortName || 'TBD'}
+                                </div>
+                                <div className="text-white/60 text-xs md:text-sm font-medium line-clamp-2">
+                                  {match.team1?.name || 'Team 1'}
+                                </div>
+                              </motion.div>
+                              
+                              {/* VS Section */}
+                              <motion.div 
+                                className="flex flex-col items-center"
+                                initial={{ opacity: 0, scale: 0.8 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                transition={{ delay: 0.6 + index * 0.08 }}
+                              >
+                                <motion.div
+                                  className="w-12 h-12 md:w-16 md:h-16 rounded-2xl mb-2 flex items-center justify-center"
+                                  style={{
+                                    background: 'linear-gradient(135deg, rgba(249, 115, 22, 0.3), rgba(239, 68, 68, 0.3))',
+                                    border: '1px solid rgba(249, 115, 22, 0.4)',
+                                    boxShadow: '0 4px 16px rgba(249, 115, 22, 0.3)',
+                                  }}
+                                  animate={{
+                                    rotate: [0, 180, 360],
+                                    scale: [1, 1.1, 1],
+                                  }}
+                                  transition={{
+                                    duration: 6,
+                                    repeat: Infinity,
+                                    ease: "easeInOut"
+                                  }}
+                                >
+                                  <span className="text-white/80 font-black text-sm md:text-base">VS</span>
+                                </motion.div>
+                                <motion.div
+                                  className="text-white/60 text-xs md:text-sm font-semibold"
+                                  animate={{ opacity: [0.6, 1, 0.6] }}
+                                  transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                                >
+                                  {match.time || ''}
+                                </motion.div>
+                              </motion.div>
+                              
+                              {/* Team 2 */}
+                              <motion.div
+                                className="flex flex-col items-center text-center"
+                                whileHover={{ scale: 1.05 }}
+                              >
+                                <motion.div
+                                  className="w-16 h-16 md:w-20 md:h-20 rounded-2xl mb-3 flex items-center justify-center"
+                                  style={{
+                                    background: `linear-gradient(135deg, ${teamColors.secondary}40, ${teamColors.primary}40)`,
+                                    border: '1px solid rgba(255, 255, 255, 0.2)',
+                                    boxShadow: `0 8px 24px ${teamColors.secondary}30`,
+                                  }}
+                                  whileHover={{ rotate: -360 }}
+                                  transition={{ duration: 0.6 }}
+                                >
+                                  <span className="text-3xl md:text-4xl">🏏</span>
+                                </motion.div>
+                                <div className="text-white font-black text-lg md:text-xl mb-1">
+                                  {match.team2?.shortName || 'TBD'}
+                                </div>
+                                <div className="text-white/60 text-xs md:text-sm font-medium line-clamp-2">
+                                  {match.team2?.name || 'Team 2'}
+                                </div>
+                              </motion.div>
                             </div>
-                            <div className="text-white/50">VS</div>
-                            <div className="text-center">
-                              <div className="text-white font-bold">{match.team2?.shortName}</div>
-                              <div className="text-white/60 text-sm">{match.team2?.name}</div>
-                            </div>
+                            
+                            {/* Match Info Footer */}
+                            <motion.div
+                              className="flex flex-wrap items-center justify-between gap-4 pt-6 border-t border-white/10"
+                              initial={{ opacity: 0 }}
+                              animate={{ opacity: 1 }}
+                              transition={{ delay: 0.7 + index * 0.08 }}
+                            >
+                              <div className="flex items-center gap-2 text-white/70">
+                                <motion.div
+                                  animate={{ rotate: [0, 360] }}
+                                  transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+                                >
+                                  <MapPin className="w-4 h-4" />
+                                </motion.div>
+                                <span className="text-sm font-medium">{match.venue}</span>
+                              </div>
+                              <div className="flex items-center gap-2 text-white/70">
+                                <Clock className="w-4 h-4" />
+                                <span className="text-sm font-medium">{match.date}</span>
+                              </div>
+                              <motion.div
+                                className="px-4 py-2 rounded-xl text-sm font-bold"
+                                style={{
+                                  background: isLive
+                                    ? 'linear-gradient(135deg, rgba(239, 68, 68, 0.3), rgba(220, 38, 38, 0.3))'
+                                    : isCompleted
+                                    ? 'linear-gradient(135deg, rgba(16, 185, 129, 0.3), rgba(5, 150, 105, 0.3))'
+                                    : 'linear-gradient(135deg, rgba(139, 92, 246, 0.3), rgba(124, 58, 237, 0.3))',
+                                  border: '1px solid rgba(255, 255, 255, 0.2)',
+                                  color: isLive ? '#fca5a5' : isCompleted ? '#86efac' : '#c4b5fd',
+                                }}
+                                whileHover={{ scale: 1.05 }}
+                              >
+                                {isLive ? '🔴 Live' : isCompleted ? '✅ Completed' : '⏳ Upcoming'}
+                              </motion.div>
+                            </motion.div>
                           </div>
-                          <div className="text-right">
-                            <div className="text-white font-medium">{match.date}</div>
-                            <div className="text-white/60 text-sm">{match.venue}</div>
-                            <div className="text-white/60 text-sm">{match.status}</div>
-                          </div>
+                          
+                          {/* Hover glow effect */}
+                          <motion.div
+                            className="absolute inset-0 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
+                            style={{
+                              background: `radial-gradient(circle at 50% 50%, ${teamColors.primary}20, transparent 70%)`,
+                            }}
+                          />
                         </div>
                       </motion.div>
-                    ))}
-                  </div>
+                    );
+                  })}
                 </div>
+                
+                {/* Empty State */}
+                {matches.length === 0 && (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="text-center py-16"
+                  >
+                    <motion.div
+                      className="text-6xl mb-4"
+                      animate={{
+                        rotate: [0, -10, 10, 0],
+                        scale: [1, 1.1, 1],
+                      }}
+                      transition={{
+                        duration: 3,
+                        repeat: Infinity,
+                        ease: "easeInOut"
+                      }}
+                    >
+                      📅
+                    </motion.div>
+                    <h3 className="text-2xl font-bold text-white mb-2">No Matches Available</h3>
+                    <p className="text-white/60">Check back soon for upcoming fixtures!</p>
+                  </motion.div>
+                )}
               </motion.div>
             )}
 
