@@ -243,8 +243,8 @@ async function createSpreadsheetWithCharts(scorecard: ScorecardData): Promise<st
 
   // Chart 2: Strike Rates (Column Chart)
   const strikeRates = getAllBatters(scorecard)
-    .filter(b => b.balls >= 10 && b.strikeRate)
-    .sort((a, b) => b.strikeRate - a.strikeRate)
+    .filter(b => b.balls >= 10 && b.strikeRate != null)
+    .sort((a, b) => (b.strikeRate || 0) - (a.strikeRate || 0))
     .slice(0, 10);
   
   const chart2Data: any[] = [
@@ -253,7 +253,7 @@ async function createSpreadsheetWithCharts(scorecard: ScorecardData): Promise<st
     ['Player', 'Strike Rate', 'Runs', 'Balls'],
   ];
   strikeRates.forEach(bat => {
-    chart2Data.push([bat.playerName, bat.strikeRate, bat.runs, bat.balls]);
+    chart2Data.push([bat.playerName, bat.strikeRate || 0, bat.runs, bat.balls]);
   });
   dataToWrite.push({
     range: 'Chart 2 - Strike Rates!A1',
@@ -300,8 +300,8 @@ async function createSpreadsheetWithCharts(scorecard: ScorecardData): Promise<st
 
   // Chart 5: Economy Rates (Column Chart)
   const economyRates = getAllBowlers(scorecard)
-    .filter(b => b.overs >= 2 && b.economy)
-    .sort((a, b) => a.economy - b.economy)
+    .filter(b => b.overs >= 2 && b.economy != null)
+    .sort((a, b) => (a.economy || 0) - (b.economy || 0))
     .slice(0, 10);
   
   const chart5Data: any[] = [
@@ -396,7 +396,7 @@ async function createSpreadsheetWithCharts(scorecard: ScorecardData): Promise<st
     ['Player', 'Balls', 'Runs', 'Strike Rate'],
   ];
   runsVsBalls.forEach(bat => {
-    chart10Data.push([bat.playerName, bat.balls, bat.runs, bat.strikeRate]);
+    chart10Data.push([bat.playerName, bat.balls, bat.runs, bat.strikeRate || 0]);
   });
   dataToWrite.push({
     range: 'Chart 10 - Runs vs Balls!A1',
@@ -409,7 +409,7 @@ async function createSpreadsheetWithCharts(scorecard: ScorecardData): Promise<st
     .map(bat => ({
       ...bat,
       boundaryRuns: (bat.fours * 4) + (bat.sixes * 6),
-      boundaryPercentage: ((bat.fours * 4 + bat.sixes * 6) / bat.runs) * 100,
+      boundaryPercentage: bat.runs > 0 ? ((bat.fours * 4 + bat.sixes * 6) / bat.runs) * 100 : 0,
     }))
     .sort((a, b) => b.boundaryPercentage - a.boundaryPercentage)
     .slice(0, 10);
@@ -420,7 +420,8 @@ async function createSpreadsheetWithCharts(scorecard: ScorecardData): Promise<st
     ['Player', 'Boundary %', 'Boundary Runs', 'Total Runs'],
   ];
   boundaryPercentage.forEach(bat => {
-    chart11Data.push([bat.playerName, bat.boundaryPercentage.toFixed(1), bat.boundaryRuns, bat.runs]);
+    const pct = bat.boundaryPercentage != null && !isNaN(bat.boundaryPercentage) ? bat.boundaryPercentage.toFixed(1) : '0.0';
+    chart11Data.push([bat.playerName, pct, bat.boundaryRuns, bat.runs]);
   });
   dataToWrite.push({
     range: 'Chart 11 - Boundary %!A1',

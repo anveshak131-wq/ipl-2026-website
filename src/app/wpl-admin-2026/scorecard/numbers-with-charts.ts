@@ -108,11 +108,12 @@ export function exportToNumbersWithCharts(scorecard: ScorecardData) {
   csvRows.push('"=== CHART 2: STRIKE RATES (Column Chart) ==="');
   csvRows.push('"Player","Strike Rate","Runs","Balls"');
   allBatters
-    .filter(b => b.balls >= 10 && b.strikeRate)
-    .sort((a, b) => b.strikeRate - a.strikeRate)
+    .filter(b => b.balls >= 10 && b.strikeRate != null)
+    .sort((a, b) => (b.strikeRate || 0) - (a.strikeRate || 0))
     .slice(0, 10)
     .forEach(bat => {
-      csvRows.push(`"${bat.playerName}",${bat.strikeRate.toFixed(2)},${bat.runs},${bat.balls}`);
+      const sr = bat.strikeRate != null ? bat.strikeRate.toFixed(2) : '0.00';
+      csvRows.push(`"${bat.playerName}",${sr},${bat.runs},${bat.balls}`);
     });
   csvRows.push('');
   csvRows.push('');
@@ -148,11 +149,12 @@ export function exportToNumbersWithCharts(scorecard: ScorecardData) {
   csvRows.push('"=== CHART 5: ECONOMY RATES (Column Chart) ==="');
   csvRows.push('"Bowler","Economy","Overs","Runs","Wickets"');
   allBowlers
-    .filter(b => b.overs >= 2 && b.economy)
-    .sort((a, b) => a.economy - b.economy)
+    .filter(b => b.overs >= 2 && b.economy != null)
+    .sort((a, b) => (a.economy || 0) - (b.economy || 0))
     .slice(0, 10)
     .forEach(bowl => {
-      csvRows.push(`"${bowl.bowlerName}",${bowl.economy.toFixed(2)},${bowl.overs},${bowl.runs},${bowl.wickets}`);
+      const econ = bowl.economy != null ? bowl.economy.toFixed(2) : '0.00';
+      csvRows.push(`"${bowl.bowlerName}",${econ},${bowl.overs},${bowl.runs},${bowl.wickets}`);
     });
   csvRows.push('');
   csvRows.push('');
@@ -223,12 +225,13 @@ export function exportToNumbersWithCharts(scorecard: ScorecardData) {
     .map(bat => ({
       ...bat,
       boundaryRuns: (bat.fours * 4) + (bat.sixes * 6),
-      boundaryPercentage: ((bat.fours * 4 + bat.sixes * 6) / bat.runs) * 100,
+      boundaryPercentage: bat.runs > 0 ? ((bat.fours * 4 + bat.sixes * 6) / bat.runs) * 100 : 0,
     }))
     .sort((a, b) => b.boundaryPercentage - a.boundaryPercentage)
     .slice(0, 10)
     .forEach(bat => {
-      csvRows.push(`"${bat.playerName}",${bat.boundaryPercentage.toFixed(1)},${bat.boundaryRuns},${bat.runs}`);
+      const pct = bat.boundaryPercentage != null && !isNaN(bat.boundaryPercentage) ? bat.boundaryPercentage.toFixed(1) : '0.0';
+      csvRows.push(`"${bat.playerName}",${pct},${bat.boundaryRuns},${bat.runs}`);
     });
   csvRows.push('');
   csvRows.push('');
