@@ -740,6 +740,26 @@ export default function ScorecardAdminPage() {
     });
   };
 
+  // Load ExcelJS for charts
+  const loadExcelJS = (): Promise<void> => {
+    return new Promise((resolve, reject) => {
+      if (typeof window === 'undefined') return reject(new Error('window is undefined'));
+      if ((window as any).ExcelJS) return resolve();
+      const existing = document.querySelector('script[data-src="exceljs-cdn"]');
+      if (existing) {
+        existing.addEventListener('load', () => resolve());
+        existing.addEventListener('error', () => reject(new Error('Failed to load ExcelJS')));
+        return;
+      }
+      const script = document.createElement('script');
+      script.setAttribute('data-src', 'exceljs-cdn');
+      script.src = 'https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js';
+      script.onload = () => resolve();
+      script.onerror = () => reject(new Error('Failed to load ExcelJS'));
+      document.head.appendChild(script);
+    });
+  };
+
   // Export scorecard to ultra-enhanced PDF with colorful fonts and premium design
   const exportScorecardPDF = async (sc: Scorecard) => {
     try {
@@ -1881,6 +1901,31 @@ export default function ScorecardAdminPage() {
     } catch (error) {
       console.error('❌ Simple Excel export failed:', error);
       alert(`Simple Excel export failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  };
+
+  // Export scorecard to Excel with Charts
+  const exportScorecardExcelWithCharts = async (sc: Scorecard) => {
+    try {
+      console.log('🚀 Starting Excel export with charts...');
+      
+      // Load ExcelJS library
+      await loadExcelJS();
+      
+      // Import the charts Excel export function
+      const { exportExcelWithCharts } = await import('./excel-with-charts');
+      
+      console.log('📦 Excel with charts export imported successfully');
+      
+      // Call the export function
+      await exportExcelWithCharts(sc);
+      
+      console.log('🎉 Excel with charts export completed successfully!');
+      setMessage('✅ Excel with charts exported successfully!');
+      setTimeout(() => setMessage(''), 3000);
+    } catch (error) {
+      console.error('❌ Excel with charts export failed:', error);
+      alert(`Excel with charts export failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   };
 
@@ -3069,6 +3114,22 @@ export default function ScorecardAdminPage() {
                 className="px-6 py-3 bg-green-600 hover:bg-green-500 rounded font-bold transition"
               >
                 📊 Export Excel
+              </button>
+              <button
+                onClick={async () => {
+                  if (!scorecard) return;
+                  setMessage('');
+                  try {
+                    await exportScorecardExcelWithCharts(scorecard);
+                  } catch (e) {
+                    console.error('Export Excel with charts error', e);
+                    setMessage('✗ Error exporting Excel with charts');
+                    setTimeout(() => setMessage(''), 3000);
+                  }
+                }}
+                className="px-6 py-3 bg-purple-600 hover:bg-purple-500 rounded font-bold transition"
+              >
+                📈 Excel + Charts
               </button>
             </div>
           </div>
