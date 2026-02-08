@@ -60,7 +60,6 @@ interface Team {
     facebook?: string;
   };
 }
-}
 
 interface Player {
   id: string | number;
