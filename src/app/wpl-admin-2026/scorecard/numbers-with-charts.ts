@@ -67,14 +67,31 @@ interface ScorecardData {
   innings: InningsData[];
 }
 
+// Helper functions to safely extract data
+const getTeamName = (team: any): string => {
+  if (!team) return 'Unknown Team';
+  if (typeof team === 'string') return team;
+  return team.name || team.shortName || `Team ${team.id}` || 'Unknown Team';
+};
+
+const getPlayerName = (player: any): string => {
+  if (!player) return 'Unknown';
+  if (typeof player === 'string') return player;
+  return player.name || player.playerId || 'Unknown';
+};
+
 /**
  * Export scorecard to CSV format with chart data for Apple Numbers
  */
-export function exportToNumbersWithCharts(scorecard: ScorecardData) {
+export function exportToNumbersWithCharts(scorecard: any) {
   const csvRows: string[] = [];
 
+  // Get team names
+  const team1Name = getTeamName(scorecard?.matchInfo?.team1);
+  const team2Name = getTeamName(scorecard?.matchInfo?.team2);
+
   // Title and Instructions
-  csvRows.push(`"${scorecard.team1} vs ${scorecard.team2} - CHART DATA FOR APPLE NUMBERS"`);
+  csvRows.push(`"${team1Name} vs ${team2Name} - CHART DATA FOR APPLE NUMBERS"`);
   csvRows.push('');
   csvRows.push('"INSTRUCTIONS: Import this CSV into Apple Numbers. Each section below can be used to create charts."');
   csvRows.push('"Select the data range for each chart and insert charts from the Charts menu."');
@@ -84,10 +101,11 @@ export function exportToNumbersWithCharts(scorecard: ScorecardData) {
   // Match Overview
   csvRows.push('"=== MATCH OVERVIEW ==="');
   csvRows.push('"Match","Value"');
-  csvRows.push(`"Teams","${scorecard.team1} vs ${scorecard.team2}"`);
-  csvRows.push(`"Venue","${scorecard.venue || 'N/A'}"`);
-  csvRows.push(`"Date","${scorecard.date || 'N/A'}"`);
-  csvRows.push(`"Result","${scorecard.result || 'N/A'}"`);
+  csvRows.push(`"Teams","${team1Name} vs ${team2Name}"`);
+  csvRows.push(`"Venue","${scorecard?.matchInfo?.venue || 'N/A'}"`);
+  csvRows.push(`"Date","${scorecard?.matchInfo?.date || 'N/A'}"`);
+  const resultStr = scorecard?.result?.winner ? `${scorecard.result.winner} won by ${scorecard.result.margin || 'N/A'}` : 'N/A';
+  csvRows.push(`"Result","${resultStr}"`);
   csvRows.push('');
   csvRows.push('');
 
@@ -266,7 +284,7 @@ export function exportToNumbersWithCharts(scorecard: ScorecardData) {
   const link = document.createElement('a');
   const url = URL.createObjectURL(blob);
 
-  const filename = `${scorecard.team1}_vs_${scorecard.team2}_Numbers_Charts.csv`;
+  const filename = `${team1Name}_vs_${team2Name}_Numbers_Charts.csv`;
   link.setAttribute('href', url);
   link.setAttribute('download', filename);
   link.style.visibility = 'hidden';
@@ -280,47 +298,87 @@ export function exportToNumbersWithCharts(scorecard: ScorecardData) {
 
 // Helper functions
 
-function getAllBatters(scorecard: ScorecardData) {
+function getAllBatters(scorecard: any) {
   const batters: any[] = [];
-  scorecard.innings.forEach(innings => {
-    innings.batting.forEach(bat => {
+  const team1Name = getTeamName(scorecard?.matchInfo?.team1);
+  const team2Name = getTeamName(scorecard?.matchInfo?.team2);
+  
+  const innings = scorecard?.innings || [];
+  innings.forEach((inn: any, idx: number) => {
+    const battingTeam = inn.battingTeamId ? 
+      (String(inn.battingTeamId) === String(scorecard?.matchInfo?.team1?.id) ? team1Name : team2Name) :
+      `Team ${idx + 1}`;
+    
+    const batting = inn.batting || [];
+    batting.forEach((bat: any) => {
       batters.push({
-        ...bat,
-        team: innings.battingTeam,
+        playerName: getPlayerName(bat),
+        runs: bat.runs ?? 0,
+        balls: bat.balls ?? 0,
+        fours: bat.fours ?? 0,
+        sixes: bat.sixes ?? 0,
+        strikeRate: bat.balls > 0 ? (bat.runs / bat.balls) * 100 : 0,
+        team: battingTeam,
       });
     });
   });
   return batters;
 }
 
-function getAllBowlers(scorecard: ScorecardData) {
+function getAllBowlers(scorecard: any) {
   const bowlers: any[] = [];
-  scorecard.innings.forEach(innings => {
-    innings.bowling.forEach(bowl => {
+  const team1Name = getTeamName(scorecard?.matchInfo?.team1);
+  const team2Name = getTeamName(scorecard?.matchInfo?.team2);
+  
+  const innings = scorecard?.innings || [];
+  innings.forEach((inn: any, idx: number) => {
+    const bowlingTeam = inn.battingTeamId ? 
+      (String(inn.battingTeamId) === String(scorecard?.matchInfo?.team1?.id) ? team2Name : team1Name) :
+      `Team ${idx + 1}`;
+    
+    const bowling = inn.bowling || [];
+    bowling.forEach((bowl: any) => {
+      const economy = bowl.economyRate ?? (bowl.overs > 0 ? bowl.runs / bowl.overs : 0);
       bowlers.push({
-        ...bowl,
-        team: innings.bowlingTeam,
+        bowlerName: getPlayerName(bowl),
+        overs: bowl.overs ?? 0,
+        maidens: bowl.maidens ?? 0,
+        runs: bowl.runs ?? 0,
+        wickets: bowl.wickets ?? 0,
+        economy: economy,
+        team: bowlingTeam,
       });
     });
   });
   return bowlers;
 }
 
-function getTeamStats(scorecard: ScorecardData) {
+function getTeamStats(scorecard: any) {
   const stats: any[] = [];
-  scorecard.innings.forEach(innings => {
+  const team1Name = getTeamName(scorecard?.matchInfo?.team1);
+  const team2Name = getTeamName(scorecard?.matchInfo?.team2);
+  
+  const innings = scorecard?.innings || [];
+  innings.forEach((inn: any, idx: number) => {
+    const battingTeam = inn.battingTeamId ? 
+      (String(inn.battingTeamId) === String(scorecard?.matchInfo?.team1?.id) ? team1Name : team2Name) :
+      `Team ${idx + 1}`;
+    
+    const extras = inn.extras || {};
+    const extrasTotal = (extras.wides || 0) + (extras.noBalls || 0) + (extras.byes || 0) + (extras.legByes || 0);
+    
     stats.push({
-      team: innings.battingTeam,
-      runs: innings.total?.runs || 0,
-      wickets: innings.total?.wickets || 0,
-      extras: innings.extras?.total || 0,
-      overs: innings.total?.overs || 0,
+      team: battingTeam,
+      runs: inn.totalRuns || 0,
+      wickets: inn.totalWickets || 0,
+      extras: extrasTotal,
+      overs: inn.totalOvers || 0,
     });
   });
   return stats;
 }
 
-function getExtrasBreakdown(scorecard: ScorecardData) {
+function getExtrasBreakdown(scorecard: any) {
   const breakdown = {
     Wides: 0,
     'No Balls': 0,
@@ -328,13 +386,13 @@ function getExtrasBreakdown(scorecard: ScorecardData) {
     'Leg Byes': 0,
   };
 
-  scorecard.innings.forEach(innings => {
-    if (innings.extras) {
-      breakdown.Wides += innings.extras.wides || 0;
-      breakdown['No Balls'] += innings.extras.noBalls || 0;
-      breakdown.Byes += innings.extras.byes || 0;
-      breakdown['Leg Byes'] += innings.extras.legByes || 0;
-    }
+  const innings = scorecard?.innings || [];
+  innings.forEach((inn: any) => {
+    const extras = inn.extras || {};
+    breakdown.Wides += extras.wides || 0;
+    breakdown['No Balls'] += extras.noBalls || 0;
+    breakdown.Byes += extras.byes || 0;
+    breakdown['Leg Byes'] += extras.legByes || 0;
   });
 
   return breakdown;

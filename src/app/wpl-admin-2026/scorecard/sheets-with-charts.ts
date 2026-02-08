@@ -67,6 +67,19 @@ interface ScorecardData {
   innings: InningsData[];
 }
 
+// Helper functions to safely extract data
+const getTeamName = (team: any): string => {
+  if (!team) return 'Unknown Team';
+  if (typeof team === 'string') return team;
+  return team.name || team.shortName || `Team ${team.id}` || 'Unknown Team';
+};
+
+const getPlayerName = (player: any): string => {
+  if (!player) return 'Unknown';
+  if (typeof player === 'string') return player;
+  return player.name || player.playerId || 'Unknown';
+};
+
 /**
  * Export scorecard to Google Sheets with chart data sheets
  */
@@ -463,47 +476,87 @@ async function createSpreadsheetWithCharts(scorecard: ScorecardData): Promise<st
 
 // Helper functions
 
-function getAllBatters(scorecard: ScorecardData) {
+function getAllBatters(scorecard: any) {
   const batters: any[] = [];
-  scorecard.innings.forEach(innings => {
-    innings.batting.forEach(bat => {
+  const team1Name = getTeamName(scorecard?.matchInfo?.team1);
+  const team2Name = getTeamName(scorecard?.matchInfo?.team2);
+  
+  const innings = scorecard?.innings || [];
+  innings.forEach((inn: any, idx: number) => {
+    const battingTeam = inn.battingTeamId ? 
+      (String(inn.battingTeamId) === String(scorecard?.matchInfo?.team1?.id) ? team1Name : team2Name) :
+      `Team ${idx + 1}`;
+    
+    const batting = inn.batting || [];
+    batting.forEach((bat: any) => {
       batters.push({
-        ...bat,
-        team: innings.battingTeam,
+        playerName: getPlayerName(bat),
+        runs: bat.runs ?? 0,
+        balls: bat.balls ?? 0,
+        fours: bat.fours ?? 0,
+        sixes: bat.sixes ?? 0,
+        strikeRate: bat.balls > 0 ? (bat.runs / bat.balls) * 100 : 0,
+        team: battingTeam,
       });
     });
   });
   return batters;
 }
 
-function getAllBowlers(scorecard: ScorecardData) {
+function getAllBowlers(scorecard: any) {
   const bowlers: any[] = [];
-  scorecard.innings.forEach(innings => {
-    innings.bowling.forEach(bowl => {
+  const team1Name = getTeamName(scorecard?.matchInfo?.team1);
+  const team2Name = getTeamName(scorecard?.matchInfo?.team2);
+  
+  const innings = scorecard?.innings || [];
+  innings.forEach((inn: any, idx: number) => {
+    const bowlingTeam = inn.battingTeamId ? 
+      (String(inn.battingTeamId) === String(scorecard?.matchInfo?.team1?.id) ? team2Name : team1Name) :
+      `Team ${idx + 1}`;
+    
+    const bowling = inn.bowling || [];
+    bowling.forEach((bowl: any) => {
+      const economy = bowl.economyRate ?? (bowl.overs > 0 ? bowl.runs / bowl.overs : 0);
       bowlers.push({
-        ...bowl,
-        team: innings.bowlingTeam,
+        bowlerName: getPlayerName(bowl),
+        overs: bowl.overs ?? 0,
+        maidens: bowl.maidens ?? 0,
+        runs: bowl.runs ?? 0,
+        wickets: bowl.wickets ?? 0,
+        economy: economy,
+        team: bowlingTeam,
       });
     });
   });
   return bowlers;
 }
 
-function getTeamStats(scorecard: ScorecardData) {
+function getTeamStats(scorecard: any) {
   const stats: any[] = [];
-  scorecard.innings.forEach(innings => {
+  const team1Name = getTeamName(scorecard?.matchInfo?.team1);
+  const team2Name = getTeamName(scorecard?.matchInfo?.team2);
+  
+  const innings = scorecard?.innings || [];
+  innings.forEach((inn: any, idx: number) => {
+    const battingTeam = inn.battingTeamId ? 
+      (String(inn.battingTeamId) === String(scorecard?.matchInfo?.team1?.id) ? team1Name : team2Name) :
+      `Team ${idx + 1}`;
+    
+    const extras = inn.extras || {};
+    const extrasTotal = (extras.wides || 0) + (extras.noBalls || 0) + (extras.byes || 0) + (extras.legByes || 0);
+    
     stats.push({
-      team: innings.battingTeam,
-      runs: innings.total?.runs || 0,
-      wickets: innings.total?.wickets || 0,
-      extras: innings.extras?.total || 0,
-      overs: innings.total?.overs || 0,
+      team: battingTeam,
+      runs: inn.totalRuns || 0,
+      wickets: inn.totalWickets || 0,
+      extras: extrasTotal,
+      overs: inn.totalOvers || 0,
     });
   });
   return stats;
 }
 
-function getExtrasBreakdown(scorecard: ScorecardData) {
+function getExtrasBreakdown(scorecard: any) {
   const breakdown = {
     Wides: 0,
     'No Balls': 0,
@@ -511,13 +564,13 @@ function getExtrasBreakdown(scorecard: ScorecardData) {
     'Leg Byes': 0,
   };
 
-  scorecard.innings.forEach(innings => {
-    if (innings.extras) {
-      breakdown.Wides += innings.extras.wides || 0;
-      breakdown['No Balls'] += innings.extras.noBalls || 0;
-      breakdown.Byes += innings.extras.byes || 0;
-      breakdown['Leg Byes'] += innings.extras.legByes || 0;
-    }
+  const innings = scorecard?.innings || [];
+  innings.forEach((inn: any) => {
+    const extras = inn.extras || {};
+    breakdown.Wides += extras.wides || 0;
+    breakdown['No Balls'] += extras.noBalls || 0;
+    breakdown.Byes += extras.byes || 0;
+    breakdown['Leg Byes'] += extras.legByes || 0;
   });
 
   return breakdown;
@@ -552,9 +605,12 @@ async function formatSpreadsheetWithCharts(spreadsheetId: string) {
 /**
  * Fallback: Download as CSV for manual Google Sheets import
  */
-export function exportChartsDataToCSV(scorecard: ScorecardData) {
+export function exportChartsDataToCSV(scorecard: any) {
   // Create a simple CSV with chart-ready data
   const csvRows: string[] = [];
+  
+  const team1Name = getTeamName(scorecard?.matchInfo?.team1);
+  const team2Name = getTeamName(scorecard?.matchInfo?.team2);
 
   csvRows.push('CHART DATA FOR GOOGLE SHEETS');
   csvRows.push('');
@@ -584,7 +640,7 @@ export function exportChartsDataToCSV(scorecard: ScorecardData) {
     .sort((a, b) => b.wickets - a.wickets)
     .slice(0, 10)
     .forEach(bowl => {
-      csvRows.push(`${bowl.bowlerName},${bowl.wickets},${bowl.economy}`);
+      csvRows.push(`${bowl.bowlerName},${bowl.wickets},${bowl.economy ? bowl.economy.toFixed(2) : '0.00'}`);
     });
 
   // Create blob and download
@@ -594,7 +650,7 @@ export function exportChartsDataToCSV(scorecard: ScorecardData) {
   const url = URL.createObjectURL(blob);
 
   link.setAttribute('href', url);
-  link.setAttribute('download', `${scorecard.team1}_vs_${scorecard.team2}_charts.csv`);
+  link.setAttribute('download', `${team1Name}_vs_${team2Name}_charts.csv`);
   link.style.visibility = 'hidden';
   document.body.appendChild(link);
   link.click();
