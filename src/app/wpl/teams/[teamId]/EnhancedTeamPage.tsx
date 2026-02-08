@@ -59,25 +59,7 @@ interface Team {
     youtube?: string;
     facebook?: string;
   };
-
-  // Resolve team display names (short / full) from team object or id
-  const resolveTeam = (t: any) => {
-    if (!t) return { short: 'TBD', full: 'TBD' };
-    if (typeof t === 'object') {
-      return {
-        short: (t.shortName && String(t.shortName)) || (t.name && String(t.name)) || String(t.id || 'TBD'),
-        full: (t.name && String(t.name)) || (t.shortName && String(t.shortName)) || String(t.id || 'TBD')
-      };
-    }
-    // t is string or number => try to find in allTeams
-    const idStr = String(t);
-    const found = allTeams.find(a => String(a.id) === idStr || (a.shortName && a.shortName.toLowerCase() === idStr.toLowerCase()));
-    if (found) return { short: found.shortName || found.name, full: found.name || found.shortName };
-    return { short: idStr, full: idStr };
-  };
-
-  const getTeamShort = (t: any) => resolveTeam(t).short;
-  const getTeamFull = (t: any) => resolveTeam(t).full;
+}
 }
 
 interface Player {
@@ -157,6 +139,23 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
   const [isInitialized, setIsInitialized] = useState(false);
   const [teamStats, setTeamStats] = useState<TeamStats | null>(null);
   const [allTeams, setAllTeams] = useState<Team[]>([]);
+  // Helper: normalize team references (object, id string, or shortName)
+  const resolveTeam = (t: any) => {
+    if (!t) return { short: 'TBD', full: 'TBD' };
+    if (typeof t === 'object') {
+      return {
+        short: (t.shortName && String(t.shortName)) || (t.name && String(t.name)) || String(t.id || 'TBD'),
+        full: (t.name && String(t.name)) || (t.shortName && String(t.shortName)) || String(t.id || 'TBD')
+      };
+    }
+    const idStr = String(t);
+    const found = allTeams.find(a => String(a.id) === idStr || (a.shortName && a.shortName.toLowerCase() === idStr.toLowerCase()) || (a.name && a.name.toLowerCase() === idStr.toLowerCase()));
+    if (found) return { short: found.shortName || found.name || String(found.id), full: found.name || found.shortName || String(found.id) };
+    return { short: idStr, full: idStr };
+  };
+
+  const getTeamShort = (t: any) => resolveTeam(t).short;
+  const getTeamFull = (t: any) => resolveTeam(t).full;
   const [selectedMatch, setSelectedMatch] = useState<any | null>(null);
   const [selectedScorecard, setSelectedScorecard] = useState<any | null>(null);
   const [showScorecard, setShowScorecard] = useState(false);
