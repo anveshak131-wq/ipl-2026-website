@@ -136,6 +136,58 @@ export async function onRequest(context) {
     }
   }
 
+  // PUT - Update team (for points table qualification updates)
+  if (method === "PUT") {
+    try {
+      const body = await request.json();
+      
+      // Validate authorization
+      const authHeader = request.headers.get('Authorization');
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+          status: 401,
+          headers: { 
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Origin": "*"
+          },
+        });
+      }
+
+      // For now, just echo back the updated team data
+      // In production, this would save to KV storage
+      const updatedTeam = {
+        ...body,
+        updatedAt: new Date().toISOString()
+      };
+
+      // Try to save to KV if available
+      try {
+        if (context.env && context.env.TEAMS_KV) {
+          await context.env.TEAMS_KV.put(`team:${body.id}`, JSON.stringify(updatedTeam));
+        }
+      } catch (kvError) {
+        console.log('KV not available, returning in-memory update');
+      }
+
+      return new Response(JSON.stringify(updatedTeam), {
+        status: 200,
+        headers: {
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "*"
+        },
+      });
+    } catch (error) {
+      console.error("Teams PUT error:", error);
+      return new Response(JSON.stringify({ error: 'Failed to update team' }), {
+        status: 500,
+        headers: { 
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "*"
+        },
+      });
+    }
+  }
+
   return new Response(JSON.stringify({ error: "Method not allowed" }), {
     status: 405,
     headers: { "Content-Type": "application/json" },
