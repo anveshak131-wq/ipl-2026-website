@@ -1929,6 +1929,73 @@ export default function ScorecardAdminPage() {
     }
   };
 
+  // Load Google Sheets API
+  const loadGoogleAPI = async (): Promise<void> => {
+    return new Promise((resolve, reject) => {
+      if (typeof window !== 'undefined' && (window as any).gapi) {
+        resolve();
+        return;
+      }
+      const script = document.createElement('script');
+      script.src = 'https://apis.google.com/js/api.js';
+      script.onload = () => {
+        (window as any).gapi.load('client:auth2', () => resolve());
+      };
+      script.onerror = () => reject(new Error('Failed to load Google API'));
+      document.head.appendChild(script);
+    });
+  };
+
+  // Export scorecard to Google Sheets (Simple)
+  const exportScorecardSheetsSimple = async (sc: Scorecard) => {
+    try {
+      console.log('🚀 Starting Google Sheets simple export...');
+      
+      // Load Google API
+      await loadGoogleAPI();
+      
+      // Import the simple Sheets export function
+      const { exportScorecardToCSV } = await import('./sheets-simple');
+      
+      console.log('📦 Google Sheets simple export imported successfully');
+      
+      // Use CSV fallback for simplicity (no API key required)
+      exportScorecardToCSV(sc);
+      
+      console.log('🎉 Google Sheets simple export completed successfully!');
+      setMessage('✅ CSV for Google Sheets exported successfully!');
+      setTimeout(() => setMessage(''), 3000);
+    } catch (error) {
+      console.error('❌ Google Sheets simple export failed:', error);
+      alert(`Google Sheets export failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  };
+
+  // Export scorecard to Google Sheets with Charts
+  const exportScorecardSheetsWithCharts = async (sc: Scorecard) => {
+    try {
+      console.log('🚀 Starting Google Sheets export with charts...');
+      
+      // Load Google API
+      await loadGoogleAPI();
+      
+      // Import the charts Sheets export function
+      const { exportChartsDataToCSV } = await import('./sheets-with-charts');
+      
+      console.log('📦 Google Sheets with charts export imported successfully');
+      
+      // Use CSV fallback for simplicity (no API key required)
+      exportChartsDataToCSV(sc);
+      
+      console.log('🎉 Google Sheets with charts export completed successfully!');
+      setMessage('✅ CSV with chart data for Google Sheets exported!');
+      setTimeout(() => setMessage(''), 3000);
+    } catch (error) {
+      console.error('❌ Google Sheets with charts export failed:', error);
+      alert(`Google Sheets with charts export failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 text-white flex items-center justify-center">
@@ -3130,6 +3197,38 @@ export default function ScorecardAdminPage() {
                 className="px-6 py-3 bg-purple-600 hover:bg-purple-500 rounded font-bold transition"
               >
                 📈 Excel + Charts
+              </button>
+              <button
+                onClick={async () => {
+                  if (!scorecard) return;
+                  setMessage('');
+                  try {
+                    await exportScorecardSheetsSimple(scorecard);
+                  } catch (e) {
+                    console.error('Export Google Sheets error', e);
+                    setMessage('✗ Error exporting to Google Sheets');
+                    setTimeout(() => setMessage(''), 3000);
+                  }
+                }}
+                className="px-6 py-3 bg-blue-600 hover:bg-blue-500 rounded font-bold transition"
+              >
+                📊 Google Sheets
+              </button>
+              <button
+                onClick={async () => {
+                  if (!scorecard) return;
+                  setMessage('');
+                  try {
+                    await exportScorecardSheetsWithCharts(scorecard);
+                  } catch (e) {
+                    console.error('Export Google Sheets with charts error', e);
+                    setMessage('✗ Error exporting Google Sheets with charts');
+                    setTimeout(() => setMessage(''), 3000);
+                  }
+                }}
+                className="px-6 py-3 bg-cyan-600 hover:bg-cyan-500 rounded font-bold transition"
+              >
+                📈 Sheets + Charts
               </button>
             </div>
           </div>
