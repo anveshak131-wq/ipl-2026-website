@@ -1357,7 +1357,7 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
                   whileTap={{ scale: 0.95 }}
                   style={{
                     background: activeTab === item.id 
-                      ? `linear-gradient(135deg, ${item.color.split(' ')[0].replace('from-', '').replace('-500', '')}40, ${item.color.split(' ')[2].replace('to-', '').replace('-500', '')}40)`
+                      ? `linear-gradient(135deg, ${item.color.split(' ')[0]?.replace('from-', '').replace('-500', '') || 'purple'}40, ${item.color.split(' ')[1]?.replace('to-', '').replace('-500', '') || 'blue'}40)`
                       : 'rgba(255, 255, 255, 0.05)',
                     backdropFilter: 'blur(10px)',
                   }}
