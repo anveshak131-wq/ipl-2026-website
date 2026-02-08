@@ -1033,7 +1033,7 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
   const logoUrl = getLogoUrl();
 
   return (
-    <div className="min-h-screen" style={{
+    <div ref={containerRef} className="min-h-screen" style={{
       background: `linear-gradient(135deg, ${WPLColors.base} 0%, ${WPLColors.gradientStart} 25%, ${WPLColors.gradientMid} 50%, ${WPLColors.gradientEnd} 75%, ${WPLColors.base} 100%)`
     }}>
       {/* Enhanced Animated Background */}
@@ -1458,7 +1458,7 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
       </motion.header>
 
       {/* Enhanced Hero Section with Dynamic Content */}
-      <section className="relative z-10 py-24" ref={containerRef}>
+      <section className="relative z-10 py-24">
         {/* Enhanced Social Proof Bar */}
         <motion.div
           initial={{ opacity: 0, y: -30 }}
