@@ -147,6 +147,13 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
   const [showPlayerStats, setShowPlayerStats] = useState(false);
   const [selectedPlayerForStats, setSelectedPlayerForStats] = useState<any | null>(null);
   const [isLoadingPlayerStats, setIsLoadingPlayerStats] = useState(false);
+  
+  // Points table stats
+  const [leaguePosition, setLeaguePosition] = useState<number>(0);
+  const [teamPointsData, setTeamPointsData] = useState<any>(null);
+  const [last5Games, setLast5Games] = useState<string>('-');
+  const [winRate, setWinRate] = useState<number>(0);
+  const [netRunRate, setNetRunRate] = useState<number>(0);
 
   // Enhanced state for advanced interactions
   const [isHoveringCard, setIsHoveringCard] = useState<string | null>(null);
@@ -192,11 +199,107 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
       if (!hasFetchedData.current) {
         hasFetchedData.current = true;
         await fetchTeamData();
+        await fetchPointsTableData();
       }
     };
     
     fetchData();
   }, [teamId]);
+  
+  // Fetch points table data for team stats
+  const fetchPointsTableData = async () => {
+    try {
+      // Fetch all teams to get points table data
+      const teamsResponse = await fetch('/api/teams?league=wpl');
+      if (!teamsResponse.ok) return;
+      
+      const allTeams = await teamsResponse.json();
+      
+      // Load saved stats from localStorage
+      let savedStats = {};
+      if (typeof window !== 'undefined') {
+        savedStats = JSON.parse(localStorage.getItem('pointsTableStats') || '{}');
+      }
+      
+      // Find current team's stats
+      const currentTeam = allTeams.find((t: any) => {
+        const tId = String(t.id || '').replace(/^team/, '');
+        const currentId = String(teamId || '').replace(/^team/, '');
+        return tId === currentId || String(t.id) === teamId || t.shortName?.toLowerCase() === teamId.toLowerCase();
+      });
+      
+      if (!currentTeam) return;
+      
+      // Get team stats from localStorage or team.stats
+      let teamData = savedStats[currentTeam.id] || currentTeam.stats || {};
+      setTeamPointsData(teamData);
+      
+      // Calculate stats
+      const matchesPlayed = teamData.matchesPlayed || 0;
+      const wins = teamData.wins || 0;
+      const nrr = teamData.netRunRate || 0;
+      
+      // Calculate win rate
+      const winRateCalc = matchesPlayed > 0 ? (wins / matchesPlayed) * 100 : 0;
+      setWinRate(winRateCalc);
+      setNetRunRate(nrr);
+      
+      // Calculate league position
+      const teamsWithStats = allTeams.map((t: any) => {
+        const stats = savedStats[t.id] || t.stats || {};
+        return {
+          id: t.id,
+          name: t.name,
+          points: stats.points || 0,
+          netRunRate: stats.netRunRate || 0
+        };
+      }).sort((a: any, b: any) => {
+        if (b.points !== a.points) return b.points - a.points;
+        return b.netRunRate - a.netRunRate;
+      });
+      
+      const position = teamsWithStats.findIndex((t: any) => t.id === currentTeam.id) + 1;
+      setLeaguePosition(position);
+      
+      // Calculate last 5 games form from recent matches
+      const matchesResponse = await fetch('/api/matches?league=wpl');
+      if (matchesResponse.ok) {
+        const allMatches = await matchesResponse.json();
+        
+        // Filter matches for this team that have results
+        const teamMatches = allMatches
+          .filter((m: any) => {
+            const team1Id = typeof m.team1 === 'object' ? m.team1.id : m.team1;
+            const team2Id = typeof m.team2 === 'object' ? m.team2.id : m.team2;
+            const team1Name = typeof m.team1 === 'object' ? m.team1.name : '';
+            const team2Name = typeof m.team2 === 'object' ? m.team2.name : '';
+            
+            return (team1Id === currentTeam.id || team2Id === currentTeam.id ||
+                    team1Name === currentTeam.name || team2Name === currentTeam.name) &&
+                   m.result && m.result !== 'TBD' && m.status !== 'upcoming';
+          })
+          .sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime())
+          .slice(0, 5);
+        
+        // Determine W/L for last 5 games
+        const formString = teamMatches.map((m: any) => {
+          const result = m.result || '';
+          if (result.toLowerCase().includes(currentTeam.name.toLowerCase()) || 
+              result.toLowerCase().includes('won')) {
+            return 'W';
+          } else if (result.toLowerCase().includes('tie') || result.toLowerCase().includes('draw')) {
+            return 'D';
+          } else {
+            return 'L';
+          }
+        }).join('');
+        
+        setLast5Games(formString || '-');
+      }
+    } catch (error) {
+      console.error('Failed to fetch points table data:', error);
+    }
+  };
 
   const fetchTeamData = async () => {
     try {
@@ -1336,62 +1439,134 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
               </motion.div>
             </div>
             
-            {/* Enhanced Primary Navigation - Desktop */}
-            <div className="hidden md:flex items-center gap-2">
+            {/* Enhanced Primary Navigation - Desktop with Premium UI */}
+            <div className="hidden md:flex items-center gap-3 relative">
+              {/* Floating indicator background */}
+              <motion.div
+                className="absolute h-full rounded-2xl pointer-events-none"
+                layoutId="activeTabIndicator"
+                style={{
+                  background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(236, 72, 153, 0.2))',
+                  backdropFilter: 'blur(20px)',
+                  boxShadow: '0 8px 32px rgba(139, 92, 246, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
+                }}
+                transition={{ type: "spring", stiffness: 400, damping: 30 }}
+              />
+              
               {[
-                { id: 'overview', label: 'Overview', icon: '🎯', color: 'from-purple-500 to-blue-500' },
-                { id: 'squad', label: 'Squad', icon: '👥', color: 'from-green-500 to-emerald-500' },
-                { id: 'matches', label: 'Matches', icon: '📅', color: 'from-orange-500 to-red-500' },
-                { id: 'stats', label: 'Stats', icon: '📊', color: 'from-blue-500 to-cyan-500' },
-                { id: 'about', label: 'About', icon: '⭐', color: 'from-yellow-500 to-orange-500' }
-              ].map((item) => (
+                { id: 'overview', label: 'Overview', icon: '🎯', gradient: 'from-purple-500 via-violet-500 to-purple-600', glow: 'rgba(139, 92, 246, 0.5)' },
+                { id: 'squad', label: 'Squad', icon: '👥', gradient: 'from-emerald-500 via-green-500 to-teal-600', glow: 'rgba(16, 185, 129, 0.5)' },
+                { id: 'matches', label: 'Matches', icon: '📅', gradient: 'from-orange-500 via-red-500 to-pink-600', glow: 'rgba(249, 115, 22, 0.5)' },
+                { id: 'stats', label: 'Stats', icon: '📊', gradient: 'from-blue-500 via-cyan-500 to-sky-600', glow: 'rgba(59, 130, 246, 0.5)' },
+                { id: 'about', label: 'About', icon: '⭐', gradient: 'from-yellow-500 via-amber-500 to-orange-600', glow: 'rgba(234, 179, 8, 0.5)' }
+              ].map((item, index) => (
                 <motion.button
                   key={item.id}
                   onClick={() => setActiveTab(item.id)}
-                  className={`relative px-4 py-2 rounded-xl text-sm font-bold transition-all duration-300 overflow-hidden ${
+                  className={`relative group px-5 py-2.5 rounded-2xl text-sm font-bold transition-all duration-500 overflow-hidden ${
                     activeTab === item.id
-                      ? 'text-white shadow-2xl border border-white/30'
-                      : 'text-white/70 hover:text-white border border-transparent'
+                      ? 'text-white shadow-2xl'
+                      : 'text-white/60 hover:text-white'
                   }`}
-                  whileHover={{ scale: 1.05, y: -2 }}
+                  initial={{ opacity: 0, y: -20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ 
+                    delay: index * 0.1,
+                    type: "spring",
+                    stiffness: 200,
+                    damping: 20
+                  }}
+                  whileHover={{ 
+                    scale: 1.08, 
+                    y: -3,
+                    rotateX: 5,
+                    transition: { duration: 0.2 }
+                  }}
                   whileTap={{ scale: 0.95 }}
                   style={{
                     background: activeTab === item.id 
-                      ? `linear-gradient(135deg, ${item.color.split(' ')[0]?.replace('from-', '').replace('-500', '') || 'purple'}40, ${item.color.split(' ')[1]?.replace('to-', '').replace('-500', '') || 'blue'}40)`
-                      : 'rgba(255, 255, 255, 0.05)',
-                    backdropFilter: 'blur(10px)',
+                      ? `linear-gradient(135deg, ${item.gradient})`
+                      : 'rgba(255, 255, 255, 0.03)',
+                    backdropFilter: 'blur(12px)',
+                    border: activeTab === item.id 
+                      ? '1px solid rgba(255, 255, 255, 0.2)' 
+                      : '1px solid rgba(255, 255, 255, 0.05)',
+                    boxShadow: activeTab === item.id
+                      ? `0 10px 40px ${item.glow}, 0 0 20px ${item.glow}, inset 0 1px 0 rgba(255, 255, 255, 0.2)`
+                      : 'none',
                   }}
                 >
-                  {/* Animated background for active tab */}
+                  {/* Glossy overlay effect */}
                   {activeTab === item.id && (
                     <motion.div
-                      className="absolute inset-0 bg-gradient-to-r opacity-20"
+                      className="absolute inset-0 rounded-2xl"
                       style={{
-                        backgroundImage: `linear-gradient(135deg, ${item.color})`
+                        background: 'linear-gradient(180deg, rgba(255, 255, 255, 0.3) 0%, transparent 50%, rgba(0, 0, 0, 0.2) 100%)',
                       }}
-                      animate={{
-                        background: [
-                          `linear-gradient(135deg, ${item.color})`,
-                          `linear-gradient(225deg, ${item.color})`,
-                          `linear-gradient(135deg, ${item.color})`,
-                        ]
-                      }}
-                      transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ duration: 0.3 }}
                     />
                   )}
                   
-                  <span className="relative z-10 flex items-center gap-2">
+                  {/* Shimmer effect on hover */}
+                  <motion.div
+                    className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                    style={{
+                      background: 'linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent)',
+                      backgroundSize: '200% 100%',
+                    }}
+                    animate={{
+                      backgroundPosition: ['200% 0', '-200% 0'],
+                    }}
+                    transition={{
+                      duration: 1.5,
+                      repeat: Infinity,
+                      ease: "linear"
+                    }}
+                  />
+                  
+                  {/* Animated particles for active tab */}
+                  {activeTab === item.id && (
+                    <>
+                      {[...Array(3)].map((_, i) => (
+                        <motion.div
+                          key={i}
+                          className="absolute w-1 h-1 rounded-full bg-white"
+                          style={{
+                            left: `${20 + i * 30}%`,
+                            top: '50%',
+                          }}
+                          animate={{
+                            y: [0, -20, 0],
+                            opacity: [0, 1, 0],
+                            scale: [0, 1.5, 0],
+                          }}
+                          transition={{
+                            duration: 2,
+                            repeat: Infinity,
+                            delay: i * 0.2,
+                            ease: "easeInOut"
+                          }}
+                        />
+                      ))}
+                    </>
+                  )}
+                  
+                  {/* Content */}
+                  <span className="relative z-10 flex items-center gap-2.5">
                     <motion.span
+                      className="text-lg"
                       animate={{ 
-                        rotate: activeTab === item.id ? [0, 360] : 0,
-                        scale: activeTab === item.id ? [1, 1.3, 1] : [1, 1.1, 1]
+                        rotate: activeTab === item.id ? [0, -10, 10, -5, 5, 0] : 0,
+                        scale: activeTab === item.id ? [1, 1.2, 1] : 1
                       }}
                       transition={{ 
-                        duration: activeTab === item.id ? 0.8 : 2,
+                        duration: activeTab === item.id ? 2 : 0.3,
                         ease: "easeInOut",
-                        repeat: activeTab === item.id ? Infinity : 0
+                        repeat: activeTab === item.id ? Infinity : 0,
+                        repeatDelay: 1
                       }}
-                      className="text-base"
                     >
                       {item.icon}
                     </motion.span>
@@ -1498,74 +1673,199 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
             </div>
           </div>
           
-          {/* Mobile Navigation Menu */}
+          {/* Mobile Navigation Menu - Enhanced Premium Design */}
           <AnimatePresence>
             {showMobileMenu && (
               <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                exit={{ opacity: 0, height: 0 }}
-                transition={{ duration: 0.3 }}
-                className="md:hidden border-t border-white/20 mt-2 pt-2"
+                initial={{ opacity: 0, height: 0, y: -20 }}
+                animate={{ opacity: 1, height: 'auto', y: 0 }}
+                exit={{ opacity: 0, height: 0, y: -20 }}
+                transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                className="md:hidden border-t mt-2 pt-4 overflow-hidden"
+                style={{
+                  borderImage: 'linear-gradient(90deg, transparent, rgba(139, 92, 246, 0.3), transparent) 1',
+                }}
               >
-                <div className="grid grid-cols-2 gap-2 pb-3">
-                  {[
-                    { id: 'overview', label: 'Overview', icon: '🎯' },
-                    { id: 'squad', label: 'Squad', icon: '👥' },
-                    { id: 'matches', label: 'Matches', icon: '📅' },
-                    { id: 'stats', label: 'Stats', icon: '📊' },
-                    { id: 'about', label: 'About', icon: '⭐' }
-                  ].map((item) => (
-                    <motion.button
-                      key={item.id}
-                      onClick={() => {
-                        setActiveTab(item.id);
-                        setShowMobileMenu(false);
+                {/* Premium glassmorphic container */}
+                <div className="relative p-4 rounded-2xl mb-4"
+                  style={{
+                    background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(236, 72, 153, 0.1))',
+                    backdropFilter: 'blur(20px)',
+                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
+                  }}
+                >
+                  {/* Animated background effect */}
+                  <motion.div
+                    className="absolute inset-0 rounded-2xl opacity-30"
+                    style={{
+                      background: 'linear-gradient(45deg, rgba(139, 92, 246, 0.2), rgba(236, 72, 153, 0.2))',
+                    }}
+                    animate={{
+                      backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'],
+                    }}
+                    transition={{ duration: 5, repeat: Infinity, ease: "linear" }}
+                  />
+                  
+                  <div className="relative z-10 grid grid-cols-2 gap-3 pb-3">
+                    {[
+                      { id: 'overview', label: 'Overview', icon: '🎯', gradient: 'from-purple-500 to-violet-600', glow: 'rgba(139, 92, 246, 0.4)' },
+                      { id: 'squad', label: 'Squad', icon: '👥', gradient: 'from-emerald-500 to-teal-600', glow: 'rgba(16, 185, 129, 0.4)' },
+                      { id: 'matches', label: 'Matches', icon: '📅', gradient: 'from-orange-500 to-pink-600', glow: 'rgba(249, 115, 22, 0.4)' },
+                      { id: 'stats', label: 'Stats', icon: '📊', gradient: 'from-blue-500 to-cyan-600', glow: 'rgba(59, 130, 246, 0.4)' },
+                      { id: 'about', label: 'About', icon: '⭐', gradient: 'from-yellow-500 to-orange-600', glow: 'rgba(234, 179, 8, 0.4)' }
+                    ].map((item, index) => (
+                      <motion.button
+                        key={item.id}
+                        onClick={() => {
+                          setActiveTab(item.id);
+                          setShowMobileMenu(false);
+                        }}
+                        className={`relative group flex items-center gap-2.5 px-4 py-3 rounded-xl text-sm font-bold transition-all duration-300 overflow-hidden ${
+                          activeTab === item.id
+                            ? 'text-white shadow-xl'
+                            : 'text-white/60 hover:text-white'
+                        }`}
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ 
+                          delay: index * 0.05,
+                          type: "spring",
+                          stiffness: 200,
+                          damping: 20
+                        }}
+                        whileHover={{ scale: 1.05, y: -2 }}
+                        whileTap={{ scale: 0.95 }}
+                        style={{
+                          background: activeTab === item.id 
+                            ? `linear-gradient(135deg, ${item.gradient})`
+                            : 'rgba(255, 255, 255, 0.05)',
+                          backdropFilter: 'blur(10px)',
+                          border: activeTab === item.id 
+                            ? '1px solid rgba(255, 255, 255, 0.2)' 
+                            : '1px solid rgba(255, 255, 255, 0.05)',
+                          boxShadow: activeTab === item.id
+                            ? `0 8px 24px ${item.glow}, inset 0 1px 0 rgba(255, 255, 255, 0.2)`
+                            : 'none',
+                        }}
+                      >
+                        {/* Glossy overlay */}
+                        {activeTab === item.id && (
+                          <motion.div
+                            className="absolute inset-0 rounded-xl"
+                            style={{
+                              background: 'linear-gradient(180deg, rgba(255, 255, 255, 0.2) 0%, transparent 50%, rgba(0, 0, 0, 0.1) 100%)',
+                            }}
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ duration: 0.3 }}
+                          />
+                        )}
+                        
+                        {/* Shimmer on hover */}
+                        <motion.div
+                          className="absolute inset-0 opacity-0 group-hover:opacity-100"
+                          style={{
+                            background: 'linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent)',
+                            backgroundSize: '200% 100%',
+                          }}
+                          animate={{
+                            backgroundPosition: ['200% 0', '-200% 0'],
+                          }}
+                          transition={{
+                            duration: 1.5,
+                            repeat: Infinity,
+                            ease: "linear"
+                          }}
+                        />
+                        
+                        <motion.span
+                          animate={{ 
+                            rotate: activeTab === item.id ? [0, -10, 10, 0] : 0,
+                            scale: activeTab === item.id ? [1, 1.2, 1] : 1
+                          }}
+                          transition={{ 
+                            duration: activeTab === item.id ? 1.5 : 0.3,
+                            ease: "easeInOut",
+                            repeat: activeTab === item.id ? Infinity : 0,
+                            repeatDelay: 0.5
+                          }}
+                          className="relative z-10 text-lg"
+                        >
+                          {item.icon}
+                        </motion.span>
+                        <span className="relative z-10 font-semibold">{item.label}</span>
+                        
+                        {/* Active pulse indicator */}
+                        {activeTab === item.id && (
+                          <motion.div
+                            className="absolute right-2 w-2 h-2 rounded-full bg-white"
+                            animate={{ 
+                              scale: [1, 1.5, 1],
+                              opacity: [1, 0.5, 1]
+                            }}
+                            transition={{ 
+                              duration: 1.5,
+                              repeat: Infinity,
+                              ease: "easeInOut"
+                            }}
+                          />
+                        )}
+                      </motion.button>
+                    ))}
+                  </div>
+                  
+                  {/* Enhanced Mobile Quick Actions */}
+                  <div className="relative z-10 flex gap-3 pt-3 border-t border-white/10">
+                    <motion.button 
+                      className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-sm font-semibold text-white/70 hover:text-white transition-all group relative overflow-hidden"
+                      style={{
+                        background: 'rgba(255, 255, 255, 0.05)',
+                        border: '1px solid rgba(255, 255, 255, 0.1)',
                       }}
-                      className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-bold transition-all duration-200 ${
-                        activeTab === item.id
-                          ? 'text-white bg-gradient-to-r from-purple-500/20 to-blue-500/20'
-                          : 'text-white/70 hover:text-white hover:bg-white/10'
-                      }`}
-                      whileHover={{ scale: 1.05 }}
+                      whileHover={{ scale: 1.05, y: -2 }}
                       whileTap={{ scale: 0.95 }}
                     >
-                      <motion.span
-                        animate={{ 
-                          rotate: activeTab === item.id ? [0, 360] : 0,
-                          scale: activeTab === item.id ? [1, 1.2, 1] : 1
+                      <motion.div
+                        className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                        style={{
+                          background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(59, 130, 246, 0.2))',
                         }}
-                        transition={{ 
-                          duration: activeTab === item.id ? 0.6 : 0.3,
-                          ease: "easeInOut"
-                        }}
-                        className="text-base"
+                      />
+                      <motion.span 
+                        className="relative z-10 text-base"
+                        whileHover={{ rotate: 360, scale: 1.2 }}
+                        transition={{ duration: 0.6 }}
                       >
-                        {item.icon}
+                        🔍
                       </motion.span>
-                      <span>{item.label}</span>
+                      <span className="relative z-10">Search</span>
                     </motion.button>
-                  ))}
-                </div>
-                
-                {/* Mobile Quick Actions */}
-                <div className="flex gap-2 pt-2 border-t border-white/10">
-                  <motion.button 
-                    className="flex-1 flex items-center justify-center gap-2 px-3 py-2 text-sm text-white/70 hover:text-white hover:bg-white/10 rounded-lg transition-all"
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    <span className="text-base">🔍</span>
-                    Search
-                  </motion.button>
-                  <motion.button 
-                    className="flex-1 flex items-center justify-center gap-2 px-3 py-2 text-sm text-white/70 hover:text-white hover:bg-white/10 rounded-lg transition-all"
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    <span className="text-base">💝</span>
-                    Share
-                  </motion.button>
+                    <motion.button 
+                      className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-sm font-semibold text-white/70 hover:text-white transition-all group relative overflow-hidden"
+                      style={{
+                        background: 'rgba(255, 255, 255, 0.05)',
+                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                      }}
+                      whileHover={{ scale: 1.05, y: -2 }}
+                      whileTap={{ scale: 0.95 }}
+                    >
+                      <motion.div
+                        className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                        style={{
+                          background: 'linear-gradient(135deg, rgba(236, 72, 153, 0.2), rgba(239, 68, 68, 0.2))',
+                        }}
+                      />
+                      <motion.span 
+                        className="relative z-10 text-base"
+                        animate={{ scale: [1, 1.2, 1] }}
+                        transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                      >
+                        💝
+                      </motion.span>
+                      <span className="relative z-10">Share</span>
+                    </motion.button>
+                  </div>
                 </div>
               </motion.div>
             )}
@@ -1599,124 +1899,6 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
 
       {/* Enhanced Hero Section with Dynamic Content */}
       <section className="relative z-10 py-24">
-        {/* Enhanced Social Proof Bar */}
-        <motion.div
-          initial={{ opacity: 0, y: -30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.2, type: "spring" }}
-          className="mb-12"
-        >
-          <div className="container mx-auto px-4">
-            <motion.div
-              className="bg-white/10 backdrop-blur-xl rounded-3xl p-6 border border-white/20 shadow-2xl"
-              whileHover={{ scale: 1.02, y: -5 }}
-              style={{
-                background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05))',
-                backdropFilter: 'blur(20px)',
-                WebkitBackdropFilter: 'blur(20px)',
-              }}
-            >
-              <div className="flex flex-wrap items-center justify-center gap-10 text-white">
-                <motion.div 
-                  className="flex items-center gap-3"
-                  whileHover={{ scale: 1.1 }}
-                >
-                  <motion.div
-                    animate={{ 
-                      scale: [1, 1.2, 1],
-                      rotate: [0, -5, 5, 0]
-                    }}
-                    transition={{ 
-                      duration: 3, 
-                      repeat: Infinity, 
-                      ease: "easeInOut" 
-                    }}
-                    className="text-2xl"
-                  >
-                    👥
-                  </motion.div>
-                  <div>
-                    <div className="font-black text-2xl">2.3M</div>
-                    <div className="text-white/70 text-sm font-medium">Followers</div>
-                  </div>
-                </motion.div>
-                
-                <motion.div 
-                  className="flex items-center gap-3"
-                  whileHover={{ scale: 1.1 }}
-                >
-                  <motion.div
-                    animate={{ 
-                      scale: [1, 1.3, 1],
-                      rotate: [0, 10, -10, 0]
-                    }}
-                    transition={{ 
-                      duration: 2.8, 
-                      repeat: Infinity, 
-                      ease: "easeInOut" 
-                    }}
-                    className="text-2xl"
-                  >
-                    📈
-                  </motion.div>
-                  <div>
-                    <div className="font-black text-2xl">85%</div>
-                    <div className="text-white/70 text-sm font-medium">Win Rate</div>
-                  </div>
-                </motion.div>
-                
-                <motion.div 
-                  className="flex items-center gap-3"
-                  whileHover={{ scale: 1.1 }}
-                >
-                  <motion.div
-                    animate={{ 
-                      scale: [1, 1.4, 1],
-                      rotate: [0, -15, 15, 0]
-                    }}
-                    transition={{ 
-                      duration: 3.2, 
-                      repeat: Infinity, 
-                      ease: "easeInOut" 
-                    }}
-                    className="text-2xl"
-                  >
-                    🏆
-                  </motion.div>
-                  <div>
-                    <div className="font-black text-2xl">3</div>
-                    <div className="text-white/70 text-sm font-medium">Championships</div>
-                  </div>
-                </motion.div>
-                
-                <motion.div 
-                  className="flex items-center gap-3"
-                  whileHover={{ scale: 1.1 }}
-                >
-                  <motion.div
-                    animate={{ 
-                      scale: [1, 1.2, 1],
-                      rotate: [0, 20, -20, 0]
-                    }}
-                    transition={{ 
-                      duration: 2.5, 
-                      repeat: Infinity, 
-                      ease: "easeInOut" 
-                    }}
-                    className="text-2xl"
-                  >
-                    ⚡
-                  </motion.div>
-                  <div>
-                    <div className="font-black text-2xl">156K</div>
-                    <div className="text-white/70 text-sm font-medium">Talking About</div>
-                  </div>
-                </motion.div>
-              </div>
-            </motion.div>
-          </div>
-        </motion.div>
-
         {/* Enhanced floating orbs animation */}
         <motion.div
           className="absolute w-[400px] h-[400px] rounded-full blur-[80px] pointer-events-none"
@@ -1980,19 +2162,55 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
                 <div className="bg-white/5 backdrop-blur-md rounded-2xl p-6 border border-white/10">
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     <div className="text-center">
-                      <div className="text-2xl font-black text-white mb-1">#2</div>
+                      <motion.div 
+                        className="text-2xl font-black text-white mb-1"
+                        initial={{ opacity: 0, scale: 0.5 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ duration: 0.5, delay: 1.0 }}
+                      >
+                        {leaguePosition > 0 ? `#${leaguePosition}` : '-'}
+                      </motion.div>
                       <div className="text-sm text-white/70">League Position</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-2xl font-black text-green-400 mb-1">W3</div>
+                      <motion.div 
+                        className="text-2xl font-black mb-1"
+                        initial={{ opacity: 0, scale: 0.5 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ duration: 0.5, delay: 1.1 }}
+                        style={{
+                          color: last5Games.startsWith('W') ? '#10b981' : 
+                                 last5Games.startsWith('L') ? '#ef4444' : '#ffffff'
+                        }}
+                      >
+                        {last5Games || '-'}
+                      </motion.div>
                       <div className="text-sm text-white/70">Last 5 Games</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-2xl font-black text-white mb-1">87%</div>
+                      <motion.div 
+                        className="text-2xl font-black text-white mb-1"
+                        initial={{ opacity: 0, scale: 0.5 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ duration: 0.5, delay: 1.2 }}
+                      >
+                        {winRate > 0 ? `${Math.round(winRate)}%` : '-'}
+                      </motion.div>
                       <div className="text-sm text-white/70">Win Rate</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-2xl font-black text-yellow-400 mb-1">+42</div>
+                      <motion.div 
+                        className="text-2xl font-black mb-1"
+                        initial={{ opacity: 0, scale: 0.5 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ duration: 0.5, delay: 1.3 }}
+                        style={{
+                          color: netRunRate > 0 ? '#facc15' : 
+                                 netRunRate < 0 ? '#ef4444' : '#ffffff'
+                        }}
+                      >
+                        {netRunRate !== 0 ? (netRunRate > 0 ? '+' : '') + netRunRate.toFixed(2) : '-'}
+                      </motion.div>
                       <div className="text-sm text-white/70">Net RR</div>
                     </div>
                   </div>
