@@ -270,12 +270,22 @@ export async function exportScorecardAsPDF(data: any): Promise<void> {
       drawSectionHeader(doc, y, W, M, `PARTNERSHIPS - ${iTeam}`, C.green);
       y += 30;
 
-      const maxRuns = Math.max(...pArr.map((p: any) => Number(p.totalRuns || p.runs) || 0), 1);
+      // Parse "22(16)" format for totalRuns
+      const parseTR = (raw: any): { runs: number; balls: number } => {
+        const s = String(raw ?? '');
+        const m = s.match(/^(\d+)\s*\((\d+)\)$/);
+        if (m) return { runs: Number(m[1]), balls: Number(m[2]) };
+        return { runs: parseInt(s) || 0, balls: 0 };
+      };
+
+      const parsed = pArr.map((p: any) => parseTR(p.totalRuns || p.runs));
+      const maxRuns = Math.max(...parsed.map(t => t.runs), 1);
       const barAreaW = W - 2 * M - 20;
 
       pArr.forEach((p: any, idx: number) => {
         needPage(55);
-        const totalRuns  = Number(p.totalRuns || p.runs) || 0;
+        const { runs: totalRuns, balls: totalBalls } = parsed[idx];
+        const sr = totalBalls > 0 ? ((totalRuns / totalBalls) * 100).toFixed(1) : '-';
         const b1r = str(p.batsman1Runs ?? p.runs1 ?? '');
         const b1b = str(p.batsman1Balls ?? p.balls1 ?? '');
         const b2r = str(p.batsman2Runs ?? p.runs2 ?? '');
@@ -295,7 +305,8 @@ export async function exportScorecardAsPDF(data: any): Promise<void> {
         const barX = M + 280;
         setF(C.green);
         rect(barX, y + 6, barW, 14, 'F');
-        text(`${totalRuns} runs`, barX + barW + 8, y + 16, C.dark, 8, 'bold');
+        const label = totalBalls > 0 ? `${totalRuns}(${totalBalls}b)  SR ${sr}` : `${totalRuns} runs`;
+        text(label, barX + barW + 8, y + 16, C.dark, 8, 'bold');
 
         y += 52;
       });

@@ -1186,10 +1186,11 @@ export default function ScorecardAdminPage() {
       safeSetFillColor(250, 250, 250);
       safeRect(x, y, width, height, 'F');
       
-      // Extract partnership totals
+      // Extract partnership totals — totalRuns can be "22(16)" format
       const partnershipRuns = partnerships.map(p => {
-        const total = p.totalRuns || '0';
-        return parseInt(total) || 0;
+        const raw = String(p.totalRuns || '0');
+        const m = raw.match(/^(\d+)\s*\((\d+)\)$/);
+        return m ? Number(m[1]) : (parseInt(raw) || 0);
       });
       
       const maxRuns = Math.max(...partnershipRuns);
@@ -1197,7 +1198,9 @@ export default function ScorecardAdminPage() {
       
       // Draw bars
       partnerships.forEach((partnership, index) => {
-        const total = parseInt(partnership.totalRuns) || 0;
+        const rawTotal = String(partnership.totalRuns || '0');
+        const tpM = rawTotal.match(/^(\d+)\s*\((\d+)\)$/);
+        const total = tpM ? Number(tpM[1]) : (parseInt(rawTotal) || 0);
         const barHeight = maxRuns > 0 ? (total / maxRuns) * (height - 25) : 0;
         const barX = x + (index * (barWidth + 5)) + 5;
         const barY = y + height - barHeight - 15;
@@ -1643,7 +1646,11 @@ export default function ScorecardAdminPage() {
         addColorfulText('Bowling Impact on Partnerships', 40, y, colors.dark, 10, 'bold');
         
         // Create a comparison chart showing partnership runs vs bowling economy
-        const partnershipData = inn.partnerships.map(p => parseInt(p.totalRuns) || 0);
+        const partnershipData = inn.partnerships.map((p: any) => {
+          const raw = String(p.totalRuns || '0');
+          const m = raw.match(/^(\d+)\s*\((\d+)\)$/);
+          return m ? Number(m[1]) : (parseInt(raw) || 0);
+        });
         const bowlingEconomies = inn.bowling.slice(0, partnershipData.length).map(b => b.economy || 0);
         
         // Show partnership runs as bars and overlay bowling economy as a line
@@ -1828,7 +1835,10 @@ export default function ScorecardAdminPage() {
           addColorfulText(`${partnership.batsman1Runs || 0} (${partnership.batsman1Balls || 0})`, 187, y, colors.info, 9, 'center');
           addColorfulText(partnership.batsman2 || 'N/A', 225, y, colors.dark, 9);
           addColorfulText(`${partnership.batsman2Runs || 0} (${partnership.batsman2Balls || 0})`, 327, y, colors.info, 9, 'center');
-          addColorfulText(`${partnership.totalRuns || 0} runs`, (365 + pageWidth - 40) / 2, y, colors.accent, 10, 'bold', 'center');
+          const rawTR = String(partnership.totalRuns || '0');
+          const trMatch = rawTR.match(/^(\d+)\s*\((\d+)\)$/);
+          const trLabel = trMatch ? `${trMatch[1]} runs (${trMatch[2]}b)` : `${parseInt(rawTR) || 0} runs`;
+          addColorfulText(trLabel, (365 + pageWidth - 40) / 2, y, colors.accent, 10, 'bold', 'center');
           y += lineHeight;
         });
         

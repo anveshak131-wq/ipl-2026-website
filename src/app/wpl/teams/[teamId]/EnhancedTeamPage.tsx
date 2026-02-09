@@ -1037,16 +1037,24 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
       if (inn.powerplays?.mandatory) pps.push({ type: 'Mandatory', overs: inn.powerplays.mandatory.overs || '', runs: inn.powerplays.mandatory.runs ?? '' });
       if (inn.powerplays?.optional)  pps.push({ type: 'Optional',  overs: inn.powerplays.optional.overs  || '', runs: inn.powerplays.optional.runs  ?? '' });
       if (inn.powerplay) pps.push({ type: 'Powerplay', overs: inn.powerplay.overs || '', runs: inn.powerplay.runs ?? '' });
-      const partnerships = (inn.partnerships || []).map((p: any, i: number) => ({
-        number: i + 1,
-        batsman1: p.batsman1 || '',
-        batsman1Runs: p.batsman1Runs ?? p.runs1 ?? '',
-        batsman1Balls: p.batsman1Balls ?? p.balls1 ?? '',
-        batsman2: p.batsman2 || '',
-        batsman2Runs: p.batsman2Runs ?? p.runs2 ?? '',
-        batsman2Balls: p.batsman2Balls ?? p.balls2 ?? '',
-        totalRuns: p.totalRuns ?? p.runs ?? '',
-      }));
+      const partnerships = (inn.partnerships || []).map((p: any, i: number) => {
+        // totalRuns can be "22(16)" meaning 22 runs in 16 balls
+        const raw = String(p.totalRuns ?? p.runs ?? '');
+        const tpMatch = raw.match(/^(\d+)\s*\((\d+)\)$/);
+        const totalRuns  = tpMatch ? Number(tpMatch[1]) : (parseInt(raw) || 0);
+        const totalBalls = tpMatch ? Number(tpMatch[2]) : 0;
+        return {
+          number: i + 1,
+          batsman1: p.batsman1 || '',
+          batsman1Runs: p.batsman1Runs ?? p.runs1 ?? '',
+          batsman1Balls: p.batsman1Balls ?? p.balls1 ?? '',
+          batsman2: p.batsman2 || '',
+          batsman2Runs: p.batsman2Runs ?? p.runs2 ?? '',
+          batsman2Balls: p.batsman2Balls ?? p.balls2 ?? '',
+          totalRuns,
+          totalBalls,
+        };
+      });
       return {
         teamName,
         totalRuns: inn.totalRuns ?? inn.total ?? '-',
@@ -1154,9 +1162,9 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
 
         // Partnerships
         if (inn.partnerships.length > 0) {
-          csv += 'PARTNERSHIPS\n#,Batsman 1,Runs,Balls,Batsman 2,Runs,Balls,Total Runs\n';
+          csv += 'PARTNERSHIPS\n#,Batsman 1,Runs,Balls,Batsman 2,Runs,Balls,Total Runs,Total Balls\n';
           inn.partnerships.forEach((p: any) => {
-            csv += `${p.number},"${p.batsman1}",${p.batsman1Runs},${p.batsman1Balls},"${p.batsman2}",${p.batsman2Runs},${p.batsman2Balls},${p.totalRuns}\n`;
+            csv += `${p.number},"${p.batsman1}",${p.batsman1Runs},${p.batsman1Balls},"${p.batsman2}",${p.batsman2Runs},${p.batsman2Balls},${p.totalRuns},${p.totalBalls}\n`;
           });
           csv += '\n';
         }
@@ -1235,10 +1243,10 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
 
         // Partnerships
         if (inn.partnerships.length > 0) {
-          html += `<table><tr><td class="section" colspan="8">PARTNERSHIPS — ${esc(inn.teamName)}</td></tr>`;
-          html += '<tr><th>#</th><th>Batsman 1</th><th>Runs</th><th>Balls</th><th>Batsman 2</th><th>Runs</th><th>Balls</th><th>Total</th></tr>';
+          html += `<table><tr><td class="section" colspan="9">PARTNERSHIPS — ${esc(inn.teamName)}</td></tr>`;
+          html += '<tr><th>#</th><th>Batsman 1</th><th>Runs</th><th>Balls</th><th>Batsman 2</th><th>Runs</th><th>Balls</th><th>Total Runs</th><th>Total Balls</th></tr>';
           inn.partnerships.forEach((p: any) => {
-            html += `<tr><td>${p.number}</td><td>${esc(p.batsman1)}</td><td>${esc(p.batsman1Runs)}</td><td>${esc(p.batsman1Balls)}</td><td>${esc(p.batsman2)}</td><td>${esc(p.batsman2Runs)}</td><td>${esc(p.batsman2Balls)}</td><td>${esc(p.totalRuns)}</td></tr>`;
+            html += `<tr><td>${p.number}</td><td>${esc(p.batsman1)}</td><td>${esc(p.batsman1Runs)}</td><td>${esc(p.batsman1Balls)}</td><td>${esc(p.batsman2)}</td><td>${esc(p.batsman2Runs)}</td><td>${esc(p.batsman2Balls)}</td><td>${esc(p.totalRuns)}</td><td>${esc(p.totalBalls)}</td></tr>`;
           });
           html += '</table>';
         }
