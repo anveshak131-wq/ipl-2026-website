@@ -520,6 +520,7 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
         winPercentage: 0
       });
       return;
+    }
     let totalRuns = 0;
     let totalWickets = 0;
     let totalOvers = 0;
