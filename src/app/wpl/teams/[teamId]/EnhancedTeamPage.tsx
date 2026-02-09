@@ -520,12 +520,6 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
         winPercentage: 0
       });
       return;
-            <motion.div
-              className="text-3xl"
-              animate={{ scale: [1, 1.2, 1] }}
-              transition={{ duration: 1, repeat: Infinity, ease: "easeInOut" }}
-            >
-              <CI.IconCricketBat size={30} className="inline-block" />
     let totalRuns = 0;
     let totalWickets = 0;
     let totalOvers = 0;
