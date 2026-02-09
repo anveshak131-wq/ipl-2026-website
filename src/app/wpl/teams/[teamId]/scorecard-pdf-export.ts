@@ -100,6 +100,22 @@ export async function exportScorecardAsPDF(data: any): Promise<void> {
   const innings: any[] = data.innings || [];
   const hasInningsData = innings.length > 0;
 
+  // Resolve battingTeamId → team short-name
+  const t1id = mi.team1?.id ?? mi.team1;
+  const t2id = mi.team2?.id ?? mi.team2;
+  const resolveTeamName = (inn: any, idx: number): string => {
+    if (inn.teamName) return inn.teamName;
+    const btid = inn.battingTeamId ?? inn.teamId;
+    if (btid != null) {
+      if (String(btid) === String(t1id)) return team1;
+      if (String(btid) === String(t2id)) return team2;
+    }
+    // Fallback: use inningsNumber if available
+    if (inn.inningsNumber === 1) return team1;
+    if (inn.inningsNumber === 2) return team2;
+    return idx === 0 ? team1 : team2;
+  };
+
   // ═══════════════════════════════════════════════════════════════
   // PAGE 1 — Header & Match Info
   // ═══════════════════════════════════════════════════════════════
@@ -161,7 +177,7 @@ export async function exportScorecardAsPDF(data: any): Promise<void> {
     innings.forEach((inn: any, innIdx: number) => {
       const fowArr: any[] = inn.fallOfWickets || [];
       if (fowArr.length === 0) return;
-      const iTeam = inn.teamName || inn.teamId || (innIdx === 0 ? team1 : team2);
+      const iTeam = resolveTeamName(inn, innIdx);
       y += 15;
       needPage(40 + fowArr.length * 22);
       drawSectionHeader(doc, y, W, M, `FALL OF WICKETS - ${iTeam}`, C.red);
@@ -213,7 +229,7 @@ export async function exportScorecardAsPDF(data: any): Promise<void> {
       if (inn.powerplay)             ppItems.push({ type: 'Powerplay', overs: str(inn.powerplay.overs), runs: inn.powerplay.runs ?? '-' });
       if (ppItems.length === 0) return;
 
-      const iTeam = inn.teamName || inn.teamId || (innIdx === 0 ? team1 : team2);
+      const iTeam = resolveTeamName(inn, innIdx);
       y += 25;
       needPage(40 + ppItems.length * 46);
       drawSectionHeader(doc, y, W, M, `POWERPLAYS - ${iTeam}`, C.cyan);
@@ -247,7 +263,7 @@ export async function exportScorecardAsPDF(data: any): Promise<void> {
     innings.forEach((inn: any, innIdx: number) => {
       const pArr: any[] = inn.partnerships || [];
       if (pArr.length === 0) return;
-      const iTeam = inn.teamName || inn.teamId || (innIdx === 0 ? team1 : team2);
+      const iTeam = resolveTeamName(inn, innIdx);
 
       y += 25;
       needPage(40 + pArr.length * 55);
@@ -291,7 +307,7 @@ export async function exportScorecardAsPDF(data: any): Promise<void> {
   // ═══════════════════════════════════════════════════════════════
   if (hasInningsData) {
     innings.forEach((inn: any, innIdx: number) => {
-      const battingTeam = inn.teamName || inn.teamId || `Innings ${innIdx + 1}`;
+      const battingTeam = resolveTeamName(inn, innIdx);
       const batting: any[] = inn.batting || [];
       const bowling: any[] = inn.bowling || [];
       const total = inn.totalRuns ?? inn.total ?? '–';

@@ -984,11 +984,26 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
     const mi = sc.matchInfo || {};
     const t1 = mi.team1?.shortName || mi.team1?.name || (typeof mi.team1 === 'string' ? mi.team1 : 'Team 1');
     const t2 = mi.team2?.shortName || mi.team2?.name || (typeof mi.team2 === 'string' ? mi.team2 : 'Team 2');
+    const t1id = mi.team1?.id ?? mi.team1;
+    const t2id = mi.team2?.id ?? mi.team2;
     const innings: any[] = sc.innings || [];
+
+    // Resolve battingTeamId to correct team name
+    const resolveTeam = (inn: any, idx: number): string => {
+      if (inn.teamName) return inn.teamName;
+      const btid = inn.battingTeamId ?? inn.teamId;
+      if (btid != null) {
+        if (String(btid) === String(t1id)) return t1;
+        if (String(btid) === String(t2id)) return t2;
+      }
+      if (inn.inningsNumber === 1) return t1;
+      if (inn.inningsNumber === 2) return t2;
+      return idx === 0 ? t1 : t2;
+    };
 
     // Build per-innings batting / bowling arrays
     const inningsData = innings.map((inn: any, idx: number) => {
-      const teamName = inn.teamName || inn.teamId || (idx === 0 ? t1 : t2);
+      const teamName = resolveTeam(inn, idx);
       const batting = (inn.batting || []).map((b: any) => ({
         name: b.name || b.batsman || '',
         runs: Number(b.runs) || 0,
