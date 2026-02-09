@@ -38,6 +38,7 @@ import {
   Menu,
   X
 } from 'lucide-react';
+import * as CI from './CricketIcons';
 import WPLFloatingParticles from '@/components/animations/WPLFloatingParticles';
 import { WPLColors, getWPLGlassmorphism, getWPLHoverGlow } from '@/lib/wplColors';
 
@@ -519,12 +520,12 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
         winPercentage: 0
       });
       return;
-    }
-
-    let totalMatches = 0;
-    let wins = 0;
-    let losses = 0;
-    let teamScores: number[] = [];
+            <motion.div
+              className="text-3xl"
+              animate={{ scale: [1, 1.2, 1] }}
+              transition={{ duration: 1, repeat: Infinity, ease: "easeInOut" }}
+            >
+              <CI.IconCricketBat size={30} className="inline-block" />
     let totalRuns = 0;
     let totalWickets = 0;
     let totalOvers = 0;
@@ -1307,7 +1308,7 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
               animate={{ scale: [1, 1.2, 1] }}
               transition={{ duration: 1, repeat: Infinity, ease: "easeInOut" }}
             >
-              🏏
+              <CI.IconCricketBat size={30} className="inline-block" />
             </motion.div>
           </motion.div>
           <motion.p
@@ -1346,7 +1347,7 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
             animate={{ rotate: [0, -10, 10, 0], scale: [1, 1.1, 1] }}
             transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
           >
-            🔍
+            <CI.IconSearch size={72} className="inline-block" />
           </motion.div>
           <h1 className="text-5xl font-black mb-4 bg-gradient-to-r from-white via-purple-200 to-pink-200 bg-clip-text text-transparent">
             Team Not Found
@@ -1584,7 +1585,7 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
                     transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
                     className="text-lg"
                   >
-                    🔙
+                    <CI.IconBack size={18} className="inline-block" />
                   </motion.span>
                   <span className="hidden sm:inline text-sm font-medium group-hover:translate-x-1 transition-transform duration-300">Teams</span>
                 </Link>
@@ -1649,11 +1650,11 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
               />
               
               {[
-                { id: 'overview', label: 'Overview', icon: '🎯', gradient: 'from-purple-500 via-violet-500 to-purple-600', glow: 'rgba(139, 92, 246, 0.5)' },
-                { id: 'squad', label: 'Squad', icon: '👥', gradient: 'from-emerald-500 via-green-500 to-teal-600', glow: 'rgba(16, 185, 129, 0.5)' },
-                { id: 'matches', label: 'Matches', icon: '📅', gradient: 'from-orange-500 via-red-500 to-pink-600', glow: 'rgba(249, 115, 22, 0.5)' },
-                { id: 'stats', label: 'Stats', icon: '📊', gradient: 'from-blue-500 via-cyan-500 to-sky-600', glow: 'rgba(59, 130, 246, 0.5)' },
-                { id: 'about', label: 'About', icon: '⭐', gradient: 'from-yellow-500 via-amber-500 to-orange-600', glow: 'rgba(234, 179, 8, 0.5)' }
+                { id: 'overview', label: 'Overview', icon: <CI.IconTarget size={20} className="inline-block" />, gradient: 'from-purple-500 via-violet-500 to-purple-600', glow: 'rgba(139, 92, 246, 0.5)' },
+                { id: 'squad', label: 'Squad', icon: <CI.IconSquad size={20} className="inline-block" />, gradient: 'from-emerald-500 via-green-500 to-teal-600', glow: 'rgba(16, 185, 129, 0.5)' },
+                { id: 'matches', label: 'Matches', icon: <CI.IconCalendar size={20} className="inline-block" />, gradient: 'from-orange-500 via-red-500 to-pink-600', glow: 'rgba(249, 115, 22, 0.5)' },
+                { id: 'stats', label: 'Stats', icon: <CI.IconChart size={20} className="inline-block" />, gradient: 'from-blue-500 via-cyan-500 to-sky-600', glow: 'rgba(59, 130, 246, 0.5)' },
+                { id: 'about', label: 'About', icon: <CI.IconStar size={20} className="inline-block" />, gradient: 'from-yellow-500 via-amber-500 to-orange-600', glow: 'rgba(234, 179, 8, 0.5)' }
               ].map((item, index) => (
                 <motion.button
                   key={item.id}
@@ -1810,7 +1811,7 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
                   transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
                   className="relative z-10 text-lg"
                 >
-                  🔍
+                  <CI.IconSearch size={20} className="inline-block" />
                 </motion.span>
               </motion.button>
               
@@ -1832,7 +1833,7 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
                   transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
                   className="relative z-10 text-lg"
                 >
-                  💝
+                  <CI.IconHeart size={20} className="inline-block" />
                 </motion.span>
               </motion.button>
               
@@ -1862,7 +1863,7 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
                   }}
                   className="relative z-10 text-xl"
                 >
-                  {showMobileMenu ? '✨' : '📱'}
+                  {showMobileMenu ? <CI.IconSparkle size={20} className="inline-block" /> : <CI.IconMobile size={20} className="inline-block" />}
                 </motion.span>
               </motion.button>
             </div>
@@ -1904,11 +1905,11 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
                   
                   <div className="relative z-10 grid grid-cols-2 gap-3 pb-3">
                     {[
-                      { id: 'overview', label: 'Overview', icon: '🎯', gradient: 'from-purple-500 to-violet-600', glow: 'rgba(139, 92, 246, 0.4)' },
-                      { id: 'squad', label: 'Squad', icon: '👥', gradient: 'from-emerald-500 to-teal-600', glow: 'rgba(16, 185, 129, 0.4)' },
-                      { id: 'matches', label: 'Matches', icon: '📅', gradient: 'from-orange-500 to-pink-600', glow: 'rgba(249, 115, 22, 0.4)' },
-                      { id: 'stats', label: 'Stats', icon: '📊', gradient: 'from-blue-500 to-cyan-600', glow: 'rgba(59, 130, 246, 0.4)' },
-                      { id: 'about', label: 'About', icon: '⭐', gradient: 'from-yellow-500 to-orange-600', glow: 'rgba(234, 179, 8, 0.4)' }
+                      { id: 'overview', label: 'Overview', icon: <CI.IconTarget size={18} className="inline-block" />, gradient: 'from-purple-500 to-violet-600', glow: 'rgba(139, 92, 246, 0.4)' },
+                      { id: 'squad', label: 'Squad', icon: <CI.IconSquad size={18} className="inline-block" />, gradient: 'from-emerald-500 to-teal-600', glow: 'rgba(16, 185, 129, 0.4)' },
+                      { id: 'matches', label: 'Matches', icon: <CI.IconCalendar size={18} className="inline-block" />, gradient: 'from-orange-500 to-pink-600', glow: 'rgba(249, 115, 22, 0.4)' },
+                      { id: 'stats', label: 'Stats', icon: <CI.IconChart size={18} className="inline-block" />, gradient: 'from-blue-500 to-cyan-600', glow: 'rgba(59, 130, 246, 0.4)' },
+                      { id: 'about', label: 'About', icon: <CI.IconStar size={18} className="inline-block" />, gradient: 'from-yellow-500 to-orange-600', glow: 'rgba(234, 179, 8, 0.4)' }
                     ].map((item, index) => (
                       <motion.button
                         key={item.id}
@@ -2032,7 +2033,7 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
                         whileHover={{ rotate: 360, scale: 1.2 }}
                         transition={{ duration: 0.6 }}
                       >
-                        🔍
+                        <CI.IconSearch size={18} className="inline-block" />
                       </motion.span>
                       <span className="relative z-10">Search</span>
                     </motion.button>
@@ -2056,7 +2057,7 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
                         animate={{ scale: [1, 1.2, 1] }}
                         transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
                       >
-                        💝
+                        <CI.IconHeart size={18} className="inline-block" />
                       </motion.span>
                       <span className="relative z-10">Share</span>
                     </motion.button>
@@ -3072,7 +3073,7 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
                                         animate={{ rotate: [0, 360] }}
                                         transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
                                       >
-                                        📊
+                                        <CI.IconChart size={16} className="inline-block" />
                                       </motion.div>
                                       Full Scorecard Available
                                     </>
@@ -3082,7 +3083,7 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
                                         animate={{ rotate: [0, -10, 10, 0] }}
                                         transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
                                       >
-                                        📋
+                                        <CI.IconClipboard size={16} className="inline-block" />
                                       </motion.div>
                                       Match Details
                                     </>
@@ -3217,15 +3218,15 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
                       >
-                        <motion.div
-                          className="absolute left-4 top-1/2 transform -translate-y-1/2 text-white/60"
-                          animate={{ 
-                            rotate: [0, -10, 10, 0],
-                            scale: [1, 1.1, 1]
-                          }}
-                          transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-                        >
-                          <span className="text-lg">🔍</span>
+                          <motion.div
+                            className="absolute left-4 top-1/2 transform -translate-y-1/2 text-white/60"
+                            animate={{ 
+                              rotate: [0, -10, 10, 0],
+                              scale: [1, 1.1, 1]
+                            }}
+                            transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                          >
+                          <CI.IconSearch size={18} className="inline-block" />
                         </motion.div>
                         <motion.input
                           type="text"
@@ -3282,7 +3283,7 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
                         }}
                         transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
                       >
-                        <span className="text-lg">🎯</span>
+                        <CI.IconTarget size={18} className="inline-block" />
                       </motion.div>
                       <span>
                         {filteredPlayers.length} {filteredPlayers.length === 1 ? 'player' : 'players'} found
@@ -3335,7 +3336,7 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
                       
                       <div className="relative z-10 p-6">
                         <div className="flex items-center gap-4 mb-6">
-                          <motion.div
+                            <motion.div
                             className="w-20 h-20 rounded-2xl flex items-center justify-center"
                             style={{
                               background: `linear-gradient(135deg, ${teamColors.primary}, ${teamColors.secondary})`,
@@ -3343,7 +3344,7 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
                             whileHover={{ rotate: 360 }}
                             transition={{ duration: 0.8, ease: "easeInOut" }}
                           >
-                            <span className="text-3xl">👤</span>
+                            <CI.IconPlayer size={30} className="inline-block" />
                           </motion.div>
                           <div>
                             <motion.h3 
@@ -3369,7 +3370,7 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
                                   animate={{ rotate: [0, -10, 10, 0] }}
                                   transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
                                 >
-                                  <span className="text-sm">🌍</span>
+                                  <CI.IconGlobe size={14} className="inline-block" />
                                 </motion.div>
                                 {player.nationality}
                               </motion.div>
@@ -3567,10 +3568,10 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
                       transition={{ delay: 0.3 }}
                     >
                       {[
-                        { label: 'Total', value: matches.length, icon: '📊', color: 'from-blue-500 to-cyan-500', glow: 'rgba(59, 130, 246, 0.3)' },
-                        { label: 'Completed', value: matches.filter(m => m.status === 'completed').length, icon: '✅', color: 'from-green-500 to-emerald-500', glow: 'rgba(16, 185, 129, 0.3)' },
-                        { label: 'Live', value: matches.filter(m => m.status === 'live').length, icon: '🔴', color: 'from-red-500 to-pink-500', glow: 'rgba(239, 68, 68, 0.3)' },
-                        { label: 'Upcoming', value: matches.filter(m => m.status === 'upcoming' || m.status === 'scheduled').length, icon: '⏳', color: 'from-yellow-500 to-orange-500', glow: 'rgba(234, 179, 8, 0.3)' },
+                        { label: 'Total', value: matches.length, icon: <CI.IconChart size={18} className="inline-block" />, color: 'from-blue-500 to-cyan-500', glow: 'rgba(59, 130, 246, 0.3)' },
+                        { label: 'Completed', value: matches.filter(m => m.status === 'completed').length, icon: <CI.IconCheck size={18} className="inline-block" />, color: 'from-green-500 to-emerald-500', glow: 'rgba(16, 185, 129, 0.3)' },
+                        { label: 'Live', value: matches.filter(m => m.status === 'live').length, icon: <CI.IconLive size={18} className="inline-block" />, color: 'from-red-500 to-pink-500', glow: 'rgba(239, 68, 68, 0.3)' },
+                        { label: 'Upcoming', value: matches.filter(m => m.status === 'upcoming' || m.status === 'scheduled').length, icon: <CI.IconHourglass size={18} className="inline-block" />, color: 'from-yellow-500 to-orange-500', glow: 'rgba(234, 179, 8, 0.3)' },
                       ].map((stat, index) => (
                         <motion.div
                           key={stat.label}
@@ -3743,7 +3744,7 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
                                   whileHover={{ rotate: 360 }}
                                   transition={{ duration: 0.6 }}
                                 >
-                                  <span className="text-3xl md:text-4xl">🏏</span>
+                                  <CI.IconCricketBat size={36} className="inline-block" />
                                 </motion.div>
                                 <div className="text-white font-black text-lg md:text-xl mb-1">
                                   {getTeamShort(match.team1) || 'TBD'}
@@ -3803,7 +3804,7 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
                                   whileHover={{ rotate: -360 }}
                                   transition={{ duration: 0.6 }}
                                 >
-                                  <span className="text-3xl md:text-4xl">🏏</span>
+                                  <CI.IconCricketBat size={36} className="inline-block" />
                                 </motion.div>
                                 <div className="text-white font-black text-lg md:text-xl mb-1">
                                   {getTeamShort(match.team2) || 'TBD'}
@@ -3847,7 +3848,13 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
                                 }}
                                 whileHover={{ scale: 1.05 }}
                               >
-                                {isLive ? '🔴 Live' : isCompleted ? '✅ Completed' : '⏳ Upcoming'}
+                                {isLive ? (
+                                  <span className="inline-flex items-center gap-2"><CI.IconLive size={14} className="inline-block" /> Live</span>
+                                ) : isCompleted ? (
+                                  <span className="inline-flex items-center gap-2"><CI.IconCheck size={14} className="inline-block" /> Completed</span>
+                                ) : (
+                                  <span className="inline-flex items-center gap-2"><CI.IconHourglass size={14} className="inline-block" /> Upcoming</span>
+                                )}
                               </motion.div>
                             </motion.div>
                           </div>
@@ -3884,7 +3891,7 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
                         ease: "easeInOut"
                       }}
                     >
-                      📅
+                      <CI.IconCalendar size={56} className="inline-block" />
                     </motion.div>
                     <h3 className="text-2xl font-bold text-white mb-2">No Matches Available</h3>
                     <p className="text-white/60">Check back soon for upcoming fixtures!</p>
@@ -4138,7 +4145,7 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
                             }}
                             className="w-12 h-12 rounded-2xl bg-gradient-to-br from-yellow-400 via-orange-500 to-red-500 flex items-center justify-center shadow-lg shadow-orange-500/30"
                           >
-                            <span className="text-2xl">🔥</span>
+                            <CI.IconFire size={24} className="inline-block" />
                           </motion.div>
                           <span className="bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 bg-clip-text text-transparent">
                             Match Details
@@ -4165,7 +4172,7 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
                             transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
                             className="text-3xl"
                           >
-                            ⚡
+                            <CI.IconLightning size={28} className="inline-block" />
                           </motion.div>
                           <motion.span 
                             className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent"
@@ -4187,21 +4194,21 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
                           className="flex items-center gap-2 bg-white/10 px-3 py-2 rounded-full backdrop-blur-sm border border-white/20"
                           whileHover={{ scale: 1.05, backgroundColor: "rgba(255,255,255,0.2)" }}
                         >
-                          <span className="text-lg">📅</span>
+                          <CI.IconCalendar size={18} className="inline-block" />
                           <span className="font-medium">{selectedMatch.date}</span>
                         </motion.div>
                         <motion.div 
                           className="flex items-center gap-2 bg-white/10 px-3 py-2 rounded-full backdrop-blur-sm border border-white/20"
                           whileHover={{ scale: 1.05, backgroundColor: "rgba(255,255,255,0.2)" }}
                         >
-                          <span className="text-lg">🏟️</span>
+                          <CI.IconStadium size={18} className="inline-block" />
                           <span className="font-medium">{selectedMatch.venue}</span>
                         </motion.div>
                         <motion.div 
                           className="flex items-center gap-2 bg-white/10 px-3 py-2 rounded-full backdrop-blur-sm border border-white/20"
                           whileHover={{ scale: 1.05, backgroundColor: "rgba(255,255,255,0.2)" }}
                         >
-                          <span className="text-lg">⏰</span>
+                          <CI.IconClock size={18} className="inline-block" />
                           <span className="font-medium">{selectedMatch.time || '19:30'}</span>
                         </motion.div>
                       </motion.div>
@@ -4217,7 +4224,7 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
                       onClick={closeScorecard}
                       className="w-12 h-12 rounded-2xl bg-gradient-to-r from-red-500/20 to-pink-500/20 hover:from-red-500/30 hover:to-pink-500/30 text-white/80 hover:text-white transition-all duration-200 flex items-center justify-center border border-white/20 backdrop-blur-sm"
                     >
-                      <span className="text-xl">✨</span>
+                      <CI.IconSparkle size={20} className="inline-block" />
                     </motion.button>
                   </div>
                   
@@ -4229,10 +4236,10 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
                     className="flex gap-3 mt-8"
                   >
                     {[
-                      { id: 'scorecard', label: 'Scorecard', icon: '📊', color: 'from-blue-500 to-cyan-500' },
-                      { id: 'playing11', label: 'Playing 11', icon: '👥', color: 'from-green-500 to-emerald-500' },
-                      { id: 'highlights', label: 'Highlights', icon: '⭐', color: 'from-yellow-500 to-orange-500' },
-                      { id: 'stats', label: 'Statistics', icon: '📈', color: 'from-purple-500 to-pink-500' }
+                      { id: 'scorecard', label: 'Scorecard', icon: <CI.IconChart size={18} className="inline-block" />, color: 'from-blue-500 to-cyan-500' },
+                      { id: 'playing11', label: 'Playing 11', icon: <CI.IconSquad size={18} className="inline-block" />, color: 'from-green-500 to-emerald-500' },
+                      { id: 'highlights', label: 'Highlights', icon: <CI.IconStar size={18} className="inline-block" />, color: 'from-yellow-500 to-orange-500' },
+                      { id: 'stats', label: 'Statistics', icon: <CI.IconTrendUp size={18} className="inline-block" />, color: 'from-purple-500 to-pink-500' }
                     ].map((tab, index) => (
                       <motion.button
                         key={tab.id}
@@ -4309,7 +4316,7 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
                                   }}
                                   className="text-2xl"
                                 >
-                                  📤
+                                  <CI.IconExport size={22} className="inline-block" />
                                 </motion.div>
                                 Export Scorecard Data
                               </h3>
@@ -4324,7 +4331,7 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
                                 onClick={() => exportScorecard('excel')}
                                 className="px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-xl font-bold flex items-center gap-2 shadow-lg hover:shadow-xl transition-all duration-300"
                               >
-                                <span className="text-lg">📊</span>
+                                <CI.IconExcel size={18} className="inline-block" />
                                 Excel
                               </motion.button>
                               
@@ -4335,7 +4342,7 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
                                 onClick={() => exportScorecard('csv')}
                                 className="px-4 py-2 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-xl font-bold flex items-center gap-2 shadow-lg hover:shadow-xl transition-all duration-300"
                               >
-                                <span className="text-lg">📋</span>
+                                <CI.IconClipboard size={18} className="inline-block" />
                                 CSV
                               </motion.button>
                               
@@ -4346,7 +4353,7 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
                                 onClick={() => exportScorecard('json')}
                                 className="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl font-bold flex items-center gap-2 shadow-lg hover:shadow-xl transition-all duration-300"
                               >
-                                <span className="text-lg">🔧</span>
+                                <CI.IconWrench size={18} className="inline-block" />
                                 JSON
                               </motion.button>
                               
@@ -4357,7 +4364,7 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
                                 onClick={() => exportScorecard('pdf')}
                                 className="px-4 py-2 bg-gradient-to-r from-yellow-500 to-orange-500 text-white rounded-xl font-bold flex items-center gap-2 shadow-lg hover:shadow-xl transition-all duration-300"
                               >
-                                <span className="text-lg">📄</span>
+                                <CI.IconFile size={18} className="inline-block" />
                                 PDF
                               </motion.button>
                             </div>
@@ -4385,7 +4392,7 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
                                   }}
                                   className="text-3xl"
                                 >
-                                  🏆
+                                  <CI.IconTrophy size={36} className="inline-block" />
                                 </motion.div>
                                 <span className="bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent">
                                   Final Result
@@ -4418,7 +4425,7 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
                                     }}
                                     className="text-2xl"
                                   >
-                                    ⭐
+                                    <CI.IconStar size={20} className="inline-block" />
                                   </motion.div>
                                   <div>
                                     <span className="text-yellow-400 font-bold">Man of the Match:</span>
@@ -4439,7 +4446,7 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
                               }}
                               className="text-6xl opacity-50"
                             >
-                              🎯
+                              <CI.IconTarget size={56} className="inline-block" />
                             </motion.div>
                           </div>
                         </motion.div>
@@ -4506,11 +4513,11 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
                                   }}
                                   className="text-4xl opacity-50"
                                 >
-                                  🎯
+                                  <CI.IconTarget size={36} className="inline-block" />
                                 </motion.div>
                               </div>
                               <div className="mt-4 flex items-center gap-2 bg-white/10 rounded-full px-3 py-1 backdrop-blur-sm border border-white/20">
-                                <span className="text-lg">⚡</span>
+                                <CI.IconLightning size={18} className="inline-block" />
                                 <span className="text-white font-medium">
                                   Run Rate: {((innings.totalRuns / (parseFloat(innings.totalOvers) || 1)) * 6).toFixed(2)}
                                 </span>
@@ -4532,7 +4539,7 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
                                   }}
                                   className="text-2xl"
                                 >
-                                  🏏
+                                  <CI.IconCricketBat size={22} className="inline-block" />
                                 </motion.div>
                                 <span className="bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent">
                                   Batting Scorecard
@@ -4618,7 +4625,7 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
                                   }}
                                   className="text-2xl"
                                 >
-                                  🎯
+                                  <CI.IconTarget size={20} className="inline-block" />
                                 </motion.div>
                                 <span className="bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
                                   Bowling Scorecard
@@ -4757,15 +4764,15 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
                         </h3>
                         <div className="space-y-4">
                           <div className="bg-white/5 rounded-lg p-4 border border-white/10">
-                            <div className="text-white font-medium mb-2">🏆 Man of the Match</div>
+                            <div className="text-white font-medium mb-2"><CI.IconTrophy size={18} className="inline-block mr-2"/>Man of the Match</div>
                             <div className="text-white/80">{selectedScorecard.result?.manOfTheMatch || 'N/A'}</div>
                           </div>
                           <div className="bg-white/5 rounded-lg p-4 border border-white/10">
-                            <div className="text-white font-medium mb-2">🎯 Result Margin</div>
+                            <div className="text-white font-medium mb-2"><CI.IconTarget size={18} className="inline-block mr-2"/>Result Margin</div>
                             <div className="text-white/80">{selectedScorecard.result?.margin || 'N/A'}</div>
                           </div>
                           <div className="bg-white/5 rounded-lg p-4 border border-white/10">
-                            <div className="text-white font-medium mb-2">⏰ Match Duration</div>
+                            <div className="text-white font-medium mb-2"><CI.IconClock size={18} className="inline-block mr-2"/>Match Duration</div>
                             <div className="text-white/80">Full 20 overs match</div>
                           </div>
                         </div>
@@ -4820,7 +4827,7 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
                   animate={{ opacity: 1, scale: 1 }}
                   className="bg-white/10 backdrop-blur-md rounded-xl p-8 border border-white/20 text-center"
                 >
-                  <div className="text-6xl mb-4">📋</div>
+                  <div className="text-6xl mb-4"><CI.IconClipboard size={56} className="inline-block" /></div>
                   <div className="text-xl font-medium text-white mb-2">No Scorecard Available</div>
                   <div className="text-white/60">
                     Full scorecard and playing 11 details are not available for this match yet.
@@ -4984,7 +4991,7 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
                               animate={{ scale: [1, 1.2, 1] }}
                               transition={{ duration: 2, repeat: Infinity }}
                             >
-                              🏏
+                              <CI.IconCricketBat size={20} className="inline-block" />
                             </motion.div>
                             Batting Statistics
                           </h3>
@@ -5028,7 +5035,7 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
                               animate={{ scale: [1, 1.2, 1] }}
                               transition={{ duration: 2, repeat: Infinity, delay: 0.5 }}
                             >
-                              🎯
+                              <CI.IconTarget size={20} className="inline-block" />
                             </motion.div>
                             Bowling Statistics
                           </h3>
@@ -5072,7 +5079,7 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
                               animate={{ scale: [1, 1.2, 1] }}
                               transition={{ duration: 2, repeat: Infinity, delay: 1 }}
                             >
-                              📊
+                              <CI.IconChart size={20} className="inline-block" />
                             </motion.div>
                             Overall Performance
                           </h3>
@@ -5104,7 +5111,7 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
                         animate={{ opacity: 1, scale: 1 }}
                         className="bg-white/10 backdrop-blur-md rounded-xl p-8 border border-white/20 text-center"
                       >
-                        <div className="text-6xl mb-4">📊</div>
+                        <div className="text-6xl mb-4"><CI.IconChart size={56} className="inline-block" /></div>
                         <div className="text-xl font-medium text-white mb-2">No Statistics Available</div>
                         <div className="text-white/60">
                           This player hasn't played any matches yet or statistics are not available.
