@@ -28,6 +28,9 @@ function loadJsPDF(): Promise<any> {
 
 const str = (v: any) => (v == null ? '' : String(v));
 
+// Strip characters outside Latin-1 that Helvetica cannot render (e.g. emoji)
+const safe = (s: string) => s.replace(/[^\x00-\xFF]/g, '').replace(/\s{2,}/g, ' ').trim();
+
 // ─── colour palette (WPL-inspired) ────────────────────────────────
 const C = {
   purple : [75, 0, 130]   as [number, number, number],
@@ -70,7 +73,7 @@ export async function exportScorecardAsPDF(data: any): Promise<void> {
     setC(color);
     doc.setFontSize(size);
     doc.setFont('helvetica', weight);
-    doc.text(String(t), x, yy, { align });
+    doc.text(safe(String(t)), x, yy, { align });
   };
 
   const needPage = (needed: number) => {
@@ -113,7 +116,7 @@ export async function exportScorecardAsPDF(data: any): Promise<void> {
   rect(0, 118, W, 4);
 
   // Title
-  text('🏏  MATCH SCORECARD', W / 2, 45, C.white, 22, 'bold', 'center');
+  text('MATCH SCORECARD', W / 2, 45, C.white, 22, 'bold', 'center');
   text('SportsUP  ·  Women\'s Premier League 2026', W / 2, 70, C.gold, 10, 'italic', 'center');
   text(`Generated ${new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}`, W / 2, 90, C.muted, 8, 'normal', 'center');
 
@@ -134,9 +137,9 @@ export async function exportScorecardAsPDF(data: any): Promise<void> {
   y += 22;
   text(`${team1}  vs  ${team2}`, infoX, y, C.dark, 14, 'bold');
   y += 18;
-  text(`📍 ${venue}`, infoX, y, C.slate, 10, 'normal');
-  text(`📅 ${date}`, infoX + 260, y, C.slate, 10, 'normal');
-  if (tossText) { y += 16; text(`🪙 ${tossText}`, infoX, y, C.slate, 9, 'italic'); }
+  text(`Venue: ${venue}`, infoX, y, C.slate, 10, 'normal');
+  text(`Date: ${date}`, infoX + 260, y, C.slate, 10, 'normal');
+  if (tossText) { y += 16; text(`Toss: ${tossText}`, infoX, y, C.slate, 9, 'italic'); }
   y += 18;
 
   // result badge
@@ -144,10 +147,10 @@ export async function exportScorecardAsPDF(data: any): Promise<void> {
   const badgeX = infoX;
   setF(resultWinner ? C.green : C.orange);
   rect(badgeX, y - 2, badgeW, 22, 'F');
-  text(`🏆  ${resultText}`, badgeX + 8, y + 13, C.white, 10, 'bold');
+  text(`Result: ${resultText}`, badgeX + 8, y + 13, C.white, 10, 'bold');
   if (resultMOM) {
     y += 26;
-    text(`⭐ Man of the Match: ${resultMOM}`, infoX, y + 4, C.purple, 10, 'bold');
+    text(`Man of the Match: ${resultMOM}`, infoX, y + 4, C.purple, 10, 'bold');
   }
   y += 28;
 
@@ -161,7 +164,7 @@ export async function exportScorecardAsPDF(data: any): Promise<void> {
       const iTeam = inn.teamName || inn.teamId || (innIdx === 0 ? team1 : team2);
       y += 15;
       needPage(40 + fowArr.length * 22);
-      drawSectionHeader(doc, y, W, M, `📉  FALL OF WICKETS — ${iTeam}`, C.red);
+      drawSectionHeader(doc, y, W, M, `FALL OF WICKETS - ${iTeam}`, C.red);
       y += 30;
 
       const cols = ['#', 'Player', 'Score', 'Over'];
@@ -213,7 +216,7 @@ export async function exportScorecardAsPDF(data: any): Promise<void> {
       const iTeam = inn.teamName || inn.teamId || (innIdx === 0 ? team1 : team2);
       y += 25;
       needPage(40 + ppItems.length * 46);
-      drawSectionHeader(doc, y, W, M, `⚡  POWERPLAYS — ${iTeam}`, C.cyan);
+      drawSectionHeader(doc, y, W, M, `POWERPLAYS - ${iTeam}`, C.cyan);
       y += 30;
 
       ppItems.forEach((p, idx) => {
@@ -248,7 +251,7 @@ export async function exportScorecardAsPDF(data: any): Promise<void> {
 
       y += 25;
       needPage(40 + pArr.length * 55);
-      drawSectionHeader(doc, y, W, M, `🤝  PARTNERSHIPS — ${iTeam}`, C.green);
+      drawSectionHeader(doc, y, W, M, `PARTNERSHIPS - ${iTeam}`, C.green);
       y += 30;
 
       const maxRuns = Math.max(...pArr.map((p: any) => Number(p.totalRuns || p.runs) || 0), 1);
@@ -299,7 +302,7 @@ export async function exportScorecardAsPDF(data: any): Promise<void> {
       if (batting.length > 0) {
         needPage(50 + batting.length * 20);
         y += 25;
-        drawSectionHeader(doc, y, W, M, `🏏  ${battingTeam} — BATTING  (${total}/${wickets}, ${overs} ov)`, C.purple);
+        drawSectionHeader(doc, y, W, M, `${battingTeam} - BATTING  (${total}/${wickets}, ${overs} ov)`, C.purple);
         y += 30;
 
         const bCols = ['Batter', 'Dismissal', 'R', 'B', '4s', '6s', 'SR'];
@@ -367,7 +370,7 @@ export async function exportScorecardAsPDF(data: any): Promise<void> {
       if (bowling.length > 0) {
         needPage(50 + bowling.length * 20);
         y += 15;
-        drawSectionHeader(doc, y, W, M, `🎯  ${battingTeam} — BOWLING`, C.red);
+        drawSectionHeader(doc, y, W, M, `${battingTeam} - BOWLING`, C.red);
         y += 30;
 
         const wCols = ['Bowler', 'O', 'M', 'R', 'W', 'Econ', 'Dots'];
@@ -442,7 +445,7 @@ function drawSectionHeader(
   doc.setFontSize(12);
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(...accent);
-  doc.text(title, M + 14, y + 15);
+  doc.text(safe(title), M + 14, y + 15);
 }
 
 
