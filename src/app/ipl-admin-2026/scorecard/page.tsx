@@ -132,35 +132,39 @@ export default function ScorecardAdminPage() {
 
   const fetchMatches = async () => {
     try {
-      console.log('Fetching WPL matches (Workers KV) via API');
-      const res = await api.get('/matches', { league: 'wpl' });
-      console.log('WPL matches response:', res);
-      console.log('WPL matches data length:', res.data?.length || 0);
+      console.log('Fetching IPL matches (Workers KV) via API');
+      const res = await api.get('/matches', { league: 'ipl' });
+      console.log('IPL matches response:', res);
+      console.log('IPL matches data length:', res.data?.length || 0);
       setMatches(res.data || []);
       if (res.data && res.data.length === 0) {
-        setMessage('⚠️ No WPL matches found. Please create WPL matches first.');
+        setMessage('⚠️ No IPL matches found. IPL matches are not yet available until you add them in the IPL matches page.');
       }
-    } catch (err) {
-      console.error('Error fetching WPL matches:', err);
-      console.error('Error details:', err.message, err.stack);
-      setMessage('✗ No WPL matches available. Please create matches or seed WPL data.');
+    } catch (err: unknown) {
+      console.error('Error fetching IPL matches:', err);
+      if (err instanceof Error) {
+        console.error('Error details:', err.message, err.stack);
+      }
+      setMessage('⚠️ IPL matches are not yet available. Please add IPL matches in the IPL matches page first.');
     }
   };
 
   const fetchPlayers = async () => {
     try {
-      console.log('Fetching WPL players (Workers KV) via API');
-      const res = await api.get('/players', { league: 'wpl' });
-      console.log('WPL players response:', res);
-      console.log('WPL players data length:', res.data?.length || 0);
+      console.log('Fetching IPL players (Workers KV) via API');
+      const res = await api.get('/players', { league: 'ipl' });
+      console.log('IPL players response:', res);
+      console.log('IPL players data length:', res.data?.length || 0);
       setPlayers(res.data || []);
       if (res.data && res.data.length === 0) {
-        setMessage('⚠️ No WPL players found. Please add WPL players first.');
+        setMessage('⚠️ No IPL players found. Please add IPL players first.');
       }
-    } catch (err) {
-      console.error('Error fetching WPL players:', err);
-      console.error('Error details:', err.message, err.stack);
-      setMessage('✗ No WPL players available. Please seed WPL data: POST /api/admin/seed-wpl-data');
+    } catch (err: unknown) {
+      console.error('Error fetching IPL players:', err);
+      if (err instanceof Error) {
+        console.error('Error details:', err.message, err.stack);
+      }
+      setMessage('⚠️ IPL players are not yet available. Please add IPL players and teams first.');
     }
   };
 
@@ -188,12 +192,95 @@ export default function ScorecardAdminPage() {
     router.push('/ipl-admin-2026/matchday');
   };
 
+  // Export scorecard to PDF
+  const exportScorecardPDF = async (sc: Scorecard) => {
+    try {
+      console.log('Starting IPL 2025 Professional PDF export...');
+      
+      // Import the 2025 PDF exporter for IPL
+      const { exportScorecardPDF2025 } = await import('./pdf-export-2025');
+      
+      await exportScorecardPDF2025(sc);
+      console.log('IPL 2025 Professional PDF exported successfully');
+      setMessage('✅ IPL Scorecard PDF exported successfully!');
+      setTimeout(() => setMessage(''), 3000);
+      
+    } catch (error) {
+      console.error('Error exporting IPL PDF:', error);
+      setMessage(`❌ Error exporting PDF: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      setTimeout(() => setMessage(''), 3000);
+    }
+  };
+
+  // Export scorecard to CSV
+  const exportScorecardCSV = (sc: Scorecard) => {
+    try {
+      const lines: string[] = [];
+
+      // Match info
+      lines.push('Match Info');
+      lines.push(`Teams,${sc.matchInfo.team1.name} vs ${sc.matchInfo.team2.name}`);
+      lines.push(`Venue,${sc.matchInfo.venue || ''}`);
+      lines.push(`Date,${sc.matchInfo.date || ''}`);
+      lines.push(`Time,${sc.matchInfo.time || ''}`);
+      lines.push(`Toss Winner,${sc.matchInfo.toss?.winner || ''}`);
+      lines.push(`Toss Decision,${sc.matchInfo.toss?.decision || ''}`);
+      lines.push('');
+
+      // Innings
+      sc.innings.forEach((inn) => {
+        const battingTeamName = inn.battingTeamId === sc.matchInfo.team1.id ? sc.matchInfo.team1.name : sc.matchInfo.team2.name;
+        lines.push(`Innings ${inn.inningsNumber} - ${battingTeamName}`);
+        lines.push('Batting');
+        lines.push('Player,Runs,Balls,4s,6s,SR,Dismissal');
+        inn.batting.forEach((b) => {
+          lines.push(`${b.name || b.playerId || ''},${b.runs || 0},${b.balls || 0},${b.fours || 0},${b.sixes || 0},${b.strikeRate || ''},${b.dismissal?.type || ''}`);
+        });
+        lines.push('');
+
+        lines.push('Bowling');
+        lines.push('Bowler,Overs,Balls,Runs,Wickets,Maidens,Econ');
+        inn.bowling.forEach((bw) => {
+          lines.push(`${bw.name || bw.playerId || ''},${bw.overs || ''},${bw.balls || ''},${bw.runs || 0},${bw.wickets || 0},${bw.maidens || 0},${bw.economyRate || ''}`);
+        });
+        lines.push('');
+        lines.push(`Extras,${(inn.extras.wides || 0) + (inn.extras.noBalls || 0) + (inn.extras.byes || 0) + (inn.extras.legByes || 0)}`);
+        lines.push(`Total,${inn.totalRuns || 0}/${inn.totalWickets || 0} (${inn.totalOvers || ''})`);
+        lines.push('');
+      });
+
+      // Result
+      lines.push('Result');
+      lines.push(`Winner,${sc.result?.winner || ''}`);
+      lines.push(`Margin,${sc.result?.margin || ''}`);
+      lines.push(`ManOfTheMatch,${sc.result?.manOfTheMatch || ''}`);
+
+      const csvContent = lines.join('\n');
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `IPL-Scorecard-${sc.matchInfo.team1.name}-vs-${sc.matchInfo.team2.name}-${new Date().toISOString().split('T')[0]}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      
+      setMessage('✅ IPL Scorecard CSV exported successfully!');
+      setTimeout(() => setMessage(''), 3000);
+    } catch (error) {
+      console.error('Error exporting CSV:', error);
+      setMessage(`❌ Error exporting CSV: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      setTimeout(() => setMessage(''), 3000);
+    }
+  };
+
 
 
   const initializeScorecard = (match: Match): Scorecard => {
     return {
       matchId: match.id,
-      league: 'wpl',
+      league: 'ipl',
       matchInfo: {
         team1: match.team1,
         team2: match.team2,
@@ -270,7 +357,7 @@ export default function ScorecardAdminPage() {
       const [parent, child] = field.split('.');
       updated.matchInfo = {
         ...updated.matchInfo,
-        [parent]: { ...updated.matchInfo[parent as keyof typeof updated.matchInfo], [child]: value },
+        [parent]: { ...(updated.matchInfo[parent as keyof typeof updated.matchInfo] as any), [child]: value },
       };
     } else {
       updated.matchInfo = { ...updated.matchInfo, [field]: value };
@@ -403,8 +490,8 @@ export default function ScorecardAdminPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 text-white p-4 md:p-8">
       <div className="max-w-7xl mx-auto">
-        <h1 className="text-4xl font-bold mb-2">WPL Scorecard Admin</h1>
-        <p className="text-gray-400 mb-8">Create and manage WPL match scorecards</p>
+        <h1 className="text-4xl font-bold mb-2">IPL Scorecard Admin</h1>
+        <p className="text-gray-400 mb-8">Create and manage IPL match scorecards</p>
 
         {message && (
           <div className={`mb-6 p-4 rounded-lg ${message.includes('✓') ? 'bg-green-900' : 'bg-red-900'}`}>
@@ -419,7 +506,7 @@ export default function ScorecardAdminPage() {
               <div>
                 <h2 className="text-2xl font-bold">Select a Match</h2>
                 <p className="text-gray-400 mt-1">
-                  {matches.length} WPL matches available • {players.length} WPL players loaded
+                  {matches.length} IPL matches available • {players.length} IPL players loaded
                 </p>
               </div>
 
@@ -439,6 +526,35 @@ export default function ScorecardAdminPage() {
                 </button>
               </div>
             </div>
+            
+            {/* Show message when no matches are available */}
+            {matches.length === 0 && (
+              <div className="bg-yellow-900 border border-yellow-700 rounded-lg p-6 mb-6">
+                <div className="flex items-center gap-3 mb-3">
+                  <span className="text-2xl">⚠️</span>
+                  <h3 className="text-xl font-bold text-yellow-300">IPL Matches Not Yet Available</h3>
+                </div>
+                <p className="text-yellow-200 mb-4">
+                  IPL matches are not yet available until you add them in the IPL matches page. 
+                  Once you create IPL matches, they will appear here for scorecard management.
+                </p>
+                <div className="flex gap-3">
+                  <button
+                    onClick={handleCreateMatch}
+                    className="px-4 py-2 bg-yellow-600 hover:bg-yellow-700 rounded transition flex items-center gap-2"
+                  >
+                    ➕ Create IPL Matches
+                  </button>
+                  <button
+                    onClick={() => router.push('/ipl-admin-2026/matches')}
+                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded transition flex items-center gap-2"
+                  >
+                    📋 Go to IPL Matches Page
+                  </button>
+                </div>
+              </div>
+            )}
+            
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {matches.map((match) => (
                 <button
@@ -469,7 +585,7 @@ export default function ScorecardAdminPage() {
                 </h2>
                 <p className="text-gray-400 mt-1">{scorecard.matchInfo.venue}</p>
               </div>
-              <div className="flex gap-2">
+              <div className="flex gap-2 flex-wrap">
                 <button
                   onClick={handleSaveScorecard}
                   disabled={saving}
@@ -483,6 +599,20 @@ export default function ScorecardAdminPage() {
                   className="px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-green-800 rounded transition"
                 >
                   {saving ? 'Publishing...' : 'Publish'}
+                </button>
+                <button
+                  onClick={() => exportScorecardPDF(scorecard)}
+                  disabled={!scorecard}
+                  className="px-4 py-2 bg-purple-600 hover:bg-purple-700 disabled:bg-purple-800 rounded transition flex items-center gap-2"
+                >
+                  📄 Export PDF
+                </button>
+                <button
+                  onClick={() => exportScorecardCSV(scorecard)}
+                  disabled={!scorecard}
+                  className="px-4 py-2 bg-orange-600 hover:bg-orange-700 disabled:bg-orange-800 rounded transition flex items-center gap-2"
+                >
+                  📊 Export CSV
                 </button>
                 <button
                   onClick={() => {
