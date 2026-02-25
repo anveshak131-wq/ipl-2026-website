@@ -16,40 +16,45 @@ const LeagueContext = createContext<LeagueContextType | undefined>(undefined);
 const LEAGUE_STORAGE_KEY = 'sportsup99_current_league';
 
 export function LeagueProvider({ children }: { children: ReactNode }) {
-  const [currentLeague, setCurrentLeagueState] = useState<League>(() => {
-    // Always default to IPL for end-user pages
-    // Only use stored value if we're on an admin page
+  const [currentLeague, setCurrentLeagueState] = useState<League>('ipl');
+  const [initialized, setInitialized] = useState(false);
+
+  // Initialize league on mount only
+  useEffect(() => {
+    if (initialized) return;
+    
     if (typeof window !== 'undefined') {
       const pathname = window.location.pathname;
+      let initialLeague: League = 'ipl';
       
       // If on WPL admin pages, always use WPL
       if (pathname.includes('/wpl-admin-2026')) {
-        return 'wpl';
+        initialLeague = 'wpl';
       }
-      
       // If on IPL admin pages, allow stored preference
-      if (pathname.includes('/ipl-admin-2026')) {
+      else if (pathname.includes('/ipl-admin-2026')) {
         const stored = localStorage.getItem(LEAGUE_STORAGE_KEY);
         if (stored === 'ipl' || stored === 'wpl') {
-          return stored as League;
+          initialLeague = stored as League;
         }
       }
-      
-      // For end-user pages, always default to IPL
-      // Only set to WPL if explicitly on a WPL route
-      if (pathname.startsWith('/wpl/') || pathname === '/wpl') {
-        return 'wpl';
+      // For end-user pages, default to IPL unless explicitly on WPL route
+      else if (pathname.startsWith('/wpl/') || pathname === '/wpl') {
+        initialLeague = 'wpl';
       }
+      
+      setCurrentLeagueState(initialLeague);
     }
-    return 'ipl';
-  });
+    setInitialized(true);
+  }, [initialized]);
 
-  // Persist to localStorage when league changes
+  // Persist to localStorage when league changes (but not on initial load)
   useEffect(() => {
+    if (!initialized) return;
     if (typeof window !== 'undefined') {
       localStorage.setItem(LEAGUE_STORAGE_KEY, currentLeague);
     }
-  }, [currentLeague]);
+  }, [currentLeague, initialized]);
 
   const setCurrentLeague = (league: League) => {
     setCurrentLeagueState(league);

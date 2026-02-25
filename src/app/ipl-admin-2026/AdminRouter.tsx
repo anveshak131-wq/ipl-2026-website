@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
-import { LeagueProvider } from '@/contexts/LeagueContext';
 import AdminSidebar from '@/components/admin/AdminSidebar';
 import PlayersAdminSidebar from '@/components/admin/PlayersAdminSidebar';
 import AdminDashboard from './dashboard/page';
@@ -225,10 +224,8 @@ export default function AdminRouter() {
   ].includes(pathname);
 
   return (
-    <LeagueProvider>
-      <div className="flex-1">
-        {renderPage()}
-      </div>
-    </LeagueProvider>
+    <div className="flex-1">
+      {renderPage()}
+    </div>
   );
 }

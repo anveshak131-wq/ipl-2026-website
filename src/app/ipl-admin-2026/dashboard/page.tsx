@@ -33,7 +33,6 @@ interface TimeOfDayBuckets {
 export default function AdminDashboard() {
   const router = useRouter();
   const { currentLeague } = useLeague();
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [stats, setStats] = useState<DashboardStats>({
     totalUsers: 0,
@@ -64,45 +63,15 @@ export default function AdminDashboard() {
     matches: 'loading',
   });
 
-  const hasCheckedAuth = useRef(false);
+  const hasFetchedStats = useRef(false);
 
+  // Fetch stats on mount (auth is handled by layout)
   useEffect(() => {
-    // Skip auth check if already authenticated or already checked
-    if (isAuthenticated || hasCheckedAuth.current) return;
-    hasCheckedAuth.current = true;
-
-    const checkAuth = async () => {
-      const token = localStorage.getItem('auth_token') || localStorage.getItem('adminToken');
-      if (!token) {
-        router.push('/ipl-admin-2026');
-        setIsLoading(false);
-        return;
-      }
-
-      try {
-        const response = await fetch(`/api/auth?action=verify&token=${token}`);
-        const data = await response.json();
-
-        if (!response.ok || !data.success) {
-          localStorage.removeItem('adminToken');
-          router.push('/ipl-admin-2026');
-          setIsLoading(false);
-          return;
-        }
-
-        setIsAuthenticated(true);
-        setIsLoading(false);
-        await fetchStats();
-      } catch (error) {
-        console.error('Auth error:', error);
-        router.push('/ipl-admin-2026');
-        setIsLoading(false);
-      }
-    };
-
-    checkAuth();
+    if (hasFetchedStats.current) return;
+    hasFetchedStats.current = true;
+    fetchStats();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Only run once on mount
+  }, []);
 
   const fetchStats = async () => {
     try {
@@ -231,7 +200,7 @@ export default function AdminDashboard() {
     }
   };
 
-  if (!isAuthenticated || isLoading) {
+  if (isLoading) {
     return (
       <div className="flex min-h-screen bg-gray-950">
         <div className="flex-1 flex items-center justify-center">
