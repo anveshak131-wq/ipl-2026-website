@@ -131,11 +131,9 @@ export default function AdminMatches() {
     const router = useRouter();
     const { currentLeague } = useLeague();
     const { toasts, success: showSuccess, error: showError, closeToast } = useToast();
-    const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [matches, setMatches] = useState<Match[]>([]);
     const [teams, setTeams] = useState<Team[]>([]);
     const [isLoading, setIsLoading] = useState(true);
-    const [authLoading, setAuthLoading] = useState(true);
     const [viewMode, setViewMode] = useState<'grid' | 'table' | 'timeline' | 'analytics'>('grid');
     const [searchQuery, setSearchQuery] = useState('');
     const [showForm, setShowForm] = useState(false);
@@ -182,25 +180,11 @@ export default function AdminMatches() {
         }));
     }, [currentLeague]);
 
+    // Fetch data on mount (auth handled by layout)
     useEffect(() => {
-        const checkAuth = () => {
-            try {
-                const token = localStorage.getItem('adminToken');
-                if (!token) {
-                    router.push('/ipl-admin-2026');
-                    return;
-                }
-                setIsAuthenticated(true);
-                fetchInitialData();
-            } catch (error) {
-                router.push('/ipl-admin-2026');
-            } finally {
-                setAuthLoading(false);
-            }
-        };
-
-        checkAuth();
-    }, [router]);
+        fetchInitialData();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     // Clear selection when filters change
     useEffect(() => {
@@ -1122,20 +1106,7 @@ export default function AdminMatches() {
         return `${displayHour}:${minutes} ${ampm}`;
     };
 
-    if (authLoading) {
-        return (
-            <div className="flex min-h-screen bg-[#0B0F13]">
-                <AuroraBackground />
-                <div className="flex-1 flex items-center justify-center">
-                    <LoadingSpinner size="lg" color="#FFD700" />
-                </div>
-            </div>
-        );
-    }
-
-    if (!isAuthenticated) {
-        return null;
-    }
+    // Auth handled by layout, no need for auth check
 
     if (isLoading) {
         return (

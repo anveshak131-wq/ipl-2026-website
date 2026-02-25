@@ -167,7 +167,7 @@ function levenshteinDistance(str1: string, str2: string): number {
 export default function AdminPlayers() {
   const router = useRouter();
   const { currentLeague } = useLeague();
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  // Auth handled by layout
   const [userRole, setUserRole] = useState<string | null>(null);
   const [players, setPlayers] = useState<Player[]>([]);
   const [teams, setTeams] = useState<Team[]>([]);
@@ -501,43 +501,11 @@ export default function AdminPlayers() {
     }
   });
 
+  // Fetch data on mount (auth handled by layout)
   useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const token = localStorage.getItem('adminToken') || localStorage.getItem('auth_token');
-    if (!token) {
-      router.push('/ipl-admin-2026');
-      return;
-    }
-
-        const response = await fetch(`/api/auth?action=verify&token=${token}`);
-        const data = await response.json();
-
-        if (!response.ok || !data.success) {
-          router.push('/ipl-admin-2026');
-          return;
-        }
-
-        const role = data.user?.role;
-        setUserRole(role);
-
-        // Check if user has valid admin role
-        if (role !== 'admin' && role !== 'super_admin' && role !== 'players_admin') {
-          alert('Access denied. Admin privileges required.');
-          router.push('/ipl-admin-2026');
-          return;
-        }
-
-    setIsAuthenticated(true);
     fetchData();
-      } catch (error) {
-        console.error('Auth error:', error);
-        router.push('/ipl-admin-2026');
-      }
-    };
-
-    checkAuth();
-  }, [router]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Auto-calculate age when date of birth is entered or changed
   useEffect(() => {
@@ -967,11 +935,9 @@ export default function AdminPlayers() {
 
   // Refetch data when league changes
   useEffect(() => {
-    if (isAuthenticated) {
-      fetchData();
-      // Reset team filter when league changes
-      setSelectedTeam('all');
-    }
+    fetchData();
+    // Reset team filter when league changes
+    setSelectedTeam('all');
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentLeague]);
 
@@ -1841,9 +1807,7 @@ export default function AdminPlayers() {
     });
   }
 
-  if (!isAuthenticated) {
-    return null;
-  }
+  // Auth handled by layout, no need for auth check
 
   if (isLoading) {
     return (

@@ -61,10 +61,8 @@ const PlusIcon = ({ className }: { className?: string }) => (
 export default function AdminTeams() {
     const router = useRouter();
     const { currentLeague } = useLeague();
-    const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [teams, setTeams] = useState<Team[]>([]);
     const [isLoading, setIsLoading] = useState(true);
-    const [authLoading, setAuthLoading] = useState(true);
     const [showSlideOver, setShowSlideOver] = useState(false);
     const [editingTeam, setEditingTeam] = useState<Team | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -88,25 +86,11 @@ export default function AdminTeams() {
         homeGrounds: [] as string[]
     });
 
+    // Fetch teams on mount (auth handled by layout)
     useEffect(() => {
-        const checkAuth = () => {
-            try {
-                const token = localStorage.getItem('adminToken');
-                if (!token) {
-                    router.push('/ipl-admin-2026');
-                    return;
-                }
-                setIsAuthenticated(true);
-                fetchTeams();
-            } catch (error) {
-                router.push('/ipl-admin-2026');
-            } finally {
-                setAuthLoading(false);
-            }
-        };
-
-        checkAuth();
-    }, [router]);
+        fetchTeams();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     const fetchTeams = async () => {
         try {
@@ -122,9 +106,7 @@ export default function AdminTeams() {
 
     // Refetch teams when league changes
     useEffect(() => {
-        if (isAuthenticated) {
-            fetchTeams();
-        }
+        fetchTeams();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [currentLeague]);
 
@@ -431,20 +413,7 @@ export default function AdminTeams() {
         }
     };
 
-    if (authLoading) {
-        return (
-            <div className="flex min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950">
-                <AuroraBackground />
-                <div className="flex-1 flex items-center justify-center">
-                    <div className="text-white">Loading...</div>
-                </div>
-            </div>
-        );
-    }
-
-    if (!isAuthenticated) {
-        return null;
-    }
+    // Auth handled by layout, no need for loading/auth checks
 
     return (
         <div className="flex min-h-screen bg-gray-950">
