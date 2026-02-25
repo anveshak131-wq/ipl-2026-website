@@ -103,6 +103,78 @@ export async function onRequest(context) {
           logo: "/teams/mi.png",
           colors: { primary: "#004BA0", secondary: "#D1AB3E" },
           description: "MI team"
+        },
+        {
+          id: "3",
+          name: "Sunrisers Hyderabad",
+          shortName: "SRH",
+          league: "ipl",
+          logo: "/teams/srh.png",
+          colors: { primary: "#FF822A", secondary: "#000000" },
+          description: "SRH team"
+        },
+        {
+          id: "4",
+          name: "Gujarat Titans",
+          shortName: "GT",
+          league: "ipl",
+          logo: "/teams/gt.png",
+          colors: { primary: "#1C2841", secondary: "#9E7E38" },
+          description: "GT team"
+        },
+        {
+          id: "5",
+          name: "Punjab Kings",
+          shortName: "PBKS",
+          league: "ipl",
+          logo: "/teams/pbks.png",
+          colors: { primary: "#ED1B24", secondary: "#C0A472" },
+          description: "PBKS team"
+        },
+        {
+          id: "6",
+          name: "Delhi Capitals",
+          shortName: "DC",
+          league: "ipl",
+          logo: "/teams/dc.png",
+          colors: { primary: "#0078BC", secondary: "#EF1B26" },
+          description: "DC team"
+        },
+        {
+          id: "7",
+          name: "Lucknow Super Giants",
+          shortName: "LSG",
+          league: "ipl",
+          logo: "/teams/lsg.png",
+          colors: { primary: "#9C2A2C", secondary: "#F7E17D" },
+          description: "LSG team"
+        },
+        {
+          id: "8",
+          name: "Rajasthan Royals",
+          shortName: "RR",
+          league: "ipl",
+          logo: "/teams/rr.png",
+          colors: { primary: "#EA1A85", secondary: "#004B8D" },
+          description: "RR team"
+        },
+        {
+          id: "9",
+          name: "Kolkata Knight Riders",
+          shortName: "KKR",
+          league: "ipl",
+          logo: "/teams/kkr.png",
+          colors: { primary: "#3A225D", secondary: "#B9975B" },
+          description: "KKR team"
+        },
+        {
+          id: "10",
+          name: "Chennai Super Kings",
+          shortName: "CSK",
+          league: "ipl",
+          logo: "/teams/csk.png",
+          colors: { primary: "#FFB90F", secondary: "#0081E8" },
+          description: "CSK team"
         }
       ];
 
