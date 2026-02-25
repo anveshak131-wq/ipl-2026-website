@@ -1,7 +1,7 @@
 // Simple API client for WPL scorecard system
 const API_BASE_URL = process.env.NODE_ENV === 'production' 
   ? '' 
-  : 'http://localhost:8787/api';
+  : process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8788/api';
 
 class ApiClient {
   private baseURL: string;
@@ -20,7 +20,8 @@ class ApiClient {
 
     // Add auth token if available
     if (typeof window !== 'undefined') {
-      const token = localStorage.getItem('authToken');
+      // Try admin token first (for admin pages), then auth token
+      const token = localStorage.getItem('adminToken') || localStorage.getItem('authToken');
       if (token) {
         headers['Authorization'] = `Bearer ${token}`;
       }
@@ -40,6 +41,7 @@ class ApiClient {
       if (!response.ok) {
         if (response.status === 401 && typeof window !== 'undefined') {
           localStorage.removeItem('authToken');
+          localStorage.removeItem('adminToken');
           window.location.href = '/login';
         }
         throw new Error(`HTTP error! status: ${response.status}`);
