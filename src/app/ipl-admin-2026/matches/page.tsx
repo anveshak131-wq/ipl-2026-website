@@ -302,9 +302,7 @@ export default function AdminMatches() {
 
     // Refetch data when league changes
     useEffect(() => {
-        if (isAuthenticated) {
-            fetchInitialData();
-        }
+        fetchInitialData();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [currentLeague]);
 
