@@ -130,47 +130,6 @@ export default function ScorecardAdminPage() {
     setMessage('');
   };
 
-  // Seed IPL data function
-  const seedIPLData = async () => {
-    setMessage('🌱 Seeding IPL data...');
-    try {
-      const token = localStorage.getItem('adminToken');
-      if (!token) {
-        throw new Error('No authentication token found');
-      }
-
-      const response = await fetch('/api/admin/seed-ipl-data', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        }
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || `Error: ${response.status} ${response.statusText}`);
-      }
-
-      const result = await response.json();
-      console.log('IPL data seeded:', result);
-      
-      setMessage(`✅ IPL data seeded successfully! Added ${result.data.teams.added} teams, ${result.data.players.added} players, ${result.data.matches.added} matches`);
-      
-      // Refresh data after seeding
-      setTimeout(() => {
-        fetchMatches();
-        fetchPlayers();
-        setMessage('');
-      }, 2000);
-      
-    } catch (err) {
-      console.error('Error seeding IPL data:', err);
-      setMessage(`❌ Error seeding IPL data: ${err instanceof Error ? err.message : 'Unknown error'}`);
-      setTimeout(() => setMessage(''), 5000);
-    }
-  };
-
   const fetchMatches = async () => {
     try {
       console.log('Fetching IPL matches (Workers KV) via API');
@@ -583,16 +542,7 @@ export default function ScorecardAdminPage() {
                   IPL matches are not yet available until you add them in the IPL matches page. 
                   Once you create IPL matches, they will appear here for scorecard management.
                 </p>
-                <p className="text-yellow-200 mb-6 text-sm">
-                  💡 <strong>Quick Start:</strong> If this is your first time setting up IPL, you can seed sample data to get started quickly.
-                </p>
                 <div className="flex gap-3 flex-wrap">
-                  <button
-                    onClick={seedIPLData}
-                    className="px-4 py-2 bg-green-600 hover:bg-green-700 rounded transition flex items-center gap-2"
-                  >
-                    🌱 Seed Sample IPL Data
-                  </button>
                   <button
                     onClick={handleCreateMatch}
                     className="px-4 py-2 bg-yellow-600 hover:bg-yellow-700 rounded transition flex items-center gap-2"
@@ -619,16 +569,7 @@ export default function ScorecardAdminPage() {
                 <p className="text-orange-200 mb-4">
                   IPL players are not yet available. You need to add players before creating scorecards.
                 </p>
-                <p className="text-orange-200 mb-6 text-sm">
-                  💡 <strong>Quick Start:</strong> You can seed sample IPL players to get started quickly.
-                </p>
                 <div className="flex gap-3 flex-wrap">
-                  <button
-                    onClick={seedIPLData}
-                    className="px-4 py-2 bg-green-600 hover:bg-green-700 rounded transition flex items-center gap-2"
-                  >
-                    🌱 Seed Sample IPL Players
-                  </button>
                   <button
                     onClick={() => router.push('/ipl-admin-2026/players')}
                     className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded transition flex items-center gap-2"
