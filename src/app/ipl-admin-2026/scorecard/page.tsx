@@ -730,24 +730,35 @@ export default function ScorecardAdminPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label className="block text-sm text-gray-400 mb-2">Toss Winner</label>
-                    <select
-                      value={scorecard.matchInfo.toss?.winner || ''}
-                      onChange={(e) => {
-                        updateMatchInfo('toss.winner', e.target.value);
-                        // Auto-determine batting order when toss winner is selected
-                        if (e.target.value && scorecard.matchInfo.toss?.decision) {
-                          updateBattingOrder(e.target.value, scorecard.matchInfo.toss.decision);
-                        }
-                      }}
-                      className="w-full bg-gray-700 p-3 rounded border border-gray-600 text-white"
-                    >
-                      <option value="">Select Toss Winner...</option>
-                      <option value={scorecard.matchInfo.team1.name}>{scorecard.matchInfo.team1.name}</option>
-                      <option value={scorecard.matchInfo.team2.name}>{scorecard.matchInfo.team2.name}</option>
-                    </select>
+                    {scorecard && scorecard.matchInfo && scorecard.matchInfo.team1 && scorecard.matchInfo.team2 ? (
+                      <select
+                        value={scorecard.matchInfo.toss?.winner || ''}
+                        onChange={(e) => {
+                          updateMatchInfo('toss.winner', e.target.value);
+                          // Auto-determine batting order when toss winner is selected
+                          if (e.target.value && scorecard.matchInfo.toss?.decision) {
+                            updateBattingOrder(e.target.value, scorecard.matchInfo.toss.decision);
+                          }
+                        }}
+                        className="w-full bg-gray-700 p-3 rounded border border-gray-600 text-white"
+                      >
+                        <option value="">Select Toss Winner...</option>
+                        <option value={scorecard.matchInfo.team1.name}>{scorecard.matchInfo.team1.name}</option>
+                        <option value={scorecard.matchInfo.team2.name}>{scorecard.matchInfo.team2.name}</option>
+                      </select>
+                    ) : (
+                      <select
+                        disabled
+                        className="w-full bg-gray-700 p-3 rounded border border-gray-600 text-gray-500"
+                      >
+                        <option>Loading teams...</option>
+                      </select>
+                    )}
                     {/* Debug info */}
                     <div className="mt-2 text-xs text-gray-500">
-                      Debug: Team1 = {scorecard?.matchInfo?.team1?.name || 'NOT FOUND'}, Team2 = {scorecard?.matchInfo?.team2?.name || 'NOT FOUND'}
+                      Debug: Scorecard = {scorecard ? 'EXISTS' : 'NOT FOUND'}, 
+                      Team1 = {scorecard?.matchInfo?.team1?.name || 'NOT FOUND'}, 
+                      Team2 = {scorecard?.matchInfo?.team2?.name || 'NOT FOUND'}
                     </div>
                   </div>
                   <div>
