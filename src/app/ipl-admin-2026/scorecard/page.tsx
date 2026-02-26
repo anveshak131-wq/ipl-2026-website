@@ -2,12 +2,12 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { api } from '@/lib/api';
+import { api } from '@/lib/data';
 
 interface Match {
   id: string;
-  team1: { id: number; name: string; shortName?: string };
-  team2: { id: number; name: string; shortName?: string };
+  team1: { id: string; name: string; shortName?: string };
+  team2: { id: string; name: string; shortName?: string };
   venue: string;
   date: string;
   time: string;
@@ -132,14 +132,12 @@ export default function ScorecardAdminPage() {
 
   const fetchMatches = async () => {
     try {
-      console.log('Fetching IPL matches (Workers KV) via API');
-      console.log('API Base URL:', process.env.NODE_ENV === 'production' ? '' : (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8788/api'));
+      console.log('Fetching IPL matches via API');
       console.log('Admin token available:', !!localStorage.getItem('adminToken'));
-      const res = await api.get('/matches', { league: 'ipl' });
-      console.log('IPL matches response:', res);
-      console.log('IPL matches data length:', res.data?.length || 0);
-      setMatches(res.data || []);
-      if (res.data && res.data.length === 0) {
+      const matches = await api.getMatches('ipl');
+      console.log('IPL matches received:', matches?.length || 0);
+      setMatches(matches || []);
+      if (matches && matches.length === 0) {
         setMessage('⚠️ No IPL matches found. IPL matches are not yet available until you add them in the IPL matches page.');
       }
     } catch (err: unknown) {
@@ -153,14 +151,12 @@ export default function ScorecardAdminPage() {
 
   const fetchPlayers = async () => {
     try {
-      console.log('Fetching IPL players (Workers KV) via API');
-      console.log('API Base URL:', process.env.NODE_ENV === 'production' ? '' : (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8788/api'));
+      console.log('Fetching IPL players via API');
       console.log('Admin token available:', !!localStorage.getItem('adminToken'));
-      const res = await api.get('/players', { league: 'ipl' });
-      console.log('IPL players response:', res);
-      console.log('IPL players data length:', res.data?.length || 0);
-      setPlayers(res.data || []);
-      if (res.data && res.data.length === 0) {
+      const players = await api.getPlayers(undefined, 'ipl');
+      console.log('IPL players received:', players?.length || 0);
+      setPlayers(players || []);
+      if (players && players.length === 0) {
         setMessage('⚠️ No IPL players found. Please add IPL players first.');
       }
     } catch (err: unknown) {
