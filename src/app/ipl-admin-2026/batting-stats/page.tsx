@@ -61,7 +61,7 @@ const BattingStatsPage = () => {
         const role = data.user?.role;
         setUserRole(role);
 
-        if (role !== 'admin' && role !== 'super_admin' && role !== 'players_admin') {
+        if (role !== 'admin' && role !== 'super_admin' && role !== 'players_admin' && role !== 'user') {
           alert('Access denied. Admin privileges required.');
           router.push('/ipl-admin-2026');
           return;
