@@ -742,19 +742,8 @@ export default function ScorecardAdminPage() {
                       className="w-full bg-gray-700 p-3 rounded border border-gray-600 text-white"
                     >
                       <option value="">Select Toss Winner...</option>
-                      {console.log('Rendering dropdown options:', {
-                        scorecard: scorecard,
-                        team1: scorecard?.matchInfo?.team1,
-                        team2: scorecard?.matchInfo?.team2,
-                        team1Name: scorecard?.matchInfo?.team1?.name,
-                        team2Name: scorecard?.matchInfo?.team2?.name
-                      })}
-                      {scorecard?.matchInfo?.team1?.name && (
-                        <option value={scorecard.matchInfo.team1.name}>{scorecard.matchInfo.team1.name}</option>
-                      )}
-                      {scorecard?.matchInfo?.team2?.name && (
-                        <option value={scorecard.matchInfo.team2.name}>{scorecard.matchInfo.team2.name}</option>
-                      )}
+                      <option value={scorecard.matchInfo.team1.name}>{scorecard.matchInfo.team1.name}</option>
+                      <option value={scorecard.matchInfo.team2.name}>{scorecard.matchInfo.team2.name}</option>
                     </select>
                     {/* Debug info */}
                     <div className="mt-2 text-xs text-gray-500">
