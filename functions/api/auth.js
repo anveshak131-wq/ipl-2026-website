@@ -262,25 +262,60 @@ export const onRequest = async (context) => {
         );
       }
 
+      let email = null;
+      let role = null;
+      let tokenSource = 'unknown';
+
+      // First, try to find token in KV storage (for legacy tokens)
       const tokenValue = await env.SPORTS_KV.get(`token:${token}`);
-      if (!tokenValue) {
+      if (tokenValue) {
+        tokenSource = 'kv';
+        // tokenValue may be a plain email (from /api/auth) or JSON (from /api/admin/setup)
+        email = tokenValue;
+        if (tokenValue.trim().startsWith('{')) {
+          try {
+            const parsed = JSON.parse(tokenValue);
+            if (parsed && typeof parsed.email === 'string') {
+              email = parsed.email;
+              role = parsed.role; // Extract role from token if available
+            }
+          } catch {
+            // fall back to using tokenValue directly
+          }
+        }
+      } else {
+        // If not in KV, try to decode as JWT
+        tokenSource = 'jwt';
+        try {
+          // Simple base64 decode JWT payload (no signature verification for now)
+          const parts = token.split('.');
+          if (parts.length === 3) {
+            const payload = JSON.parse(atob(parts[1]));
+            email = payload.email;
+            role = payload.role;
+            
+            // Check if token is expired
+            if (payload.exp && payload.exp < Date.now()) {
+              return new Response(
+                JSON.stringify({ error: 'Token expired' }),
+                { status: 401, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
+              );
+            }
+          }
+        } catch (error) {
+          console.error('JWT decode error:', error);
+          return new Response(
+            JSON.stringify({ error: 'Invalid token format' }),
+            { status: 401, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
+          );
+        }
+      }
+
+      if (!email) {
         return new Response(
           JSON.stringify({ error: 'Invalid or expired token' }),
           { status: 401, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
         );
-      }
-
-      // tokenValue may be a plain email (from /api/auth) or JSON (from /api/admin/setup)
-      let email = tokenValue;
-      if (tokenValue.trim().startsWith('{')) {
-        try {
-          const parsed = JSON.parse(tokenValue);
-          if (parsed && typeof parsed.email === 'string') {
-            email = parsed.email;
-          }
-        } catch {
-          // fall back to using tokenValue directly
-        }
       }
 
       const userData = await env.SPORTS_KV.get(`user:${email}`);
@@ -292,6 +327,13 @@ export const onRequest = async (context) => {
       }
 
       const user = JSON.parse(userData);
+
+      // Update user role if token has a role and it's different from stored role
+      if (role && user.role !== role) {
+        user.role = role;
+        await env.SPORTS_KV.put(`user:${email}`, JSON.stringify(user));
+        console.log(`Updated user role for ${email} from ${user.role} to ${role} (source: ${tokenSource})`);
+      }
 
       if (user.isBlocked) {
         return new Response(
