@@ -45,7 +45,11 @@ const BattingStatsPage = () => {
     const checkAuth = async () => {
       try {
         const token = localStorage.getItem('adminToken') || localStorage.getItem('auth_token');
+        console.log('Batting Stats: Token available:', !!token);
+        console.log('Batting Stats: Token value:', token?.substring(0, 20) + '...');
+        
         if (!token) {
+          console.log('Batting Stats: No token found, redirecting to dashboard');
           router.push('/ipl-admin-2026');
           return;
         }
@@ -53,23 +57,29 @@ const BattingStatsPage = () => {
         const response = await fetch(`/api/auth?action=verify&token=${token}`);
         const data = await response.json();
 
+        console.log('Batting Stats: Auth response:', data);
+
         if (!response.ok || !data.success) {
+          console.log('Batting Stats: Auth failed, redirecting to dashboard');
           router.push('/ipl-admin-2026');
           return;
         }
 
         const role = data.user?.role;
+        console.log('Batting Stats: User role:', role);
         setUserRole(role);
 
         if (role !== 'admin' && role !== 'user') {
+          console.log('Batting Stats: Role not allowed, redirecting to dashboard');
           alert('Access denied. Admin privileges required.');
           router.push('/ipl-admin-2026');
           return;
         }
 
+        console.log('Batting Stats: Authentication successful, showing page');
         setIsCheckingAuth(false);
       } catch (error) {
-        console.error('Auth error:', error);
+        console.error('Batting Stats: Auth error:', error);
         router.push('/ipl-admin-2026');
       }
     };
