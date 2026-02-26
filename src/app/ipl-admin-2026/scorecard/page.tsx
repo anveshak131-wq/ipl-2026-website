@@ -355,14 +355,56 @@ export default function ScorecardAdminPage() {
     const updated = { ...scorecard };
     if (field.includes('.')) {
       const [parent, child] = field.split('.');
-      updated.matchInfo = {
-        ...updated.matchInfo,
-        [parent]: { ...(updated.matchInfo[parent as keyof typeof updated.matchInfo] as any), [child]: value },
-      };
+      (updated as any)[parent] = { ...(updated as any)[parent], [child]: value };
     } else {
       updated.matchInfo = { ...updated.matchInfo, [field]: value };
     }
     setScorecard(updated);
+  };
+
+  const updateBattingOrder = (tossWinner: string, tossDecision: string) => {
+    if (!scorecard) return;
+    const updated = { ...scorecard };
+    
+    // Determine which team won the toss
+    let tossWinnerTeamId: number;
+    let otherTeamId: number;
+    
+    if (tossWinner === scorecard.matchInfo.team1.name) {
+      tossWinnerTeamId = scorecard.matchInfo.team1.id;
+      otherTeamId = scorecard.matchInfo.team2.id;
+    } else if (tossWinner === scorecard.matchInfo.team2.name) {
+      tossWinnerTeamId = scorecard.matchInfo.team2.id;
+      otherTeamId = scorecard.matchInfo.team1.id;
+    } else {
+      return; // Invalid toss winner
+    }
+    
+    // Determine batting order based on toss decision
+    let firstInningsTeamId: number;
+    let secondInningsTeamId: number;
+    
+    if (tossDecision === 'bat') {
+      // Toss winner chose to bat, they bat first
+      firstInningsTeamId = tossWinnerTeamId;
+      secondInningsTeamId = otherTeamId;
+    } else if (tossDecision === 'bowl') {
+      // Toss winner chose to bowl, other team bats first
+      firstInningsTeamId = otherTeamId;
+      secondInningsTeamId = tossWinnerTeamId;
+    } else {
+      return; // Invalid toss decision
+    }
+    
+    // Update innings batting order
+    updated.innings[0].battingTeamId = firstInningsTeamId;
+    updated.innings[1].battingTeamId = secondInningsTeamId;
+    
+    setScorecard(updated);
+    
+    // Show feedback to user
+    const firstTeamName = firstInningsTeamId === scorecard.matchInfo.team1.id ? scorecard.matchInfo.team1.name : scorecard.matchInfo.team2.name;
+    console.log(`Batting order updated: ${firstTeamName} bats first`);
   };
 
   const addBatter = () => {
@@ -665,8 +707,8 @@ export default function ScorecardAdminPage() {
                   }`}
                 >
                   {tab === 'matchInfo' && '📋 Match Info'}
-                  {tab === 'innings1' && `🏏 ${scorecard.matchInfo.team1.name} Innings`}
-                  {tab === 'innings2' && `🏏 ${scorecard.matchInfo.team2.name} Innings`}
+                  {tab === 'innings1' && `🏏 ${scorecard.innings[0].battingTeamId === scorecard.matchInfo.team1.id ? scorecard.matchInfo.team1.name : scorecard.matchInfo.team2.name} Innings (1st)`}
+                  {tab === 'innings2' && `🏏 ${scorecard.innings[1].battingTeamId === scorecard.matchInfo.team1.id ? scorecard.matchInfo.team1.name : scorecard.matchInfo.team2.name} Innings (2nd)`}
                   {tab === 'result' && '🏆 Result'}
                 </button>
               ))}
@@ -679,24 +721,38 @@ export default function ScorecardAdminPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label className="block text-sm text-gray-400 mb-2">Toss Winner</label>
-                    <input
-                      type="text"
-                      placeholder={`${scorecard.matchInfo.team1.name} or ${scorecard.matchInfo.team2.name}`}
+                    <select
                       value={scorecard.matchInfo.toss?.winner || ''}
-                      onChange={(e) => updateMatchInfo('toss.winner', e.target.value)}
-                      className="w-full bg-gray-700 p-3 rounded border border-gray-600 text-white placeholder-gray-500"
-                    />
+                      onChange={(e) => {
+                        updateMatchInfo('toss.winner', e.target.value);
+                        // Auto-determine batting order when toss winner is selected
+                        if (e.target.value && scorecard.matchInfo.toss?.decision) {
+                          updateBattingOrder(e.target.value, scorecard.matchInfo.toss.decision);
+                        }
+                      }}
+                      className="w-full bg-gray-700 p-3 rounded border border-gray-600 text-white"
+                    >
+                      <option value="">Select Toss Winner...</option>
+                      <option value={scorecard.matchInfo.team1.name}>{scorecard.matchInfo.team1.name}</option>
+                      <option value={scorecard.matchInfo.team2.name}>{scorecard.matchInfo.team2.name}</option>
+                    </select>
                   </div>
                   <div>
                     <label className="block text-sm text-gray-400 mb-2">Toss Decision</label>
                     <select
                       value={scorecard.matchInfo.toss?.decision || ''}
-                      onChange={(e) => updateMatchInfo('toss.decision', e.target.value)}
+                      onChange={(e) => {
+                        updateMatchInfo('toss.decision', e.target.value);
+                        // Auto-determine batting order when decision is selected
+                        if (e.target.value && scorecard.matchInfo.toss?.winner) {
+                          updateBattingOrder(scorecard.matchInfo.toss.winner, e.target.value);
+                        }
+                      }}
                       className="w-full bg-gray-700 p-3 rounded border border-gray-600 text-white"
                     >
                       <option value="">Select...</option>
                       <option value="bat">Bat</option>
-                      <option value="bowl">Bowl</option>
+                      <option value="bowl">Bowl (Field First)</option>
                     </select>
                   </div>
                   <div>
