@@ -707,15 +707,15 @@ export default function ScorecardAdminPage() {
                   }`}
                 >
                   {tab === 'matchInfo' && '📋 Match Info'}
-                  {tab === 'innings1' && `🏏 ${scorecard.innings[0].battingTeamId === scorecard.matchInfo.team1.id ? scorecard.matchInfo.team1.name : scorecard.matchInfo.team2.name} Innings (1st)`}
-                  {tab === 'innings2' && `🏏 ${scorecard.innings[1].battingTeamId === scorecard.matchInfo.team1.id ? scorecard.matchInfo.team1.name : scorecard.matchInfo.team2.name} Innings (2nd)`}
+                  {tab === 'innings1' && scorecard && `🏏 ${scorecard.innings[0]?.battingTeamId === scorecard.matchInfo.team1?.id ? scorecard.matchInfo.team1?.name : scorecard.matchInfo.team2?.name} Innings (1st)`}
+                  {tab === 'innings2' && scorecard && `🏏 ${scorecard.innings[1]?.battingTeamId === scorecard.matchInfo.team1?.id ? scorecard.matchInfo.team1?.name : scorecard.matchInfo.team2?.name} Innings (2nd)`}
                   {tab === 'result' && '🏆 Result'}
                 </button>
               ))}
             </div>
 
             {/* Match Info Tab */}
-            {activeTab === 'matchInfo' && (
+            {activeTab === 'matchInfo' && scorecard && (
               <div className="bg-gray-800 p-6 rounded-lg">
                 <h3 className="text-xl font-bold mb-6">Match Information</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -733,8 +733,12 @@ export default function ScorecardAdminPage() {
                       className="w-full bg-gray-700 p-3 rounded border border-gray-600 text-white"
                     >
                       <option value="">Select Toss Winner...</option>
-                      <option value={scorecard.matchInfo.team1.name}>{scorecard.matchInfo.team1.name}</option>
-                      <option value={scorecard.matchInfo.team2.name}>{scorecard.matchInfo.team2.name}</option>
+                      {scorecard.matchInfo.team1?.name && (
+                        <option value={scorecard.matchInfo.team1.name}>{scorecard.matchInfo.team1.name}</option>
+                      )}
+                      {scorecard.matchInfo.team2?.name && (
+                        <option value={scorecard.matchInfo.team2.name}>{scorecard.matchInfo.team2.name}</option>
+                      )}
                     </select>
                   </div>
                   <div>
