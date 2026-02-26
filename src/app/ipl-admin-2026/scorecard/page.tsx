@@ -174,6 +174,8 @@ export default function ScorecardAdminPage() {
   const fetchMatches = async () => {
     try {
       console.log('Fetching IPL matches (Workers KV) via API');
+      console.log('API Base URL:', process.env.NODE_ENV === 'production' ? '' : (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8788/api'));
+      console.log('Admin token available:', !!localStorage.getItem('adminToken'));
       const res = await api.get('/matches', { league: 'ipl' });
       console.log('IPL matches response:', res);
       console.log('IPL matches data length:', res.data?.length || 0);
@@ -193,6 +195,8 @@ export default function ScorecardAdminPage() {
   const fetchPlayers = async () => {
     try {
       console.log('Fetching IPL players (Workers KV) via API');
+      console.log('API Base URL:', process.env.NODE_ENV === 'production' ? '' : (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8788/api'));
+      console.log('Admin token available:', !!localStorage.getItem('adminToken'));
       const res = await api.get('/players', { league: 'ipl' });
       console.log('IPL players response:', res);
       console.log('IPL players data length:', res.data?.length || 0);
