@@ -278,12 +278,19 @@ export default function ScorecardAdminPage() {
 
 
   const initializeScorecard = (match: Match): Scorecard => {
-    return {
+    console.log('Initializing scorecard with match data:', match);
+    const scorecard = {
       matchId: match.id,
       league: 'ipl',
       matchInfo: {
-        team1: match.team1,
-        team2: match.team2,
+        team1: {
+          ...match.team1,
+          id: parseInt(match.team1.id) // Convert string ID to number
+        },
+        team2: {
+          ...match.team2,
+          id: parseInt(match.team2.id) // Convert string ID to number
+        },
         venue: match.venue,
         date: match.date,
         time: match.time,
@@ -292,7 +299,7 @@ export default function ScorecardAdminPage() {
       innings: [
         {
           inningsNumber: 1,
-          battingTeamId: match.team1.id,
+          battingTeamId: parseInt(match.team1.id), // Convert string ID to number
           batting: [],
           bowling: [],
           extras: { wides: 0, noBalls: 0, byes: 0, legByes: 0 },
@@ -302,7 +309,7 @@ export default function ScorecardAdminPage() {
         },
         {
           inningsNumber: 2,
-          battingTeamId: match.team2.id,
+          battingTeamId: parseInt(match.team2.id), // Convert string ID to number
           batting: [],
           bowling: [],
           extras: { wides: 0, noBalls: 0, byes: 0, legByes: 0 },
@@ -312,6 +319,8 @@ export default function ScorecardAdminPage() {
         },
       ],
     };
+    console.log('Created scorecard:', scorecard);
+    return scorecard;
   };
 
   const handleSaveScorecard = async () => {
