@@ -364,7 +364,10 @@ export default function ScorecardAdminPage() {
     const updated = { ...scorecard };
     if (field.includes('.')) {
       const [parent, child] = field.split('.');
-      (updated as any)[parent] = { ...(updated as any)[parent], [child]: value };
+      updated.matchInfo = {
+        ...updated.matchInfo,
+        [parent]: { ...(updated.matchInfo as any)[parent], [child]: value }
+      };
     } else {
       updated.matchInfo = { ...updated.matchInfo, [field]: value };
     }
