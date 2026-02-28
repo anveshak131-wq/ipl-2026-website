@@ -766,21 +766,30 @@ export default function ScorecardAdminPage() {
                   </div>
                   <div>
                     <label className="block text-sm text-gray-400 mb-2">Toss Decision</label>
-                    <select
-                      value={scorecard.matchInfo.toss?.decision || ''}
-                      onChange={(e) => {
-                        updateMatchInfo('toss.decision', e.target.value);
-                        // Auto-determine batting order when decision is selected
-                        if (e.target.value && scorecard.matchInfo.toss?.winner) {
-                          updateBattingOrder(scorecard.matchInfo.toss.winner, e.target.value);
-                        }
-                      }}
-                      className="w-full bg-gray-700 p-3 rounded border border-gray-600 text-white"
-                    >
-                      <option value="">Select...</option>
-                      <option value="bat">Bat</option>
-                      <option value="bowl">Bowl (Field First)</option>
-                    </select>
+                    {scorecard && scorecard.matchInfo ? (
+                      <select
+                        value={scorecard.matchInfo.toss?.decision || ''}
+                        onChange={(e) => {
+                          updateMatchInfo('toss.decision', e.target.value);
+                          // Auto-determine batting order when decision is selected
+                          if (e.target.value && scorecard.matchInfo.toss?.winner) {
+                            updateBattingOrder(scorecard.matchInfo.toss.winner, e.target.value);
+                          }
+                        }}
+                        className="w-full bg-gray-700 p-3 rounded border border-gray-600 text-white"
+                      >
+                        <option value="">Select Toss Decision...</option>
+                        <option value="bat">Bat</option>
+                        <option value="bowl">Bowl (Field First)</option>
+                      </select>
+                    ) : (
+                      <select
+                        disabled
+                        className="w-full bg-gray-700 p-3 rounded border border-gray-600 text-gray-500"
+                      >
+                        <option>Loading...</option>
+                      </select>
+                    )}
                   </div>
                   <div>
                     <label className="block text-sm text-gray-400 mb-2">Venue</label>
