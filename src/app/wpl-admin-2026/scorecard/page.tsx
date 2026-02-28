@@ -148,21 +148,21 @@ export default function ScorecardAdminPage() {
 
   const fetchMatches = async () => {
     try {
-      const data = await dataApi.getMatches('wpl');
-      console.log('Fetched WPL matches:', data);
+      const data = await dataApi.getMatches('ipl');
+      console.log('Fetched IPL matches:', data);
       setMatches(data || []);
       if (!data || data.length === 0) {
-        setMessage('⚠ No WPL matches found. Please check Cloudflare KV data.');
+        setMessage('⚠ No IPL matches found. Please check Cloudflare KV data.');
       }
     } catch (err) {
       console.error('Error fetching matches:', err);
-      setMessage('❌ Error fetching WPL matches');
+      setMessage('❌ Error fetching IPL matches');
     }
   };
 
   const fetchAllScorecards = async () => {
     try {
-      const response = await fetch('/api/scorecards?league=wpl');
+      const response = await fetch('/api/scorecards?league=ipl');
       if (response.ok) {
         const data = await response.json();
         setScorecards(data || []);
@@ -174,12 +174,12 @@ export default function ScorecardAdminPage() {
 
   const fetchPlayers = async () => {
     try {
-      const data = await dataApi.getPlayers(undefined, 'wpl');
-      console.log('Fetched WPL players:', data);
+      const data = await dataApi.getPlayers(undefined, 'ipl');
+      console.log('Fetched IPL players:', data);
       setPlayers(data || []);
     } catch (err) {
       console.error('Error fetching players:', err);
-      setMessage('❌ Error fetching WPL players');
+      setMessage('❌ Error fetching IPL players');
     }
   };
 
@@ -214,7 +214,7 @@ export default function ScorecardAdminPage() {
   const initializeScorecard = (match: Match): Scorecard => {
     return {
       matchId: match.id,
-      league: 'wpl',
+      league: 'ipl',
       matchInfo: {
         matchId: match.id,
         team1: match.team1,
