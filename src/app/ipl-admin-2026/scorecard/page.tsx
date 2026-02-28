@@ -463,11 +463,11 @@ export default function ScorecardAdminPage() {
     updated.innings[activeInnings].batting.push({
       playerId: '',
       name: '',
-      runs: 0,
-      balls: 0,
-      fours: 0,
-      sixes: 0,
-      strikeRate: 0,
+      runs: '',
+      balls: '',
+      fours: '',
+      sixes: '',
+      strikeRate: '',
       dismissal: { type: 'not-out' }
     });
     setScorecard(updated);
@@ -489,7 +489,9 @@ export default function ScorecardAdminPage() {
 
     // Calculate strike rate
     if (field === 'runs' || field === 'balls') {
-      batter.strikeRate = batter.balls > 0 ? parseFloat(((batter.runs / batter.balls) * 100).toFixed(2)) : 0;
+      const runsNum = Number(batter.runs) || 0;
+      const ballsNum = Number(batter.balls) || 0;
+      batter.strikeRate = ballsNum > 0 ? parseFloat(((runsNum / ballsNum) * 100).toFixed(2)) : '';
     }
 
     setScorecard(updated);
@@ -509,12 +511,12 @@ export default function ScorecardAdminPage() {
     updated.innings[activeInnings].bowling.push({
       playerId: '',
       name: '',
-      overs: 0,
-      balls: 0,
-      runs: 0,
-      wickets: 0,
-      maidens: 0,
-      economyRate: 0,
+      overs: '',
+      balls: '',
+      runs: '',
+      wickets: '',
+      maidens: '',
+      economyRate: '',
     });
     setScorecard(updated);
   };
@@ -535,8 +537,11 @@ export default function ScorecardAdminPage() {
 
     // Calculate economy rate
     if (field === 'overs' || field === 'balls' || field === 'runs') {
-      const totalOvers = bowler.overs + bowler.balls / 6;
-      bowler.economyRate = totalOvers > 0 ? parseFloat((bowler.runs / totalOvers).toFixed(2)) : 0;
+      const oversNum = Number(bowler.overs) || 0;
+      const ballsNum = Number(bowler.balls) || 0;
+      const runsNum = Number(bowler.runs) || 0;
+      const totalOvers = oversNum + ballsNum / 6;
+      bowler.economyRate = totalOvers > 0 ? parseFloat((runsNum / totalOvers).toFixed(2)) : '';
     }
 
     setScorecard(updated);
@@ -554,9 +559,9 @@ export default function ScorecardAdminPage() {
     const updated = { ...scorecard };
     const inning = updated.innings[activeInnings];
 
-    // Calculate total runs
-    inning.totalRuns = inning.batting.reduce((sum, b) => sum + b.runs, 0) + 
-                       (inning.extras.wides + inning.extras.noBalls + inning.extras.byes + inning.extras.legByes);
+    // Calculate total runs (handle empty-string inputs)
+    inning.totalRuns = inning.batting.reduce((sum, b) => sum + (Number(b.runs) || 0), 0) + 
+               (Number(inning.extras.wides) + Number(inning.extras.noBalls) + Number(inning.extras.byes) + Number(inning.extras.legByes));
 
     // Calculate total wickets
     inning.totalWickets = inning.batting.filter(
@@ -901,32 +906,36 @@ export default function ScorecardAdminPage() {
                                 <td className="p-2">
                                   <input
                                     type="number"
-                                    value={batter.runs}
-                                    onChange={(e) => updateBatter(idx, 'runs', parseInt(e.target.value) || 0)}
+                                    value={batter.runs || ''}
+                                    onChange={(e) => updateBatter(idx, 'runs', e.target.value)}
+                                    placeholder=""
                                     className="w-full bg-gray-700 p-2 rounded border border-gray-600 text-white text-center text-sm"
                                   />
                                 </td>
                                 <td className="p-2">
                                   <input
                                     type="number"
-                                    value={batter.balls}
-                                    onChange={(e) => updateBatter(idx, 'balls', parseInt(e.target.value) || 0)}
+                                    value={batter.balls || ''}
+                                    onChange={(e) => updateBatter(idx, 'balls', e.target.value)}
+                                    placeholder=""
                                     className="w-full bg-gray-700 p-2 rounded border border-gray-600 text-white text-center text-sm"
                                   />
                                 </td>
                                 <td className="p-2">
                                   <input
                                     type="number"
-                                    value={batter.fours}
-                                    onChange={(e) => updateBatter(idx, 'fours', parseInt(e.target.value) || 0)}
+                                    value={batter.fours || ''}
+                                    onChange={(e) => updateBatter(idx, 'fours', e.target.value)}
+                                    placeholder=""
                                     className="w-full bg-gray-700 p-2 rounded border border-gray-600 text-white text-center text-sm"
                                   />
                                 </td>
                                 <td className="p-2">
                                   <input
                                     type="number"
-                                    value={batter.sixes}
-                                    onChange={(e) => updateBatter(idx, 'sixes', parseInt(e.target.value) || 0)}
+                                    value={batter.sixes || ''}
+                                    onChange={(e) => updateBatter(idx, 'sixes', e.target.value)}
+                                    placeholder=""
                                     className="w-full bg-gray-700 p-2 rounded border border-gray-600 text-white text-center text-sm"
                                   />
                                 </td>
@@ -1026,40 +1035,45 @@ export default function ScorecardAdminPage() {
                                   <input
                                     type="number"
                                     step="0.1"
-                                    value={bowler.overs}
-                                    onChange={(e) => updateBowler(idx, 'overs', parseFloat(e.target.value) || 0)}
+                                    value={bowler.overs || ''}
+                                    onChange={(e) => updateBowler(idx, 'overs', e.target.value)}
+                                    placeholder=""
                                     className="w-full bg-gray-700 p-2 rounded border border-gray-600 text-white text-center text-sm"
                                   />
                                 </td>
                                 <td className="p-2">
                                   <input
                                     type="number"
-                                    value={bowler.balls}
-                                    onChange={(e) => updateBowler(idx, 'balls', parseInt(e.target.value) || 0)}
+                                    value={bowler.balls || ''}
+                                    onChange={(e) => updateBowler(idx, 'balls', e.target.value)}
+                                    placeholder=""
                                     className="w-full bg-gray-700 p-2 rounded border border-gray-600 text-white text-center text-sm"
                                   />
                                 </td>
                                 <td className="p-2">
                                   <input
                                     type="number"
-                                    value={bowler.runs}
-                                    onChange={(e) => updateBowler(idx, 'runs', parseInt(e.target.value) || 0)}
+                                    value={bowler.runs || ''}
+                                    onChange={(e) => updateBowler(idx, 'runs', e.target.value)}
+                                    placeholder=""
                                     className="w-full bg-gray-700 p-2 rounded border border-gray-600 text-white text-center text-sm"
                                   />
                                 </td>
                                 <td className="p-2">
                                   <input
                                     type="number"
-                                    value={bowler.wickets}
-                                    onChange={(e) => updateBowler(idx, 'wickets', parseInt(e.target.value) || 0)}
+                                    value={bowler.wickets || ''}
+                                    onChange={(e) => updateBowler(idx, 'wickets', e.target.value)}
+                                    placeholder=""
                                     className="w-full bg-gray-700 p-2 rounded border border-gray-600 text-white text-center text-sm"
                                   />
                                 </td>
                                 <td className="p-2">
                                   <input
                                     type="number"
-                                    value={bowler.maidens}
-                                    onChange={(e) => updateBowler(idx, 'maidens', parseInt(e.target.value) || 0)}
+                                    value={bowler.maidens || ''}
+                                    onChange={(e) => updateBowler(idx, 'maidens', e.target.value)}
+                                    placeholder=""
                                     className="w-full bg-gray-700 p-2 rounded border border-gray-600 text-white text-center text-sm font-bold text-yellow-400"
                                   />
                                 </td>
