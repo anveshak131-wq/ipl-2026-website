@@ -21,6 +21,10 @@ export default function Playing11Page() {
   const [selectedMatchId, setSelectedMatchId] = useState<string>('');
   const [team1Playing11, setTeam1Playing11] = useState<string[]>([]);
   const [team2Playing11, setTeam2Playing11] = useState<string[]>([]);
+  const [team1ImpactPlayer, setTeam1ImpactPlayer] = useState<string>('');
+  const [team2ImpactPlayer, setTeam2ImpactPlayer] = useState<string>('');
+  const [team1SubstitutionTime, setTeam1SubstitutionTime] = useState<string>('');
+  const [team2SubstitutionTime, setTeam2SubstitutionTime] = useState<string>('');
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
   const [isRefreshing, setIsRefreshing] = useState(false);
 
@@ -322,6 +326,38 @@ export default function Playing11Page() {
     }
   };
 
+  const handleImpactPlayerSelection = (team: 'team1' | 'team2', playerId: string) => {
+    if (team === 'team1') {
+      setTeam1ImpactPlayer(playerId);
+    } else {
+      setTeam2ImpactPlayer(playerId);
+    }
+  };
+
+  const handleSubstitution = (team: 'team1' | 'team2', substitutionTime: string) => {
+    const impactPlayerId = team === 'team1' ? team1ImpactPlayer : team2ImpactPlayer;
+    const playing11 = team === 'team1' ? team1Playing11 : team2Playing11;
+    
+    if (!impactPlayerId) return;
+    
+    // Remove one player from playing 11 and add impact player
+    const updatedPlaying11 = [...playing11];
+    const playerToRemoveIndex = updatedPlaying11.findIndex(id => id !== impactPlayerId);
+    
+    if (playerToRemoveIndex >= 0) {
+      updatedPlaying11.splice(playerToRemoveIndex, 1);
+      updatedPlaying11.push(impactPlayerId);
+      
+      if (team === 'team1') {
+        setTeam1Playing11(updatedPlaying11);
+        setTeam1SubstitutionTime(substitutionTime);
+      } else {
+        setTeam2Playing11(updatedPlaying11);
+        setTeam2SubstitutionTime(substitutionTime);
+      }
+    }
+  };
+
   const handleSave = async () => {
     if (!selectedMatch) return;
 
@@ -355,6 +391,16 @@ export default function Playing11Page() {
             team1: team1Playing11,
             team2: team2Playing11,
             setAt: new Date().toISOString(), // Timestamp when admin set playing 11
+          },
+          impactPlayer: {
+            team1: team1ImpactPlayer ? {
+              playerId: team1ImpactPlayer,
+              substitutionTime: team1SubstitutionTime
+            } : null,
+            team2: team2ImpactPlayer ? {
+              playerId: team2ImpactPlayer,
+              substitutionTime: team2SubstitutionTime
+            } : null
           }
         }),
       });
@@ -611,6 +657,101 @@ export default function Playing11Page() {
                 </div>
               </div>
 
+              {/* Team 1 Impact Player */}
+              <div 
+                className="rounded-2xl p-6 backdrop-blur-xl border"
+                style={isWPL ? {
+                  background: WPLColors.purpleRGBA[10],
+                  borderColor: WPLColors.purpleRGBA[30],
+                } : {
+                  background: 'rgba(30, 41, 59, 0.4)',
+                  borderColor: 'rgba(255, 255, 255, 0.1)',
+                }}
+              >
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <h2 className="text-2xl font-bold text-white mb-1">
+                      {selectedMatch.team1.shortName || selectedMatch.team1.name} - Impact Player
+                    </h2>
+                    <p className="text-sm" style={{ color: isWPL ? WPLColors.textMuted : '#9CA3AF' }}>
+                      Select impact player from available substitutes
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2 px-4 py-2 rounded-lg" style={{
+                    background: team1ImpactPlayer ? 'rgba(34, 197, 94, 0.2)' : 'rgba(251, 191, 36, 0.2)',
+                    border: `1px solid ${team1ImpactPlayer ? 'rgba(34, 197, 94, 0.3)' : 'rgba(251, 191, 36, 0.3)'}`
+                  }}>
+                    <Users className="w-5 h-5" style={{ color: team1ImpactPlayer ? '#22C55E' : '#FBBF24' }} />
+                    <span className="font-bold" style={{ color: team1ImpactPlayer ? '#22C55E' : '#FBBF24' }}>
+                      {team1ImpactPlayer ? 'Selected' : 'Not Selected'}
+                    </span>
+                  </div>
+                </div>
+                
+                <div className="space-y-4">
+                  {/* Impact Player Selection */}
+                  <div>
+                    <h4 className="text-sm font-semibold mb-2 text-white">Select Impact Player:</h4>
+                    <select
+                      value={team1ImpactPlayer}
+                      onChange={(e) => handleImpactPlayerSelection('team1', e.target.value)}
+                      className="w-full px-4 py-3 rounded-lg text-white"
+                      style={isWPL ? {
+                        background: WPLColors.purpleRGBA[20],
+                        border: `1px solid ${WPLColors.purpleRGBA[30]}`,
+                      } : {
+                        background: '#0F172A',
+                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                      }}
+                    >
+                      <option value="">Select Impact Player...</option>
+                      {team1Players
+                        .filter(player => !team1Playing11.includes(player.id))
+                        .map(player => (
+                          <option key={player.id} value={player.id}>
+                            {player.name} ({player.role}) {player.nationality !== 'India' && '🌍'}
+                          </option>
+                        ))}
+                    </select>
+                  </div>
+                  
+                  {/* Substitution Timing */}
+                  {team1ImpactPlayer && (
+                    <div>
+                      <h4 className="text-sm font-semibold mb-2 text-white">Substitution Timing:</h4>
+                      <div className="grid grid-cols-3 gap-2">
+                        <button
+                          onClick={() => handleSubstitution('team1', 'Before Innings')}
+                          className="px-3 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm"
+                        >
+                          Before Innings
+                        </button>
+                        <button
+                          onClick={() => handleSubstitution('team1', 'After Wicket')}
+                          className="px-3 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm"
+                        >
+                          After Wicket
+                        </button>
+                        <button
+                          onClick={() => handleSubstitution('team1', 'End of Over')}
+                          className="px-3 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm"
+                        >
+                          End of Over
+                        </button>
+                      </div>
+                      
+                      {team1SubstitutionTime && (
+                        <div className="mt-2 p-3 rounded-lg bg-yellow-600/20 border border-yellow-600/30">
+                          <p className="text-sm text-yellow-300">
+                            Impact Player substituted: {team1SubstitutionTime}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+
               {/* Team 2 Selection */}
               <div 
                 className="rounded-2xl p-6 backdrop-blur-xl border"
@@ -711,6 +852,101 @@ export default function Playing11Page() {
                         </button>
                       );
                     })
+                  )}
+                </div>
+              </div>
+
+              {/* Team 2 Impact Player */}
+              <div 
+                className="rounded-2xl p-6 backdrop-blur-xl border"
+                style={isWPL ? {
+                  background: WPLColors.purpleRGBA[10],
+                  borderColor: WPLColors.purpleRGBA[30],
+                } : {
+                  background: 'rgba(30, 41, 59, 0.4)',
+                  borderColor: 'rgba(255, 255, 255, 0.1)',
+                }}
+              >
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <h2 className="text-2xl font-bold text-white mb-1">
+                      {selectedMatch.team2.shortName || selectedMatch.team2.name} - Impact Player
+                    </h2>
+                    <p className="text-sm" style={{ color: isWPL ? WPLColors.textMuted : '#9CA3AF' }}>
+                      Select impact player from available substitutes
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2 px-4 py-2 rounded-lg" style={{
+                    background: team2ImpactPlayer ? 'rgba(34, 197, 94, 0.2)' : 'rgba(251, 191, 36, 0.2)',
+                    border: `1px solid ${team2ImpactPlayer ? 'rgba(34, 197, 94, 0.3)' : 'rgba(251, 191, 36, 0.3)'}`
+                  }}>
+                    <Users className="w-5 h-5" style={{ color: team2ImpactPlayer ? '#22C55E' : '#FBBF24' }} />
+                    <span className="font-bold" style={{ color: team2ImpactPlayer ? '#22C55E' : '#FBBF24' }}>
+                      {team2ImpactPlayer ? 'Selected' : 'Not Selected'}
+                    </span>
+                  </div>
+                </div>
+                
+                <div className="space-y-4">
+                  {/* Impact Player Selection */}
+                  <div>
+                    <h4 className="text-sm font-semibold mb-2 text-white">Select Impact Player:</h4>
+                    <select
+                      value={team2ImpactPlayer}
+                      onChange={(e) => handleImpactPlayerSelection('team2', e.target.value)}
+                      className="w-full px-4 py-3 rounded-lg text-white"
+                      style={isWPL ? {
+                        background: WPLColors.purpleRGBA[20],
+                        border: `1px solid ${WPLColors.purpleRGBA[30]}`,
+                      } : {
+                        background: '#0F172A',
+                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                      }}
+                    >
+                      <option value="">Select Impact Player...</option>
+                      {team2Players
+                        .filter(player => !team2Playing11.includes(player.id))
+                        .map(player => (
+                          <option key={player.id} value={player.id}>
+                            {player.name} ({player.role}) {player.nationality !== 'India' && '🌍'}
+                          </option>
+                        ))}
+                    </select>
+                  </div>
+                  
+                  {/* Substitution Timing */}
+                  {team2ImpactPlayer && (
+                    <div>
+                      <h4 className="text-sm font-semibold mb-2 text-white">Substitution Timing:</h4>
+                      <div className="grid grid-cols-3 gap-2">
+                        <button
+                          onClick={() => handleSubstitution('team2', 'Before Innings')}
+                          className="px-3 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm"
+                        >
+                          Before Innings
+                        </button>
+                        <button
+                          onClick={() => handleSubstitution('team2', 'After Wicket')}
+                          className="px-3 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm"
+                        >
+                          After Wicket
+                        </button>
+                        <button
+                          onClick={() => handleSubstitution('team2', 'End of Over')}
+                          className="px-3 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm"
+                        >
+                          End of Over
+                        </button>
+                      </div>
+                      
+                      {team2SubstitutionTime && (
+                        <div className="mt-2 p-3 rounded-lg bg-yellow-600/20 border border-yellow-600/30">
+                          <p className="text-sm text-yellow-300">
+                            Impact Player substituted: {team2SubstitutionTime}
+                          </p>
+                        </div>
+                      )}
+                    </div>
                   )}
                 </div>
               </div>
