@@ -139,28 +139,25 @@ export default function PlayingElevenPage() {
 
     const playingXI = isTeam1 ? [...team1PlayingXI] : [...team2PlayingXI];
     
-    // Find player to replace
-    const playerToReplaceIndex = playingXI.findIndex(p => !p.isImpactPlayer);
+    // Check if impact player is already in playing XI
+    const impactPlayerIndex = playingXI.findIndex(p => p.playerId === playerId);
     
-    if (playerToReplaceIndex >= 0) {
-      // Mark replaced player as substituted
-      playingXI[playerToReplaceIndex] = {
-        ...playingXI[playerToReplaceIndex],
+    if (impactPlayerIndex >= 0) {
+      // Impact player is already in playing XI, just mark substitution time
+      playingXI[impactPlayerIndex] = {
+        ...playingXI[impactPlayerIndex],
         isImpactPlayer: true,
         substitutionTime: substitutionTime
       };
-      
-      // Add impact player
-      const impactPlayerIndex = playingXI.findIndex(p => p.playerId === playerId);
-      if (impactPlayerIndex >= 0) {
-        playingXI[impactPlayerIndex] = {
-          playerId: player.id,
-          playerName: player.name,
-          role: player.role,
-          isImpactPlayer: true,
-          substitutionTime: substitutionTime
-        };
-      }
+    } else {
+      // Add impact player to playing XI and mark as impact player
+      playingXI.push({
+        playerId: player.id,
+        playerName: player.name,
+        role: player.role,
+        isImpactPlayer: true,
+        substitutionTime: substitutionTime
+      });
     }
 
     if (isTeam1) {
@@ -317,45 +314,54 @@ export default function PlayingElevenPage() {
 
                 {/* Impact Player Selection */}
                 <div className="mt-4">
-                  <h3 className="font-semibold mb-2">Impact Player</h3>
-                  <select
-                    value={team1ImpactPlayer}
-                    onChange={(e) => handleImpactPlayerSelection(e.target.value, true)}
-                    className="w-full bg-gray-700 p-3 rounded border border-gray-600 text-white"
-                  >
-                    <option value="">Select Impact Player...</option>
-                    {getTeamPlayers(selectedMatch.team1.id)
-                      .filter(player => !team1PlayingXI.some(p => p.playerId === player.id))
-                      .map(player => (
-                        <option key={player.id} value={player.id}>
-                          {player.name} ({player.role})
-                        </option>
-                      ))}
-                  </select>
-                  
-                  {/* Substitution Controls */}
-                  <div className="mt-4 grid grid-cols-3 gap-2">
-                    <button
-                      onClick={() => handleSubstitution(team1ImpactPlayer, true, 'Before Innings')}
-                      disabled={!team1ImpactPlayer}
-                      className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 p-2 rounded text-sm"
-                    >
-                      Before Innings
-                    </button>
-                    <button
-                      onClick={() => handleSubstitution(team1ImpactPlayer, true, 'After Wicket')}
-                      disabled={!team1ImpactPlayer}
-                      className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 p-2 rounded text-sm"
-                    >
-                      After Wicket
-                    </button>
-                    <button
-                      onClick={() => handleSubstitution(team1ImpactPlayer, true, 'End of Over')}
-                      disabled={!team1ImpactPlayer}
-                      className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 p-2 rounded text-sm"
-                    >
-                      End of Over
-                    </button>
+                  <h3 className="font-semibold mb-2">Impact Player Selection</h3>
+                  <div className="space-y-4">
+                    {/* Available Players for Impact Player */}
+                    <div>
+                      <h4 className="text-sm font-medium mb-2">Select Impact Player:</h4>
+                      <select
+                        value={team1ImpactPlayer}
+                        onChange={(e) => handleImpactPlayerSelection(e.target.value, true)}
+                        className="w-full bg-gray-700 p-3 rounded border border-gray-600 text-white"
+                      >
+                        <option value="">Select Impact Player...</option>
+                        {getTeamPlayers(selectedMatch.team1.id)
+                          .filter(player => !team1PlayingXI.some(p => p.playerId === player.id))
+                          .map(player => (
+                            <option key={player.id} value={player.id}>
+                              {player.name} ({player.role}) {player.isOverseas && '🌍'}
+                            </option>
+                          ))}
+                      </select>
+                    </div>
+                    
+                    {/* Substitution Controls */}
+                    <div>
+                      <h4 className="text-sm font-medium mb-2">Substitution Timing:</h4>
+                      <div className="grid grid-cols-3 gap-2">
+                        <button
+                          onClick={() => handleSubstitution(team1ImpactPlayer, true, 'Before Innings')}
+                          disabled={!team1ImpactPlayer}
+                          className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 p-2 rounded text-sm"
+                        >
+                          Before Innings
+                        </button>
+                        <button
+                          onClick={() => handleSubstitution(team1ImpactPlayer, true, 'After Wicket')}
+                          disabled={!team1ImpactPlayer}
+                          className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 p-2 rounded text-sm"
+                        >
+                          After Wicket
+                        </button>
+                        <button
+                          onClick={() => handleSubstitution(team1ImpactPlayer, true, 'End of Over')}
+                          disabled={!team1ImpactPlayer}
+                          className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 p-2 rounded text-sm"
+                        >
+                          End of Over
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 </div>
 
@@ -430,44 +436,54 @@ export default function PlayingElevenPage() {
 
                 {/* Similar Impact Player and Stats for Team 2 */}
                 <div className="mt-4">
-                  <h3 className="font-semibold mb-2">Impact Player</h3>
-                  <select
-                    value={team2ImpactPlayer}
-                    onChange={(e) => handleImpactPlayerSelection(e.target.value, false)}
-                    className="w-full bg-gray-700 p-3 rounded border border-gray-600 text-white"
-                  >
-                    <option value="">Select Impact Player...</option>
-                    {getTeamPlayers(selectedMatch.team2.id)
-                      .filter(player => !team2PlayingXI.some(p => p.playerId === player.id))
-                      .map(player => (
-                        <option key={player.id} value={player.id}>
-                          {player.name} ({player.role})
-                        </option>
-                      ))}
-                  </select>
-                  
-                  <div className="mt-4 grid grid-cols-3 gap-2">
-                    <button
-                      onClick={() => handleSubstitution(team2ImpactPlayer, false, 'Before Innings')}
-                      disabled={!team2ImpactPlayer}
-                      className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 p-2 rounded text-sm"
-                    >
-                      Before Innings
-                    </button>
-                    <button
-                      onClick={() => handleSubstitution(team2ImpactPlayer, false, 'After Wicket')}
-                      disabled={!team2ImpactPlayer}
-                      className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 p-2 rounded text-sm"
-                    >
-                      After Wicket
-                    </button>
-                    <button
-                      onClick={() => handleSubstitution(team2ImpactPlayer, false, 'End of Over')}
-                      disabled={!team2ImpactPlayer}
-                      className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 p-2 rounded text-sm"
-                    >
-                      End of Over
-                    </button>
+                  <h3 className="font-semibold mb-2">Impact Player Selection</h3>
+                  <div className="space-y-4">
+                    {/* Available Players for Impact Player */}
+                    <div>
+                      <h4 className="text-sm font-medium mb-2">Select Impact Player:</h4>
+                      <select
+                        value={team2ImpactPlayer}
+                        onChange={(e) => handleImpactPlayerSelection(e.target.value, false)}
+                        className="w-full bg-gray-700 p-3 rounded border border-gray-600 text-white"
+                      >
+                        <option value="">Select Impact Player...</option>
+                        {getTeamPlayers(selectedMatch.team2.id)
+                          .filter(player => !team2PlayingXI.some(p => p.playerId === player.id))
+                          .map(player => (
+                            <option key={player.id} value={player.id}>
+                              {player.name} ({player.role}) {player.isOverseas && '🌍'}
+                            </option>
+                          ))}
+                      </select>
+                    </div>
+                    
+                    {/* Substitution Controls */}
+                    <div>
+                      <h4 className="text-sm font-medium mb-2">Substitution Timing:</h4>
+                      <div className="grid grid-cols-3 gap-2">
+                        <button
+                          onClick={() => handleSubstitution(team2ImpactPlayer, false, 'Before Innings')}
+                          disabled={!team2ImpactPlayer}
+                          className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 p-2 rounded text-sm"
+                        >
+                          Before Innings
+                        </button>
+                        <button
+                          onClick={() => handleSubstitution(team2ImpactPlayer, false, 'After Wicket')}
+                          disabled={!team2ImpactPlayer}
+                          className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 p-2 rounded text-sm"
+                        >
+                          After Wicket
+                        </button>
+                        <button
+                          onClick={() => handleSubstitution(team2ImpactPlayer, false, 'End of Over')}
+                          disabled={!team2ImpactPlayer}
+                          className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 p-2 rounded text-sm"
+                        >
+                          End of Over
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 </div>
 
