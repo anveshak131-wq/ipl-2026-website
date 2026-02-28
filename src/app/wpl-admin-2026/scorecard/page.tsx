@@ -2427,7 +2427,7 @@ export default function ScorecardAdminPage() {
                                     type="number"
                                     value={batter.runs || ''}
                                     onChange={(e) => updateBatter(idx, 'runs', e.target.value ? parseInt(e.target.value) : '')}
-                                    placeholder="0"
+                                    placeholder="Runs"
                                     className="w-full bg-gray-700 p-2 rounded border border-gray-600 text-white text-center text-sm"
                                   />
                                 </td>
@@ -2436,7 +2436,7 @@ export default function ScorecardAdminPage() {
                                     type="number"
                                     value={batter.balls || ''}
                                     onChange={(e) => updateBatter(idx, 'balls', e.target.value ? parseInt(e.target.value) : '')}
-                                    placeholder="0"
+                                    placeholder="Balls"
                                     className="w-full bg-gray-700 p-2 rounded border border-gray-600 text-white text-center text-sm"
                                   />
                                 </td>
@@ -2445,7 +2445,7 @@ export default function ScorecardAdminPage() {
                                     type="number"
                                     value={batter.fours || ''}
                                     onChange={(e) => updateBatter(idx, 'fours', e.target.value ? parseInt(e.target.value) : '')}
-                                    placeholder="0"
+                                    placeholder="4s"
                                     className="w-full bg-gray-700 p-2 rounded border border-gray-600 text-white text-center text-sm"
                                   />
                                 </td>
@@ -2454,7 +2454,7 @@ export default function ScorecardAdminPage() {
                                     type="number"
                                     value={batter.sixes || ''}
                                     onChange={(e) => updateBatter(idx, 'sixes', e.target.value ? parseInt(e.target.value) : '')}
-                                    placeholder="0"
+                                    placeholder="6s"
                                     className="w-full bg-gray-700 p-2 rounded border border-gray-600 text-white text-center text-sm"
                                   />
                                 </td>
@@ -2524,7 +2524,7 @@ export default function ScorecardAdminPage() {
                           updated.innings[activeInnings].extras.wides = e.target.value ? parseInt(e.target.value) : '';
                           setScorecard(updated);
                         }}
-                        placeholder="0"
+                        placeholder="Wides"
                         className="w-full bg-gray-700 p-2 rounded border border-gray-600 text-white"
                       />
                     </div>
@@ -2538,7 +2538,7 @@ export default function ScorecardAdminPage() {
                           updated.innings[activeInnings].extras.noBalls = e.target.value ? parseInt(e.target.value) : '';
                           setScorecard(updated);
                         }}
-                        placeholder="0"
+                        placeholder="No Balls"
                         className="w-full bg-gray-700 p-2 rounded border border-gray-600 text-white"
                       />
                     </div>
@@ -2552,7 +2552,7 @@ export default function ScorecardAdminPage() {
                           updated.innings[activeInnings].extras.byes = e.target.value ? parseInt(e.target.value) : '';
                           setScorecard(updated);
                         }}
-                        placeholder="0"
+                        placeholder="Byes"
                         className="w-full bg-gray-700 p-2 rounded border border-gray-600 text-white"
                       />
                     </div>
@@ -2566,7 +2566,7 @@ export default function ScorecardAdminPage() {
                           updated.innings[activeInnings].extras.legByes = e.target.value ? parseInt(e.target.value) : '';
                           setScorecard(updated);
                         }}
-                        placeholder="0"
+                        placeholder="Leg Byes"
                         className="w-full bg-gray-700 p-2 rounded border border-gray-600 text-white"
                       />
                     </div>
@@ -2629,7 +2629,7 @@ export default function ScorecardAdminPage() {
                                     type="text"
                                     value={bowler.overs || ''}
                                     onChange={(e) => updateBowler(idx, 'overs', e.target.value)}
-                                    placeholder="3.5"
+                                    placeholder="Overs"
                                     className="w-full bg-gray-700 p-2 rounded border border-gray-600 text-white text-center text-sm"
                                   />
                                 </td>
@@ -2638,7 +2638,7 @@ export default function ScorecardAdminPage() {
                                     type="number"
                                     value={bowler.runs || ''}
                                     onChange={(e) => updateBowler(idx, 'runs', e.target.value ? parseInt(e.target.value) : '')}
-                                    placeholder="0"
+                                    placeholder="Runs"
                                     className="w-full bg-gray-700 p-2 rounded border border-gray-600 text-white text-center text-sm"
                                   />
                                 </td>
@@ -2647,7 +2647,7 @@ export default function ScorecardAdminPage() {
                                     type="number"
                                     value={bowler.wickets || ''}
                                     onChange={(e) => updateBowler(idx, 'wickets', e.target.value ? parseInt(e.target.value) : '')}
-                                    placeholder="0"
+                                    placeholder="Wickets"
                                     className="w-full bg-gray-700 p-2 rounded border border-gray-600 text-white text-center text-sm"
                                   />
                                 </td>
@@ -2656,7 +2656,7 @@ export default function ScorecardAdminPage() {
                                     type="number"
                                     value={bowler.maidens || ''}
                                     onChange={(e) => updateBowler(idx, 'maidens', e.target.value ? parseInt(e.target.value) : '')}
-                                    placeholder="0"
+                                    placeholder="Maidens"
                                     className="w-full bg-gray-700 p-2 rounded border border-gray-600 text-white text-center text-sm"
                                   />
                                 </td>
@@ -2665,7 +2665,7 @@ export default function ScorecardAdminPage() {
                                     type="number"
                                     value={bowler.wides || ''}
                                     onChange={(e) => updateBowler(idx, 'wides', e.target.value ? parseInt(e.target.value) : '')}
-                                    placeholder="0"
+                                    placeholder="Wides"
                                     className="w-full bg-gray-700 p-2 rounded border border-gray-600 text-white text-center text-sm"
                                   />
                                 </td>
@@ -2674,7 +2674,7 @@ export default function ScorecardAdminPage() {
                                     type="number"
                                     value={bowler.noBalls || ''}
                                     onChange={(e) => updateBowler(idx, 'noBalls', e.target.value ? parseInt(e.target.value) : '')}
-                                    placeholder="0"
+                                    placeholder="No Balls"
                                     className="w-full bg-gray-700 p-2 rounded border border-gray-600 text-white text-center text-sm"
                                   />
                                 </td>
