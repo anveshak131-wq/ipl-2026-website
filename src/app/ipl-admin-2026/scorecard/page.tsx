@@ -328,18 +328,35 @@ export default function ScorecardAdminPage() {
     setSaving(true);
     setMessage('');
     try {
-      let res;
-      if (scorecard.id) {
-        res = await api.put(`/scorecards/${scorecard.id}`, scorecard);
-      } else {
-        res = await api.post('/scorecards', scorecard);
+      const token = localStorage.getItem('adminToken');
+      if (!token) {
+        throw new Error('No authentication token found. Please login as admin.');
       }
-      setScorecard(res.data);
+
+      const endpoint = scorecard.id ? `/api/scorecards/${scorecard.id}` : '/api/scorecards';
+      const method = scorecard.id ? 'PUT' : 'POST';
+
+      const response = await fetch(endpoint, {
+        method,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(scorecard),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || `Error: ${response.status} ${response.statusText}`);
+      }
+
+      const saved = await response.json();
+      setScorecard(saved);
       setMessage('✓ Scorecard saved successfully!');
       setTimeout(() => setMessage(''), 3000);
     } catch (err) {
       console.error('Error saving:', err);
-      setMessage('✗ Error saving scorecard');
+      setMessage(`✗ Error saving scorecard: ${err instanceof Error ? err.message : 'Unknown error'}`);
     }
     setSaving(false);
   };
@@ -349,12 +366,31 @@ export default function ScorecardAdminPage() {
     setSaving(true);
     setMessage('');
     try {
-      await api.put(`/scorecards/${scorecard.id}/publish`);
+      const token = localStorage.getItem('adminToken');
+      if (!token) {
+        throw new Error('No authentication token found. Please login as admin.');
+      }
+
+      const response = await fetch(`/api/scorecards/${scorecard.id}/publish`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || `Error: ${response.status} ${response.statusText}`);
+      }
+
+      const published = await response.json();
+      setScorecard(published);
       setMessage('✓ Scorecard published successfully!');
       setTimeout(() => setMessage(''), 3000);
     } catch (err) {
       console.error('Error publishing:', err);
-      setMessage('✗ Error publishing scorecard');
+      setMessage(`✗ Error publishing scorecard: ${err instanceof Error ? err.message : 'Unknown error'}`);
     }
     setSaving(false);
   };
