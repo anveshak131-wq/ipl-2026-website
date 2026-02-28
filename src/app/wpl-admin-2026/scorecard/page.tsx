@@ -2468,7 +2468,7 @@ export default function ScorecardAdminPage() {
                                         type: e.target.value,
                                       })
                                     }
-                                    className="bg-gray-700 p-2 rounded border border-gray-600 text-white text-sm"
+                                    className="w-full bg-gray-700 p-2 rounded border border-gray-600 text-white text-sm"
                                   >
                                     <option value="not-out">Not Out</option>
                                     <option value="bowled">Bowled</option>
@@ -2477,14 +2477,15 @@ export default function ScorecardAdminPage() {
                                     <option value="run-out">Run Out</option>
                                     <option value="stumped">Stumped</option>
                                     <option value="hit-wicket">Hit Wicket</option>
-                                    <option value="retd-out">Retd Out</option>
+                                    <option value="retired-hurt">Retired Hurt</option>
+                                    <option value="obstructing">Obstructing</option>
+                                    <option value="handled-ball">Handled Ball</option>
+                                    <option value="timed-out">Timed Out</option>
                                   </select>
-                                </td>
-                                <td className="p-2">
                                   {batter.dismissal?.type && batter.dismissal.type !== 'not-out' && (
                                     <input
                                       type="text"
-                                      value={batter.dismissal?.details || ''}
+                                      value={batter.dismissal.details || ''}
                                       onChange={(e) =>
                                         updateBatter(idx, 'dismissal', {
                                           ...batter.dismissal,
@@ -2492,7 +2493,7 @@ export default function ScorecardAdminPage() {
                                         })
                                       }
                                       placeholder="e.g., c Shabnim Ismail b Nat Sciver-Brunt"
-                                      className="w-full bg-gray-700 p-2 rounded border border-gray-600 text-white text-sm"
+                                      className="w-full bg-gray-700 p-2 rounded border border-gray-600 text-white text-sm mt-2"
                                     />
                                   )}
                                 </td>
@@ -2734,30 +2735,29 @@ export default function ScorecardAdminPage() {
                     </div>
                   </div>
                 )}
-              )}
 
-              {/* Fall of Wickets Section */}
-              <div className="bg-gray-800 p-6 rounded-lg">
-                <div className="flex justify-between items-center mb-6">
-                  <h3 className="text-xl font-bold">Fall of Wickets</h3>
-                  <button
-                    onClick={() => {
-                      const updated = { ...scorecard };
-                      if (!updated.innings[activeInnings].fallOfWickets) {
-                        updated.innings[activeInnings].fallOfWickets = [];
-                      }
-                      updated.innings[activeInnings].fallOfWickets.push({
-                        player: '',
-                        score: '',
-                        over: ''
-                      });
-                      setScorecard(updated);
-                    }}
-                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded transition"
-                  >
-                    + Add FOW
-                  </button>
-                </div>
+                {/* Fall of Wickets Section */}
+                <div className="bg-gray-800 p-6 rounded-lg">
+                  <div className="flex justify-between items-center mb-6">
+                    <h3 className="text-xl font-bold">Fall of Wickets</h3>
+                    <button
+                      onClick={() => {
+                        const updated = { ...scorecard };
+                        if (!updated.innings[activeInnings].fallOfWickets) {
+                          updated.innings[activeInnings].fallOfWickets = [];
+                        }
+                        updated.innings[activeInnings].fallOfWickets.push({
+                          player: '',
+                          score: '',
+                          over: ''
+                        });
+                        setScorecard(updated);
+                      }}
+                      className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded transition"
+                    >
+                      + Add FOW
+                    </button>
+                  </div>
 
                 {(!scorecard.innings[activeInnings].fallOfWickets || scorecard.innings[activeInnings].fallOfWickets.length === 0) ? (
                   <p className="text-gray-400">No fall of wickets added yet</p>
