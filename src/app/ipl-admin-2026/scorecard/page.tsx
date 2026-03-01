@@ -109,30 +109,43 @@ export default function ScorecardAdminPage() {
   const [message, setMessage] = useState('');
 
   useEffect(() => {
+    console.log('🚀 IPL Scorecard page loading...');
+    
     fetchMatches();
     fetchPlayers();
     
     // Restore selected match and scorecard from localStorage
     const savedMatch = localStorage.getItem('selectedIPLMatch');
+    console.log('📦 Saved match found in localStorage:', !!savedMatch);
+    
     if (savedMatch) {
       try {
         const match = JSON.parse(savedMatch);
+        console.log('🎯 Restoring match:', match);
         setSelectedMatch(match);
+        
         // Load the scorecard for the saved match
+        console.log('🔍 Loading scorecard for match:', match.id);
         api.get(`/scorecards?matchId=${match.id}`).then(res => {
+          console.log('📊 Scorecard API response:', res);
           if (res.data && res.data.length > 0) {
+            console.log('✅ Found existing scorecard:', res.data[0]);
             setScorecard(res.data[0]);
           } else {
+            console.log('🆕 No scorecard found, creating new one');
             setScorecard(initializeScorecard(match));
           }
         }).catch(err => {
-          console.log('No scorecard exists yet, creating new one');
+          console.error('❌ Error loading scorecard:', err);
+          console.log('🆕 Creating new scorecard due to error');
           setScorecard(initializeScorecard(match));
         });
       } catch (err) {
-        console.error('Error parsing saved match:', err);
+        console.error('❌ Error parsing saved match:', err);
         localStorage.removeItem('selectedIPLMatch');
       }
+    } else {
+      console.log('ℹ️ No saved match found in localStorage');
     }
   }, []);
 
@@ -361,11 +374,16 @@ export default function ScorecardAdminPage() {
   };
 
   const handleSaveScorecard = async () => {
-    if (!scorecard) return;
+    console.log('💾 Save button clicked!');
+    if (!scorecard) {
+      console.error('❌ No scorecard data to save');
+      return;
+    }
     setSaving(true);
     setMessage('');
     try {
       const token = localStorage.getItem('adminToken');
+      console.log('🔑 Admin token available:', !!token);
       if (!token) {
         throw new Error('No authentication token found. Please login as admin.');
       }
@@ -373,8 +391,8 @@ export default function ScorecardAdminPage() {
       const endpoint = scorecard.id ? `/api/scorecards/${scorecard.id}` : '/api/scorecards';
       const method = scorecard.id ? 'PUT' : 'POST';
 
-      console.log('Saving scorecard to:', endpoint);
-      console.log('Scorecard data:', scorecard);
+      console.log('💾 Saving scorecard to:', endpoint);
+      console.log('📊 Scorecard data being saved:', JSON.stringify(scorecard, null, 2));
 
       const response = await fetch(endpoint, {
         method,
@@ -385,18 +403,21 @@ export default function ScorecardAdminPage() {
         body: JSON.stringify(scorecard),
       });
 
+      console.log('📡 Save response status:', response.status);
+
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
+        console.error('❌ Save failed:', errorData);
         throw new Error(errorData.error || `Error: ${response.status} ${response.statusText}`);
       }
 
       const saved = await response.json();
-      console.log('Scorecard saved successfully:', saved);
+      console.log('✅ Scorecard saved successfully:', saved);
       setScorecard(saved);
       setMessage('✓ Scorecard saved successfully!');
       setTimeout(() => setMessage(''), 3000);
     } catch (err) {
-      console.error('Error saving:', err);
+      console.error('❌ Error saving scorecard:', err);
       setMessage(`✗ Error saving scorecard: ${err instanceof Error ? err.message : 'Unknown error'}`);
     }
     setSaving(false);
