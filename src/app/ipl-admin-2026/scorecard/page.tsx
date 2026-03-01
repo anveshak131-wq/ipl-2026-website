@@ -306,6 +306,12 @@ export default function ScorecardAdminPage() {
           totalRuns: 0,
           totalWickets: 0,
           totalOvers: 0,
+          fallOfWickets: [],
+          powerplays: {
+            mandatory: { overs: 0, runs: 0 },
+            optional: { overs: 0, runs: 0 }
+          },
+          partnerships: []
         },
         {
           inningsNumber: 2,
@@ -316,6 +322,12 @@ export default function ScorecardAdminPage() {
           totalRuns: 0,
           totalWickets: 0,
           totalOvers: 0,
+          fallOfWickets: [],
+          powerplays: {
+            mandatory: { overs: 0, runs: 0 },
+            optional: { overs: 0, runs: 0 }
+          },
+          partnerships: []
         },
       ],
     };
