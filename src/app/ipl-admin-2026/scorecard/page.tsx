@@ -111,6 +111,29 @@ export default function ScorecardAdminPage() {
   useEffect(() => {
     fetchMatches();
     fetchPlayers();
+    
+    // Restore selected match and scorecard from localStorage
+    const savedMatch = localStorage.getItem('selectedIPLMatch');
+    if (savedMatch) {
+      try {
+        const match = JSON.parse(savedMatch);
+        setSelectedMatch(match);
+        // Load the scorecard for the saved match
+        api.get(`/scorecards?matchId=${match.id}`).then(res => {
+          if (res.data && res.data.length > 0) {
+            setScorecard(res.data[0]);
+          } else {
+            setScorecard(initializeScorecard(match));
+          }
+        }).catch(err => {
+          console.log('No scorecard exists yet, creating new one');
+          setScorecard(initializeScorecard(match));
+        });
+      } catch (err) {
+        console.error('Error parsing saved match:', err);
+        localStorage.removeItem('selectedIPLMatch');
+      }
+    }
   }, []);
 
   // Helper to get players by team
@@ -170,6 +193,8 @@ export default function ScorecardAdminPage() {
 
   const handleSelectMatch = async (match: Match) => {
     setSelectedMatch(match);
+    // Save selected match to localStorage for persistence
+    localStorage.setItem('selectedIPLMatch', JSON.stringify(match));
     setLoading(true);
     setMessage('');
     try {
@@ -348,6 +373,9 @@ export default function ScorecardAdminPage() {
       const endpoint = scorecard.id ? `/api/scorecards/${scorecard.id}` : '/api/scorecards';
       const method = scorecard.id ? 'PUT' : 'POST';
 
+      console.log('Saving scorecard to:', endpoint);
+      console.log('Scorecard data:', scorecard);
+
       const response = await fetch(endpoint, {
         method,
         headers: {
@@ -363,6 +391,7 @@ export default function ScorecardAdminPage() {
       }
 
       const saved = await response.json();
+      console.log('Scorecard saved successfully:', saved);
       setScorecard(saved);
       setMessage('✓ Scorecard saved successfully!');
       setTimeout(() => setMessage(''), 3000);
