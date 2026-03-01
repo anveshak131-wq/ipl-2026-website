@@ -109,48 +109,60 @@ export default function ScorecardAdminPage() {
   const [message, setMessage] = useState('');
 
   useEffect(() => {
-    console.log('🚀 IPL Scorecard page loading...');
+    console.log('🚀 [IPL SCORECARD] Page loading at:', new Date().toISOString());
     
     // Set loading to false immediately to ensure page renders
     setLoading(false);
+    console.log('⚡ [IPL SCORECARD] Loading set to false');
     
     fetchMatches();
     fetchPlayers();
     
     // Restore selected match and scorecard from localStorage
     const savedMatch = localStorage.getItem('selectedIPLMatch');
-    console.log('📦 Saved match found in localStorage:', !!savedMatch);
+    console.log('📦 [IPL SCORECARD] Saved match found in localStorage:', !!savedMatch);
     
     if (savedMatch) {
       try {
         const match = JSON.parse(savedMatch);
-        console.log('🎯 Restoring match:', match);
+        console.log('🎯 [IPL SCORECARD] Restoring match:', match);
         setSelectedMatch(match);
         
         // Load the scorecard for the saved match
-        console.log('🔍 Loading scorecard for match:', match.id);
+        console.log('🔍 [IPL SCORECARD] Loading scorecard for match:', match.id);
         api.get(`/scorecards?matchId=${match.id}`).then(res => {
-          console.log('📊 Scorecard API response:', res);
+          console.log('📊 [IPL SCORECARD] Scorecard API response:', res);
           if (res.data && res.data.length > 0) {
-            console.log('✅ Found existing scorecard:', res.data[0]);
+            console.log('✅ [IPL SCORECARD] Found existing scorecard:', res.data[0]);
             setScorecard(res.data[0]);
           } else {
-            console.log('🆕 No scorecard found, creating new one');
+            console.log('🆕 [IPL SCORECARD] No scorecard found, creating new one');
             setScorecard(initializeScorecard(match));
           }
         }).catch(err => {
-          console.error('❌ Error loading scorecard:', err);
-          console.log('🆕 Creating new scorecard due to error');
+          console.error('❌ [IPL SCORECARD] Error loading scorecard:', err);
+          console.log('🆕 [IPL SCORECARD] Creating new scorecard due to error');
           setScorecard(initializeScorecard(match));
         });
       } catch (err) {
-        console.error('❌ Error parsing saved match:', err);
+        console.error('❌ [IPL SCORECARD] Error parsing saved match:', err);
         localStorage.removeItem('selectedIPLMatch');
       }
     } else {
-      console.log('ℹ️ No saved match found in localStorage');
+      console.log('ℹ️ [IPL SCORECARD] No saved match found in localStorage');
     }
   }, []);
+
+  // Add visible status indicator
+  useEffect(() => {
+    console.log('🎯 [IPL SCORECARD] Component state updated:', {
+      loading,
+      hasMatches: matches.length > 0,
+      hasPlayers: players.length > 0,
+      hasSelectedMatch: !!selectedMatch,
+      hasScorecard: !!scorecard
+    });
+  }, [loading, matches, players, selectedMatch, scorecard]);
 
   // Helper to get players by team
   const getPlayersByTeam = (teamId: number): Player[] => {
