@@ -1303,8 +1303,7 @@ export default function ScorecardAdminPage() {
                           {scorecard.innings[activeInnings].partnerships.map((partnership, index) => (
                             <tr key={index} className="border-b border-gray-600">
                               <td className="p-3">
-                                <input
-                                  type="text"
+                                <select
                                   value={partnership.batsman1 || ''}
                                   onChange={(e) => {
                                     const updated = { ...scorecard };
@@ -1312,12 +1311,22 @@ export default function ScorecardAdminPage() {
                                     setScorecard(updated);
                                   }}
                                   className="w-full bg-gray-700 p-2 rounded border border-gray-600 text-white"
-                                  placeholder="Batsman 1"
-                                />
+                                >
+                                  <option value="">Select Batsman 1...</option>
+                                  {players
+                                    .filter(player => {
+                                      const battingTeamId = scorecard.innings[activeInnings].battingTeamId;
+                                      return String(player.teamId) === String(battingTeamId);
+                                    })
+                                    .map(player => (
+                                      <option key={player.id} value={player.name}>
+                                        {player.name}
+                                      </option>
+                                    ))}
+                                </select>
                               </td>
                               <td className="p-3">
-                                <input
-                                  type="text"
+                                <select
                                   value={partnership.batsman2 || ''}
                                   onChange={(e) => {
                                     const updated = { ...scorecard };
@@ -1325,8 +1334,19 @@ export default function ScorecardAdminPage() {
                                     setScorecard(updated);
                                   }}
                                   className="w-full bg-gray-700 p-2 rounded border border-gray-600 text-white"
-                                  placeholder="Batsman 2"
-                                />
+                                >
+                                  <option value="">Select Batsman 2...</option>
+                                  {players
+                                    .filter(player => {
+                                      const battingTeamId = scorecard.innings[activeInnings].battingTeamId;
+                                      return String(player.teamId) === String(battingTeamId);
+                                    })
+                                    .map(player => (
+                                      <option key={player.id} value={player.name}>
+                                        {player.name}
+                                      </option>
+                                    ))}
+                                </select>
                               </td>
                               <td className="p-3">
                                 <input
