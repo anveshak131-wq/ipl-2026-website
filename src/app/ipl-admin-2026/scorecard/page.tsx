@@ -4,6 +4,9 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { api } from '@/lib/data';
 
+// Prevent infinite reload loop
+let isInitialized = false;
+
 interface Match {
   id: string;
   team1: { id: string; name: string; shortName?: string };
@@ -104,12 +107,19 @@ export default function ScorecardAdminPage() {
   const [scorecard, setScorecard] = useState<Scorecard | null>(null);
   const [activeTab, setActiveTab] = useState('matchInfo');
   const [activeInnings, setActiveInnings] = useState(0);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
 
   useEffect(() => {
-    console.log('🚀 [IPL SCORECARD] Page loading at:', new Date().toISOString());
+    // Prevent infinite initialization
+    if (isInitialized) {
+      console.log('� [IPL SCORECARD] Already initialized, skipping...');
+      return;
+    }
+    
+    console.log('🚀 [IPL SCORECARD] First time initialization at:', new Date().toISOString());
+    isInitialized = true;
     
     // Set loading to false immediately to ensure page renders
     setLoading(false);
