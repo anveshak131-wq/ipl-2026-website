@@ -111,6 +111,9 @@ export default function ScorecardAdminPage() {
   useEffect(() => {
     console.log('🚀 IPL Scorecard page loading...');
     
+    // Set loading to false immediately to ensure page renders
+    setLoading(false);
+    
     fetchMatches();
     fetchPlayers();
     
@@ -182,6 +185,8 @@ export default function ScorecardAdminPage() {
         console.error('Error details:', err.message, err.stack);
       }
       setMessage('⚠️ IPL matches are not yet available. Please add IPL matches in the IPL matches page first.');
+      // Set empty array to prevent loading issues
+      setMatches([]);
     }
   };
 
@@ -201,6 +206,8 @@ export default function ScorecardAdminPage() {
         console.error('Error details:', err.message, err.stack);
       }
       setMessage('⚠️ IPL players are not yet available. Please add IPL players and teams first.');
+      // Set empty array to prevent loading issues
+      setPlayers([]);
     }
   };
 
