@@ -2051,6 +2051,7 @@ export default function ScorecardAdminPage() {
   };
 
   if (loading) {
+    console.log('Still loading...');
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 text-white flex items-center justify-center">
         <div className="text-center">
@@ -2061,13 +2062,15 @@ export default function ScorecardAdminPage() {
     );
   }
 
+  console.log('Loading complete, rendering main content');
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 text-white">
       <WPLAdminSidebarNew />
       <div className="lg:ml-64 p-4 md:p-8">
       <div className="max-w-7xl mx-auto">
-        <h1 className="text-4xl font-bold mb-2">WPL Scorecard Admin</h1>
-        <p className="text-gray-400 mb-8">Create and manage WPL match scorecards</p>
+        <h1 className="text-4xl font-bold mb-2">IPL Scorecard Admin</h1>
+        <p className="text-gray-400 mb-8">Create and manage IPL match scorecards</p>
 
         {message && (
           <div className={`mb-6 p-4 rounded-lg ${message.includes('✓') ? 'bg-green-900' : 'bg-red-900'}`}>
