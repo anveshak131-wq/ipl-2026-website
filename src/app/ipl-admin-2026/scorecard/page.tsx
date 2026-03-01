@@ -1094,6 +1094,273 @@ export default function ScorecardAdminPage() {
                     </div>
                   )}
                 </div>
+
+                {/* Fall of Wickets Section */}
+                {['innings1', 'innings2'].includes(activeTab) && (
+                  <div className="bg-gray-800 p-6 rounded-lg mb-6">
+                    <h3 className="text-xl font-bold mb-4">Fall of Wickets</h3>
+                    <button
+                      onClick={() => {
+                        const updated = { ...scorecard };
+                        updated.innings[activeInnings].fallOfWickets = [
+                          ...updated.innings[activeInnings].fallOfWickets,
+                          { player: '', score: '', over: '' }
+                        ];
+                        setScorecard(updated);
+                      }}
+                      className="mb-4 px-4 py-2 bg-blue-600 hover:bg-blue-500 rounded font-bold transition"
+                    >
+                      Add FOW
+                    </button>
+                    {scorecard.innings[activeInnings].fallOfWickets && scorecard.innings[activeInnings].fallOfWickets.length > 0 && (
+                      <table className="w-full bg-gray-700 rounded-lg overflow-hidden">
+                        <thead className="bg-gray-600">
+                          <tr>
+                            <th className="p-3 text-left">Player</th>
+                            <th className="p-3 text-left">Score at Dismissal</th>
+                            <th className="p-3 text-left">Over</th>
+                            <th className="p-3 text-left">Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {scorecard.innings[activeInnings].fallOfWickets.map((fow, index) => (
+                            <tr key={index} className="border-b border-gray-600">
+                              <td className="p-3">
+                                <input
+                                  type="text"
+                                  value={fow.player || ''}
+                                  onChange={(e) => {
+                                    const updated = { ...scorecard };
+                                    updated.innings[activeInnings].fallOfWickets[index] = { ...fow, player: e.target.value };
+                                    setScorecard(updated);
+                                  }}
+                                  className="w-full bg-gray-700 p-2 rounded border border-gray-600 text-white"
+                                  placeholder="Player name"
+                                />
+                              </td>
+                              <td className="p-3">
+                                <input
+                                  type="text"
+                                  value={fow.score || ''}
+                                  onChange={(e) => {
+                                    const updated = { ...scorecard };
+                                    updated.innings[activeInnings].fallOfWickets[index] = { ...fow, score: e.target.value };
+                                    setScorecard(updated);
+                                  }}
+                                  className="w-full bg-gray-700 p-2 rounded border border-gray-600 text-white"
+                                  placeholder="Score"
+                                />
+                              </td>
+                              <td className="p-3">
+                                <input
+                                  type="text"
+                                  value={fow.over || ''}
+                                  onChange={(e) => {
+                                    const updated = { ...scorecard };
+                                    updated.innings[activeInnings].fallOfWickets[index] = { ...fow, over: e.target.value };
+                                    setScorecard(updated);
+                                  }}
+                                  className="w-full bg-gray-700 p-2 rounded border border-gray-600 text-white"
+                                  placeholder="Over"
+                                />
+                              </td>
+                              <td className="p-3">
+                                <button
+                                  onClick={() => {
+                                    const updated = { ...scorecard };
+                                    updated.innings[activeInnings].fallOfWickets = updated.innings[activeInnings].fallOfWickets.filter((_, i) => i !== index);
+                                    setScorecard(updated);
+                                  }}
+                                  className="px-3 py-1 bg-red-600 hover:bg-red-500 rounded text-white font-bold transition"
+                                >
+                                  Remove
+                                </button>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    )}
+                  </div>
+                )}
+
+                {/* Powerplays Section */}
+                {['innings1', 'innings2'].includes(activeTab) && (
+                  <div className="bg-gray-800 p-6 rounded-lg mb-6">
+                    <h3 className="text-xl font-bold mb-4">Powerplays</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div>
+                        <h4 className="text-lg font-semibold mb-3">Mandatory Powerplay</h4>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-sm text-gray-400 mb-2">Overs</label>
+                            <input
+                              type="number"
+                              value={scorecard.innings[activeInnings].powerplays.mandatory.overs || ''}
+                              onChange={(e) => {
+                                const updated = { ...scorecard };
+                                updated.innings[activeInnings].powerplays.mandatory.overs = parseInt(e.target.value) || 0;
+                                setScorecard(updated);
+                              }}
+                              className="w-full bg-gray-700 p-3 rounded border border-gray-600 text-white"
+                              placeholder="Overs"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm text-gray-400 mb-2">Runs</label>
+                            <input
+                              type="number"
+                              value={scorecard.innings[activeInnings].powerplays.mandatory.runs || ''}
+                              onChange={(e) => {
+                                const updated = { ...scorecard };
+                                updated.innings[activeInnings].powerplays.mandatory.runs = parseInt(e.target.value) || 0;
+                                setScorecard(updated);
+                              }}
+                              className="w-full bg-gray-700 p-3 rounded border border-gray-600 text-white"
+                              placeholder="Runs"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                      <div>
+                        <h4 className="text-lg font-semibold mb-3">Optional Powerplay</h4>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-sm text-gray-400 mb-2">Overs</label>
+                            <input
+                              type="number"
+                              value={scorecard.innings[activeInnings].powerplays.optional.overs || ''}
+                              onChange={(e) => {
+                                const updated = { ...scorecard };
+                                updated.innings[activeInnings].powerplays.optional.overs = parseInt(e.target.value) || 0;
+                                setScorecard(updated);
+                              }}
+                              className="w-full bg-gray-700 p-3 rounded border border-gray-600 text-white"
+                              placeholder="Overs"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm text-gray-400 mb-2">Runs</label>
+                            <input
+                              type="number"
+                              value={scorecard.innings[activeInnings].powerplays.optional.runs || ''}
+                              onChange={(e) => {
+                                const updated = { ...scorecard };
+                                updated.innings[activeInnings].powerplays.optional.runs = parseInt(e.target.value) || 0;
+                                setScorecard(updated);
+                              }}
+                              className="w-full bg-gray-700 p-3 rounded border border-gray-600 text-white"
+                              placeholder="Runs"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Partnerships Section */}
+                {['innings1', 'innings2'].includes(activeTab) && (
+                  <div className="bg-gray-800 p-6 rounded-lg mb-6">
+                    <h3 className="text-xl font-bold mb-4">Partnerships</h3>
+                    <button
+                      onClick={() => {
+                        const updated = { ...scorecard };
+                        updated.innings[activeInnings].partnerships = [
+                          ...updated.innings[activeInnings].partnerships,
+                          { batsman1: '', batsman2: '', runs: 0, balls: 0 }
+                        ];
+                        setScorecard(updated);
+                      }}
+                      className="mb-4 px-4 py-2 bg-blue-600 hover:bg-blue-500 rounded font-bold transition"
+                    >
+                      Add Partnership
+                    </button>
+                    {scorecard.innings[activeInnings].partnerships && scorecard.innings[activeInnings].partnerships.length > 0 && (
+                      <table className="w-full bg-gray-700 rounded-lg overflow-hidden">
+                        <thead className="bg-gray-600">
+                          <tr>
+                            <th className="p-3 text-left">Batsman 1</th>
+                            <th className="p-3 text-left">Batsman 2</th>
+                            <th className="p-3 text-left">Partnership Runs</th>
+                            <th className="p-3 text-left">Partnership Balls</th>
+                            <th className="p-3 text-left">Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {scorecard.innings[activeInnings].partnerships.map((partnership, index) => (
+                            <tr key={index} className="border-b border-gray-600">
+                              <td className="p-3">
+                                <input
+                                  type="text"
+                                  value={partnership.batsman1 || ''}
+                                  onChange={(e) => {
+                                    const updated = { ...scorecard };
+                                    updated.innings[activeInnings].partnerships[index] = { ...partnership, batsman1: e.target.value };
+                                    setScorecard(updated);
+                                  }}
+                                  className="w-full bg-gray-700 p-2 rounded border border-gray-600 text-white"
+                                  placeholder="Batsman 1"
+                                />
+                              </td>
+                              <td className="p-3">
+                                <input
+                                  type="text"
+                                  value={partnership.batsman2 || ''}
+                                  onChange={(e) => {
+                                    const updated = { ...scorecard };
+                                    updated.innings[activeInnings].partnerships[index] = { ...partnership, batsman2: e.target.value };
+                                    setScorecard(updated);
+                                  }}
+                                  className="w-full bg-gray-700 p-2 rounded border border-gray-600 text-white"
+                                  placeholder="Batsman 2"
+                                />
+                              </td>
+                              <td className="p-3">
+                                <input
+                                  type="number"
+                                  value={partnership.runs || ''}
+                                  onChange={(e) => {
+                                    const updated = { ...scorecard };
+                                    updated.innings[activeInnings].partnerships[index] = { ...partnership, runs: parseInt(e.target.value) || 0 };
+                                    setScorecard(updated);
+                                  }}
+                                  className="w-full bg-gray-700 p-2 rounded border border-gray-600 text-white"
+                                  placeholder="Runs"
+                                />
+                              </td>
+                              <td className="p-3">
+                                <input
+                                  type="number"
+                                  value={partnership.balls || ''}
+                                  onChange={(e) => {
+                                    const updated = { ...scorecard };
+                                    updated.innings[activeInnings].partnerships[index] = { ...partnership, balls: parseInt(e.target.value) || 0 };
+                                    setScorecard(updated);
+                                  }}
+                                  className="w-full bg-gray-700 p-2 rounded border border-gray-600 text-white"
+                                  placeholder="Balls"
+                                />
+                              </td>
+                              <td className="p-3">
+                                <button
+                                  onClick={() => {
+                                    const updated = { ...scorecard };
+                                    updated.innings[activeInnings].partnerships = updated.innings[activeInnings].partnerships.filter((_, i) => i !== index);
+                                    setScorecard(updated);
+                                  }}
+                                  className="px-3 py-1 bg-red-600 hover:bg-red-500 rounded text-white font-bold transition"
+                                >
+                                  Remove
+                                </button>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    )}
+                  </div>
+                )}
               </div>
             )}
 
