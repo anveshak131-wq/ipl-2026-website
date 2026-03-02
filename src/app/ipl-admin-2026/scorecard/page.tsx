@@ -145,12 +145,38 @@ export default function ScorecardAdminPage() {
           if (res.data && res.data.length > 0) {
             console.log('✅ [IPL SCORECARD] Found existing scorecard:', res.data[0]);
             setScorecard(res.data[0]);
+            // If a local draft exists for this match, remove it because remote saved copy is authoritative
+            try { localStorage.removeItem(`ipl_scorecard_draft_${match.id}`); } catch (e) {}
           } else {
+            // No remote scorecard — check for a local draft first
+            const localDraft = localStorage.getItem(`ipl_scorecard_draft_${match.id}`);
+            if (localDraft) {
+              try {
+                const parsed = JSON.parse(localDraft);
+                console.log('📝 [IPL SCORECARD] Restoring local draft for match:', match.id);
+                setScorecard(parsed);
+                return;
+              } catch (e) {
+                console.error('❌ [IPL SCORECARD] Failed to parse local draft:', e);
+              }
+            }
             console.log('🆕 [IPL SCORECARD] No scorecard found, creating new one');
             setScorecard(initializeScorecard(match));
           }
         }).catch(err => {
           console.error('❌ [IPL SCORECARD] Error loading scorecard:', err);
+          // On error, prefer local draft if present
+          const localDraft = localStorage.getItem(`ipl_scorecard_draft_${match.id}`);
+          if (localDraft) {
+            try {
+              const parsed = JSON.parse(localDraft);
+              console.log('📝 [IPL SCORECARD] Restoring local draft after fetch error for match:', match.id);
+              setScorecard(parsed);
+              return;
+            } catch (e) {
+              console.error('❌ [IPL SCORECARD] Failed to parse local draft:', e);
+            }
+          }
           console.log('🆕 [IPL SCORECARD] Creating new scorecard due to error');
           setScorecard(initializeScorecard(match));
         });
@@ -443,10 +469,21 @@ export default function ScorecardAdminPage() {
       const saved = await response.json();
       console.log('✅ Scorecard saved successfully:', saved);
       setScorecard(saved);
+      // Remove any local draft for this match since remote save succeeded
+      try { localStorage.removeItem(`ipl_scorecard_draft_${saved.matchId || saved.matchId}`); } catch (e) {}
       setMessage('✓ Scorecard saved successfully!');
       setTimeout(() => setMessage(''), 3000);
     } catch (err) {
       console.error('❌ Error saving scorecard:', err);
+      // Save a local draft so changes aren't lost on refresh
+      try {
+        if (scorecard && scorecard.matchId) {
+          localStorage.setItem(`ipl_scorecard_draft_${scorecard.matchId}`, JSON.stringify(scorecard));
+          console.log('💾 Local draft saved for match:', scorecard.matchId);
+        }
+      } catch (e) {
+        console.error('❌ Failed to save local draft:', e);
+      }
       setMessage(`✗ Error saving scorecard: ${err instanceof Error ? err.message : 'Unknown error'}`);
     }
     setSaving(false);
