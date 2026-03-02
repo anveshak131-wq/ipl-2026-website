@@ -482,7 +482,10 @@ export default function ScorecardAdminPage() {
       setScorecard(saved);
       setMessage('✓ Scorecard saved successfully!');
       // Persist a local copy of the saved scorecard so Refresh restores latest draft
-      try { localStorage.setItem(`ipl_scorecard_draft_${saved.matchId}`, JSON.stringify(saved)); } catch (e) { console.error('Failed to persist local copy:', e); }
+      try { 
+        localStorage.setItem(`ipl_scorecard_draft_${saved.matchId}`, JSON.stringify(saved)); 
+        console.log('📥 [IPL SCORECARD] Local copy persisted after save:', localStorage.getItem(`ipl_scorecard_draft_${saved.matchId}`));
+      } catch (e) { console.error('Failed to persist local copy:', e); }
       setMessage('✓ Scorecard saved successfully! (local copy kept)');
       setTimeout(() => setMessage(''), 3000);
     } catch (err) {
@@ -492,6 +495,7 @@ export default function ScorecardAdminPage() {
         if (scorecard && scorecard.matchId) {
           localStorage.setItem(`ipl_scorecard_draft_${scorecard.matchId}`, JSON.stringify(scorecard));
           console.log('💾 Local draft saved for match:', scorecard.matchId);
+          console.log('📥 [IPL SCORECARD] Local draft contents:', localStorage.getItem(`ipl_scorecard_draft_${scorecard.matchId}`));
         }
       } catch (e) {
         console.error('❌ Failed to save local draft:', e);
@@ -527,7 +531,10 @@ export default function ScorecardAdminPage() {
       const published = await response.json();
       setScorecard(published);
       // Remove local draft after publishing
-      try { localStorage.removeItem(`ipl_scorecard_draft_${published.matchId}`); } catch (e) {}
+      try { 
+        localStorage.removeItem(`ipl_scorecard_draft_${published.matchId}`); 
+        console.log('🗑️ [IPL SCORECARD] Removed local draft after publish. Current value:', localStorage.getItem(`ipl_scorecard_draft_${published.matchId}`));
+      } catch (e) {}
       setMessage('✓ Scorecard published successfully!');
       setTimeout(() => setMessage(''), 3000);
     } catch (err) {
