@@ -1,57 +1,48 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect, useMemo } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Trophy, TrendingUp, TrendingDown, Info, Award, Users, Calendar, Clock, Search, X, Edit, Save, RefreshCw } from 'lucide-react';
+import { api } from '@/lib/data';
+import { Team } from '@/types';
+import LoadingSpinner from '@/components/ui/LoadingSpinner';
+import GradientText from '@/components/ui/GradientText';
+import AdminSidebar from '@/components/admin/AdminSidebar';
 
-// Team data interface
-interface Team {
-  id: string;
-  name: string;
-  matches: number;
-  wins: number;
-  losses: number;
-  ties: number;
-  noResults: number;
-  points: number;
-  netRunRate: number;
-  position?: number;
-  qualificationStatus?: 'Q' | 'E' | null;
-}
+const IPL_STORAGE_KEY = 'iplPointsTableStats';
 
-// IPL Teams Data
-const IPL_TEAMS = [
-  { id: 'rcb', name: 'Royal Challengers Bangalore' },
-  { id: 'mi', name: 'Mumbai Indians' },
-  { id: 'csk', name: 'Chennai Super Kings' },
-  { id: 'kkr', name: 'Kolkata Knight Riders' },
-  { id: 'srh', name: 'Sunrisers Hyderabad' },
-  { id: 'rr', name: 'Rajasthan Royals' },
-  { id: 'dc', name: 'Delhi Capitals' },
-  { id: 'lsg', name: 'Lucknow Super Giants' },
-  { id: 'pbks', name: 'Punjab Kings' },
-  { id: 'gt', name: 'Gujarat Titans' },
-];
-
-export default function PointsTablePage() {
-  const router = useRouter();
+export default function IPLAdminPointsTablePage() {
   const [teams, setTeams] = useState<Team[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [sortBy, setSortBy] = useState<'points' | 'wins' | 'losses' | 'nrr'>('points');
   const [selectedYear, setSelectedYear] = useState<number>(2026);
   const [availableYears, setAvailableYears] = useState<number[]>([]);
-  const [editingTeam, setEditingTeam] = useState<Team | null>(null);
-  const [showPopup, setShowPopup] = useState(false);
-  const [errors, setErrors] = useState<Record<string, string>>({});
-  const [editedFields, setEditedFields] = useState<Set<string>>(new Set());
-  const [backups, setBackups] = useState<any[]>([]);
-  const [showBackupModal, setShowBackupModal] = useState(false);
-  const [backupLoading, setBackupLoading] = useState(false);
-  const [backupMessage, setBackupMessage] = useState<string | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editingTeam, setEditingTeam] = useState<string | null>(null);
+  const [editData, setEditData] = useState<Record<string, unknown>>({});
 
-  // Generate available years (2008 to current year)
+  // Fetch IPL teams
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsLoading(true);
+      try {
+        const teamsData = await api.getTeams('ipl');
+        setTeams(teamsData || []);
+      } catch {
+        setTeams([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  // Generate available years (2008 to current year for IPL)
   useEffect(() => {
     const currentYear = new Date().getFullYear();
-    const years = [];
+    const years: number[] = [];
     for (let year = 2008; year <= currentYear; year++) {
       years.push(year);
     }
@@ -59,884 +50,569 @@ export default function PointsTablePage() {
     setSelectedYear(currentYear);
   }, []);
 
-  // Load data from localStorage on initial load
-  useEffect(() => {
-    if (selectedYear) {
-      const savedData = localStorage.getItem(`iplPointsTable${selectedYear}`);
-      if (savedData) {
-        try {
-          const parsedData = JSON.parse(savedData);
-          // Ensure points are recalculated when loading from localStorage
-          const dataWithRecalculatedPoints = parsedData.map((team: Team) => ({
-            ...team,
-            points: team.wins * 2 + team.ties * 1 + team.noResults * 1,
-          }));
-          setTeams(calculatePositions(dataWithRecalculatedPoints));
-        } catch (error) {
-          console.error('Error parsing saved data:', error);
-        }
-      } else {
-        // Initialize with default data if no saved data exists
-        const initialData = IPL_TEAMS.map(team => ({
-          id: team.id,
-          name: team.name,
-          matches: 0,
-          wins: 0,
-          losses: 0,
-          ties: 0,
-          noResults: 0,
-          points: 0,
-          netRunRate: 0.0,
-          qualificationStatus: null,
-        }));
-        setTeams(calculatePositions(initialData));
+  // Calculate points table - use localStorage first, then team.stats
+  const pointsTable = useMemo(() => {
+    let savedStats: Record<string, { matchesPlayed?: number; wins?: number; losses?: number; points?: number; netRunRate?: number }> = {};
+    if (typeof window !== 'undefined') {
+      try {
+        savedStats = JSON.parse(localStorage.getItem(IPL_STORAGE_KEY) || '{}') || {};
+      } catch {
+        /* ignore */
       }
-      setLoading(false);
     }
-  }, [selectedYear]);
 
-  // Save data to localStorage whenever teams change
-  useEffect(() => {
-    if (!loading && selectedYear) {
-      localStorage.setItem(`iplPointsTable${selectedYear}`, JSON.stringify(teams));
-    }
-  }, [teams, loading, selectedYear]);
+    return teams.map(team => {
+      const displayShortName = team.shortName || team.name.split(' ').map(w => w[0]).join('');
+      const displayName = team.name || '';
 
-  // Calculate team positions based on points and NRR
-  const calculatePositions = (teamsData: Team[]): Team[] => {
-    return [...teamsData]
-      .map(team => ({
-        ...team,
-        // Calculate points: 2 for win, 1 for tie/no result, 0 for loss
-        points: team.wins * 2 + team.ties * 1 + team.noResults * 1,
-        // Ensure netRunRate is preserved
-        netRunRate: team.netRunRate || 0.0,
-        // Ensure qualificationStatus is preserved
-        qualificationStatus: team.qualificationStatus || null,
-      }))
-      .sort((a, b) => {
-        // First by points (descending)
-        if (b.points !== a.points) {
-          return b.points - a.points;
-        }
-        // Then by net run rate (descending)
-        return b.netRunRate - a.netRunRate;
-      })
-      .map((team, index) => ({
-        ...team,
-        position: index + 1,
-      }));
-  };
-
-  // Handle form input changes
-  const handleInputChange = (field: string, value: string) => {
-    if (!editingTeam) return;
-    
-    // Track edited fields
-    const newEditedFields = new Set(editedFields);
-    newEditedFields.add(field);
-    setEditedFields(newEditedFields);
-    
-    // Handle empty values - convert to 0 for numeric fields
-    if (value === '') {
-      if (field === 'netRunRate') {
-        setEditingTeam({ ...editingTeam, [field]: 0.0 });
-      } else {
-        setEditingTeam({ ...editingTeam, [field]: 0 });
-      }
-    } else if (field === 'netRunRate') {
-      const floatValue = parseFloat(value);
-      setEditingTeam({ ...editingTeam, [field]: floatValue });
-    } else {
-      const numValue = parseInt(value);
-      setEditingTeam({ ...editingTeam, [field]: numValue });
-    }
-  };
-
-  // Helper function to determine if field should show placeholder
-  const shouldShowPlaceholder = (field: string, value: number): boolean => {
-    return !editedFields.has(field) && value === 0;
-  };
-
-  // Validate form data
-  const validateForm = (): boolean => {
-    if (!editingTeam) return false;
-    
-    const newErrors: Record<string, string> = {};
-    
-    // Validate matches
-    if (editingTeam.matches < 0) {
-      newErrors.matches = 'Matches cannot be negative';
-    }
-    
-    // Validate wins
-    if (editingTeam.wins < 0) {
-      newErrors.wins = 'Wins cannot be negative';
-    }
-    
-    // Validate losses
-    if (editingTeam.losses < 0) {
-      newErrors.losses = 'Losses cannot be negative';
-    }
-    
-    // Validate ties
-    if (editingTeam.ties < 0) {
-      newErrors.ties = 'Ties cannot be negative';
-    }
-    
-    // Validate no results
-    if (editingTeam.noResults < 0) {
-      newErrors.noResults = 'No Results cannot be negative';
-    }
-    
-    // Validate that wins + losses + ties + noResults <= matches
-    const totalResults = editingTeam.wins + editingTeam.losses + editingTeam.ties + editingTeam.noResults;
-    if (totalResults > editingTeam.matches) {
-      newErrors.results = 'Total results cannot exceed matches played';
-    }
-    
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  // Handle qualification status selection
-  const handleQualificationStatus = (status: 'Q' | 'E' | null) => {
-    if (!editingTeam) return;
-    setEditingTeam({ ...editingTeam, qualificationStatus: status });
-  };
-
-  // Handle edit team
-  const handleEdit = (team: Team) => {
-    // Ensure netRunRate is properly initialized
-    const teamToEdit = {
-      ...team,
-      netRunRate: team.netRunRate || 0.0
-    };
-    setEditingTeam(teamToEdit);
-    setShowPopup(true);
-    setErrors({});
-    setEditedFields(new Set()); // Reset edited fields tracking
-  };
-
-  // Handle save team data
-  const handleSave = () => {
-    if (!editingTeam || !validateForm()) {
-      return;
-    }
-    
-    const updatedTeams = teams.map(team => {
-      if (team.id === editingTeam.id) {
+      if (savedStats[team.id]) {
         return {
-          ...editingTeam,
-          points: editingTeam.wins * 2 + editingTeam.ties * 1 + editingTeam.noResults * 1,
-          netRunRate: editingTeam.netRunRate, // Ensure netRunRate is preserved
-          qualificationStatus: editingTeam.qualificationStatus || null,
+          ...team,
+          shortName: displayShortName,
+          name: displayName,
+          matchesPlayed: savedStats[team.id].matchesPlayed ?? 0,
+          wins: savedStats[team.id].wins ?? 0,
+          losses: savedStats[team.id].losses ?? 0,
+          points: savedStats[team.id].points ?? 0,
+          netRunRate: savedStats[team.id].netRunRate ?? 0
         };
       }
-      return team;
-    });
-    
-    setTeams(calculatePositions(updatedTeams));
-    setShowPopup(false);
-    setEditingTeam(null);
-  };
 
-  // Handle delete team data
-const handleDelete = (teamId: string) => {
-if (confirm('Are you sure you want to reset this team\'s data? This cannot be undone.')) {
-const updatedTeams = teams.map(team => {
-  if (team.id === teamId) {
-    return {
-      ...team,
-      matches: 0,
-      wins: 0,
-      losses: 0,
-      ties: 0,
-      noResults: 0,
-      points: 0,
-      netRunRate: 0.0,
-      qualificationStatus: null,
-    };
-  }
-  return team;
-});
+      if (team.stats && typeof team.stats === 'object') {
+        const s = team.stats as { matchesPlayed?: number; wins?: number; losses?: number; points?: number; netRunRate?: number };
+        return {
+          ...team,
+          shortName: displayShortName,
+          name: displayName,
+          matchesPlayed: s.matchesPlayed ?? 0,
+          wins: s.wins ?? 0,
+          losses: s.losses ?? 0,
+          points: s.points ?? 0,
+          netRunRate: s.netRunRate ?? 0
+        };
+      }
 
-setTeams(calculatePositions(updatedTeams));
-}
-};
-
-  // Handle reset all data
-  const handleResetAll = () => {
-    if (confirm('Are you sure you want to reset ALL team data? This cannot be undone.')) {
-      const resetTeams = IPL_TEAMS.map(team => ({
-        id: team.id,
-        name: team.name,
-        matches: 0,
+      return {
+        ...team,
+        shortName: displayShortName,
+        name: displayName,
+        matchesPlayed: 0,
         wins: 0,
         losses: 0,
-        ties: 0,
-        noResults: 0,
         points: 0,
-        netRunRate: 0.0,
-        qualificationStatus: null,
-      }));
-      setTeams(calculatePositions(resetTeams));
+        netRunRate: 0
+      };
+    });
+  }, [teams]);
+
+  const sortedPointsTable = useMemo(() => {
+    let result = [...pointsTable];
+
+    if (searchTerm) {
+      const n = searchTerm.trim().toLowerCase();
+      result = result.filter(team =>
+        team.name.toLowerCase().includes(n) ||
+        (team.shortName || '').toLowerCase().includes(n)
+      );
+    }
+
+    result.sort((a, b) => {
+      if (sortBy === 'points') {
+        if (b.points !== a.points) return b.points - a.points;
+        return (b.netRunRate ?? 0) - (a.netRunRate ?? 0);
+      }
+      if (sortBy === 'wins') return b.wins - a.wins;
+      if (sortBy === 'losses') return a.losses - b.losses;
+      if (sortBy === 'nrr') return (b.netRunRate ?? 0) - (a.netRunRate ?? 0);
+      return 0;
+    });
+
+    return result;
+  }, [pointsTable, searchTerm, sortBy]);
+
+  const clearFilters = () => {
+    setSearchTerm('');
+    setSortBy('points');
+  };
+
+  const handleEdit = (teamId: string) => {
+    const team = pointsTable.find(t => t.id === teamId);
+    if (team) {
+      setEditingTeam(teamId);
+      setEditData({
+        matchesPlayed: team.matchesPlayed,
+        wins: team.wins,
+        losses: team.losses,
+        points: team.points,
+        netRunRate: team.netRunRate
+      });
     }
   };
 
-  // Backup functions
-  const createBackup = async () => {
-    setBackupLoading(true);
-    setBackupMessage(null);
-    
+  const handleToggleQualified = async (teamId: string, qualified: boolean) => {
     try {
-      const response = await fetch('/api/admin/backup-points-table?action=create', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer admin-token'
-        }
+      const token = localStorage.getItem('adminToken') || localStorage.getItem('auth_token');
+      if (!token) return;
+
+      const teamToUpdate = teams.find(t => t.id === teamId);
+      if (!teamToUpdate) return;
+
+      const updated = {
+        ...teamToUpdate,
+        stats: { ...(teamToUpdate.stats as object || {}), qualified }
+      };
+
+      const base = typeof window !== 'undefined' ? window.location.origin : '';
+      const res = await fetch(`${base}/api/teams`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify(updated)
       });
-      
-      const data = await response.json();
-      
-      if (data.success) {
-        setBackupMessage(`✅ Backup created successfully! ${data.backup.teamCount} teams backed up.`);
-        loadBackups();
-      } else {
-        setBackupMessage(`❌ Error: ${data.error || 'Failed to create backup'}`);
+
+      if (res.ok) {
+        const updatedTeam = await res.json();
+        setTeams(teams.map(t => t.id === teamId ? updatedTeam : t));
       }
-    } catch (error) {
-      setBackupMessage(`❌ Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    } catch {
+      /* ignore */
+    }
+  };
+
+  const handleSave = async (teamId: string) => {
+    try {
+      const dataToSave = {
+        ...editData,
+        netRunRate: parseFloat(String(editData.netRunRate)) || 0
+      };
+
+      const teamToUpdate = teams.find(t => t.id === teamId);
+      if (!teamToUpdate) return;
+
+      const updatedTeam = {
+        ...teamToUpdate,
+        stats: {
+          matchesPlayed: Number(dataToSave.matchesPlayed) || 0,
+          wins: Number(dataToSave.wins) || 0,
+          losses: Number(dataToSave.losses) || 0,
+          points: Number(dataToSave.points) || 0,
+          netRunRate: Number(dataToSave.netRunRate) || 0,
+          qualified: Boolean((dataToSave as { qualified?: boolean }).qualified)
+        }
+      };
+
+      setTeams(teams.map(t => t.id === teamId ? updatedTeam : t));
+
+      const savedStats = JSON.parse(localStorage.getItem(IPL_STORAGE_KEY) || '{}');
+      savedStats[teamId] = updatedTeam.stats;
+      localStorage.setItem(IPL_STORAGE_KEY, JSON.stringify(savedStats));
+
+      setEditingTeam(null);
+      setEditData({});
+
+      const token = localStorage.getItem('adminToken') || localStorage.getItem('auth_token');
+      if (token) {
+        try {
+          const base = typeof window !== 'undefined' ? window.location.origin : '';
+          await fetch(`${base}/api/teams`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+            body: JSON.stringify({ id: teamId, ...teamToUpdate, stats: updatedTeam.stats })
+          });
+        } catch {
+          /* ignore */
+        }
+      }
+    } catch {
+      /* ignore */
+    }
+  };
+
+  const handleCancel = () => {
+    setEditingTeam(null);
+    setEditData({});
+  };
+
+  const refreshData = async () => {
+    setIsLoading(true);
+    try {
+      const teamsData = await api.getTeams('ipl');
+      setTeams(teamsData || []);
+    } catch {
+      setTeams([]);
     } finally {
-      setBackupLoading(false);
+      setIsLoading(false);
     }
   };
-
-  const loadBackups = async () => {
-    try {
-      const response = await fetch('/api/admin/backup-points-table?action=list', {
-        headers: {
-          'Authorization': 'Bearer admin-token'
-        }
-      });
-      
-      const data = await response.json();
-      
-      if (data.success) {
-        setBackups(data.backups);
-      }
-    } catch (error) {
-      console.error('Error loading backups:', error);
-    }
-  };
-
-  const restoreBackup = async (backupKey: string) => {
-    if (!confirm('Are you sure you want to restore this backup? This will overwrite current data.')) {
-      return;
-    }
-    
-    setBackupLoading(true);
-    setBackupMessage(null);
-    
-    try {
-      const response = await fetch(`/api/admin/backup-points-table?action=restore&backupKey=${backupKey}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer admin-token'
-        }
-      });
-      
-      const data = await response.json();
-      
-      if (data.success) {
-        setBackupMessage(`✅ Backup restored successfully! ${data.restored.teamCount} teams restored.`);
-        // Refresh the points table
-        const savedData = localStorage.getItem(`iplPointsTable${data.restored.year}`);
-        if (savedData) {
-          const parsedData = JSON.parse(savedData);
-          setTeams(calculatePositions(parsedData));
-        }
-        loadBackups();
-      } else {
-        setBackupMessage(`❌ Error: ${data.error || 'Failed to restore backup'}`);
-      }
-    } catch (error) {
-      setBackupMessage(`❌ Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
-    } finally {
-      setBackupLoading(false);
-    }
-  };
-
-  const deleteBackup = async (backupKey: string) => {
-    if (!confirm('Are you sure you want to delete this backup? This cannot be undone.')) {
-      return;
-    }
-    
-    setBackupLoading(true);
-    
-    try {
-      const response = await fetch(`/api/admin/backup-points-table?action=delete&backupKey=${backupKey}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': 'Bearer admin-token'
-        }
-      });
-      
-      const data = await response.json();
-      
-      if (data.success) {
-        setBackupMessage('✅ Backup deleted successfully');
-        loadBackups();
-      } else {
-        setBackupMessage(`❌ Error: ${data.error || 'Failed to delete backup'}`);
-      }
-    } catch (error) {
-      setBackupMessage(`❌ Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
-    } finally {
-      setBackupLoading(false);
-    }
-  };
-
-  const filteredTeams = teams.filter(team =>
-    team.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    team.id.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-900 text-white p-8">
-        <div className="max-w-6xl mx-auto">
-          <h1 className="text-3xl font-bold mb-6">Points Table</h1>
-          <div className="flex justify-center items-center h-64">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-          </div>
-          <p className="text-center text-gray-400">Loading points table...</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white p-8">
-      <div className="max-w-6xl mx-auto">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">IPL {selectedYear} Points Table - Admin Panel</h1>
-          <p className="text-gray-400">Manage team standings with full CRUD functionality</p>
-        </div>
+    <div className="min-h-screen bg-gradient-to-br from-amber-950 via-orange-900 to-black flex">
+      <AdminSidebar currentPage="/ipl-admin-2026/points-table" />
 
-        {/* Controls */}
-        <div className="flex flex-wrap gap-4 mb-6">
-          {/* Year Filter */}
-          <div className="flex-1 min-w-[200px]">
-            <label className="block text-sm font-medium mb-1">Season Year</label>
-            <select
-              value={selectedYear}
-              onChange={(e) => setSelectedYear(parseInt(e.target.value))}
-              className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              {availableYears.map(year => (
-                <option key={year} value={year}>{year}</option>
-              ))}
-            </select>
-          </div>
-          
-          <div className="relative max-w-md flex-1 min-w-[250px]">
-            <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
-            <input
-              type="text"
-              placeholder="Search teams..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-          </div>
-          
-          <button
-            onClick={handleResetAll}
-            className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center gap-2 self-end"
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-            </svg>
-            Reset All
-          </button>
-          
-          <button
-            onClick={() => {
-              setShowBackupModal(true);
-              loadBackups();
-            }}
-            className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors flex items-center gap-2 self-end"
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" />
-            </svg>
-            Manage Backups
-          </button>
-        </div>
-
-        {/* Points Table */}
-        <div className="bg-gray-800/50 border border-gray-700 rounded-lg overflow-hidden">
-          <table className="w-full">
-            <thead className="bg-gray-700/50">
-              <tr>
-                <th className="text-left p-4 text-gray-300 font-medium">Pos</th>
-                <th className="text-left p-4 text-gray-300 font-medium">Team</th>
-                <th className="text-center p-4 text-gray-300 font-medium">M</th>
-                <th className="text-center p-4 text-gray-300 font-medium">W</th>
-                <th className="text-center p-4 text-gray-300 font-medium">L</th>
-                <th className="text-center p-4 text-gray-300 font-medium">T</th>
-                <th className="text-center p-4 text-gray-300 font-medium">NR</th>
-                <th className="text-center p-4 text-gray-300 font-medium">PTS</th>
-                <th className="text-center p-4 text-gray-300 font-medium">NRR</th>
-                <th className="text-center p-4 text-gray-300 font-medium">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredTeams.length > 0 ? (
-                filteredTeams.map((team) => (
-                  <tr key={team.id} className="border-b border-gray-700/50 hover:bg-gray-700/30 transition-colors">
-                    <td className="p-4">
-                      <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${
-                        team.position === 1 ? 'bg-yellow-500 text-black' :
-                        team.position === 2 ? 'bg-gray-400 text-white' :
-                        team.position === 3 ? 'bg-orange-600 text-white' :
-                        team.position === 4 ? 'bg-blue-600 text-white' :
-                        'bg-gray-600 text-white'
-                      }`}>
-                        {team.position || '?'}
-                      </div>
-                    </td>
-                    <td className="p-4">
-                      <div className="flex items-center gap-3">
-                        <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${
-                          team.id === 'rcb' ? 'from-red-500 to-red-600' :
-                          team.id === 'mi' ? 'from-blue-500 to-blue-600' :
-                          team.id === 'csk' ? 'from-yellow-500 to-yellow-600' :
-                          team.id === 'kkr' ? 'from-purple-500 to-purple-600' :
-                          team.id === 'srh' ? 'from-orange-500 to-orange-600' :
-                          team.id === 'rr' ? 'from-pink-500 to-pink-600' :
-                          team.id === 'dc' ? 'from-indigo-500 to-indigo-600' :
-                          team.id === 'lsg' ? 'from-green-500 to-green-600' :
-                          team.id === 'pbks' ? 'from-red-600 to-red-700' :
-                          team.id === 'gt' ? 'from-blue-400 to-blue-500' :
-                          'from-gray-500 to-gray-600'
-                        } flex items-center justify-center text-white font-bold text-xs`}>
-                          {team.id.toUpperCase()}
-                        </div>
-                        <span className="font-medium">{team.name}</span>
-                        {team.qualificationStatus && (
-                          <span className={`ml-2 text-xs font-bold px-2 py-1 rounded ${
-                            team.qualificationStatus === 'Q' ? 'bg-green-600 text-white' : 'bg-red-600 text-white'
-                          }`}>
-                            {team.qualificationStatus}
-                          </span>
-                        )}
-                      </div>
-                    </td>
-                    <td className="p-4 text-center">{team.matches}</td>
-                    <td className="p-4 text-center">{team.wins}</td>
-                    <td className="p-4 text-center">{team.losses}</td>
-                    <td className="p-4 text-center">{team.ties}</td>
-                    <td className="p-4 text-center">{team.noResults}</td>
-                    <td className="p-4 text-center font-bold">{team.points}</td>
-                    <td className="p-4 text-center">
-                      <span className={team.netRunRate > 0 ? 'text-green-400' : team.netRunRate < 0 ? 'text-red-400' : 'text-gray-300'}>{
-                        team.netRunRate > 0 ? '+' : (team.netRunRate < 0 ? '-' : '')
-                      }{Math.abs(team.netRunRate).toFixed(2)}</span>
-                    </td>
-                    <td className="p-4 text-center">
-                      <div className="flex gap-2 justify-center">
-                        <button
-                          onClick={() => handleEdit(team)}
-                          className="p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                          title="Edit"
-                        >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                          </svg>
-                        </button>
-                        <button
-                          onClick={() => handleDelete(team.id)}
-                          className="p-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
-                          title="Reset"
-                        >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                          </svg>
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan={10} className="p-8 text-center text-gray-400">
-                    No teams found matching "{searchQuery}"
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Edit Popup Panel */}
-        {showPopup && editingTeam && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-gray-800 border border-gray-600 rounded-lg p-6 max-w-md w-full">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-xl font-bold">Edit Team Data</h3>
-                <button
-                  onClick={() => setShowPopup(false)}
-                  className="text-gray-400 hover:text-white"
-                >
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              </div>
-              <div className="mb-4 p-3 bg-blue-900/20 border border-blue-700 rounded-lg text-sm">
-                <p className="text-blue-300">💡 <strong>Tip:</strong> You can copy-paste values directly into these fields from spreadsheets or other sources.</p>
-              </div>
-              
-              <div className="mb-4">
-                <label className="block text-sm font-medium mb-1">Team</label>
-                <div className="flex items-center gap-3 p-3 bg-gray-700 rounded-lg">
-                  <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${
-                    editingTeam.id === 'rcb' ? 'from-red-500 to-red-600' :
-                    editingTeam.id === 'mi' ? 'from-blue-500 to-blue-600' :
-                    editingTeam.id === 'csk' ? 'from-yellow-500 to-yellow-600' :
-                    editingTeam.id === 'kkr' ? 'from-purple-500 to-purple-600' :
-                    editingTeam.id === 'srh' ? 'from-orange-500 to-orange-600' :
-                    editingTeam.id === 'rr' ? 'from-pink-500 to-pink-600' :
-                    editingTeam.id === 'dc' ? 'from-indigo-500 to-indigo-600' :
-                    editingTeam.id === 'lsg' ? 'from-green-500 to-green-600' :
-                    editingTeam.id === 'pbks' ? 'from-red-600 to-red-700' :
-                    editingTeam.id === 'gt' ? 'from-blue-400 to-blue-500' :
-                    'from-gray-500 to-gray-600'
-                  } flex items-center justify-center text-white font-bold text-xs`}>
-                    {editingTeam.id.toUpperCase()}
-                  </div>
-                  <span className="font-medium">{editingTeam.name}</span>
-                </div>
-              </div>
-              
-              <div className="grid grid-cols-2 gap-4 mb-4">
-                <div>
-                  <label className="block text-sm font-medium mb-1">Matches Played</label>
-                  <input
-                    type="number"
-                    value={shouldShowPlaceholder('matches', editingTeam.matches) ? '' : editingTeam.matches}
-                    placeholder={shouldShowPlaceholder('matches', editingTeam.matches) ? '0' : undefined}
-                    onChange={(e) => handleInputChange('matches', e.target.value)}
-                    className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                  {errors.matches && <p className="text-red-400 text-sm mt-1">{errors.matches}</p>}
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium mb-1">Wins</label>
-                  <input
-                    type="number"
-                    value={shouldShowPlaceholder('wins', editingTeam.wins) ? '' : editingTeam.wins}
-                    placeholder={shouldShowPlaceholder('wins', editingTeam.wins) ? '0' : undefined}
-                    onChange={(e) => handleInputChange('wins', e.target.value)}
-                    className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                  {errors.wins && <p className="text-red-400 text-sm mt-1">{errors.wins}</p>}
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium mb-1">Losses</label>
-                  <input
-                    type="number"
-                    value={shouldShowPlaceholder('losses', editingTeam.losses) ? '' : editingTeam.losses}
-                    placeholder={shouldShowPlaceholder('losses', editingTeam.losses) ? '0' : undefined}
-                    onChange={(e) => handleInputChange('losses', e.target.value)}
-                    className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                  {errors.losses && <p className="text-red-400 text-sm mt-1">{errors.losses}</p>}
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium mb-1">Ties</label>
-                  <input
-                    type="number"
-                    value={shouldShowPlaceholder('ties', editingTeam.ties) ? '' : editingTeam.ties}
-                    placeholder={shouldShowPlaceholder('ties', editingTeam.ties) ? '0' : undefined}
-                    onChange={(e) => handleInputChange('ties', e.target.value)}
-                    className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                  {errors.ties && <p className="text-red-400 text-sm mt-1">{errors.ties}</p>}
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium mb-1">No Results</label>
-                  <input
-                    type="number"
-                    value={shouldShowPlaceholder('noResults', editingTeam.noResults) ? '' : editingTeam.noResults}
-                    placeholder={shouldShowPlaceholder('noResults', editingTeam.noResults) ? '0' : undefined}
-                    onChange={(e) => handleInputChange('noResults', e.target.value)}
-                    className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                  {errors.noResults && <p className="text-red-400 text-sm mt-1">{errors.noResults}</p>}
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium mb-1">Net Run Rate</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    value={shouldShowPlaceholder('netRunRate', editingTeam.netRunRate) ? '' : editingTeam.netRunRate}
-                    placeholder={shouldShowPlaceholder('netRunRate', editingTeam.netRunRate) ? '0.00' : undefined}
-                    onChange={(e) => handleInputChange('netRunRate', e.target.value)}
-                    className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                  {editingTeam.netRunRate !== undefined && editingTeam.netRunRate !== null && (
-                    <p className="text-xs text-gray-400 mt-1">
-                      Current: {editingTeam.netRunRate > 0 ? '+' : (editingTeam.netRunRate < 0 ? '-' : '')}{Math.abs(editingTeam.netRunRate).toFixed(2)}
-                    </p>
-                  )}
-                </div>
-              </div>
-              
-              {errors.results && <p className="text-red-400 text-sm mb-4">{errors.results}</p>}
-              
-              <div className="bg-gray-700/50 border border-gray-600 rounded-lg p-3 mb-4">
-                <p className="text-sm">
-                  <strong>Calculated Points:</strong> {editingTeam.wins * 2 + editingTeam.ties * 1 + editingTeam.noResults * 1}
-                </p>
-                <p className="text-xs text-gray-400 mt-1">
-                  Points = (Wins × 2) + (Ties × 1) + (No Results × 1)
-                </p>
-              </div>
-              
-              <div className="mb-4">
-              <label className="block text-sm font-medium mb-2">Qualification Status</label>
-              <div className="flex gap-2">
-                <button
-                  type="button"
-                  onClick={() => handleQualificationStatus('Q')}
-                  className={`flex-1 px-4 py-2 rounded-lg transition-colors ${
-                    editingTeam.qualificationStatus === 'Q'
-                      ? 'bg-green-600 text-white'
-                      : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                  }`}
-                >
-                  Q (Qualifier)
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleQualificationStatus('E')}
-                  className={`flex-1 px-4 py-2 rounded-lg transition-colors ${
-                    editingTeam.qualificationStatus === 'E'
-                      ? 'bg-red-600 text-white'
-                      : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                  }`}
-                >
-                  E (Eliminated)
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleQualificationStatus(null)}
-                  className={`px-4 py-2 rounded-lg transition-colors ${
-                    !editingTeam.qualificationStatus
-                      ? 'bg-gray-600 text-white'
-                      : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                  }`}
-                >
-                  Clear
-                </button>
-              </div>
-              {editingTeam.qualificationStatus && (
-                <p className="text-xs text-gray-400 mt-2 text-center">
-                  Current status: <strong>{editingTeam.qualificationStatus}</strong>
-                </p>
-              )}
+      <main className="flex-1 relative z-10 lg:ml-64">
+        <div className="bg-gradient-to-r from-amber-900/50 to-orange-900/50 backdrop-blur-2xl border-b border-white/10 p-6">
+          <div className="flex items-center justify-between flex-wrap gap-4">
+            <div>
+              <h1 className="text-3xl font-black text-white mb-2">
+                <GradientText gradient="from-amber-400 via-orange-400 to-amber-400">
+                  IPL Points Table Admin
+                </GradientText>
+              </h1>
+              <p className="text-gray-300">Manage IPL championship standings</p>
             </div>
-              
-              <div className="flex gap-2">
-                <button
-                  onClick={handleSave}
-                  className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
-                >
-                  Save Changes
-                </button>
-                <button
-                  onClick={() => setShowPopup(false)}
-                  className="flex-1 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
-                >
-                  Cancel
-                </button>
-              </div>
+            <div className="flex items-center gap-4">
+              <motion.button
+                onClick={refreshData}
+                className="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-white font-bold flex items-center gap-2"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <RefreshCw className="w-4 h-4" />
+                Refresh
+              </motion.button>
+              <motion.button
+                onClick={() => setIsEditing(!isEditing)}
+                className={`px-4 py-2 rounded-xl font-bold flex items-center gap-2 transition-all ${
+                  isEditing
+                    ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white'
+                    : 'bg-gradient-to-r from-blue-500 to-amber-500 text-white'
+                }`}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <Edit className="w-4 h-4" />
+                {isEditing ? 'Save All' : 'Edit Mode'}
+              </motion.button>
             </div>
           </div>
-        )}
+        </div>
 
-        {/* Backup Management Modal */}
-        {showBackupModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-gray-800 border border-gray-600 rounded-lg p-6 max-w-2xl w-full max-h-[80vh] overflow-y-auto">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-xl font-bold">Points Table Backup Management</h3>
-                <button
-                  onClick={() => setShowBackupModal(false)}
-                  className="text-gray-400 hover:text-white"
-                >
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              </div>
-
-              {/* Backup Message */}
-              {backupMessage && (
-                <div className={`mb-4 p-3 rounded-lg ${backupMessage.includes('✅') ? 'bg-green-900/30 border border-green-700' : 'bg-red-900/30 border border-red-700'}`}>
-                  <p className="text-sm">{backupMessage}</p>
-                </div>
-              )}
-
-              {/* Create Backup Button */}
-              <div className="mb-6">
-                <button
-                  onClick={createBackup}
-                  disabled={backupLoading}
-                  className="w-full px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {backupLoading ? (
-                    <><span className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white"></span> Creating Backup...</>
-                  ) : (
-                    <><svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" />
-                    </svg> Create New Backup</>
-                  )}
-                </button>
-              </div>
-
-              {/* Backups List */}
-              <div className="mb-4">
-                <h4 className="text-lg font-semibold mb-3">Existing Backups ({backups.length})</h4>
-                
-                {backups.length === 0 ? (
-                  <div className="text-center py-8 text-gray-400">
-                    <p>No backups found</p>
-                    <p className="text-sm mt-2">Create your first backup to protect your points table data</p>
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    {backups.map((backup) => (
-                      <div key={backup.key} className="bg-gray-700/50 border border-gray-600 rounded-lg p-4">
-                        <div className="flex justify-between items-start">
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-1">
-                              <span className="text-sm text-gray-400">
-                                {new Date(backup.timestamp).toLocaleString()}
-                              </span>
-                              <span className="bg-blue-600 text-xs px-2 py-1 rounded">Year: {backup.year}</span>
-                              <span className="bg-gray-600 text-xs px-2 py-1 rounded">
-                                {backup.teamCount} teams
-                              </span>
-                            </div>
-                            <div className="text-sm text-gray-300">
-                              {backup.metadata?.backupType === 'single_year' ? 'Single Year Backup' : 'Current Year Backup'}
-                            </div>
-                          </div>
-                          <div className="flex gap-2 ml-4">
-                            <button
-                              onClick={() => restoreBackup(backup.key)}
-                              disabled={backupLoading}
-                              className="p-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
-                              title="Restore"
-                            >
-                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                              </svg>
-                            </button>
-                            <button
-                              onClick={() => deleteBackup(backup.key)}
-                              disabled={backupLoading}
-                              className="p-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50"
-                              title="Delete"
-                            >
-                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                              </svg>
-                            </button>
-                          </div>
-                        </div>
-                      </div>
+        <div className="p-6">
+          <motion.div
+            className="relative rounded-3xl backdrop-blur-2xl border-2 border-white/20 bg-gradient-to-br from-slate-900/90 via-slate-800/80 to-slate-900/90 shadow-2xl overflow-hidden mb-8"
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+          >
+            <div className="relative z-10 p-6">
+              <div className="flex flex-wrap gap-4 mb-6">
+                <div className="flex-1 min-w-[200px]">
+                  <label className="block text-sm font-bold uppercase tracking-wider text-gray-300 mb-2">Season Year</label>
+                  <select
+                    value={selectedYear}
+                    onChange={(e) => setSelectedYear(parseInt(e.target.value, 10))}
+                    className="w-full px-4 py-3 bg-slate-800/60 border-2 border-white/15 text-white rounded-xl focus:outline-none focus:border-amber-500 focus:ring-4 focus:ring-amber-500/20 transition-all text-lg font-medium"
+                  >
+                    {availableYears.map(year => (
+                      <option key={year} value={year}>{year}</option>
                     ))}
-                  </div>
+                  </select>
+                </div>
+              </div>
+
+              <div className="relative mb-6 group">
+                <Search className="absolute left-6 top-1/2 -translate-y-1/2 w-6 h-6 text-gray-400 group-focus-within:text-amber-400 transition-colors" />
+                <input
+                  type="text"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  placeholder="Search IPL teams..."
+                  className="w-full pl-16 pr-14 py-4 rounded-2xl bg-slate-800/60 border-2 border-white/15 text-white placeholder-gray-400 focus:outline-none focus:border-amber-500 focus:ring-4 focus:ring-amber-500/20 transition-all text-lg font-medium"
+                />
+                {searchTerm && (
+                  <motion.button
+                    onClick={() => setSearchTerm('')}
+                    className="absolute right-6 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
+                    whileHover={{ scale: 1.2, rotate: 90 }}
+                    whileTap={{ scale: 0.9 }}
+                  >
+                    <X className="w-6 h-6" />
+                  </motion.button>
                 )}
               </div>
 
-              {/* Info Section */}
-              <div className="mt-6 p-4 bg-blue-900/20 border border-blue-700 rounded-lg text-sm">
-                <p className="text-blue-300 mb-2">💡 <strong>Backup Information:</strong></p>
-                <ul className="list-disc list-inside space-y-1 text-gray-300">
-                  <li>Backups are stored in Cloudflare Workers KV for reliability</li>
-                  <li>Each backup contains the complete points table for a specific year</li>
-                  <li>You can restore any backup to revert to a previous state</li>
-                  <li>Backups are retained until manually deleted</li>
-                  <li>Create backups regularly to protect your data</li>
-                </ul>
+              <div className="flex flex-wrap items-center gap-4">
+                <div className="flex items-center gap-3">
+                  <span className="text-sm font-bold uppercase tracking-wider text-gray-300">Sort:</span>
+                  <select
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value as 'points' | 'wins' | 'losses' | 'nrr')}
+                    className="px-5 py-2.5 rounded-xl text-sm font-bold bg-slate-800/60 text-white border-2 border-white/10 focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-500/20 hover:border-amber-500/50 transition-all cursor-pointer"
+                  >
+                    <option value="points">Points (High to Low)</option>
+                    <option value="wins">Wins (Most first)</option>
+                    <option value="losses">Losses (Least first)</option>
+                    <option value="nrr">Net Run Rate</option>
+                  </select>
+                </div>
+                {searchTerm && (
+                  <motion.button
+                    onClick={clearFilters}
+                    className="px-5 py-2.5 rounded-xl text-sm font-bold bg-gradient-to-r from-amber-500/20 to-orange-600/20 text-amber-300 border-2 border-amber-500/50 hover:from-amber-500/30 hover:to-orange-600/30 transition-all flex items-center gap-2"
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <X className="w-4 h-4" />
+                    Clear all
+                  </motion.button>
+                )}
+              </div>
+
+              <div className="flex items-center justify-between pt-6 mt-6 border-t border-white/10">
+                <span className="text-sm text-gray-400">
+                  Showing <span className="font-black text-white text-lg">{sortedPointsTable.length}</span> of <span className="font-black text-white text-lg">{teams.length}</span> IPL teams
+                </span>
+                {searchTerm && (
+                  <span className="px-3 py-1.5 rounded-lg text-xs font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                    Filtered
+                  </span>
+                )}
               </div>
             </div>
-          </div>
-        )}
+          </motion.div>
 
-        {/* Points System Legend */}
-        <div className="mt-8 bg-gray-800/50 border border-gray-700 rounded-lg p-6">
-          <h3 className="text-xl font-bold mb-4">Points System & Position Rules</h3>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-            <div className="text-center">
-              <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center text-white font-bold mx-auto mb-2">2</div>
-              <div className="text-white font-medium">Win</div>
-              <div className="text-gray-400 text-sm">2 points</div>
-            </div>
-            <div className="text-center">
-              <div className="w-8 h-8 bg-gray-500 rounded-full flex items-center justify-center text-white font-bold mx-auto mb-2">0</div>
-              <div className="text-white font-medium">Loss</div>
-              <div className="text-gray-400 text-sm">0 points</div>
-            </div>
-            <div className="text-center">
-              <div className="w-8 h-8 bg-yellow-500 rounded-full flex items-center justify-center text-black font-bold mx-auto mb-2">1</div>
-              <div className="text-white font-medium">Tie/NR</div>
-              <div className="text-gray-400 text-sm">1 point each</div>
-            </div>
-            <div className="text-center">
-              <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold mx-auto mb-2">NRR</div>
-              <div className="text-white font-medium">Net RR</div>
-              <div className="text-gray-400 text-sm">Tie-breaker</div>
-            </div>
-          </div>
-          
-          <div className="text-sm text-gray-300 space-y-2">
-            <p><strong>Position Rules:</strong></p>
-            <ol className="list-decimal list-inside space-y-1">
-              <li>Teams are ranked by total points (descending)</li>
-              <li>If points are equal, teams are ranked by Net Run Rate (descending)</li>
-              <li>If both points and NRR are equal, teams share the same position</li>
-              <li>Top 4 teams qualify for playoffs</li>
-            </ol>
-          </div>
-        </div>
+          {isLoading ? (
+            <motion.div className="text-center py-32" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+              <LoadingSpinner size="lg" />
+              <p className="text-gray-400 text-xl mt-8">Loading IPL points table...</p>
+            </motion.div>
+          ) : sortedPointsTable.length === 0 ? (
+            <motion.div className="text-center py-32" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+              <Trophy className="w-20 h-20 text-gray-400 mx-auto mb-8" />
+              <h3 className="text-4xl font-black text-white mb-4">No IPL teams found</h3>
+              <p className="text-gray-400 text-xl mb-10">
+                {searchTerm ? `No teams match "${searchTerm}"` : 'No IPL teams in database'}
+              </p>
+              <motion.button
+                onClick={clearFilters}
+                className="px-10 py-5 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 text-white font-black text-lg flex items-center gap-3 mx-auto"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <X className="w-5 h-5" />
+                Clear filters
+              </motion.button>
+            </motion.div>
+          ) : (
+            <motion.div className="space-y-4" initial="hidden" animate="visible">
+              <div className="grid grid-cols-[40px_200px_1fr_100px_100px_100px_100px_100px_120px_140px] gap-4 px-6 py-4 rounded-3xl backdrop-blur-2xl border-2 border-white/20 bg-gradient-to-br from-slate-900/90 via-slate-800/80 to-slate-900/90 text-sm font-bold uppercase tracking-wider text-gray-300 max-w-full overflow-x-auto">
+                <div className="flex items-center justify-center">Rank</div>
+                <div className="flex items-center gap-2">Team <Info className="w-4 h-4 text-gray-500" /></div>
+                <div>Name</div>
+                <div>Played</div>
+                <div>Wins</div>
+                <div>Losses</div>
+                <div>Points</div>
+                <div>NRR</div>
+                <div className="flex justify-center">Qualified</div>
+                <div className="flex justify-center">Actions</div>
+              </div>
 
-        {/* Back Button */}
-        <div className="mt-8">
-          <button
-            onClick={() => router.push('/ipl-admin-2026/dashboard')}
-            className="px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-colors"
+              <AnimatePresence mode="popLayout">
+                {sortedPointsTable.map((team, index) => {
+                  const rank = index + 1;
+                  const isTop4 = rank <= 4;
+                  const isBottom2 = rank >= sortedPointsTable.length - 1;
+                  const isCurrentlyEditing = editingTeam === team.id;
+                  const nrr = team.netRunRate ?? 0;
+
+                  return (
+                    <motion.div
+                      key={team.id}
+                      layout
+                      initial={{ opacity: 0, y: 50, scale: 0.9 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.8, y: -20 }}
+                      transition={{ duration: 0.6, delay: index * 0.05, ease: [0.22, 1, 0.36, 1] }}
+                      whileHover={{ y: -5, scale: 1.02 }}
+                      className={`relative group grid grid-cols-[40px_200px_1fr_100px_100px_100px_100px_100px_120px_140px] gap-4 items-center px-6 py-5 rounded-3xl backdrop-blur-2xl border-2 border-white/10 bg-gradient-to-br from-slate-900/80 via-slate-800/70 to-slate-900/80 max-w-full overflow-x-auto ${
+                        isTop4 ? 'border-amber-500/50 bg-gradient-to-br from-amber-900/30 via-orange-800/20 to-amber-900/30' :
+                        isBottom2 ? 'border-orange-500/50 bg-gradient-to-br from-orange-900/30 via-amber-800/20 to-orange-900/30' :
+                        'hover:border-amber-500/50'
+                      }`}
+                    >
+                      <div className={`flex justify-center text-2xl font-black ${isTop4 ? 'text-amber-400' : isBottom2 ? 'text-orange-400' : 'text-white'}`}>
+                        {rank}
+                      </div>
+
+                      <div className="flex items-center gap-3">
+                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center text-white font-black text-lg shadow-lg">
+                          {(team.shortName || 'IPL').slice(0, 2)}
+                        </div>
+                        <span className="text-xl font-black text-white">{team.shortName || team.name}</span>
+                      </div>
+
+                      <div className="text-white font-semibold truncate">{team.name}</div>
+
+                      <div className="text-white font-bold">
+                        {isCurrentlyEditing ? (
+                          <input
+                            type="number"
+                            value={editData.matchesPlayed ?? ''}
+                            onChange={(e) => setEditData({ ...editData, matchesPlayed: parseInt(e.target.value, 10) || 0 })}
+                            className="w-16 px-2 py-1 bg-slate-700 border border-amber-500 rounded text-center"
+                            min={0}
+                          />
+                        ) : (
+                          team.matchesPlayed
+                        )}
+                      </div>
+
+                      <div className="text-green-400 font-bold flex items-center gap-1">
+                        {isCurrentlyEditing ? (
+                          <input
+                            type="number"
+                            value={editData.wins ?? ''}
+                            onChange={(e) => setEditData({ ...editData, wins: parseInt(e.target.value, 10) || 0 })}
+                            className="w-16 px-2 py-1 bg-slate-700 border border-green-500 rounded text-center"
+                            min={0}
+                          />
+                        ) : (
+                          <>
+                            <TrendingUp className="w-4 h-4" />
+                            {team.wins}
+                          </>
+                        )}
+                      </div>
+
+                      <div className="text-red-400 font-bold flex items-center gap-1">
+                        {isCurrentlyEditing ? (
+                          <input
+                            type="number"
+                            value={editData.losses ?? ''}
+                            onChange={(e) => setEditData({ ...editData, losses: parseInt(e.target.value, 10) || 0 })}
+                            className="w-16 px-2 py-1 bg-slate-700 border border-red-500 rounded text-center"
+                            min={0}
+                          />
+                        ) : (
+                          <>
+                            <TrendingDown className="w-4 h-4" />
+                            {team.losses}
+                          </>
+                        )}
+                      </div>
+
+                      <div className="text-amber-400 font-black text-xl">
+                        {isCurrentlyEditing ? (
+                          <input
+                            type="number"
+                            value={editData.points ?? ''}
+                            onChange={(e) => setEditData({ ...editData, points: parseInt(e.target.value, 10) || 0 })}
+                            className="w-20 px-2 py-1 bg-slate-700 border border-amber-500 rounded text-center font-black"
+                            min={0}
+                          />
+                        ) : (
+                          team.points
+                        )}
+                      </div>
+
+                      <div className={`font-bold ${nrr > 0 ? 'text-green-400' : nrr < 0 ? 'text-red-400' : 'text-white'}`}>
+                        {isCurrentlyEditing ? (
+                          <input
+                            type="text"
+                            value={editData.netRunRate ?? ''}
+                            onChange={(e) => setEditData({ ...editData, netRunRate: e.target.value })}
+                            className="w-20 px-2 py-1 bg-slate-700 border border-white rounded text-center"
+                            placeholder="0.00"
+                          />
+                        ) : (
+                          nrr > 0 ? `+${nrr.toFixed(2)}` : nrr.toFixed(2)
+                        )}
+                      </div>
+
+                      <div className="flex justify-center">
+                        {isCurrentlyEditing ? (
+                          <label className="inline-flex items-center gap-2">
+                            <input
+                              type="checkbox"
+                              checked={Boolean((editData as { qualified?: boolean }).qualified)}
+                              onChange={(e) => setEditData({ ...editData, qualified: e.target.checked })}
+                              className="w-5 h-5 rounded text-amber-500"
+                            />
+                            <span className="text-sm text-gray-300">Qualified</span>
+                          </label>
+                        ) : (
+                          <label className="inline-flex items-center gap-2 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={Boolean((team.stats as { qualified?: boolean })?.qualified)}
+                              onChange={(e) => handleToggleQualified(team.id, e.target.checked)}
+                              className="w-5 h-5 rounded text-amber-500"
+                            />
+                          </label>
+                        )}
+                      </div>
+
+                      <div className="flex justify-center gap-2">
+                        {isCurrentlyEditing ? (
+                          <>
+                            <motion.button
+                              onClick={() => handleSave(team.id)}
+                              className="p-2 rounded-full bg-green-500 text-white"
+                              whileHover={{ scale: 1.2 }}
+                              whileTap={{ scale: 0.9 }}
+                            >
+                              <Save className="w-4 h-4" />
+                            </motion.button>
+                            <motion.button
+                              onClick={handleCancel}
+                              className="p-2 rounded-full bg-red-500 text-white"
+                              whileHover={{ scale: 1.2 }}
+                              whileTap={{ scale: 0.9 }}
+                            >
+                              <X className="w-4 h-4" />
+                            </motion.button>
+                          </>
+                        ) : (
+                          <motion.button
+                            onClick={() => handleEdit(team.id)}
+                            disabled={!isEditing}
+                            className={`p-2 rounded-full transition-all ${
+                              isEditing ? 'bg-blue-500 text-white hover:bg-blue-600' : 'bg-slate-700 text-gray-400 cursor-not-allowed'
+                            }`}
+                            whileHover={isEditing ? { scale: 1.2 } : {}}
+                            whileTap={isEditing ? { scale: 0.9 } : {}}
+                          >
+                            <Edit className="w-4 h-4" />
+                          </motion.button>
+                        )}
+                      </div>
+                    </motion.div>
+                  );
+                })}
+              </AnimatePresence>
+            </motion.div>
+          )}
+
+          <motion.div
+            className="grid grid-cols-2 md:grid-cols-4 gap-6 mt-8"
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.5 }}
           >
-            ← Back to Dashboard
-          </button>
+            {[
+              { label: 'IPL Teams', value: teams.length, icon: Users, color: 'from-amber-500 to-orange-500' },
+              { label: 'Total Points', value: pointsTable.reduce((sum, t) => sum + (t.points ?? 0), 0), icon: Award, color: 'from-orange-500 to-amber-500' },
+              { label: 'Season', value: selectedYear, icon: Calendar, color: 'from-amber-500 to-orange-500' },
+              { label: 'Showing', value: sortedPointsTable.length, icon: Clock, color: 'from-orange-500 to-amber-500' }
+            ].map((stat, index) => (
+              <motion.div
+                key={index}
+                className="group relative overflow-hidden rounded-3xl backdrop-blur-2xl border-2 border-white/20 bg-gradient-to-br from-slate-900/90 via-slate-800/80 to-slate-900/90 p-6"
+                initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.6 + index * 0.1 }}
+                whileHover={{ scale: 1.05 }}
+              >
+                <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${stat.color} flex items-center justify-center mb-4`}>
+                  <stat.icon className="w-6 h-6 text-white" />
+                </div>
+                <p className="text-4xl font-black mb-2 text-white">{stat.value}</p>
+                <p className="text-xs font-bold uppercase tracking-widest text-gray-400">{stat.label}</p>
+              </motion.div>
+            ))}
+          </motion.div>
         </div>
-      </div>
+      </main>
     </div>
   );
 }
