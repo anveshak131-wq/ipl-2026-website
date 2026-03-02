@@ -17,7 +17,7 @@ interface LeaderboardSectionProps {
   expandedPlayerId: string | null;
   onPlayerExpand: (playerId: string | null) => void;
   leadersLimit: 10 | 50;
-  visualizationVariant?: 'bar' | 'column' | 'donut';
+  visualizationVariant?: 'bar' | 'column' | 'donut' | 'axis';
 }
 
 export default function LeaderboardSection({

@@ -351,7 +351,7 @@ export default function StatsPage() {
                         expandedPlayerId={expandedPlayerId}
                         onPlayerExpand={setExpandedPlayerId}
                         leadersLimit={leadersLimit}
-                        visualizationVariant="bar"
+                        visualizationVariant="axis"
                       />
                     )}
 
@@ -396,7 +396,7 @@ export default function StatsPage() {
                       expandedPlayerId={expandedPlayerId}
                       onPlayerExpand={setExpandedPlayerId}
                       leadersLimit={leadersLimit}
-                      visualizationVariant="bar"
+                      visualizationVariant="axis"
                     />
                   )}
 

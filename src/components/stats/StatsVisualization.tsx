@@ -8,7 +8,7 @@ interface StatsVisualizationProps {
   players: Player[];
   type: 'batting' | 'bowling';
   maxItems?: number;
-  variant?: 'bar' | 'column' | 'donut';
+  variant?: 'bar' | 'column' | 'donut' | 'axis';
 }
 
 export default function StatsVisualization({ players, type, maxItems = 10, variant = 'bar' }: StatsVisualizationProps) {
@@ -45,6 +45,75 @@ export default function StatsVisualization({ players, type, maxItems = 10, varia
     if (index === 2) return 'from-purple-300 to-violet-300';
     return 'from-gray-600 to-gray-700';
   };
+
+  // Axis / track variant (used for Orange Cap to feel very different from Purple Cap)
+  if (variant === 'axis') {
+    return (
+      <div className="space-y-4">
+        <div className="relative h-28">
+          {/* Axis line */}
+          <div className="absolute left-0 right-0 top-1/2 h-px bg-gradient-to-r from-gray-700 via-gray-500 to-gray-700" />
+          {/* Min / max markers */}
+          <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-4 bg-gray-400 rounded-full" />
+          <div className="absolute right-0 top-1/2 -translate-y-1/2 w-1 h-4 bg-gray-400 rounded-full" />
+
+          {sortedPlayers.map((player, index) => {
+            const value = type === 'batting' ? player.stats.runs : player.stats.wickets;
+            const percentage = (value / maxValue) * 100;
+            const barColor = type === 'batting' ? getBarColor(index) : getBarColorBowling(index);
+
+            return (
+              <motion.div
+                key={player.id}
+                className="absolute"
+                style={{
+                  left: `calc(${percentage}% - 14px)`,
+                  top: '50%',
+                }}
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, delay: index * 0.06 }}
+              >
+                {/* Point + glow */}
+                <motion.div
+                  className={`w-7 h-7 rounded-full border-2 border-white/60 shadow-lg flex items-center justify-center bg-gradient-to-br ${barColor}`}
+                  whileHover={{ scale: 1.2, y: -4 }}
+                >
+                  <span className="text-[10px] font-bold text-white">#{index + 1}</span>
+                </motion.div>
+              </motion.div>
+            );
+          })}
+        </div>
+
+        {/* Legend with names and values */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {sortedPlayers.map((player, index) => {
+            const value = type === 'batting' ? player.stats.runs : player.stats.wickets;
+            const barColor = type === 'batting' ? getBarColor(index) : getBarColorBowling(index);
+            const colorClass =
+              type === 'batting'
+                ? index === 0
+                  ? 'text-amber-300'
+                  : 'text-amber-200'
+                : index === 0
+                ? 'text-purple-300'
+                : 'text-purple-200';
+
+            return (
+              <div key={player.id} className="flex items-center gap-3 text-xs">
+                <div
+                  className={`w-2.5 h-2.5 rounded-full bg-gradient-to-r ${barColor} shadow-md`}
+                />
+                <span className="text-gray-200 truncate flex-1">{player.name}</span>
+                <span className={`font-semibold ${colorClass}`}>{value}</span>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  }
 
   // Donut chart variant (e.g. Purple Cap special view)
   if (variant === 'donut') {
