@@ -367,7 +367,7 @@ export default function StatsPage() {
                         expandedPlayerId={expandedPlayerId}
                         onPlayerExpand={setExpandedPlayerId}
                         leadersLimit={leadersLimit}
-                        visualizationVariant="column"
+                        visualizationVariant="donut"
                       />
                     )}
                   </div>
@@ -440,7 +440,7 @@ export default function StatsPage() {
                       expandedPlayerId={expandedPlayerId}
                       onPlayerExpand={setExpandedPlayerId}
                       leadersLimit={leadersLimit}
-                      visualizationVariant="column"
+                      visualizationVariant="donut"
                     />
                   )}
 

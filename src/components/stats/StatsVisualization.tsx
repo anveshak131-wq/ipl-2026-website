@@ -8,7 +8,7 @@ interface StatsVisualizationProps {
   players: Player[];
   type: 'batting' | 'bowling';
   maxItems?: number;
-  variant?: 'bar' | 'column';
+  variant?: 'bar' | 'column' | 'donut';
 }
 
 export default function StatsVisualization({ players, type, maxItems = 10, variant = 'bar' }: StatsVisualizationProps) {
@@ -46,7 +46,62 @@ export default function StatsVisualization({ players, type, maxItems = 10, varia
     return 'from-gray-600 to-gray-700';
   };
 
-  // Column chart variant (used e.g. for Purple Cap)
+  // Donut chart variant (e.g. Purple Cap special view)
+  if (variant === 'donut') {
+    return (
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {sortedPlayers.map((player, index) => {
+          const value = type === 'batting' ? player.stats.runs : player.stats.wickets;
+          const percentage = (value / maxValue) * 100;
+          const barColor = type === 'batting' ? getBarColor(index) : getBarColorBowling(index);
+          const gradient = barColor.includes('purple')
+            ? 'rgba(168,85,247,1), rgba(244,114,182,1)'
+            : 'rgba(249,115,22,1), rgba(234,179,8,1)';
+
+          return (
+            <motion.div
+              key={player.id}
+              className="flex items-center gap-4"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, delay: index * 0.05 }}
+            >
+              <div className="relative w-16 h-16 flex-shrink-0">
+                <div
+                  className="w-16 h-16 rounded-full bg-gray-900/80 flex items-center justify-center"
+                  style={{
+                    background: `conic-gradient(${gradient} ${percentage}%, rgba(31,41,55,1) ${percentage}%)`,
+                  }}
+                >
+                  <div className="w-11 h-11 rounded-full bg-gray-950 flex items-center justify-center">
+                    <span className="text-xs font-semibold text-gray-200">
+                      #{index + 1}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center justify-between gap-2">
+                  <p className="text-sm font-semibold text-white truncate">
+                    {player.name}
+                  </p>
+                  <span className={`text-sm font-bold ${type === 'bowling' ? 'text-purple-300' : 'text-amber-300'}`}>
+                    {value}
+                  </span>
+                </div>
+                <p className="text-xs text-gray-400 mt-1">
+                  Share of leader: {Math.round(percentage)}%
+                </p>
+              </div>
+            </motion.div>
+          );
+        })}
+      </div>
+    );
+  }
+
+  // Column chart variant
   if (variant === 'column') {
     return (
       <div className="flex flex-col gap-4">
