@@ -4,8 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { api } from '@/lib/data';
 
-// Prevent infinite reload loop
-let isInitialized = false;
+// Prevent infinite reload loop across a single component mount; reset on unmount
 
 interface Match {
   id: string;
@@ -100,6 +99,15 @@ interface Scorecard {
 }
 
 export default function ScorecardAdminPage() {
+  // track initialization per component instance so client-side navigation remounts re-run init
+  const initializedRef = (function () {
+    try {
+      // use a ref-like object persisted across renders
+      return { current: false };
+    } catch (e) {
+      return { current: false };
+    }
+  })();
   const router = useRouter();
   const [matches, setMatches] = useState<Match[]>([]);
   const [players, setPlayers] = useState<Player[]>([]);
@@ -112,14 +120,13 @@ export default function ScorecardAdminPage() {
   const [message, setMessage] = useState('');
 
   useEffect(() => {
-    // Prevent infinite initialization
-    if (isInitialized) {
-      console.log('� [IPL SCORECARD] Already initialized, skipping...');
+    // Prevent infinite initialization within this component instance
+    if (initializedRef.current) {
+      console.log('� [IPL SCORECARD] Already initialized for this instance, skipping...');
       return;
     }
-    
-    console.log('🚀 [IPL SCORECARD] First time initialization at:', new Date().toISOString());
-    isInitialized = true;
+    console.log('🚀 [IPL SCORECARD] First time initialization for this instance at:', new Date().toISOString());
+    initializedRef.current = true;
     
     // Set loading to false immediately to ensure page renders
     setLoading(false);
@@ -187,6 +194,10 @@ export default function ScorecardAdminPage() {
     } else {
       console.log('ℹ️ [IPL SCORECARD] No saved match found in localStorage');
     }
+    // Cleanup: reset initialized flag on unmount so client-side navigation can re-init
+    return () => {
+      try { initializedRef.current = false; } catch (e) {}
+    };
   }, []);
 
   // Add visible status indicator
