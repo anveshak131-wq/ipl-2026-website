@@ -80,6 +80,8 @@ export default function StatsPage() {
   const [expandedPlayerId, setExpandedPlayerId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<StatsTabKey>('overview');
   const [leadersLimit, setLeadersLimit] = useState<10 | 50>(10);
+  const [pointsYear, setPointsYear] = useState<number>(2026);
+  const [availablePointsYears, setAvailablePointsYears] = useState<number[]>([]);
   
   // Redirect WPL users away from stats page
   useEffect(() => {
@@ -116,6 +118,17 @@ export default function StatsPage() {
 
     fetchData();
   }, [currentLeague]);
+
+  // Available years for end-user IPL points table (mirror admin UX)
+  useEffect(() => {
+    const currentYear = new Date().getFullYear();
+    const years: number[] = [];
+    for (let year = 2008; year <= currentYear; year++) {
+      years.push(year);
+    }
+    setAvailablePointsYears(years);
+    setPointsYear(currentYear);
+  }, []);
 
   const computedTopRunScorers = useMemo(() => {
     const criteria = getQualificationCriteria('orangeCap', currentLeague);
@@ -242,7 +255,7 @@ export default function StatsPage() {
           netRunRate: 0,
         };
       });
-  }, [teams]);
+  }, [teams, pointsYear]);
 
   const sortedPointsTable = useMemo(() => {
     const copy = [...pointsTable];
@@ -404,61 +417,39 @@ export default function StatsPage() {
                   transition={{ duration: 0.4 }}
                   className="space-y-8"
                 >
-                  {/* Quick Stats */}
-                  <QuickStatsGrid players={players} teams={teams} />
-
-                  {/* Top Performers Grid */}
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    {topRunScorers.length > 0 && (
-                      <LeaderboardSection
-                        title="Orange Cap Race"
-                        icon={Trophy}
-                        players={topRunScorers}
-                        teams={teams}
-                        type="batting"
-                        qualificationText={getQualificationDescription('orangeCap', currentLeague)}
-                        color="from-orange-500/20 to-yellow-500/20"
-                        expandedPlayerId={expandedPlayerId}
-                        onPlayerExpand={setExpandedPlayerId}
-                        leadersLimit={leadersLimit}
-                        visualizationVariant="axis"
-                      />
-                    )}
-
-                    {topWicketTakers.length > 0 && (
-                      <LeaderboardSection
-                        title="Purple Cap Race"
-                        icon={Award}
-                        players={topWicketTakers}
-                        teams={teams}
-                        type="bowling"
-                        qualificationText={getQualificationDescription('purpleCap', currentLeague)}
-                        color="from-purple-500/20 to-pink-500/20"
-                        expandedPlayerId={expandedPlayerId}
-                        onPlayerExpand={setExpandedPlayerId}
-                        leadersLimit={leadersLimit}
-                        visualizationVariant="donut"
-                      />
-                    )}
-                  </div>
-
                   {/* IPL Points Table Snapshot */}
                   {sortedPointsTable.length > 0 && (
                     <motion.section
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.5, delay: 0.2 }}
-                      className="mt-10 rounded-3xl bg-black/40 border border-white/15 backdrop-blur-xl p-6 md:p-8"
+                      className="rounded-3xl bg-black/40 border border-white/15 backdrop-blur-xl p-6 md:p-8"
                     >
-                      <div className="flex items-center justify-between gap-4 mb-4">
+                      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
                         <div>
                           <h2 className="text-xl md:text-2xl font-black text-white flex items-center gap-2">
                             <Trophy className="w-5 h-5 text-ipl-gold" />
-                            IPL 2026 Points Table
+                            IPL {pointsYear} Points Table
                           </h2>
                           <p className="text-xs text-gray-400 mt-1">
                             Read-only snapshot using the same admin points data (including any manual edits).
                           </p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                            Season
+                          </span>
+                          <select
+                            value={pointsYear}
+                            onChange={(e) => setPointsYear(parseInt(e.target.value, 10))}
+                            className="px-3 py-1.5 rounded-lg bg-black/60 border border-white/20 text-xs text-gray-100 focus:outline-none focus:ring-2 focus:ring-ipl-gold/40"
+                          >
+                            {availablePointsYears.map((year) => (
+                              <option key={year} value={year}>
+                                {year}
+                              </option>
+                            ))}
+                          </select>
                         </div>
                       </div>
 
@@ -535,6 +526,44 @@ export default function StatsPage() {
                       </div>
                     </motion.section>
                   )}
+
+                  {/* Quick Stats */}
+                  <QuickStatsGrid players={players} teams={teams} />
+
+                  {/* Top Performers Grid */}
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    {topRunScorers.length > 0 && (
+                      <LeaderboardSection
+                        title="Orange Cap Race"
+                        icon={Trophy}
+                        players={topRunScorers}
+                        teams={teams}
+                        type="batting"
+                        qualificationText={getQualificationDescription('orangeCap', currentLeague)}
+                        color="from-orange-500/20 to-yellow-500/20"
+                        expandedPlayerId={expandedPlayerId}
+                        onPlayerExpand={setExpandedPlayerId}
+                        leadersLimit={leadersLimit}
+                        visualizationVariant="axis"
+                      />
+                    )}
+
+                    {topWicketTakers.length > 0 && (
+                      <LeaderboardSection
+                        title="Purple Cap Race"
+                        icon={Award}
+                        players={topWicketTakers}
+                        teams={teams}
+                        type="bowling"
+                        qualificationText={getQualificationDescription('purpleCap', currentLeague)}
+                        color="from-purple-500/20 to-pink-500/20"
+                        expandedPlayerId={expandedPlayerId}
+                        onPlayerExpand={setExpandedPlayerId}
+                        leadersLimit={leadersLimit}
+                        visualizationVariant="donut"
+                      />
+                    )}
+                  </div>
                 </motion.div>
               )}
 
