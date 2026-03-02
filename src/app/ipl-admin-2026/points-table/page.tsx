@@ -8,6 +8,29 @@ import { Team } from '@/types';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import GradientText from '@/components/ui/GradientText';
 
+// IPL Teams by Season - Historical data for each IPL year
+const IPL_TEAMS_BY_SEASON: Record<number, string[]> = {
+  2008: ['rcb', 'mi', 'kkr', 'dd', 'csk', 'rr', 'kxip', 'dc'],
+  2009: ['rcb', 'mi', 'kkr', 'dd', 'csk', 'rr', 'kxip', 'dc'],
+  2010: ['rcb', 'mi', 'kkr', 'dd', 'csk', 'rr', 'kxip', 'dc'],
+  2011: ['rcb', 'mi', 'kkr', 'dd', 'csk', 'rr', 'kxip', 'dc', 'pwi', 'kochi'],
+  2012: ['rcb', 'mi', 'kkr', 'dd', 'csk', 'rr', 'kxip', 'dc', 'pwi', 'kochi'],
+  2013: ['rcb', 'mi', 'kkr', 'dd', 'csk', 'rr', 'kxip', 'dc', 'pwi', 'kochi'],
+  2014: ['rcb', 'mi', 'kkr', 'dd', 'csk', 'rr', 'kxip', 'dc', 'pwi'],
+  2015: ['rcb', 'mi', 'kkr', 'dd', 'csk', 'rr', 'kxip', 'dc', 'pwi'],
+  2016: ['rcb', 'mi', 'kkr', 'dd', 'csk', 'rr', 'kxip', 'dc', 'pwi', 'gl'],
+  2017: ['rcb', 'mi', 'kkr', 'dd', 'csk', 'rr', 'kxip', 'dc', 'pwi', 'gl', 'rps'],
+  2018: ['rcb', 'mi', 'kkr', 'dd', 'csk', 'rr', 'kxip', 'dc', 'srh', 'gl'],
+  2019: ['rcb', 'mi', 'kkr', 'dd', 'csk', 'rr', 'kxip', 'dc', 'srh'],
+  2020: ['rcb', 'mi', 'kkr', 'dd', 'csk', 'rr', 'kxip', 'dc', 'srh'],
+  2021: ['rcb', 'mi', 'kkr', 'dd', 'csk', 'rr', 'pbks', 'dc', 'srh'],
+  2022: ['rcb', 'mi', 'kkr', 'dd', 'csk', 'rr', 'pbks', 'dc', 'srh', 'gt', 'lsg'],
+  2023: ['rcb', 'mi', 'kkr', 'dd', 'csk', 'rr', 'pbks', 'dc', 'srh', 'gt', 'lsg'],
+  2024: ['rcb', 'mi', 'kkr', 'dd', 'csk', 'rr', 'pbks', 'dc', 'srh', 'gt', 'lsg'],
+  2025: ['rcb', 'mi', 'kkr', 'dd', 'csk', 'rr', 'pbks', 'dc', 'srh', 'gt', 'lsg'],
+  2026: ['rcb', 'mi', 'kkr', 'dd', 'csk', 'rr', 'pbks', 'dc', 'srh', 'gt', 'lsg']
+};
+
 const IPL_STORAGE_KEY = 'iplPointsTableStats';
 
 export default function IPLAdminPointsTablePage() {
@@ -49,8 +72,12 @@ export default function IPLAdminPointsTablePage() {
     setSelectedYear(currentYear);
   }, []);
 
-  // Calculate points table - use year-based localStorage first, then team.stats
+  // Calculate points table - filter teams by selected year first, then use year-based localStorage
   const pointsTable = useMemo(() => {
+    // Get teams for the selected season
+    const seasonTeamIds = IPL_TEAMS_BY_SEASON[selectedYear] || [];
+    const seasonTeams = teams.filter(team => seasonTeamIds.includes(team.id));
+    
     let savedStats: Record<string, { matchesPlayed?: number; wins?: number; losses?: number; points?: number; netRunRate?: number }> = {};
     if (typeof window !== 'undefined') {
       try {
@@ -75,7 +102,7 @@ export default function IPLAdminPointsTablePage() {
       }
     }
 
-    return teams.map(team => {
+    return seasonTeams.map(team => {
       const displayShortName = team.shortName || team.name.split(' ').map(w => w[0]).join('');
       const displayName = team.name || '';
 
@@ -411,7 +438,7 @@ export default function IPLAdminPointsTablePage() {
 
               <div className="flex items-center justify-between pt-6 mt-6 border-t border-white/10">
                 <span className="text-sm text-gray-400">
-                  Showing <span className="font-black text-white text-lg">{sortedPointsTable.length}</span> of <span className="font-black text-white text-lg">{teams.length}</span> IPL teams
+                  Showing <span className="font-black text-white text-lg">{sortedPointsTable.length}</span> of <span className="font-black text-white text-lg">{(IPL_TEAMS_BY_SEASON[selectedYear] || []).length}</span> IPL teams for Season {selectedYear}
                 </span>
                 <div className="flex items-center gap-3">
                   <span className="px-3 py-1.5 rounded-lg text-xs font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
@@ -651,7 +678,7 @@ export default function IPLAdminPointsTablePage() {
             transition={{ duration: 0.8, delay: 0.5 }}
           >
             {[
-              { label: 'IPL Teams', value: teams.length, icon: Users, color: 'from-amber-500 to-orange-500' },
+              { label: 'IPL Teams', value: (IPL_TEAMS_BY_SEASON[selectedYear] || []).length, icon: Users, color: 'from-amber-500 to-orange-500' },
               { label: 'Total Points', value: pointsTable.reduce((sum, t) => sum + (t.points ?? 0), 0), icon: Award, color: 'from-orange-500 to-amber-500' },
               { label: 'Season', value: selectedYear, icon: Calendar, color: 'from-amber-500 to-orange-500' },
               { label: 'Showing', value: sortedPointsTable.length, icon: Clock, color: 'from-orange-500 to-amber-500' }
