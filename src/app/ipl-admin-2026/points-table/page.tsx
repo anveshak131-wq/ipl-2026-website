@@ -49,12 +49,27 @@ export default function IPLAdminPointsTablePage() {
     setSelectedYear(currentYear);
   }, []);
 
-  // Calculate points table - use localStorage first, then team.stats
+  // Calculate points table - use year-based localStorage first, then team.stats
   const pointsTable = useMemo(() => {
     let savedStats: Record<string, { matchesPlayed?: number; wins?: number; losses?: number; points?: number; netRunRate?: number }> = {};
     if (typeof window !== 'undefined') {
       try {
-        savedStats = JSON.parse(localStorage.getItem(IPL_STORAGE_KEY) || '{}') || {};
+        // Get year-specific stats or migrate old format
+        const allStats = JSON.parse(localStorage.getItem(IPL_STORAGE_KEY) || '{}') || {};
+        
+        // Check if data is in old format (flat structure) or new format (year-based)
+        if (allStats[selectedYear] && typeof allStats[selectedYear] === 'object') {
+          // New format: { "2026": { "team1": { stats } }, "2025": { ... } }
+          savedStats = allStats[selectedYear];
+        } else {
+          // Old format: { "team1": { stats } } - migrate to new format
+          const migratedData: Record<number, Record<string, any>> = {};
+          migratedData[selectedYear] = allStats; // Move old data to current year
+          
+          // Save migrated format
+          localStorage.setItem(IPL_STORAGE_KEY, JSON.stringify(migratedData));
+          savedStats = migratedData[selectedYear];
+        }
       } catch {
         /* ignore */
       }
@@ -201,9 +216,15 @@ export default function IPLAdminPointsTablePage() {
 
       setTeams(teams.map(t => t.id === teamId ? updatedTeam : t));
 
-      const savedStats = JSON.parse(localStorage.getItem(IPL_STORAGE_KEY) || '{}');
-      savedStats[teamId] = updatedTeam.stats;
-      localStorage.setItem(IPL_STORAGE_KEY, JSON.stringify(savedStats));
+      const allSavedStats = JSON.parse(localStorage.getItem(IPL_STORAGE_KEY) || '{}');
+      
+      // Ensure year-based structure exists
+      if (!allSavedStats[selectedYear]) {
+        allSavedStats[selectedYear] = {};
+      }
+      
+      allSavedStats[selectedYear][teamId] = updatedTeam.stats;
+      localStorage.setItem(IPL_STORAGE_KEY, JSON.stringify(allSavedStats));
 
       setEditingTeam(null);
       setEditData({});
@@ -265,6 +286,24 @@ export default function IPLAdminPointsTablePage() {
               >
                 <RefreshCw className="w-4 h-4" />
                 Refresh
+              </motion.button>
+              <motion.button
+                onClick={() => {
+                  if (confirm(`Clear all points table data for ${selectedYear}? This cannot be undone.`)) {
+                    const allStats = JSON.parse(localStorage.getItem(IPL_STORAGE_KEY) || '{}');
+                    if (allStats[selectedYear]) {
+                      delete allStats[selectedYear];
+                      localStorage.setItem(IPL_STORAGE_KEY, JSON.stringify(allStats));
+                      refreshData();
+                    }
+                  }
+                }}
+                className="px-4 py-2 rounded-xl bg-gradient-to-r from-red-500 to-pink-500 text-white font-bold flex items-center gap-2"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <X className="w-4 h-4" />
+                Clear {selectedYear}
               </motion.button>
               <motion.button
                 onClick={() => setIsEditing(!isEditing)}
@@ -358,11 +397,16 @@ export default function IPLAdminPointsTablePage() {
                 <span className="text-sm text-gray-400">
                   Showing <span className="font-black text-white text-lg">{sortedPointsTable.length}</span> of <span className="font-black text-white text-lg">{teams.length}</span> IPL teams
                 </span>
-                {searchTerm && (
+                <div className="flex items-center gap-3">
                   <span className="px-3 py-1.5 rounded-lg text-xs font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
-                    Filtered
+                    Season {selectedYear}
                   </span>
-                )}
+                  {searchTerm && (
+                    <span className="px-3 py-1.5 rounded-lg text-xs font-bold bg-blue-500/20 text-blue-300 border border-blue-500/30">
+                      Filtered
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
           </motion.div>
