@@ -469,9 +469,10 @@ export default function ScorecardAdminPage() {
       const saved = await response.json();
       console.log('✅ Scorecard saved successfully:', saved);
       setScorecard(saved);
-      // Remove any local draft for this match since remote save succeeded
-      try { localStorage.removeItem(`ipl_scorecard_draft_${saved.matchId || saved.matchId}`); } catch (e) {}
       setMessage('✓ Scorecard saved successfully!');
+      // Persist a local copy of the saved scorecard so Refresh restores latest draft
+      try { localStorage.setItem(`ipl_scorecard_draft_${saved.matchId}`, JSON.stringify(saved)); } catch (e) { console.error('Failed to persist local copy:', e); }
+      setMessage('✓ Scorecard saved successfully! (local copy kept)');
       setTimeout(() => setMessage(''), 3000);
     } catch (err) {
       console.error('❌ Error saving scorecard:', err);
@@ -514,6 +515,8 @@ export default function ScorecardAdminPage() {
 
       const published = await response.json();
       setScorecard(published);
+      // Remove local draft after publishing
+      try { localStorage.removeItem(`ipl_scorecard_draft_${published.matchId}`); } catch (e) {}
       setMessage('✓ Scorecard published successfully!');
       setTimeout(() => setMessage(''), 3000);
     } catch (err) {
