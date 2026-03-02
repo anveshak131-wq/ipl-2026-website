@@ -258,7 +258,22 @@ export default function StatsPage() {
   }, [teams, pointsYear]);
 
   const sortedPointsTable = useMemo(() => {
-    const copy = [...pointsTable];
+    // Season-specific team visibility (can be extended with historical franchises)
+    const filterTeamBySeason = (team: Team, year: number) => {
+      const short = (team.shortName || '').toUpperCase();
+
+      // Hide new expansion teams before they existed
+      if (year < 2022 && (short === 'GT' || short === 'LSG')) {
+        return false;
+      }
+
+      // Default: show team
+      return true;
+    };
+
+    const filtered = pointsTable.filter((team) => filterTeamBySeason(team, pointsYear));
+
+    const copy = [...filtered];
     copy.sort((a, b) => {
       if ((b as any).points !== (a as any).points) {
         return ((b as any).points ?? 0) - ((a as any).points ?? 0);
