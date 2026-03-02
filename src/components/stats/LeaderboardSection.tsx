@@ -17,6 +17,7 @@ interface LeaderboardSectionProps {
   expandedPlayerId: string | null;
   onPlayerExpand: (playerId: string | null) => void;
   leadersLimit: 10 | 50;
+  visualizationVariant?: 'bar' | 'column';
 }
 
 export default function LeaderboardSection({
@@ -30,6 +31,7 @@ export default function LeaderboardSection({
   expandedPlayerId,
   onPlayerExpand,
   leadersLimit,
+  visualizationVariant = 'bar',
 }: LeaderboardSectionProps) {
   const displayPlayers = players.slice(0, leadersLimit);
 
@@ -102,6 +104,7 @@ export default function LeaderboardSection({
               players={displayPlayers} 
               type={type}
               maxItems={leadersLimit}
+              variant={visualizationVariant}
             />
           </motion.div>
         )}

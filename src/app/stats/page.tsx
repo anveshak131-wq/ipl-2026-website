@@ -351,6 +351,7 @@ export default function StatsPage() {
                         expandedPlayerId={expandedPlayerId}
                         onPlayerExpand={setExpandedPlayerId}
                         leadersLimit={leadersLimit}
+                        visualizationVariant="bar"
                       />
                     )}
 
@@ -366,6 +367,7 @@ export default function StatsPage() {
                         expandedPlayerId={expandedPlayerId}
                         onPlayerExpand={setExpandedPlayerId}
                         leadersLimit={leadersLimit}
+                        visualizationVariant="column"
                       />
                     )}
                   </div>
@@ -394,6 +396,7 @@ export default function StatsPage() {
                       expandedPlayerId={expandedPlayerId}
                       onPlayerExpand={setExpandedPlayerId}
                       leadersLimit={leadersLimit}
+                      visualizationVariant="bar"
                     />
                   )}
 
@@ -437,6 +440,7 @@ export default function StatsPage() {
                       expandedPlayerId={expandedPlayerId}
                       onPlayerExpand={setExpandedPlayerId}
                       leadersLimit={leadersLimit}
+                      visualizationVariant="column"
                     />
                   )}
 

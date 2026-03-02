@@ -8,9 +8,10 @@ interface StatsVisualizationProps {
   players: Player[];
   type: 'batting' | 'bowling';
   maxItems?: number;
+  variant?: 'bar' | 'column';
 }
 
-export default function StatsVisualization({ players, type, maxItems = 10 }: StatsVisualizationProps) {
+export default function StatsVisualization({ players, type, maxItems = 10, variant = 'bar' }: StatsVisualizationProps) {
   const sortedPlayers = useMemo(() => {
     const sorted = [...players].sort((a, b) => {
       if (type === 'batting') {
@@ -45,6 +46,48 @@ export default function StatsVisualization({ players, type, maxItems = 10 }: Sta
     return 'from-gray-600 to-gray-700';
   };
 
+  // Column chart variant (used e.g. for Purple Cap)
+  if (variant === 'column') {
+    return (
+      <div className="flex flex-col gap-4">
+        <div className="flex items-end gap-3 h-48">
+          {sortedPlayers.map((player, index) => {
+            const value = type === 'batting' ? player.stats.runs : player.stats.wickets;
+            const percentage = (value / maxValue) * 100;
+            const barColor = type === 'batting' ? getBarColor(index) : getBarColorBowling(index);
+
+            return (
+              <motion.div
+                key={player.id}
+                className="flex-1 flex flex-col items-center gap-2 min-w-[40px]"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, delay: index * 0.06 }}
+              >
+                <span className="text-xs font-semibold text-gray-300">{value}</span>
+                <div className="relative w-full h-full bg-gray-900/60 rounded-full overflow-hidden flex items-end">
+                  <motion.div
+                    className={`w-full bg-gradient-to-t ${barColor} rounded-full`}
+                    initial={{ height: 0 }}
+                    animate={{ height: `${percentage}%` }}
+                    transition={{ duration: 0.8, delay: index * 0.08, ease: 'easeOut' }}
+                  />
+                </div>
+                <div className="flex flex-col items-center gap-1">
+                  <span className="text-[10px] text-gray-400 font-bold">#{index + 1}</span>
+                  <span className="text-[11px] text-gray-200 font-medium text-center line-clamp-2">
+                    {player.name.split(' ').slice(-2).join(' ')}
+                  </span>
+                </div>
+              </motion.div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  }
+
+  // Default variant: horizontal bar comparison
   return (
     <div className="space-y-3">
       {sortedPlayers.map((player, index) => {
@@ -65,7 +108,7 @@ export default function StatsVisualization({ players, type, maxItems = 10 }: Sta
                 <span className="text-gray-400 font-bold w-6">#{index + 1}</span>
                 <span className="text-white font-semibold truncate">{player.name}</span>
               </div>
-              <span className={`font-bold ${index === 0 ? 'text-orange-400' : index === 0 && type === 'bowling' ? 'text-purple-400' : 'text-gray-300'}`}>
+              <span className={`font-bold ${type === 'bowling' && index === 0 ? 'text-purple-400' : index === 0 ? 'text-orange-400' : 'text-gray-300'}`}>
                 {value}
               </span>
             </div>
@@ -76,7 +119,6 @@ export default function StatsVisualization({ players, type, maxItems = 10 }: Sta
                 animate={{ width: `${percentage}%` }}
                 transition={{ duration: 0.8, delay: index * 0.1, ease: 'easeOut' }}
               />
-              {/* Animated shine effect */}
               <motion.div
                 className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
                 animate={{
