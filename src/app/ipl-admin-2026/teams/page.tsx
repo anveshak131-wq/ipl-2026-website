@@ -4,7 +4,6 @@ import { useState, useEffect, useMemo } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useLeague } from '@/contexts/LeagueContext';
-import AdminSidebar from '@/components/admin/AdminSidebar';
 import AuroraBackground from '@/components/ui/AuroraBackground';
 import { Team } from '@/types';
 import { api } from '@/lib/data';
@@ -418,7 +417,6 @@ export default function AdminTeams() {
     return (
         <div className="flex min-h-screen bg-gray-950">
             <AuroraBackground />
-            <AdminSidebar currentPage="/ipl-admin-2026/teams" />
 
             <div className="flex-1 relative z-10">
                 <div className="p-8">

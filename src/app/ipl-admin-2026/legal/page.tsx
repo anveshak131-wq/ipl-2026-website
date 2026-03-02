@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import AdminSidebar from '@/components/admin/AdminSidebar';
 
 type LegalPageKey = 'legal' | 'privacy' | 'terms';
 
@@ -321,7 +320,6 @@ export default function AdminLegalPage() {
 
   return (
     <div className="flex min-h-screen bg-slate-900">
-      <AdminSidebar currentPage="/ipl-admin-2026/legal" />
       <main className="flex-grow">
         <div className="max-w-5xl mx-auto px-6 py-8">
           <header className="mb-8">

@@ -7,7 +7,6 @@ import { api } from '@/lib/data';
 import { Team } from '@/types';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import GradientText from '@/components/ui/GradientText';
-import AdminSidebar from '@/components/admin/AdminSidebar';
 
 const IPL_STORAGE_KEY = 'iplPointsTableStats';
 
@@ -245,10 +244,8 @@ export default function IPLAdminPointsTablePage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-amber-950 via-orange-900 to-black flex">
-      <AdminSidebar currentPage="/ipl-admin-2026/points-table" />
-
-      <main className="flex-1 relative z-10 lg:ml-64">
+    <div className="min-h-screen bg-gradient-to-br from-amber-950 via-orange-900 to-black">
+      <main className="flex-1 relative z-10">
         <div className="bg-gradient-to-r from-amber-900/50 to-orange-900/50 backdrop-blur-2xl border-b border-white/10 p-6">
           <div className="flex items-center justify-between flex-wrap gap-4">
             <div>

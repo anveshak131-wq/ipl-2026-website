@@ -21,7 +21,6 @@ import {
   Calendar,
   Clock,
 } from 'lucide-react';
-import AdminSidebar from '@/components/admin/AdminSidebar';
 import { PageTransition, SkeletonLoader } from '@/components/admin/animations';
 import { EmptyStateIllustration, AnimatedStatusIcon } from '@/components/admin/icons';
 import { ToastContainer, useToast } from '@/components/admin/Toast';
@@ -959,7 +958,6 @@ export default function AdminEmailNotificationsPage() {
 
   return (
     <div className="flex min-h-screen bg-[#0B0F13]">
-      <AdminSidebar currentPage="/ipl-admin-2026/email-notifications" />
       <div className="flex-1">
         <PageTransition>
           <div className="p-8 max-w-7xl mx-auto">

@@ -111,8 +111,12 @@ export default function AdminLayout({
     <LeagueProvider>
       <AdminDataProvider>
         <div className="flex min-h-screen bg-ipl-dark">
-          {/* Show appropriate sidebar based on user role */}
-          <AdminSidebar />
+          {/* Single sidebar - show PlayersAdminSidebar for players_admin on players pages, else AdminSidebar */}
+          {userRole === 'players_admin' && ['/ipl-admin-2026/players', '/ipl-admin-2026/batting-stats', '/ipl-admin-2026/bowling-stats', '/ipl-admin-2026/players/upload'].includes(pathname) ? (
+            <PlayersAdminSidebar currentPage={pathname} />
+          ) : (
+            <AdminSidebar currentPage={pathname} />
+          )}
           
           <div className="flex-1 flex flex-col">
             <div className="sticky top-0 z-10 bg-slate-900/95 backdrop-blur-sm border-b border-white/10">

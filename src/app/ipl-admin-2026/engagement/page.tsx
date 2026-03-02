@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import AdminSidebar from '@/components/admin/AdminSidebar';
 import ModernDialog from '@/components/admin/ModernDialog';
 
 // Polling configuration
@@ -304,7 +303,6 @@ export default function AdminEngagementPage() {
 
   return (
     <div className="flex min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
-      <AdminSidebar />
 
       <main className="flex-1 relative z-10">
         <div className="max-w-6xl mx-auto px-8 py-8">

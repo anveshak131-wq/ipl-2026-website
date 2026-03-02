@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import AdminSidebar from '@/components/admin/AdminSidebar';
 import AuroraBackground from '@/components/ui/AuroraBackground';
 import { api } from '@/lib/data';
 import { CustomEmoji } from '@/components/emoji/Emoji';
@@ -247,7 +246,6 @@ export default function AdminDashboard() {
     return (
         <div className="flex min-h-screen bg-[#0B0F13]">
             <AuroraBackground />
-            <AdminSidebar currentPage="/ipl-admin-2026/dashboard" />
 
             <div className="flex-1 relative z-10">
                 <div className="p-8 max-w-[1600px] mx-auto">

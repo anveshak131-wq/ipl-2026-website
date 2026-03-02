@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import AdminSidebar from '@/components/admin/AdminSidebar';
 import { Team, CoachingStaff } from '@/types';
 
 export default function AdminCoachesPage() {
@@ -128,7 +127,6 @@ export default function AdminCoachesPage() {
 
   return (
     <div className="flex min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900">
-      <AdminSidebar currentPage="/ipl-admin-2026/coaches" />
       
       <div className="flex-1 p-8">
         <div className="max-w-4xl mx-auto">

@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import AdminSidebar from '@/components/admin/AdminSidebar';
 
 interface ParsedCsv {
   headers: string[];
@@ -234,7 +233,6 @@ export default function AdminDatasetsPage() {
 
   return (
     <div className="flex min-h-screen bg-ipl-dark text-white">
-      <AdminSidebar currentPage="/ipl-admin-2026/datasets" />
       <div className="flex-1">
         <div className="max-w-6xl mx-auto px-6 py-8">
           <div className="flex items-center justify-between mb-6">

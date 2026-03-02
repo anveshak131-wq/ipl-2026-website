@@ -6,7 +6,6 @@ import { useRouter } from 'next/navigation';
 import { useLeague } from '@/contexts/LeagueContext';
 import { motion } from 'framer-motion';
 import { Calendar, Clock, Zap, CheckCircle2, Users, TrendingUp, CheckSquare, Square, BarChart3, Calendar as CalendarIcon, MapPin, Grid3x3, Copy, ExternalLink } from 'lucide-react';
-import AdminSidebar from '@/components/admin/AdminSidebar';
 import AuroraBackground from '@/components/ui/AuroraBackground';
 import RCBLionLogo from '@/components/RCBLion/RCBLionLogo';
 import RCBLottie from '@/components/ui/RCBLottie';
@@ -1110,7 +1109,6 @@ export default function AdminMatches() {
         return (
             <div className="flex min-h-screen bg-[#0B0F13]">
                 <AuroraBackground />
-                <AdminSidebar currentPage="/ipl-admin-2026/matches" />
                 <div className="flex-1 relative z-10 p-8">
                     <div className="space-y-6">
                         {/* Header skeleton */}
@@ -1148,7 +1146,6 @@ export default function AdminMatches() {
     return (
         <div className="flex min-h-screen bg-[#0B0F13]">
             <AuroraBackground />
-            <AdminSidebar currentPage="/ipl-admin-2026/matches" />
             <ToastContainer toasts={toasts} onClose={closeToast} />
 
             <PageTransition className="flex-1 relative z-10">

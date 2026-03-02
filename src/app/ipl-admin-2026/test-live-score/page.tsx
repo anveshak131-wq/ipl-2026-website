@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import AdminSidebar from '@/components/admin/AdminSidebar';
 import BallEntryPanel from '@/components/admin/live-score/BallEntryPanel';
 import AuroraBackground from '@/components/ui/AuroraBackground';
 import { LiveScoreState } from '@/hooks/useLiveScore';
@@ -111,7 +110,6 @@ export default function TestLiveScorePage() {
   return (
     <div className="flex min-h-screen" style={bgStyle}>
       <AuroraBackground />
-      <AdminSidebar currentPage="/ipl-admin-2026/test-live-score" />
       
       <main className="flex-1 relative z-20 p-4 md:p-8 overflow-y-auto">
         <div className="max-w-7xl mx-auto">

@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import AdminSidebar from '@/components/admin/AdminSidebar';
 
 interface AdminUser {
   id: string;
@@ -182,7 +181,6 @@ export default function AdminManagement() {
 
   return (
     <div className="flex min-h-screen bg-gray-950">
-      <AdminSidebar currentPage="/ipl-admin-2026/admins" />
       <div className="flex-1">
         <div className="p-8">
           {/* Header */}

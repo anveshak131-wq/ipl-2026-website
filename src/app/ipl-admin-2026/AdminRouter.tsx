@@ -2,8 +2,6 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
-import AdminSidebar from '@/components/admin/AdminSidebar';
-import PlayersAdminSidebar from '@/components/admin/PlayersAdminSidebar';
 import AdminDashboard from './dashboard/page';
 import AdminMatches from './matches/page';
 import AdminTeams from './teams/page';

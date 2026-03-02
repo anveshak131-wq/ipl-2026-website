@@ -3,8 +3,6 @@
 import { useState, useEffect, ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import { useLeague } from '@/contexts/LeagueContext';
-import AdminSidebar from '@/components/admin/AdminSidebar';
-import PlayersAdminSidebar from '@/components/admin/PlayersAdminSidebar';
 import ModernDialog from '@/components/admin/ModernDialog';
 import LeagueSwitch from '@/components/admin/LeagueSwitch';
 import WPLTeamsManager from '@/components/admin/WPLTeamsManager';
@@ -1820,12 +1818,7 @@ export default function AdminPlayers() {
   }
 
   return (
-    <div className="flex min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950">
-      {userRole === 'players_admin' ? (
-        <PlayersAdminSidebar currentPage="/ipl-admin-2026/players" />
-      ) : (
-      <AdminSidebar currentPage="/ipl-admin-2026/players" />
-      )}
+    <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950">
       <div className="flex-1 relative">
         <div className="p-6 lg:p-8 relative">
           {/* Enhanced Modern Header */}

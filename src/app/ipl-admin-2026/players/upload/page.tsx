@@ -2,7 +2,6 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import AdminSidebar from '@/components/admin/AdminSidebar';
 import ModernDialog from '@/components/admin/ModernDialog';
 import { CustomEmoji } from '@/components/emoji/Emoji';
 
@@ -173,7 +172,6 @@ export default function UploadPlayersCSV() {
 
   return (
     <div className="flex min-h-screen bg-gray-950">
-      <AdminSidebar currentPage="/ipl-admin-2026/players/upload" />
       <div className="flex-1">
         <div className="p-8">
           {/* Header */}

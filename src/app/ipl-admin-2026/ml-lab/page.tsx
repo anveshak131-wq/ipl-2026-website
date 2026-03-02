@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import AdminSidebar from '@/components/admin/AdminSidebar';
 
 interface DatasetSummary {
   key: string;
@@ -274,7 +273,6 @@ export default function AdminMlLabPage() {
 
   return (
     <div className="flex min-h-screen bg-ipl-dark text-white">
-      <AdminSidebar currentPage="/ipl-admin-2026/ml-lab" />
       <div className="flex-1">
         <div className="max-w-6xl mx-auto px-6 py-8">
           <div className="flex items-center justify-between mb-6">

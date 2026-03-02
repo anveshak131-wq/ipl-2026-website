@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { wplTeams } from '@/data/wpl-teams';
 import { api } from '@/lib/data';
-import AdminSidebar from '@/components/admin/AdminSidebar';
 
 export default function AddWPLTeamsPage() {
   const router = useRouter();
@@ -39,7 +38,6 @@ export default function AddWPLTeamsPage() {
 
   return (
     <div className="flex min-h-screen bg-[#0B0F13]">
-      <AdminSidebar currentPage="/ipl-admin-2026/teams/add-wpl-teams" />
       <div className="flex-1 p-8">
         <div className="max-w-4xl mx-auto">
           <div className="mb-8">

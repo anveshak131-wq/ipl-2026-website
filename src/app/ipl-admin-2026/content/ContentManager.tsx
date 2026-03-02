@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { useRouter, usePathname } from 'next/navigation';
-import AdminSidebar from '@/components/admin/AdminSidebar';
 import AuroraBackground from '@/components/ui/AuroraBackground';
 import ModernDialog from '@/components/admin/ModernDialog';
 import { Content, Team, Match, Player } from '@/types';
@@ -412,7 +411,6 @@ export default function ContentManager({
     return (
       <div className="flex min-h-screen bg-ipl-dark relative overflow-hidden">
         <AuroraBackground />
-        <AdminSidebar currentPage={currentPagePath} />
         <div className="flex-1 flex items-center justify-center">
           <div className="text-white">Loading content...</div>
         </div>
@@ -423,8 +421,6 @@ export default function ContentManager({
   return (
     <div className="flex min-h-screen bg-ipl-dark relative overflow-hidden">
       <AuroraBackground />
-      <AdminSidebar currentPage={currentPagePath} />
-
       <div className="flex-1 relative z-10">
         <div className="p-8">
           {/* Header */}
