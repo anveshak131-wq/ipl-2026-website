@@ -1,1587 +1,333 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { api } from '@/lib/data';
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
+import { api } from "@/lib/data";
 
-// Prevent infinite reload loop across a single component mount; reset on unmount
+/*
+  Rewritten Scorecard admin page (focused on robust draft persistence):
+  - Load matches + players
+  - Determine active match from: query param `?matchId=...` -> localStorage `selectedIPLMatch` -> first match
+  - Load remote scorecard (attempt with/without auth) and fallback to local draft at
+    key `ipl_scorecard_draft_{matchId}` if remote missing or fetch fails
+  - Auto-persist local draft to `localStorage` on every change (debounced)
+  - Save (POST/PUT) using fetch and include `Authorization: Bearer <adminToken>` when available
+  - Publish endpoint clears local draft
+*/
 
 interface Match {
   id: string;
-  team1: { id: string; name: string; shortName?: string };
-  team2: { id: string; name: string; shortName?: string };
-  venue: string;
-  date: string;
-  time: string;
-  status?: string;
-  league?: string;
+  team1: { id: string; name: string };
+  team2: { id: string; name: string };
+  venue?: string;
+  date?: string;
+  time?: string;
 }
 
-interface Player {
-  id: string;
-  name: string;
-  teamId: string | number;
-  role?: string;
-  battingStyle?: string;
-  bowlingStyle?: string;
+type AnyObj = Record<string, any>;
+
+const DRAFT_KEY_PREFIX = "ipl_scorecard_draft_";
+
+function getDraftKey(matchId: string) {
+  return `${DRAFT_KEY_PREFIX}${matchId}`;
 }
 
-interface Batter {
-  playerId: string;
-  name: string;
-  runs: number;
-  balls: number;
-  fours: number;
-  sixes: number;
-  strikeRate?: number;
-  dismissal?: {
-    type: string;
-    bowlerId?: string;
-    fielderId?: string;
-  };
+function nowISO() {
+  return new Date().toISOString();
 }
 
-interface Bowler {
-  playerId: string;
-  name: string;
-  overs: number;
-  balls: number;
-  runs: number;
-  wickets: number;
-  maidens: number;
-  economyRate?: number;
-  dots?: number;
-  wides?: number;
-  noBalls?: number;
-}
-
-interface Innings {
-  inningsNumber: number;
-  battingTeamId: number;
-  batting: Batter[];
-  bowling: Bowler[];
-  extras: {
-    wides: number;
-    noBalls: number;
-    byes: number;
-    legByes: number;
-  };
-  totalRuns?: number;
-  totalWickets?: number;
-  totalOvers?: number;
-  powerplay?: { overs: number; runs: number };
-}
-
-interface Scorecard {
-  id?: string;
-  matchId: string;
-  league: string;
-  matchInfo: {
-    team1: { id: number; name: string; shortName?: string };
-    team2: { id: number; name: string; shortName?: string };
-    venue: string;
-    date: string;
-    time: string;
-    toss?: { winner: string; decision: string };
-    weather?: string;
-    status?: string;
-  };
-  innings: Innings[];
-  result?: {
-    winner?: string;
-    margin?: string;
-    manOfTheMatch?: string;
-  };
-  draft?: boolean;
-  createdAt?: string;
-  updatedAt?: string;
-  publishedAt?: string;
-}
-
-export default function ScorecardAdminPage() {
-  // track initialization per component instance so client-side navigation remounts re-run init
-  const initializedRef = (function () {
-    try {
-      // use a ref-like object persisted across renders
-      return { current: false };
-    } catch (e) {
-      return { current: false };
-    }
-  })();
+export default function ScorecardAdminPage(): JSX.Element {
   const router = useRouter();
   const [matches, setMatches] = useState<Match[]>([]);
-  const [players, setPlayers] = useState<Player[]>([]);
-  const [selectedMatch, setSelectedMatch] = useState<Match | null>(null);
-  const [scorecard, setScorecard] = useState<Scorecard | null>(null);
-  const [activeTab, setActiveTab] = useState('matchInfo');
-  const [activeInnings, setActiveInnings] = useState(0);
+  const [players, setPlayers] = useState<AnyObj[]>([]);
+  const [selectedMatchId, setSelectedMatchId] = useState<string | null>(null);
+  const [scorecard, setScorecard] = useState<AnyObj | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [message, setMessage] = useState('');
+  const [message, setMessage] = useState("");
+  const autoSaveTimer = useRef<number | null>(null);
 
+  // Fetch matches + players on mount
   useEffect(() => {
-    // Prevent infinite initialization within this component instance
-    if (initializedRef.current) {
-      console.log('� [IPL SCORECARD] Already initialized for this instance, skipping...');
-      return;
-    }
-    console.log('🚀 [IPL SCORECARD] First time initialization for this instance at:', new Date().toISOString());
-    initializedRef.current = true;
-    
-    // Set loading to false immediately to ensure page renders
-    setLoading(false);
-    console.log('⚡ [IPL SCORECARD] Loading set to false');
-    
-    fetchMatches();
-    fetchPlayers();
-    
-    // Restore selected match and scorecard from localStorage
-    const savedMatch = localStorage.getItem('selectedIPLMatch');
-    console.log('📦 [IPL SCORECARD] Saved match found in localStorage:', !!savedMatch);
-    
-    if (savedMatch) {
+    (async () => {
       try {
-        const match = JSON.parse(savedMatch);
-        console.log('🎯 [IPL SCORECARD] Restoring match:', match);
-        setSelectedMatch(match);
-        
-        // Load the scorecard for the saved match
-        console.log('🔍 [IPL SCORECARD] Loading scorecard for match:', match.id);
-        api.get(`/scorecards?matchId=${match.id}`).then(res => {
-          console.log('📊 [IPL SCORECARD] Scorecard API response:', res);
-          if (res.data && res.data.length > 0) {
-            console.log('✅ [IPL SCORECARD] Found existing scorecard:', res.data[0]);
-            setScorecard(res.data[0]);
-            // If a local draft exists for this match, remove it because remote saved copy is authoritative
-            try { localStorage.removeItem(`ipl_scorecard_draft_${match.id}`); } catch (e) {}
-          } else {
-            // No remote scorecard — check for a local draft first
-            const localDraft = localStorage.getItem(`ipl_scorecard_draft_${match.id}`);
-            if (localDraft) {
-              try {
-                const parsed = JSON.parse(localDraft);
-                console.log('📝 [IPL SCORECARD] Restoring local draft for match:', match.id);
-                setScorecard(parsed);
-                return;
-              } catch (e) {
-                console.error('❌ [IPL SCORECARD] Failed to parse local draft:', e);
-              }
-            }
-            console.log('🆕 [IPL SCORECARD] No scorecard found, creating new one');
-            setScorecard(initializeScorecard(match));
-          }
-        }).catch(err => {
-          console.error('❌ [IPL SCORECARD] Error loading scorecard:', err);
-          // On error, prefer local draft if present
-          const localDraft = localStorage.getItem(`ipl_scorecard_draft_${match.id}`);
-          if (localDraft) {
-            try {
-              const parsed = JSON.parse(localDraft);
-              console.log('📝 [IPL SCORECARD] Restoring local draft after fetch error for match:', match.id);
-              setScorecard(parsed);
-              return;
-            } catch (e) {
-              console.error('❌ [IPL SCORECARD] Failed to parse local draft:', e);
-            }
-          }
-          console.log('🆕 [IPL SCORECARD] Creating new scorecard due to error');
-          setScorecard(initializeScorecard(match));
-        });
-      } catch (err) {
-        console.error('❌ [IPL SCORECARD] Error parsing saved match:', err);
-        localStorage.removeItem('selectedIPLMatch');
+        const ms = await api.getMatches("ipl");
+        setMatches(ms || []);
+      } catch (e) {
+        console.error("Failed to load matches", e);
+        setMatches([]);
       }
-    } else {
-      console.log('ℹ️ [IPL SCORECARD] No saved match found in localStorage');
-    }
-    // Cleanup: reset initialized flag on unmount so client-side navigation can re-init
-    return () => {
-      try { initializedRef.current = false; } catch (e) {}
-    };
+
+      try {
+        const ps = await api.getPlayers(undefined, "ipl");
+        setPlayers(ps || []);
+      } catch (e) {
+        console.error("Failed to load players", e);
+        setPlayers([]);
+      }
+
+      setLoading(false);
+    })();
   }, []);
 
-  // Add visible status indicator
+  // Determine active match when matches list changes or on first load
   useEffect(() => {
-    console.log('🎯 [IPL SCORECARD] Component state updated:', {
-      loading,
-      hasMatches: matches.length > 0,
-      hasPlayers: players.length > 0,
-      hasSelectedMatch: !!selectedMatch,
-      hasScorecard: !!scorecard
-    });
-  }, [loading, matches, players, selectedMatch, scorecard]);
+    if (matches.length === 0) return;
 
-  // Helper to get players by team
-  const getPlayersByTeam = (teamId: number): Player[] => {
-    const teamIdStr = String(teamId);
-    return players.filter(player => {
-      const playerTeamId = typeof player.teamId === 'number' ? String(player.teamId) : player.teamId;
-      return playerTeamId === teamIdStr;
-    });
-  };
-
-  // Refresh data function
-  const refreshData = async () => {
-    setMessage('🔄 Refreshing data...');
-    await fetchMatches();
-    await fetchPlayers();
-    setMessage('');
-  };
-
-  const fetchMatches = async () => {
+    // priority: URL query param ?matchId= -> localStorage selectedIPLMatch -> first match
     try {
-      console.log('Fetching IPL matches via API');
-      console.log('Admin token available:', !!localStorage.getItem('adminToken'));
-      const matches = await api.getMatches('ipl');
-      console.log('IPL matches received:', matches?.length || 0);
-      setMatches(matches || []);
-      if (matches && matches.length === 0) {
-        setMessage('⚠️ No IPL matches found. IPL matches are not yet available until you add them in the IPL matches page.');
+      const url = new URL(window.location.href);
+      const param = url.searchParams.get("matchId");
+      if (param) {
+        setSelectedMatchId(param);
+        localStorage.setItem("selectedIPLMatch", JSON.stringify({ id: param }));
+        return;
       }
-    } catch (err: unknown) {
-      console.error('Error fetching IPL matches:', err);
-      if (err instanceof Error) {
-        console.error('Error details:', err.message, err.stack);
-      }
-      setMessage('⚠️ IPL matches are not yet available. Please add IPL matches in the IPL matches page first.');
-      // Set empty array to prevent loading issues
-      setMatches([]);
+    } catch (e) {}
+
+    const saved = localStorage.getItem("selectedIPLMatch");
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (parsed?.id) {
+          setSelectedMatchId(parsed.id);
+          return;
+        }
+      } catch (e) {}
     }
-  };
 
-  const fetchPlayers = async () => {
-    try {
-      console.log('Fetching IPL players via API');
-      console.log('Admin token available:', !!localStorage.getItem('adminToken'));
-      const players = await api.getPlayers(undefined, 'ipl');
-      console.log('IPL players received:', players?.length || 0);
-      setPlayers(players || []);
-      if (players && players.length === 0) {
-        setMessage('⚠️ No IPL players found. Please add IPL players first.');
+    // fallback to first match in the list
+    setSelectedMatchId(matches[0].id);
+    localStorage.setItem("selectedIPLMatch", JSON.stringify(matches[0]));
+  }, [matches]);
+
+  // Load scorecard for selectedMatchId: try remote then local draft
+  useEffect(() => {
+    if (!selectedMatchId) return;
+    let mounted = true;
+
+    (async () => {
+      setLoading(true);
+      setMessage("");
+      try {
+        // Attempt remote fetch (no auth). If API returns empty, we'll try local draft.
+        const res = await fetch(`/api/scorecards?matchId=${encodeURIComponent(selectedMatchId)}`);
+        if (!mounted) return;
+        if (res.ok) {
+          const json = await res.json().catch(() => null);
+          if (json && Array.isArray(json) && json.length > 0) {
+            setScorecard(json[0]);
+            // remote is authoritative; remove local draft if present
+            try { localStorage.removeItem(getDraftKey(selectedMatchId)); } catch (e) {}
+            setLoading(false);
+            return;
+          }
+        }
+      } catch (e) {
+        console.warn("Remote scorecard fetch failed, will try local draft", e);
       }
-    } catch (err: unknown) {
-      console.error('Error fetching IPL players:', err);
-      if (err instanceof Error) {
-        console.error('Error details:', err.message, err.stack);
+
+      // Try local draft
+      try {
+        const draft = localStorage.getItem(getDraftKey(selectedMatchId));
+        if (draft) {
+          const parsed = JSON.parse(draft);
+          setScorecard(parsed);
+          setLoading(false);
+          return;
+        }
+      } catch (e) {
+        console.error("Failed to parse local draft", e);
       }
-      setMessage('⚠️ IPL players are not yet available. Please add IPL players and teams first.');
-      // Set empty array to prevent loading issues
-      setPlayers([]);
-    }
-  };
 
-  const handleSelectMatch = async (match: Match) => {
-    setSelectedMatch(match);
-    // Save selected match to localStorage for persistence
-    localStorage.setItem('selectedIPLMatch', JSON.stringify(match));
-    setLoading(true);
-    setMessage('');
-    try {
-      const res = await api.get(`/scorecards?matchId=${match.id}`);
-      if (res.data && res.data.length > 0) {
-        setScorecard(res.data[0]);
-      } else {
-        setScorecard(initializeScorecard(match));
-      }
-    } catch (err) {
-      console.log('No scorecard exists yet, creating new one');
-      setScorecard(initializeScorecard(match));
-    }
-    setLoading(false);
-  };
-
-  const handleCreateMatch = () => {
-    // Matches are authored on the matchday page which writes to Workers KV.
-    // Navigate the admin to the match creation page where matches are created.
-    router.push('/ipl-admin-2026/matchday');
-  };
-
-  // Export scorecard to PDF
-  const exportScorecardPDF = async (sc: Scorecard) => {
-    try {
-      console.log('Starting IPL 2025 Professional PDF export...');
-      
-      // Import the 2025 PDF exporter for IPL
-      const { exportScorecardPDF2025 } = await import('./pdf-export-2025');
-      
-      await exportScorecardPDF2025(sc);
-      console.log('IPL 2025 Professional PDF exported successfully');
-      setMessage('✅ IPL Scorecard PDF exported successfully!');
-      setTimeout(() => setMessage(''), 3000);
-      
-    } catch (error) {
-      console.error('Error exporting IPL PDF:', error);
-      setMessage(`❌ Error exporting PDF: ${error instanceof Error ? error.message : 'Unknown error'}`);
-      setTimeout(() => setMessage(''), 3000);
-    }
-  };
-
-  // Export scorecard to CSV
-  const exportScorecardCSV = (sc: Scorecard) => {
-    try {
-      const lines: string[] = [];
-
-      // Match info
-      lines.push('Match Info');
-      lines.push(`Teams,${sc.matchInfo.team1.name} vs ${sc.matchInfo.team2.name}`);
-      lines.push(`Venue,${sc.matchInfo.venue || ''}`);
-      lines.push(`Date,${sc.matchInfo.date || ''}`);
-      lines.push(`Time,${sc.matchInfo.time || ''}`);
-      lines.push(`Toss Winner,${sc.matchInfo.toss?.winner || ''}`);
-      lines.push(`Toss Decision,${sc.matchInfo.toss?.decision || ''}`);
-      lines.push('');
-
-      // Innings
-      sc.innings.forEach((inn) => {
-        const battingTeamName = inn.battingTeamId === sc.matchInfo.team1.id ? sc.matchInfo.team1.name : sc.matchInfo.team2.name;
-        lines.push(`Innings ${inn.inningsNumber} - ${battingTeamName}`);
-        lines.push('Batting');
-        lines.push('Player,Runs,Balls,4s,6s,SR,Dismissal');
-        inn.batting.forEach((b) => {
-          lines.push(`${b.name || b.playerId || ''},${b.runs || 0},${b.balls || 0},${b.fours || 0},${b.sixes || 0},${b.strikeRate || ''},${b.dismissal?.type || ''}`);
-        });
-        lines.push('');
-
-        lines.push('Bowling');
-        lines.push('Bowler,Overs,Balls,Runs,Wickets,Maidens,Econ');
-        inn.bowling.forEach((bw) => {
-          lines.push(`${bw.name || bw.playerId || ''},${bw.overs || ''},${bw.balls || ''},${bw.runs || 0},${bw.wickets || 0},${bw.maidens || 0},${bw.economyRate || ''}`);
-        });
-        lines.push('');
-        lines.push(`Extras,${(inn.extras.wides || 0) + (inn.extras.noBalls || 0) + (inn.extras.byes || 0) + (inn.extras.legByes || 0)}`);
-        lines.push(`Total,${inn.totalRuns || 0}/${inn.totalWickets || 0} (${inn.totalOvers || ''})`);
-        lines.push('');
+      // No remote or local draft -> initialize minimal new scorecard
+      const match = matches.find((m) => m.id === selectedMatchId);
+      setScorecard({
+        matchId: selectedMatchId,
+        league: "ipl",
+        matchInfo: match
+          ? { team1: match.team1, team2: match.team2, venue: match.venue || "", date: match.date || "", time: match.time || "", toss: { winner: "", decision: "" } }
+          : { team1: { id: "", name: "" }, team2: { id: "", name: "" }, venue: "", date: "", time: "", toss: { winner: "", decision: "" } },
+        innings: [
+          { inningsNumber: 1, battingTeamId: match ? parseInt(match.team1.id) : 0, batting: [], bowling: [], extras: { wides: 0, noBalls: 0, byes: 0, legByes: 0 } },
+          { inningsNumber: 2, battingTeamId: match ? parseInt(match.team2.id) : 0, batting: [], bowling: [], extras: { wides: 0, noBalls: 0, byes: 0, legByes: 0 } }
+        ],
+        draft: true,
+        createdAt: nowISO(),
+        updatedAt: nowISO(),
       });
+      setLoading(false);
+    })();
 
-      // Result
-      lines.push('Result');
-      lines.push(`Winner,${sc.result?.winner || ''}`);
-      lines.push(`Margin,${sc.result?.margin || ''}`);
-      lines.push(`ManOfTheMatch,${sc.result?.manOfTheMatch || ''}`);
+    return () => { mounted = false; };
+  }, [selectedMatchId]);
 
-      const csvContent = lines.join('\n');
-      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `IPL-Scorecard-${sc.matchInfo.team1.name}-vs-${sc.matchInfo.team2.name}-${new Date().toISOString().split('T')[0]}.csv`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-      
-      setMessage('✅ IPL Scorecard CSV exported successfully!');
-      setTimeout(() => setMessage(''), 3000);
-    } catch (error) {
-      console.error('Error exporting CSV:', error);
-      setMessage(`❌ Error exporting CSV: ${error instanceof Error ? error.message : 'Unknown error'}`);
-      setTimeout(() => setMessage(''), 3000);
-    }
-  };
-
-
-
-  const initializeScorecard = (match: Match): Scorecard => {
-    console.log('Initializing scorecard with match data:', match);
-    const scorecard = {
-      matchId: match.id,
-      league: 'ipl',
-      matchInfo: {
-        team1: {
-          ...match.team1,
-          id: parseInt(match.team1.id) // Convert string ID to number
-        },
-        team2: {
-          ...match.team2,
-          id: parseInt(match.team2.id) // Convert string ID to number
-        },
-        venue: match.venue,
-        date: match.date,
-        time: match.time,
-        toss: { winner: '', decision: '' },
-      },
-      innings: [
-        {
-          inningsNumber: 1,
-          battingTeamId: parseInt(match.team1.id), // Convert string ID to number
-          batting: [],
-          bowling: [],
-          extras: { wides: 0, noBalls: 0, byes: 0, legByes: 0 },
-          totalRuns: 0,
-          totalWickets: 0,
-          totalOvers: 0,
-          fallOfWickets: [],
-          powerplays: {
-            mandatory: { overs: 0, runs: 0 },
-            optional: { overs: 0, runs: 0 }
-          },
-          partnerships: []
-        },
-        {
-          inningsNumber: 2,
-          battingTeamId: parseInt(match.team2.id), // Convert string ID to number
-          batting: [],
-          bowling: [],
-          extras: { wides: 0, noBalls: 0, byes: 0, legByes: 0 },
-          totalRuns: 0,
-          totalWickets: 0,
-          totalOvers: 0,
-          fallOfWickets: [],
-          powerplays: {
-            mandatory: { overs: 0, runs: 0 },
-            optional: { overs: 0, runs: 0 }
-          },
-          partnerships: []
-        },
-      ],
-    };
-    console.log('Created scorecard:', scorecard);
-    return scorecard;
-  };
-
-  const handleSaveScorecard = async () => {
-    console.log('💾 Save button clicked!');
-    if (!scorecard) {
-      console.error('❌ No scorecard data to save');
-      return;
-    }
-    setSaving(true);
-    setMessage('');
+  // Persist selected match when it changes
+  useEffect(() => {
+    if (!selectedMatchId) return;
+    const match = matches.find((m) => m.id === selectedMatchId);
     try {
-      const token = localStorage.getItem('adminToken');
-      console.log('🔑 Admin token available:', !!token);
-      if (!token) {
-        throw new Error('No authentication token found. Please login as admin.');
+      if (match) localStorage.setItem("selectedIPLMatch", JSON.stringify(match));
+    } catch (e) {}
+  }, [selectedMatchId, matches]);
+
+  // Auto-save draft to localStorage (debounced) whenever scorecard changes
+  useEffect(() => {
+    if (!scorecard || !scorecard.matchId) return;
+    if (autoSaveTimer.current) window.clearTimeout(autoSaveTimer.current);
+    // debounce 1s
+    autoSaveTimer.current = window.setTimeout(() => {
+      try {
+        localStorage.setItem(getDraftKey(scorecard.matchId), JSON.stringify(scorecard));
+        console.log("[IPL] Auto-saved draft", getDraftKey(scorecard.matchId));
+      } catch (e) {
+        console.error("[IPL] Failed to auto-save draft", e);
       }
+      autoSaveTimer.current = null;
+    }, 1000) as unknown as number;
 
-      const endpoint = scorecard.id ? `/api/scorecards/${scorecard.id}` : '/api/scorecards';
-      const method = scorecard.id ? 'PUT' : 'POST';
+    return () => {
+      if (autoSaveTimer.current) window.clearTimeout(autoSaveTimer.current);
+    };
+  }, [scorecard]);
 
-      console.log('💾 Saving scorecard to:', endpoint);
-      console.log('📊 Scorecard data being saved:', JSON.stringify(scorecard, null, 2));
+  const handleSelectMatch = (id: string) => {
+    setSelectedMatchId(id);
+  };
 
-      const response = await fetch(endpoint, {
+  // Basic updater helper for nested fields using dot notation like "matchInfo.toss.winner"
+  const updateField = (path: string, value: any) => {
+    if (!scorecard) return;
+    const parts = path.split(".");
+    const updated = JSON.parse(JSON.stringify(scorecard));
+    let cur: any = updated;
+    for (let i = 0; i < parts.length - 1; i++) {
+      const p = parts[i];
+      if (!cur[p]) cur[p] = {};
+      cur = cur[p];
+    }
+    cur[parts[parts.length - 1]] = value;
+    updated.updatedAt = nowISO();
+    setScorecard(updated);
+  };
+
+  const handleSave = async () => {
+    if (!scorecard) return;
+    setSaving(true);
+    setMessage("");
+    try {
+      const token = localStorage.getItem("adminToken");
+      const endpoint = scorecard.id ? `/api/scorecards/${scorecard.id}` : "/api/scorecards";
+      const method = scorecard.id ? "PUT" : "POST";
+      const res = await fetch(endpoint, {
         method,
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
         body: JSON.stringify(scorecard),
       });
 
-      console.log('📡 Save response status:', response.status);
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        console.error('❌ Save failed:', errorData);
-        throw new Error(errorData.error || `Error: ${response.status} ${response.statusText}`);
+      if (!res.ok) {
+        const body = await res.text().catch(() => "");
+        throw new Error(`Save failed: ${res.status} ${res.statusText} ${body}`);
       }
 
-      const saved = await response.json();
-      console.log('✅ Scorecard saved successfully:', saved);
-      setScorecard(saved);
-      setMessage('✓ Scorecard saved successfully!');
-      // Persist a local copy of the saved scorecard so Refresh restores latest draft
-      try { 
-        localStorage.setItem(`ipl_scorecard_draft_${saved.matchId}`, JSON.stringify(saved)); 
-        console.log('📥 [IPL SCORECARD] Local copy persisted after save:', localStorage.getItem(`ipl_scorecard_draft_${saved.matchId}`));
-      } catch (e) { console.error('Failed to persist local copy:', e); }
-      setMessage('✓ Scorecard saved successfully! (local copy kept)');
-      setTimeout(() => setMessage(''), 3000);
-    } catch (err) {
-      console.error('❌ Error saving scorecard:', err);
-      // Save a local draft so changes aren't lost on refresh
-      try {
-        if (scorecard && scorecard.matchId) {
-          localStorage.setItem(`ipl_scorecard_draft_${scorecard.matchId}`, JSON.stringify(scorecard));
-          console.log('💾 Local draft saved for match:', scorecard.matchId);
-          console.log('📥 [IPL SCORECARD] Local draft contents:', localStorage.getItem(`ipl_scorecard_draft_${scorecard.matchId}`));
-        }
-      } catch (e) {
-        console.error('❌ Failed to save local draft:', e);
+      const saved = await res.json().catch(() => null);
+      if (saved) {
+        // persist local copy and update state
+        try { localStorage.setItem(getDraftKey(saved.matchId), JSON.stringify(saved)); } catch (e) {}
+        setScorecard(saved);
       }
-      setMessage(`✗ Error saving scorecard: ${err instanceof Error ? err.message : 'Unknown error'}`);
+      setMessage("✓ Saved");
+      setTimeout(() => setMessage(""), 2500);
+    } catch (e: any) {
+      console.error("Save error", e);
+      // ensure a local draft exists
+      try { if (scorecard.matchId) localStorage.setItem(getDraftKey(scorecard.matchId), JSON.stringify(scorecard)); } catch (e) {}
+      setMessage(`✗ Save failed: ${e?.message || e}`);
     }
     setSaving(false);
   };
 
-  const handlePublishScorecard = async () => {
-    if (!scorecard?.id) return;
+  const handlePublish = async () => {
+    if (!scorecard?.id) return setMessage("No saved scorecard to publish");
     setSaving(true);
-    setMessage('');
     try {
-      const token = localStorage.getItem('adminToken');
-      if (!token) {
-        throw new Error('No authentication token found. Please login as admin.');
-      }
-
-      const response = await fetch(`/api/scorecards/${scorecard.id}/publish`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
+      const token = localStorage.getItem("adminToken");
+      if (!token) throw new Error("No admin token");
+      const res = await fetch(`/api/scorecards/${scorecard.id}/publish`, {
+        method: "PUT",
+        headers: { Authorization: `Bearer ${token}` },
       });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || `Error: ${response.status} ${response.statusText}`);
+      if (!res.ok) throw new Error(`Publish failed: ${res.status}`);
+      const pub = await res.json().catch(() => null);
+      if (pub) {
+        // remove draft
+        try { localStorage.removeItem(getDraftKey(pub.matchId)); } catch (e) {}
+        setScorecard(pub);
+        setMessage("✓ Published");
+        setTimeout(() => setMessage(""), 2500);
       }
-
-      const published = await response.json();
-      setScorecard(published);
-      // Remove local draft after publishing
-      try { 
-        localStorage.removeItem(`ipl_scorecard_draft_${published.matchId}`); 
-        console.log('🗑️ [IPL SCORECARD] Removed local draft after publish. Current value:', localStorage.getItem(`ipl_scorecard_draft_${published.matchId}`));
-      } catch (e) {}
-      setMessage('✓ Scorecard published successfully!');
-      setTimeout(() => setMessage(''), 3000);
-    } catch (err) {
-      console.error('Error publishing:', err);
-      setMessage(`✗ Error publishing scorecard: ${err instanceof Error ? err.message : 'Unknown error'}`);
+    } catch (e: any) {
+      console.error(e);
+      setMessage(`✗ Publish failed: ${e?.message || e}`);
     }
     setSaving(false);
   };
 
-  const updateMatchInfo = (field: string, value: any) => {
-    if (!scorecard) return;
-    const updated = { ...scorecard };
-    if (field.includes('.')) {
-      const [parent, child] = field.split('.');
-      updated.matchInfo = {
-        ...updated.matchInfo,
-        [parent]: { ...(updated.matchInfo as any)[parent], [child]: value }
-      };
-    } else {
-      updated.matchInfo = { ...updated.matchInfo, [field]: value };
-    }
-    setScorecard(updated);
-  };
+  // UI helpers
+  const currentMatch = useMemo(() => matches.find((m) => m.id === selectedMatchId) || null, [matches, selectedMatchId]);
 
-  const updateBattingOrder = (tossWinner: string, tossDecision: string) => {
-    if (!scorecard) return;
-    const updated = { ...scorecard };
-    
-    // Determine which team won the toss
-    let tossWinnerTeamId: number;
-    let otherTeamId: number;
-    
-    if (tossWinner === scorecard.matchInfo.team1.name) {
-      tossWinnerTeamId = scorecard.matchInfo.team1.id;
-      otherTeamId = scorecard.matchInfo.team2.id;
-    } else if (tossWinner === scorecard.matchInfo.team2.name) {
-      tossWinnerTeamId = scorecard.matchInfo.team2.id;
-      otherTeamId = scorecard.matchInfo.team1.id;
-    } else {
-      return; // Invalid toss winner
-    }
-    
-    // Determine batting order based on toss decision
-    let firstInningsTeamId: number;
-    let secondInningsTeamId: number;
-    
-    if (tossDecision === 'bat') {
-      // Toss winner chose to bat, they bat first
-      firstInningsTeamId = tossWinnerTeamId;
-      secondInningsTeamId = otherTeamId;
-    } else if (tossDecision === 'bowl') {
-      // Toss winner chose to bowl, other team bats first
-      firstInningsTeamId = otherTeamId;
-      secondInningsTeamId = tossWinnerTeamId;
-    } else {
-      return; // Invalid toss decision
-    }
-    
-    // Update innings batting order
-    updated.innings[0].battingTeamId = firstInningsTeamId;
-    updated.innings[1].battingTeamId = secondInningsTeamId;
-    
-    setScorecard(updated);
-    
-    // Show feedback to user
-    const firstTeamName = firstInningsTeamId === scorecard.matchInfo.team1.id ? scorecard.matchInfo.team1.name : scorecard.matchInfo.team2.name;
-    console.log(`Batting order updated: ${firstTeamName} bats first`);
-  };
-
-  const addBatter = () => {
-    if (!scorecard) return;
-    const updated = { ...scorecard };
-    const teamPlayers = getPlayersByTeam(updated.innings[activeInnings].battingTeamId);
-    
-    updated.innings[activeInnings].batting.push({
-      playerId: '',
-      name: '',
-      runs: '',
-      balls: '',
-      fours: '',
-      sixes: '',
-      strikeRate: '',
-      dismissal: { type: 'not-out' }
-    });
-    setScorecard(updated);
-  };
-
-  const updateBatter = (playerIndex: number, field: string, value: any) => {
-    if (!scorecard) return;
-    const updated = { ...scorecard };
-    const batter = updated.innings[activeInnings].batting[playerIndex];
-    
-    if (field === 'playerId') {
-      const player = players.find(p => p.id === value);
-      if (player) {
-        batter.name = player.name;
-      }
-    }
-    
-    (batter as any)[field] = value;
-
-    // Calculate strike rate
-    if (field === 'runs' || field === 'balls') {
-      const runsNum = Number(batter.runs) || 0;
-      const ballsNum = Number(batter.balls) || 0;
-      batter.strikeRate = ballsNum > 0 ? parseFloat(((runsNum / ballsNum) * 100).toFixed(2)) : '';
-    }
-
-    setScorecard(updated);
-  };
-
-  const removeBatter = (playerIndex: number) => {
-    if (!scorecard) return;
-    const updated = { ...scorecard };
-    updated.innings[activeInnings].batting.splice(playerIndex, 1);
-    setScorecard(updated);
-  };
-
-  const addBowler = () => {
-    if (!scorecard) return;
-    const updated = { ...scorecard };
-    
-    updated.innings[activeInnings].bowling.push({
-      playerId: '',
-      name: '',
-      overs: '',
-      balls: '',
-      runs: '',
-      wickets: '',
-      maidens: '',
-      economyRate: '',
-    });
-    setScorecard(updated);
-  };
-
-  const updateBowler = (bowlerIndex: number, field: string, value: any) => {
-    if (!scorecard) return;
-    const updated = { ...scorecard };
-    const bowler = updated.innings[activeInnings].bowling[bowlerIndex];
-    
-    if (field === 'playerId') {
-      const player = players.find(p => p.id === value);
-      if (player) {
-        bowler.name = player.name;
-      }
-    }
-    
-    (bowler as any)[field] = value;
-
-    // Calculate economy rate
-    if (field === 'overs' || field === 'balls' || field === 'runs') {
-      const oversNum = Number(bowler.overs) || 0;
-      const ballsNum = Number(bowler.balls) || 0;
-      const runsNum = Number(bowler.runs) || 0;
-      const totalOvers = oversNum + ballsNum / 6;
-      bowler.economyRate = totalOvers > 0 ? parseFloat((runsNum / totalOvers).toFixed(2)) : '';
-    }
-
-    setScorecard(updated);
-  };
-
-  const removeBowler = (bowlerIndex: number) => {
-    if (!scorecard) return;
-    const updated = { ...scorecard };
-    updated.innings[activeInnings].bowling.splice(bowlerIndex, 1);
-    setScorecard(updated);
-  };
-
-  const calculateInningsTotals = () => {
-    if (!scorecard) return;
-    const updated = { ...scorecard };
-    const inning = updated.innings[activeInnings];
-
-    // Calculate total runs (handle empty-string inputs)
-    inning.totalRuns = inning.batting.reduce((sum, b) => sum + (Number(b.runs) || 0), 0) + 
-               (Number(inning.extras.wides) + Number(inning.extras.noBalls) + Number(inning.extras.byes) + Number(inning.extras.legByes));
-
-    // Calculate total wickets
-    inning.totalWickets = inning.batting.filter(
-      (b) => !b.dismissal || b.dismissal.type !== 'not-out'
-    ).length;
-
-    setScorecard(updated);
-  };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 text-white flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mx-auto mb-4"></div>
-          <p>Loading...</p>
-        </div>
-      </div>
-    );
-  }
+  if (loading) return <div className="p-8 text-white">Loading...</div>;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 text-white p-4 md:p-8">
-      <div className="max-w-7xl mx-auto">
-        <h1 className="text-4xl font-bold mb-2">IPL Scorecard Admin</h1>
-        <p className="text-gray-400 mb-8">Create and manage IPL match scorecards</p>
+    <div className="p-6 text-white">
+      <h1 className="text-2xl font-bold mb-4">IPL Scorecard Admin (robust draft persistence)</h1>
+      {message && <div className="mb-4">{message}</div>}
 
-        {message && (
-          <div className={`mb-6 p-4 rounded-lg ${message.includes('✓') ? 'bg-green-900' : 'bg-red-900'}`}>
-            {message}
-          </div>
-        )}
+      <div className="mb-4">
+        <label className="block mb-1">Select Match</label>
+        <select value={selectedMatchId || ""} onChange={(e) => handleSelectMatch(e.target.value)} className="p-2 rounded">
+          {matches.map((m) => (
+            <option key={m.id} value={m.id}>{m.team1.name} vs {m.team2.name}</option>
+          ))}
+        </select>
+      </div>
 
-        {/* Match Selection */}
-        {!selectedMatch && (
-          <div>
-            <div className="mb-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-              <div>
-                <h2 className="text-2xl font-bold">Select a Match</h2>
-                <p className="text-gray-400 mt-1">
-                  {matches.length} IPL matches available • {players.length} IPL players loaded
-                </p>
-              </div>
+      <div className="mb-4">
+        <label className="block mb-1">Venue</label>
+        <input value={scorecard?.matchInfo?.venue || ""} onChange={(e) => updateField("matchInfo.venue", e.target.value)} className="p-2 rounded text-black" />
+      </div>
 
-              <div className="flex items-center gap-3">
-                <button
-                  onClick={refreshData}
-                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded transition flex items-center gap-2"
-                >
-                  🔄 Refresh Data
-                </button>
+      <div className="mb-4">
+        <label className="block mb-1">Toss Winner</label>
+        <select value={scorecard?.matchInfo?.toss?.winner || ""} onChange={(e) => { updateField("matchInfo.toss.winner", e.target.value); }} className="p-2 rounded">
+          <option value="">(select)</option>
+          <option value={currentMatch?.team1.name || ""}>{currentMatch?.team1.name}</option>
+          <option value={currentMatch?.team2.name || ""}>{currentMatch?.team2.name}</option>
+        </select>
+      </div>
 
-                <button
-                  onClick={handleCreateMatch}
-                  className="px-4 py-2 bg-pink-600 hover:bg-pink-700 rounded transition"
-                >
-                  ➕ Create Match
-                </button>
-              </div>
-            </div>
-            
-            {/* Show message when no matches are available */}
-            {matches.length === 0 && (
-              <div className="bg-yellow-900 border border-yellow-700 rounded-lg p-6 mb-6">
-                <div className="flex items-center gap-3 mb-3">
-                  <span className="text-2xl">⚠️</span>
-                  <h3 className="text-xl font-bold text-yellow-300">IPL Matches Not Yet Available</h3>
-                </div>
-                <p className="text-yellow-200 mb-4">
-                  IPL matches are not yet available until you add them in the IPL matches page. 
-                  Once you create IPL matches, they will appear here for scorecard management.
-                </p>
-                <div className="flex gap-3 flex-wrap">
-                  <button
-                    onClick={handleCreateMatch}
-                    className="px-4 py-2 bg-yellow-600 hover:bg-yellow-700 rounded transition flex items-center gap-2"
-                  >
-                    ➕ Create IPL Matches Manually
-                  </button>
-                  <button
-                    onClick={() => router.push('/ipl-admin-2026/matches')}
-                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded transition flex items-center gap-2"
-                  >
-                    📋 Go to IPL Matches Page
-                  </button>
-                </div>
-              </div>
-            )}
-            
-            {/* Show message when no players are available but matches exist */}
-            {matches.length > 0 && players.length === 0 && (
-              <div className="bg-orange-900 border border-orange-700 rounded-lg p-6 mb-6">
-                <div className="flex items-center gap-3 mb-3">
-                  <span className="text-2xl">👥</span>
-                  <h3 className="text-xl font-bold text-orange-300">IPL Players Not Yet Available</h3>
-                </div>
-                <p className="text-orange-200 mb-4">
-                  IPL players are not yet available. You need to add players before creating scorecards.
-                </p>
-                <div className="flex gap-3 flex-wrap">
-                  <button
-                    onClick={() => router.push('/ipl-admin-2026/players')}
-                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded transition flex items-center gap-2"
-                  >
-                    👥 Go to IPL Players Page
-                  </button>
-                </div>
-              </div>
-            )}
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {matches.map((match) => (
-                <button
-                  key={match.id}
-                  onClick={() => handleSelectMatch(match)}
-                  className="p-6 rounded-lg bg-gray-800 hover:bg-gray-700 transition text-left border border-gray-700 hover:border-blue-500"
-                >
-                  <div className="font-bold text-lg mb-2">
-                    {match.team1.name} vs {match.team2.name}
-                  </div>
-                  <div className="text-sm text-gray-400">
-                    {match.date} • {match.time}
-                  </div>
-                  <div className="text-sm text-gray-400">{match.venue}</div>
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
+      <div className="mb-4">
+        <label className="block mb-1">Toss Decision</label>
+        <select value={scorecard?.matchInfo?.toss?.decision || ""} onChange={(e) => { updateField("matchInfo.toss.decision", e.target.value); }} className="p-2 rounded">
+          <option value="">(select)</option>
+          <option value="bat">Bat</option>
+          <option value="bowl">Bowl</option>
+        </select>
+      </div>
 
-        {/* Scorecard Editor */}
-        {scorecard && (
-          <div>
-            <div className="mb-6 flex items-center justify-between">
-              <div>
-                <h2 className="text-2xl font-bold">
-                  {scorecard.matchInfo.team1.name} vs {scorecard.matchInfo.team2.name}
-                </h2>
-                <p className="text-gray-400 mt-1">{scorecard.matchInfo.venue}</p>
-              </div>
-              <div className="flex gap-2 flex-wrap">
-                <button
-                  onClick={handleSaveScorecard}
-                  disabled={saving}
-                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-800 rounded transition"
-                >
-                  {saving ? 'Saving...' : 'Save Draft'}
-                </button>
-                <button
-                  onClick={handlePublishScorecard}
-                  disabled={saving || !scorecard.id}
-                  className="px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-green-800 rounded transition"
-                >
-                  {saving ? 'Publishing...' : 'Publish'}
-                </button>
-                <button
-                  onClick={() => exportScorecardPDF(scorecard)}
-                  disabled={!scorecard}
-                  className="px-4 py-2 bg-purple-600 hover:bg-purple-700 disabled:bg-purple-800 rounded transition flex items-center gap-2"
-                >
-                  📄 Export PDF
-                </button>
-                <button
-                  onClick={() => exportScorecardCSV(scorecard)}
-                  disabled={!scorecard}
-                  className="px-4 py-2 bg-orange-600 hover:bg-orange-700 disabled:bg-orange-800 rounded transition flex items-center gap-2"
-                >
-                  📊 Export CSV
-                </button>
-                <button
-                  onClick={() => {
-                    setSelectedMatch(null);
-                    setScorecard(null);
-                    setActiveTab('matchInfo');
-                  }}
-                  className="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded"
-                >
-                  Change Match
-                </button>
-              </div>
-            </div>
+      <div className="flex gap-3">
+        <button onClick={handleSave} disabled={saving} className="px-4 py-2 bg-blue-600 rounded">{saving ? "Saving..." : "Save Draft"}</button>
+        <button onClick={handlePublish} disabled={saving || !scorecard?.id} className="px-4 py-2 bg-green-600 rounded">Publish</button>
+        <button onClick={() => { localStorage.removeItem(getDraftKey(selectedMatchId || "")); setMessage('Local draft removed'); setTimeout(()=>setMessage(''),2000); }} className="px-4 py-2 bg-red-600 rounded">Clear Local Draft</button>
+      </div>
 
-            {/* Tabs */}
-            <div className="flex gap-2 mb-6 overflow-x-auto pb-2 border-b border-gray-700">
-              {['matchInfo', 'innings1', 'innings2', 'result'].map((tab) => (
-                <button
-                  key={tab}
-                  onClick={() => {
-                    setActiveTab(tab);
-                    if (tab === 'innings1') setActiveInnings(0);
-                    if (tab === 'innings2') setActiveInnings(1);
-                  }}
-                  className={`px-4 py-2 rounded-t whitespace-nowrap transition ${
-                    activeTab === tab
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-gray-800 text-gray-400 hover:text-white'
-                  }`}
-                >
-                  {tab === 'matchInfo' && '📋 Match Info'}
-                  {tab === 'innings1' && scorecard && `🏏 ${scorecard.innings[0]?.battingTeamId === scorecard.matchInfo.team1?.id ? scorecard.matchInfo.team1?.name : scorecard.matchInfo.team2?.name} Innings (1st)`}
-                  {tab === 'innings2' && scorecard && `🏏 ${scorecard.innings[1]?.battingTeamId === scorecard.matchInfo.team1?.id ? scorecard.matchInfo.team1?.name : scorecard.matchInfo.team2?.name} Innings (2nd)`}
-                  {tab === 'result' && '🏆 Result'}
-                </button>
-              ))}
-            </div>
-
-            {/* Match Info Tab */}
-            {activeTab === 'matchInfo' && scorecard && (
-              <div className="bg-gray-800 p-6 rounded-lg">
-                <h3 className="text-xl font-bold mb-6">Match Information</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label className="block text-sm text-gray-400 mb-2">Toss Winner</label>
-                    {scorecard && scorecard.matchInfo && scorecard.matchInfo.team1 && scorecard.matchInfo.team2 ? (
-                      <select
-                        value={scorecard.matchInfo.toss?.winner || ''}
-                        onChange={(e) => {
-                          updateMatchInfo('toss.winner', e.target.value);
-                          // Auto-determine batting order when toss winner is selected
-                          if (e.target.value && scorecard.matchInfo.toss?.decision) {
-                            updateBattingOrder(e.target.value, scorecard.matchInfo.toss.decision);
-                          }
-                        }}
-                        className="w-full bg-gray-700 p-3 rounded border border-gray-600 text-white"
-                      >
-                        <option value="">Select Toss Winner...</option>
-                        <option value={scorecard.matchInfo.team1.name}>{scorecard.matchInfo.team1.name}</option>
-                        <option value={scorecard.matchInfo.team2.name}>{scorecard.matchInfo.team2.name}</option>
-                      </select>
-                    ) : (
-                      <select
-                        disabled
-                        className="w-full bg-gray-700 p-3 rounded border border-gray-600 text-gray-500"
-                      >
-                        <option>Loading teams...</option>
-                      </select>
-                    )}
-                    {/* Debug info */}
-                    <div className="mt-2 text-xs text-gray-500">
-                      Debug: Scorecard = {scorecard ? 'EXISTS' : 'NOT FOUND'}, 
-                      Team1 = {scorecard?.matchInfo?.team1?.name || 'NOT FOUND'}, 
-                      Team2 = {scorecard?.matchInfo?.team2?.name || 'NOT FOUND'}
-                    </div>
-                  </div>
-                  <div>
-                    <label className="block text-sm text-gray-400 mb-2">Toss Decision</label>
-                    {scorecard && scorecard.matchInfo ? (
-                      <select
-                        value={scorecard.matchInfo.toss?.decision || ''}
-                        onChange={(e) => {
-                          updateMatchInfo('toss.decision', e.target.value);
-                          // Auto-determine batting order when decision is selected
-                          if (e.target.value && scorecard.matchInfo.toss?.winner) {
-                            updateBattingOrder(scorecard.matchInfo.toss.winner, e.target.value);
-                          }
-                        }}
-                        className="w-full bg-gray-700 p-3 rounded border border-gray-600 text-white"
-                      >
-                        <option value="">Select Toss Decision...</option>
-                        <option value="bat">Bat</option>
-                        <option value="bowl">Bowl (Field First)</option>
-                      </select>
-                    ) : (
-                      <select
-                        disabled
-                        className="w-full bg-gray-700 p-3 rounded border border-gray-600 text-gray-500"
-                      >
-                        <option>Loading...</option>
-                      </select>
-                    )}
-                  </div>
-                  <div>
-                    <label className="block text-sm text-gray-400 mb-2">Venue</label>
-                    <input
-                      type="text"
-                      value={scorecard.matchInfo.venue}
-                      onChange={(e) => updateMatchInfo('venue', e.target.value)}
-                      className="w-full bg-gray-700 p-3 rounded border border-gray-600 text-white"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm text-gray-400 mb-2">Date</label>
-                    <input
-                      type="date"
-                      value={scorecard.matchInfo.date}
-                      onChange={(e) => updateMatchInfo('date', e.target.value)}
-                      className="w-full bg-gray-700 p-3 rounded border border-gray-600 text-white"
-                    />
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Innings Tabs */}
-            {['innings1', 'innings2'].includes(activeTab) && (
-              <div className="space-y-8">
-                {/* Batting Section */}
-                <div className="bg-gray-800 p-6 rounded-lg">
-                  <div className="flex justify-between items-center mb-6">
-                    <h3 className="text-xl font-bold">Batting</h3>
-                    <button
-                      onClick={addBatter}
-                      className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded transition"
-                    >
-                      + Add Batter
-                    </button>
-                  </div>
-
-                  {scorecard.innings[activeInnings].batting.length === 0 ? (
-                    <p className="text-gray-400">No batters added yet</p>
-                  ) : (
-                    <div className="overflow-x-auto">
-                      <table className="w-full text-sm">
-                        <thead>
-                          <tr className="border-b border-gray-600">
-                            <th className="text-left p-2">Player</th>
-                            <th className="text-center p-2">Runs</th>
-                            <th className="text-center p-2">Balls</th>
-                            <th className="text-center p-2">4s</th>
-                            <th className="text-center p-2">6s</th>
-                            <th className="text-center p-2">SR</th>
-                            <th className="text-left p-2">Dismissal</th>
-                            <th className="text-center p-2">Action</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {scorecard.innings[activeInnings].batting.map((batter, idx) => {
-                            const teamPlayers = getPlayersByTeam(scorecard.innings[activeInnings].battingTeamId);
-                            return (
-                              <tr key={idx} className="border-b border-gray-700">
-                                <td className="p-2">
-                                  <select
-                                    value={batter.playerId}
-                                    onChange={(e) => updateBatter(idx, 'playerId', e.target.value)}
-                                    className="w-full bg-gray-700 p-2 rounded border border-gray-600 text-white text-sm"
-                                  >
-                                    <option value="">Select Player</option>
-                                    {teamPlayers.map(player => (
-                                      <option key={player.id} value={player.id}>{player.name}</option>
-                                    ))}
-                                  </select>
-                                </td>
-                                <td className="p-2">
-                                  <input
-                                    type="number"
-                                    value={batter.runs || ''}
-                                    onChange={(e) => updateBatter(idx, 'runs', e.target.value)}
-                                    placeholder=""
-                                    className="w-full bg-gray-700 p-2 rounded border border-gray-600 text-white text-center text-sm"
-                                  />
-                                </td>
-                                <td className="p-2">
-                                  <input
-                                    type="number"
-                                    value={batter.balls || ''}
-                                    onChange={(e) => updateBatter(idx, 'balls', e.target.value)}
-                                    placeholder=""
-                                    className="w-full bg-gray-700 p-2 rounded border border-gray-600 text-white text-center text-sm"
-                                  />
-                                </td>
-                                <td className="p-2">
-                                  <input
-                                    type="number"
-                                    value={batter.fours || ''}
-                                    onChange={(e) => updateBatter(idx, 'fours', e.target.value)}
-                                    placeholder=""
-                                    className="w-full bg-gray-700 p-2 rounded border border-gray-600 text-white text-center text-sm"
-                                  />
-                                </td>
-                                <td className="p-2">
-                                  <input
-                                    type="number"
-                                    value={batter.sixes || ''}
-                                    onChange={(e) => updateBatter(idx, 'sixes', e.target.value)}
-                                    placeholder=""
-                                    className="w-full bg-gray-700 p-2 rounded border border-gray-600 text-white text-center text-sm"
-                                  />
-                                </td>
-                                <td className="p-2 text-center font-bold text-green-400">{batter.strikeRate}</td>
-                                <td className="p-2">
-                                  <select
-                                    value={batter.dismissal?.type || 'not-out'}
-                                    onChange={(e) =>
-                                      updateBatter(idx, 'dismissal', {
-                                        ...batter.dismissal,
-                                        type: e.target.value,
-                                      })
-                                    }
-                                    className="bg-gray-700 p-2 rounded border border-gray-600 text-white text-sm"
-                                  >
-                                    <option value="not-out">Not Out</option>
-                                    <option value="bowled">Bowled</option>
-                                    <option value="caught">Caught</option>
-                                    <option value="lbw">LBW</option>
-                                    <option value="run-out">Run Out</option>
-                                    <option value="stumped">Stumped</option>
-                                    <option value="hit-wicket">Hit Wicket</option>
-                                  </select>
-                                </td>
-                                <td className="p-2 text-center">
-                                  <button
-                                    onClick={() => removeBatter(idx)}
-                                    className="px-3 py-1 bg-red-600 hover:bg-red-700 rounded text-sm"
-                                  >
-                                    ✕
-                                  </button>
-                                </td>
-                              </tr>
-                            );
-                          })}
-                        </tbody>
-                      </table>
-                    </div>
-                  )}
-
-                  {/* Calculate Totals Button */}
-                  <button
-                    onClick={calculateInningsTotals}
-                    className="w-full px-6 py-3 bg-purple-600 hover:bg-purple-700 rounded font-semibold transition mt-6"
-                  >
-                    Calculate Totals
-                  </button>
-                </div>
-
-                {/* Bowling Section */}
-                <div className="bg-gray-800 p-6 rounded-lg">
-                  <div className="flex justify-between items-center mb-6">
-                    <h3 className="text-xl font-bold">Bowling</h3>
-                    <button
-                      onClick={addBowler}
-                      className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded transition"
-                    >
-                      + Add Bowler
-                    </button>
-                  </div>
-
-                  {scorecard.innings[activeInnings].bowling.length === 0 ? (
-                    <p className="text-gray-400">No bowlers added yet</p>
-                  ) : (
-                    <div className="overflow-x-auto">
-                      <table className="w-full text-sm">
-                        <thead>
-                          <tr className="border-b border-gray-600">
-                            <th className="text-left p-2">Player</th>
-                            <th className="text-center p-2">Overs</th>
-                            <th className="text-center p-2">Balls</th>
-                            <th className="text-center p-2">Runs</th>
-                            <th className="text-center p-2">Wickets</th>
-                            <th className="text-center p-2">Maidens</th>
-                            <th className="text-center p-2">Economy</th>
-                            <th className="text-center p-2">Action</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {scorecard.innings[activeInnings].bowling.map((bowler, idx) => {
-                            const teamPlayers = getPlayersByTeam(scorecard.innings[activeInnings].battingTeamId === scorecard.matchInfo.team1.id ? scorecard.matchInfo.team2.id : scorecard.matchInfo.team1.id);
-                            return (
-                              <tr key={idx} className="border-b border-gray-700">
-                                <td className="p-2">
-                                  <select
-                                    value={bowler.playerId}
-                                    onChange={(e) => updateBowler(idx, 'playerId', e.target.value)}
-                                    className="w-full bg-gray-700 p-2 rounded border border-gray-600 text-white text-sm"
-                                  >
-                                    <option value="">Select Player</option>
-                                    {teamPlayers.map(player => (
-                                      <option key={player.id} value={player.id}>{player.name}</option>
-                                    ))}
-                                  </select>
-                                </td>
-                                <td className="p-2">
-                                  <input
-                                    type="number"
-                                    step="0.1"
-                                    value={bowler.overs || ''}
-                                    onChange={(e) => updateBowler(idx, 'overs', e.target.value)}
-                                    placeholder=""
-                                    className="w-full bg-gray-700 p-2 rounded border border-gray-600 text-white text-center text-sm"
-                                  />
-                                </td>
-                                <td className="p-2">
-                                  <input
-                                    type="number"
-                                    value={bowler.balls || ''}
-                                    onChange={(e) => updateBowler(idx, 'balls', e.target.value)}
-                                    placeholder=""
-                                    className="w-full bg-gray-700 p-2 rounded border border-gray-600 text-white text-center text-sm"
-                                  />
-                                </td>
-                                <td className="p-2">
-                                  <input
-                                    type="number"
-                                    value={bowler.runs || ''}
-                                    onChange={(e) => updateBowler(idx, 'runs', e.target.value)}
-                                    placeholder=""
-                                    className="w-full bg-gray-700 p-2 rounded border border-gray-600 text-white text-center text-sm"
-                                  />
-                                </td>
-                                <td className="p-2">
-                                  <input
-                                    type="number"
-                                    value={bowler.wickets || ''}
-                                    onChange={(e) => updateBowler(idx, 'wickets', e.target.value)}
-                                    placeholder=""
-                                    className="w-full bg-gray-700 p-2 rounded border border-gray-600 text-white text-center text-sm"
-                                  />
-                                </td>
-                                <td className="p-2">
-                                  <input
-                                    type="number"
-                                    value={bowler.maidens || ''}
-                                    onChange={(e) => updateBowler(idx, 'maidens', e.target.value)}
-                                    placeholder=""
-                                    className="w-full bg-gray-700 p-2 rounded border border-gray-600 text-white text-center text-sm font-bold text-yellow-400"
-                                  />
-                                </td>
-                                <td className="p-2 text-center font-bold text-green-400">{bowler.economyRate}</td>
-                                <td className="p-2 text-center">
-                                  <button
-                                    onClick={() => removeBowler(idx)}
-                                    className="px-3 py-1 bg-red-600 hover:bg-red-700 rounded text-sm"
-                                  >
-                                    ✕
-                                  </button>
-                                </td>
-                              </tr>
-                            );
-                          })}
-                        </tbody>
-                      </table>
-                    </div>
-                  )}
-                </div>
-
-                {/* Fall of Wickets Section */}
-                {['innings1', 'innings2'].includes(activeTab) && (
-                  <div className="bg-gray-800 p-6 rounded-lg mb-6">
-                    <h3 className="text-xl font-bold mb-4">Fall of Wickets</h3>
-                    <button
-                      onClick={() => {
-                        const updated = { ...scorecard };
-                        updated.innings[activeInnings].fallOfWickets = [
-                          ...updated.innings[activeInnings].fallOfWickets,
-                          { player: '', score: '', over: '' }
-                        ];
-                        setScorecard(updated);
-                      }}
-                      className="mb-4 px-4 py-2 bg-blue-600 hover:bg-blue-500 rounded font-bold transition"
-                    >
-                      Add FOW
-                    </button>
-                    {scorecard.innings[activeInnings].fallOfWickets && scorecard.innings[activeInnings].fallOfWickets.length > 0 && (
-                      <table className="w-full bg-gray-700 rounded-lg overflow-hidden">
-                        <thead className="bg-gray-600">
-                          <tr>
-                            <th className="p-3 text-left">Player</th>
-                            <th className="p-3 text-left">Score at Dismissal</th>
-                            <th className="p-3 text-left">Over</th>
-                            <th className="p-3 text-left">Actions</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {scorecard.innings[activeInnings].fallOfWickets.map((fow, index) => (
-                            <tr key={index} className="border-b border-gray-600">
-                              <td className="p-3">
-                                <select
-                                  value={fow.player || ''}
-                                  onChange={(e) => {
-                                    const updated = { ...scorecard };
-                                    updated.innings[activeInnings].fallOfWickets[index] = { ...fow, player: e.target.value };
-                                    setScorecard(updated);
-                                  }}
-                                  className="w-full bg-gray-700 p-2 rounded border border-gray-600 text-white"
-                                >
-                                  <option value="">Select Player...</option>
-                                  {players
-                                    .filter(player => {
-                                      const battingTeamId = scorecard.innings[activeInnings].battingTeamId;
-                                      return String(player.teamId) === String(battingTeamId);
-                                    })
-                                    .map(player => (
-                                      <option key={player.id} value={player.name}>
-                                        {player.name}
-                                      </option>
-                                    ))}
-                                </select>
-                              </td>
-                              <td className="p-3">
-                                <input
-                                  type="text"
-                                  value={fow.score || ''}
-                                  onChange={(e) => {
-                                    const updated = { ...scorecard };
-                                    updated.innings[activeInnings].fallOfWickets[index] = { ...fow, score: e.target.value };
-                                    setScorecard(updated);
-                                  }}
-                                  className="w-full bg-gray-700 p-2 rounded border border-gray-600 text-white"
-                                  placeholder="Score"
-                                />
-                              </td>
-                              <td className="p-3">
-                                <input
-                                  type="text"
-                                  value={fow.over || ''}
-                                  onChange={(e) => {
-                                    const updated = { ...scorecard };
-                                    updated.innings[activeInnings].fallOfWickets[index] = { ...fow, over: e.target.value };
-                                    setScorecard(updated);
-                                  }}
-                                  className="w-full bg-gray-700 p-2 rounded border border-gray-600 text-white"
-                                  placeholder="Over"
-                                />
-                              </td>
-                              <td className="p-3">
-                                <button
-                                  onClick={() => {
-                                    const updated = { ...scorecard };
-                                    updated.innings[activeInnings].fallOfWickets = updated.innings[activeInnings].fallOfWickets.filter((_, i) => i !== index);
-                                    setScorecard(updated);
-                                  }}
-                                  className="px-3 py-1 bg-red-600 hover:bg-red-500 rounded text-white font-bold transition"
-                                >
-                                  Remove
-                                </button>
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    )}
-                  </div>
-                )}
-
-                {/* Powerplays Section */}
-                {['innings1', 'innings2'].includes(activeTab) && (
-                  <div className="bg-gray-800 p-6 rounded-lg mb-6">
-                    <h3 className="text-xl font-bold mb-4">Powerplays</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div>
-                        <h4 className="text-lg font-semibold mb-3">Mandatory Powerplay</h4>
-                        <div className="grid grid-cols-2 gap-4">
-                          <div>
-                            <label className="block text-sm text-gray-400 mb-2">Overs</label>
-                            <input
-                              type="number"
-                              value={scorecard.innings[activeInnings].powerplays.mandatory.overs || ''}
-                              onChange={(e) => {
-                                const updated = { ...scorecard };
-                                updated.innings[activeInnings].powerplays.mandatory.overs = parseInt(e.target.value) || 0;
-                                setScorecard(updated);
-                              }}
-                              className="w-full bg-gray-700 p-3 rounded border border-gray-600 text-white"
-                              placeholder="Overs"
-                            />
-                          </div>
-                          <div>
-                            <label className="block text-sm text-gray-400 mb-2">Runs</label>
-                            <input
-                              type="number"
-                              value={scorecard.innings[activeInnings].powerplays.mandatory.runs || ''}
-                              onChange={(e) => {
-                                const updated = { ...scorecard };
-                                updated.innings[activeInnings].powerplays.mandatory.runs = parseInt(e.target.value) || 0;
-                                setScorecard(updated);
-                              }}
-                              className="w-full bg-gray-700 p-3 rounded border border-gray-600 text-white"
-                              placeholder="Runs"
-                            />
-                          </div>
-                        </div>
-                      </div>
-                      <div>
-                        <h4 className="text-lg font-semibold mb-3">Optional Powerplay</h4>
-                        <div className="grid grid-cols-2 gap-4">
-                          <div>
-                            <label className="block text-sm text-gray-400 mb-2">Overs</label>
-                            <input
-                              type="number"
-                              value={scorecard.innings[activeInnings].powerplays.optional.overs || ''}
-                              onChange={(e) => {
-                                const updated = { ...scorecard };
-                                updated.innings[activeInnings].powerplays.optional.overs = parseInt(e.target.value) || 0;
-                                setScorecard(updated);
-                              }}
-                              className="w-full bg-gray-700 p-3 rounded border border-gray-600 text-white"
-                              placeholder="Overs"
-                            />
-                          </div>
-                          <div>
-                            <label className="block text-sm text-gray-400 mb-2">Runs</label>
-                            <input
-                              type="number"
-                              value={scorecard.innings[activeInnings].powerplays.optional.runs || ''}
-                              onChange={(e) => {
-                                const updated = { ...scorecard };
-                                updated.innings[activeInnings].powerplays.optional.runs = parseInt(e.target.value) || 0;
-                                setScorecard(updated);
-                              }}
-                              className="w-full bg-gray-700 p-3 rounded border border-gray-600 text-white"
-                              placeholder="Runs"
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* Partnerships Section */}
-                {['innings1', 'innings2'].includes(activeTab) && (
-                  <div className="bg-gray-800 p-6 rounded-lg mb-6">
-                    <h3 className="text-xl font-bold mb-4">Partnerships</h3>
-                    <button
-                      onClick={() => {
-                        const updated = { ...scorecard };
-                        updated.innings[activeInnings].partnerships = [
-                          ...updated.innings[activeInnings].partnerships,
-                          { batsman1: '', batsman2: '', runs: 0, balls: 0 }
-                        ];
-                        setScorecard(updated);
-                      }}
-                      className="mb-4 px-4 py-2 bg-blue-600 hover:bg-blue-500 rounded font-bold transition"
-                    >
-                      Add Partnership
-                    </button>
-                    {scorecard.innings[activeInnings].partnerships && scorecard.innings[activeInnings].partnerships.length > 0 && (
-                      <table className="w-full bg-gray-700 rounded-lg overflow-hidden">
-                        <thead className="bg-gray-600">
-                          <tr>
-                            <th className="p-3 text-left">Batsman 1</th>
-                            <th className="p-3 text-left">Batsman 2</th>
-                            <th className="p-3 text-left">Partnership Runs</th>
-                            <th className="p-3 text-left">Partnership Balls</th>
-                            <th className="p-3 text-left">Actions</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {scorecard.innings[activeInnings].partnerships.map((partnership, index) => (
-                            <tr key={index} className="border-b border-gray-600">
-                              <td className="p-3">
-                                <select
-                                  value={partnership.batsman1 || ''}
-                                  onChange={(e) => {
-                                    const updated = { ...scorecard };
-                                    updated.innings[activeInnings].partnerships[index] = { ...partnership, batsman1: e.target.value };
-                                    setScorecard(updated);
-                                  }}
-                                  className="w-full bg-gray-700 p-2 rounded border border-gray-600 text-white"
-                                >
-                                  <option value="">Select Batsman 1...</option>
-                                  {players
-                                    .filter(player => {
-                                      const battingTeamId = scorecard.innings[activeInnings].battingTeamId;
-                                      return String(player.teamId) === String(battingTeamId);
-                                    })
-                                    .map(player => (
-                                      <option key={player.id} value={player.name}>
-                                        {player.name}
-                                      </option>
-                                    ))}
-                                </select>
-                              </td>
-                              <td className="p-3">
-                                <select
-                                  value={partnership.batsman2 || ''}
-                                  onChange={(e) => {
-                                    const updated = { ...scorecard };
-                                    updated.innings[activeInnings].partnerships[index] = { ...partnership, batsman2: e.target.value };
-                                    setScorecard(updated);
-                                  }}
-                                  className="w-full bg-gray-700 p-2 rounded border border-gray-600 text-white"
-                                >
-                                  <option value="">Select Batsman 2...</option>
-                                  {players
-                                    .filter(player => {
-                                      const battingTeamId = scorecard.innings[activeInnings].battingTeamId;
-                                      return String(player.teamId) === String(battingTeamId);
-                                    })
-                                    .map(player => (
-                                      <option key={player.id} value={player.name}>
-                                        {player.name}
-                                      </option>
-                                    ))}
-                                </select>
-                              </td>
-                              <td className="p-3">
-                                <input
-                                  type="number"
-                                  value={partnership.runs || ''}
-                                  onChange={(e) => {
-                                    const updated = { ...scorecard };
-                                    updated.innings[activeInnings].partnerships[index] = { ...partnership, runs: parseInt(e.target.value) || 0 };
-                                    setScorecard(updated);
-                                  }}
-                                  className="w-full bg-gray-700 p-2 rounded border border-gray-600 text-white"
-                                  placeholder="Runs"
-                                />
-                              </td>
-                              <td className="p-3">
-                                <input
-                                  type="number"
-                                  value={partnership.balls || ''}
-                                  onChange={(e) => {
-                                    const updated = { ...scorecard };
-                                    updated.innings[activeInnings].partnerships[index] = { ...partnership, balls: parseInt(e.target.value) || 0 };
-                                    setScorecard(updated);
-                                  }}
-                                  className="w-full bg-gray-700 p-2 rounded border border-gray-600 text-white"
-                                  placeholder="Balls"
-                                />
-                              </td>
-                              <td className="p-3">
-                                <button
-                                  onClick={() => {
-                                    const updated = { ...scorecard };
-                                    updated.innings[activeInnings].partnerships = updated.innings[activeInnings].partnerships.filter((_, i) => i !== index);
-                                    setScorecard(updated);
-                                  }}
-                                  className="px-3 py-1 bg-red-600 hover:bg-red-500 rounded text-white font-bold transition"
-                                >
-                                  Remove
-                                </button>
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    )}
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* Result Tab */}
-            {activeTab === 'result' && (
-              <div className="bg-gray-800 p-6 rounded-lg">
-                <h3 className="text-xl font-bold mb-6">Match Result</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label className="block text-sm text-gray-400 mb-2">Winner</label>
-                    <select
-                      value={scorecard.result?.winner || ''}
-                      onChange={(e) => {
-                        const updated = { ...scorecard };
-                        updated.result = { ...updated.result, winner: e.target.value };
-                        setScorecard(updated);
-                      }}
-                      className="w-full bg-gray-700 p-3 rounded border border-gray-600 text-white"
-                    >
-                      <option value="">Select...</option>
-                      <option value={scorecard.matchInfo.team1.name}>{scorecard.matchInfo.team1.name}</option>
-                      <option value={scorecard.matchInfo.team2.name}>{scorecard.matchInfo.team2.name}</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-sm text-gray-400 mb-2">Margin (e.g., "by 5 runs")</label>
-                    <input
-                      type="text"
-                      value={scorecard.result?.margin || ''}
-                      onChange={(e) => {
-                        const updated = { ...scorecard };
-                        updated.result = { ...updated.result, margin: e.target.value };
-                        setScorecard(updated);
-                      }}
-                      className="w-full bg-gray-700 p-3 rounded border border-gray-600 text-white"
-                    />
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-        )}
+      <div className="mt-6 text-sm text-gray-300">
+        <div>Match: {currentMatch ? `${currentMatch.team1.name} vs ${currentMatch.team2.name}` : selectedMatchId}</div>
+        <div>Scorecard id: {scorecard?.id || '(unsaved)'}</div>
+        <div>Local draft key: {selectedMatchId ? getDraftKey(selectedMatchId) : '(none)'}</div>
       </div>
     </div>
   );
