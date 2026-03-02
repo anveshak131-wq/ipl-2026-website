@@ -201,11 +201,16 @@ export default function StatsPage() {
 
   // IPL points table for end-user stats page (read-only)
   const pointsTable = useMemo(() => {
-    // Mirror admin logic: prefer locally saved stats, then team.stats, then zeros
+    // Mirror admin logic: prefer locally saved stats (year -> teamId -> stats), then team.stats, then zeros
     let savedStats: Record<string, { matchesPlayed?: number; wins?: number; losses?: number; points?: number; netRunRate?: number }> = {};
     if (typeof window !== 'undefined') {
       try {
-        savedStats = JSON.parse(window.localStorage.getItem('iplPointsTableStats') || '{}') || {};
+        const allStats = JSON.parse(window.localStorage.getItem('iplPointsTableStats') || '{}') || {};
+        if (allStats[pointsYear] && typeof allStats[pointsYear] === 'object') {
+          savedStats = allStats[pointsYear];
+        } else {
+          savedStats = {};
+        }
       } catch {
         // ignore parse errors and fall back to team.stats
       }

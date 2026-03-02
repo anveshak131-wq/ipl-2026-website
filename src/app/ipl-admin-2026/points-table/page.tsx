@@ -8,27 +8,35 @@ import { Team } from '@/types';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import GradientText from '@/components/ui/GradientText';
 
-// IPL Teams by Season - Historical data for each IPL year
+// IPL Teams by Season - mapped to the CURRENT IPL team IDs returned by `/api/teams`
+// Team IDs (from `functions/api/teams.js`):
+// 1=RCB, 2=MI, 3=SRH, 4=GT, 5=PBKS, 6=DC, 7=LSG, 8=RR, 9=KKR, 10=CSK
+//
+// Note: historical franchises (Kochi, Pune, Gujarat Lions, RPS) are not present in the current Teams API,
+// so for now season-specific tables vary by showing/hiding current franchises (8-team era vs 10-team era).
 const IPL_TEAMS_BY_SEASON: Record<number, string[]> = {
-  2008: ['rcb', 'mi', 'kkr', 'dd', 'csk', 'rr', 'kxip', 'dc'],
-  2009: ['rcb', 'mi', 'kkr', 'dd', 'csk', 'rr', 'kxip', 'dc'],
-  2010: ['rcb', 'mi', 'kkr', 'dd', 'csk', 'rr', 'kxip', 'dc'],
-  2011: ['rcb', 'mi', 'kkr', 'dd', 'csk', 'rr', 'kxip', 'dc', 'pwi', 'kochi'],
-  2012: ['rcb', 'mi', 'kkr', 'dd', 'csk', 'rr', 'kxip', 'dc', 'pwi', 'kochi'],
-  2013: ['rcb', 'mi', 'kkr', 'dd', 'csk', 'rr', 'kxip', 'dc', 'pwi', 'kochi'],
-  2014: ['rcb', 'mi', 'kkr', 'dd', 'csk', 'rr', 'kxip', 'dc', 'pwi'],
-  2015: ['rcb', 'mi', 'kkr', 'dd', 'csk', 'rr', 'kxip', 'dc', 'pwi'],
-  2016: ['rcb', 'mi', 'kkr', 'dd', 'csk', 'rr', 'kxip', 'dc', 'pwi', 'gl'],
-  2017: ['rcb', 'mi', 'kkr', 'dd', 'csk', 'rr', 'kxip', 'dc', 'pwi', 'gl', 'rps'],
-  2018: ['rcb', 'mi', 'kkr', 'dd', 'csk', 'rr', 'kxip', 'dc', 'srh', 'gl'],
-  2019: ['rcb', 'mi', 'kkr', 'dd', 'csk', 'rr', 'kxip', 'dc', 'srh'],
-  2020: ['rcb', 'mi', 'kkr', 'dd', 'csk', 'rr', 'kxip', 'dc', 'srh'],
-  2021: ['rcb', 'mi', 'kkr', 'dd', 'csk', 'rr', 'pbks', 'dc', 'srh'],
-  2022: ['rcb', 'mi', 'kkr', 'dd', 'csk', 'rr', 'pbks', 'dc', 'srh', 'gt', 'lsg'],
-  2023: ['rcb', 'mi', 'kkr', 'dd', 'csk', 'rr', 'pbks', 'dc', 'srh', 'gt', 'lsg'],
-  2024: ['rcb', 'mi', 'kkr', 'dd', 'csk', 'rr', 'pbks', 'dc', 'srh', 'gt', 'lsg'],
-  2025: ['rcb', 'mi', 'kkr', 'dd', 'csk', 'rr', 'pbks', 'dc', 'srh', 'gt', 'lsg'],
-  2026: ['rcb', 'mi', 'kkr', 'dd', 'csk', 'rr', 'pbks', 'dc', 'srh', 'gt', 'lsg']
+  // 8-team era (use SRH slot as Deccan/SRH continuity)
+  2008: ['1', '2', '3', '5', '6', '8', '9', '10'],
+  2009: ['1', '2', '3', '5', '6', '8', '9', '10'],
+  2010: ['1', '2', '3', '5', '6', '8', '9', '10'],
+  2011: ['1', '2', '3', '5', '6', '8', '9', '10'],
+  2012: ['1', '2', '3', '5', '6', '8', '9', '10'],
+  2013: ['1', '2', '3', '5', '6', '8', '9', '10'],
+  2014: ['1', '2', '3', '5', '6', '8', '9', '10'],
+  2015: ['1', '2', '3', '5', '6', '8', '9', '10'],
+  2016: ['1', '2', '3', '5', '6', '8', '9', '10'],
+  2017: ['1', '2', '3', '5', '6', '8', '9', '10'],
+  2018: ['1', '2', '3', '5', '6', '8', '9', '10'],
+  2019: ['1', '2', '3', '5', '6', '8', '9', '10'],
+  2020: ['1', '2', '3', '5', '6', '8', '9', '10'],
+  2021: ['1', '2', '3', '5', '6', '8', '9', '10'],
+
+  // 10-team era (adds GT + LSG)
+  2022: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10'],
+  2023: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10'],
+  2024: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10'],
+  2025: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10'],
+  2026: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10'],
 };
 
 const IPL_STORAGE_KEY = 'iplPointsTableStats';
