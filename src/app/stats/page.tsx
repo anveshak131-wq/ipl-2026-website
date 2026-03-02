@@ -287,7 +287,7 @@ export default function StatsPage() {
     });
     // Show top 10 teams on stats page
     return copy.slice(0, 10);
-  }, [pointsTable]);
+  }, [pointsTable, pointsYear]);
 
   if (isLoading) {
     return (
