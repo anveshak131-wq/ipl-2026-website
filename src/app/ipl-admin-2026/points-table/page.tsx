@@ -84,24 +84,32 @@ export default function IPLAdminPointsTablePage() {
   const pointsTable = useMemo(() => {
     // Get teams for the selected season
     const seasonTeamIds = IPL_TEAMS_BY_SEASON[selectedYear] || [];
-    const seasonTeams = teams.filter(team => seasonTeamIds.includes(team.id));
-    
-    let savedStats: Record<string, { matchesPlayed?: number; wins?: number; losses?: number; points?: number; netRunRate?: number }> = {};
+    const seasonTeams = teams.filter((team) => seasonTeamIds.includes(team.id));
+
+    type SavedRow = {
+      matchesPlayed?: number;
+      wins?: number;
+      losses?: number;
+      noResult?: number;
+      points?: number;
+      netRunRate?: number;
+    };
+
+    let savedStats: Record<string, SavedRow> = {};
     if (typeof window !== 'undefined') {
       try {
         // Get year-specific stats or migrate old format
         const allStats = JSON.parse(localStorage.getItem(IPL_STORAGE_KEY) || '{}') || {};
-        
+
         // Check if data is in old format (flat structure) or new format (year-based)
         if (allStats[selectedYear] && typeof allStats[selectedYear] === 'object') {
-          // New format: { "2026": { "team1": { stats } }, "2025": { ... } }
-          savedStats = allStats[selectedYear];
+          // New format: { "2026": { "1": { stats } }, "2025": { ... } }
+          savedStats = allStats[selectedYear] as Record<string, SavedRow>;
         } else {
-          // Old format: { "team1": { stats } } - migrate to new format
-          const migratedData: Record<number, Record<string, any>> = {};
-          migratedData[selectedYear] = allStats; // Move old data to current year
-          
-          // Save migrated format
+          // Old format: { "1": { stats } } - migrate to new format for current year only
+          const migratedData: Record<number, Record<string, SavedRow>> = {};
+          migratedData[selectedYear] = allStats;
+
           localStorage.setItem(IPL_STORAGE_KEY, JSON.stringify(migratedData));
           savedStats = migratedData[selectedYear];
         }
@@ -110,49 +118,24 @@ export default function IPLAdminPointsTablePage() {
       }
     }
 
-    return seasonTeams.map(team => {
-      const displayShortName = team.shortName || team.name.split(' ').map(w => w[0]).join('');
+    return seasonTeams.map((team) => {
+      const displayShortName = team.shortName || team.name.split(' ').map((w) => w[0]).join('');
       const displayName = team.name || '';
-
-      if (savedStats[team.id]) {
-        return {
-          ...team,
-          shortName: displayShortName,
-          name: displayName,
-          matchesPlayed: savedStats[team.id].matchesPlayed ?? null,
-          wins: savedStats[team.id].wins ?? null,
-          losses: savedStats[team.id].losses ?? null,
-          points: savedStats[team.id].points ?? null,
-          netRunRate: savedStats[team.id].netRunRate ?? null
-        };
-      }
-
-      if (team.stats && typeof team.stats === 'object') {
-        const s = team.stats as { matchesPlayed?: number; wins?: number; losses?: number; points?: number; netRunRate?: number };
-        return {
-          ...team,
-          shortName: displayShortName,
-          name: displayName,
-          matchesPlayed: s.matchesPlayed ?? null,
-          wins: s.wins ?? null,
-          losses: s.losses ?? null,
-          points: s.points ?? null,
-          netRunRate: s.netRunRate ?? null
-        };
-      }
+      const row = savedStats[team.id] || {};
 
       return {
         ...team,
         shortName: displayShortName,
         name: displayName,
-        matchesPlayed: null,
-        wins: null,
-        losses: null,
-        points: null,
-        netRunRate: null
+        matchesPlayed: row.matchesPlayed ?? null,
+        wins: row.wins ?? null,
+        losses: row.losses ?? null,
+        noResult: row.noResult ?? null,
+        points: row.points ?? null,
+        netRunRate: row.netRunRate ?? null,
       };
     });
-  }, [teams]);
+  }, [teams, selectedYear]);
 
   const sortedPointsTable = useMemo(() => {
     let result = [...pointsTable];
@@ -208,6 +191,7 @@ export default function IPLAdminPointsTablePage() {
         matchesPlayed: team.matchesPlayed,
         wins: team.wins,
         losses: team.losses,
+        noResult: (team as any).noResult ?? 0,
         points: team.points,
         netRunRate: team.netRunRate
       });
@@ -259,6 +243,7 @@ export default function IPLAdminPointsTablePage() {
           matchesPlayed: Number(dataToSave.matchesPlayed) || 0,
           wins: Number(dataToSave.wins) || 0,
           losses: Number(dataToSave.losses) || 0,
+          noResult: Number((dataToSave as { noResult?: number }).noResult) || 0,
           points: Number(dataToSave.points) || 0,
           netRunRate: Number(dataToSave.netRunRate) || 0,
           qualified: Boolean((dataToSave as { qualified?: boolean }).qualified)
@@ -486,13 +471,14 @@ export default function IPLAdminPointsTablePage() {
             </motion.div>
           ) : (
             <motion.div className="space-y-4" initial="hidden" animate="visible">
-              <div className="grid grid-cols-[40px_200px_1fr_100px_100px_100px_100px_100px_120px_140px] gap-4 px-6 py-4 rounded-3xl backdrop-blur-2xl border-2 border-white/20 bg-gradient-to-br from-slate-900/90 via-slate-800/80 to-slate-900/90 text-sm font-bold uppercase tracking-wider text-gray-300 max-w-full overflow-x-auto">
+              <div className="grid grid-cols-[40px_200px_1fr_90px_80px_80px_80px_80px_100px_120px_140px] gap-4 px-6 py-4 rounded-3xl backdrop-blur-2xl border-2 border-white/20 bg-gradient-to-br from-slate-900/90 via-slate-800/80 to-slate-900/90 text-sm font-bold uppercase tracking-wider text-gray-300 max-w-full overflow-x-auto">
                 <div className="flex items-center justify-center">Rank</div>
                 <div className="flex items-center gap-2">Team <Info className="w-4 h-4 text-gray-500" /></div>
                 <div>Name</div>
                 <div>Played</div>
                 <div>Wins</div>
                 <div>Losses</div>
+                <div className="text-center">NR</div>
                 <div>Points</div>
                 <div>NRR</div>
                 <div className="flex justify-center">Qualified</div>
@@ -516,7 +502,7 @@ export default function IPLAdminPointsTablePage() {
                       exit={{ opacity: 0, scale: 0.8, y: -20 }}
                       transition={{ duration: 0.6, delay: index * 0.05, ease: [0.22, 1, 0.36, 1] }}
                       whileHover={{ y: -5, scale: 1.02 }}
-                      className={`relative group grid grid-cols-[40px_200px_1fr_100px_100px_100px_100px_100px_120px_140px] gap-4 items-center px-6 py-5 rounded-3xl backdrop-blur-2xl border-2 border-white/10 bg-gradient-to-br from-slate-900/80 via-slate-800/70 to-slate-900/80 max-w-full overflow-x-auto ${
+                      className={`relative group grid grid-cols-[40px_200px_1fr_90px_80px_80px_80px_80px_100px_120px_140px] gap-4 items-center px-6 py-5 rounded-3xl backdrop-blur-2xl border-2 border-white/10 bg-gradient-to-br from-slate-900/80 via-slate-800/70 to-slate-900/80 max-w-full overflow-x-auto ${
                         isTop4 ? 'border-amber-500/50 bg-gradient-to-br from-amber-900/30 via-orange-800/20 to-amber-900/30' :
                         isBottom2 ? 'border-orange-500/50 bg-gradient-to-br from-orange-900/30 via-amber-800/20 to-orange-900/30' :
                         'hover:border-amber-500/50'
@@ -584,6 +570,20 @@ export default function IPLAdminPointsTablePage() {
                               {team.losses}
                             </>
                           ) : ''
+                        )}
+                      </div>
+
+                      <div className="text-blue-300 font-bold">
+                        {isCurrentlyEditing ? (
+                          <input
+                            type="number"
+                            value={editData.noResult ?? ''}
+                            onChange={(e) => setEditData({ ...editData, noResult: parseInt(e.target.value, 10) || 0 })}
+                            className="w-16 px-2 py-1 bg-slate-700 border border-blue-500 rounded text-center"
+                            min={0}
+                          />
+                        ) : (
+                          (team as any).noResult !== null && (team as any).noResult !== undefined ? (team as any).noResult : ''
                         )}
                       </div>
 

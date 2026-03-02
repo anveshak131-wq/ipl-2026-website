@@ -202,7 +202,7 @@ export default function StatsPage() {
   // IPL points table for end-user stats page (read-only)
   const pointsTable = useMemo(() => {
     // Mirror admin logic: prefer locally saved stats (year -> teamId -> stats), then team.stats, then zeros
-    let savedStats: Record<string, { matchesPlayed?: number; wins?: number; losses?: number; points?: number; netRunRate?: number }> = {};
+    let savedStats: Record<string, { matchesPlayed?: number; wins?: number; losses?: number; noResult?: number; points?: number; netRunRate?: number }> = {};
     if (typeof window !== 'undefined') {
       try {
         const allStats = JSON.parse(window.localStorage.getItem('iplPointsTableStats') || '{}') || {};
@@ -222,42 +222,17 @@ export default function StatsPage() {
         const displayShortName = team.shortName || team.name.split(' ').map((w) => w[0]).join('');
         const displayName = team.name || '';
 
-        if (savedStats[team.id]) {
-          return {
-            ...team,
-            shortName: displayShortName,
-            name: displayName,
-            matchesPlayed: savedStats[team.id].matchesPlayed ?? 0,
-            wins: savedStats[team.id].wins ?? 0,
-            losses: savedStats[team.id].losses ?? 0,
-            points: savedStats[team.id].points ?? 0,
-            netRunRate: savedStats[team.id].netRunRate ?? 0,
-          };
-        }
-
-        if (team.stats && typeof team.stats === 'object') {
-          const s = team.stats as { matchesPlayed?: number; wins?: number; losses?: number; points?: number; netRunRate?: number };
-          return {
-            ...team,
-            shortName: displayShortName,
-            name: displayName,
-            matchesPlayed: s.matchesPlayed ?? 0,
-            wins: s.wins ?? 0,
-            losses: s.losses ?? 0,
-            points: s.points ?? 0,
-            netRunRate: s.netRunRate ?? 0,
-          };
-        }
+        const row = savedStats[team.id] || {};
 
         return {
           ...team,
           shortName: displayShortName,
           name: displayName,
-          matchesPlayed: 0,
-          wins: 0,
-          losses: 0,
-          points: 0,
-          netRunRate: 0,
+          matchesPlayed: row.matchesPlayed ?? 0,
+          wins: row.wins ?? 0,
+          losses: row.losses ?? 0,
+          points: row.points ?? 0,
+          netRunRate: row.netRunRate ?? 0,
         };
       });
   }, [teams, pointsYear]);
