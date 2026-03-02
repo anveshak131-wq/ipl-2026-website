@@ -186,6 +186,76 @@ export default function StatsPage() {
     return players.reduce((sum, p) => sum + p.stats.wickets, 0);
   }, [players]);
 
+  // IPL points table for end-user stats page (read-only)
+  const pointsTable = useMemo(() => {
+    // Mirror admin logic: prefer locally saved stats, then team.stats, then zeros
+    let savedStats: Record<string, { matchesPlayed?: number; wins?: number; losses?: number; points?: number; netRunRate?: number }> = {};
+    if (typeof window !== 'undefined') {
+      try {
+        savedStats = JSON.parse(window.localStorage.getItem('iplPointsTableStats') || '{}') || {};
+      } catch {
+        // ignore parse errors and fall back to team.stats
+      }
+    }
+
+    return teams
+      .filter((team) => team.league === 'ipl')
+      .map((team) => {
+        const displayShortName = team.shortName || team.name.split(' ').map((w) => w[0]).join('');
+        const displayName = team.name || '';
+
+        if (savedStats[team.id]) {
+          return {
+            ...team,
+            shortName: displayShortName,
+            name: displayName,
+            matchesPlayed: savedStats[team.id].matchesPlayed ?? 0,
+            wins: savedStats[team.id].wins ?? 0,
+            losses: savedStats[team.id].losses ?? 0,
+            points: savedStats[team.id].points ?? 0,
+            netRunRate: savedStats[team.id].netRunRate ?? 0,
+          };
+        }
+
+        if (team.stats && typeof team.stats === 'object') {
+          const s = team.stats as { matchesPlayed?: number; wins?: number; losses?: number; points?: number; netRunRate?: number };
+          return {
+            ...team,
+            shortName: displayShortName,
+            name: displayName,
+            matchesPlayed: s.matchesPlayed ?? 0,
+            wins: s.wins ?? 0,
+            losses: s.losses ?? 0,
+            points: s.points ?? 0,
+            netRunRate: s.netRunRate ?? 0,
+          };
+        }
+
+        return {
+          ...team,
+          shortName: displayShortName,
+          name: displayName,
+          matchesPlayed: 0,
+          wins: 0,
+          losses: 0,
+          points: 0,
+          netRunRate: 0,
+        };
+      });
+  }, [teams]);
+
+  const sortedPointsTable = useMemo(() => {
+    const copy = [...pointsTable];
+    copy.sort((a, b) => {
+      if ((b as any).points !== (a as any).points) {
+        return ((b as any).points ?? 0) - ((a as any).points ?? 0);
+      }
+      return ((b as any).netRunRate ?? 0) - ((a as any).netRunRate ?? 0);
+    });
+    // Show top 10 teams on stats page
+    return copy.slice(0, 10);
+  }, [pointsTable]);
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex flex-col bg-ipl-dark">
@@ -371,6 +441,100 @@ export default function StatsPage() {
                       />
                     )}
                   </div>
+
+                  {/* IPL Points Table Snapshot */}
+                  {sortedPointsTable.length > 0 && (
+                    <motion.section
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.5, delay: 0.2 }}
+                      className="mt-10 rounded-3xl bg-black/40 border border-white/15 backdrop-blur-xl p-6 md:p-8"
+                    >
+                      <div className="flex items-center justify-between gap-4 mb-4">
+                        <div>
+                          <h2 className="text-xl md:text-2xl font-black text-white flex items-center gap-2">
+                            <Trophy className="w-5 h-5 text-ipl-gold" />
+                            IPL 2026 Points Table
+                          </h2>
+                          <p className="text-xs text-gray-400 mt-1">
+                            Read-only snapshot using the same admin points data (including any manual edits).
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="overflow-x-auto">
+                        <table className="min-w-full text-sm text-left">
+                          <thead className="text-xs uppercase tracking-wider text-gray-400 border-b border-white/10">
+                            <tr>
+                              <th className="py-2 pr-4">Pos</th>
+                              <th className="py-2 pr-4">Team</th>
+                              <th className="py-2 pr-4 text-center">M</th>
+                              <th className="py-2 pr-4 text-center">W</th>
+                              <th className="py-2 pr-4 text-center">L</th>
+                              <th className="py-2 pr-4 text-center">Pts</th>
+                              <th className="py-2 pr-4 text-right">NRR</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {sortedPointsTable.map((team, index) => {
+                              const nrr = (team as any).netRunRate ?? 0;
+                              const isTop4 = index < 4;
+                              return (
+                                <tr
+                                  key={team.id}
+                                  className={`border-b border-white/5 last:border-0 ${
+                                    isTop4 ? 'bg-white/5' : ''
+                                  }`}
+                                >
+                                  <td className="py-2 pr-4 font-bold text-gray-200">
+                                    {index + 1}
+                                  </td>
+                                  <td className="py-2 pr-4">
+                                    <div className="flex items-center gap-2">
+                                      <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-ipl-gold/40 to-ipl-purple/40 text-xs font-black text-white">
+                                        {(team.shortName || '').slice(0, 2)}
+                                      </span>
+                                      <div className="flex flex-col">
+                                        <span className="text-sm font-semibold text-white">
+                                          {team.shortName}
+                                        </span>
+                                        <span className="text-[10px] text-gray-400">
+                                          {team.name}
+                                        </span>
+                                      </div>
+                                    </div>
+                                  </td>
+                                  <td className="py-2 pr-4 text-center text-gray-100">
+                                    {(team as any).matchesPlayed ?? 0}
+                                  </td>
+                                  <td className="py-2 pr-4 text-center text-emerald-300 font-semibold">
+                                    {(team as any).wins ?? 0}
+                                  </td>
+                                  <td className="py-2 pr-4 text-center text-red-300 font-semibold">
+                                    {(team as any).losses ?? 0}
+                                  </td>
+                                  <td className="py-2 pr-4 text-center font-black text-ipl-gold">
+                                    {(team as any).points ?? 0}
+                                  </td>
+                                  <td
+                                    className={`py-2 pr-4 text-right font-semibold ${
+                                      nrr > 0
+                                        ? 'text-emerald-300'
+                                        : nrr < 0
+                                        ? 'text-red-300'
+                                        : 'text-gray-200'
+                                    }`}
+                                  >
+                                    {nrr > 0 ? `+${nrr.toFixed(2)}` : nrr.toFixed(2)}
+                                  </td>
+                                </tr>
+                              );
+                            })}
+                          </tbody>
+                        </table>
+                      </div>
+                    </motion.section>
+                  )}
                 </motion.div>
               )}
 
