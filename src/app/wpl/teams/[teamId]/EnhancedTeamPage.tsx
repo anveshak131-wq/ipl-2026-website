@@ -1375,22 +1375,26 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
       return team.logo;
     }
     
+    // Prefer the new 2026 modern/animated logo set for both WPL and IPL teams
     switch (team.shortName) {
-      case 'RCB-W': return '/logos/wpl_rcb_logo_animated.svg';
-      case 'MI-W': return '/logos/wpl_mi_logo_animated.svg';
-      case 'DC-W': return '/logos/wpl_dc_logo_animated.svg';
-      case 'GG-W': return '/logos/wpl_gg_logo_animated.svg';
-      case 'UPW': return '/logos/wpl_upw_logo_animated.svg';
-      case 'RCB': return '/logos/rcb_logo_animated.svg';
-      case 'MI': return '/logos/mi_logo_animated.svg';
-      case 'CSK': return '/logos/csk_logo_animated.svg';
-      case 'KKR': return '/logos/kkr_logo_animated.svg';
-      case 'SRH': return '/logos/srh_logo_animated.svg';
-      case 'RR': return '/logos/rr_logo_animated.svg';
-      case 'PBKS': return '/logos/pbks_logo_animated.svg';
-      case 'LSG': return '/logos/lsg_logo_animated.svg';
-      case 'GT': return '/logos/gt_logo_animated.svg';
-      case 'DC': return '/logos/dc_logo_animated.svg';
+      // WPL teams - use modern variants
+      case 'RCB-W': return '/logos/wpl_rcb_logo_modern.svg';
+      case 'MI-W': return '/logos/wpl_mi_logo_modern.svg';
+      case 'DC-W': return '/logos/wpl_dc_logo_modern.svg';
+      case 'GG-W': return '/logos/wpl_gg_logo_modern.svg';
+      case 'UPW': return '/logos/wpl_upw_logo_modern.svg';
+
+      // IPL teams - use the new 2026 modern logos
+      case 'RCB': return '/logos/rcb_logo_2026_modern.svg';
+      case 'MI': return '/logos/mi_logo_2026_modern.svg';
+      case 'CSK': return '/logos/csk_logo_2026_modern.svg';
+      case 'KKR': return '/logos/kkr_logo_2026_modern.svg';
+      case 'SRH': return '/logos/srh_logo_2026_modern.svg';
+      case 'RR': return '/logos/rr_logo_2026_modern.svg';
+      case 'PBKS': return '/logos/pbks_logo_2026_modern.svg';
+      case 'LSG': return '/logos/lsg_logo_2026_modern.svg';
+      case 'GT': return '/logos/gt_logo_2026_modern.svg';
+      case 'DC': return '/logos/dc_logo_2026_modern.svg';
       default: return team.logo || null;
     }
   };
