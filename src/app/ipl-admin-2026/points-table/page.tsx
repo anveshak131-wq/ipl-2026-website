@@ -84,11 +84,11 @@ export default function IPLAdminPointsTablePage() {
           ...team,
           shortName: displayShortName,
           name: displayName,
-          matchesPlayed: savedStats[team.id].matchesPlayed ?? 0,
-          wins: savedStats[team.id].wins ?? 0,
-          losses: savedStats[team.id].losses ?? 0,
-          points: savedStats[team.id].points ?? 0,
-          netRunRate: savedStats[team.id].netRunRate ?? 0
+          matchesPlayed: savedStats[team.id].matchesPlayed ?? null,
+          wins: savedStats[team.id].wins ?? null,
+          losses: savedStats[team.id].losses ?? null,
+          points: savedStats[team.id].points ?? null,
+          netRunRate: savedStats[team.id].netRunRate ?? null
         };
       }
 
@@ -98,11 +98,11 @@ export default function IPLAdminPointsTablePage() {
           ...team,
           shortName: displayShortName,
           name: displayName,
-          matchesPlayed: s.matchesPlayed ?? 0,
-          wins: s.wins ?? 0,
-          losses: s.losses ?? 0,
-          points: s.points ?? 0,
-          netRunRate: s.netRunRate ?? 0
+          matchesPlayed: s.matchesPlayed ?? null,
+          wins: s.wins ?? null,
+          losses: s.losses ?? null,
+          points: s.points ?? null,
+          netRunRate: s.netRunRate ?? null
         };
       }
 
@@ -110,11 +110,11 @@ export default function IPLAdminPointsTablePage() {
         ...team,
         shortName: displayShortName,
         name: displayName,
-        matchesPlayed: 0,
-        wins: 0,
-        losses: 0,
-        points: 0,
-        netRunRate: 0
+        matchesPlayed: null,
+        wins: null,
+        losses: null,
+        points: null,
+        netRunRate: null
       };
     });
   }, [teams]);
@@ -132,12 +132,28 @@ export default function IPLAdminPointsTablePage() {
 
     result.sort((a, b) => {
       if (sortBy === 'points') {
-        if (b.points !== a.points) return b.points - a.points;
-        return (b.netRunRate ?? 0) - (a.netRunRate ?? 0);
+        const aPoints = a.points ?? 0;
+        const bPoints = b.points ?? 0;
+        if (bPoints !== aPoints) return bPoints - aPoints;
+        const aNrr = a.netRunRate ?? 0;
+        const bNrr = b.netRunRate ?? 0;
+        return bNrr - aNrr;
       }
-      if (sortBy === 'wins') return b.wins - a.wins;
-      if (sortBy === 'losses') return a.losses - b.losses;
-      if (sortBy === 'nrr') return (b.netRunRate ?? 0) - (a.netRunRate ?? 0);
+      if (sortBy === 'wins') {
+        const aWins = a.wins ?? 0;
+        const bWins = b.wins ?? 0;
+        return bWins - aWins;
+      }
+      if (sortBy === 'losses') {
+        const aLosses = a.losses ?? 0;
+        const bLosses = b.losses ?? 0;
+        return aLosses - bLosses;
+      }
+      if (sortBy === 'nrr') {
+        const aNrr = a.netRunRate ?? 0;
+        const bNrr = b.netRunRate ?? 0;
+        return bNrr - aNrr;
+      }
       return 0;
     });
 
@@ -454,7 +470,7 @@ export default function IPLAdminPointsTablePage() {
                   const isTop4 = rank <= 4;
                   const isBottom2 = rank >= sortedPointsTable.length - 1;
                   const isCurrentlyEditing = editingTeam === team.id;
-                  const nrr = team.netRunRate ?? 0;
+                  const nrr = team.netRunRate ?? null;
 
                   return (
                     <motion.div
@@ -494,7 +510,7 @@ export default function IPLAdminPointsTablePage() {
                             min={0}
                           />
                         ) : (
-                          team.matchesPlayed
+                          team.matchesPlayed !== null ? team.matchesPlayed : ''
                         )}
                       </div>
 
@@ -508,10 +524,12 @@ export default function IPLAdminPointsTablePage() {
                             min={0}
                           />
                         ) : (
-                          <>
-                            <TrendingUp className="w-4 h-4" />
-                            {team.wins}
-                          </>
+                          team.wins !== null ? (
+                            <>
+                              <TrendingUp className="w-4 h-4" />
+                              {team.wins}
+                            </>
+                          ) : ''
                         )}
                       </div>
 
@@ -525,10 +543,12 @@ export default function IPLAdminPointsTablePage() {
                             min={0}
                           />
                         ) : (
-                          <>
-                            <TrendingDown className="w-4 h-4" />
-                            {team.losses}
-                          </>
+                          team.losses !== null ? (
+                            <>
+                              <TrendingDown className="w-4 h-4" />
+                              {team.losses}
+                            </>
+                          ) : ''
                         )}
                       </div>
 
@@ -542,7 +562,7 @@ export default function IPLAdminPointsTablePage() {
                             min={0}
                           />
                         ) : (
-                          team.points
+                          team.points !== null ? team.points : ''
                         )}
                       </div>
 
@@ -556,7 +576,7 @@ export default function IPLAdminPointsTablePage() {
                             placeholder="0.00"
                           />
                         ) : (
-                          nrr > 0 ? `+${nrr.toFixed(2)}` : nrr.toFixed(2)
+                          nrr !== null ? (nrr > 0 ? `+${nrr.toFixed(2)}` : nrr.toFixed(2)) : '-'
                         )}
                       </div>
 
