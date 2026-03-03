@@ -477,9 +477,22 @@ export default function StatsPage() {
                                   </td>
                                   <td className="py-2 pr-4">
                                     <div className="flex items-center gap-2">
-                                      <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-ipl-gold/40 to-ipl-purple/40 text-xs font-black text-white">
-                                        {(team.shortName || '').slice(0, 2)}
-                                      </span>
+                                      <div className="relative inline-flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-ipl-gold/40 to-ipl-purple/40 text-xs font-black text-white overflow-hidden">
+                                        <img 
+                                          src={team.logo} 
+                                          alt={team.shortName || team.name}
+                                          className="w-full h-full object-cover"
+                                          onError={(e) => {
+                                            // Fallback to text if logo fails to load
+                                            const target = e.target as HTMLImageElement;
+                                            target.style.display = 'none';
+                                            target.nextElementSibling?.classList.remove('hidden');
+                                          }}
+                                        />
+                                        <div className="hidden absolute inset-0 flex items-center justify-center text-white">
+                                          {(team.shortName || '').slice(0, 2)}
+                                        </div>
+                                      </div>
                                       <div className="flex flex-col">
                                         <span className="text-sm font-semibold text-white">
                                           {team.shortName}
