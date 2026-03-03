@@ -9,4 +9,5 @@
 
 # Static assets - ensure they're served directly
 /logos/*    /logos/:splat     200
+/logos      /logos/index.html    200
 /assets/*    /assets/:splat     200
