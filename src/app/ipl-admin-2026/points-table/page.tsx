@@ -98,6 +98,7 @@ export default function IPLAdminPointsTablePage() {
       noResult?: number;
       points?: number;
       netRunRate?: number;
+      qualified?: boolean;
     };
 
     let savedStats: Record<string, SavedRow> = {};
@@ -135,6 +136,7 @@ export default function IPLAdminPointsTablePage() {
         noResult: row.noResult ?? null,
         points: row.points ?? null,
         netRunRate: row.netRunRate ?? null,
+        qualified: row.qualified ?? false,
       };
     });
   }, [teams, selectedYear]);
@@ -212,6 +214,17 @@ export default function IPLAdminPointsTablePage() {
         ...teamToUpdate,
         stats: { ...(teamToUpdate.stats as object || {}), qualified }
       };
+
+      // Save to localStorage for current year
+      const allSavedStats = JSON.parse(localStorage.getItem(IPL_STORAGE_KEY) || '{}');
+      if (!allSavedStats[selectedYear]) {
+        allSavedStats[selectedYear] = {};
+      }
+      if (!allSavedStats[selectedYear][teamId]) {
+        allSavedStats[selectedYear][teamId] = {};
+      }
+      allSavedStats[selectedYear][teamId].qualified = qualified;
+      localStorage.setItem(IPL_STORAGE_KEY, JSON.stringify(allSavedStats));
 
       const base = typeof window !== 'undefined' ? window.location.origin : '';
       const res = await fetch(`${base}/api/teams`, {
@@ -632,7 +645,7 @@ export default function IPLAdminPointsTablePage() {
                           <label className="inline-flex items-center gap-2 cursor-pointer">
                             <input
                               type="checkbox"
-                              checked={Boolean((team.stats as { qualified?: boolean })?.qualified)}
+                              checked={Boolean(team.qualified)}
                               onChange={(e) => handleToggleQualified(team.id, e.target.checked)}
                               className="w-5 h-5 rounded text-amber-500"
                             />
