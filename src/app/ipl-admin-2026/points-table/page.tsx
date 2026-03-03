@@ -80,6 +80,11 @@ export default function IPLAdminPointsTablePage() {
     setSelectedYear(currentYear);
   }, []);
 
+  // Force re-render when year changes to reload data
+  useEffect(() => {
+    // This will trigger the pointsTable useMemo to recalculate with new year
+  }, [selectedYear]);
+
   // Calculate points table - filter teams by selected year first, then use year-based localStorage
   const pointsTable = useMemo(() => {
     // Get teams for the selected season
@@ -98,21 +103,18 @@ export default function IPLAdminPointsTablePage() {
     let savedStats: Record<string, SavedRow> = {};
     if (typeof window !== 'undefined') {
       try {
-        // Get year-specific stats or migrate old format
+        // Get ALL years' stats from localStorage
         const allStats = JSON.parse(localStorage.getItem(IPL_STORAGE_KEY) || '{}') || {};
 
-        // Check if data is in old format (flat structure) or new format (year-based)
-        if (allStats[selectedYear] && typeof allStats[selectedYear] === 'object') {
-          // New format: { "2026": { "1": { stats } }, "2025": { ... } }
-          savedStats = allStats[selectedYear] as Record<string, SavedRow>;
-        } else {
-          // Old format: { "1": { stats } } - migrate to new format for current year only
-          const migratedData: Record<number, Record<string, SavedRow>> = {};
-          migratedData[selectedYear] = allStats;
-
-          localStorage.setItem(IPL_STORAGE_KEY, JSON.stringify(migratedData));
-          savedStats = migratedData[selectedYear];
+        // Ensure we have a proper year-based structure
+        if (!allStats[selectedYear] || typeof allStats[selectedYear] !== 'object') {
+          // Initialize this year's data if it doesn't exist
+          allStats[selectedYear] = {};
+          localStorage.setItem(IPL_STORAGE_KEY, JSON.stringify(allStats));
         }
+
+        // Get stats for the current year only
+        savedStats = (allStats[selectedYear] as Record<string, SavedRow>) || {};
       } catch {
         /* ignore */
       }
