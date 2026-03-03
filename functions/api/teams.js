@@ -91,7 +91,7 @@ export async function onRequest(context) {
           name: "Royal Challengers Bangalore",
           shortName: "RCB", 
           league: "ipl",
-          logo: "/teams/rcb.png",
+          logo: "/logos/rcb_logo_2026.svg",
           colors: { primary: "#EC1C24", secondary: "#000000" },
           description: "RCB team"
         },
@@ -100,7 +100,7 @@ export async function onRequest(context) {
           name: "Mumbai Indians",
           shortName: "MI", 
           league: "ipl",
-          logo: "/teams/mi.png",
+          logo: "/logos/mi_logo_2026.svg",
           colors: { primary: "#004BA0", secondary: "#D1AB3E" },
           description: "MI team"
         },
@@ -109,8 +109,8 @@ export async function onRequest(context) {
           name: "Sunrisers Hyderabad",
           shortName: "SRH",
           league: "ipl",
-          logo: "/teams/srh.png",
-          colors: { primary: "#FF822A", secondary: "#000000" },
+          logo: "/logos/srh_logo_2026.svg",
+          colors: { primary: "#FF822D", secondary: "#000000" },
           description: "SRH team"
         },
         {
@@ -118,8 +118,8 @@ export async function onRequest(context) {
           name: "Gujarat Titans",
           shortName: "GT",
           league: "ipl",
-          logo: "/teams/gt.png",
-          colors: { primary: "#1C2841", secondary: "#9E7E38" },
+          logo: "/logos/gt_logo_2026.svg",
+          colors: { primary: "#F97316", secondary: "#FFD700" },
           description: "GT team"
         },
         {
@@ -127,8 +127,8 @@ export async function onRequest(context) {
           name: "Punjab Kings",
           shortName: "PBKS",
           league: "ipl",
-          logo: "/teams/pbks.png",
-          colors: { primary: "#ED1B24", secondary: "#C0A472" },
+          logo: "/logos/pbks_logo_2026.svg",
+          colors: { primary: "#ED1C24", secondary: "#000000" },
           description: "PBKS team"
         },
         {
@@ -136,7 +136,7 @@ export async function onRequest(context) {
           name: "Delhi Capitals",
           shortName: "DC",
           league: "ipl",
-          logo: "/teams/dc.png",
+          logo: "/logos/dc_logo_2026.svg",
           colors: { primary: "#0078BC", secondary: "#EF1B26" },
           description: "DC team"
         },
@@ -145,8 +145,8 @@ export async function onRequest(context) {
           name: "Lucknow Super Giants",
           shortName: "LSG",
           league: "ipl",
-          logo: "/teams/lsg.png",
-          colors: { primary: "#9C2A2C", secondary: "#F7E17D" },
+          logo: "/logos/lsg_logo_2026.svg",
+          colors: { primary: "#334154", secondary: "#FFB81C" },
           description: "LSG team"
         },
         {
@@ -154,8 +154,8 @@ export async function onRequest(context) {
           name: "Rajasthan Royals",
           shortName: "RR",
           league: "ipl",
-          logo: "/teams/rr.png",
-          colors: { primary: "#EA1A85", secondary: "#004B8D" },
+          logo: "/logos/rr_logo_2026.svg",
+          colors: { primary: "#EC1C24", secondary: "#000000" },
           description: "RR team"
         },
         {
@@ -163,8 +163,8 @@ export async function onRequest(context) {
           name: "Kolkata Knight Riders",
           shortName: "KKR",
           league: "ipl",
-          logo: "/teams/kkr.png",
-          colors: { primary: "#3A225D", secondary: "#B9975B" },
+          logo: "/logos/kkr_logo_2026.svg",
+          colors: { primary: "#3A225D", secondary: "#000000" },
           description: "KKR team"
         },
         {
@@ -172,8 +172,8 @@ export async function onRequest(context) {
           name: "Chennai Super Kings",
           shortName: "CSK",
           league: "ipl",
-          logo: "/teams/csk.png",
-          colors: { primary: "#FFB90F", secondary: "#0081E8" },
+          logo: "/logos/csk_logo_2026.svg",
+          colors: { primary: "#FFFF00", secondary: "#0081E8" },
           description: "CSK team"
         }
       ];
