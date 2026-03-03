@@ -91,7 +91,7 @@ export async function onRequest(context) {
           name: "Royal Challengers Bangalore",
           shortName: "RCB", 
           league: "ipl",
-          logo: "/logos/rcb_logo_2026.svg",
+          logo: "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjEwMCIgaGVpZ2h0PSIxMDAiIGZpbGw9IiNFQzFDMjQiLz48dGV4dCB4PSI1MCIgeT0iNTAiIGZpbGw9IndoaXRlIiBmb250LXNpemU9IjQwIiBmb250LXdlaWdodD0iYm9sZCIgdGV4dC1hbmNob3I9Im1pZGRsZSI+UkNCPC90ZXh0Pjwvc3ZnPg==",
           colors: { primary: "#EC1C24", secondary: "#000000" },
           description: "RCB team"
         },
