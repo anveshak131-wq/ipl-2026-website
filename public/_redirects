@@ -6,3 +6,7 @@
 # Admin routes with client-side routing
 # Serve the admin SPA root (avoid pointing to an explicit index file to prevent loop)
 /admin/*    /admin/   200
+
+# Static assets - ensure they're served directly
+/logos/*    /logos/:splat     200
+/assets/*    /assets/:splat     200
