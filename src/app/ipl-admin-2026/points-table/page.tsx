@@ -528,8 +528,21 @@ export default function IPLAdminPointsTablePage() {
                       </div>
 
                       <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center text-white font-black text-lg shadow-lg">
-                          {(team.shortName || 'IPL').slice(0, 2)}
+                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center text-white font-black text-lg shadow-lg overflow-hidden">
+                          <img 
+                            src={team.logo} 
+                            alt={team.shortName || team.name}
+                            className="w-full h-full object-cover"
+                            onError={(e) => {
+                              // Fallback to text if logo fails to load
+                              const target = e.target as HTMLImageElement;
+                              target.style.display = 'none';
+                              target.nextElementSibling?.classList.remove('hidden');
+                            }}
+                          />
+                          <div className="hidden w-full h-full flex items-center justify-center text-white font-black text-lg">
+                            {(team.shortName || 'IPL').slice(0, 2)}
+                          </div>
                         </div>
                         <span className="text-xl font-black text-white">{team.shortName || team.name}</span>
                       </div>
