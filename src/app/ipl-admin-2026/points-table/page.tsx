@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { createPortal } from 'react-dom';
 import { Trophy, TrendingUp, TrendingDown, Info, Award, Users, Calendar, Clock, Search, X, Edit, Save, RefreshCw, Download, FileText, Table, Database } from 'lucide-react';
 import { api } from '@/lib/data';
 import { Team } from '@/types';
@@ -63,6 +64,7 @@ export default function IPLAdminPointsTablePage() {
   const [editData, setEditData] = useState<Record<string, unknown>>({});
   const [showExportMenu, setShowExportMenu] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
+  const [buttonPosition, setButtonPosition] = useState({ top: 0, left: 0 });
 
   // Fetch IPL teams
   useEffect(() => {
@@ -111,6 +113,15 @@ export default function IPLAdminPointsTablePage() {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [showExportMenu]);
+
+  // Update button position when menu opens
+  const updateButtonPosition = (buttonElement: HTMLButtonElement) => {
+    const rect = buttonElement.getBoundingClientRect();
+    setButtonPosition({
+      top: rect.bottom + window.scrollY,
+      left: rect.right + window.scrollX - 224 // 224 is dropdown width
+    });
+  };
 
   // Calculate points table - filter teams by selected year first, then use year-based localStorage
   const pointsTable = useMemo(() => {
@@ -436,9 +447,21 @@ export default function IPLAdminPointsTablePage() {
               {/* Export Button */}
               <div className="relative export-menu-container z-[100]">
                 <motion.button
-                  onClick={() => setShowExportMenu(!showExportMenu)}
+                  ref={(buttonElement) => {
+                    if (buttonElement && showExportMenu) {
+                      updateButtonPosition(buttonElement);
+                    }
+                  }}
+                  onClick={() => {
+                    setShowExportMenu(!showExportMenu);
+                    // Update position immediately when opening
+                    setTimeout(() => {
+                      const button = document.querySelector('.export-button') as HTMLButtonElement;
+                      if (button) updateButtonPosition(button);
+                    }, 0);
+                  }}
                   disabled={isExporting || sortedPointsTable.length === 0}
-                  className="px-4 py-2 rounded-xl bg-gradient-to-r from-green-500 to-emerald-500 text-white font-bold flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="export-button px-4 py-2 rounded-xl bg-gradient-to-r from-green-500 to-emerald-500 text-white font-bold flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
@@ -446,14 +469,24 @@ export default function IPLAdminPointsTablePage() {
                   {isExporting ? 'Exporting...' : 'Export'}
                 </motion.button>
                 
-                {/* Export Dropdown Menu */}
-                <AnimatePresence>
-                  {showExportMenu && (
+                {/* Export Dropdown Menu - Using Portal */}
+                {showExportMenu && createPortal(
+                  <AnimatePresence>
                     <motion.div
                       initial={{ opacity: 0, y: -10, scale: 0.95 }}
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       exit={{ opacity: 0, y: -10, scale: 0.95 }}
+<<<<<<< HEAD
                       className="fixed right-4 top-20 w-56 rounded-2xl backdrop-blur-2xl border-2 border-white/20 bg-gradient-to-br from-slate-900/95 via-slate-800/90 to-slate-900/95 shadow-2xl z-[999999] overflow-hidden"
+=======
+                      style={{
+                        position: 'fixed',
+                        top: `${buttonPosition.top}px`,
+                        left: `${buttonPosition.left}px`,
+                        zIndex: 999999
+                      }}
+                      className="w-56 rounded-2xl backdrop-blur-2xl border-2 border-white/20 bg-gradient-to-br from-slate-900/95 via-slate-800/90 to-slate-900/95 shadow-2xl overflow-hidden"
+>>>>>>> 20ce8c0fb554947e5f80536dd9ebc7ac291e7cc9
                     >
                       <div className="p-2">
                         <div className="px-3 py-2 text-xs font-bold uppercase tracking-wider text-gray-400 border-b border-white/10 mb-2">
@@ -540,9 +573,9 @@ export default function IPLAdminPointsTablePage() {
                           </div>
                         </div>
                       </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+                    </motion.div>,
+                  document.body
+                )}
               </div>
               
               <motion.button
