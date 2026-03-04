@@ -477,16 +477,13 @@ export default function IPLAdminPointsTablePage() {
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       exit={{ opacity: 0, y: -10, scale: 0.95 }}
 <<<<<<< HEAD
-                      className="fixed right-4 top-20 w-56 rounded-2xl backdrop-blur-2xl border-2 border-white/20 bg-gradient-to-br from-slate-900/95 via-slate-800/90 to-slate-900/95 shadow-2xl z-[999999] overflow-hidden"
-=======
                       style={{
                         position: 'fixed',
                         top: `${buttonPosition.top}px`,
                         left: `${buttonPosition.left}px`,
                         zIndex: 999999
                       }}
-                      className="w-56 rounded-2xl backdrop-blur-2xl border-2 border-white/20 bg-gradient-to-br from-slate-900/95 via-slate-800/90 to-slate-900/95 shadow-2xl overflow-hidden"
->>>>>>> 20ce8c0fb554947e5f80536dd9ebc7ac291e7cc9
+                      className="w-56 rounded-2xl backdrop-blur-2xl border-2 border-white/20 bg-gradient-to-br from-slate-900/95 via-slate-800/90 to-slate-900/95 shadow-2xl overflow-hidden fixed"
                     >
                       <div className="p-2">
                         <div className="px-3 py-2 text-xs font-bold uppercase tracking-wider text-gray-400 border-b border-white/10 mb-2">
