@@ -434,7 +434,7 @@ export default function IPLAdminPointsTablePage() {
               </motion.button>
               
               {/* Export Button */}
-              <div className="relative export-menu-container">
+              <div className="relative export-menu-container z-[100]">
                 <motion.button
                   onClick={() => setShowExportMenu(!showExportMenu)}
                   disabled={isExporting || sortedPointsTable.length === 0}
@@ -453,7 +453,7 @@ export default function IPLAdminPointsTablePage() {
                       initial={{ opacity: 0, y: -10, scale: 0.95 }}
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       exit={{ opacity: 0, y: -10, scale: 0.95 }}
-                      className="absolute right-0 mt-2 w-56 rounded-2xl backdrop-blur-2xl border-2 border-white/20 bg-gradient-to-br from-slate-900/95 via-slate-800/90 to-slate-900/95 shadow-2xl z-[9999] overflow-hidden"
+                      className="fixed right-4 top-20 w-56 rounded-2xl backdrop-blur-2xl border-2 border-white/20 bg-gradient-to-br from-slate-900/95 via-slate-800/90 to-slate-900/95 shadow-2xl z-[99999] overflow-hidden"
                     >
                       <div className="p-2">
                         <div className="px-3 py-2 text-xs font-bold uppercase tracking-wider text-gray-400 border-b border-white/10 mb-2">
