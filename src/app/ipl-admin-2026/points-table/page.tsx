@@ -569,7 +569,8 @@ export default function IPLAdminPointsTablePage() {
                           </div>
                         </div>
                       </div>
-                    </motion.div>,
+                    </motion.div>
+                  </AnimatePresence>,
                   document.body
                 )}
               </div>
