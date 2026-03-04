@@ -2,11 +2,21 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Trophy, TrendingUp, TrendingDown, Info, Award, Users, Calendar, Clock, Search, X, Edit, Save, RefreshCw } from 'lucide-react';
+import { Trophy, TrendingUp, TrendingDown, Info, Award, Users, Calendar, Clock, Search, X, Edit, Save, RefreshCw, Download, FileText, Table, Database } from 'lucide-react';
 import { api } from '@/lib/data';
 import { Team } from '@/types';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import GradientText from '@/components/ui/GradientText';
+import {
+  exportPointsTableToCSV,
+  exportPointsTableToExcel,
+  exportPointsTableToPDF,
+  exportPointsTableToDatabase,
+  exportPointsTableAllFormats,
+  type PointsTableExportData,
+  validateExportData,
+  getExportStatistics
+} from './points-table-export';
 
 // IPL Teams by Season - mapped to the CURRENT IPL team IDs returned by `/api/teams`
 // Team IDs (from `functions/api/teams.js`):
@@ -51,6 +61,8 @@ export default function IPLAdminPointsTablePage() {
   const [isEditing, setIsEditing] = useState(false);
   const [editingTeam, setEditingTeam] = useState<string | null>(null);
   const [editData, setEditData] = useState<Record<string, unknown>>({});
+  const [showExportMenu, setShowExportMenu] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
 
   // Fetch IPL teams
   useEffect(() => {
@@ -84,6 +96,21 @@ export default function IPLAdminPointsTablePage() {
   useEffect(() => {
     // This will trigger the pointsTable useMemo to recalculate with new year
   }, [selectedYear]);
+
+  // Close export menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (showExportMenu) {
+        const target = event.target as Element;
+        if (!target.closest('.export-menu-container')) {
+          setShowExportMenu(false);
+        }
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showExportMenu]);
 
   // Calculate points table - filter teams by selected year first, then use year-based localStorage
   const pointsTable = useMemo(() => {
@@ -315,6 +342,73 @@ export default function IPLAdminPointsTablePage() {
     }
   };
 
+  // Export functions
+  const prepareExportData = (): PointsTableExportData => {
+    return {
+      teams: sortedPointsTable.map(team => ({
+        id: team.id,
+        name: team.name,
+        shortName: team.shortName || team.name,
+        matchesPlayed: team.matchesPlayed,
+        wins: team.wins,
+        losses: team.losses,
+        noResult: (team as any).noResult || 0,
+        points: team.points,
+        netRunRate: team.netRunRate,
+        qualified: team.qualified,
+        logo: team.logo
+      })),
+      year: selectedYear,
+      filtered: !!searchTerm,
+      searchTerm: searchTerm || undefined,
+      sortBy: sortBy
+    };
+  };
+
+  const handleExport = async (format: 'csv' | 'excel' | 'pdf' | 'database' | 'all') => {
+    setIsExporting(true);
+    try {
+      const exportData = prepareExportData();
+      
+      if (!validateExportData(exportData)) {
+        alert('Invalid export data');
+        return;
+      }
+
+      switch (format) {
+        case 'csv':
+          exportPointsTableToCSV(exportData);
+          break;
+        case 'excel':
+          await exportPointsTableToExcel(exportData);
+          break;
+        case 'pdf':
+          await exportPointsTableToPDF(exportData);
+          break;
+        case 'database':
+          exportPointsTableToDatabase(exportData);
+          break;
+        case 'all':
+          exportPointsTableToCSV(exportData);
+          await exportPointsTableToExcel(exportData);
+          await exportPointsTableToPDF(exportData);
+          exportPointsTableToDatabase(exportData);
+          break;
+      }
+    } catch (error) {
+      console.error('Export failed:', error);
+      alert('Export failed. Please try again.');
+    } finally {
+      setIsExporting(false);
+      setShowExportMenu(false);
+    }
+  };
+
+  const getExportStats = () => {
+    const exportData = prepareExportData();
+    return getExportStatistics(exportData);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-amber-950 via-orange-900 to-black">
       <main className="flex-1 relative z-10">
@@ -338,6 +432,119 @@ export default function IPLAdminPointsTablePage() {
                 <RefreshCw className="w-4 h-4" />
                 Refresh
               </motion.button>
+              
+              {/* Export Button */}
+              <div className="relative export-menu-container">
+                <motion.button
+                  onClick={() => setShowExportMenu(!showExportMenu)}
+                  disabled={isExporting || sortedPointsTable.length === 0}
+                  className="px-4 py-2 rounded-xl bg-gradient-to-r from-green-500 to-emerald-500 text-white font-bold flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <Download className="w-4 h-4" />
+                  {isExporting ? 'Exporting...' : 'Export'}
+                </motion.button>
+                
+                {/* Export Dropdown Menu */}
+                <AnimatePresence>
+                  {showExportMenu && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                      className="absolute right-0 mt-2 w-56 rounded-2xl backdrop-blur-2xl border-2 border-white/20 bg-gradient-to-br from-slate-900/95 via-slate-800/90 to-slate-900/95 shadow-2xl z-50 overflow-hidden"
+                    >
+                      <div className="p-2">
+                        <div className="px-3 py-2 text-xs font-bold uppercase tracking-wider text-gray-400 border-b border-white/10 mb-2">
+                          Export Format
+                        </div>
+                        
+                        <motion.button
+                          onClick={() => handleExport('csv')}
+                          className="w-full px-3 py-2.5 rounded-xl text-left text-sm font-medium text-white hover:bg-amber-500/20 flex items-center gap-3 transition-all"
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                        >
+                          <FileText className="w-4 h-4 text-amber-400" />
+                          CSV Format
+                          <span className="ml-auto text-xs text-gray-400">.csv</span>
+                        </motion.button>
+                        
+                        <motion.button
+                          onClick={() => handleExport('excel')}
+                          className="w-full px-3 py-2.5 rounded-xl text-left text-sm font-medium text-white hover:bg-green-500/20 flex items-center gap-3 transition-all"
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                        >
+                          <Table className="w-4 h-4 text-green-400" />
+                          Excel Format
+                          <span className="ml-auto text-xs text-gray-400">.xlsx</span>
+                        </motion.button>
+                        
+                        <motion.button
+                          onClick={() => handleExport('pdf')}
+                          className="w-full px-3 py-2.5 rounded-xl text-left text-sm font-medium text-white hover:bg-red-500/20 flex items-center gap-3 transition-all"
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                        >
+                          <FileText className="w-4 h-4 text-red-400" />
+                          PDF Format
+                          <span className="ml-auto text-xs text-gray-400">.pdf</span>
+                        </motion.button>
+                        
+                        <motion.button
+                          onClick={() => handleExport('database')}
+                          className="w-full px-3 py-2.5 rounded-xl text-left text-sm font-medium text-white hover:bg-blue-500/20 flex items-center gap-3 transition-all"
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                        >
+                          <Database className="w-4 h-4 text-blue-400" />
+                          Database Format
+                          <span className="ml-auto text-xs text-gray-400">.json</span>
+                        </motion.button>
+                        
+                        <div className="border-t border-white/10 my-2"></div>
+                        
+                        <motion.button
+                          onClick={() => handleExport('all')}
+                          className="w-full px-3 py-2.5 rounded-xl text-left text-sm font-bold text-white bg-gradient-to-r from-purple-500/20 to-pink-500/20 hover:from-purple-500/30 hover:to-pink-500/30 flex items-center gap-3 transition-all"
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                        >
+                          <Download className="w-4 h-4 text-purple-400" />
+                          All Formats
+                          <span className="ml-auto text-xs text-gray-400">4 files</span>
+                        </motion.button>
+                      </div>
+                      
+                      {/* Export Statistics */}
+                      <div className="border-t border-white/10 p-3 bg-gradient-to-r from-amber-500/10 to-orange-500/10">
+                        <div className="text-xs font-bold text-gray-400 mb-2">Export Summary</div>
+                        <div className="grid grid-cols-2 gap-2 text-xs">
+                          <div>
+                            <span className="text-gray-400">Teams:</span>
+                            <span className="ml-1 font-bold text-white">{sortedPointsTable.length}</span>
+                          </div>
+                          <div>
+                            <span className="text-gray-400">Qualified:</span>
+                            <span className="ml-1 font-bold text-amber-400">{getExportStats().qualifiedTeams}</span>
+                          </div>
+                          <div>
+                            <span className="text-gray-400">Total Points:</span>
+                            <span className="ml-1 font-bold text-green-400">{getExportStats().totalPoints}</span>
+                          </div>
+                          <div>
+                            <span className="text-gray-400">Avg NRR:</span>
+                            <span className="ml-1 font-bold text-blue-400">{getExportStats().averageNRR}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+              
               <motion.button
                 onClick={() => {
                   if (confirm(`Clear all points table data for ${selectedYear}? This cannot be undone.`)) {

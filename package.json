@@ -26,6 +26,8 @@
     "bcryptjs": "^3.0.3",
     "framer-motion": "^7.10.3",
     "jsonwebtoken": "^9.0.2",
+    "jspdf": "^4.2.0",
+    "jspdf-autotable": "^5.0.7",
     "lottie-web": "^5.13.0",
     "lucide-react": "^0.553.0",
     "next": "^14.2.33",
