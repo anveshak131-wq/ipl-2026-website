@@ -458,12 +458,13 @@ export default function IPLAdminPointsTablePage() {
                 Refresh
               </motion.button>
               
-              {/* Export Button - Simple Working Version */}
+              {/* Export Button */}
               <div className="relative" style={{ zIndex: 9999999999 }}>
                 <button
+                  type="button"
+                  ref={exportButtonRef}
                   onClick={() => {
-                    console.log('Export button clicked'); // Debug log
-                    alert('Export button clicked!'); // Test alert
+                    updateDropdownPosition();
                     setShowExportMenu(!showExportMenu);
                   }}
                   disabled={isExporting || sortedPointsTable.length === 0}
@@ -473,7 +474,7 @@ export default function IPLAdminPointsTablePage() {
                   {isExporting ? 'Exporting...' : 'Export'}
                 </button>
                 
-                {/* Simple Working Dropdown */}
+                {/* Export Dropdown */}
                 {showExportMenu && (
                   <div
                     style={{
@@ -496,28 +497,7 @@ export default function IPLAdminPointsTablePage() {
                     
                     <button
                       onClick={() => {
-                        console.log('CSV button clicked'); // Debug log
-                        alert('CSV export clicked!'); // Test alert
-                        
-                        // Simple test CSV export
-                        const testCSV = 'Rank,Team Name,Points\n1,Test Team,10\n2,Another Team,8';
-                        const blob = new Blob([testCSV], { type: 'text/csv' });
-                        const link = document.createElement('a');
-                        const url = URL.createObjectURL(blob);
-                        
-                        link.setAttribute('href', url);
-                        link.setAttribute('download', 'test-export.csv');
-                        link.style.visibility = 'hidden';
-                        
-                        document.body.appendChild(link);
-                        link.click();
-                        document.body.removeChild(link);
-                        
-                        URL.revokeObjectURL(url);
-                        console.log('Test CSV download completed'); // Debug log
-                        
-                        // Also try the real export
-                        // handleExport('csv');
+                        handleExport('csv');
                       }}
                       style={{
                         width: '100%',
@@ -535,13 +515,11 @@ export default function IPLAdminPointsTablePage() {
                       }}
                     >
                       <span style={{ color: '#fbbf24' }}>📄</span>
-                      CSV Format (Test)
+                      CSV Format
                     </button>
                     
                     <button
                       onClick={() => {
-                        console.log('Excel button clicked'); // Debug log
-                        alert('Excel export clicked!'); // Test alert
                         handleExport('excel');
                       }}
                       style={{
@@ -565,8 +543,6 @@ export default function IPLAdminPointsTablePage() {
                     
                     <button
                       onClick={() => {
-                        console.log('PDF button clicked'); // Debug log
-                        alert('PDF export clicked!'); // Test alert
                         handleExport('pdf');
                       }}
                       style={{
@@ -590,8 +566,6 @@ export default function IPLAdminPointsTablePage() {
                     
                     <button
                       onClick={() => {
-                        console.log('Database button clicked'); // Debug log
-                        alert('Database export clicked!'); // Test alert
                         handleExport('database');
                       }}
                       style={{
@@ -615,8 +589,6 @@ export default function IPLAdminPointsTablePage() {
                     
                     <button
                       onClick={() => {
-                        console.log('All formats button clicked'); // Debug log
-                        alert('All formats export clicked!'); // Test alert
                         handleExport('all');
                       }}
                       style={{

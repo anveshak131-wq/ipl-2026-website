@@ -8,12 +8,16 @@
 const importJsPDF = async () => {
   if (typeof window === 'undefined') return null;
   try {
-    const { default: jsPDF } = await import('jspdf');
+    const jspdfModule = await import('jspdf');
     await import('jspdf-autotable');
-    console.log('jsPDF imported successfully'); // Debug log
+    const jsPDF = (jspdfModule as { jsPDF?: typeof import('jspdf').jsPDF; default?: any }).jsPDF
+      || (jspdfModule as { default?: any }).default;
+    if (!jsPDF) {
+      throw new Error('jsPDF export not found');
+    }
     return jsPDF;
   } catch (error) {
-    console.error('Failed to import jsPDF:', error); // Debug log
+    console.error('Failed to import jsPDF:', error);
     return null;
   }
 };
@@ -21,11 +25,14 @@ const importJsPDF = async () => {
 const importXLSX = async () => {
   if (typeof window === 'undefined') return null;
   try {
-    const { default: XLSX } = await import('xlsx');
-    console.log('XLSX imported successfully'); // Debug log
-    return XLSX;
+    const xlsxModule = await import('xlsx');
+    const XLSX = (xlsxModule as { default?: any }).default || xlsxModule;
+    if (!XLSX || !XLSX.utils) {
+      throw new Error('XLSX export not found');
+    }
+    return XLSX as typeof import('xlsx');
   } catch (error) {
-    console.error('Failed to import XLSX:', error); // Debug log
+    console.error('Failed to import XLSX:', error);
     return null;
   }
 };
@@ -73,8 +80,6 @@ export interface DatabaseExportRecord {
  * Export points table to CSV format
  */
 export function exportPointsTableToCSV(data: PointsTableExportData): void {
-  console.log('CSV export started'); // Debug log
-  
   const { teams, year, filtered, searchTerm } = data;
   
   if (teams.length === 0) {
@@ -118,11 +123,7 @@ export function exportPointsTableToCSV(data: PointsTableExportData): void {
     })
   ].filter(Boolean).join('\n');
 
-  console.log('CSV content generated, length:', csvContent.length); // Debug log
-  
   downloadFile(csvContent, `ipl-points-table-${year}${filtered ? '-filtered' : ''}.csv`, 'text/csv');
-  
-  console.log('CSV export completed'); // Debug log
 }
 
 /**
@@ -205,8 +206,10 @@ export async function exportPointsTableToExcel(data: PointsTableExportData): Pro
   // Add worksheet to workbook
   XLSX.utils.book_append_sheet(wb, ws, `IPL ${year} Points`);
 
-  // Save the file
-  XLSX.writeFile(wb, `ipl-points-table-${year}${filtered ? '-filtered' : ''}.xlsx`);
+  // Save the file using a blob for better browser compatibility
+  const excelBuffer = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+  const blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+  downloadBlob(blob, `ipl-points-table-${year}${filtered ? '-filtered' : ''}.xlsx`);
 }
 
 /**
@@ -325,8 +328,9 @@ export async function exportPointsTableToPDF(data: PointsTableExportData): Promi
   doc.text(`Total Teams: ${teams.length}`, 14, finalY + 10);
   doc.text(`Page 1 of 1`, 280, finalY + 10, { align: 'right' });
 
-  // Save the PDF
-  doc.save(`ipl-points-table-${year}${filtered ? '-filtered' : ''}.pdf`);
+  // Save the PDF using a blob for better browser compatibility
+  const pdfBlob = doc.output('blob');
+  downloadBlob(pdfBlob, `ipl-points-table-${year}${filtered ? '-filtered' : ''}.pdf`);
 }
 
 /**
@@ -395,23 +399,27 @@ export function exportPointsTableAllFormats(data: PointsTableExportData): void {
  * Helper function to download files
  */
 function downloadFile(content: string, filename: string, mimeType: string): void {
-  console.log('Download file called:', { filename, mimeType, contentLength: content.length }); // Debug log
-  
-  const blob = new Blob([content], { type: mimeType });
+  const blob = new Blob([content], { type: `${mimeType};charset=utf-8;` });
+  downloadBlob(blob, filename);
+}
+
+function downloadBlob(blob: Blob, filename: string): void {
   const link = document.createElement('a');
   const url = URL.createObjectURL(blob);
-  
+
   link.setAttribute('href', url);
   link.setAttribute('download', filename);
+  link.setAttribute('rel', 'noopener');
   link.style.visibility = 'hidden';
-  
+
   document.body.appendChild(link);
   link.click();
-  document.body.removeChild(link);
-  
-  URL.revokeObjectURL(url);
-  
-  console.log('Download completed'); // Debug log
+
+  // Give the browser time to start the download before revoking.
+  setTimeout(() => {
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  }, 1000);
 }
 
 /**
