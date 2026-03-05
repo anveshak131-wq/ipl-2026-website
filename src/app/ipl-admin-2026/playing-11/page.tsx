@@ -6,9 +6,10 @@ import AuroraBackground from '@/components/ui/AuroraBackground';
 import { Match, Player, Team } from '@/types';
 import { api } from '@/lib/data';
 import { LoadingSpinner } from '@/components/admin/animations';
-import { CheckCircle2, AlertCircle, Users, Save, X, RefreshCw } from 'lucide-react';
+import { CheckCircle2, AlertCircle, Users, Save, RefreshCw, FileDown, FileText, FileSpreadsheet, Database } from 'lucide-react';
 import { useLeague } from '@/contexts/LeagueContext';
 import { WPLColors } from '@/lib/wplColors';
+import { exportPlaying11ToCSV, exportPlaying11ToExcel, exportPlaying11ToPDF, exportPlaying11ToDatabase } from './playing-11-export';
 
 export default function Playing11Page() {
   const router = useRouter();
@@ -27,6 +28,7 @@ export default function Playing11Page() {
   const [team2SubstitutionTime, setTeam2SubstitutionTime] = useState<string>('');
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
 
   // Check authentication
   useEffect(() => {
@@ -152,9 +154,31 @@ export default function Playing11Page() {
       const existingTeam2 = (selectedMatch as any).playing11?.team2 || [];
       setTeam1Playing11(existingTeam1);
       setTeam2Playing11(existingTeam2);
+
+      const normalizeImpact = (impact: any) => {
+        if (!impact) return { playerId: '', substitutionTime: '' };
+        const playerId = impact.playerId || impact.impact || '';
+        let substitutionTime = impact.substitutionTime || '';
+        if (!substitutionTime && typeof impact.substitutedAt === 'number') {
+          substitutionTime = new Date(impact.substitutedAt).toLocaleString();
+        }
+        return { playerId, substitutionTime };
+      };
+
+      const impact = (selectedMatch as any).impactPlayer;
+      const team1Impact = normalizeImpact(impact?.team1);
+      const team2Impact = normalizeImpact(impact?.team2);
+      setTeam1ImpactPlayer(team1Impact.playerId);
+      setTeam2ImpactPlayer(team2Impact.playerId);
+      setTeam1SubstitutionTime(team1Impact.substitutionTime);
+      setTeam2SubstitutionTime(team2Impact.substitutionTime);
     } else {
       setTeam1Playing11([]);
       setTeam2Playing11([]);
+      setTeam1ImpactPlayer('');
+      setTeam2ImpactPlayer('');
+      setTeam1SubstitutionTime('');
+      setTeam2SubstitutionTime('');
     }
   }, [selectedMatch]);
 
@@ -424,7 +448,72 @@ export default function Playing11Page() {
     }
   };
 
+  const buildExportPayload = useCallback(() => {
+    if (!selectedMatch) return null;
+    return {
+      match: selectedMatch,
+      players,
+      playing11: {
+        team1: team1Playing11,
+        team2: team2Playing11
+      },
+      impact: {
+        team1: team1ImpactPlayer || team1SubstitutionTime ? {
+          playerId: team1ImpactPlayer,
+          substitutionTime: team1SubstitutionTime
+        } : null,
+        team2: team2ImpactPlayer || team2SubstitutionTime ? {
+          playerId: team2ImpactPlayer,
+          substitutionTime: team2SubstitutionTime
+        } : null
+      }
+    };
+  }, [
+    selectedMatch,
+    players,
+    team1Playing11,
+    team2Playing11,
+    team1ImpactPlayer,
+    team2ImpactPlayer,
+    team1SubstitutionTime,
+    team2SubstitutionTime
+  ]);
+
+  const handleExport = async (format: 'pdf' | 'excel' | 'csv' | 'database') => {
+    const payload = buildExportPayload();
+    if (!payload) return;
+
+    setIsExporting(true);
+    try {
+      switch (format) {
+        case 'csv':
+          exportPlaying11ToCSV(payload);
+          break;
+        case 'excel':
+          await exportPlaying11ToExcel(payload);
+          break;
+        case 'pdf':
+          await exportPlaying11ToPDF(payload);
+          break;
+        case 'database':
+          exportPlaying11ToDatabase(payload);
+          break;
+      }
+    } catch (error) {
+      console.error('Export failed:', error);
+      alert('Export failed. Please try again.');
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
   const isWPL = currentLeague === 'wpl';
+  const canExport = !!selectedMatch && (
+    team1Playing11.length > 0 ||
+    team2Playing11.length > 0 ||
+    !!team1ImpactPlayer ||
+    !!team2ImpactPlayer
+  );
   const bgStyle = isWPL 
     ? { background: `linear-gradient(to bottom, ${WPLColors.base}, ${WPLColors.gradientStart}66, ${WPLColors.gradientMid}33, ${WPLColors.base})` }
     : { background: '#0B0F13' };
@@ -548,6 +637,97 @@ export default function Playing11Page() {
                   ))}
               </select>
             </div>
+
+            {selectedMatch && (
+              <div
+                className="rounded-2xl p-4 backdrop-blur-xl border"
+                style={isWPL ? {
+                  background: WPLColors.purpleRGBA[10],
+                  borderColor: WPLColors.purpleRGBA[30],
+                } : {
+                  background: 'rgba(30, 41, 59, 0.6)',
+                  borderColor: 'rgba(255, 255, 255, 0.1)',
+                }}
+              >
+                <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                  <div>
+                    <h3 className="text-lg font-semibold text-white">Export Playing 11</h3>
+                    <p className="text-sm" style={{ color: isWPL ? WPLColors.textMuted : '#9CA3AF' }}>
+                      Download playing 11 and impact players for the selected match.
+                    </p>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    <button
+                      onClick={() => handleExport('pdf')}
+                      disabled={!canExport || isExporting}
+                      className={`
+                        flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold transition-all border
+                        ${isWPL
+                          ? 'bg-red-500/20 border-red-400/30 text-red-200 hover:bg-red-500/30'
+                          : 'bg-red-500/20 border-red-400/30 text-red-200 hover:bg-red-500/30'
+                        }
+                        ${(!canExport || isExporting) ? 'opacity-50 cursor-not-allowed' : 'hover:scale-105'}
+                      `}
+                      title="Export PDF"
+                    >
+                      <FileDown className="w-4 h-4" />
+                      PDF
+                    </button>
+                    <button
+                      onClick={() => handleExport('excel')}
+                      disabled={!canExport || isExporting}
+                      className={`
+                        flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold transition-all border
+                        ${isWPL
+                          ? 'bg-purple-500/20 border-purple-400/30 text-purple-200 hover:bg-purple-500/30'
+                          : 'bg-emerald-500/20 border-emerald-400/30 text-emerald-200 hover:bg-emerald-500/30'
+                        }
+                        ${(!canExport || isExporting) ? 'opacity-50 cursor-not-allowed' : 'hover:scale-105'}
+                      `}
+                      title="Export Excel"
+                    >
+                      <FileSpreadsheet className="w-4 h-4" />
+                      Excel
+                    </button>
+                    <button
+                      onClick={() => handleExport('csv')}
+                      disabled={!canExport || isExporting}
+                      className={`
+                        flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold transition-all border
+                        ${isWPL
+                          ? 'bg-blue-500/20 border-blue-400/30 text-blue-200 hover:bg-blue-500/30'
+                          : 'bg-blue-500/20 border-blue-400/30 text-blue-200 hover:bg-blue-500/30'
+                        }
+                        ${(!canExport || isExporting) ? 'opacity-50 cursor-not-allowed' : 'hover:scale-105'}
+                      `}
+                      title="Export CSV"
+                    >
+                      <FileText className="w-4 h-4" />
+                      CSV
+                    </button>
+                    <button
+                      onClick={() => handleExport('database')}
+                      disabled={!canExport || isExporting}
+                      className={`
+                        flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold transition-all border
+                        ${isWPL
+                          ? 'bg-amber-500/20 border-amber-400/30 text-amber-200 hover:bg-amber-500/30'
+                          : 'bg-amber-500/20 border-amber-400/30 text-amber-200 hover:bg-amber-500/30'
+                        }
+                        ${(!canExport || isExporting) ? 'opacity-50 cursor-not-allowed' : 'hover:scale-105'}
+                      `}
+                      title="Export Database (SQL)"
+                    >
+                      <Database className="w-4 h-4" />
+                      Database
+                    </button>
+                  </div>
+                </div>
+                <p className="text-xs mt-3" style={{ color: isWPL ? WPLColors.textMuted : '#9CA3AF' }}>
+                  Exports include match info, playing 11, impact players, and full player data.
+                </p>
+              </div>
+            )}
           </div>
 
           {/* Playing 11 Selection */}
@@ -993,4 +1173,3 @@ export default function Playing11Page() {
     </>
   );
 }
-
