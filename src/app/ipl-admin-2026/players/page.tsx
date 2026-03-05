@@ -958,14 +958,14 @@ export default function AdminPlayers() {
     const pageHeight = doc.internal.pageSize.getHeight();
 
     const theme = {
-      pageBackground: [248, 250, 252],
-      headerBackground: [15, 23, 42],
-      headerAccent: [59, 130, 246],
-      headerText: [248, 250, 252],
-      mutedText: [100, 116, 139],
-      tableHeader: [30, 64, 175],
-      tableAltRow: [241, 245, 249],
-      cardBorder: [226, 232, 240]
+      pageBackground: [255, 246, 233],
+      headerBackground: [74, 29, 10],
+      headerAccent: [204, 96, 22],
+      headerText: [255, 250, 242],
+      mutedText: [120, 96, 70],
+      tableHeader: [143, 58, 16],
+      tableAltRow: [254, 242, 227],
+      cardBorder: [229, 205, 178]
     } as const;
 
     const headerTitle = `${currentLeague.toUpperCase()} Players Export`;
@@ -977,11 +977,11 @@ export default function AdminPlayers() {
     const generatedAt = new Date().toLocaleString();
 
     const summaryCards = [
-      { label: 'Total Players', value: playersToExport.length, color: [59, 130, 246] as const },
-      { label: 'Batsmen', value: playersToExport.filter(p => p.role === 'Batsman').length, color: [16, 185, 129] as const },
-      { label: 'Bowlers', value: playersToExport.filter(p => p.role === 'Bowler').length, color: [249, 115, 22] as const },
-      { label: 'All-rounders', value: playersToExport.filter(p => p.role === 'All-rounder').length, color: [139, 92, 246] as const },
-      { label: 'Wicket-keepers', value: playersToExport.filter(p => p.role === 'Wicket-keeper').length, color: [236, 72, 153] as const }
+      { label: 'Total Players', value: playersToExport.length, color: [204, 96, 22] as const },
+      { label: 'Batsmen', value: playersToExport.filter(p => p.role === 'Batsman').length, color: [90, 132, 52] as const },
+      { label: 'Bowlers', value: playersToExport.filter(p => p.role === 'Bowler').length, color: [196, 74, 28] as const },
+      { label: 'All-rounders', value: playersToExport.filter(p => p.role === 'All-rounder').length, color: [168, 78, 96] as const },
+      { label: 'Wicket-keepers', value: playersToExport.filter(p => p.role === 'Wicket-keeper').length, color: [130, 94, 40] as const }
     ];
 
     const drawPageFrame = (pageNumber: number) => {
@@ -1037,10 +1037,10 @@ export default function AdminPlayers() {
     };
 
     const roleColors = new Map<string, [number, number, number]>([
-      ['Batsman', [16, 185, 129]],
-      ['Bowler', [249, 115, 22]],
-      ['All-rounder', [139, 92, 246]],
-      ['Wicket-keeper', [59, 130, 246]]
+      ['Batsman', [90, 132, 52]],
+      ['Bowler', [196, 74, 28]],
+      ['All-rounder', [168, 78, 96]],
+      ['Wicket-keeper', [130, 94, 40]]
     ]);
 
     const drawCard = (title: string, x: number, y: number, w: number, h: number, draw: (plotX: number, plotY: number, plotW: number, plotH: number) => void) => {
@@ -1049,7 +1049,7 @@ export default function AdminPlayers() {
       doc.roundedRect(x, y, w, h, 8, 8, 'FD');
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(10);
-      doc.setTextColor(15, 23, 42);
+      doc.setTextColor(60, 36, 16);
       doc.text(title, x + 12, y + 16);
       const plotX = x + 12;
       const plotY = y + 24;
@@ -1059,7 +1059,7 @@ export default function AdminPlayers() {
     };
 
     const drawAxes = (x: number, y: number, w: number, h: number) => {
-      doc.setDrawColor(226, 232, 240);
+      doc.setDrawColor(232, 217, 196);
       doc.setLineWidth(0.5);
       doc.line(x, y, x, y + h);
       doc.line(x, y + h, x + w, y + h);
@@ -1083,7 +1083,7 @@ export default function AdminPlayers() {
         doc.rect(barX, barY, barWidth, barHeight, 'F');
         doc.setFont('helvetica', 'normal');
         doc.setFontSize(7);
-        doc.setTextColor(100, 116, 139);
+        doc.setTextColor(...theme.mutedText);
         const label = item.label.split(' ')[0].slice(0, 6);
         doc.text(label, barX + barWidth / 2, y + h + 10, { align: 'center' });
       });
@@ -1114,14 +1114,14 @@ export default function AdminPlayers() {
           const prev = points[idx - 1];
           const ppx = x + ((idx - 1) / (points.length - 1)) * w;
           const ppy = y + h - (prev.value / maxVal) * (h - 12);
-          doc.setDrawColor(59, 130, 246);
+          doc.setDrawColor(...theme.headerAccent);
           doc.setLineWidth(1.2);
           doc.line(ppx, ppy, px, py);
         }
-        doc.setFillColor(59, 130, 246);
+        doc.setFillColor(...theme.headerAccent);
         doc.circle(px, py, 2.4, 'F');
         doc.setFontSize(7);
-        doc.setTextColor(100, 116, 139);
+        doc.setTextColor(...theme.mutedText);
         doc.text(point.label, px, y + h + 10, { align: 'center' });
       });
     };
@@ -1142,7 +1142,7 @@ export default function AdminPlayers() {
       sampled.forEach(point => {
         const px = x + ((point.x - minX) / (maxX - minX || 1)) * w;
         const py = y + h - ((point.y - minY) / (maxY - minY || 1)) * h;
-        const color = roleColors.get(point.role) || [59, 130, 246];
+        const color = roleColors.get(point.role) || theme.headerAccent;
         doc.setFillColor(...color);
         doc.circle(px, py, 2, 'F');
       });
@@ -1165,7 +1165,7 @@ export default function AdminPlayers() {
       drawAxes(x, y, w, h);
       counts.forEach((count, idx) => {
         const barHeight = (count / maxCount) * (h - 10);
-        doc.setFillColor(96, 165, 250);
+        doc.setFillColor(214, 128, 34);
         doc.rect(x + idx * barWidth, y + h - barHeight, barWidth - 2, barHeight, 'F');
       });
     };
@@ -1204,14 +1204,14 @@ export default function AdminPlayers() {
         const q1Y = scale(stat.q1);
         const q3Y = scale(stat.q3);
         const medY = scale(stat.median);
-        doc.setDrawColor(148, 163, 184);
+        doc.setDrawColor(164, 142, 118);
         doc.line(centerX, minY, centerX, maxY);
-        doc.setFillColor(219, 234, 254);
+        doc.setFillColor(252, 238, 218);
         doc.rect(centerX - boxWidth / 2, q3Y, boxWidth, q1Y - q3Y, 'F');
-        doc.setDrawColor(59, 130, 246);
+        doc.setDrawColor(...theme.headerAccent);
         doc.line(centerX - boxWidth / 2, medY, centerX + boxWidth / 2, medY);
         doc.setFontSize(7);
-        doc.setTextColor(100, 116, 139);
+        doc.setTextColor(...theme.mutedText);
         doc.text(stat.role.split('-')[0], centerX, y + h + 10, { align: 'center' });
       });
     };
@@ -1226,7 +1226,7 @@ export default function AdminPlayers() {
       let offsetX = x;
       counts.forEach(item => {
         const width = (item.count / total) * w;
-        const color = roleColors.get(item.role) || [59, 130, 246];
+        const color = roleColors.get(item.role) || theme.headerAccent;
         doc.setFillColor(...color);
         doc.rect(offsetX, y, width, h, 'F');
         doc.setTextColor(255, 255, 255);
@@ -1276,15 +1276,15 @@ export default function AdminPlayers() {
       const rowH = h / teamStats.length;
       teamStats.forEach((team, idx) => {
         const barY = y + idx * rowH + 6;
-        doc.setFillColor(226, 232, 240);
+        doc.setFillColor(238, 225, 208);
         doc.rect(x + 80, barY, w - 90, 8, 'F');
-        doc.setFillColor(59, 130, 246);
+        doc.setFillColor(...theme.headerAccent);
         doc.rect(x + 80, barY, ((team.avgRuns / maxVal) * (w - 90)), 8, 'F');
         const targetX = x + 80 + (target / maxVal) * (w - 90);
-        doc.setDrawColor(15, 23, 42);
+        doc.setDrawColor(60, 36, 16);
         doc.line(targetX, barY - 2, targetX, barY + 10);
         doc.setFontSize(7);
-        doc.setTextColor(71, 85, 105);
+        doc.setTextColor(...theme.mutedText);
         doc.text(team.team, x + 4, barY + 7);
         doc.text(team.avgRuns.toFixed(0), x + w - 6, barY + 7, { align: 'right' });
       });
@@ -1310,23 +1310,23 @@ export default function AdminPlayers() {
           const count = matrix[rIdx][tIdx];
           const intensity = count / maxCount;
           const color = [
-            Math.round(226 + (30 - 226) * intensity),
-            Math.round(232 + (64 - 232) * intensity),
-            Math.round(240 + (175 - 240) * intensity)
+            Math.round(252 + (176 - 252) * intensity),
+            Math.round(240 + (74 - 240) * intensity),
+            Math.round(224 + (20 - 224) * intensity)
           ];
           doc.setFillColor(color[0], color[1], color[2]);
           doc.rect(x + tIdx * cellW, y + rIdx * cellH, cellW, cellH, 'F');
           doc.setFontSize(7);
-          doc.setTextColor(15, 23, 42);
+          doc.setTextColor(60, 36, 16);
           doc.text(String(count), x + tIdx * cellW + cellW / 2, y + rIdx * cellH + cellH / 2 + 2, { align: 'center' });
         });
         doc.setFontSize(7);
-        doc.setTextColor(71, 85, 105);
+        doc.setTextColor(...theme.mutedText);
         doc.text(role.split('-')[0], x - 6, y + rIdx * cellH + cellH / 2 + 2, { align: 'right' });
       });
       teams.forEach((team, idx) => {
         doc.setFontSize(7);
-        doc.setTextColor(71, 85, 105);
+        doc.setTextColor(...theme.mutedText);
         doc.text(team, x + idx * cellW + cellW / 2, y + h + 10, { align: 'center' });
       });
     };
@@ -1368,23 +1368,23 @@ export default function AdminPlayers() {
           const t = clamp(Math.abs(corr), 0, 1);
           const color = corr >= 0
             ? [
-                Math.round(239 + (30 - 239) * t),
-                Math.round(246 + (64 - 246) * t),
-                Math.round(255 + (175 - 255) * t)
+                Math.round(255 + (176 - 255) * t),
+                Math.round(244 + (74 - 244) * t),
+                Math.round(230 + (20 - 230) * t)
               ]
             : [
-                Math.round(254 + (220 - 254) * t),
-                Math.round(226 + (38 - 226) * t),
-                Math.round(226 + (38 - 226) * t)
+                Math.round(252 + (176 - 252) * t),
+                Math.round(226 + (40 - 226) * t),
+                Math.round(220 + (24 - 220) * t)
               ];
           doc.setFillColor(color[0], color[1], color[2]);
           doc.rect(x + j * cellW, y + i * cellH, cellW, cellH, 'F');
           doc.setFontSize(7);
-          doc.setTextColor(15, 23, 42);
+          doc.setTextColor(60, 36, 16);
           doc.text(corr.toFixed(1), x + j * cellW + cellW / 2, y + i * cellH + cellH / 2 + 2, { align: 'center' });
         });
         doc.setFontSize(7);
-        doc.setTextColor(71, 85, 105);
+        doc.setTextColor(...theme.mutedText);
         doc.text(metric.label, x - 6, y + i * cellH + cellH / 2 + 2, { align: 'right' });
         doc.text(metric.label, x + i * cellW + cellW / 2, y - 6, { align: 'center' });
       });
@@ -1469,7 +1469,7 @@ export default function AdminPlayers() {
         fontSize: 8.5,
         cellPadding: 4,
         overflow: 'linebreak',
-        textColor: [15, 23, 42],
+        textColor: [60, 36, 16],
         lineColor: theme.cardBorder,
         lineWidth: 0.1
       },
