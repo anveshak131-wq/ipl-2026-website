@@ -468,19 +468,18 @@ export default function IPLAdminPointsTablePage() {
                 
                 {/* Export Dropdown Menu - React Portal to Body */}
                 {showExportMenu && createPortal(
-                  <AnimatePresence>
-                    <motion.div
-                      initial={{ opacity: 0, y: -10, scale: 0.95 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      exit={{ opacity: 0, y: -10, scale: 0.95 }}
-                      style={{
-                        position: 'fixed',
-                        top: `${dropdownPosition.top}px`,
-                        left: `${dropdownPosition.left}px`,
-                        zIndex: 999999999
-                      }}
-                      className="w-56 rounded-2xl backdrop-blur-2xl border-2 border-white/20 bg-gradient-to-br from-slate-900/95 via-slate-800/90 to-slate-900/95 shadow-2xl overflow-hidden"
-                    >
+                  <motion.div
+                    initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                    style={{
+                      position: 'fixed',
+                      top: `${dropdownPosition.top}px`,
+                      left: `${dropdownPosition.left}px`,
+                      zIndex: 999999999
+                    }}
+                    className="w-56 rounded-2xl backdrop-blur-2xl border-2 border-white/20 bg-gradient-to-br from-slate-900/95 via-slate-800/90 to-slate-900/95 shadow-2xl overflow-hidden"
+                  >
                       <div className="p-2">
                         <div className="px-3 py-2 text-xs font-bold uppercase tracking-wider text-gray-400 border-b border-white/10 mb-2">
                           Export Format
@@ -566,8 +565,7 @@ export default function IPLAdminPointsTablePage() {
                           </div>
                         </div>
                       </div>
-                    </motion.div>
-                  </AnimatePresence>,
+                  </motion.div>,
                   document.body
                 )}
               </div>
