@@ -1035,6 +1035,12 @@ export default function AdminPlayers() {
       const parsed = Number(value);
       return Number.isFinite(parsed) ? parsed : 0;
     };
+    const formatNumber = (value: number, digits = 0) => (Number.isFinite(value) ? value.toFixed(digits) : '0');
+    const shortName = (value: unknown) => {
+      const name = String(value ?? '').trim();
+      if (!name) return 'N/A';
+      return name.split(' ')[0];
+    };
 
     const roleColors = new Map<string, [number, number, number]>([
       ['Batsman', [90, 132, 52]],
@@ -1253,7 +1259,7 @@ export default function AdminPlayers() {
         const cx = x + col * cellW + cellW / 2;
         const cy = y + row * cellH + cellH / 2;
         const radius = clamp(Math.sqrt(item.value / maxVal) * (Math.min(cellW, cellH) / 2 - 6), 6, Math.min(cellW, cellH) / 2 - 6);
-        const color = roleColors.get(item.role) || [59, 130, 246];
+        const color = roleColors.get(item.role) || theme.headerAccent;
         doc.setFillColor(...color);
         doc.circle(cx, cy, radius, 'F');
         doc.setTextColor(255, 255, 255);
@@ -1425,7 +1431,214 @@ export default function AdminPlayers() {
       });
     };
 
+    const drawChartNotesPage = () => {
+      const pageNumber = doc.internal.getCurrentPageInfo().pageNumber;
+      drawPageFrame(pageNumber);
+
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(14);
+      doc.setTextColor(60, 36, 16);
+      doc.text('Chart Explanations', 40, 92);
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(9);
+      doc.setTextColor(...theme.mutedText);
+      doc.text('Each chart includes the data basis and why this chart type was chosen.', 40, 108);
+
+      const topScorers = [...rows]
+        .map(r => ({ name: shortName(r.name), runs: toNumber(r.runs) }))
+        .sort((a, b) => b.runs - a.runs)
+        .slice(0, 2);
+      const topScorerLine = topScorers.length
+        ? `Top 2: ${topScorers.map(p => `${p.name} ${formatNumber(p.runs)}`).join(', ')}.`
+        : 'Run data unavailable.';
+
+      const ageBuckets = [
+        { label: '<=22', min: 0, max: 22 },
+        { label: '23-26', min: 23, max: 26 },
+        { label: '27-30', min: 27, max: 30 },
+        { label: '31-34', min: 31, max: 34 },
+        { label: '35+', min: 35, max: 200 }
+      ];
+      const ageBucketAverages = ageBuckets.map(bucket => {
+        const values = rows.filter(r => {
+          const age = toNumber(r.age);
+          return age >= bucket.min && age <= bucket.max;
+        }).map(r => toNumber(r.runs));
+        const avg = values.length ? values.reduce((a, b) => a + b, 0) / values.length : 0;
+        return { label: bucket.label, value: avg };
+      });
+      const bestAgeBucket = [...ageBucketAverages].sort((a, b) => b.value - a.value)[0];
+
+      const srValues = rows.map(r => toNumber(r.strikeRate)).filter(v => v > 0);
+      const runValues = rows.map(r => toNumber(r.runs)).filter(v => v > 0);
+      const minSR = srValues.length ? Math.min(...srValues) : 0;
+      const maxSR = srValues.length ? Math.max(...srValues) : 0;
+      const minRuns = runValues.length ? Math.min(...runValues) : 0;
+      const maxRuns = runValues.length ? Math.max(...runValues) : 0;
+      const scatterPoints = rows
+        .map(r => ({ x: toNumber(r.strikeRate), y: toNumber(r.runs) }))
+        .filter(p => p.x > 0 || p.y > 0);
+      const scatterStep = Math.max(1, Math.ceil(scatterPoints.length / 60));
+      const scatterCount = scatterPoints.length ? Math.ceil(scatterPoints.length / scatterStep) : 0;
+
+      const ageValues = rows.map(r => toNumber(r.age)).filter(v => v > 0);
+      const minAge = ageValues.length ? Math.min(...ageValues) : 0;
+      const maxAge = ageValues.length ? Math.max(...ageValues) : 0;
+      const bins = 6;
+      const binSize = (maxAge - minAge) / bins || 1;
+      const ageBins = new Array(bins).fill(0).map((_, idx) => {
+        const start = minAge + idx * binSize;
+        const end = start + binSize;
+        return { label: `${Math.floor(start)}-${Math.floor(end)}`, count: 0 };
+      });
+      ageValues.forEach(v => {
+        const index = Math.min(Math.floor((v - minAge) / binSize), bins - 1);
+        ageBins[index].count += 1;
+      });
+      const topAgeBin = [...ageBins].sort((a, b) => b.count - a.count)[0];
+
+      const roles = ['Batsman', 'Bowler', 'All-rounder', 'Wicket-keeper'];
+      const medianByRole = roles.map(role => {
+        const values = rows.filter(r => r.role === role).map(r => toNumber(r.runs)).filter(v => v > 0);
+        return { role, median: quantile(values, 0.5) };
+      });
+      const bestMedianRole = [...medianByRole].sort((a, b) => b.median - a.median)[0];
+
+      const roleCounts = roles.map(role => ({
+        role,
+        count: rows.filter(r => r.role === role).length
+      }));
+      const topRole = [...roleCounts].sort((a, b) => b.count - a.count)[0];
+
+      const topPlayer = [...rows]
+        .map(r => ({ name: shortName(r.name), runs: toNumber(r.runs) }))
+        .sort((a, b) => b.runs - a.runs)[0];
+
+      const teams = Array.from(new Map(rows.map(r => [String(r.teamName), r])).keys());
+      const teamStats = teams.map(team => {
+        const teamRows = rows.filter(r => r.teamName === team);
+        const avgRuns = teamRows.length ? teamRows.reduce((sum, r) => sum + toNumber(r.runs), 0) / teamRows.length : 0;
+        return { team, avgRuns };
+      }).sort((a, b) => b.avgRuns - a.avgRuns);
+      const overallAvg = rows.length ? rows.reduce((sum, r) => sum + toNumber(r.runs), 0) / rows.length : 0;
+      const target = overallAvg * 1.1;
+      const topTeam = teamStats[0];
+
+      const teamCounts = rows.reduce((acc, r) => {
+        acc[r.teamShortName as string] = (acc[r.teamShortName as string] || 0) + 1;
+        return acc;
+      }, {} as Record<string, number>);
+      const topTeams = Object.entries(teamCounts).sort((a, b) => b[1] - a[1]).slice(0, 6).map(([team]) => team);
+      let topCell = { team: 'N/A', role: 'N/A', count: 0 };
+      roles.forEach(role => {
+        topTeams.forEach(team => {
+          const count = rows.filter(r => r.role === role && r.teamShortName === team).length;
+          if (count > topCell.count) topCell = { team, role, count };
+        });
+      });
+
+      const metrics = [
+        { key: 'runs', label: 'Runs' },
+        { key: 'wickets', label: 'Wkts' },
+        { key: 'average', label: 'Avg' },
+        { key: 'strikeRate', label: 'SR' },
+        { key: 'economy', label: 'Econ' },
+        { key: 'matches', label: 'M' }
+      ];
+      const metricValues = metrics.map(metric => rows.map(r => toNumber((r as any)[metric.key])));
+      let strongest = { a: metrics[0].label, b: metrics[0].label, value: 0 };
+      metrics.forEach((metricA, i) => {
+        metrics.forEach((metricB, j) => {
+          if (i >= j) return;
+          const corr = Math.abs(pearson(metricValues[i], metricValues[j]));
+          if (corr > strongest.value) strongest = { a: metricA.label, b: metricB.label, value: corr };
+        });
+      });
+
+      const explanations = [
+        {
+          title: 'Top Run Scorers',
+          data: topScorerLine,
+          why: 'Best for ranking players by runs.'
+        },
+        {
+          title: 'Runs by Age Group',
+          data: `Peak bucket: ${bestAgeBucket.label} (${formatNumber(bestAgeBucket.value)} avg).`,
+          why: 'Shows trend across ordered age bands.'
+        },
+        {
+          title: 'Runs vs Strike Rate',
+          data: `SR ${formatNumber(minSR)}-${formatNumber(maxSR)}, Runs ${formatNumber(minRuns)}-${formatNumber(maxRuns)} (n=${scatterCount}).`,
+          why: 'Reveals relationship between pace and output.'
+        },
+        {
+          title: 'Age Distribution',
+          data: `Ages ${formatNumber(minAge)}-${formatNumber(maxAge)}. Biggest bin: ${topAgeBin.label} (${topAgeBin.count}).`,
+          why: 'Best to show distribution and skew.'
+        },
+        {
+          title: 'Runs by Role (Box Plot)',
+          data: `Highest median: ${bestMedianRole.role} (${formatNumber(bestMedianRole.median)}).`,
+          why: 'Shows spread and median across roles.'
+        },
+        {
+          title: 'Role Composition (Treemap)',
+          data: `Largest role: ${topRole.role} (${topRole.count}/${rows.length}).`,
+          why: 'Best for part-to-whole comparison.'
+        },
+        {
+          title: 'Player Impact (Bubble)',
+          data: `Top: ${topPlayer ? `${topPlayer.name} ${formatNumber(topPlayer.runs)}` : 'N/A'}. Size=runs, color=role.`,
+          why: 'Encodes value and category together.'
+        },
+        {
+          title: 'Team Avg Runs (Bullet)',
+          data: `Leader: ${topTeam ? `${topTeam.team} ${formatNumber(topTeam.avgRuns)}` : 'N/A'}; target ${formatNumber(target)}.`,
+          why: 'Compares actual vs target compactly.'
+        },
+        {
+          title: 'Team vs Role Heatmap',
+          data: `Top cell: ${topCell.team}/${topCell.role} (${topCell.count}).`,
+          why: 'Highlights intensity in the grid.'
+        },
+        {
+          title: 'Stat Correlation Matrix',
+          data: `Strongest |r|: ${strongest.a}-${strongest.b} (${formatNumber(strongest.value, 2)}).`,
+          why: 'Shows relationships across many stats.'
+        }
+      ];
+
+      const cols = 2;
+      const rowsCount = 5;
+      const gap = 12;
+      const top = 120;
+      const availableHeight = pageHeight - 190;
+      const cardWidth = (pageWidth - 80 - gap) / cols;
+      const cardHeight = (availableHeight - gap * (rowsCount - 1)) / rowsCount;
+
+      explanations.forEach((item, index) => {
+        const row = Math.floor(index / cols);
+        const col = index % cols;
+        const x = 40 + col * (cardWidth + gap);
+        const y = top + row * (cardHeight + gap);
+        doc.setFillColor(255, 255, 255);
+        doc.setDrawColor(...theme.cardBorder);
+        doc.roundedRect(x, y, cardWidth, cardHeight, 8, 8, 'FD');
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(10);
+        doc.setTextColor(60, 36, 16);
+        doc.text(item.title, x + 12, y + 16, { maxWidth: cardWidth - 24 });
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(8);
+        doc.setTextColor(...theme.mutedText);
+        doc.text(`Data: ${item.data}`, x + 12, y + 30, { maxWidth: cardWidth - 24 });
+        doc.text(`Why: ${item.why}`, x + 12, y + 44, { maxWidth: cardWidth - 24 });
+      });
+    };
+
     drawChartsPage();
+    doc.addPage();
+    drawChartNotesPage();
 
     const pdfColumns = [
       { key: 'name', label: 'Name' },
