@@ -476,38 +476,6 @@ export default function IPLAdminPointsTablePage() {
                   <Download className="w-4 h-4" />
                   {isExporting ? 'Exporting...' : 'Export'}
                 </motion.button>
-                
-                {/* Simple Test Dropdown - No Portal */}
-                {showExportMenu && (
-                  <div
-                    style={{
-                      position: 'absolute',
-                      top: '100%',
-                      right: '0',
-                      zIndex: 999999999
-                    }}
-                    className="w-56 rounded-2xl backdrop-blur-2xl border-2 border-white/20 bg-gradient-to-br from-slate-900/95 via-slate-800/90 to-slate-900/95 shadow-2xl overflow-hidden"
-                  >
-                    <div className="p-2">
-                      <div className="px-3 py-2 text-xs font-bold uppercase tracking-wider text-gray-400 border-b border-white/10 mb-2">
-                        Export Format
-                      </div>
-                      
-                      <button
-                        onClick={() => {
-                          console.log('CSV button clicked'); // Debug log
-                          alert('CSV export clicked!'); // Test alert
-                          handleExport('csv');
-                        }}
-                        className="w-full px-3 py-2.5 rounded-xl text-left text-sm font-medium text-white hover:bg-amber-500/20 flex items-center gap-3 transition-all"
-                      >
-                        <FileText className="w-4 h-4 text-amber-400" />
-                        CSV Format
-                        <span className="ml-auto text-xs text-gray-400">.csv</span>
-                      </button>
-                    </div>
-                  </div>
-                )}
               </div>
               
               <motion.button
@@ -909,6 +877,38 @@ export default function IPLAdminPointsTablePage() {
           </motion.div>
         </div>
       </main>
+      
+      {/* Export Dropdown at End of Page */}
+      {showExportMenu && (
+        <div
+          style={{
+            position: 'fixed',
+            bottom: '20px',
+            right: '20px',
+            zIndex: 999999999
+          }}
+          className="w-56 rounded-2xl backdrop-blur-2xl border-2 border-white/20 bg-gradient-to-br from-slate-900/95 via-slate-800/90 to-slate-900/95 shadow-2xl overflow-hidden"
+        >
+          <div className="p-2">
+            <div className="px-3 py-2 text-xs font-bold uppercase tracking-wider text-gray-400 border-b border-white/10 mb-2">
+              Export Format
+            </div>
+            
+            <button
+              onClick={() => {
+                console.log('CSV button clicked'); // Debug log
+                alert('CSV export clicked!'); // Test alert
+                handleExport('csv');
+              }}
+              className="w-full px-3 py-2.5 rounded-xl text-left text-sm font-medium text-white hover:bg-amber-500/20 flex items-center gap-3 transition-all"
+            >
+              <FileText className="w-4 h-4 text-amber-400" />
+              CSV Format
+              <span className="ml-auto text-xs text-gray-400">.csv</span>
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
