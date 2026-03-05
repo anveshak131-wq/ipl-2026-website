@@ -461,6 +461,8 @@ export default function IPLAdminPointsTablePage() {
                 <motion.button
                   ref={exportButtonRef}
                   onClick={() => {
+                    console.log('Export button clicked'); // Debug log
+                    alert('Export button clicked!'); // Test alert
                     setShowExportMenu(!showExportMenu);
                     if (!showExportMenu) {
                       updateDropdownPosition();
@@ -495,7 +497,11 @@ export default function IPLAdminPointsTablePage() {
                         </div>
                         
                         <motion.button
-                          onClick={() => handleExport('csv')}
+                          onClick={() => {
+                            console.log('CSV button clicked'); // Debug log
+                            alert('CSV export clicked!'); // Test alert
+                            handleExport('csv');
+                          }}
                           className="w-full px-3 py-2.5 rounded-xl text-left text-sm font-medium text-white hover:bg-amber-500/20 flex items-center gap-3 transition-all"
                           whileHover={{ scale: 1.02 }}
                           whileTap={{ scale: 0.98 }}
