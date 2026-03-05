@@ -7,15 +7,27 @@
 // Dynamic imports for client-side only libraries
 const importJsPDF = async () => {
   if (typeof window === 'undefined') return null;
-  const { default: jsPDF } = await import('jspdf');
-  await import('jspdf-autotable');
-  return jsPDF;
+  try {
+    const { default: jsPDF } = await import('jspdf');
+    await import('jspdf-autotable');
+    console.log('jsPDF imported successfully'); // Debug log
+    return jsPDF;
+  } catch (error) {
+    console.error('Failed to import jsPDF:', error); // Debug log
+    return null;
+  }
 };
 
 const importXLSX = async () => {
   if (typeof window === 'undefined') return null;
-  const { default: XLSX } = await import('xlsx');
-  return XLSX;
+  try {
+    const { default: XLSX } = await import('xlsx');
+    console.log('XLSX imported successfully'); // Debug log
+    return XLSX;
+  } catch (error) {
+    console.error('Failed to import XLSX:', error); // Debug log
+    return null;
+  }
 };
 
 // Types for Points Table data
@@ -61,6 +73,8 @@ export interface DatabaseExportRecord {
  * Export points table to CSV format
  */
 export function exportPointsTableToCSV(data: PointsTableExportData): void {
+  console.log('CSV export started'); // Debug log
+  
   const { teams, year, filtered, searchTerm } = data;
   
   if (teams.length === 0) {
@@ -104,7 +118,11 @@ export function exportPointsTableToCSV(data: PointsTableExportData): void {
     })
   ].filter(Boolean).join('\n');
 
+  console.log('CSV content generated, length:', csvContent.length); // Debug log
+  
   downloadFile(csvContent, `ipl-points-table-${year}${filtered ? '-filtered' : ''}.csv`, 'text/csv');
+  
+  console.log('CSV export completed'); // Debug log
 }
 
 /**
