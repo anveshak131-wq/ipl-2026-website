@@ -90,6 +90,106 @@ export interface DatabaseExportRecord {
   data_source: string;
 }
 
+type ChartSeries = {
+  label: string;
+  value: number;
+  valueLabel?: string;
+};
+
+const safeNumber = (value: number | null | undefined, fallback: number = 0) => {
+  if (typeof value !== 'number' || Number.isNaN(value)) return fallback;
+  return value;
+};
+
+const getTopSeries = (
+  teams: PointsTableTeam[],
+  selector: (team: PointsTableTeam) => number,
+  limit: number
+): ChartSeries[] => {
+  return [...teams]
+    .map((team) => {
+      const rawLabel = team.shortName || team.name || 'Team';
+      const label = rawLabel.length > 7 ? rawLabel.slice(0, 7) : rawLabel;
+      return {
+        label,
+        value: safeNumber(selector(team), 0)
+      };
+    })
+    .sort((a, b) => b.value - a.value)
+    .slice(0, limit);
+};
+
+const drawStatCard = (
+  doc: any,
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+  title: string,
+  value: string,
+  accent: [number, number, number]
+) => {
+  doc.setFillColor(247, 249, 252);
+  doc.setDrawColor(224, 230, 238);
+  doc.rect(x, y, width, height, 'FD');
+
+  doc.setFontSize(8);
+  doc.setTextColor(110);
+  doc.text(title, x + 4, y + 5);
+
+  doc.setFontSize(12);
+  doc.setTextColor(accent[0], accent[1], accent[2]);
+  doc.text(value, x + 4, y + 11);
+};
+
+const drawBarChart = (
+  doc: any,
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+  title: string,
+  series: ChartSeries[],
+  color: [number, number, number]
+) => {
+  doc.setFillColor(248, 250, 252);
+  doc.setDrawColor(224, 230, 238);
+  doc.rect(x, y, width, height, 'FD');
+
+  doc.setFontSize(9);
+  doc.setTextColor(60);
+  doc.text(title, x + 4, y + 6);
+
+  const chartX = x + 4;
+  const chartY = y + 8;
+  const chartHeight = height - 16;
+  const chartWidth = width - 8;
+
+  const maxValue = Math.max(...series.map((s) => s.value), 1);
+  const barGap = 2;
+  const barWidth = chartWidth / Math.max(series.length, 1) - barGap;
+
+  doc.setDrawColor(200);
+  doc.line(chartX, chartY + chartHeight, chartX + chartWidth, chartY + chartHeight);
+
+  series.forEach((item, index) => {
+    const barHeight = Math.max(2, (item.value / maxValue) * (chartHeight - 4));
+    const barX = chartX + index * (barWidth + barGap);
+    const barY = chartY + chartHeight - barHeight;
+
+    doc.setFillColor(color[0], color[1], color[2]);
+    doc.rect(barX, barY, barWidth, barHeight, 'F');
+
+    doc.setFontSize(6);
+    doc.setTextColor(80);
+    doc.text(item.label, barX + barWidth / 2, chartY + chartHeight + 4, { align: 'center' });
+    if (barHeight > 6) {
+      doc.setTextColor(255);
+      doc.text(item.valueLabel ?? String(item.value), barX + barWidth / 2, barY + 3, { align: 'center' });
+    }
+  });
+};
+
 /**
  * Export points table to CSV format
  */
@@ -249,6 +349,7 @@ export async function exportPointsTableToPDF(data: PointsTableExportData): Promi
   }
 
   const doc = new jsPDF('l', 'mm', 'a4');
+  const pageWidth = doc.internal.pageSize.getWidth();
   
   // Add custom font for better appearance
   doc.setFont('helvetica');
@@ -256,21 +357,74 @@ export async function exportPointsTableToPDF(data: PointsTableExportData): Promi
   // Title
   doc.setFontSize(20);
   doc.setTextColor(41, 128, 185); // Blue color
-  doc.text(`IPL Points Table - Season ${year}`, 148, 20, { align: 'center' });
+  doc.text(`IPL Points Table - Season ${year}`, pageWidth / 2, 18, { align: 'center' });
   
   if (filtered) {
     doc.setFontSize(12);
     doc.setTextColor(255, 0, 0); // Red for filtered
-    doc.text('(Filtered Results)', 148, 28, { align: 'center' });
+    doc.text('(Filtered Results)', pageWidth / 2, 26, { align: 'center' });
   }
   
   // Metadata
   doc.setFontSize(10);
   doc.setTextColor(100);
-  doc.text(`Generated on: ${new Date().toLocaleString()}`, 148, 36, { align: 'center' });
+  doc.text(`Generated on: ${new Date().toLocaleString()}`, pageWidth / 2, 34, { align: 'center' });
   if (searchTerm) {
-    doc.text(`Search Term: ${searchTerm}`, 148, 42, { align: 'center' });
+    doc.text(`Search Term: ${searchTerm}`, pageWidth / 2, 40, { align: 'center' });
   }
+
+  const marginX = 12;
+  const contentWidth = pageWidth - marginX * 2;
+  let cursorY = searchTerm ? 44 : 40;
+
+  // Summary stats
+  const totalTeams = teams.length;
+  const qualifiedTeams = teams.filter(t => t.qualified).length;
+  const avgNRR =
+    teams.length > 0
+      ? teams.reduce((sum, t) => sum + safeNumber(t.netRunRate, 0), 0) / teams.length
+      : 0;
+  const topTeam = [...teams].sort((a, b) => {
+    const pointsDiff = safeNumber(b.points, 0) - safeNumber(a.points, 0);
+    if (pointsDiff !== 0) return pointsDiff;
+    return safeNumber(b.netRunRate, 0) - safeNumber(a.netRunRate, 0);
+  })[0];
+
+  const statCardHeight = 14;
+  const statGap = 4;
+  const statWidth = (contentWidth - statGap * 3) / 4;
+  const stats = [
+    { title: 'Total Teams', value: String(totalTeams), color: [59, 130, 246] as [number, number, number] },
+    { title: 'Qualified', value: String(qualifiedTeams), color: [16, 185, 129] as [number, number, number] },
+    { title: 'Avg NRR', value: avgNRR.toFixed(3), color: [234, 179, 8] as [number, number, number] },
+    { title: 'Top Team', value: topTeam?.shortName || topTeam?.name || '-', color: [220, 38, 38] as [number, number, number] }
+  ];
+
+  stats.forEach((stat, index) => {
+    const x = marginX + index * (statWidth + statGap);
+    drawStatCard(doc, x, cursorY, statWidth, statCardHeight, stat.title, stat.value, stat.color);
+  });
+
+  cursorY += statCardHeight + 6;
+
+  // Charts
+  const chartHeight = 34;
+  const chartGap = 6;
+  const chartWidth = (contentWidth - chartGap * 2) / 3;
+  const chartLimit = Math.min(teams.length, 6);
+
+  const pointsSeries = getTopSeries(teams, (t) => safeNumber(t.points, 0), chartLimit);
+  const winsSeries = getTopSeries(teams, (t) => safeNumber(t.wins, 0), chartLimit);
+  const qualificationSeries: ChartSeries[] = [
+    { label: 'Qualified', value: qualifiedTeams, valueLabel: String(qualifiedTeams) },
+    { label: 'Not Qual.', value: Math.max(totalTeams - qualifiedTeams, 0), valueLabel: String(Math.max(totalTeams - qualifiedTeams, 0)) }
+  ];
+
+  drawBarChart(doc, marginX, cursorY, chartWidth, chartHeight, 'Top Points', pointsSeries, [37, 99, 235]);
+  drawBarChart(doc, marginX + chartWidth + chartGap, cursorY, chartWidth, chartHeight, 'Top Wins', winsSeries, [16, 185, 129]);
+  drawBarChart(doc, marginX + (chartWidth + chartGap) * 2, cursorY, chartWidth, chartHeight, 'Qualification Split', qualificationSeries, [234, 88, 12]);
+
+  cursorY += chartHeight + 8;
 
   // Table headers
   const headers = [
@@ -302,7 +456,7 @@ export async function exportPointsTableToPDF(data: PointsTableExportData): Promi
   autoTable(doc, {
     head: [headers],
     body: tableData,
-    startY: searchTerm ? 50 : 45,
+    startY: cursorY,
     styles: {
       fontSize: 9,
       cellPadding: 3,
@@ -340,7 +494,7 @@ export async function exportPointsTableToPDF(data: PointsTableExportData): Promi
   });
 
   // Add footer
-  const finalY = (doc as any).lastAutoTable.finalY || 150;
+  const finalY = (doc as any).lastAutoTable.finalY || cursorY + 40;
   doc.setFontSize(8);
   doc.setTextColor(150);
   doc.text(`Total Teams: ${teams.length}`, 14, finalY + 10);
