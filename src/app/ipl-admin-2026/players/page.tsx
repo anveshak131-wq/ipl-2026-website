@@ -1132,10 +1132,11 @@ export default function AdminPlayers() {
   // Close suggestions when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
       if (showSuggestions) {
         setShowSuggestions(false);
       }
-      if (showRoleDropdown) {
+      if (showRoleDropdown && !target.closest('[data-role-dropdown]')) {
         setShowRoleDropdown(false);
       }
       if (contextMenu.visible) {
