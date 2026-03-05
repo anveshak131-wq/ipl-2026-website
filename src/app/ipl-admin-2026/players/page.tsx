@@ -1764,7 +1764,10 @@ export default function AdminPlayers() {
     };
 
     const createTableColumns = sqlColumns
-      .map(column => `${column.name} TEXT${column.key === 'id' ? ' PRIMARY KEY' : ''}`)
+      .map(column => {
+        if (column.key === 'id') return `${column.name} VARCHAR(64) PRIMARY KEY`;
+        return `${column.name} TEXT`;
+      })
       .join(',\n  ');
 
     const insertValues = rows.map(row => {
