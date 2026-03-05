@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { createPortal } from 'react-dom';
 import { Trophy, TrendingUp, TrendingDown, Info, Award, Users, Calendar, Clock, Search, X, Edit, Save, RefreshCw, Download, FileText, Table, Database } from 'lucide-react';
 import { api } from '@/lib/data';
 import { Team } from '@/types';
@@ -465,9 +466,9 @@ export default function IPLAdminPointsTablePage() {
                   {isExporting ? 'Exporting...' : 'Export'}
                 </motion.button>
                 
-                {/* Export Dropdown Menu - Ultimate Z-Index Fix */}
-                <AnimatePresence>
-                  {showExportMenu && (
+                {/* Export Dropdown Menu - React Portal to Body */}
+                {showExportMenu && createPortal(
+                  <AnimatePresence>
                     <motion.div
                       initial={{ opacity: 0, y: -10, scale: 0.95 }}
                       animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -566,8 +567,9 @@ export default function IPLAdminPointsTablePage() {
                         </div>
                       </div>
                     </motion.div>
-                  )}
-                </AnimatePresence>
+                  </AnimatePresence>,
+                  document.body
+                )}
               </div>
               
               <motion.button
