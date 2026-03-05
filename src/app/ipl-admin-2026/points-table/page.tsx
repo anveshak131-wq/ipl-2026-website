@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Trophy, TrendingUp, TrendingDown, Info, Award, Users, Calendar, Clock, Search, X, Edit, Save, RefreshCw, Download, FileText, Table, Database } from 'lucide-react';
 import { api } from '@/lib/data';
@@ -63,6 +63,8 @@ export default function IPLAdminPointsTablePage() {
   const [editData, setEditData] = useState<Record<string, unknown>>({});
   const [showExportMenu, setShowExportMenu] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
+  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0 });
+  const exportButtonRef = useRef<HTMLButtonElement>(null);
 
   // Fetch IPL teams
   useEffect(() => {
@@ -96,6 +98,17 @@ export default function IPLAdminPointsTablePage() {
   useEffect(() => {
     // This will trigger the pointsTable useMemo to recalculate with new year
   }, [selectedYear]);
+
+  // Calculate dropdown position relative to button
+  const updateDropdownPosition = () => {
+    if (exportButtonRef.current) {
+      const rect = exportButtonRef.current.getBoundingClientRect();
+      setDropdownPosition({
+        top: rect.bottom + window.scrollY,
+        left: rect.right + window.scrollX - 224 // 224 is dropdown width
+      });
+    }
+  };
 
   // Close export menu when clicking outside
   useEffect(() => {
@@ -434,9 +447,15 @@ export default function IPLAdminPointsTablePage() {
               </motion.button>
               
               {/* Export Button */}
-              <div className="relative export-menu-container">
+              <div className="relative export-menu-container" style={{ zIndex: 999999999 }}>
                 <motion.button
-                  onClick={() => setShowExportMenu(!showExportMenu)}
+                  ref={exportButtonRef}
+                  onClick={() => {
+                    setShowExportMenu(!showExportMenu);
+                    if (!showExportMenu) {
+                      updateDropdownPosition();
+                    }
+                  }}
                   disabled={isExporting || sortedPointsTable.length === 0}
                   className="px-4 py-2 rounded-xl bg-gradient-to-r from-green-500 to-emerald-500 text-white font-bold flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                   whileHover={{ scale: 1.05 }}
@@ -446,14 +465,20 @@ export default function IPLAdminPointsTablePage() {
                   {isExporting ? 'Exporting...' : 'Export'}
                 </motion.button>
                 
-                {/* Export Dropdown Menu - Simple Z-Index Fix */}
+                {/* Export Dropdown Menu - Ultimate Z-Index Fix */}
                 <AnimatePresence>
                   {showExportMenu && (
                     <motion.div
                       initial={{ opacity: 0, y: -10, scale: 0.95 }}
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       exit={{ opacity: 0, y: -10, scale: 0.95 }}
-                      className="absolute right-0 top-full mt-2 w-56 rounded-2xl backdrop-blur-2xl border-2 border-white/20 bg-gradient-to-br from-slate-900/95 via-slate-800/90 to-slate-900/95 shadow-2xl z-[999999999] overflow-hidden"
+                      style={{
+                        position: 'fixed',
+                        top: `${dropdownPosition.top}px`,
+                        left: `${dropdownPosition.left}px`,
+                        zIndex: 999999999
+                      }}
+                      className="w-56 rounded-2xl backdrop-blur-2xl border-2 border-white/20 bg-gradient-to-br from-slate-900/95 via-slate-800/90 to-slate-900/95 shadow-2xl overflow-hidden"
                     >
                       <div className="p-2">
                         <div className="px-3 py-2 text-xs font-bold uppercase tracking-wider text-gray-400 border-b border-white/10 mb-2">
