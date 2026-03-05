@@ -459,7 +459,7 @@ export default function IPLAdminPointsTablePage() {
               </motion.button>
               
               {/* Export Button */}
-              <div className="relative" style={{ zIndex: 9999999999 }}>
+              <div className="relative export-menu-container" style={{ zIndex: 9999999999 }}>
                 <button
                   type="button"
                   ref={exportButtonRef}
