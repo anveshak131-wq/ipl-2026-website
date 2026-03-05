@@ -13,7 +13,10 @@ import { parseDateDDMMYYYY, calculateAge, isValidDate, formatDateMonthDDYYYY, pa
 import { CustomEmoji } from '@/components/emoji/Emoji';
 import FlagImage from '@/components/ui/FlagImage';
 import CustomSelect from '@/components/ui/CustomSelect';
-import { Search, Filter, Edit2, X, Users, TrendingUp, Award, Target, Zap, ChevronDown, ChevronUp, SortAsc, SortDesc, User, Shirt, Calendar, BarChart3, Plus, Trash2, Download, Upload, Shield, Activity, Hash, Grid3x3, List, Eye, Star, Copy, History, FileSpreadsheet, FileText, Database } from 'lucide-react';
+import { jsPDF } from 'jspdf';
+import 'jspdf-autotable';
+import * as XLSX from 'xlsx';
+import { Search, Filter, Edit2, X, Users, TrendingUp, Award, Target, Zap, ChevronDown, ChevronUp, SortAsc, SortDesc, User, Shirt, Calendar, BarChart3, Plus, Trash2, Download, Upload, Shield, Activity, Hash, Grid3x3, List, Eye, Star, Copy, History, FileSpreadsheet, FileText, FileDown, Database, DatabaseBackup } from 'lucide-react';
 import '@/styles/flags.css';
 
 // Data Integrity Helper Functions
@@ -725,42 +728,160 @@ export default function AdminPlayers() {
   };
 
   // Export functionality
-  const exportToJSON = (playersToExport: Player[]) => {
-    const exportData = playersToExport.map(player => {
+  const normalizeSlug = (value: string) => {
+    return value
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)/g, '');
+  };
+
+  const getSelectedTeamLabel = () => {
+    if (selectedTeam === 'all') return 'All Teams';
+    const team = teams.find(t => String(t.id) === String(selectedTeam));
+    return team?.name || `Team ${selectedTeam}`;
+  };
+
+  const getSelectedTeamSlug = () => {
+    if (selectedTeam === 'all') return 'all-teams';
+    const team = teams.find(t => String(t.id) === String(selectedTeam));
+    return normalizeSlug(team?.shortName || team?.name || String(selectedTeam));
+  };
+
+  const hasAdvancedFiltersActive = () => {
+    const { ageRange, runsRange, wicketsRange, battingStyle, bowlingStyle, isCaptain, teamId } = advancedFilters;
+    return Boolean(
+      ageRange.min ||
+      ageRange.max ||
+      runsRange.min ||
+      runsRange.max ||
+      wicketsRange.min ||
+      wicketsRange.max ||
+      battingStyle ||
+      bowlingStyle ||
+      isCaptain !== '' ||
+      teamId
+    );
+  };
+
+  const isFilteredExport = () => {
+    return (
+      selectedTeam !== 'all' ||
+      selectedRole !== 'all' ||
+      searchQuery.trim().length > 0 ||
+      hasAdvancedFiltersActive()
+    );
+  };
+
+  const buildExportRows = (playersToExport: Player[]) => {
+    return playersToExport.map(player => {
       const team = teams.find(t => String(t.id) === String(player.teamId));
+      const stats = player.stats || ({} as Player['stats']);
+      const transferInfo = player.transferInfo || {};
       return {
         id: player.id,
         name: player.name,
         role: player.role,
-        allrounderType: player.allrounderType,
-        teamId: player.teamId,
+        allrounderType: player.allrounderType || '',
+        teamId: player.teamId || '',
         teamName: team?.name || 'Unknown',
         teamShortName: team?.shortName || 'Unknown',
-        age: player.age,
-        nationality: player.nationality,
-        jerseyNumber: player.jerseyNumber,
-        isCaptain: player.isCaptain,
-        battingStyle: player.battingStyle,
-        bowlingStyle: player.bowlingStyle,
-        league: player.league,
-        photoUrl: player.photoUrl,
-        stats: {
-          matches: player.stats?.matches || 0,
-          runs: player.stats?.runs || 0,
-          wickets: player.stats?.wickets || 0,
-          average: player.stats?.average || 0,
-          bowlingAverage: player.stats?.bowlingAverage || 0,
-          strikeRate: player.stats?.strikeRate || 0,
-          economy: player.stats?.economy || 0,
-          highest: player.stats?.highest || 0,
-          fours: player.stats?.fours || 0,
-          sixes: player.stats?.sixes || 0,
-          fifties: player.stats?.fifties || 0,
-          hundreds: player.stats?.hundreds || 0,
-          bestBowling: player.stats?.bestBowling || '',
-          maidens: player.stats?.maidens || 0,
-          fiveWickets: (player.stats as any)?.fiveWickets || 0
-        },
+        age: player.age ?? '',
+        dateOfBirth: player.dateOfBirth || '',
+        nationality: player.nationality || '',
+        jerseyNumber: player.jerseyNumber ?? '',
+        isCaptain: player.isCaptain ?? false,
+        battingStyle: player.battingStyle || '',
+        bowlingStyle: player.bowlingStyle || '',
+        league: player.league || currentLeague,
+        photoUrl: player.photoUrl || '',
+        matches: stats.matches ?? 0,
+        runs: stats.runs ?? 0,
+        wickets: stats.wickets ?? 0,
+        average: stats.average ?? 0,
+        bowlingAverage: stats.bowlingAverage ?? '',
+        strikeRate: stats.strikeRate ?? 0,
+        economy: stats.economy ?? 0,
+        highest: stats.highest ?? 0,
+        fours: stats.fours ?? 0,
+        sixes: stats.sixes ?? 0,
+        fifties: stats.fifties ?? 0,
+        hundreds: stats.hundreds ?? 0,
+        bestBowling: stats.bestBowling ?? '',
+        maidens: (stats as any)?.maidens ?? 0,
+        fiveWickets: (stats as any)?.fiveWickets ?? 0,
+        lastAuctionYear: transferInfo.lastAuctionYear ?? '',
+        acquiredVia: transferInfo.acquiredVia ?? '',
+        transferable: transferInfo.transferable ?? '',
+        transferFee: transferInfo.transferFee ?? '',
+        transferNotes: transferInfo.notes ?? '',
+        performanceGrade: getPerformanceIndicator(player),
+        performanceLabel: getPerformanceLabel(player),
+        performanceColor: getPerformanceColor(player)
+      };
+    });
+  };
+
+  const exportColumns = [
+    { key: 'id', label: 'ID' },
+    { key: 'name', label: 'Name' },
+    { key: 'role', label: 'Role' },
+    { key: 'allrounderType', label: 'Allrounder Type' },
+    { key: 'teamId', label: 'Team ID' },
+    { key: 'teamName', label: 'Team Name' },
+    { key: 'teamShortName', label: 'Team Short Name' },
+    { key: 'age', label: 'Age' },
+    { key: 'dateOfBirth', label: 'Date of Birth' },
+    { key: 'nationality', label: 'Nationality' },
+    { key: 'jerseyNumber', label: 'Jersey Number' },
+    { key: 'isCaptain', label: 'Captain' },
+    { key: 'battingStyle', label: 'Batting Style' },
+    { key: 'bowlingStyle', label: 'Bowling Style' },
+    { key: 'league', label: 'League' },
+    { key: 'photoUrl', label: 'Photo URL' },
+    { key: 'matches', label: 'Matches' },
+    { key: 'runs', label: 'Runs' },
+    { key: 'wickets', label: 'Wickets' },
+    { key: 'average', label: 'Batting Average' },
+    { key: 'bowlingAverage', label: 'Bowling Average' },
+    { key: 'strikeRate', label: 'Strike Rate' },
+    { key: 'economy', label: 'Economy' },
+    { key: 'highest', label: 'Highest' },
+    { key: 'fours', label: 'Fours' },
+    { key: 'sixes', label: 'Sixes' },
+    { key: 'fifties', label: 'Fifties' },
+    { key: 'hundreds', label: 'Hundreds' },
+    { key: 'bestBowling', label: 'Best Bowling' },
+    { key: 'maidens', label: 'Maidens' },
+    { key: 'fiveWickets', label: 'Five Wickets' },
+    { key: 'lastAuctionYear', label: 'Last Auction Year' },
+    { key: 'acquiredVia', label: 'Acquired Via' },
+    { key: 'transferable', label: 'Transferable' },
+    { key: 'transferFee', label: 'Transfer Fee' },
+    { key: 'transferNotes', label: 'Transfer Notes' },
+    { key: 'performanceGrade', label: 'Performance Grade' },
+    { key: 'performanceLabel', label: 'Performance Label' },
+    { key: 'performanceColor', label: 'Performance Color' }
+  ] as const;
+
+  const formatSpreadsheetValue = (value: unknown) => {
+    if (value === null || value === undefined) return '';
+    if (typeof value === 'boolean') return value ? 'Yes' : 'No';
+    return value;
+  };
+
+  const formatCsvValue = (value: unknown) => {
+    const formatted = formatSpreadsheetValue(value);
+    const text = String(formatted ?? '');
+    return `"${text.replace(/"/g, '""')}"`;
+  };
+
+  const exportToJSON = (playersToExport: Player[]) => {
+    const exportData = playersToExport.map(player => {
+      const team = teams.find(t => String(t.id) === String(player.teamId));
+      return {
+        ...player,
+        teamName: team?.name || 'Unknown',
+        teamShortName: team?.shortName || 'Unknown',
         performance: {
           grade: getPerformanceIndicator(player),
           label: getPerformanceLabel(player),
@@ -773,61 +894,134 @@ export default function AdminPlayers() {
   };
 
   const exportToCSV = (playersToExport: Player[]) => {
-    const headers = [
-      'ID', 'Name', 'Role', 'Type', 'Team', 'Age', 'Nationality', 'Jersey', 'Captain',
-      'Batting Style', 'Bowling Style', 'League', 'Matches', 'Runs', 'Wickets', 'Average',
-      'Strike Rate', 'Economy', 'Highest', 'Fours', 'Sixes', 'Fifties', 'Hundreds',
-      'Best Bowling', 'Maidens', '5-Wickets', 'Performance Grade'
+    const rows = buildExportRows(playersToExport);
+    const headers = exportColumns.map(column => column.label);
+    const csvRows = rows.map(row =>
+      exportColumns.map(column => formatCsvValue((row as any)[column.key])).join(',')
+    );
+
+    return [headers.join(','), ...csvRows].join('\n');
+  };
+
+  const exportToExcel = (playersToExport: Player[]) => {
+    const rows = buildExportRows(playersToExport);
+    const headerRow = exportColumns.map(column => column.label);
+    const dataRows = rows.map(row =>
+      exportColumns.map(column => formatSpreadsheetValue((row as any)[column.key]))
+    );
+
+    const worksheet = XLSX.utils.aoa_to_sheet([headerRow, ...dataRows]);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Players');
+
+    return XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+  };
+
+  const exportToPDF = (playersToExport: Player[]) => {
+    const rows = buildExportRows(playersToExport);
+    const doc = new jsPDF({ orientation: 'landscape', unit: 'pt', format: 'a4' });
+
+    const headerTitle = `${currentLeague.toUpperCase()} Players Export`;
+    const filterParts = [`Team: ${getSelectedTeamLabel()}`];
+    if (selectedRole !== 'all') filterParts.push(`Role: ${selectedRole}`);
+    if (searchQuery.trim().length > 0) filterParts.push(`Search: "${searchQuery.trim()}"`);
+    if (hasAdvancedFiltersActive()) filterParts.push('Advanced Filters: On');
+
+    doc.setFontSize(18);
+    doc.text(headerTitle, 40, 40);
+    doc.setFontSize(10);
+    doc.setTextColor(120);
+    doc.text(`${filterParts.join(' • ')} • Total: ${playersToExport.length}`, 40, 58);
+
+    const pdfColumns = [
+      { key: 'name', label: 'Name' },
+      { key: 'role', label: 'Role' },
+      { key: 'teamShortName', label: 'Team' },
+      { key: 'age', label: 'Age' },
+      { key: 'nationality', label: 'Nat' },
+      { key: 'matches', label: 'M' },
+      { key: 'runs', label: 'Runs' },
+      { key: 'wickets', label: 'Wkts' },
+      { key: 'average', label: 'Avg' },
+      { key: 'strikeRate', label: 'SR' },
+      { key: 'economy', label: 'Econ' },
+      { key: 'fifties', label: '50s' },
+      { key: 'hundreds', label: '100s' },
+      { key: 'isCaptain', label: 'C' }
     ];
 
-    const csvData = playersToExport.map(player => {
-      const team = teams.find(t => String(t.id) === String(player.teamId));
-      return [
-        player.id,
-        player.name,
-        player.role,
-        player.allrounderType || '',
-        team?.name || 'Unknown',
-        player.age,
-        player.nationality,
-        player.jerseyNumber,
-        player.isCaptain ? 'Yes' : 'No',
-        player.battingStyle,
-        player.bowlingStyle,
-        player.league,
-        player.stats?.matches || 0,
-        player.stats?.runs || 0,
-        player.stats?.wickets || 0,
-        player.stats?.average || 0,
-        player.stats?.strikeRate || 0,
-        player.stats?.economy || 0,
-        player.stats?.highest || 0,
-        player.stats?.fours || 0,
-        player.stats?.sixes || 0,
-        player.stats?.fifties || 0,
-        player.stats?.hundreds || 0,
-        player.stats?.bestBowling || '',
-        player.stats?.maidens || 0,
-        (player.stats as any)?.fiveWickets || 0,
-        getPerformanceIndicator(player)
-      ];
+    const decimalFields = new Set(['average', 'strikeRate', 'economy', 'bowlingAverage']);
+    const pdfRows = rows.map(row =>
+      pdfColumns.map(column => {
+        const value = (row as any)[column.key];
+        if (typeof value === 'boolean') return value ? 'Yes' : 'No';
+        if (typeof value === 'number' && Number.isFinite(value)) {
+          return decimalFields.has(column.key) ? value.toFixed(2) : value.toString();
+        }
+        return value ?? '';
+      })
+    );
+
+    // @ts-ignore - jspdf-autotable augments jsPDF instance
+    doc.autoTable({
+      head: [pdfColumns.map(column => column.label)],
+      body: pdfRows,
+      startY: 75,
+      styles: {
+        fontSize: 8,
+        cellPadding: 3,
+        overflow: 'linebreak'
+      },
+      headStyles: {
+        fillColor: [30, 64, 175],
+        textColor: 255,
+        fontStyle: 'bold'
+      },
+      alternateRowStyles: {
+        fillColor: [245, 245, 245]
+      }
     });
 
-    const csvContent = [
-      headers.join(','),
-      ...csvData.map(row => row.map(cell => `"${cell}"`).join(','))
-    ].join('\n');
-
-    return csvContent;
+    return doc.output('arraybuffer');
   };
 
-  const exportToExcel = async (playersToExport: Player[]) => {
-    // For Excel export, we'll create a CSV and suggest opening in Excel
-    // In a real implementation, you might use libraries like xlsx or exceljs
-    return exportToCSV(playersToExport);
+  const exportToSQL = (playersToExport: Player[]) => {
+    const rows = buildExportRows(playersToExport);
+    const toSnakeCase = (value: string) =>
+      value
+        .replace(/[A-Z]/g, letter => `_${letter.toLowerCase()}`)
+        .replace(/[^a-z0-9_]/g, '_')
+        .replace(/__+/g, '_')
+        .replace(/^_+|_+$/g, '');
+
+    const sqlColumns = exportColumns.map(column => ({
+      key: column.key,
+      name: toSnakeCase(column.key)
+    }));
+
+    const formatSqlValue = (value: unknown) => {
+      if (value === null || value === undefined || value === '') return 'NULL';
+      if (typeof value === 'number' && Number.isFinite(value)) return value.toString();
+      if (typeof value === 'boolean') return value ? '1' : '0';
+      const safe = String(value).replace(/'/g, "''");
+      return `'${safe}'`;
+    };
+
+    const createTableColumns = sqlColumns
+      .map(column => `${column.name} TEXT${column.key === 'id' ? ' PRIMARY KEY' : ''}`)
+      .join(',\n  ');
+
+    const insertValues = rows.map(row => {
+      const values = sqlColumns.map(column => formatSqlValue((row as any)[column.key]));
+      return `(${values.join(', ')})`;
+    });
+
+    const header = `-- Players export (${currentLeague.toUpperCase()})\n-- Team: ${getSelectedTeamLabel()}\n-- Generated: ${new Date().toISOString()}\n`;
+
+    return `${header}\nCREATE TABLE IF NOT EXISTS players_export (\n  ${createTableColumns}\n);\n\nINSERT INTO players_export (${sqlColumns.map(column => column.name).join(', ')}) VALUES\n${insertValues.join(',\n')};\n`;
   };
 
-  const downloadFile = (content: string, filename: string, mimeType: string) => {
+  const downloadFile = (content: BlobPart, filename: string, mimeType: string) => {
     const blob = new Blob([content], { type: mimeType });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
@@ -839,33 +1033,50 @@ export default function AdminPlayers() {
     URL.revokeObjectURL(url);
   };
 
-  const handleExport = async (format: 'json' | 'csv' | 'excel') => {
+  const handleExport = async (format: 'json' | 'csv' | 'excel' | 'pdf' | 'database') => {
+    const playersToExport = searchFilteredPlayers;
+    if (!playersToExport || playersToExport.length === 0) {
+      alert('No players found for the current filters.');
+      return;
+    }
+
     setIsExporting(true);
     
     try {
-      const playersToExport = players.filter(player => 
-        (player.league || 'ipl') === currentLeague
-      );
+      const dateStamp = new Date().toISOString().split('T')[0];
+      const teamSlug = getSelectedTeamSlug();
+      const filterTag = isFilteredExport() ? 'filtered' : 'all';
+      const baseFilename = `players_${currentLeague}_${teamSlug}_${filterTag}_${dateStamp}`;
 
-      let content: string;
+      let content: BlobPart;
       let filename: string;
       let mimeType: string;
 
       switch (format) {
         case 'json':
           content = exportToJSON(playersToExport);
-          filename = `players_${currentLeague}_${new Date().toISOString().split('T')[0]}.json`;
+          filename = `${baseFilename}.json`;
           mimeType = 'application/json';
           break;
         case 'csv':
           content = exportToCSV(playersToExport);
-          filename = `players_${currentLeague}_${new Date().toISOString().split('T')[0]}.csv`;
+          filename = `${baseFilename}.csv`;
           mimeType = 'text/csv';
           break;
         case 'excel':
-          content = await exportToExcel(playersToExport);
-          filename = `players_${currentLeague}_${new Date().toISOString().split('T')[0]}.csv`;
-          mimeType = 'text/csv';
+          content = exportToExcel(playersToExport);
+          filename = `${baseFilename}.xlsx`;
+          mimeType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+          break;
+        case 'pdf':
+          content = exportToPDF(playersToExport);
+          filename = `${baseFilename}.pdf`;
+          mimeType = 'application/pdf';
+          break;
+        case 'database':
+          content = exportToSQL(playersToExport);
+          filename = `${baseFilename}.sql`;
+          mimeType = 'application/sql';
           break;
         default:
           throw new Error('Unsupported format');
@@ -4497,23 +4708,32 @@ export default function AdminPlayers() {
         }
       >
         <div className="space-y-6">
+          <div className="p-4 bg-gray-800/40 border border-white/10 rounded-xl">
+            <p className="text-sm text-gray-200">
+              Export scope: {currentLeague.toUpperCase()} • {getSelectedTeamLabel()} • {searchFilteredPlayers.length} players
+            </p>
+            <p className="text-xs text-gray-400 mt-1">
+              Exports follow current filters, search, and advanced filters.
+            </p>
+          </div>
+
           {/* Format Selection */}
           <div>
             <h4 className="text-lg font-semibold text-white mb-4">Choose Export Format</h4>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {/* JSON Format */}
+              {/* PDF Format */}
               <button
-                onClick={() => handleExport('json')}
+                onClick={() => handleExport('pdf')}
                 disabled={isExporting}
                 className="p-4 bg-gray-800/50 hover:bg-gray-700/50 border border-white/10 rounded-xl transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed group"
               >
                 <div className="flex flex-col items-center gap-3">
-                  <div className="w-12 h-12 rounded-lg bg-blue-500/20 flex items-center justify-center group-hover:bg-blue-500/30 transition-colors">
-                    <Database className="w-6 h-6 text-blue-400" />
+                  <div className="w-12 h-12 rounded-lg bg-red-500/20 flex items-center justify-center group-hover:bg-red-500/30 transition-colors">
+                    <FileDown className="w-6 h-6 text-red-400" />
                   </div>
                   <div className="text-center">
-                    <p className="text-white font-medium">JSON</p>
-                    <p className="text-xs text-gray-400">Structured data format</p>
+                    <p className="text-white font-medium">PDF</p>
+                    <p className="text-xs text-gray-400">Printable report</p>
                   </div>
                 </div>
               </button>
@@ -4530,7 +4750,7 @@ export default function AdminPlayers() {
                   </div>
                   <div className="text-center">
                     <p className="text-white font-medium">CSV</p>
-                    <p className="text-xs text-gray-400">Excel compatible</p>
+                    <p className="text-xs text-gray-400">Excel/Sheets friendly</p>
                   </div>
                 </div>
               </button>
@@ -4547,7 +4767,41 @@ export default function AdminPlayers() {
                   </div>
                   <div className="text-center">
                     <p className="text-white font-medium">Excel</p>
-                    <p className="text-xs text-gray-400">CSV for Excel</p>
+                    <p className="text-xs text-gray-400">.XLSX spreadsheet</p>
+                  </div>
+                </div>
+              </button>
+
+              {/* Database Format */}
+              <button
+                onClick={() => handleExport('database')}
+                disabled={isExporting}
+                className="p-4 bg-gray-800/50 hover:bg-gray-700/50 border border-white/10 rounded-xl transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed group"
+              >
+                <div className="flex flex-col items-center gap-3">
+                  <div className="w-12 h-12 rounded-lg bg-amber-500/20 flex items-center justify-center group-hover:bg-amber-500/30 transition-colors">
+                    <Database className="w-6 h-6 text-amber-400" />
+                  </div>
+                  <div className="text-center">
+                    <p className="text-white font-medium">Database (SQL)</p>
+                    <p className="text-xs text-gray-400">Import-ready dump</p>
+                  </div>
+                </div>
+              </button>
+
+              {/* JSON Format */}
+              <button
+                onClick={() => handleExport('json')}
+                disabled={isExporting}
+                className="p-4 bg-gray-800/50 hover:bg-gray-700/50 border border-white/10 rounded-xl transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed group"
+              >
+                <div className="flex flex-col items-center gap-3">
+                  <div className="w-12 h-12 rounded-lg bg-blue-500/20 flex items-center justify-center group-hover:bg-blue-500/30 transition-colors">
+                    <DatabaseBackup className="w-6 h-6 text-blue-400" />
+                  </div>
+                  <div className="text-center">
+                    <p className="text-white font-medium">JSON Backup</p>
+                    <p className="text-xs text-gray-400">Full data export</p>
                   </div>
                 </div>
               </button>
@@ -4573,10 +4827,11 @@ export default function AdminPlayers() {
               <div className="text-sm text-amber-300">
                 <p className="font-medium mb-1">Export Tips:</p>
                 <ul className="text-xs space-y-1 text-amber-200">
-                  <li>• JSON is best for data backup and API integration</li>
-                  <li>• CSV works directly with Excel and Google Sheets</li>
-                  <li>• Files are named with date and league for easy organization</li>
-                  <li>• All player statistics are included in the export</li>
+                  <li>• Exports respect current filters, search, and advanced filters</li>
+                  <li>• PDF is best for sharing or printing</li>
+                  <li>• Excel (.xlsx) and CSV work with Excel and Google Sheets</li>
+                  <li>• Database (SQL) can be imported into MySQL/SQLite/Postgres</li>
+                  <li>• Files are named with league, team, and date for easy tracking</li>
                 </ul>
               </div>
             </div>
@@ -4837,5 +5092,3 @@ export default function AdminPlayers() {
     </div>
   );
 }
-
-
