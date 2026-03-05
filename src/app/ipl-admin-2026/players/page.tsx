@@ -1029,6 +1029,404 @@ export default function AdminPlayers() {
       });
     };
 
+    const clamp = (value: number, min: number, max: number) => Math.min(Math.max(value, min), max);
+    const toNumber = (value: unknown) => {
+      if (typeof value === 'number' && Number.isFinite(value)) return value;
+      const parsed = Number(value);
+      return Number.isFinite(parsed) ? parsed : 0;
+    };
+
+    const roleColors = new Map<string, [number, number, number]>([
+      ['Batsman', [16, 185, 129]],
+      ['Bowler', [249, 115, 22]],
+      ['All-rounder', [139, 92, 246]],
+      ['Wicket-keeper', [59, 130, 246]]
+    ]);
+
+    const drawCard = (title: string, x: number, y: number, w: number, h: number, draw: (plotX: number, plotY: number, plotW: number, plotH: number) => void) => {
+      doc.setFillColor(255, 255, 255);
+      doc.setDrawColor(...theme.cardBorder);
+      doc.roundedRect(x, y, w, h, 8, 8, 'FD');
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(10);
+      doc.setTextColor(15, 23, 42);
+      doc.text(title, x + 12, y + 16);
+      const plotX = x + 12;
+      const plotY = y + 24;
+      const plotW = w - 24;
+      const plotH = h - 34;
+      draw(plotX, plotY, plotW, plotH);
+    };
+
+    const drawAxes = (x: number, y: number, w: number, h: number) => {
+      doc.setDrawColor(226, 232, 240);
+      doc.setLineWidth(0.5);
+      doc.line(x, y, x, y + h);
+      doc.line(x, y + h, x + w, y + h);
+    };
+
+    const drawBarChart = (x: number, y: number, w: number, h: number) => {
+      const data = [...rows]
+        .map(r => ({ label: r.name as string, value: toNumber(r.runs) }))
+        .sort((a, b) => b.value - a.value)
+        .slice(0, 8);
+      if (data.length === 0) return;
+      const maxVal = Math.max(...data.map(d => d.value), 1);
+      const barGap = 6;
+      const barWidth = (w - barGap * (data.length - 1)) / data.length;
+      drawAxes(x, y, w, h);
+      data.forEach((item, idx) => {
+        const barHeight = (item.value / maxVal) * (h - 18);
+        const barX = x + idx * (barWidth + barGap);
+        const barY = y + h - barHeight;
+        doc.setFillColor(...theme.headerAccent);
+        doc.rect(barX, barY, barWidth, barHeight, 'F');
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(7);
+        doc.setTextColor(100, 116, 139);
+        const label = item.label.split(' ')[0].slice(0, 6);
+        doc.text(label, barX + barWidth / 2, y + h + 10, { align: 'center' });
+      });
+    };
+
+    const drawLineChart = (x: number, y: number, w: number, h: number) => {
+      const buckets = [
+        { label: '<=22', min: 0, max: 22 },
+        { label: '23-26', min: 23, max: 26 },
+        { label: '27-30', min: 27, max: 30 },
+        { label: '31-34', min: 31, max: 34 },
+        { label: '35+', min: 35, max: 200 }
+      ];
+      const points = buckets.map(bucket => {
+        const values = rows.filter(r => {
+          const age = toNumber(r.age);
+          return age >= bucket.min && age <= bucket.max;
+        }).map(r => toNumber(r.runs));
+        const avg = values.length ? values.reduce((a, b) => a + b, 0) / values.length : 0;
+        return { label: bucket.label, value: avg };
+      });
+      const maxVal = Math.max(...points.map(p => p.value), 1);
+      drawAxes(x, y, w, h);
+      points.forEach((point, idx) => {
+        const px = x + (idx / (points.length - 1)) * w;
+        const py = y + h - (point.value / maxVal) * (h - 12);
+        if (idx > 0) {
+          const prev = points[idx - 1];
+          const ppx = x + ((idx - 1) / (points.length - 1)) * w;
+          const ppy = y + h - (prev.value / maxVal) * (h - 12);
+          doc.setDrawColor(59, 130, 246);
+          doc.setLineWidth(1.2);
+          doc.line(ppx, ppy, px, py);
+        }
+        doc.setFillColor(59, 130, 246);
+        doc.circle(px, py, 2.4, 'F');
+        doc.setFontSize(7);
+        doc.setTextColor(100, 116, 139);
+        doc.text(point.label, px, y + h + 10, { align: 'center' });
+      });
+    };
+
+    const drawScatterPlot = (x: number, y: number, w: number, h: number) => {
+      const points = rows.map(r => ({
+        x: toNumber(r.strikeRate),
+        y: toNumber(r.runs),
+        role: r.role as string
+      })).filter(p => p.x > 0 || p.y > 0);
+      if (points.length === 0) return;
+      const sampled = points.length > 60 ? points.filter((_, i) => i % Math.ceil(points.length / 60) === 0) : points;
+      const minX = Math.min(...sampled.map(p => p.x));
+      const maxX = Math.max(...sampled.map(p => p.x));
+      const minY = Math.min(...sampled.map(p => p.y));
+      const maxY = Math.max(...sampled.map(p => p.y));
+      drawAxes(x, y, w, h);
+      sampled.forEach(point => {
+        const px = x + ((point.x - minX) / (maxX - minX || 1)) * w;
+        const py = y + h - ((point.y - minY) / (maxY - minY || 1)) * h;
+        const color = roleColors.get(point.role) || [59, 130, 246];
+        doc.setFillColor(...color);
+        doc.circle(px, py, 2, 'F');
+      });
+    };
+
+    const drawHistogram = (x: number, y: number, w: number, h: number) => {
+      const values = rows.map(r => toNumber(r.age)).filter(v => v > 0);
+      if (values.length === 0) return;
+      const min = Math.min(...values);
+      const max = Math.max(...values);
+      const bins = 6;
+      const binSize = (max - min) / bins || 1;
+      const counts = new Array(bins).fill(0);
+      values.forEach(v => {
+        const index = Math.min(Math.floor((v - min) / binSize), bins - 1);
+        counts[index] += 1;
+      });
+      const maxCount = Math.max(...counts, 1);
+      const barWidth = w / bins;
+      drawAxes(x, y, w, h);
+      counts.forEach((count, idx) => {
+        const barHeight = (count / maxCount) * (h - 10);
+        doc.setFillColor(96, 165, 250);
+        doc.rect(x + idx * barWidth, y + h - barHeight, barWidth - 2, barHeight, 'F');
+      });
+    };
+
+    const quantile = (arr: number[], q: number) => {
+      if (!arr.length) return 0;
+      const sorted = [...arr].sort((a, b) => a - b);
+      const pos = (sorted.length - 1) * q;
+      const base = Math.floor(pos);
+      const rest = pos - base;
+      return sorted[base] + (sorted[base + 1] ? rest * (sorted[base + 1] - sorted[base]) : 0);
+    };
+
+    const drawBoxPlot = (x: number, y: number, w: number, h: number) => {
+      const roles = ['Batsman', 'Bowler', 'All-rounder', 'Wicket-keeper'];
+      const statsByRole = roles.map(role => {
+        const values = rows.filter(r => r.role === role).map(r => toNumber(r.runs)).filter(v => v > 0);
+        return {
+          role,
+          values,
+          min: values.length ? Math.min(...values) : 0,
+          max: values.length ? Math.max(...values) : 0,
+          q1: quantile(values, 0.25),
+          median: quantile(values, 0.5),
+          q3: quantile(values, 0.75)
+        };
+      });
+      const maxVal = Math.max(...statsByRole.map(s => s.max), 1);
+      drawAxes(x, y, w, h);
+      const boxWidth = w / roles.length - 10;
+      statsByRole.forEach((stat, idx) => {
+        const centerX = x + idx * (boxWidth + 10) + boxWidth / 2;
+        const scale = (val: number) => y + h - (val / maxVal) * (h - 10);
+        const minY = scale(stat.min);
+        const maxY = scale(stat.max);
+        const q1Y = scale(stat.q1);
+        const q3Y = scale(stat.q3);
+        const medY = scale(stat.median);
+        doc.setDrawColor(148, 163, 184);
+        doc.line(centerX, minY, centerX, maxY);
+        doc.setFillColor(219, 234, 254);
+        doc.rect(centerX - boxWidth / 2, q3Y, boxWidth, q1Y - q3Y, 'F');
+        doc.setDrawColor(59, 130, 246);
+        doc.line(centerX - boxWidth / 2, medY, centerX + boxWidth / 2, medY);
+        doc.setFontSize(7);
+        doc.setTextColor(100, 116, 139);
+        doc.text(stat.role.split('-')[0], centerX, y + h + 10, { align: 'center' });
+      });
+    };
+
+    const drawTreemap = (x: number, y: number, w: number, h: number) => {
+      const roles = ['Batsman', 'Bowler', 'All-rounder', 'Wicket-keeper'];
+      const counts = roles.map(role => ({
+        role,
+        count: rows.filter(r => r.role === role).length
+      }));
+      const total = counts.reduce((sum, item) => sum + item.count, 0) || 1;
+      let offsetX = x;
+      counts.forEach(item => {
+        const width = (item.count / total) * w;
+        const color = roleColors.get(item.role) || [59, 130, 246];
+        doc.setFillColor(...color);
+        doc.rect(offsetX, y, width, h, 'F');
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(8);
+        doc.text(`${item.role}\n${item.count}`, offsetX + width / 2, y + h / 2, { align: 'center' });
+        offsetX += width;
+      });
+    };
+
+    const drawBubbleChart = (x: number, y: number, w: number, h: number) => {
+      const data = [...rows]
+        .map(r => ({ label: r.name as string, value: toNumber(r.runs), role: r.role as string }))
+        .sort((a, b) => b.value - a.value)
+        .slice(0, 8);
+      if (!data.length) return;
+      const maxVal = Math.max(...data.map(d => d.value), 1);
+      const cols = 4;
+      const rowsCount = 2;
+      const cellW = w / cols;
+      const cellH = h / rowsCount;
+      data.forEach((item, idx) => {
+        const col = idx % cols;
+        const row = Math.floor(idx / cols);
+        const cx = x + col * cellW + cellW / 2;
+        const cy = y + row * cellH + cellH / 2;
+        const radius = clamp(Math.sqrt(item.value / maxVal) * (Math.min(cellW, cellH) / 2 - 6), 6, Math.min(cellW, cellH) / 2 - 6);
+        const color = roleColors.get(item.role) || [59, 130, 246];
+        doc.setFillColor(...color);
+        doc.circle(cx, cy, radius, 'F');
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(7);
+        const label = item.label.split(' ')[0].slice(0, 6);
+        doc.text(label, cx, cy + 2, { align: 'center' });
+      });
+    };
+
+    const drawBulletGraph = (x: number, y: number, w: number, h: number) => {
+      const teams = Array.from(new Map(rows.map(r => [String(r.teamName), r])).keys());
+      const teamStats = teams.map(team => {
+        const teamRows = rows.filter(r => r.teamName === team);
+        const avgRuns = teamRows.length ? teamRows.reduce((sum, r) => sum + toNumber(r.runs), 0) / teamRows.length : 0;
+        return { team, avgRuns };
+      }).sort((a, b) => b.avgRuns - a.avgRuns).slice(0, 3);
+      const overallAvg = rows.length ? rows.reduce((sum, r) => sum + toNumber(r.runs), 0) / rows.length : 0;
+      const target = overallAvg * 1.1;
+      const maxVal = Math.max(...teamStats.map(t => t.avgRuns), target, 1);
+      const rowH = h / teamStats.length;
+      teamStats.forEach((team, idx) => {
+        const barY = y + idx * rowH + 6;
+        doc.setFillColor(226, 232, 240);
+        doc.rect(x + 80, barY, w - 90, 8, 'F');
+        doc.setFillColor(59, 130, 246);
+        doc.rect(x + 80, barY, ((team.avgRuns / maxVal) * (w - 90)), 8, 'F');
+        const targetX = x + 80 + (target / maxVal) * (w - 90);
+        doc.setDrawColor(15, 23, 42);
+        doc.line(targetX, barY - 2, targetX, barY + 10);
+        doc.setFontSize(7);
+        doc.setTextColor(71, 85, 105);
+        doc.text(team.team, x + 4, barY + 7);
+        doc.text(team.avgRuns.toFixed(0), x + w - 6, barY + 7, { align: 'right' });
+      });
+    };
+
+    const drawHeatmap = (x: number, y: number, w: number, h: number) => {
+      const roles = ['Batsman', 'Bowler', 'All-rounder', 'Wicket-keeper'];
+      const teamCounts = rows.reduce((acc, r) => {
+        acc[r.teamShortName as string] = (acc[r.teamShortName as string] || 0) + 1;
+        return acc;
+      }, {} as Record<string, number>);
+      const teams = Object.entries(teamCounts).sort((a, b) => b[1] - a[1]).slice(0, 6).map(([team]) => team);
+      const cellW = w / teams.length;
+      const cellH = h / roles.length;
+      let maxCount = 1;
+      const matrix = roles.map(role => teams.map(team => {
+        const count = rows.filter(r => r.role === role && r.teamShortName === team).length;
+        if (count > maxCount) maxCount = count;
+        return count;
+      }));
+      roles.forEach((role, rIdx) => {
+        teams.forEach((team, tIdx) => {
+          const count = matrix[rIdx][tIdx];
+          const intensity = count / maxCount;
+          const color = [
+            Math.round(226 + (30 - 226) * intensity),
+            Math.round(232 + (64 - 232) * intensity),
+            Math.round(240 + (175 - 240) * intensity)
+          ];
+          doc.setFillColor(color[0], color[1], color[2]);
+          doc.rect(x + tIdx * cellW, y + rIdx * cellH, cellW, cellH, 'F');
+          doc.setFontSize(7);
+          doc.setTextColor(15, 23, 42);
+          doc.text(String(count), x + tIdx * cellW + cellW / 2, y + rIdx * cellH + cellH / 2 + 2, { align: 'center' });
+        });
+        doc.setFontSize(7);
+        doc.setTextColor(71, 85, 105);
+        doc.text(role.split('-')[0], x - 6, y + rIdx * cellH + cellH / 2 + 2, { align: 'right' });
+      });
+      teams.forEach((team, idx) => {
+        doc.setFontSize(7);
+        doc.setTextColor(71, 85, 105);
+        doc.text(team, x + idx * cellW + cellW / 2, y + h + 10, { align: 'center' });
+      });
+    };
+
+    const pearson = (xs: number[], ys: number[]) => {
+      const n = Math.min(xs.length, ys.length);
+      if (n < 2) return 0;
+      const meanX = xs.reduce((s, v) => s + v, 0) / n;
+      const meanY = ys.reduce((s, v) => s + v, 0) / n;
+      let num = 0;
+      let denomX = 0;
+      let denomY = 0;
+      for (let i = 0; i < n; i += 1) {
+        const dx = xs[i] - meanX;
+        const dy = ys[i] - meanY;
+        num += dx * dy;
+        denomX += dx * dx;
+        denomY += dy * dy;
+      }
+      const denom = Math.sqrt(denomX * denomY);
+      return denom === 0 ? 0 : num / denom;
+    };
+
+    const drawCorrelationMatrix = (x: number, y: number, w: number, h: number) => {
+      const metrics = [
+        { key: 'runs', label: 'Runs' },
+        { key: 'wickets', label: 'Wkts' },
+        { key: 'average', label: 'Avg' },
+        { key: 'strikeRate', label: 'SR' },
+        { key: 'economy', label: 'Econ' },
+        { key: 'matches', label: 'M' }
+      ];
+      const values = metrics.map(metric => rows.map(r => toNumber((r as any)[metric.key])));
+      const cellW = w / metrics.length;
+      const cellH = h / metrics.length;
+      metrics.forEach((metric, i) => {
+        metrics.forEach((metricB, j) => {
+          const corr = pearson(values[i], values[j]);
+          const t = clamp(Math.abs(corr), 0, 1);
+          const color = corr >= 0
+            ? [
+                Math.round(239 + (30 - 239) * t),
+                Math.round(246 + (64 - 246) * t),
+                Math.round(255 + (175 - 255) * t)
+              ]
+            : [
+                Math.round(254 + (220 - 254) * t),
+                Math.round(226 + (38 - 226) * t),
+                Math.round(226 + (38 - 226) * t)
+              ];
+          doc.setFillColor(color[0], color[1], color[2]);
+          doc.rect(x + j * cellW, y + i * cellH, cellW, cellH, 'F');
+          doc.setFontSize(7);
+          doc.setTextColor(15, 23, 42);
+          doc.text(corr.toFixed(1), x + j * cellW + cellW / 2, y + i * cellH + cellH / 2 + 2, { align: 'center' });
+        });
+        doc.setFontSize(7);
+        doc.setTextColor(71, 85, 105);
+        doc.text(metric.label, x - 6, y + i * cellH + cellH / 2 + 2, { align: 'right' });
+        doc.text(metric.label, x + i * cellW + cellW / 2, y - 6, { align: 'center' });
+      });
+    };
+
+    const drawChartsPage = () => {
+      drawPageFrame(1);
+      drawSummary();
+
+      const chartTop = 130;
+      const chartBottom = pageHeight - 70;
+      const chartHeight = chartBottom - chartTop;
+      const cols = 2;
+      const rowsCount = 5;
+      const gap = 12;
+      const chartWidth = (pageWidth - 80 - gap) / cols;
+      const chartRowHeight = (chartHeight - gap * (rowsCount - 1)) / rowsCount;
+
+      const chartCards = [
+        { title: 'Top Run Scorers', draw: drawBarChart },
+        { title: 'Runs by Age Group', draw: drawLineChart },
+        { title: 'Runs vs Strike Rate', draw: drawScatterPlot },
+        { title: 'Age Distribution', draw: drawHistogram },
+        { title: 'Runs by Role (Box Plot)', draw: drawBoxPlot },
+        { title: 'Role Composition (Treemap)', draw: drawTreemap },
+        { title: 'Player Impact (Bubble)', draw: drawBubbleChart },
+        { title: 'Team Avg Runs (Bullet)', draw: drawBulletGraph },
+        { title: 'Team vs Role Heatmap', draw: drawHeatmap },
+        { title: 'Stat Correlation Matrix', draw: drawCorrelationMatrix }
+      ];
+
+      chartCards.forEach((card, index) => {
+        const row = Math.floor(index / cols);
+        const col = index % cols;
+        const x = 40 + col * (chartWidth + gap);
+        const y = chartTop + row * (chartRowHeight + gap);
+        drawCard(card.title, x, y, chartWidth, chartRowHeight, card.draw);
+      });
+    };
+
+    drawChartsPage();
+
     const pdfColumns = [
       { key: 'name', label: 'Name' },
       { key: 'role', label: 'Role' },
@@ -1058,6 +1456,7 @@ export default function AdminPlayers() {
       })
     );
 
+    doc.addPage();
     const tableStartY = 130;
 
     autoTable(doc, {
@@ -1096,10 +1495,8 @@ export default function AdminPlayers() {
         13: { halign: 'center' }
       },
       willDrawPage: (data) => {
-        drawPageFrame(data.pageNumber);
-        if (data.pageNumber === 1) {
-          drawSummary();
-        }
+        const pageNumber = doc.internal.getCurrentPageInfo().pageNumber;
+        drawPageFrame(pageNumber);
       }
     });
 
