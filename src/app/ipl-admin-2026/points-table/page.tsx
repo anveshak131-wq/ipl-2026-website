@@ -456,26 +456,168 @@ export default function IPLAdminPointsTablePage() {
                 Refresh
               </motion.button>
               
-              {/* Export Button */}
-              <div className="relative export-menu-container" style={{ zIndex: 999999999 }}>
-                <motion.button
-                  ref={exportButtonRef}
+              {/* Export Button - Simple Working Version */}
+              <div className="relative">
+                <button
                   onClick={() => {
                     console.log('Export button clicked'); // Debug log
                     alert('Export button clicked!'); // Test alert
                     setShowExportMenu(!showExportMenu);
-                    if (!showExportMenu) {
-                      updateDropdownPosition();
-                    }
                   }}
                   disabled={isExporting || sortedPointsTable.length === 0}
                   className="px-4 py-2 rounded-xl bg-gradient-to-r from-green-500 to-emerald-500 text-white font-bold flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
                 >
                   <Download className="w-4 h-4" />
                   {isExporting ? 'Exporting...' : 'Export'}
-                </motion.button>
+                </button>
+                
+                {/* Simple Working Dropdown */}
+                {showExportMenu && (
+                  <div
+                    style={{
+                      position: 'absolute',
+                      top: '100%',
+                      left: '0',
+                      transform: 'translateX(-50%)',
+                      zIndex: 999999999,
+                      backgroundColor: '#1e293b',
+                      border: '2px solid #374151',
+                      borderRadius: '12px',
+                      padding: '8px',
+                      minWidth: '224px',
+                      boxShadow: '0 10px 25px rgba(0,0,0,0.2)'
+                    }}
+                  >
+                    <div style={{ marginBottom: '8px', fontSize: '12px', fontWeight: 'bold', color: '#9ca3af' }}>
+                      Export Format
+                    </div>
+                    
+                    <button
+                      onClick={() => {
+                        console.log('CSV button clicked'); // Debug log
+                        alert('CSV export clicked!'); // Test alert
+                        handleExport('csv');
+                      }}
+                      style={{
+                        width: '100%',
+                        padding: '10px',
+                        backgroundColor: '#059669',
+                        border: 'none',
+                        borderRadius: '8px',
+                        color: 'white',
+                        cursor: 'pointer',
+                        fontSize: '14px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        marginBottom: '4px'
+                      }}
+                    >
+                      <span style={{ color: '#fbbf24' }}>📄</span>
+                      CSV Format
+                    </button>
+                    
+                    <button
+                      onClick={() => {
+                        console.log('Excel button clicked'); // Debug log
+                        alert('Excel export clicked!'); // Test alert
+                        handleExport('excel');
+                      }}
+                      style={{
+                        width: '100%',
+                        padding: '10px',
+                        backgroundColor: '#107c10',
+                        border: 'none',
+                        borderRadius: '8px',
+                        color: 'white',
+                        cursor: 'pointer',
+                        fontSize: '14px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        marginBottom: '4px'
+                      }}
+                    >
+                      <span style={{ color: '#fbbf24' }}>📊</span>
+                      Excel Format
+                    </button>
+                    
+                    <button
+                      onClick={() => {
+                        console.log('PDF button clicked'); // Debug log
+                        alert('PDF export clicked!'); // Test alert
+                        handleExport('pdf');
+                      }}
+                      style={{
+                        width: '100%',
+                        padding: '10px',
+                        backgroundColor: '#dc2626',
+                        border: 'none',
+                        borderRadius: '8px',
+                        color: 'white',
+                        cursor: 'pointer',
+                        fontSize: '14px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        marginBottom: '4px'
+                      }}
+                    >
+                      <span style={{ color: '#fbbf24' }}>📑</span>
+                      PDF Format
+                    </button>
+                    
+                    <button
+                      onClick={() => {
+                        console.log('Database button clicked'); // Debug log
+                        alert('Database export clicked!'); // Test alert
+                        handleExport('database');
+                      }}
+                      style={{
+                        width: '100%',
+                        padding: '10px',
+                        backgroundColor: '#2563eb',
+                        border: 'none',
+                        borderRadius: '8px',
+                        color: 'white',
+                        cursor: 'pointer',
+                        fontSize: '14px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        marginBottom: '4px'
+                      }}
+                    >
+                      <span style={{ color: '#fbbf24' }}>🗄️</span>
+                      Database Format
+                    </button>
+                    
+                    <button
+                      onClick={() => {
+                        console.log('All formats button clicked'); // Debug log
+                        alert('All formats export clicked!'); // Test alert
+                        handleExport('all');
+                      }}
+                      style={{
+                        width: '100%',
+                        padding: '10px',
+                        backgroundColor: '#6f42c1',
+                        border: 'none',
+                        borderRadius: '8px',
+                        color: 'white',
+                        cursor: 'pointer',
+                        fontSize: '14px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        marginBottom: '4px'
+                      }}
+                    >
+                      <span style={{ color: '#fbbf24' }}>📦</span>
+                      All Formats
+                    </button>
+                  </div>
+                )}
               </div>
               
               <motion.button
