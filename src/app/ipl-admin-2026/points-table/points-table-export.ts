@@ -448,13 +448,19 @@ export async function exportPointsTableToPDF(data: PointsTableExportData): Promi
   const pageWidth = doc.internal.pageSize.getWidth();
   const pageHeight = doc.internal.pageSize.getHeight();
 
-  // Background design
-  doc.setFillColor(244, 247, 251);
+  // Background design (soft gradient bands + accents)
+  doc.setFillColor(243, 246, 251);
   doc.rect(0, 0, pageWidth, pageHeight, 'F');
+  doc.setFillColor(232, 238, 246);
+  doc.rect(0, 0, pageWidth, pageHeight * 0.45, 'F');
+  doc.setFillColor(236, 244, 252);
+  doc.rect(0, pageHeight * 0.45, pageWidth, pageHeight * 0.55, 'F');
   doc.setFillColor(226, 232, 240);
-  doc.circle(pageWidth - 24, pageHeight - 18, 16, 'F');
+  doc.circle(pageWidth - 22, pageHeight - 18, 16, 'F');
   doc.setFillColor(219, 234, 254);
   doc.circle(20, pageHeight - 12, 12, 'F');
+  doc.setFillColor(224, 231, 245);
+  doc.triangle(pageWidth * 0.7, 0, pageWidth, 0, pageWidth, pageHeight * 0.28, 'F');
 
   // Header band
   const headerHeight = 24;
@@ -485,9 +491,12 @@ export async function exportPointsTableToPDF(data: PointsTableExportData): Promi
   doc.setTextColor(226, 232, 240);
   doc.text('Confidential • Admin Use Only', pageWidth - 12, 15, { align: 'right' });
 
+  const bodyTextColor: [number, number, number] = [15, 23, 42];
+  const mutedTextColor: [number, number, number] = [71, 85, 105];
+
   // Metadata below header
   doc.setFontSize(9);
-  doc.setTextColor(60);
+  doc.setTextColor(mutedTextColor[0], mutedTextColor[1], mutedTextColor[2]);
   const metadataY = headerHeight + 6;
   doc.text(`Generated on: ${new Date().toLocaleString()}`, pageWidth / 2, metadataY, { align: 'center' });
   if (filtered) {
@@ -495,7 +504,7 @@ export async function exportPointsTableToPDF(data: PointsTableExportData): Promi
     doc.text('(Filtered Results)', pageWidth / 2, metadataY + 5, { align: 'center' });
   }
   if (searchTerm) {
-    doc.setTextColor(60);
+    doc.setTextColor(mutedTextColor[0], mutedTextColor[1], mutedTextColor[2]);
     doc.text(`Search Term: ${searchTerm}`, pageWidth / 2, metadataY + 10, { align: 'center' });
   }
 
@@ -614,7 +623,9 @@ export async function exportPointsTableToPDF(data: PointsTableExportData): Promi
       cellPadding: 3,
       overflow: 'linebreak',
       lineWidth: 0.1,
-      lineColor: [200, 200, 200]
+      lineColor: [200, 200, 200],
+      textColor: bodyTextColor,
+      fillColor: [248, 250, 252]
     },
     headStyles: {
       fillColor: [41, 128, 185], // Blue header
