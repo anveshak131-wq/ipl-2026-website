@@ -474,8 +474,8 @@ export default function IPLAdminPointsTablePage() {
                     exit={{ opacity: 0, y: -10, scale: 0.95 }}
                     style={{
                       position: 'fixed',
-                      top: `${dropdownPosition.top}px`,
-                      left: `${dropdownPosition.left}px`,
+                      top: '200px',
+                      right: '20px',
                       zIndex: 999999999
                     }}
                     className="w-56 rounded-2xl backdrop-blur-2xl border-2 border-white/20 bg-gradient-to-br from-slate-900/95 via-slate-800/90 to-slate-900/95 shadow-2xl overflow-hidden"
