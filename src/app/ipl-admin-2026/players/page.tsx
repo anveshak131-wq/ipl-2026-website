@@ -954,18 +954,80 @@ export default function AdminPlayers() {
   const exportToPDF = (playersToExport: Player[]) => {
     const rows = buildExportRows(playersToExport);
     const doc = new jsPDF({ orientation: 'landscape', unit: 'pt', format: 'a4' });
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+
+    const theme = {
+      pageBackground: [248, 250, 252],
+      headerBackground: [15, 23, 42],
+      headerAccent: [59, 130, 246],
+      headerText: [248, 250, 252],
+      mutedText: [100, 116, 139],
+      tableHeader: [30, 64, 175],
+      tableAltRow: [241, 245, 249],
+      cardBorder: [226, 232, 240]
+    } as const;
 
     const headerTitle = `${currentLeague.toUpperCase()} Players Export`;
     const filterParts = [`Team: ${getSelectedTeamLabel()}`];
     if (selectedRole !== 'all') filterParts.push(`Role: ${selectedRole}`);
     if (searchQuery.trim().length > 0) filterParts.push(`Search: "${searchQuery.trim()}"`);
     if (hasAdvancedFiltersActive()) filterParts.push('Advanced Filters: On');
+    const filterLine = filterParts.join(' • ');
+    const generatedAt = new Date().toLocaleString();
 
-    doc.setFontSize(18);
-    doc.text(headerTitle, 40, 40);
-    doc.setFontSize(10);
-    doc.setTextColor(120);
-    doc.text(`${filterParts.join(' • ')} • Total: ${playersToExport.length}`, 40, 58);
+    const summaryCards = [
+      { label: 'Total Players', value: playersToExport.length, color: [59, 130, 246] as const },
+      { label: 'Batsmen', value: playersToExport.filter(p => p.role === 'Batsman').length, color: [16, 185, 129] as const },
+      { label: 'Bowlers', value: playersToExport.filter(p => p.role === 'Bowler').length, color: [249, 115, 22] as const },
+      { label: 'All-rounders', value: playersToExport.filter(p => p.role === 'All-rounder').length, color: [139, 92, 246] as const },
+      { label: 'Wicket-keepers', value: playersToExport.filter(p => p.role === 'Wicket-keeper').length, color: [236, 72, 153] as const }
+    ];
+
+    const drawPageFrame = (pageNumber: number) => {
+      doc.setFillColor(...theme.pageBackground);
+      doc.rect(0, 0, pageWidth, pageHeight, 'F');
+      doc.setFillColor(...theme.headerBackground);
+      doc.rect(0, 0, pageWidth, 64, 'F');
+      doc.setFillColor(...theme.headerAccent);
+      doc.rect(0, 64, pageWidth, 2, 'F');
+
+      doc.setTextColor(...theme.headerText);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(16);
+      doc.text(headerTitle, 40, 38);
+
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(9);
+      doc.text(filterLine, 40, 55, { maxWidth: pageWidth - 260 });
+      doc.text(generatedAt, pageWidth - 40, 38, { align: 'right' });
+
+      doc.setFontSize(9);
+      doc.text(`Page ${pageNumber}`, pageWidth - 40, 55, { align: 'right' });
+    };
+
+    const drawSummary = () => {
+      const cardY = 78;
+      const cardHeight = 36;
+      const gap = 10;
+      const totalWidth = pageWidth - 80;
+      const cardWidth = (totalWidth - gap * (summaryCards.length - 1)) / summaryCards.length;
+
+      summaryCards.forEach((card, index) => {
+        const x = 40 + index * (cardWidth + gap);
+        doc.setFillColor(255, 255, 255);
+        doc.setDrawColor(...theme.cardBorder);
+        doc.roundedRect(x, cardY, cardWidth, cardHeight, 6, 6, 'FD');
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(12);
+        doc.setTextColor(...card.color);
+        doc.text(String(card.value), x + 12, cardY + 21);
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(8);
+        doc.setTextColor(...theme.mutedText);
+        doc.text(card.label, x + 12, cardY + 32, { maxWidth: cardWidth - 20 });
+      });
+    };
 
     const pdfColumns = [
       { key: 'name', label: 'Name' },
@@ -996,24 +1058,69 @@ export default function AdminPlayers() {
       })
     );
 
+    const tableStartY = 130;
+
     autoTable(doc, {
       head: [pdfColumns.map(column => column.label)],
       body: pdfRows,
-      startY: 75,
+      startY: tableStartY,
+      margin: { top: 90, left: 40, right: 40, bottom: 50 },
+      theme: 'striped',
       styles: {
-        fontSize: 8,
-        cellPadding: 3,
-        overflow: 'linebreak'
+        fontSize: 8.5,
+        cellPadding: 4,
+        overflow: 'linebreak',
+        textColor: [15, 23, 42],
+        lineColor: theme.cardBorder,
+        lineWidth: 0.1
       },
       headStyles: {
-        fillColor: [30, 64, 175],
+        fillColor: theme.tableHeader,
         textColor: 255,
-        fontStyle: 'bold'
+        fontStyle: 'bold',
+        halign: 'center'
       },
       alternateRowStyles: {
-        fillColor: [245, 245, 245]
+        fillColor: theme.tableAltRow
+      },
+      columnStyles: {
+        3: { halign: 'right' },
+        5: { halign: 'right' },
+        6: { halign: 'right' },
+        7: { halign: 'right' },
+        8: { halign: 'right' },
+        9: { halign: 'right' },
+        10: { halign: 'right' },
+        11: { halign: 'right' },
+        12: { halign: 'right' },
+        13: { halign: 'center' }
+      },
+      willDrawPage: (data) => {
+        drawPageFrame(data.pageNumber);
+        if (data.pageNumber === 1) {
+          drawSummary();
+        }
       }
     });
+
+    const totalPages = doc.getNumberOfPages();
+    for (let pageNumber = 1; pageNumber <= totalPages; pageNumber += 1) {
+      doc.setPage(pageNumber);
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(9);
+      doc.setTextColor(...theme.mutedText);
+      doc.text(
+        `Generated ${generatedAt} • ${playersToExport.length} players`,
+        40,
+        pageHeight - 20
+      );
+      doc.text(
+        `Page ${pageNumber} of ${totalPages}`,
+        pageWidth - 40,
+        pageHeight - 20,
+        { align: 'right' }
+      );
+    }
 
     return doc.output('arraybuffer');
   };
