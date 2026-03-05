@@ -218,6 +218,40 @@ export default function AdminPlayers() {
   const [virtualScrollEnabled, setVirtualScrollEnabled] = useState(false);
   const VIRTUAL_SCROLL_THRESHOLD = 50; // Enable virtual scrolling for 50+ players
 
+  // Resolve user role for UI-level permissions (layout handles auth)
+  useEffect(() => {
+    const resolveRole = async () => {
+      try {
+        const token = localStorage.getItem('adminToken') || localStorage.getItem('auth_token');
+        if (!token) return;
+
+        try {
+          const response = await fetch(`/api/auth?action=verify&token=${token}`);
+          const data = await response.json();
+          if (response.ok && data.success) {
+            setUserRole(data.user?.role || null);
+            return;
+          }
+        } catch {
+          // Fall through to token parsing
+        }
+
+        try {
+          const tokenPayload = JSON.parse(atob(token));
+          if (tokenPayload.role) {
+            setUserRole(tokenPayload.role);
+          }
+        } catch {
+          // Ignore parsing errors
+        }
+      } catch {
+        // localStorage not available
+      }
+    };
+
+    resolveRole();
+  }, []);
+
   // Performance helper functions
   const getPerformanceColor = (player: Player): string => {
     const runs = player.stats?.runs || 0;
@@ -2070,8 +2104,8 @@ export default function AdminPlayers() {
                 <div className="flex items-center gap-3 flex-wrap">
                 <LeagueSwitch size="md" showLabel={false} />
                   
-                  {/* Export Button - Only for admin and super_admin */}
-                  {(userRole === 'admin' || userRole === 'super_admin') && (
+                  {/* Export Button - admin, super_admin, players_admin */}
+                  {(userRole === 'admin' || userRole === 'super_admin' || userRole === 'players_admin') && (
                     <button
                       onClick={() => setShowExportModal(true)}
                       className="p-2.5 rounded-lg bg-gradient-to-r from-green-600 to-emerald-600 text-white shadow-lg hover:shadow-green-500/25 transition-all duration-300 hover:scale-105 border border-green-500/30"
