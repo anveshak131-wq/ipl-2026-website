@@ -396,16 +396,149 @@ export async function exportPlaying11ToPDF(payload: Playing11ExportPayload): Pro
 
   const doc = new jsPDF({ orientation: 'landscape', unit: 'pt', format: 'a4' });
   const pageWidth = doc.internal.pageSize.getWidth();
+  const pageHeight = doc.internal.pageSize.getHeight();
+  const marginX = 40;
+  const headerHeight = 78;
 
   const matchTitle = `${payload.match.team1.shortName || payload.match.team1.name} vs ${payload.match.team2.shortName || payload.match.team2.name}`;
   const matchMeta = `${payload.match.date} • ${payload.match.time} • ${payload.match.venue}`;
+  const generatedAt = new Date().toLocaleString();
+  const playing11Count = payload.playing11.team1.length + payload.playing11.team2.length;
+  const impactCount = [payload.impact.team1, payload.impact.team2].filter(
+    (item) => item && (item.playerId || (item as any).impact)
+  ).length;
 
-  doc.setFontSize(18);
-  doc.text('Playing 11 & Impact Players', pageWidth / 2, 40, { align: 'center' });
-  doc.setFontSize(12);
-  doc.text(matchTitle, pageWidth / 2, 60, { align: 'center' });
-  doc.setFontSize(10);
-  doc.text(matchMeta, pageWidth / 2, 76, { align: 'center' });
+  const theme = {
+    pageBackground: [248, 250, 252] as const,
+    headerDark: [15, 23, 42] as const,
+    headerAccent: [37, 99, 235] as const,
+    headerLine: [203, 213, 225] as const,
+    headerText: [248, 250, 252] as const,
+    headerMuted: [226, 232, 240] as const,
+    cardBackground: [255, 255, 255] as const,
+    cardBorder: [226, 232, 240] as const,
+    cardTitle: [30, 41, 59] as const,
+    cardText: [71, 85, 105] as const,
+    cardAccent: [59, 130, 246] as const,
+    cardAccentSecondary: [14, 116, 144] as const,
+    tableText: [15, 23, 42] as const,
+    tableLine: [226, 232, 240] as const,
+    team1Header: [37, 99, 235] as const,
+    team2Header: [34, 197, 94] as const,
+    impactHeader: [249, 115, 22] as const,
+    team1Alt: [239, 246, 255] as const,
+    team2Alt: [236, 253, 245] as const,
+    impactAlt: [255, 247, 237] as const
+  };
+
+  const drawPageShell = () => {
+    doc.setFillColor(...theme.pageBackground);
+    doc.rect(0, 0, pageWidth, pageHeight, 'F');
+    doc.setFillColor(...theme.headerDark);
+    doc.rect(0, 0, pageWidth, headerHeight, 'F');
+    doc.setFillColor(...theme.headerAccent);
+    doc.rect(0, 0, pageWidth * 0.62, headerHeight, 'F');
+    doc.setDrawColor(...theme.headerLine);
+    doc.setLineWidth(0.8);
+    doc.line(0, headerHeight, pageWidth, headerHeight);
+
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(12);
+    doc.setTextColor(...theme.headerText);
+    doc.text('SportsUp18 Admin', marginX, 26);
+
+    doc.setFontSize(20);
+    doc.text('Playing 11 & Impact Players', pageWidth / 2, 40, { align: 'center' });
+
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(10);
+    doc.setTextColor(...theme.headerMuted);
+    doc.text(`Generated: ${generatedAt}`, pageWidth - marginX, 26, { align: 'right' });
+
+    doc.setFontSize(11);
+    doc.text(matchTitle, pageWidth / 2, 58, { align: 'center' });
+    doc.setFontSize(9);
+    doc.text(matchMeta, pageWidth / 2, 72, { align: 'center' });
+  };
+
+  const drawInfoCard = (x: number, y: number, w: number, h: number, title: string, lines: string[], accent: [number, number, number]) => {
+    doc.setFillColor(...theme.cardBackground);
+    doc.setDrawColor(...theme.cardBorder);
+    doc.setLineWidth(0.8);
+    doc.roundedRect(x, y, w, h, 10, 10, 'FD');
+    doc.setFillColor(...accent);
+    doc.rect(x, y, w, 5, 'F');
+
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(10);
+    doc.setTextColor(...theme.cardTitle);
+    doc.text(title, x + 12, y + 20);
+
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(9);
+    doc.setTextColor(...theme.cardText);
+    let cursor = y + 34;
+    lines.forEach((line) => {
+      const wrapped = doc.splitTextToSize(line, w - 24);
+      wrapped.forEach((textLine: string) => {
+        doc.text(textLine, x + 12, cursor);
+        cursor += 12;
+      });
+    });
+  };
+
+  const drawSectionHeader = (label: string, color: [number, number, number], y: number) => {
+    doc.setFillColor(...color);
+    doc.roundedRect(marginX, y, 220, 24, 8, 8, 'F');
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(11);
+    doc.setTextColor(255, 255, 255);
+    doc.text(label, marginX + 12, y + 16);
+  };
+
+  const drawFooter = (pageNumber: number, totalPages: number) => {
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(9);
+    doc.setTextColor(148, 163, 184);
+    doc.text(matchTitle, marginX, pageHeight - 16);
+    doc.text(`Page ${pageNumber} of ${totalPages}`, pageWidth - marginX, pageHeight - 16, { align: 'right' });
+  };
+
+  drawPageShell();
+
+  const cardY = headerHeight + 12;
+  const cardHeight = 84;
+  const cardGap = 16;
+  const cardWidth = (pageWidth - marginX * 2 - cardGap) / 2;
+
+  drawInfoCard(
+    marginX,
+    cardY,
+    cardWidth,
+    cardHeight,
+    'Match Overview',
+    [
+      matchTitle,
+      `${payload.match.date} • ${payload.match.time}`,
+      payload.match.venue,
+      `Match ID: ${payload.match.id}${payload.match.matchNumber ? ` • ${payload.match.matchNumber}` : ''}`
+    ],
+    theme.cardAccent
+  );
+
+  drawInfoCard(
+    marginX + cardWidth + cardGap,
+    cardY,
+    cardWidth,
+    cardHeight,
+    'Summary',
+    [
+      `Playing 11 Players: ${playing11Count}`,
+      `Impact Players: ${impactCount}`,
+      `League: ${payload.match.league.toUpperCase()}`
+    ],
+    theme.cardAccentSecondary
+  );
 
   const tableHeaders = ['#', 'Player', 'Role', 'Jersey', 'Nationality', 'Captain', 'Batting', 'Bowling', 'Impact'];
 
@@ -432,35 +565,47 @@ export async function exportPlaying11ToPDF(payload: Playing11ExportPayload): Pro
     });
   };
 
-  let cursorY = 96;
+  let cursorY = cardY + cardHeight + 24;
+  const tableMargin = { left: marginX, right: marginX, top: headerHeight + 24, bottom: 36 };
+  const tableHooks = {
+    willDrawPage: (data: any) => {
+      if (data.pageNumber > 1) {
+        drawPageShell();
+      }
+    },
+    didDrawPage: (data: any) => {
+      const totalPages = doc.internal.getNumberOfPages();
+      drawFooter(data.pageNumber, totalPages);
+    }
+  };
 
-  doc.setFontSize(12);
-  doc.text(payload.match.team1.shortName || payload.match.team1.name || 'Team 1', 40, cursorY);
-  cursorY += 8;
+  drawSectionHeader(payload.match.team1.shortName || payload.match.team1.name || 'Team 1', theme.team1Header, cursorY);
+  cursorY += 32;
   autoTable(doc, {
     head: [tableHeaders],
     body: buildTeamRows('team1'),
     startY: cursorY,
-    styles: { fontSize: 8, cellPadding: 3 },
-    headStyles: { fillColor: [34, 81, 185], textColor: 255 },
-    alternateRowStyles: { fillColor: [245, 247, 252] },
-    margin: { left: 40, right: 40 }
+    styles: { fontSize: 8, cellPadding: 3, textColor: theme.tableText, lineColor: theme.tableLine, lineWidth: 0.2 },
+    headStyles: { fillColor: theme.team1Header, textColor: 255, fontStyle: 'bold' },
+    alternateRowStyles: { fillColor: theme.team1Alt },
+    margin: tableMargin,
+    ...tableHooks
   });
 
   const lastTable = (doc as any).lastAutoTable;
   cursorY = lastTable?.finalY ? lastTable.finalY + 24 : cursorY + 160;
 
-  doc.setFontSize(12);
-  doc.text(payload.match.team2.shortName || payload.match.team2.name || 'Team 2', 40, cursorY);
-  cursorY += 8;
+  drawSectionHeader(payload.match.team2.shortName || payload.match.team2.name || 'Team 2', theme.team2Header, cursorY);
+  cursorY += 32;
   autoTable(doc, {
     head: [tableHeaders],
     body: buildTeamRows('team2'),
     startY: cursorY,
-    styles: { fontSize: 8, cellPadding: 3 },
-    headStyles: { fillColor: [22, 163, 74], textColor: 255 },
-    alternateRowStyles: { fillColor: [242, 250, 245] },
-    margin: { left: 40, right: 40 }
+    styles: { fontSize: 8, cellPadding: 3, textColor: theme.tableText, lineColor: theme.tableLine, lineWidth: 0.2 },
+    headStyles: { fillColor: theme.team2Header, textColor: 255, fontStyle: 'bold' },
+    alternateRowStyles: { fillColor: theme.team2Alt },
+    margin: tableMargin,
+    ...tableHooks
   });
 
   const impactRows = [
@@ -471,18 +616,18 @@ export async function exportPlaying11ToPDF(payload: Playing11ExportPayload): Pro
   const afterTeam2 = (doc as any).lastAutoTable;
   cursorY = afterTeam2?.finalY ? afterTeam2.finalY + 24 : cursorY + 160;
 
-  doc.setFontSize(12);
-  doc.text('Impact Players', 40, cursorY);
-  cursorY += 8;
+  drawSectionHeader('Impact Players', theme.impactHeader, cursorY);
+  cursorY += 32;
 
   autoTable(doc, {
     head: [['Team', 'Impact Player', 'Role', 'Substitution Time', 'Original Player', 'Substituted At']],
     body: impactRows.length > 0 ? impactRows : [['-', 'None selected', '', '', '', '']],
     startY: cursorY,
-    styles: { fontSize: 8, cellPadding: 3 },
-    headStyles: { fillColor: [251, 146, 60], textColor: 255 },
-    alternateRowStyles: { fillColor: [255, 246, 237] },
-    margin: { left: 40, right: 40 }
+    styles: { fontSize: 8, cellPadding: 3, textColor: theme.tableText, lineColor: theme.tableLine, lineWidth: 0.2 },
+    headStyles: { fillColor: theme.impactHeader, textColor: 255, fontStyle: 'bold' },
+    alternateRowStyles: { fillColor: theme.impactAlt },
+    margin: tableMargin,
+    ...tableHooks
   });
 
   const filename = buildFilename(payload.match, 'playing11-impact', 'pdf');
