@@ -9,7 +9,6 @@ const importJsPDF = async () => {
   if (typeof window === 'undefined') return null;
   try {
     const jspdfModule = await import('jspdf');
-    await import('jspdf-autotable');
     const jsPDF = (jspdfModule as { jsPDF?: typeof import('jspdf').jsPDF; default?: any }).jsPDF
       || (jspdfModule as { default?: any }).default;
     if (!jsPDF) {
@@ -18,6 +17,21 @@ const importJsPDF = async () => {
     return jsPDF;
   } catch (error) {
     console.error('Failed to import jsPDF:', error);
+    return null;
+  }
+};
+
+const importAutoTable = async () => {
+  if (typeof window === 'undefined') return null;
+  try {
+    const module = await import('jspdf-autotable');
+    const autoTable = (module as { autoTable?: any; default?: any }).autoTable || (module as { default?: any }).default;
+    if (!autoTable) {
+      throw new Error('autoTable export not found');
+    }
+    return autoTable as (doc: any, options: any) => void;
+  } catch (error) {
+    console.error('Failed to import autoTable:', error);
     return null;
   }
 };
@@ -228,6 +242,11 @@ export async function exportPointsTableToPDF(data: PointsTableExportData): Promi
     alert('PDF export is not available in this environment');
     return;
   }
+  const autoTable = await importAutoTable();
+  if (!autoTable) {
+    alert('PDF table export is not available in this environment');
+    return;
+  }
 
   const doc = new jsPDF('l', 'mm', 'a4');
   
@@ -280,8 +299,7 @@ export async function exportPointsTableToPDF(data: PointsTableExportData): Promi
   ]);
 
   // Add table using autoTable
-  // @ts-ignore - jsPDF-autotable extension
-  doc.autoTable({
+  autoTable(doc, {
     head: [headers],
     body: tableData,
     startY: searchTerm ? 50 : 45,
