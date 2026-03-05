@@ -477,109 +477,36 @@ export default function IPLAdminPointsTablePage() {
                   {isExporting ? 'Exporting...' : 'Export'}
                 </motion.button>
                 
-                {/* Export Dropdown Menu - React Portal to Body */}
-                {showExportMenu && createPortal(
-                  <motion.div
-                    initial={{ opacity: 0, y: -10, scale: 0.95 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                {/* Simple Test Dropdown - No Portal */}
+                {showExportMenu && (
+                  <div
                     style={{
-                      position: 'fixed',
-                      top: '200px',
-                      right: '20px',
+                      position: 'absolute',
+                      top: '100%',
+                      right: '0',
                       zIndex: 999999999
                     }}
                     className="w-56 rounded-2xl backdrop-blur-2xl border-2 border-white/20 bg-gradient-to-br from-slate-900/95 via-slate-800/90 to-slate-900/95 shadow-2xl overflow-hidden"
                   >
-                      <div className="p-2">
-                        <div className="px-3 py-2 text-xs font-bold uppercase tracking-wider text-gray-400 border-b border-white/10 mb-2">
-                          Export Format
-                        </div>
-                        
-                        <button
-                          onClick={() => {
-                            console.log('CSV button clicked'); // Debug log
-                            alert('CSV export clicked!'); // Test alert
-                            handleExport('csv');
-                          }}
-                          className="w-full px-3 py-2.5 rounded-xl text-left text-sm font-medium text-white hover:bg-amber-500/20 flex items-center gap-3 transition-all"
-                        >
-                          <FileText className="w-4 h-4 text-amber-400" />
-                          CSV Format
-                          <span className="ml-auto text-xs text-gray-400">.csv</span>
-                        </button>
-                        
-                        <motion.button
-                          onClick={() => handleExport('excel')}
-                          className="w-full px-3 py-2.5 rounded-xl text-left text-sm font-medium text-white hover:bg-green-500/20 flex items-center gap-3 transition-all"
-                          whileHover={{ scale: 1.02 }}
-                          whileTap={{ scale: 0.98 }}
-                        >
-                          <Table className="w-4 h-4 text-green-400" />
-                          Excel Format
-                          <span className="ml-auto text-xs text-gray-400">.xlsx</span>
-                        </motion.button>
-                        
-                        <motion.button
-                          onClick={() => handleExport('pdf')}
-                          className="w-full px-3 py-2.5 rounded-xl text-left text-sm font-medium text-white hover:bg-red-500/20 flex items-center gap-3 transition-all"
-                          whileHover={{ scale: 1.02 }}
-                          whileTap={{ scale: 0.98 }}
-                        >
-                          <FileText className="w-4 h-4 text-red-400" />
-                          PDF Format
-                          <span className="ml-auto text-xs text-gray-400">.pdf</span>
-                        </motion.button>
-                        
-                        <motion.button
-                          onClick={() => handleExport('database')}
-                          className="w-full px-3 py-2.5 rounded-xl text-left text-sm font-medium text-white hover:bg-blue-500/20 flex items-center gap-3 transition-all"
-                          whileHover={{ scale: 1.02 }}
-                          whileTap={{ scale: 0.98 }}
-                        >
-                          <Database className="w-4 h-4 text-blue-400" />
-                          Database Format
-                          <span className="ml-auto text-xs text-gray-400">.json</span>
-                        </motion.button>
-                        
-                        <div className="border-t border-white/10 my-2"></div>
-                        
-                        <motion.button
-                          onClick={() => handleExport('all')}
-                          className="w-full px-3 py-2.5 rounded-xl text-left text-sm font-bold text-white bg-gradient-to-r from-purple-500/20 to-pink-500/20 hover:from-purple-500/30 hover:to-pink-500/30 flex items-center gap-3 transition-all"
-                          whileHover={{ scale: 1.02 }}
-                          whileTap={{ scale: 0.98 }}
-                        >
-                          <Download className="w-4 h-4 text-purple-400" />
-                          All Formats
-                          <span className="ml-auto text-xs text-gray-400">4 files</span>
-                        </motion.button>
+                    <div className="p-2">
+                      <div className="px-3 py-2 text-xs font-bold uppercase tracking-wider text-gray-400 border-b border-white/10 mb-2">
+                        Export Format
                       </div>
                       
-                      {/* Export Statistics */}
-                      <div className="border-t border-white/10 p-3 bg-gradient-to-r from-amber-500/10 to-orange-500/10">
-                        <div className="text-xs font-bold text-gray-400 mb-2">Export Summary</div>
-                        <div className="grid grid-cols-2 gap-2 text-xs">
-                          <div>
-                            <span className="text-gray-400">Teams:</span>
-                            <span className="ml-1 font-bold text-white">{sortedPointsTable.length}</span>
-                          </div>
-                          <div>
-                            <span className="text-gray-400">Qualified:</span>
-                            <span className="ml-1 font-bold text-amber-400">{getExportStats().qualifiedTeams}</span>
-                          </div>
-                          <div>
-                            <span className="text-gray-400">Total Points:</span>
-                            <span className="ml-1 font-bold text-green-400">{getExportStats().totalPoints}</span>
-                          </div>
-                          <div>
-                            <span className="text-gray-400">Avg NRR:</span>
-                            <span className="ml-1 font-bold text-blue-400">{getExportStats().averageNRR}</span>
-                          </div>
-                        </div>
-                      </div>
-                  </motion.div>,
-                  document.body
+                      <button
+                        onClick={() => {
+                          console.log('CSV button clicked'); // Debug log
+                          alert('CSV export clicked!'); // Test alert
+                          handleExport('csv');
+                        }}
+                        className="w-full px-3 py-2.5 rounded-xl text-left text-sm font-medium text-white hover:bg-amber-500/20 flex items-center gap-3 transition-all"
+                      >
+                        <FileText className="w-4 h-4 text-amber-400" />
+                        CSV Format
+                        <span className="ml-auto text-xs text-gray-400">.csv</span>
+                      </button>
+                    </div>
+                  </div>
                 )}
               </div>
               
