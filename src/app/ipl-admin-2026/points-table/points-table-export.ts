@@ -377,6 +377,8 @@ export function exportPointsTableAllFormats(data: PointsTableExportData): void {
  * Helper function to download files
  */
 function downloadFile(content: string, filename: string, mimeType: string): void {
+  console.log('Download file called:', { filename, mimeType, contentLength: content.length }); // Debug log
+  
   const blob = new Blob([content], { type: mimeType });
   const link = document.createElement('a');
   const url = URL.createObjectURL(blob);
@@ -390,6 +392,8 @@ function downloadFile(content: string, filename: string, mimeType: string): void
   document.body.removeChild(link);
   
   URL.revokeObjectURL(url);
+  
+  console.log('Download completed'); // Debug log
 }
 
 /**

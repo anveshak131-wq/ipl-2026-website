@@ -384,25 +384,34 @@ export default function IPLAdminPointsTablePage() {
     try {
       const exportData = prepareExportData();
       
+      console.log('Export data:', exportData); // Debug log
+      
       if (!validateExportData(exportData)) {
         alert('Invalid export data');
         return;
       }
 
+      console.log('Export format:', format); // Debug log
+
       switch (format) {
         case 'csv':
+          console.log('Calling CSV export'); // Debug log
           exportPointsTableToCSV(exportData);
           break;
         case 'excel':
+          console.log('Calling Excel export'); // Debug log
           await exportPointsTableToExcel(exportData);
           break;
         case 'pdf':
+          console.log('Calling PDF export'); // Debug log
           await exportPointsTableToPDF(exportData);
           break;
         case 'database':
+          console.log('Calling Database export'); // Debug log
           exportPointsTableToDatabase(exportData);
           break;
         case 'all':
+          console.log('Calling All exports'); // Debug log
           exportPointsTableToCSV(exportData);
           await exportPointsTableToExcel(exportData);
           await exportPointsTableToPDF(exportData);
