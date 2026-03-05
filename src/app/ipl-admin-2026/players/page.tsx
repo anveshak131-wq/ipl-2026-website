@@ -1724,6 +1724,12 @@ export default function AdminPlayers() {
         40,
         pageHeight - 20
       );
+      doc.setFontSize(8);
+      doc.text(
+        '© 2026 SportsUP18. Admin-only. Unauthorized use prohibited.',
+        40,
+        pageHeight - 34
+      );
       doc.text(
         `Page ${pageNumber} of ${totalPages}`,
         pageWidth - 40,
