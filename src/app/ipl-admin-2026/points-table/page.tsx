@@ -496,20 +496,18 @@ export default function IPLAdminPointsTablePage() {
                           Export Format
                         </div>
                         
-                        <motion.button
+                        <button
                           onClick={() => {
                             console.log('CSV button clicked'); // Debug log
                             alert('CSV export clicked!'); // Test alert
                             handleExport('csv');
                           }}
                           className="w-full px-3 py-2.5 rounded-xl text-left text-sm font-medium text-white hover:bg-amber-500/20 flex items-center gap-3 transition-all"
-                          whileHover={{ scale: 1.02 }}
-                          whileTap={{ scale: 0.98 }}
                         >
                           <FileText className="w-4 h-4 text-amber-400" />
                           CSV Format
                           <span className="ml-auto text-xs text-gray-400">.csv</span>
-                        </motion.button>
+                        </button>
                         
                         <motion.button
                           onClick={() => handleExport('excel')}
