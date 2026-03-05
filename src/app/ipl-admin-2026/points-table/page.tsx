@@ -387,10 +387,12 @@ export default function IPLAdminPointsTablePage() {
       console.log('Export data:', exportData); // Debug log
       
       if (!validateExportData(exportData)) {
+        console.log('Export data validation failed'); // Debug log
         alert('Invalid export data');
         return;
       }
 
+      console.log('Export data validation passed'); // Debug log
       console.log('Export format:', format); // Debug log
 
       switch (format) {
@@ -496,7 +498,26 @@ export default function IPLAdminPointsTablePage() {
                       onClick={() => {
                         console.log('CSV button clicked'); // Debug log
                         alert('CSV export clicked!'); // Test alert
-                        handleExport('csv');
+                        
+                        // Simple test CSV export
+                        const testCSV = 'Rank,Team Name,Points\n1,Test Team,10\n2,Another Team,8';
+                        const blob = new Blob([testCSV], { type: 'text/csv' });
+                        const link = document.createElement('a');
+                        const url = URL.createObjectURL(blob);
+                        
+                        link.setAttribute('href', url);
+                        link.setAttribute('download', 'test-export.csv');
+                        link.style.visibility = 'hidden';
+                        
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                        
+                        URL.revokeObjectURL(url);
+                        console.log('Test CSV download completed'); // Debug log
+                        
+                        // Also try the real export
+                        // handleExport('csv');
                       }}
                       style={{
                         width: '100%',
@@ -514,7 +535,7 @@ export default function IPLAdminPointsTablePage() {
                       }}
                     >
                       <span style={{ color: '#fbbf24' }}>📄</span>
-                      CSV Format
+                      CSV Format (Test)
                     </button>
                     
                     <button
