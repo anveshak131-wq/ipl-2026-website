@@ -14,7 +14,7 @@ import { CustomEmoji } from '@/components/emoji/Emoji';
 import FlagImage from '@/components/ui/FlagImage';
 import CustomSelect from '@/components/ui/CustomSelect';
 import { jsPDF } from 'jspdf';
-import 'jspdf-autotable';
+import autoTable from 'jspdf-autotable';
 import * as XLSX from 'xlsx';
 import { Search, Filter, Edit2, X, Users, TrendingUp, Award, Target, Zap, ChevronDown, ChevronUp, SortAsc, SortDesc, User, Shirt, Calendar, BarChart3, Plus, Trash2, Download, Upload, Shield, Activity, Hash, Grid3x3, List, Eye, Star, Copy, History, FileSpreadsheet, FileText, FileDown, Database, DatabaseBackup } from 'lucide-react';
 import '@/styles/flags.css';
@@ -996,8 +996,7 @@ export default function AdminPlayers() {
       })
     );
 
-    // @ts-ignore - jspdf-autotable augments jsPDF instance
-    doc.autoTable({
+    autoTable(doc, {
       head: [pdfColumns.map(column => column.label)],
       body: pdfRows,
       startY: 75,
