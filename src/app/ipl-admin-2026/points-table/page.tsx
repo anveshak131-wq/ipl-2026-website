@@ -457,7 +457,7 @@ export default function IPLAdminPointsTablePage() {
               </motion.button>
               
               {/* Export Button - Simple Working Version */}
-              <div className="relative">
+              <div className="relative" style={{ zIndex: 9999999999 }}>
                 <button
                   onClick={() => {
                     console.log('Export button clicked'); // Debug log
@@ -479,7 +479,7 @@ export default function IPLAdminPointsTablePage() {
                       top: '100%',
                       left: '0',
                       transform: 'translateX(-50%)',
-                      zIndex: 999999999,
+                      zIndex: 9999999999,
                       backgroundColor: '#1e293b',
                       border: '2px solid #374151',
                       borderRadius: '12px',
