@@ -190,6 +190,61 @@ const drawBarChart = (
   });
 };
 
+const drawDivergingBarChart = (
+  doc: any,
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+  title: string,
+  series: ChartSeries[],
+  positiveColor: [number, number, number],
+  negativeColor: [number, number, number]
+) => {
+  doc.setFillColor(248, 250, 252);
+  doc.setDrawColor(224, 230, 238);
+  doc.rect(x, y, width, height, 'FD');
+
+  doc.setFontSize(9);
+  doc.setTextColor(60);
+  doc.text(title, x + 4, y + 6);
+
+  const chartX = x + 4;
+  const chartY = y + 8;
+  const chartHeight = height - 16;
+  const chartWidth = width - 8;
+  const zeroY = chartY + chartHeight / 2;
+  const maxAbs = Math.max(...series.map((s) => Math.abs(s.value)), 1);
+  const barGap = 2;
+  const barWidth = chartWidth / Math.max(series.length, 1) - barGap;
+
+  doc.setDrawColor(200);
+  doc.line(chartX, zeroY, chartX + chartWidth, zeroY);
+
+  series.forEach((item, index) => {
+    const barHeight = Math.max(1, (Math.abs(item.value) / maxAbs) * (chartHeight / 2 - 2));
+    const barX = chartX + index * (barWidth + barGap);
+    const barY = item.value >= 0 ? zeroY - barHeight : zeroY;
+
+    const [r, g, b] = item.value >= 0 ? positiveColor : negativeColor;
+    doc.setFillColor(r, g, b);
+    doc.rect(barX, barY, barWidth, barHeight, 'F');
+
+    doc.setFontSize(6);
+    doc.setTextColor(80);
+    doc.text(item.label, barX + barWidth / 2, chartY + chartHeight + 4, { align: 'center' });
+
+    const valueLabel = item.valueLabel ?? (item.value >= 0 ? `+${item.value}` : String(item.value));
+    doc.setTextColor(60);
+    doc.text(
+      valueLabel,
+      barX + barWidth / 2,
+      item.value >= 0 ? barY - 1 : barY + barHeight + 5,
+      { align: 'center' }
+    );
+  });
+};
+
 /**
  * Export points table to CSV format
  */
@@ -414,15 +469,41 @@ export async function exportPointsTableToPDF(data: PointsTableExportData): Promi
   const chartLimit = Math.min(teams.length, 6);
 
   const pointsSeries = getTopSeries(teams, (t) => safeNumber(t.points, 0), chartLimit);
-  const winsSeries = getTopSeries(teams, (t) => safeNumber(t.wins, 0), chartLimit);
-  const qualificationSeries: ChartSeries[] = [
-    { label: 'Qualified', value: qualifiedTeams, valueLabel: String(qualifiedTeams) },
-    { label: 'Not Qual.', value: Math.max(totalTeams - qualifiedTeams, 0), valueLabel: String(Math.max(totalTeams - qualifiedTeams, 0)) }
-  ];
+  const winRateSeries = [...teams]
+    .map((team) => {
+      const played = safeNumber(team.matchesPlayed, 0);
+      const wins = safeNumber(team.wins, 0);
+      const winRate = played > 0 ? Math.round((wins / played) * 100) : 0;
+      const rawLabel = team.shortName || team.name || 'Team';
+      const label = rawLabel.length > 7 ? rawLabel.slice(0, 7) : rawLabel;
+      return { label, value: winRate, valueLabel: `${winRate}%` };
+    })
+    .sort((a, b) => b.value - a.value)
+    .slice(0, chartLimit);
+
+  const nrrSeries: ChartSeries[] = [...teams]
+    .map((team) => {
+      const nrr = safeNumber(team.netRunRate, 0);
+      const rawLabel = team.shortName || team.name || 'Team';
+      const label = rawLabel.length > 7 ? rawLabel.slice(0, 7) : rawLabel;
+      const valueLabel = nrr >= 0 ? `+${nrr.toFixed(2)}` : nrr.toFixed(2);
+      return { label, value: Number(nrr.toFixed(2)), valueLabel };
+    })
+    .sort((a, b) => b.value - a.value);
 
   drawBarChart(doc, marginX, cursorY, chartWidth, chartHeight, 'Top Points', pointsSeries, [37, 99, 235]);
-  drawBarChart(doc, marginX + chartWidth + chartGap, cursorY, chartWidth, chartHeight, 'Top Wins', winsSeries, [16, 185, 129]);
-  drawBarChart(doc, marginX + (chartWidth + chartGap) * 2, cursorY, chartWidth, chartHeight, 'Qualification Split', qualificationSeries, [234, 88, 12]);
+  drawBarChart(doc, marginX + chartWidth + chartGap, cursorY, chartWidth, chartHeight, 'Top Win %', winRateSeries, [16, 185, 129]);
+  drawDivergingBarChart(
+    doc,
+    marginX + (chartWidth + chartGap) * 2,
+    cursorY,
+    chartWidth,
+    chartHeight,
+    'Net Run Rate',
+    nrrSeries,
+    [59, 130, 246],
+    [239, 68, 68]
+  );
 
   cursorY += chartHeight + 8;
 
@@ -484,11 +565,11 @@ export async function exportPointsTableToPDF(data: PointsTableExportData): Promi
       7: { cellWidth: 25, halign: 'center' }, // NRR
       8: { cellWidth: 25, halign: 'center' }  // Qualified
     },
-    didDrawCell: (data: any) => {
-      // Highlight top 4 teams (playoff qualifiers)
+    didParseCell: (data: any) => {
       if (data.section === 'body' && data.row.index < 4) {
-        doc.setFillColor(255, 215, 0, 0.1); // Light gold background
-        doc.rect(data.cell.x, data.cell.y, data.cell.width, data.cell.height, 'F');
+        data.cell.styles.fillColor = [255, 247, 214]; // Soft gold
+        data.cell.styles.textColor = [30, 41, 59]; // Slate-800
+        data.cell.styles.fontStyle = 'bold';
       }
     }
   });
