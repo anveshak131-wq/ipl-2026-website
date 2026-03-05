@@ -1022,24 +1022,56 @@ export default function IPLAdminPointsTablePage() {
             right: '20px',
             zIndex: 999999999
           }}
-          className="w-56 rounded-2xl backdrop-blur-2xl border-2 border-white/20 bg-gradient-to-br from-slate-900/95 via-slate-800/90 to-slate-900/95 shadow-2xl overflow-hidden"
+          className="export-menu-container w-56 rounded-2xl backdrop-blur-2xl border-2 border-white/20 bg-gradient-to-br from-slate-900/95 via-slate-800/90 to-slate-900/95 shadow-2xl overflow-hidden"
         >
           <div className="p-2">
             <div className="px-3 py-2 text-xs font-bold uppercase tracking-wider text-gray-400 border-b border-white/10 mb-2">
               Export Format
             </div>
-            
+
             <button
-              onClick={() => {
-                console.log('CSV button clicked'); // Debug log
-                alert('CSV export clicked!'); // Test alert
-                handleExport('csv');
-              }}
+              onClick={() => handleExport('csv')}
               className="w-full px-3 py-2.5 rounded-xl text-left text-sm font-medium text-white hover:bg-amber-500/20 flex items-center gap-3 transition-all"
             >
               <FileText className="w-4 h-4 text-amber-400" />
               CSV Format
               <span className="ml-auto text-xs text-gray-400">.csv</span>
+            </button>
+
+            <button
+              onClick={() => handleExport('excel')}
+              className="w-full px-3 py-2.5 rounded-xl text-left text-sm font-medium text-white hover:bg-green-500/20 flex items-center gap-3 transition-all"
+            >
+              <Table className="w-4 h-4 text-green-400" />
+              Excel Format
+              <span className="ml-auto text-xs text-gray-400">.xlsx</span>
+            </button>
+
+            <button
+              onClick={() => handleExport('pdf')}
+              className="w-full px-3 py-2.5 rounded-xl text-left text-sm font-medium text-white hover:bg-red-500/20 flex items-center gap-3 transition-all"
+            >
+              <FileText className="w-4 h-4 text-red-400" />
+              PDF Format
+              <span className="ml-auto text-xs text-gray-400">.pdf</span>
+            </button>
+
+            <button
+              onClick={() => handleExport('database')}
+              className="w-full px-3 py-2.5 rounded-xl text-left text-sm font-medium text-white hover:bg-blue-500/20 flex items-center gap-3 transition-all"
+            >
+              <Database className="w-4 h-4 text-blue-400" />
+              Database Format
+              <span className="ml-auto text-xs text-gray-400">.json</span>
+            </button>
+
+            <button
+              onClick={() => handleExport('all')}
+              className="w-full px-3 py-2.5 rounded-xl text-left text-sm font-medium text-white hover:bg-purple-500/20 flex items-center gap-3 transition-all"
+            >
+              <Download className="w-4 h-4 text-purple-300" />
+              All Formats
+              <span className="ml-auto text-xs text-gray-400">multi</span>
             </button>
           </div>
         </div>
