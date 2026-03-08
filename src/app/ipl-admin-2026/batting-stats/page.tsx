@@ -551,86 +551,91 @@ const BattingStatsPage = () => {
 
   return (
     <>
-      <div className="flex-1 bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950 min-h-screen overflow-x-hidden">
+      <div className="flex-1 bg-gradient-to-br from-slate-950 via-indigo-950 to-slate-950 min-h-screen overflow-x-hidden relative">
+        {/* Animated background overlay */}
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-indigo-900/20 via-transparent to-purple-900/20 pointer-events-none animate-pulse" style={{ animationDuration: '8s' }}></div>
+        
         {/* Hero Header */}
-        <div className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 p-8 shadow-2xl">
-          <div className="max-w-7xl mx-auto">
+        <div className="relative bg-gradient-to-r from-cyan-600 via-blue-600 to-indigo-700 p-8 shadow-2xl overflow-hidden">
+          {/* Animated gradient overlay */}
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-shimmer"></div>
+          <div className="max-w-7xl mx-auto relative z-10">
             <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-              <div>
-                <h1 className="text-4xl lg:text-5xl font-bold text-white mb-2 flex items-center gap-3">
-                  <div className="w-12 h-12 bg-white/20 backdrop-blur rounded-xl flex items-center justify-center">
+              <div className="animate-in slide-in-from-left duration-700">
+                <h1 className="text-4xl lg:text-5xl font-bold text-white mb-2 flex items-center gap-3 group">
+                  <div className="w-12 h-12 bg-white/20 backdrop-blur rounded-xl flex items-center justify-center transform group-hover:rotate-12 group-hover:scale-110 transition-all duration-300 shadow-lg shadow-white/20">
                     <TrendingUp className="w-6 h-6 text-white" />
                   </div>
-                  Batting Statistics
+                  <span className="bg-gradient-to-r from-white via-cyan-100 to-white bg-clip-text text-transparent">Batting Statistics</span>
                 </h1>
-                <p className="text-blue-100 text-lg">Comprehensive batting performance analytics</p>
+                <p className="text-cyan-100 text-lg font-medium tracking-wide">Comprehensive batting performance analytics</p>
               </div>
-              <div className="flex flex-wrap gap-4">
-                <div className="bg-white/10 backdrop-blur rounded-xl p-4 text-center min-w-[120px]">
-                  <div className="text-3xl font-bold text-white">{summaryStats.activeBatsmen}</div>
-                  <div className="text-blue-100 text-sm mt-1">Active Batsmen</div>
+              <div className="flex flex-wrap gap-4 animate-in slide-in-from-right duration-700">
+                <div className="bg-white/10 backdrop-blur rounded-xl p-4 text-center min-w-[120px] border border-white/20 hover:bg-white/20 hover:scale-105 transition-all duration-300 cursor-pointer shadow-lg hover:shadow-2xl hover:shadow-cyan-500/50">
+                  <div className="text-3xl font-bold text-white animate-in zoom-in duration-500">{summaryStats.activeBatsmen}</div>
+                  <div className="text-cyan-100 text-sm mt-1 font-semibold">Active Batsmen</div>
                 </div>
-                <div className="bg-white/10 backdrop-blur rounded-xl p-4 text-center min-w-[120px]">
-                  <div className="text-3xl font-bold text-white">{teams.length}</div>
-                  <div className="text-blue-100 text-sm mt-1">Teams</div>
+                <div className="bg-white/10 backdrop-blur rounded-xl p-4 text-center min-w-[120px] border border-white/20 hover:bg-white/20 hover:scale-105 transition-all duration-300 cursor-pointer shadow-lg hover:shadow-2xl hover:shadow-indigo-500/50">
+                  <div className="text-3xl font-bold text-white animate-in zoom-in duration-500 delay-100">{teams.length}</div>
+                  <div className="text-cyan-100 text-sm mt-1 font-semibold">Teams</div>
                 </div>
               </div>
             </div>
           </div>
         </div>
 
-        <div className="max-w-7xl mx-auto p-6 lg:p-8">
+        <div className="max-w-7xl mx-auto p-6 lg:p-8 relative z-10">
           {/* Summary Cards */}
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 mb-8">
-            <div className="bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl p-5 shadow-lg border border-blue-500/30">
+            <div className="bg-gradient-to-br from-cyan-600 via-cyan-600 to-blue-700 rounded-2xl p-5 shadow-xl border border-cyan-400/30 hover:border-cyan-400/60 transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-cyan-500/50 cursor-pointer animate-in fade-in-50 slide-in-from-bottom-4 duration-500 group">
               <div className="flex items-center justify-between mb-2">
-                <Target className="w-5 h-5 text-blue-200" />
+                <Target className="w-5 h-5 text-cyan-100 group-hover:scale-110 transition-transform" />
               </div>
-              <div className="text-2xl font-bold text-white">{summaryStats.totalRuns.toLocaleString()}</div>
-              <div className="text-blue-100 text-xs mt-1">Total Runs</div>
+              <div className="text-2xl font-bold text-white group-hover:scale-105 transition-transform">{summaryStats.totalRuns.toLocaleString()}</div>
+              <div className="text-cyan-100 text-xs mt-1 font-semibold uppercase tracking-wider">Total Runs</div>
             </div>
-            <div className="bg-gradient-to-br from-purple-600 to-purple-700 rounded-xl p-5 shadow-lg border border-purple-500/30">
+            <div className="bg-gradient-to-br from-violet-600 via-purple-600 to-purple-700 rounded-2xl p-5 shadow-xl border border-violet-400/30 hover:border-violet-400/60 transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-violet-500/50 cursor-pointer animate-in fade-in-50 slide-in-from-bottom-4 duration-500 delay-75 group">
               <div className="flex items-center justify-between mb-2">
-                <Award className="w-5 h-5 text-purple-200" />
+                <Award className="w-5 h-5 text-violet-100 group-hover:scale-110 transition-transform" />
               </div>
-              <div className="text-2xl font-bold text-white">{summaryStats.highestScore}</div>
-              <div className="text-purple-100 text-xs mt-1">Highest Score</div>
+              <div className="text-2xl font-bold text-white group-hover:scale-105 transition-transform">{summaryStats.highestScore}</div>
+              <div className="text-violet-100 text-xs mt-1 font-semibold uppercase tracking-wider">Highest Score</div>
             </div>
-            <div className="bg-gradient-to-br from-pink-600 to-pink-700 rounded-xl p-5 shadow-lg border border-pink-500/30">
+            <div className="bg-gradient-to-br from-pink-600 via-rose-600 to-rose-700 rounded-2xl p-5 shadow-xl border border-pink-400/30 hover:border-pink-400/60 transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-pink-500/50 cursor-pointer animate-in fade-in-50 slide-in-from-bottom-4 duration-500 delay-150 group">
               <div className="flex items-center justify-between mb-2">
-                <Award className="w-5 h-5 text-pink-200" />
+                <Award className="w-5 h-5 text-pink-100 group-hover:scale-110 transition-transform" />
               </div>
-              <div className="text-2xl font-bold text-white">{summaryStats.totalHundreds}</div>
-              <div className="text-pink-100 text-xs mt-1">Centuries</div>
+              <div className="text-2xl font-bold text-white group-hover:scale-105 transition-transform">{summaryStats.totalHundreds}</div>
+              <div className="text-pink-100 text-xs mt-1 font-semibold uppercase tracking-wider">Centuries</div>
             </div>
-            <div className="bg-gradient-to-br from-orange-600 to-orange-700 rounded-xl p-5 shadow-lg border border-orange-500/30">
+            <div className="bg-gradient-to-br from-amber-600 via-orange-600 to-orange-700 rounded-2xl p-5 shadow-xl border border-amber-400/30 hover:border-amber-400/60 transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-orange-500/50 cursor-pointer animate-in fade-in-50 slide-in-from-bottom-4 duration-500 delay-200 group">
               <div className="flex items-center justify-between mb-2">
-                <Zap className="w-5 h-5 text-orange-200" />
+                <Zap className="w-5 h-5 text-amber-100 group-hover:scale-110 transition-transform" />
               </div>
-              <div className="text-2xl font-bold text-white">{summaryStats.totalFifties}</div>
-              <div className="text-orange-100 text-xs mt-1">Half Centuries</div>
+              <div className="text-2xl font-bold text-white group-hover:scale-105 transition-transform">{summaryStats.totalFifties}</div>
+              <div className="text-amber-100 text-xs mt-1 font-semibold uppercase tracking-wider">Half Centuries</div>
             </div>
-            <div className="bg-gradient-to-br from-cyan-600 to-cyan-700 rounded-xl p-5 shadow-lg border border-cyan-500/30">
+            <div className="bg-gradient-to-br from-emerald-600 via-teal-600 to-teal-700 rounded-2xl p-5 shadow-xl border border-emerald-400/30 hover:border-emerald-400/60 transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-emerald-500/50 cursor-pointer animate-in fade-in-50 slide-in-from-bottom-4 duration-500 delay-300 group">
               <div className="flex items-center justify-between mb-2">
-                <TrendingUp className="w-5 h-5 text-cyan-200" />
+                <TrendingUp className="w-5 h-5 text-emerald-100 group-hover:scale-110 transition-transform" />
               </div>
-              <div className="text-2xl font-bold text-white">{summaryStats.avgRuns}</div>
-              <div className="text-cyan-100 text-xs mt-1">Avg Runs/Player</div>
+              <div className="text-2xl font-bold text-white group-hover:scale-105 transition-transform">{summaryStats.avgRuns}</div>
+              <div className="text-emerald-100 text-xs mt-1 font-semibold uppercase tracking-wider">Avg Runs/Player</div>
             </div>
-            <div className="bg-gradient-to-br from-teal-600 to-teal-700 rounded-xl p-5 shadow-lg border border-teal-500/30">
+            <div className="bg-gradient-to-br from-sky-600 via-blue-600 to-indigo-700 rounded-2xl p-5 shadow-xl border border-sky-400/30 hover:border-sky-400/60 transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-sky-500/50 cursor-pointer animate-in fade-in-50 slide-in-from-bottom-4 duration-500 delay-[375ms] group">
               <div className="flex items-center justify-between mb-2">
-                <Target className="w-5 h-5 text-teal-200" />
+                <Target className="w-5 h-5 text-sky-100 group-hover:scale-110 transition-transform" />
               </div>
-              <div className="text-2xl font-bold text-white">{filteredAndSortedPlayers.length}</div>
-              <div className="text-teal-100 text-xs mt-1">Filtered Players</div>
+              <div className="text-2xl font-bold text-white group-hover:scale-105 transition-transform">{filteredAndSortedPlayers.length}</div>
+              <div className="text-sky-100 text-xs mt-1 font-semibold uppercase tracking-wider">Filtered Players</div>
             </div>
           </div>
 
           {/* Search and Filters */}
-          <div className="bg-gray-800/50 backdrop-blur rounded-xl p-6 mb-6 border border-gray-700/50">
+          <div className="bg-gradient-to-r from-gray-800/60 via-gray-800/40 to-gray-800/60 backdrop-blur-md rounded-2xl p-6 mb-6 border border-gray-700/50 shadow-xl hover:shadow-2xl transition-all duration-300 animate-in fade-in-50 slide-in-from-bottom-4 duration-700">
             <div className="flex flex-col md:flex-row gap-4">
-              <div className="flex-1 relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <div className="flex-1 relative group">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-cyan-400 transition-colors" />
                 <input
                   type="text"
                   id="search-players"
@@ -638,15 +643,15 @@ const BattingStatsPage = () => {
                   placeholder="Search players..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 bg-gray-900/50 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full pl-10 pr-4 py-2.5 bg-gray-900/60 border border-gray-700 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all hover:bg-gray-900/80"
                 />
               </div>
-              <div className="relative">
-                <Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <div className="relative group">
+                <Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-indigo-400 transition-colors" />
                 <select
                   value={selectedTeam}
                   onChange={(e) => setSelectedTeam(e.target.value)}
-                  className="pl-10 pr-8 py-2.5 bg-gray-900/50 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none cursor-pointer"
+                  className="pl-10 pr-8 py-2.5 bg-gray-900/60 border border-gray-700 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all appearance-none cursor-pointer hover:bg-gray-900/80"
                 >
                   <option value="all">All Teams</option>
                   {teams.map(team => (
@@ -654,13 +659,13 @@ const BattingStatsPage = () => {
                   ))}
                 </select>
               </div>
-              <div className="flex gap-2 bg-gray-900/50 rounded-lg p-1 border border-gray-700">
+              <div className="flex gap-2 bg-gray-900/60 rounded-xl p-1 border border-gray-700">
                 <button
                   onClick={() => setViewMode('table')}
                   className={`px-4 py-2 rounded-lg transition-all flex items-center gap-2 ${
                     viewMode === 'table'
-                      ? 'bg-blue-600 text-white shadow-lg'
-                      : 'text-gray-400 hover:text-white'
+                      ? 'bg-gradient-to-r from-cyan-600 to-blue-600 text-white shadow-lg scale-105'
+                      : 'text-gray-400 hover:text-white hover:bg-gray-800'
                   }`}
                 >
                   <Table2 className="w-4 h-4" />
@@ -670,8 +675,8 @@ const BattingStatsPage = () => {
                   onClick={() => setViewMode('teams')}
                   className={`px-4 py-2 rounded-lg transition-all flex items-center gap-2 ${
                     viewMode === 'teams'
-                      ? 'bg-blue-600 text-white shadow-lg'
-                      : 'text-gray-400 hover:text-white'
+                      ? 'bg-gradient-to-r from-cyan-600 to-blue-600 text-white shadow-lg scale-105'
+                      : 'text-gray-400 hover:text-white hover:bg-gray-800'
                   }`}
                 >
                   <LayoutGrid className="w-4 h-4" />
@@ -683,18 +688,18 @@ const BattingStatsPage = () => {
 
           {/* Players Table or Team Panels */}
           {filteredAndSortedPlayers.length === 0 ? (
-            <div className="bg-gray-800/30 backdrop-blur rounded-2xl p-16 text-center border border-gray-700/50">
-              <div className="w-20 h-20 bg-gray-700/50 rounded-full flex items-center justify-center mx-auto mb-6">
-                <Search className="w-10 h-10 text-gray-500" />
+            <div className="bg-gradient-to-br from-gray-800/40 via-gray-800/30 to-gray-800/40 backdrop-blur-md rounded-3xl p-16 text-center border border-gray-700/50 shadow-xl animate-in fade-in-50 zoom-in-95 duration-500">
+              <div className="w-20 h-20 bg-gradient-to-br from-gray-700/60 to-gray-600/60 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
+                <Search className="w-10 h-10 text-gray-400" />
               </div>
               <h3 className="text-2xl font-bold text-white mb-3">No Players Found</h3>
               <p className="text-gray-400 text-lg mb-6">Try adjusting your search or filter criteria</p>
             </div>
           ) : viewMode === 'table' ? (
-            <div className="bg-gray-800/30 backdrop-blur rounded-2xl border border-gray-700/50 overflow-hidden shadow-xl">
+            <div className="bg-gradient-to-br from-gray-800/40 via-gray-800/30 to-gray-800/40 backdrop-blur-md rounded-2xl border border-gray-700/50 overflow-hidden shadow-2xl animate-in fade-in-50 slide-in-from-bottom-8 duration-700">
               <div className="overflow-x-auto">
                 <table className="w-full">
-                  <thead className="bg-gray-900/50 border-b border-gray-700">
+                  <thead className="bg-gradient-to-r from-gray-900/80 via-gray-900/60 to-gray-900/80 border-b border-gray-700">
                     <tr>
                       <th className="px-6 py-4 text-left">
                         <button
@@ -772,24 +777,24 @@ const BattingStatsPage = () => {
                       const runsPercentage = (runs / maxRuns) * 100;
 
                       return (
-                        <tr key={player.id} className="hover:bg-gray-800/50 transition-colors group">
+                        <tr key={player.id} className="hover:bg-gradient-to-r hover:from-gray-800/60 hover:via-gray-800/40 hover:to-gray-800/60 transition-all duration-300 group border-l-4 border-transparent hover:border-l-cyan-500 hover:shadow-lg">
                           <td className="px-6 py-4">
                             <div className="flex items-center gap-3">
-                              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center text-white font-bold text-sm">
+                              <div className="w-10 h-10 bg-gradient-to-br from-cyan-500 via-blue-600 to-indigo-600 rounded-xl flex items-center justify-center text-white font-bold text-sm shadow-lg group-hover:scale-110 group-hover:rotate-6 transition-all duration-300">
                                 {player.name?.charAt(0) || '?'}
                   </div>
                   <div>
-                                <div className="font-semibold text-white">{player.name || 'Unknown'}</div>
-                                <div className="text-sm text-gray-400">{team?.shortName || 'No Team'}</div>
+                                <div className="font-semibold text-white group-hover:text-cyan-300 transition-colors">{player.name || 'Unknown'}</div>
+                                <div className="text-sm text-gray-400 group-hover:text-gray-300 transition-colors">{team?.shortName || 'No Team'}</div>
                               </div>
                             </div>
                           </td>
                           <td className="px-6 py-4">
                             <div className="flex items-center gap-2">
-                              <span className="font-bold text-white">{runs.toLocaleString()}</span>
-                              <div className="w-16 h-1.5 bg-gray-700 rounded-full overflow-hidden">
+                              <span className="font-bold text-white group-hover:text-cyan-300 transition-colors">{runs.toLocaleString()}</span>
+                              <div className="w-16 h-2 bg-gray-700/50 rounded-full overflow-hidden shadow-inner">
                                 <div 
-                                  className="h-full bg-gradient-to-r from-blue-500 to-purple-500 transition-all"
+                                  className="h-full bg-gradient-to-r from-cyan-500 via-blue-500 to-indigo-500 transition-all duration-700 shadow-lg shadow-cyan-500/50"
                                   style={{ width: `${runsPercentage}%` }}
                                 />
                   </div>
@@ -859,7 +864,7 @@ const BattingStatsPage = () => {
                           <td className="px-6 py-4">
                 <button
                               onClick={() => handleEditPlayer(player)}
-                              className="mx-auto flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors text-sm font-medium"
+                              className="mx-auto flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white rounded-xl transition-all duration-300 text-sm font-medium shadow-lg hover:shadow-xl hover:scale-105 group-hover:shadow-cyan-500/50"
                             >
                               <Edit2 className="w-4 h-4" />
                               Edit
@@ -880,40 +885,41 @@ const BattingStatsPage = () => {
                   const teamPlayers = filteredAndSortedPlayers.filter(p => p.teamId === team.id);
                   return teamPlayers.length > 0;
                 })
-                .map(team => {
+                .map((team, teamIndex) => {
                   const teamPlayers = filteredAndSortedPlayers.filter(p => p.teamId === team.id);
                   const teamRuns = teamPlayers.reduce((sum, p) => sum + (p.stats?.runs || 0), 0);
                   const teamHundreds = teamPlayers.reduce((sum, p) => sum + (p.stats?.hundreds || 0), 0);
                   const teamFifties = teamPlayers.reduce((sum, p) => sum + (p.stats?.fifties || 0), 0);
 
                   return (
-                    <div key={team.id} className="bg-gray-800/30 backdrop-blur rounded-2xl border border-gray-700/50 overflow-hidden shadow-xl">
+                    <div key={team.id} className="bg-gradient-to-br from-gray-800/50 via-gray-800/30 to-gray-800/50 backdrop-blur-md rounded-3xl border border-gray-700/50 overflow-hidden shadow-2xl hover:shadow-cyan-500/20 transition-all duration-500 animate-in fade-in-50 slide-in-from-bottom-8" style={{ animationDelay: `${teamIndex * 100}ms` }}>
                       {/* Team Header */}
-                      <div className="bg-gradient-to-r from-blue-600/20 via-purple-600/20 to-pink-600/20 p-6 border-b border-gray-700/50">
-                        <div className="flex items-center justify-between">
+                      <div className="bg-gradient-to-r from-cyan-600/20 via-blue-600/20 to-indigo-600/20 p-6 border-b border-gray-700/50 relative overflow-hidden group">
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
+                        <div className="flex items-center justify-between relative z-10">
                           <div className="flex items-center gap-4">
-                            <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg">
+                            <div className="w-16 h-16 bg-gradient-to-br from-cyan-500 via-blue-600 to-indigo-600 rounded-2xl flex items-center justify-center text-white font-bold text-xl shadow-xl group-hover:scale-110 group-hover:rotate-6 transition-all duration-300">
                               {team.shortName || team.name.charAt(0)}
                             </div>
                             <div>
-                              <h2 className="text-2xl font-bold text-white">{team.name}</h2>
+                              <h2 className="text-2xl font-bold text-white group-hover:text-cyan-300 transition-colors">{team.name}</h2>
                               <p className="text-gray-400 text-sm mt-1">
                                 {teamPlayers.length} players • {teamPlayers.filter(p => p.stats?.battingInnings > 0).length} active batsmen
                               </p>
                             </div>
                           </div>
                           <div className="flex gap-4">
-                            <div className="text-center">
+                            <div className="text-center bg-white/5 backdrop-blur rounded-xl px-4 py-2 border border-white/10 hover:bg-white/10 transition-all">
                               <div className="text-2xl font-bold text-white">{teamRuns.toLocaleString()}</div>
-                              <div className="text-gray-400 text-xs">Total Runs</div>
+                              <div className="text-gray-400 text-xs font-semibold">Total Runs</div>
                             </div>
-                            <div className="text-center">
+                            <div className="text-center bg-white/5 backdrop-blur rounded-xl px-4 py-2 border border-white/10 hover:bg-white/10 transition-all">
                               <div className="text-2xl font-bold text-pink-400">{teamHundreds}</div>
-                              <div className="text-gray-400 text-xs">100s</div>
+                              <div className="text-gray-400 text-xs font-semibold">100s</div>
                             </div>
-                            <div className="text-center">
+                            <div className="text-center bg-white/5 backdrop-blur rounded-xl px-4 py-2 border border-white/10 hover:bg-white/10 transition-all">
                               <div className="text-2xl font-bold text-orange-400">{teamFifties}</div>
-                              <div className="text-gray-400 text-xs">50s</div>
+                              <div className="text-gray-400 text-xs font-semibold">50s</div>
                             </div>
                           </div>
                         </div>
@@ -922,7 +928,7 @@ const BattingStatsPage = () => {
                       {/* Team Players Grid */}
                       <div className="p-6">
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                          {teamPlayers.map((player) => {
+                          {teamPlayers.map((player, playerIndex) => {
                             const runs = player.stats?.runs || 0;
                             const maxRuns = Math.max(...teamPlayers.map(p => p.stats?.runs || 0), 1);
                             const runsPercentage = (runs / maxRuns) * 100;
@@ -930,32 +936,33 @@ const BattingStatsPage = () => {
                             return (
                               <div
                                 key={player.id}
-                                className="bg-gradient-to-br from-gray-700/50 to-gray-800/50 rounded-xl p-5 border border-gray-600/50 hover:border-blue-500/50 transition-all hover:shadow-lg group"
+                                className="bg-gradient-to-br from-gray-700/60 via-gray-800/60 to-gray-800/60 rounded-2xl p-5 border border-gray-600/50 hover:border-cyan-500/60 transition-all duration-300 hover:shadow-xl hover:shadow-cyan-500/30 group hover:scale-105 cursor-pointer animate-in fade-in-50 zoom-in-95"
+                                style={{ animationDelay: `${playerIndex * 50}ms` }}
                               >
                                 <div className="flex items-center gap-3 mb-4">
-                                  <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center text-white font-bold text-sm">
+                                  <div className="w-12 h-12 bg-gradient-to-br from-cyan-500 via-blue-600 to-indigo-600 rounded-xl flex items-center justify-center text-white font-bold text-sm shadow-lg group-hover:scale-110 group-hover:rotate-6 transition-all duration-300">
                                     {player.name?.charAt(0) || '?'}
                                   </div>
                                   <div className="flex-1 min-w-0">
-                                    <div className="font-semibold text-white truncate">{player.name || 'Unknown'}</div>
-                                    <div className="text-xs text-gray-400">{player.role}</div>
+                                    <div className="font-semibold text-white truncate group-hover:text-cyan-300 transition-colors">{player.name || 'Unknown'}</div>
+                                    <div className="text-xs text-gray-400 group-hover:text-gray-300 transition-colors">{player.role}</div>
                                   </div>
                                 </div>
 
                                 <div className="space-y-2 mb-4">
                                   <div className="flex items-center justify-between">
-                                    <span className="text-gray-400 text-sm">Runs</span>
-                                    <span className="font-bold text-white">{runs.toLocaleString()}</span>
+                                    <span className="text-gray-400 text-sm font-medium">Runs</span>
+                                    <span className="font-bold text-white group-hover:text-cyan-300 transition-colors">{runs.toLocaleString()}</span>
                                   </div>
-                                  <div className="w-full h-1.5 bg-gray-700 rounded-full overflow-hidden">
+                                  <div className="w-full h-2 bg-gray-900/60 rounded-full overflow-hidden shadow-inner">
                                     <div
-                                      className="h-full bg-gradient-to-r from-blue-500 to-purple-500 transition-all"
+                                      className="h-full bg-gradient-to-r from-cyan-500 via-blue-500 to-indigo-500 transition-all duration-700 shadow-lg shadow-cyan-500/50"
                                       style={{ width: `${runsPercentage}%` }}
                                     />
                                   </div>
                                   <div className="grid grid-cols-2 gap-2 mt-3">
-                                    <div className="bg-gray-900/50 rounded-lg p-2 text-center">
-                                      <div className="text-blue-400 font-semibold">
+                                    <div className="bg-gray-900/60 rounded-xl p-2 text-center border border-cyan-500/20 hover:border-cyan-500/50 transition-all">
+                                      <div className="text-cyan-400 font-semibold">
                                         {(() => {
                                           if (player.stats?.battingAverage && player.stats.battingAverage !== '0' && player.stats.battingAverage !== '-') {
                                             return player.stats.battingAverage;
@@ -973,10 +980,10 @@ const BattingStatsPage = () => {
                                           return '-';
                                         })()}
                                       </div>
-                                      <div className="text-xs text-gray-400">Avg</div>
+                                      <div className="text-xs text-gray-400 font-semibold">Avg</div>
                                     </div>
-                                    <div className="bg-gray-900/50 rounded-lg p-2 text-center">
-                                      <div className="text-purple-400 font-semibold">
+                                    <div className="bg-gray-900/60 rounded-xl p-2 text-center border border-indigo-500/20 hover:border-indigo-500/50 transition-all">
+                                      <div className="text-indigo-400 font-semibold">
                                         {(() => {
                                           if (player.stats?.battingStrikeRate && player.stats.battingStrikeRate !== '0' && player.stats.battingStrikeRate !== '-') {
                                             return player.stats.battingStrikeRate;
@@ -992,10 +999,10 @@ const BattingStatsPage = () => {
                                           return '-';
                                         })()}
                                       </div>
-                                      <div className="text-xs text-gray-400">SR</div>
+                                      <div className="text-xs text-gray-400 font-semibold">SR</div>
                                     </div>
                                   </div>
-                                  <div className="flex items-center justify-between text-xs text-gray-400 mt-2">
+                                  <div className="flex items-center justify-between text-xs text-gray-400 mt-2 font-medium">
                                     <span>HS: {player.stats?.highest || '-'}</span>
                                     <span>{player.stats?.hundreds || 0}💯 / {player.stats?.fifties || 0} 50</span>
                                   </div>
@@ -1003,7 +1010,7 @@ const BattingStatsPage = () => {
 
                                 <button
                                   onClick={() => handleEditPlayer(player)}
-                                  className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-4 py-2 rounded-lg font-medium transition-all text-sm flex items-center justify-center gap-2 group-hover:scale-105"
+                                  className="w-full bg-gradient-to-r from-cyan-600 via-blue-600 to-indigo-600 hover:from-cyan-500 hover:via-blue-500 hover:to-indigo-500 text-white px-4 py-2 rounded-xl font-medium transition-all duration-300 text-sm flex items-center justify-center gap-2 group-hover:scale-105 shadow-lg hover:shadow-xl hover:shadow-cyan-500/50"
                                 >
                                   <Edit2 className="w-4 h-4" />
                                   Edit Stats
@@ -1022,23 +1029,24 @@ const BattingStatsPage = () => {
 
         {/* Edit Modal */}
         {showEditModal && (
-          <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center z-[9999] p-4 animate-in fade-in duration-200">
-            <div className="bg-gradient-to-br from-gray-800 via-gray-900 to-gray-800 rounded-3xl shadow-2xl w-full max-w-5xl max-h-[95vh] overflow-hidden border border-gray-700/50 animate-in zoom-in-95 duration-200">
+          <div className="fixed inset-0 bg-black/80 backdrop-blur-lg flex items-center justify-center z-[9999] p-4 animate-in fade-in duration-300">
+            <div className="bg-gradient-to-br from-gray-800 via-gray-900 to-gray-800 rounded-3xl shadow-2xl w-full max-w-5xl max-h-[95vh] overflow-hidden border border-gray-700/50 animate-in zoom-in-95 duration-300">
               {/* Header */}
-              <div className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 p-6 border-b border-gray-700/50">
-                <div className="flex items-center justify-between">
+              <div className="bg-gradient-to-r from-cyan-600 via-blue-600 to-indigo-700 p-6 border-b border-gray-700/50 relative overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-shimmer"></div>
+                <div className="flex items-center justify-between relative z-10">
                   <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-white/20 backdrop-blur rounded-xl flex items-center justify-center">
+                    <div className="w-12 h-12 bg-white/20 backdrop-blur rounded-xl flex items-center justify-center shadow-lg">
                       <Edit2 className="w-6 h-6 text-white" />
                     </div>
                     <div>
                       <h2 className="text-2xl font-bold text-white">Edit Batting Statistics</h2>
-                      <p className="text-blue-100 text-sm mt-0.5">{editForm.name || 'Player'}</p>
+                      <p className="text-cyan-100 text-sm mt-0.5 font-medium">{editForm.name || 'Player'}</p>
                     </div>
                   </div>
                   <button
                     onClick={handleCancelEdit}
-                    className="text-white hover:text-gray-200 transition-all bg-white/10 hover:bg-white/20 rounded-xl w-10 h-10 flex items-center justify-center hover:scale-110"
+                    className="text-white hover:text-gray-200 transition-all bg-white/10 hover:bg-white/20 rounded-xl w-10 h-10 flex items-center justify-center hover:scale-110 hover:rotate-90 duration-300"
                   >
                     <X className="w-5 h-5" />
                   </button>
@@ -1047,18 +1055,18 @@ const BattingStatsPage = () => {
 
               <div className="overflow-y-auto max-h-[calc(95vh-180px)]">
                 {/* Player Info Section */}
-                <div className="p-6 bg-gradient-to-r from-gray-800/50 to-gray-900/50 border-b border-gray-700/50">
+                <div className="p-6 bg-gradient-to-r from-gray-800/60 via-gray-900/60 to-gray-800/60 border-b border-gray-700/50">
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     {/* Player Name - Read-only with premium design */}
                     <div className="relative group">
                       <label className="flex items-center gap-2 text-xs font-semibold text-gray-400 mb-2 uppercase tracking-wide">
-                        <User className="w-3.5 h-3.5 text-blue-400" />
+                        <User className="w-3.5 h-3.5 text-cyan-400" />
                         Player Name
                       </label>
-                      <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-gray-800/90 to-gray-900/90 border border-blue-500/30 shadow-lg">
+                      <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-gray-800/90 to-gray-900/90 border border-cyan-500/30 shadow-lg hover:shadow-cyan-500/20 transition-all">
                         <div className="flex items-center gap-3 px-4 py-3.5">
-                          <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500/20 to-purple-600/20 border border-blue-500/30 flex items-center justify-center">
-                            <User className="w-5 h-5 text-blue-400" />
+                          <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-gradient-to-br from-cyan-500/20 to-blue-600/20 border border-cyan-500/30 flex items-center justify-center">
+                            <User className="w-5 h-5 text-cyan-400" />
                           </div>
                           <div className="flex-1 min-w-0">
                             <div className="text-white font-semibold text-base truncate">
@@ -1067,47 +1075,47 @@ const BattingStatsPage = () => {
                             <div className="text-xs text-gray-400 mt-0.5">Read-only</div>
                           </div>
                           <div className="flex-shrink-0">
-                            <div className="w-2 h-2 rounded-full bg-blue-500/50 animate-pulse"></div>
+                            <div className="w-2 h-2 rounded-full bg-cyan-500/50 animate-pulse"></div>
                           </div>
                         </div>
-                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-blue-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-cyan-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
                       </div>
                     </div>
 
                     {/* Role - Read-only with badge design */}
                     <div className="relative group">
                       <label className="flex items-center gap-2 text-xs font-semibold text-gray-400 mb-2 uppercase tracking-wide">
-                        <Activity className="w-3.5 h-3.5 text-purple-400" />
+                        <Activity className="w-3.5 h-3.5 text-violet-400" />
                         Role
                       </label>
-                      <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-gray-800/90 to-gray-900/90 border border-purple-500/30 shadow-lg">
+                      <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-gray-800/90 to-gray-900/90 border border-violet-500/30 shadow-lg hover:shadow-violet-500/20 transition-all">
                         <div className="flex items-center gap-3 px-4 py-3.5">
-                          <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-gradient-to-br from-purple-500/20 to-pink-600/20 border border-purple-500/30 flex items-center justify-center">
-                            <Activity className="w-5 h-5 text-purple-400" />
+                          <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-gradient-to-br from-violet-500/20 to-purple-600/20 border border-violet-500/30 flex items-center justify-center">
+                            <Activity className="w-5 h-5 text-violet-400" />
                           </div>
                           <div className="flex-1 min-w-0">
                             <div className="inline-flex items-center gap-2">
-                              <span className="px-3 py-1 rounded-lg bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-500/40 text-purple-200 font-semibold text-sm">
+                              <span className="px-3 py-1 rounded-lg bg-gradient-to-r from-violet-500/20 to-purple-500/20 border border-violet-500/40 text-violet-200 font-semibold text-sm">
                                 {editForm.role || editingPlayer?.role || 'N/A'}
                               </span>
                             </div>
                             <div className="text-xs text-gray-400 mt-1.5">Read-only</div>
                           </div>
                         </div>
-                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-purple-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-violet-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
                       </div>
                     </div>
 
                     {/* Jersey Number - Read-only with premium design */}
                     <div className="relative group">
                       <label className="flex items-center gap-2 text-xs font-semibold text-gray-400 mb-2 uppercase tracking-wide">
-                        <Shirt className="w-3.5 h-3.5 text-pink-400" />
+                        <Shirt className="w-3.5 h-3.5 text-rose-400" />
                         Jersey Number
                       </label>
-                      <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-gray-800/90 to-gray-900/90 border border-pink-500/30 shadow-lg">
+                      <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-gray-800/90 to-gray-900/90 border border-rose-500/30 shadow-lg hover:shadow-rose-500/20 transition-all">
                         <div className="flex items-center gap-3 px-4 py-3.5">
-                          <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-gradient-to-br from-pink-500/20 to-rose-600/20 border border-pink-500/30 flex items-center justify-center">
-                            <Hash className="w-5 h-5 text-pink-400" />
+                          <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-gradient-to-br from-rose-500/20 to-pink-600/20 border border-rose-500/30 flex items-center justify-center">
+                            <Hash className="w-5 h-5 text-rose-400" />
                           </div>
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2">
@@ -1121,7 +1129,7 @@ const BattingStatsPage = () => {
                             <div className="text-xs text-gray-400 mt-0.5">Read-only</div>
                           </div>
                         </div>
-                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-pink-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-rose-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
                       </div>
                     </div>
                   </div>
@@ -1131,15 +1139,15 @@ const BattingStatsPage = () => {
                 <div className="p-6">
                   <div className="mb-6">
                     <h3 className="text-lg font-bold text-white mb-1 flex items-center gap-2">
-                      <BarChart3 className="w-5 h-5 text-blue-400" />
+                      <BarChart3 className="w-5 h-5 text-cyan-400" />
                       Match Statistics
                     </h3>
                     <p className="text-gray-400 text-sm">Basic match and innings information</p>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
-                    <div className="relative">
+                    <div className="relative group">
                       <label className="flex items-center gap-2 text-sm font-medium text-gray-300 mb-2">
-                        <Calendar className="w-4 h-4 text-blue-400" />
+                        <Calendar className="w-4 h-4 text-cyan-400" />
                         Matches
                       </label>
                 <input
@@ -1148,13 +1156,13 @@ const BattingStatsPage = () => {
                   name="statsMatches"
                   value={editForm.stats.matches}
                   onChange={(e) => handleFormChange('stats.matches', e.target.value === '' ? '' : parseInt(e.target.value) || '')}
-                        className="w-full px-4 py-2.5 bg-gray-700/70 border border-gray-600/50 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                        className="w-full px-4 py-2.5 bg-gray-700/70 border border-gray-600/50 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all hover:bg-gray-700/90 hover:border-cyan-500/30"
                         placeholder="Matches"
                 />
               </div>
-                    <div className="relative">
+                    <div className="relative group">
                       <label className="flex items-center gap-2 text-sm font-medium text-gray-300 mb-2">
-                        <TargetIcon className="w-4 h-4 text-purple-400" />
+                        <TargetIcon className="w-4 h-4 text-indigo-400" />
                         Batting Innings
                       </label>
                 <input
@@ -1163,13 +1171,13 @@ const BattingStatsPage = () => {
                   name="statsBattingInnings"
                   value={editForm.stats.battingInnings}
                   onChange={(e) => handleFormChange('stats.battingInnings', e.target.value === '' ? '' : parseInt(e.target.value) || '')}
-                        className="w-full px-4 py-2.5 bg-gray-700/70 border border-gray-600/50 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                        className="w-full px-4 py-2.5 bg-gray-700/70 border border-gray-600/50 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all hover:bg-gray-700/90 hover:border-indigo-500/30"
                         placeholder="Batting Innings"
                 />
               </div>
-                    <div className="relative">
+                    <div className="relative group">
                       <label className="flex items-center gap-2 text-sm font-medium text-gray-300 mb-2">
-                        <ZapIcon className="w-4 h-4 text-pink-400" />
+                        <ZapIcon className="w-4 h-4 text-violet-400" />
                         Not Outs
                       </label>
                 <input
@@ -1178,7 +1186,7 @@ const BattingStatsPage = () => {
                   name="statsNotOuts"
                   value={editForm.stats.notOuts}
                   onChange={(e) => handleFormChange('stats.notOuts', e.target.value === '' ? '' : parseInt(e.target.value) || '')}
-                        className="w-full px-4 py-2.5 bg-gray-700/70 border border-gray-600/50 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                        className="w-full px-4 py-2.5 bg-gray-700/70 border border-gray-600/50 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500 transition-all hover:bg-gray-700/90 hover:border-violet-500/30"
                         placeholder="Not Outs"
                 />
                     </div>
@@ -1186,14 +1194,14 @@ const BattingStatsPage = () => {
               
                   <div className="mb-6">
                     <h3 className="text-lg font-bold text-white mb-1 flex items-center gap-2">
-                      <TrendingUp className="w-5 h-5 text-green-400" />
+                      <TrendingUp className="w-5 h-5 text-emerald-400" />
                       Batting Performance
                     </h3>
                     <p className="text-gray-400 text-sm">Runs, boundaries, and scoring statistics</p>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
-                    <div className="relative bg-gradient-to-br from-blue-500/10 to-blue-600/5 p-4 rounded-xl border border-blue-500/20">
-                      <label className="flex items-center gap-2 text-sm font-semibold text-blue-300 mb-2">
+                    <div className="relative bg-gradient-to-br from-cyan-500/10 to-cyan-600/5 p-4 rounded-xl border border-cyan-500/20 hover:border-cyan-500/40 transition-all group">
+                      <label className="flex items-center gap-2 text-sm font-semibold text-cyan-300 mb-2">
                         <TargetIcon className="w-4 h-4" />
                         Runs
                       </label>
@@ -1203,12 +1211,12 @@ const BattingStatsPage = () => {
                   name="statsRuns"
                   value={editForm.stats.runs}
                   onChange={(e) => handleFormChange('stats.runs', e.target.value === '' ? '' : parseInt(e.target.value) || '')}
-                        className="w-full px-4 py-2.5 bg-gray-700/70 border border-blue-500/30 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                        className="w-full px-4 py-2.5 bg-gray-700/70 border border-cyan-500/30 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all hover:bg-gray-700/90"
                         placeholder="Runs"
                       />
                     </div>
-                    <div className="relative bg-gradient-to-br from-purple-500/10 to-purple-600/5 p-4 rounded-xl border border-purple-500/20">
-                      <label className="flex items-center gap-2 text-sm font-semibold text-purple-300 mb-2">
+                    <div className="relative bg-gradient-to-br from-indigo-500/10 to-indigo-600/5 p-4 rounded-xl border border-indigo-500/20 hover:border-indigo-500/40 transition-all group">
+                      <label className="flex items-center gap-2 text-sm font-semibold text-indigo-300 mb-2">
                         <TargetIcon className="w-4 h-4" />
                         Highest Score
                       </label>
@@ -1218,12 +1226,12 @@ const BattingStatsPage = () => {
                         name="statsHighest"
                         value={editForm.stats.highest}
                         onChange={(e) => handleFormChange('stats.highest', e.target.value === '' ? '' : parseInt(e.target.value) || '')}
-                        className="w-full px-4 py-2.5 bg-gray-700/70 border border-purple-500/30 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all"
+                        className="w-full px-4 py-2.5 bg-gray-700/70 border border-indigo-500/30 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all hover:bg-gray-700/90"
                         placeholder="Highest Score"
                 />
               </div>
-                    <div className="relative bg-gradient-to-br from-pink-500/10 to-pink-600/5 p-4 rounded-xl border border-pink-500/20">
-                      <label className="flex items-center gap-2 text-sm font-semibold text-pink-300 mb-2">
+                    <div className="relative bg-gradient-to-br from-violet-500/10 to-violet-600/5 p-4 rounded-xl border border-violet-500/20 hover:border-violet-500/40 transition-all group">
+                      <label className="flex items-center gap-2 text-sm font-semibold text-violet-300 mb-2">
                         <ZapIcon className="w-4 h-4" />
                         Balls Faced
                       </label>
@@ -1233,13 +1241,13 @@ const BattingStatsPage = () => {
                   name="statsBallsFaced"
                   value={editForm.stats.ballsFaced}
                   onChange={(e) => handleFormChange('stats.ballsFaced', e.target.value === '' ? '' : parseInt(e.target.value) || '')}
-                        className="w-full px-4 py-2.5 bg-gray-700/70 border border-pink-500/30 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition-all"
+                        className="w-full px-4 py-2.5 bg-gray-700/70 border border-violet-500/30 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500 transition-all hover:bg-gray-700/90"
                         placeholder="Balls Faced"
                 />
               </div>
-                    <div className="relative">
+                    <div className="relative group">
                       <label className="flex items-center gap-2 text-sm font-medium text-gray-300 mb-2">
-                        <Hash className="w-4 h-4 text-blue-400" />
+                        <Hash className="w-4 h-4 text-cyan-400" />
                         Fours
                       </label>
                 <input
@@ -1248,13 +1256,13 @@ const BattingStatsPage = () => {
                   name="statsFours"
                   value={editForm.stats.fours}
                   onChange={(e) => handleFormChange('stats.fours', e.target.value === '' ? '' : parseInt(e.target.value) || '')}
-                        className="w-full px-4 py-2.5 bg-gray-700/70 border border-gray-600/50 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                        className="w-full px-4 py-2.5 bg-gray-700/70 border border-gray-600/50 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all hover:bg-gray-700/90 hover:border-cyan-500/30"
                         placeholder="Fours"
                 />
               </div>
-                    <div className="relative">
+                    <div className="relative group">
                       <label className="flex items-center gap-2 text-sm font-medium text-gray-300 mb-2">
-                        <ZapIcon className="w-4 h-4 text-yellow-400" />
+                        <ZapIcon className="w-4 h-4 text-amber-400" />
                         Sixes
                       </label>
                 <input
@@ -1263,7 +1271,7 @@ const BattingStatsPage = () => {
                   name="statsSixes"
                   value={editForm.stats.sixes}
                   onChange={(e) => handleFormChange('stats.sixes', e.target.value === '' ? '' : parseInt(e.target.value) || '')}
-                        className="w-full px-4 py-2.5 bg-gray-700/70 border border-gray-600/50 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-all"
+                        className="w-full px-4 py-2.5 bg-gray-700/70 border border-gray-600/50 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all hover:bg-gray-700/90 hover:border-amber-500/30"
                         placeholder="Sixes"
                 />
                     </div>
@@ -1271,14 +1279,14 @@ const BattingStatsPage = () => {
               
                   <div className="mb-6">
                     <h3 className="text-lg font-bold text-white mb-1 flex items-center gap-2">
-                      <AwardIcon className="w-5 h-5 text-yellow-400" />
+                      <AwardIcon className="w-5 h-5 text-amber-400" />
                       Milestones & Averages
                     </h3>
                     <p className="text-gray-400 text-sm">Half-centuries, centuries, and calculated averages</p>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    <div className="relative bg-gradient-to-br from-orange-500/10 to-orange-600/5 p-4 rounded-xl border border-orange-500/20">
-                      <label className="flex items-center gap-2 text-sm font-semibold text-orange-300 mb-2">
+                    <div className="relative bg-gradient-to-br from-amber-500/10 to-amber-600/5 p-4 rounded-xl border border-amber-500/20 hover:border-amber-500/40 transition-all group">
+                      <label className="flex items-center gap-2 text-sm font-semibold text-amber-300 mb-2">
                         <AwardIcon className="w-4 h-4" />
                         Fifties
                       </label>
@@ -1288,12 +1296,12 @@ const BattingStatsPage = () => {
                   name="statsFifties"
                   value={editForm.stats.fifties}
                   onChange={(e) => handleFormChange('stats.fifties', e.target.value === '' ? '' : parseInt(e.target.value) || '')}
-                        className="w-full px-4 py-2.5 bg-gray-700/70 border border-orange-500/30 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all"
+                        className="w-full px-4 py-2.5 bg-gray-700/70 border border-amber-500/30 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all hover:bg-gray-700/90"
                         placeholder="Fifties"
                 />
               </div>
-                    <div className="relative bg-gradient-to-br from-pink-500/10 to-pink-600/5 p-4 rounded-xl border border-pink-500/20">
-                      <label className="flex items-center gap-2 text-sm font-semibold text-pink-300 mb-2">
+                    <div className="relative bg-gradient-to-br from-rose-500/10 to-rose-600/5 p-4 rounded-xl border border-rose-500/20 hover:border-rose-500/40 transition-all group">
+                      <label className="flex items-center gap-2 text-sm font-semibold text-rose-300 mb-2">
                         <AwardIcon className="w-4 h-4" />
                         Hundreds
                       </label>
@@ -1303,12 +1311,12 @@ const BattingStatsPage = () => {
                   name="statsHundreds"
                   value={editForm.stats.hundreds}
                   onChange={(e) => handleFormChange('stats.hundreds', e.target.value === '' ? '' : parseInt(e.target.value) || '')}
-                        className="w-full px-4 py-2.5 bg-gray-700/70 border border-pink-500/30 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition-all"
+                        className="w-full px-4 py-2.5 bg-gray-700/70 border border-rose-500/30 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-rose-500 transition-all hover:bg-gray-700/90"
                         placeholder="Hundreds"
                 />
               </div>
-                    <div className="relative bg-gradient-to-br from-cyan-500/10 to-cyan-600/5 p-4 rounded-xl border border-cyan-500/20">
-                      <label className="flex items-center gap-2 text-sm font-semibold text-cyan-300 mb-2">
+                    <div className="relative bg-gradient-to-br from-emerald-500/10 to-emerald-600/5 p-4 rounded-xl border border-emerald-500/20 hover:border-emerald-500/40 transition-all group">
+                      <label className="flex items-center gap-2 text-sm font-semibold text-emerald-300 mb-2">
                         <BarChart3 className="w-4 h-4" />
                         Batting Average
                       </label>
@@ -1319,11 +1327,11 @@ const BattingStatsPage = () => {
                   value={editForm.stats.battingAverage}
                   onChange={(e) => handleFormChange('stats.battingAverage', e.target.value)}
                         placeholder="e.g., 45.67"
-                        className="w-full px-4 py-2.5 bg-gray-700/70 border border-cyan-500/30 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all"
+                        className="w-full px-4 py-2.5 bg-gray-700/70 border border-emerald-500/30 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all hover:bg-gray-700/90"
                 />
               </div>
-                    <div className="relative bg-gradient-to-br from-green-500/10 to-green-600/5 p-4 rounded-xl border border-green-500/20">
-                      <label className="flex items-center gap-2 text-sm font-semibold text-green-300 mb-2">
+                    <div className="relative bg-gradient-to-br from-teal-500/10 to-teal-600/5 p-4 rounded-xl border border-teal-500/20 hover:border-teal-500/40 transition-all group">
+                      <label className="flex items-center gap-2 text-sm font-semibold text-teal-300 mb-2">
                         <ZapIcon className="w-4 h-4" />
                         Strike Rate
                       </label>
@@ -1334,7 +1342,7 @@ const BattingStatsPage = () => {
                   value={editForm.stats.battingStrikeRate}
                   onChange={(e) => handleFormChange('stats.battingStrikeRate', e.target.value)}
                         placeholder="e.g., 145.50"
-                        className="w-full px-4 py-2.5 bg-gray-700/70 border border-green-500/30 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all"
+                        className="w-full px-4 py-2.5 bg-gray-700/70 border border-teal-500/30 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-all hover:bg-gray-700/90"
                 />
                     </div>
                   </div>
@@ -1345,14 +1353,14 @@ const BattingStatsPage = () => {
               <div className="bg-gradient-to-r from-gray-800/80 to-gray-900/80 p-6 border-t border-gray-700/50 flex justify-end gap-4 backdrop-blur-sm">
               <button
                 onClick={handleCancelEdit}
-                  className="px-6 py-3 bg-gray-700/80 hover:bg-gray-600 text-white rounded-xl transition-all font-medium flex items-center gap-2 hover:scale-105"
+                  className="px-6 py-3 bg-gray-700/80 hover:bg-gray-600 text-white rounded-xl transition-all duration-300 font-medium flex items-center gap-2 hover:scale-105 shadow-lg"
               >
                   <X className="w-4 h-4" />
                 Cancel
               </button>
               <button
                 onClick={handleSavePlayer}
-                  className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-xl transition-all font-medium flex items-center gap-2 shadow-lg hover:shadow-xl hover:scale-105"
+                  className="px-6 py-3 bg-gradient-to-r from-cyan-600 via-blue-600 to-indigo-600 hover:from-cyan-500 hover:via-blue-500 hover:to-indigo-500 text-white rounded-xl transition-all duration-300 font-medium flex items-center gap-2 shadow-xl hover:shadow-2xl hover:scale-105 hover:shadow-cyan-500/50"
                 >
                   <Edit2 className="w-4 h-4" />
                   Save Changes

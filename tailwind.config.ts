@@ -54,6 +54,10 @@ const config: Config = {
           '0%': { transform: 'scale(0.98)', opacity: '0' },
           '100%': { transform: 'scale(1)', opacity: '1' },
         },
+        shimmer: {
+          '0%': { transform: 'translateX(-100%)' },
+          '100%': { transform: 'translateX(100%)' },
+        },
       },
       backdropBlur: {
         xs: '2px',
