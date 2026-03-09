@@ -391,6 +391,7 @@ export default function AdminMatches() {
              .replace(/bombay/g, 'mumbai')
              .replace(/madras/g, 'chennai')
              .replace(/calcutta/g, 'kolkata')
+             .replace(/delhi daredevils/g, 'delhi capitals')
              .replace(/kings xi punjab/g, 'punjab kings')
              .replace(/kings eleven punjab/g, 'punjab kings')
              .replace(/\s+/g, ' ')
