@@ -479,6 +479,44 @@ async function handlePostRequest(context) {
   }
 }
 
+// PUT (bulk) - Update status for multiple matches in one atomic KV write
+async function handleBulkPutRequest(context) {
+  const { env, request } = context;
+
+  if (!verifyAdminToken(request)) {
+    return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+      status: 401, headers: { 'Content-Type': 'application/json' }
+    });
+  }
+
+  try {
+    const body = await request.json();
+    const { matchIds, status } = body;
+    if (!Array.isArray(matchIds) || !matchIds.length || !status) {
+      return new Response(JSON.stringify({ error: 'matchIds array and status are required' }), {
+        status: 400, headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
+    const idSet = new Set(matchIds.map(String));
+    let matches = await env.IPL_CACHE.get('matches', 'json') || [];
+    let updatedCount = 0;
+    matches = matches.map(m => {
+      if (idSet.has(String(m.id))) { updatedCount++; return { ...m, status }; }
+      return m;
+    });
+    await env.IPL_CACHE.put('matches', JSON.stringify(matches));
+    return new Response(JSON.stringify({ success: true, updated: updatedCount, status }), {
+      status: 200, headers: { 'Content-Type': 'application/json' }
+    });
+  } catch (error) {
+    console.error('Error bulk updating match status:', error);
+    return new Response(JSON.stringify({ error: `Bulk status update failed: ${error.message}` }), {
+      status: 500, headers: { 'Content-Type': 'application/json' }
+    });
+  }
+}
+
 // PUT - Update an existing match
 async function handlePutRequest(context) {
   const { env, request } = context;
@@ -678,9 +716,13 @@ export async function onRequest(context) {
         : await handlePostRequest(context);
       break;
     }
-    case 'PUT':
-      response = await handlePutRequest(context);
+    case 'PUT': {
+      const putUrl = new URL(request.url);
+      response = putUrl.searchParams.get('bulkStatus') === 'true'
+        ? await handleBulkPutRequest(context)
+        : await handlePutRequest(context);
       break;
+    }
     case 'DELETE':
       response = await handleDeleteRequest(context);
       break;

@@ -506,6 +506,31 @@ export const api = {
     }
   },
   
+  bulkUpdateMatchStatus: async (
+    matchIds: string[],
+    status: 'upcoming' | 'live' | 'completed' | 'cancelled'
+  ): Promise<{ updated: number; status: string }> => {
+    try {
+      const token = localStorage.getItem('admin_token') || sessionStorage.getItem('admin_token') || localStorage.getItem('adminToken');
+      const response = await fetch('/api/matches?bulkStatus=true', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ matchIds, status })
+      });
+      if (!response.ok) {
+        const body = await response.text();
+        throw new Error(`Bulk status update failed (${response.status}): ${body}`);
+      }
+      return await response.json();
+    } catch (error) {
+      console.error('Error bulk updating match status:', error);
+      throw error;
+    }
+  },
+
   bulkCreateMatches: async (
     matches: Array<Omit<Match, 'id' | 'team1' | 'team2'> & { team1Id: string; team2Id: string }>
   ): Promise<{ created: Match[]; count: number }> => {

@@ -764,38 +764,37 @@ export default function AdminMatches() {
     // Bulk operations handlers
     const handleBulkStatusUpdate = async (status: 'upcoming' | 'live' | 'completed') => {
         if (selectedMatches.size === 0) return;
-
         try {
             setIsSubmitting(true);
-            const selectedIds = Array.from(selectedMatches);
-            const updatePromises = selectedIds.map(matchId => {
-                const match = matches.find(m => m.id === matchId);
-                if (!match) return Promise.resolve();
-                return api.updateMatch(matchId, {
-                    date: match.date,
-                    time: match.time,
-                    venue: match.venue,
-                    team1Id: match.team1.id,
-                    team2Id: match.team2.id,
-                    status,
-                    league: match.league
-                });
-            });
-
-            await Promise.all(updatePromises);
-            
-            // Update matches in state
-            setMatches(matches.map(match => 
-                selectedMatches.has(match.id) 
-                    ? { ...match, status } 
-                    : match
-            ));
-
-            showSuccess(`${selectedMatches.size} match(es) status updated to ${status}`);
+            const ids = Array.from(selectedMatches);
+            await api.bulkUpdateMatchStatus(ids, status);
+            setMatches(prev => prev.map(m => selectedMatches.has(m.id) ? { ...m, status } : m));
+            showSuccess(`${ids.length} match${ids.length !== 1 ? 'es' : ''} marked as ${status}`);
             clearSelection();
         } catch (error) {
             console.error('Failed to update match statuses:', error);
             showError('Failed to update match statuses');
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    /** Mark every match in the currently selected season as completed */
+    const handleMarkSeasonCompleted = async () => {
+        const toMark = seasonMatches.filter(m => m.status !== 'completed');
+        if (!toMark.length) {
+            showSuccess(`All ${selectedSeason} matches are already marked as completed`);
+            return;
+        }
+        if (!confirm(`Mark all ${toMark.length} remaining matches in ${selectedSeason} as completed? This cannot be undone easily.`)) return;
+        try {
+            setIsSubmitting(true);
+            const ids = toMark.map(m => m.id);
+            await api.bulkUpdateMatchStatus(ids, 'completed');
+            setMatches(prev => prev.map(m => ids.includes(m.id) ? { ...m, status: 'completed' } : m));
+            showSuccess(`${ids.length} match${ids.length !== 1 ? 'es' : ''} in ${selectedSeason} marked as completed`);
+        } catch (err: any) {
+            showError(err?.message || 'Failed to mark season as completed');
         } finally {
             setIsSubmitting(false);
         }
@@ -1537,6 +1536,25 @@ export default function AdminMatches() {
                                         </motion.button>
                                     ))}
                                 </div>
+                                {/* Mark whole season as completed — only show for past seasons */}
+                                {selectedSeason < new Date().getFullYear() && seasonMatches.length > 0 && (
+                                    <motion.button
+                                        whileHover={{ scale: 1.04 }}
+                                        whileTap={{ scale: 0.96 }}
+                                        onClick={handleMarkSeasonCompleted}
+                                        disabled={isSubmitting || seasonMatches.every(m => m.status === 'completed')}
+                                        className="ml-2 flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold border transition-all duration-200
+                                            disabled:opacity-40 disabled:cursor-not-allowed
+                                            border-emerald-500/30 text-emerald-400 hover:text-emerald-200 hover:border-emerald-500/60"
+                                        style={{ background: 'rgba(16,185,129,0.07)' }}
+                                        title={`Mark all ${selectedSeason} matches as completed`}
+                                    >
+                                        <CheckCircle2 className="w-3.5 h-3.5" />
+                                        {seasonMatches.every(m => m.status === 'completed')
+                                            ? `${selectedSeason} ✓ all done`
+                                            : `Mark ${selectedSeason} complete`}
+                                    </motion.button>
+                                )}
                             </div>
                         </div>
 
