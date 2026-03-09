@@ -391,6 +391,8 @@ export default function AdminMatches() {
              .replace(/bombay/g, 'mumbai')
              .replace(/madras/g, 'chennai')
              .replace(/calcutta/g, 'kolkata')
+             .replace(/kings xi punjab/g, 'punjab kings')
+             .replace(/kings eleven punjab/g, 'punjab kings')
              .replace(/\s+/g, ' ')
              .trim();
 
@@ -400,11 +402,14 @@ export default function AdminMatches() {
             return teams.find(t => {
                 const tName = normaliseName(t.name ?? '');
                 const tShort = (t.shortName ?? '').toLowerCase();
+                const tAliases = ((t.aliases ?? []) as string[]).map(alias => normaliseName(alias));
                 return tShort === norm ||
                     tName === norm ||
+                    tAliases.includes(norm) ||
                     tName.includes(norm) ||
                     norm.includes(tName) ||
-                    norm.includes(tShort);
+                    norm.includes(tShort) ||
+                    tAliases.some(alias => alias.includes(norm) || norm.includes(alias));
             }) ?? null;
         };
 
