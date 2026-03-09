@@ -8,12 +8,71 @@ import AuroraBackground from '@/components/ui/AuroraBackground';
 import { Team } from '@/types';
 import { api } from '@/lib/data';
 import { wplTeams } from '@/data/wpl-teams';
-import { getAnimatedLogoPath } from '@/lib/logoUtils';
+import { IPL_HISTORICAL_TEAMS, IPL_SEASON_RECORDS } from '@/data/ipl-team-history';
+import { getAnimatedLogoPath, getLogoPath } from '@/lib/logoUtils';
 import RCBLottie from '@/components/ui/RCBLottie';
 import RCBLionLogo from '@/components/RCBLion/RCBLionLogo';
 
 type SortField = 'name' | 'shortName';
 type SortDirection = 'asc' | 'desc';
+
+const formatSeasonRanges = (seasons: number[] = []) => {
+    if (seasons.length === 0) return 'No seasons recorded';
+
+    const sorted = [...seasons].sort((a, b) => a - b);
+    const ranges: string[] = [];
+    let rangeStart = sorted[0];
+    let previous = sorted[0];
+
+    for (let index = 1; index < sorted.length; index += 1) {
+        const current = sorted[index];
+        if (current === previous + 1) {
+            previous = current;
+            continue;
+        }
+
+        ranges.push(rangeStart === previous ? `${rangeStart}` : `${rangeStart}-${previous}`);
+        rangeStart = current;
+        previous = current;
+    }
+
+    ranges.push(rangeStart === previous ? `${rangeStart}` : `${rangeStart}-${previous}`);
+    return ranges.join(', ');
+};
+
+const getStatusClasses = (status: 'active' | 'defunct' | 'renamed') => {
+    if (status === 'active') return 'border-emerald-500/20 bg-emerald-500/10 text-emerald-300';
+    if (status === 'renamed') return 'border-amber-500/20 bg-amber-500/10 text-amber-300';
+    return 'border-rose-500/20 bg-rose-500/10 text-rose-300';
+};
+
+const normalizeTeamIdentity = (value?: string) =>
+    (value || '')
+        .toLowerCase()
+        .replace(/\(wpl\)/g, '')
+        .replace(/women|bengaluru|bangalore/g, (match) => {
+            if (match === 'bengaluru') return 'bangalore';
+            return '';
+        })
+        .replace(/[^a-z0-9]/g, '');
+
+const getIPLSummaryForTeam = (team: Team) => {
+    const identities = [
+        normalizeTeamIdentity(team.name),
+        normalizeTeamIdentity(team.shortName),
+        ...(team.aliases || []).map(normalizeTeamIdentity)
+    ];
+
+    return IPL_HISTORICAL_TEAMS.find((historicalTeam) => {
+        const historyIdentities = [
+            normalizeTeamIdentity(historicalTeam.name),
+            normalizeTeamIdentity(historicalTeam.shortName),
+            ...(historicalTeam.aliases || []).map(normalizeTeamIdentity)
+        ];
+
+        return identities.some((identity) => historyIdentities.includes(identity));
+    });
+};
 
 const ChevronUpIcon = ({ className }: { className?: string }) => (
   <svg className={className} fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
@@ -144,6 +203,12 @@ export default function AdminTeams() {
 
         return filtered;
     }, [teams, searchQuery, sortField, sortDirection]);
+
+    const iplHistoryStats = useMemo(() => ({
+        legacy: IPL_HISTORICAL_TEAMS.filter((team) => team.status !== 'active').length,
+        total: IPL_HISTORICAL_TEAMS.length,
+        seasonsCovered: `${IPL_SEASON_RECORDS[0]?.year}-${IPL_SEASON_RECORDS[IPL_SEASON_RECORDS.length - 1]?.year}`
+    }), []);
 
     const handleAddTeam = () => {
         setEditingTeam(null);
@@ -479,6 +544,27 @@ export default function AdminTeams() {
                         </div>
                     </div>
 
+                    {currentLeague === 'ipl' && (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-8">
+                            <div className="admin-glass rounded-2xl border border-white/10 p-5">
+                                <p className="text-xs uppercase tracking-[0.2em] text-gray-400 mb-2">Current Teams</p>
+                                <p className="text-3xl font-bold text-white">{teams.filter(team => team.league === 'ipl').length}</p>
+                            </div>
+                            <div className="admin-glass rounded-2xl border border-white/10 p-5">
+                                <p className="text-xs uppercase tracking-[0.2em] text-gray-400 mb-2">All IPL Teams</p>
+                                <p className="text-3xl font-bold text-white">{iplHistoryStats.total}</p>
+                            </div>
+                            <div className="admin-glass rounded-2xl border border-white/10 p-5">
+                                <p className="text-xs uppercase tracking-[0.2em] text-gray-400 mb-2">Legacy / Renamed</p>
+                                <p className="text-3xl font-bold text-white">{iplHistoryStats.legacy}</p>
+                            </div>
+                            <div className="admin-glass rounded-2xl border border-white/10 p-5">
+                                <p className="text-xs uppercase tracking-[0.2em] text-gray-400 mb-2">Seasons Covered</p>
+                                <p className="text-3xl font-bold text-white">{iplHistoryStats.seasonsCovered}</p>
+                            </div>
+                        </div>
+                    )}
+
                     {selectedTeams.size > 0 && (
                         <div className="admin-glass mb-8 p-5 rounded-xl border border-blue-500/20 bg-blue-500/5 flex items-center justify-between">
                             <div className="flex items-center gap-3">
@@ -595,6 +681,11 @@ export default function AdminTeams() {
                                                 <th className="px-6 py-5 text-left text-xs font-semibold text-gray-300 uppercase tracking-wider">
                                                     Description
                                                 </th>
+                                                {currentLeague === 'ipl' && (
+                                                    <th className="px-6 py-5 text-left text-xs font-semibold text-gray-300 uppercase tracking-wider">
+                                                        Seasons
+                                                    </th>
+                                                )}
                                                 <th className="px-6 py-5 text-right text-xs font-semibold text-gray-300 uppercase tracking-wider">
                                                     Actions
                                                 </th>
@@ -602,6 +693,9 @@ export default function AdminTeams() {
                                         </thead>
                                         <tbody className="divide-y divide-white/5">
                                             {filteredAndSortedTeams.map((team) => (
+                                                (() => {
+                                                    const history = team.league === 'ipl' ? getIPLSummaryForTeam(team) : null;
+                                                    return (
                                                 <tr
                                                     key={team.id}
                                                     className="hover:bg-white/5 transition-all duration-300 group"
@@ -709,6 +803,20 @@ export default function AdminTeams() {
                                                         {team.description || <span className="text-gray-500 italic">No description</span>}
                                                     </p>
                                                 </td>
+                                                {currentLeague === 'ipl' && (
+                                                    <td className="px-6 py-5 align-top">
+                                                        {history ? (
+                                                            <div className="space-y-2 max-w-sm">
+                                                                <p className="text-sm font-medium text-white">{formatSeasonRanges(history.seasons)}</p>
+                                                                <span className={`inline-flex items-center rounded-lg border px-2.5 py-1 text-xs font-semibold ${getStatusClasses(history.status)}`}>
+                                                                    {history.status === 'defunct' ? 'Legacy team' : history.status === 'renamed' ? 'Renamed franchise' : 'Active franchise'}
+                                                                </span>
+                                                            </div>
+                                                        ) : (
+                                                            <span className="text-sm text-gray-500">No IPL history mapped</span>
+                                                        )}
+                                                    </td>
+                                                )}
                                                 <td className="px-6 py-5 text-right">
                                                     <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300">
                                                         <button
@@ -730,6 +838,8 @@ export default function AdminTeams() {
                                                     </div>
                                                 </td>
                                                 </tr>
+                                                    );
+                                                })()
                                             ))}
                                         </tbody>
                                     </table>
@@ -737,6 +847,9 @@ export default function AdminTeams() {
 
                                 <div className="lg:hidden divide-y divide-white/5">
                                     {filteredAndSortedTeams.map((team) => (
+                                        (() => {
+                                            const history = team.league === 'ipl' ? getIPLSummaryForTeam(team) : null;
+                                            return (
                                         <div key={team.id} className="p-5 hover:bg-white/5 transition-all duration-300">
                                             <div className="flex items-start gap-4 mb-4">
                                                 <input
@@ -830,6 +943,15 @@ export default function AdminTeams() {
                                             <p className="text-sm text-gray-300 mb-4 line-clamp-2 leading-relaxed">
                                                 {team.description || <span className="text-gray-500 italic">No description</span>}
                                             </p>
+                                            {currentLeague === 'ipl' && history && (
+                                                <div className="mb-4 rounded-xl border border-white/10 bg-white/[0.03] p-3">
+                                                    <p className="text-xs uppercase tracking-[0.18em] text-gray-500 mb-1">Seasons</p>
+                                                    <p className="text-sm font-medium text-white mb-2">{formatSeasonRanges(history.seasons)}</p>
+                                                    <span className={`inline-flex items-center rounded-lg border px-2.5 py-1 text-xs font-semibold ${getStatusClasses(history.status)}`}>
+                                                        {history.status === 'defunct' ? 'Legacy team' : history.status === 'renamed' ? 'Renamed franchise' : 'Active franchise'}
+                                                    </span>
+                                                </div>
+                                            )}
                                             <div className="flex items-center justify-between">
                                                 <div className="flex items-center gap-3">
                                                     {team.colors?.primary ? (
@@ -871,11 +993,80 @@ export default function AdminTeams() {
                                                 </div>
                                             </div>
                                         </div>
+                                            );
+                                        })()
                                     ))}
                                 </div>
                             </>
                         )}
                     </div>
+
+                    {currentLeague === 'ipl' && (
+                        <div className="grid grid-cols-1 2xl:grid-cols-[1.15fr,1fr] gap-6 mt-8">
+                            <section className="admin-card p-6">
+                                <div className="flex items-center justify-between gap-4 mb-6">
+                                    <div>
+                                        <h2 className="text-2xl font-bold text-white">IPL Teams By Franchise</h2>
+                                        <p className="text-sm text-gray-400 mt-1">Every IPL team and brand variation from 2008 through 2026.</p>
+                                    </div>
+                                    <div className="rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm text-gray-300">
+                                        Gujarat Lions: 2016, 2017
+                                    </div>
+                                </div>
+                                <div className="space-y-3">
+                                    {IPL_HISTORICAL_TEAMS.map((historyTeam) => (
+                                        <div key={historyTeam.key} className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+                                            <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3">
+                                                <div>
+                                                    <div className="flex items-center gap-3 mb-2">
+                                                        <h3 className="text-lg font-semibold text-white">{historyTeam.name}</h3>
+                                                        <span className="text-xs font-semibold text-gray-400">{historyTeam.shortName}</span>
+                                                        <span className={`inline-flex items-center rounded-lg border px-2.5 py-1 text-xs font-semibold ${getStatusClasses(historyTeam.status)}`}>
+                                                            {historyTeam.status}
+                                                        </span>
+                                                    </div>
+                                                    <p className="text-sm text-gray-300">{formatSeasonRanges(historyTeam.seasons)}</p>
+                                                    {historyTeam.notes && (
+                                                        <p className="text-sm text-gray-400 mt-2">{historyTeam.notes}</p>
+                                                    )}
+                                                </div>
+                                                <div className="text-sm text-gray-400">
+                                                    {historyTeam.seasons.length} season{historyTeam.seasons.length === 1 ? '' : 's'}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </section>
+
+                            <section className="admin-card p-6">
+                                <div className="mb-6">
+                                    <h2 className="text-2xl font-bold text-white">Season Timeline</h2>
+                                    <p className="text-sm text-gray-400 mt-1">Year-wise view of how many teams were in the IPL and which teams joined or left.</p>
+                                </div>
+                                <div className="space-y-3 max-h-[1200px] overflow-y-auto pr-1">
+                                    {IPL_SEASON_RECORDS.map((season) => (
+                                        <div key={season.year} className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+                                            <div className="flex items-start justify-between gap-4 mb-3">
+                                                <div>
+                                                    <h3 className="text-lg font-semibold text-white">{season.year}</h3>
+                                                    <p className="text-sm text-gray-400">{season.teams.length} teams in the season</p>
+                                                </div>
+                                                <div className="text-right text-xs text-gray-400">
+                                                    {season.joined?.length ? <p>Added: {season.joined.join(', ')}</p> : null}
+                                                    {season.left?.length ? <p>Left: {season.left.join(', ')}</p> : null}
+                                                </div>
+                                            </div>
+                                            <p className="text-sm text-gray-300 leading-relaxed">{season.teams.join(', ')}</p>
+                                            {season.notes && (
+                                                <p className="text-sm text-gray-400 mt-3">{season.notes}</p>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                            </section>
+                        </div>
+                    )}
                 </div>
             </div>
 
