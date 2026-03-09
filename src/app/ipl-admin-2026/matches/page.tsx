@@ -732,7 +732,7 @@ export default function AdminMatches() {
             autoTable(doc, {
                 startY: HDR_H + 3,
                 margin: { top: HDR_H + 3, left: 6, right: 6, bottom: FTR_H + 3 },
-                head: [['#', 'Date', 'Time (IST)', 'Home', 'Away', 'Venue / Type', 'Status']],
+                head: [['No.', 'Date', 'Time (IST)', 'Home Team', 'Away Team', 'Venue / Type', 'Status']],
                 body: rows,
                 theme: 'plain',
                 styles: {
@@ -741,7 +741,7 @@ export default function AdminMatches() {
                     cellPadding: { top: 3, bottom: 3, left: 4, right: 3 },
                     textColor: [222, 230, 255],   // bright blue-white body text
                     lineWidth: 0,
-                    overflow: 'ellipsize',
+                    overflow: 'linebreak',         // wrap text instead of truncating
                     minCellHeight: 9,
                 },
                 headStyles: {
@@ -752,13 +752,13 @@ export default function AdminMatches() {
                     minCellHeight: 9,
                 },
                 columnStyles: {
-                    0: { cellWidth: 12, halign: 'center', fontStyle: 'bold' },
-                    1: { cellWidth: 42 },
-                    2: { cellWidth: 27, halign: 'center' },
-                    3: { cellWidth: 33, halign: 'right',  fontStyle: 'bold' },
-                    4: { cellWidth: 33, halign: 'left',   fontStyle: 'bold' },
-                    5: { cellWidth: 'auto' },
-                    6: { cellWidth: 27, halign: 'center', fontStyle: 'bold' },
+                    0: { cellWidth: 14, halign: 'center', fontStyle: 'bold' },  // No.
+                    1: { cellWidth: 44 },                                        // Date
+                    2: { cellWidth: 26, halign: 'center' },                     // Time
+                    3: { cellWidth: 36, halign: 'right',  fontStyle: 'bold' },  // Home
+                    4: { cellWidth: 36, halign: 'left',   fontStyle: 'bold' },  // Away
+                    5: { cellWidth: 'auto' },                                    // Venue (fills rest)
+                    6: { cellWidth: 26, halign: 'center', fontStyle: 'bold' },  // Status
                 },
                 didParseCell: (data: any) => {
                     if (data.section !== 'body') return;
