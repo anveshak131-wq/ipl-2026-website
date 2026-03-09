@@ -189,6 +189,10 @@ export default function AdminMatches() {
     const [csvImporting, setCsvImporting] = useState(false);
     const csvInputRef = useRef<HTMLInputElement>(null);
 
+    // Season selector — declared before the effects that reference them
+    const [selectedSeason, setSelectedSeason] = useState<number>(new Date().getFullYear());
+    const [availableSeasons, setAvailableSeasons] = useState<number[]>([]);
+
     // Generate available seasons when league changes; restore last-used season from localStorage
     useEffect(() => {
         const currentYear = new Date().getFullYear();
@@ -205,10 +209,6 @@ export default function AdminMatches() {
     useEffect(() => {
         localStorage.setItem(`adminMatchesSeason_${currentLeague}`, String(selectedSeason));
     }, [selectedSeason, currentLeague]);
-
-    // Season selector
-    const [selectedSeason, setSelectedSeason] = useState<number>(new Date().getFullYear());
-    const [availableSeasons, setAvailableSeasons] = useState<number[]>([]);
 
     // Update formData.league and reset venue/time when league changes
     useEffect(() => {
