@@ -51,6 +51,7 @@ const mockTeams = [
     id: '6',
     league: 'ipl',
     name: 'Delhi Capitals',
+    aliases: ['Delhi Daredevils'],
     shortName: 'DC',
     logo: '/logos/dc_logo_new.svg',
     colors: { primary: '#0078BC', secondary: '#EF1B26' }
@@ -86,6 +87,47 @@ const mockTeams = [
     shortName: 'CSK',
     logo: '/logos/csk_logo_new.svg',
     colors: { primary: '#FFB90F', secondary: '#0081E8' }
+  },
+  {
+    id: '16',
+    league: 'ipl',
+    name: 'Gujarat Lions',
+    shortName: 'GL',
+    logo: '/logos/tba_logo.svg',
+    colors: { primary: '#F28C28', secondary: '#1B365D' }
+  },
+  {
+    id: '17',
+    league: 'ipl',
+    name: 'Rising Pune Supergiant',
+    shortName: 'RPS',
+    aliases: ['Rising Pune Supergiants'],
+    logo: '/logos/tba_logo.svg',
+    colors: { primary: '#6A1B9A', secondary: '#F06292' }
+  },
+  {
+    id: '18',
+    league: 'ipl',
+    name: 'Deccan Chargers',
+    shortName: 'DCG',
+    logo: '/logos/tba_logo.svg',
+    colors: { primary: '#1E3A8A', secondary: '#F59E0B' }
+  },
+  {
+    id: '19',
+    league: 'ipl',
+    name: 'Kochi Tuskers Kerala',
+    shortName: 'KTK',
+    logo: '/logos/tba_logo.svg',
+    colors: { primary: '#0F766E', secondary: '#F97316' }
+  },
+  {
+    id: '20',
+    league: 'ipl',
+    name: 'Pune Warriors India',
+    shortName: 'PWI',
+    logo: '/logos/tba_logo.svg',
+    colors: { primary: '#2563EB', secondary: '#FACC15' }
   },
   // WPL Teams (IDs 11-15)
   {

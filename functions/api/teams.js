@@ -135,6 +135,7 @@ export async function onRequest(context) {
         {
           id: "6",
           name: "Delhi Capitals",
+          aliases: ["Delhi Daredevils"],
           shortName: "DC",
           league: "ipl",
           logo: "/logos/dc_logo_2026.svg",
@@ -176,6 +177,52 @@ export async function onRequest(context) {
           logo: "/logos/csk_logo_2026.svg",
           colors: { primary: "#FFFF00", secondary: "#0081E8" },
           description: "CSK team"
+        },
+        {
+          id: "16",
+          name: "Gujarat Lions",
+          shortName: "GL",
+          league: "ipl",
+          logo: "/logos/tba_logo.svg",
+          colors: { primary: "#F28C28", secondary: "#1B365D" },
+          description: "Historical IPL team (2016-2017)"
+        },
+        {
+          id: "17",
+          name: "Rising Pune Supergiant",
+          shortName: "RPS",
+          aliases: ["Rising Pune Supergiants"],
+          league: "ipl",
+          logo: "/logos/tba_logo.svg",
+          colors: { primary: "#6A1B9A", secondary: "#F06292" },
+          description: "Historical IPL team (2016-2017)"
+        },
+        {
+          id: "18",
+          name: "Deccan Chargers",
+          shortName: "DCG",
+          league: "ipl",
+          logo: "/logos/tba_logo.svg",
+          colors: { primary: "#1E3A8A", secondary: "#F59E0B" },
+          description: "Historical IPL team (2008-2012)"
+        },
+        {
+          id: "19",
+          name: "Kochi Tuskers Kerala",
+          shortName: "KTK",
+          league: "ipl",
+          logo: "/logos/tba_logo.svg",
+          colors: { primary: "#0F766E", secondary: "#F97316" },
+          description: "Historical IPL team (2011)"
+        },
+        {
+          id: "20",
+          name: "Pune Warriors India",
+          shortName: "PWI",
+          league: "ipl",
+          logo: "/logos/tba_logo.svg",
+          colors: { primary: "#2563EB", secondary: "#FACC15" },
+          description: "Historical IPL team (2011-2013)"
         }
       ];
 

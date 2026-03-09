@@ -80,6 +80,7 @@ export const mockTeams: Team[] = [
     id: '6',
     league: 'ipl',
     name: 'Delhi Capitals',
+    aliases: ['Delhi Daredevils'],
     shortName: 'DC',
     logo: '/logos/dc_logo_2026_animated.svg',
     description: 'Young and dynamic team with a perfect blend of experience and youth',
@@ -145,6 +146,69 @@ export const mockTeams: Team[] = [
       { year: 2021, name: 'IPL Champions' }
     ],
     homeGrounds: ['M. A. Chidambaram Stadium']
+  },
+  {
+    id: '16',
+    league: 'ipl',
+    name: 'Gujarat Lions',
+    shortName: 'GL',
+    logo: '/logos/tba_logo.svg',
+    description: 'Temporary IPL franchise that competed in the 2016 and 2017 seasons',
+    colors: { primary: '#F28C28', secondary: '#1B365D' },
+    players: [],
+    trophies: [],
+    homeGrounds: ['Saurashtra Cricket Association Stadium']
+  },
+  {
+    id: '17',
+    league: 'ipl',
+    name: 'Rising Pune Supergiant',
+    shortName: 'RPS',
+    aliases: ['Rising Pune Supergiants'],
+    logo: '/logos/tba_logo.svg',
+    description: 'Temporary IPL franchise that competed in the 2016 and 2017 seasons',
+    colors: { primary: '#6A1B9A', secondary: '#F06292' },
+    players: [],
+    trophies: [],
+    homeGrounds: ['Maharashtra Cricket Association Stadium']
+  },
+  {
+    id: '18',
+    league: 'ipl',
+    name: 'Deccan Chargers',
+    shortName: 'DCG',
+    logo: '/logos/tba_logo.svg',
+    description: 'Defunct IPL franchise that competed from 2008 through 2012',
+    colors: { primary: '#1E3A8A', secondary: '#F59E0B' },
+    players: [],
+    trophies: [
+      { year: 2009, name: 'IPL Champions' }
+    ],
+    homeGrounds: ['Rajiv Gandhi International Stadium']
+  },
+  {
+    id: '19',
+    league: 'ipl',
+    name: 'Kochi Tuskers Kerala',
+    shortName: 'KTK',
+    logo: '/logos/tba_logo.svg',
+    description: 'Defunct IPL franchise that competed in the 2011 season',
+    colors: { primary: '#0F766E', secondary: '#F97316' },
+    players: [],
+    trophies: [],
+    homeGrounds: ['Jawaharlal Nehru Stadium, Kochi']
+  },
+  {
+    id: '20',
+    league: 'ipl',
+    name: 'Pune Warriors India',
+    shortName: 'PWI',
+    logo: '/logos/tba_logo.svg',
+    description: 'Defunct IPL franchise that competed from 2011 through 2013',
+    colors: { primary: '#2563EB', secondary: '#FACC15' },
+    players: [],
+    trophies: [],
+    homeGrounds: ['Maharashtra Cricket Association Stadium']
   },
   // WPL Teams
   {
