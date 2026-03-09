@@ -457,7 +457,7 @@ export async function exportPointsTableToExcel(data: PointsTableExportData): Pro
  */
 export async function exportPointsTableToPDF(data: PointsTableExportData): Promise<void> {
   const { teams, year, filtered, searchTerm } = data;
-  
+
   if (teams.length === 0) {
     alert('No data to export');
     return;
@@ -474,192 +474,259 @@ export async function exportPointsTableToPDF(data: PointsTableExportData): Promi
     return;
   }
 
-  const doc = new jsPDF('l', 'mm', 'a4');
-  const pageWidth = doc.internal.pageSize.getWidth();
-  const pageHeight = doc.internal.pageSize.getHeight();
+  // ── Dark Palette ──────────────────────────────────────────────────────────────
+  const C_BG:      [number, number, number] = [8,   10,  18];
+  const C_BGHDR:   [number, number, number] = [14,  19,  33];
+  const C_ROW1:    [number, number, number] = [14,  18,  30];
+  const C_ROW2:    [number, number, number] = [20,  25,  42];
+  const C_QUAL:    [number, number, number] = [10,  30,  20];
+  const C_GRID:    [number, number, number] = [35,  45,  75];
+  const C_GOLD:    [number, number, number] = [245, 158, 11];
+  const C_RED:     [number, number, number] = [239,  68, 68];
+  const C_WHITE:   [number, number, number] = [230, 235, 255];
+  const C_MUTED:   [number, number, number] = [110, 120, 155];
+  const C_GREEN:   [number, number, number] = [52,  211, 153];
+  const C_REDTXT:  [number, number, number] = [248, 113, 113];
+  const C_EMERALD: [number, number, number] = [16,  185, 129];
 
-  // Background + header
-  const headerHeight = 24;
-  drawPageBackground(doc, pageWidth, pageHeight);
-  drawHeaderBand(doc, pageWidth, headerHeight, year);
+  // Team brand colours
+  const TEAM_COLORS: Record<string, [number, number, number]> = {
+    MI:   [80,  140, 220],  CSK:  [252, 210,  50],  RCB:  [240,  90,  90],
+    KKR:  [160, 100, 220],  SRH:  [255, 140,  40],  DC:   [80,  140, 220],
+    PBKS: [220,  60,  60],  RR:   [240, 100, 160],  GT:   [100, 180, 200],
+    LSG:  [80,  200, 180],  DD:   [80,  140, 220],  KTK:  [160, 100, 220],
+    PWI:  [220,  60,  60],  DEC:  [255, 140,  40],  COC:  [100, 180, 200],
+    RPS:  [240, 100, 160]
+  };
+  const teamColor = (shortName: string): [number, number, number] =>
+    TEAM_COLORS[(shortName || '').toUpperCase().trim()] ?? C_GOLD;
 
-  const bodyTextColor: [number, number, number] = [54, 32, 18];
-  const mutedTextColor: [number, number, number] = [112, 86, 60];
+  // Portrait A4
+  const doc = new jsPDF('p', 'mm', 'a4');
+  const PW = doc.internal.pageSize.getWidth();
+  const PH = doc.internal.pageSize.getHeight();
+  const MX = 12;
+  const HDR_H = 32;
 
-  // Metadata below header
-  doc.setFontSize(9);
-  doc.setTextColor(mutedTextColor[0], mutedTextColor[1], mutedTextColor[2]);
-  const metadataY = headerHeight + 6;
-  doc.text(`Generated on: ${new Date().toLocaleString()}`, pageWidth / 2, metadataY, { align: 'center' });
-  if (filtered) {
-    doc.setTextColor(185, 28, 28);
-    doc.text('(Filtered Results)', pageWidth / 2, metadataY + 5, { align: 'center' });
-  }
-  if (searchTerm) {
-    doc.setTextColor(mutedTextColor[0], mutedTextColor[1], mutedTextColor[2]);
-    doc.text(`Search Term: ${searchTerm}`, pageWidth / 2, metadataY + 10, { align: 'center' });
-  }
+  // ── Helpers ───────────────────────────────────────────────────────────────────
+  const paintBg = () => {
+    doc.setFillColor(C_BG[0], C_BG[1], C_BG[2]);
+    doc.rect(0, 0, PW, PH, 'F');
+  };
 
-  const marginX = 12;
-  const contentWidth = pageWidth - marginX * 2;
-  let cursorY = metadataY + (searchTerm ? 14 : filtered ? 10 : 6);
+  const paintHeader = () => {
+    // Header bg
+    doc.setFillColor(C_BGHDR[0], C_BGHDR[1], C_BGHDR[2]);
+    doc.rect(0, 0, PW, HDR_H, 'F');
+    // Gold top rule
+    doc.setFillColor(C_GOLD[0], C_GOLD[1], C_GOLD[2]);
+    doc.rect(0, 0, PW, 1.5, 'F');
+    // Gold left accent stripe
+    doc.setFillColor(C_GOLD[0], C_GOLD[1], C_GOLD[2]);
+    doc.rect(0, 0, 4, HDR_H, 'F');
+    // Red right accent stripe
+    doc.setFillColor(C_RED[0], C_RED[1], C_RED[2]);
+    doc.rect(PW - 4, 0, 4, HDR_H, 'F');
+    // Bottom separator
+    doc.setFillColor(C_GRID[0], C_GRID[1], C_GRID[2]);
+    doc.rect(0, HDR_H - 0.5, PW, 0.5, 'F');
 
-  // Summary stats
+    // Left: "IPL" + year
+    doc.setFontSize(20);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(C_GOLD[0], C_GOLD[1], C_GOLD[2]);
+    doc.text('IPL', MX + 4, HDR_H / 2 + 3);
+    doc.setTextColor(C_WHITE[0], C_WHITE[1], C_WHITE[2]);
+    doc.text(String(year), MX + 22, HDR_H / 2 + 3);
+    doc.setFontSize(7);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(C_MUTED[0], C_MUTED[1], C_MUTED[2]);
+    doc.text('INDIAN PREMIER LEAGUE', MX + 4, HDR_H / 2 + 8.5);
+
+    // Right: "POINTS TABLE"
+    doc.setFontSize(15);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(C_WHITE[0], C_WHITE[1], C_WHITE[2]);
+    doc.text('POINTS TABLE', PW - MX - 4, HDR_H / 2 + 3, { align: 'right' });
+    doc.setFontSize(7);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(C_MUTED[0], C_MUTED[1], C_MUTED[2]);
+    doc.text(`Season ${year}`, PW - MX - 4, HDR_H / 2 + 8.5, { align: 'right' });
+  };
+
+  const paintFooter = (pageNum: number, totalPages: number) => {
+    const FY = PH - 8;
+    doc.setFillColor(C_BGHDR[0], C_BGHDR[1], C_BGHDR[2]);
+    doc.rect(0, FY - 2, PW, 10, 'F');
+    doc.setFillColor(C_GOLD[0], C_GOLD[1], C_GOLD[2]);
+    doc.rect(0, FY - 2, PW, 0.6, 'F');
+    doc.setFontSize(7);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(C_MUTED[0], C_MUTED[1], C_MUTED[2]);
+    doc.text(`IPL ${year} · Points Table`, MX, FY + 3);
+    doc.text(`Page ${pageNum} / ${totalPages}`, PW - MX, FY + 3, { align: 'right' });
+    doc.text(new Date().toLocaleString(), PW / 2, FY + 3, { align: 'center' });
+  };
+
+  // ── First page ────────────────────────────────────────────────────────────────
+  paintBg();
+  paintHeader();
+
+  let cursorY = HDR_H + 7;
+
+  // ── Stat badges ───────────────────────────────────────────────────────────────
   const totalTeams = teams.length;
-  const qualifiedTeams = teams.filter(t => t.qualified).length;
-  const avgNRR =
-    teams.length > 0
-      ? teams.reduce((sum, t) => sum + safeNumber(t.netRunRate, 0), 0) / teams.length
-      : 0;
-  const topTeam = [...teams].sort((a, b) => {
-    const pointsDiff = safeNumber(b.points, 0) - safeNumber(a.points, 0);
-    if (pointsDiff !== 0) return pointsDiff;
-    return safeNumber(b.netRunRate, 0) - safeNumber(a.netRunRate, 0);
-  })[0];
+  const qualifiedCount = teams.filter(t => t.qualified).length;
+  const topTeam = teams[0]; // already sorted by points→NRR
 
-  const statCardHeight = 14;
-  const statGap = 4;
-  const statWidth = (contentWidth - statGap * 3) / 4;
-  const stats = [
-    { title: 'Total Teams', value: String(totalTeams), color: [233, 94, 32] as [number, number, number] },
-    { title: 'Qualified', value: String(qualifiedTeams), color: [107, 154, 66] as [number, number, number] },
-    { title: 'Avg NRR', value: avgNRR.toFixed(3), color: [221, 133, 50] as [number, number, number] },
-    { title: 'Top Team', value: topTeam?.shortName || topTeam?.name || '-', color: [187, 62, 86] as [number, number, number] }
+  interface Badge { label: string; value: string; accent: [number, number, number] }
+  const badges: Badge[] = [
+    { label: 'TOTAL TEAMS', value: String(totalTeams),   accent: C_GOLD },
+    { label: 'QUALIFIED',   value: String(qualifiedCount), accent: C_EMERALD },
+    { label: 'SEASON',      value: String(year),          accent: [80, 140, 220] },
+    { label: 'LEADER',      value: topTeam?.shortName || topTeam?.name || '—',
+      accent: teamColor(topTeam?.shortName || '') }
   ];
 
-  stats.forEach((stat, index) => {
-    const x = marginX + index * (statWidth + statGap);
-    drawStatCard(doc, x, cursorY, statWidth, statCardHeight, stat.title, stat.value, stat.color);
+  const badgeW = (PW - MX * 2 - 9) / 4;
+  const badgeH = 16;
+  badges.forEach((b, i) => {
+    const bx = MX + i * (badgeW + 3);
+    doc.setFillColor(C_BGHDR[0], C_BGHDR[1], C_BGHDR[2]);
+    doc.roundedRect(bx, cursorY, badgeW, badgeH, 1.5, 1.5, 'F');
+    // Left colour pip
+    doc.setFillColor(b.accent[0], b.accent[1], b.accent[2]);
+    doc.roundedRect(bx, cursorY, 3, badgeH, 1, 1, 'F');
+    // Label
+    doc.setFontSize(5.5);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(b.accent[0], b.accent[1], b.accent[2]);
+    doc.text(b.label, bx + 5.5, cursorY + 5);
+    // Value
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(C_WHITE[0], C_WHITE[1], C_WHITE[2]);
+    doc.text(b.value, bx + 5.5, cursorY + 12.5);
   });
 
-  cursorY += statCardHeight + 6;
+  cursorY += badgeH + 5;
 
-  // Charts
-  const chartHeight = 34;
-  const chartGap = 6;
-  const chartWidth = (contentWidth - chartGap * 2) / 3;
-  const chartLimit = Math.min(teams.length, 6);
+  // Filter notice
+  if (filtered || searchTerm) {
+    doc.setFontSize(7.5);
+    doc.setFont('helvetica', 'italic');
+    doc.setTextColor(C_GOLD[0], C_GOLD[1], C_GOLD[2]);
+    const note = filtered
+      ? `Filtered Results${searchTerm ? ` — "${searchTerm}"` : ''}`
+      : `Search: "${searchTerm}"`;
+    doc.text(note, MX, cursorY);
+    cursorY += 5;
+  }
 
-  const pointsSeries = getTopSeries(teams, (t) => safeNumber(t.points, 0), chartLimit);
-  const winRateSeries = [...teams]
-    .map((team) => {
-      const played = safeNumber(team.matchesPlayed, 0);
-      const wins = safeNumber(team.wins, 0);
-      const winRate = played > 0 ? Math.round((wins / played) * 100) : 0;
-      const rawLabel = team.shortName || team.name || 'Team';
-      const label = rawLabel.length > 7 ? rawLabel.slice(0, 7) : rawLabel;
-      return { label, value: winRate, valueLabel: `${winRate}%` };
-    })
-    .sort((a, b) => b.value - a.value)
-    .slice(0, chartLimit);
+  // ── Table ─────────────────────────────────────────────────────────────────────
+  const tableHeaders = ['#', 'Team', 'M', 'W', 'L', 'NR', 'Pts', 'NRR', 'Status'];
+  const tableBody = teams.map((team, idx) => {
+    const nrr = safeNumber(team.netRunRate, 0);
+    const nrrStr = nrr >= 0 ? `+${nrr.toFixed(3)}` : nrr.toFixed(3);
+    return [
+      String(idx + 1),
+      team.shortName || team.name || '—',
+      String(safeNumber(team.matchesPlayed, 0)),
+      String(safeNumber(team.wins, 0)),
+      String(safeNumber(team.losses, 0)),
+      String(safeNumber(team.noResult, 0)),
+      String(safeNumber(team.points, 0)),
+      nrrStr,
+      team.qualified ? 'Qualified' : '—'
+    ];
+  });
 
-  const nrrSeries: ChartSeries[] = [...teams]
-    .map((team) => {
-      const nrr = safeNumber(team.netRunRate, 0);
-      const rawLabel = team.shortName || team.name || 'Team';
-      const label = rawLabel.length > 7 ? rawLabel.slice(0, 7) : rawLabel;
-      const valueLabel = nrr >= 0 ? `+${nrr.toFixed(2)}` : nrr.toFixed(2);
-      return { label, value: Number(nrr.toFixed(2)), valueLabel };
-    })
-    .sort((a, b) => b.value - a.value);
-
-  drawBarChart(doc, marginX, cursorY, chartWidth, chartHeight, 'Top Points', pointsSeries, [233, 94, 32]);
-  drawBarChart(doc, marginX + chartWidth + chartGap, cursorY, chartWidth, chartHeight, 'Top Win %', winRateSeries, [107, 154, 66]);
-  drawDivergingBarChart(
-    doc,
-    marginX + (chartWidth + chartGap) * 2,
-    cursorY,
-    chartWidth,
-    chartHeight,
-    'Net Run Rate',
-    nrrSeries,
-    [178, 82, 35],
-    [187, 62, 86]
-  );
-
-  cursorY += chartHeight + 8;
-
-  // Table headers
-  const headers = [
-    'Rank',
-    'Team',
-    'Played',
-    'Won',
-    'Lost',
-    'NR',
-    'Points',
-    'NRR',
-    'Qualified'
-  ];
-
-  // Table data
-  const tableData = teams.map((team, index) => [
-    index + 1,
-    team.shortName,
-    team.matchesPlayed || 0,
-    team.wins || 0,
-    team.losses || 0,
-    team.noResult || 0,
-    team.points || 0,
-    team.netRunRate !== null ? team.netRunRate.toFixed(3) : '0.000',
-    team.qualified ? 'Yes' : 'No'
-  ]);
-
-  // Add table using autoTable
   autoTable(doc, {
-    head: [headers],
-    body: tableData,
+    head: [tableHeaders],
+    body: tableBody,
     startY: cursorY,
-    margin: { top: headerHeight + 10, left: marginX, right: marginX },
+    margin: { top: HDR_H + 7, left: MX, right: MX, bottom: 14 },
+    theme: 'plain',
     styles: {
-      fontSize: 9,
-      cellPadding: 3,
-      overflow: 'linebreak',
-      lineWidth: 0.1,
-      lineColor: [220, 190, 160],
-      textColor: bodyTextColor,
-      fillColor: [255, 244, 230]
+      fontSize: 8.5,
+      cellPadding: { top: 3.5, bottom: 3.5, left: 3, right: 3 },
+      lineWidth: 0.18,
+      lineColor: C_GRID,
+      overflow: 'linebreak'
     },
     headStyles: {
-      fillColor: [150, 56, 20],
-      textColor: 255,
+      fillColor: C_BGHDR,
+      textColor: C_GOLD,
       fontStyle: 'bold',
-      fontSize: 10
+      fontSize: 8,
+      cellPadding: { top: 4, bottom: 4, left: 3, right: 3 }
     },
-    alternateRowStyles: {
-      fillColor: [255, 251, 245]
-    },
+    alternateRowStyles: { fillColor: C_ROW2 },
     columnStyles: {
-      0: { cellWidth: 15, halign: 'center' }, // Rank
-      1: { cellWidth: 40, halign: 'left' },  // Team
-      2: { cellWidth: 20, halign: 'center' }, // Played
-      3: { cellWidth: 15, halign: 'center' }, // Won
-      4: { cellWidth: 15, halign: 'center' }, // Lost
-      5: { cellWidth: 15, halign: 'center' }, // NR
-      6: { cellWidth: 20, halign: 'center' }, // Points
-      7: { cellWidth: 25, halign: 'center' }, // NRR
-      8: { cellWidth: 25, halign: 'center' }  // Qualified
+      0: { cellWidth: 11, halign: 'center' },   // #
+      1: { cellWidth: 32, halign: 'left'   },   // Team
+      2: { cellWidth: 14, halign: 'center' },   // M
+      3: { cellWidth: 14, halign: 'center' },   // W
+      4: { cellWidth: 14, halign: 'center' },   // L
+      5: { cellWidth: 14, halign: 'center' },   // NR
+      6: { cellWidth: 16, halign: 'center' },   // Pts
+      7: { cellWidth: 25, halign: 'center' },   // NRR
+      8: { cellWidth: 32, halign: 'center' }    // Status
     },
-    didParseCell: (data: any) => {
-      if (data.section === 'body' && data.row.index < 4) {
-        data.cell.styles.fillColor = [255, 235, 200]; // Highlight
-        data.cell.styles.textColor = [54, 32, 18];
-        data.cell.styles.fontStyle = 'bold';
+    didParseCell: (cellData: any) => {
+      if (cellData.section === 'body') {
+        const rowIdx = cellData.row.index;
+        const colIdx = cellData.column.index;
+        const team = teams[rowIdx];
+        const isQual = team?.qualified;
+
+        // Row background
+        cellData.cell.styles.fillColor = isQual ? C_QUAL : (rowIdx % 2 === 0 ? C_ROW1 : C_ROW2);
+        cellData.cell.styles.textColor = C_WHITE;
+        cellData.cell.styles.fontStyle = 'normal';
+
+        // Rank column
+        if (colIdx === 0) {
+          cellData.cell.styles.textColor = isQual ? C_GOLD : C_MUTED;
+          if (isQual) cellData.cell.styles.fontStyle = 'bold';
+        }
+        // Team name: brand colour + bold
+        if (colIdx === 1) {
+          cellData.cell.styles.textColor = teamColor(team?.shortName || '');
+          cellData.cell.styles.fontStyle = 'bold';
+        }
+        // Points: gold for qualified
+        if (colIdx === 6 && isQual) {
+          cellData.cell.styles.textColor = C_GOLD;
+          cellData.cell.styles.fontStyle = 'bold';
+        }
+        // NRR: green/red
+        if (colIdx === 7) {
+          const nrr = safeNumber(team?.netRunRate, 0);
+          cellData.cell.styles.textColor = nrr >= 0 ? C_GREEN : C_REDTXT;
+          cellData.cell.styles.fontStyle = 'bold';
+        }
+        // Status: emerald / muted
+        if (colIdx === 8) {
+          if (isQual) {
+            cellData.cell.styles.textColor = C_EMERALD;
+            cellData.cell.styles.fontStyle = 'bold';
+          } else {
+            cellData.cell.styles.textColor = C_MUTED;
+          }
+        }
       }
     },
-    willDrawPage: (data: any) => {
-      if (data.pageNumber > 1) {
-        drawPageBackground(doc, pageWidth, pageHeight);
-        drawHeaderBand(doc, pageWidth, headerHeight, year);
-      }
+    willDrawPage: (pd: any) => {
+      paintBg();
+      if (pd.pageNumber > 1) paintHeader();
     },
-    didDrawPage: (data: any) => {
+    didDrawPage: (pd: any) => {
       const totalPages = doc.internal.getNumberOfPages();
-      drawFooter(doc, pageWidth, pageHeight, totalTeams, data.pageNumber, totalPages);
+      paintFooter(pd.pageNumber, totalPages);
     }
   });
 
-  // Save the PDF using a blob for better browser compatibility
   const pdfBlob = doc.output('blob');
   downloadBlob(pdfBlob, `ipl-points-table-${year}${filtered ? '-filtered' : ''}.pdf`);
 }
