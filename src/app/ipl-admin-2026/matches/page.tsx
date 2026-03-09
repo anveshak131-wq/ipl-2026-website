@@ -1702,337 +1702,553 @@ export default function AdminMatches() {
                     )}
 
                     {showForm && (
-                        <div className="glass-effect rounded-xl p-8 mb-8 border border-white/10">
-                            <div className="flex justify-between items-center mb-6">
-                                <div>
-                                    <h2 className="text-2xl font-bold text-white">
-                                        {editingId ? 'Edit Match' : 'Create New Match'}
-                                    </h2>
-                                    <p className="text-gray-400 text-sm mt-1">Step {formStep} of 3</p>
-                                </div>
-                                <button onClick={resetForm} className="text-gray-400 hover:text-white transition-colors">
-                                    <IconX className="w-6 h-6" />
-                                </button>
-                            </div>
+                        <motion.div
+                            key="create-edit-form"
+                            initial={{ opacity: 0, y: -16, scale: 0.98 }}
+                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                            exit={{ opacity: 0, y: -12, scale: 0.98 }}
+                            transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+                            className="relative overflow-hidden rounded-2xl mb-8 border border-white/10"
+                            style={{ background: 'linear-gradient(160deg, rgba(14,18,32,0.98) 0%, rgba(10,12,22,0.99) 100%)' }}
+                        >
+                            {/* Top accent line */}
+                            <div className={`h-1 w-full bg-gradient-to-r ${editingId ? 'from-yellow-500 via-amber-400 to-orange-500' : 'from-blue-500 via-indigo-500 to-purple-600'}`} />
 
-                            <div className="mb-6 flex gap-2">
-                                {[1, 2, 3].map(step => (
-                                    <div
-                                        key={step}
-                                        className={`flex-1 h-1.5 rounded-full transition-all duration-300 ${step <= formStep ? 'bg-gradient-to-r from-ipl-gold to-ipl-purple' : 'bg-white/10'
-                                            }`}
-                                    />
-                                ))}
-                            </div>
+                            {/* Ambient glow */}
+                            <div className={`absolute top-0 left-0 right-0 h-32 opacity-8 pointer-events-none bg-gradient-to-b ${editingId ? 'from-yellow-500/10' : 'from-blue-500/10'} to-transparent`} />
 
-                            {error && (
-                                <div className="mb-6 p-4 bg-red-500/10 border border-red-500/30 rounded-lg text-red-400">
-                                    {error}
-                                </div>
-                            )}
-
-                            <form onSubmit={handleSubmit}>
-                                {formStep === 1 && (
-                                    <div className="space-y-6">
+                            <div className="relative p-6 lg:p-8">
+                                {/* Header */}
+                                <div className="flex items-start justify-between mb-7">
+                                    <div className="flex items-center gap-3">
+                                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${editingId ? 'bg-yellow-500/15 border border-yellow-500/30' : 'bg-blue-500/15 border border-blue-500/30'}`}>
+                                            {editingId ? (
+                                                <IconEdit className={`w-5 h-5 text-yellow-400`} />
+                                            ) : (
+                                                <IconPlus className={`w-5 h-5 text-blue-400`} />
+                                            )}
+                                        </div>
                                         <div>
-                                            <h3 className="text-lg font-semibold text-white mb-4">Match Details</h3>
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                                <div>
-                                                    <label className="block text-sm font-medium text-gray-300 mb-2">Date</label>
-                                                    <input
-                                                        type="date"
-                                                        value={formData.date}
-                                                        onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                                                        className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-ipl-gold transition-colors"
-                                                        required
-                                                    />
+                                            <h2 className="text-xl font-bold text-white">
+                                                {editingId ? 'Edit Match' : 'Create New Match'}
+                                            </h2>
+                                            <p className="text-xs text-gray-500 mt-0.5">
+                                                {editingId ? 'Update match details below' : 'Fill in the details to schedule a match'}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <button
+                                        onClick={resetForm}
+                                        className="p-2 rounded-xl text-gray-500 hover:text-white hover:bg-white/8 transition-all duration-200"
+                                    >
+                                        <IconX className="w-5 h-5" />
+                                    </button>
+                                </div>
+
+                                {/* Step Indicators */}
+                                <div className="flex items-center gap-0 mb-8">
+                                    {[
+                                        { num: 1, label: 'Date & Time' },
+                                        { num: 2, label: 'Teams' },
+                                        { num: 3, label: 'Venue & Status' },
+                                    ].map((step, i) => (
+                                        <div key={step.num} className="flex items-center flex-1">
+                                            <div className="flex flex-col items-center gap-1 flex-shrink-0">
+                                                <motion.div
+                                                    animate={{
+                                                        scale: formStep === step.num ? 1.1 : 1,
+                                                        backgroundColor: formStep > step.num
+                                                            ? 'rgba(16, 185, 129, 0.9)'
+                                                            : formStep === step.num
+                                                            ? 'rgba(234, 179, 8, 0.9)'
+                                                            : 'rgba(255,255,255,0.08)',
+                                                    }}
+                                                    transition={{ duration: 0.3 }}
+                                                    className="w-8 h-8 rounded-full flex items-center justify-center border cursor-pointer"
+                                                    style={{
+                                                        borderColor: formStep > step.num
+                                                            ? 'rgba(16, 185, 129, 0.5)'
+                                                            : formStep === step.num
+                                                            ? 'rgba(234, 179, 8, 0.5)'
+                                                            : 'rgba(255,255,255,0.1)',
+                                                    }}
+                                                    onClick={() => formStep > step.num && setFormStep(step.num)}
+                                                >
+                                                    {formStep > step.num ? (
+                                                        <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                                                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                                        </svg>
+                                                    ) : (
+                                                        <span className={`text-xs font-bold ${formStep === step.num ? 'text-white' : 'text-gray-500'}`}>{step.num}</span>
+                                                    )}
+                                                </motion.div>
+                                                <span className={`text-[10px] font-medium hidden sm:block ${formStep === step.num ? 'text-yellow-400' : formStep > step.num ? 'text-emerald-400' : 'text-gray-600'}`}>
+                                                    {step.label}
+                                                </span>
+                                            </div>
+                                            {i < 2 && (
+                                                <div className="flex-1 mx-2 mt-[-10px]">
+                                                    <div className="h-px w-full bg-white/8 relative overflow-hidden rounded-full">
+                                                        <motion.div
+                                                            className="absolute inset-y-0 left-0 bg-gradient-to-r from-yellow-400 to-emerald-400 rounded-full"
+                                                            initial={{ width: '0%' }}
+                                                            animate={{ width: formStep > step.num ? '100%' : '0%' }}
+                                                            transition={{ duration: 0.4, ease: 'easeOut' }}
+                                                        />
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+
+                                {error && (
+                                    <motion.div
+                                        initial={{ opacity: 0, x: -8 }}
+                                        animate={{ opacity: 1, x: 0 }}
+                                        className="mb-6 p-3.5 bg-red-500/10 border border-red-500/25 rounded-xl text-red-400 text-sm flex items-center gap-2.5"
+                                    >
+                                        <IconX className="w-4 h-4 flex-shrink-0" />
+                                        {error}
+                                    </motion.div>
+                                )}
+
+                                <form onSubmit={handleSubmit}>
+                                    {formStep === 1 && (
+                                        <motion.div
+                                            key="step1"
+                                            initial={{ opacity: 0, x: 20 }}
+                                            animate={{ opacity: 1, x: 0 }}
+                                            exit={{ opacity: 0, x: -20 }}
+                                            transition={{ duration: 0.28 }}
+                                            className="space-y-5"
+                                        >
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                                <div className="space-y-1.5">
+                                                    <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                                                        Match Date
+                                                    </label>
+                                                    <div className="relative">
+                                                        <Calendar className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
+                                                        <input
+                                                            type="date"
+                                                            value={formData.date}
+                                                            onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                                                            className="w-full pl-10 pr-4 py-3 rounded-xl border border-white/10 text-white text-sm focus:outline-none focus:border-yellow-500/50 focus:ring-2 focus:ring-yellow-500/15 transition-all"
+                                                            style={{ background: 'rgba(255,255,255,0.06)', colorScheme: 'dark' }}
+                                                            required
+                                                        />
+                                                    </div>
                                                 </div>
 
-                                                <div>
-                                                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                                                        Time (stored in IST)
+                                                <div className="space-y-1.5">
+                                                    <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                                                        Match Time (IST)
                                                         {currentLeague === 'wpl' && (
-                                                            <span className="ml-2 text-xs text-purple-300">(WPL 2026 times only)</span>
+                                                            <span className="ml-2 normal-case font-normal text-purple-400">WPL times only</span>
                                                         )}
                                                     </label>
                                                     {currentLeague === 'wpl' ? (
-                                                        // WPL: Dropdown with only 2 times (showing both Paris and IST)
                                                         <div className="space-y-2">
-                                                            <select
-                                                                value={formData.time}
-                                                                onChange={(e) => {
-                                                                    setFormData({ ...formData, time: e.target.value });
-                                                                }}
-                                                                className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-purple-500 transition-colors"
-                                                                required
-                                                            >
-                                                                <option value="">Select a time...</option>
-                                                                {WPL_TIMES.map((timeOption, index) => (
-                                                                    <option key={index} value={timeOption.ist} className="bg-gray-900 text-white">
-                                                                        {timeOption.display}
-                                                                    </option>
-                                                                ))}
-                                                            </select>
+                                                            <div className="relative">
+                                                                <Clock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
+                                                                <select
+                                                                    value={formData.time}
+                                                                    onChange={(e) => setFormData({ ...formData, time: e.target.value })}
+                                                                    className="w-full pl-10 pr-4 py-3 rounded-xl border border-white/10 text-white text-sm focus:outline-none focus:border-purple-500/50 focus:ring-2 focus:ring-purple-500/15 transition-all appearance-none"
+                                                                    style={{ background: 'rgba(255,255,255,0.06)', colorScheme: 'dark' }}
+                                                                    required
+                                                                >
+                                                                    <option value="">Select a time...</option>
+                                                                    {WPL_TIMES.map((timeOption, index) => (
+                                                                        <option key={index} value={timeOption.ist} className="bg-gray-900 text-white">
+                                                                            {timeOption.display}
+                                                                        </option>
+                                                                    ))}
+                                                                </select>
+                                                            </div>
                                                             {formData.time && (
-                                                                <div className="flex items-center gap-2 text-xs text-purple-300 bg-purple-500/10 border border-purple-500/20 rounded-lg px-3 py-2">
-                                                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                                                    </svg>
-                                                                    <span>
-                                                                        {(() => {
-                                                                            const selected = WPL_TIMES.find(t => t.ist === formData.time);
-                                                                            if (selected) {
-                                                                                return `Storing: ${selected.ist} IST (Paris: ${selected.paris})`;
-                                                                            }
-                                                                            return `Storing: ${formData.time} IST`;
-                                                                        })()}
-                                                                    </span>
+                                                                <div className="flex items-center gap-2 text-xs text-purple-300 bg-purple-500/8 border border-purple-500/20 rounded-lg px-3 py-2">
+                                                                    <Clock className="w-3.5 h-3.5 flex-shrink-0" />
+                                                                    {(() => {
+                                                                        const selected = WPL_TIMES.find(t => t.ist === formData.time);
+                                                                        return selected ? `Storing: ${selected.ist} IST (Paris: ${selected.paris})` : `Storing: ${formData.time} IST`;
+                                                                    })()}
                                                                 </div>
                                                             )}
                                                         </div>
                                                     ) : (
-                                                        // IPL: Time input
-                                                    <input
-                                                        type="time"
-                                                        value={formData.time}
-                                                        onChange={(e) => setFormData({ ...formData, time: e.target.value })}
-                                                        className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-ipl-gold transition-colors"
-                                                        required
-                                                    />
+                                                        <div className="relative">
+                                                            <Clock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
+                                                            <input
+                                                                type="time"
+                                                                value={formData.time}
+                                                                onChange={(e) => setFormData({ ...formData, time: e.target.value })}
+                                                                className="w-full pl-10 pr-4 py-3 rounded-xl border border-white/10 text-white text-sm focus:outline-none focus:border-yellow-500/50 focus:ring-2 focus:ring-yellow-500/15 transition-all"
+                                                                style={{ background: 'rgba(255,255,255,0.06)', colorScheme: 'dark' }}
+                                                                required
+                                                            />
+                                                        </div>
                                                     )}
                                                 </div>
                                             </div>
-                                        </div>
 
-                                        <div className="flex justify-end">
-                                            <button
-                                                type="button"
-                                                onClick={() => setFormStep(2)}
-                                                className="ipl-button"
-                                            >
-                                                Next Step
-                                            </button>
-                                        </div>
-                                    </div>
-                                )}
+                                            {/* Preview card */}
+                                            {(formData.date || formData.time) && (
+                                                <motion.div
+                                                    initial={{ opacity: 0, y: 6 }}
+                                                    animate={{ opacity: 1, y: 0 }}
+                                                    className="flex items-center gap-3 p-3.5 rounded-xl border border-yellow-500/20 bg-yellow-500/5"
+                                                >
+                                                    <Calendar className="w-4 h-4 text-yellow-400 flex-shrink-0" />
+                                                    <span className="text-sm text-yellow-200/80">
+                                                        {formData.date ? new Date(formData.date + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' }) : '–'}
+                                                        {formData.time ? ` · ${formatTime(formData.time)}` : ''}
+                                                    </span>
+                                                </motion.div>
+                                            )}
 
-                                {formStep === 2 && (
-                                    <div className="space-y-6">
-                                        <div>
-                                            <h3 className="text-lg font-semibold text-white mb-4">Select Teams</h3>
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                                <div>
-                                                    <label className="block text-sm font-medium text-gray-300 mb-2">Team 1</label>
-                                                    <select
-                                                        value={formData.team1Id}
-                                                        onChange={(e) => setFormData({ ...formData, team1Id: e.target.value })}
-                                                        className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-ipl-gold transition-colors"
-                                                        required
-                                                    >
-                                                        <option value="">Select Team</option>
-                                                        {teams.map(team => (
-                                                            <option key={team.id} value={team.id} disabled={team.id === formData.team2Id}>
-                                                                {team.shortName} - {team.name}
-                                                            </option>
-                                                        ))}
-                                                    </select>
+                                            <div className="flex justify-end pt-2">
+                                                <motion.button
+                                                    type="button"
+                                                    onClick={() => setFormStep(2)}
+                                                    whileHover={{ scale: 1.03 }}
+                                                    whileTap={{ scale: 0.97 }}
+                                                    className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-yellow-500 to-amber-500 text-black text-sm font-bold shadow-md hover:shadow-yellow-500/30 transition-all"
+                                                >
+                                                    Next: Select Teams
+                                                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" /></svg>
+                                                </motion.button>
+                                            </div>
+                                        </motion.div>
+                                    )}
+
+                                    {formStep === 2 && (
+                                        <motion.div
+                                            key="step2"
+                                            initial={{ opacity: 0, x: 20 }}
+                                            animate={{ opacity: 1, x: 0 }}
+                                            exit={{ opacity: 0, x: -20 }}
+                                            transition={{ duration: 0.28 }}
+                                            className="space-y-5"
+                                        >
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                                <div className="space-y-1.5">
+                                                    <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                                                        Team 1 <span className="text-blue-400 normal-case font-normal">(Home)</span>
+                                                    </label>
+                                                    <div className="relative">
+                                                        <Users className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
+                                                        <select
+                                                            value={formData.team1Id}
+                                                            onChange={(e) => setFormData({ ...formData, team1Id: e.target.value })}
+                                                            className="w-full pl-10 pr-4 py-3 rounded-xl border border-white/10 text-white text-sm focus:outline-none focus:border-blue-500/50 focus:ring-2 focus:ring-blue-500/15 transition-all appearance-none"
+                                                            style={{ background: 'rgba(255,255,255,0.06)', colorScheme: 'dark' }}
+                                                            required
+                                                        >
+                                                            <option value="">Select Team 1...</option>
+                                                            {teams.map(team => (
+                                                                <option key={team.id} value={team.id} disabled={team.id === formData.team2Id} className="bg-gray-900">
+                                                                    {team.shortName} — {team.name}
+                                                                </option>
+                                                            ))}
+                                                        </select>
+                                                        <svg className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
+                                                    </div>
+                                                    {formData.team1Id && (
+                                                        <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-xs text-blue-400 pl-1">
+                                                            ✓ {teams.find(t => t.id === formData.team1Id)?.name}
+                                                        </motion.p>
+                                                    )}
                                                 </div>
 
-                                                <div>
-                                                    <label className="block text-sm font-medium text-gray-300 mb-2">Team 2</label>
-                                                    <select
-                                                        value={formData.team2Id}
-                                                        onChange={(e) => setFormData({ ...formData, team2Id: e.target.value })}
-                                                        className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-ipl-gold transition-colors"
-                                                        required
-                                                    >
-                                                        <option value="">Select Team</option>
-                                                        {teams.map(team => (
-                                                            <option key={team.id} value={team.id} disabled={team.id === formData.team1Id}>
-                                                                {team.shortName} - {team.name}
-                                                            </option>
-                                                        ))}
-                                                    </select>
+                                                <div className="space-y-1.5">
+                                                    <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                                                        Team 2 <span className="text-rose-400 normal-case font-normal">(Away)</span>
+                                                    </label>
+                                                    <div className="relative">
+                                                        <Users className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
+                                                        <select
+                                                            value={formData.team2Id}
+                                                            onChange={(e) => setFormData({ ...formData, team2Id: e.target.value })}
+                                                            className="w-full pl-10 pr-4 py-3 rounded-xl border border-white/10 text-white text-sm focus:outline-none focus:border-rose-500/50 focus:ring-2 focus:ring-rose-500/15 transition-all appearance-none"
+                                                            style={{ background: 'rgba(255,255,255,0.06)', colorScheme: 'dark' }}
+                                                            required
+                                                        >
+                                                            <option value="">Select Team 2...</option>
+                                                            {teams.map(team => (
+                                                                <option key={team.id} value={team.id} disabled={team.id === formData.team1Id} className="bg-gray-900">
+                                                                    {team.shortName} — {team.name}
+                                                                </option>
+                                                            ))}
+                                                        </select>
+                                                        <svg className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
+                                                    </div>
+                                                    {formData.team2Id && (
+                                                        <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-xs text-rose-400 pl-1">
+                                                            ✓ {teams.find(t => t.id === formData.team2Id)?.name}
+                                                        </motion.p>
+                                                    )}
                                                 </div>
                                             </div>
-                                        </div>
 
-                                        <div className="flex justify-between">
-                                            <button
-                                                type="button"
-                                                onClick={() => setFormStep(1)}
-                                                className="glass-effect text-white font-semibold py-3 px-6 rounded-lg hover:bg-white/10 transition-all duration-200"
-                                            >
-                                                Previous
-                                            </button>
-                                            <button
-                                                type="button"
-                                                onClick={() => setFormStep(3)}
-                                                className="ipl-button"
-                                            >
-                                                Next Step
-                                            </button>
-                                        </div>
-                                    </div>
-                                )}
+                                            {/* Matchup preview */}
+                                            {formData.team1Id && formData.team2Id && (
+                                                <motion.div
+                                                    initial={{ opacity: 0, y: 6 }}
+                                                    animate={{ opacity: 1, y: 0 }}
+                                                    className="flex items-center justify-center gap-4 p-4 rounded-xl border border-white/10"
+                                                    style={{ background: 'rgba(255,255,255,0.03)' }}
+                                                >
+                                                    <span className="text-sm font-bold text-blue-300">{teams.find(t => t.id === formData.team1Id)?.shortName}</span>
+                                                    <div className="px-3 py-1 rounded-full bg-gradient-to-r from-white/5 to-white/10 border border-white/15 text-xs font-extrabold text-gray-300">VS</div>
+                                                    <span className="text-sm font-bold text-rose-300">{teams.find(t => t.id === formData.team2Id)?.shortName}</span>
+                                                </motion.div>
+                                            )}
 
-                                {formStep === 3 && (
-                                   <div className="space-y-6">
-                                       <div>
-                                           <h3 className="text-lg font-semibold text-white mb-4">Venue & Status</h3>
-                                           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                               <div className="md:col-span-2 relative">
-                                                   <label className="block text-sm font-medium text-gray-300 mb-2">
-                                                       Venue
-                                                       {currentLeague === 'wpl' && (
-                                                           <span className="ml-2 text-xs text-purple-300">(WPL 2026 venues only)</span>
-                                                       )}
-                                                   </label>
-                                                   {currentLeague === 'wpl' ? (
-                                                       // WPL: Dropdown with only 2 venues
-                                                       <select
-                                                           value={formData.venue}
-                                                           onChange={(e) => {
-                                                               setFormData({ ...formData, venue: e.target.value });
-                                                           }}
-                                                           className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-purple-500 transition-colors"
-                                                           required
-                                                       >
-                                                           <option value="">Select a venue...</option>
-                                                           {WPL_VENUES.map((venue, index) => (
-                                                               <option key={index} value={venue} className="bg-gray-900 text-white">
-                                                                   {venue}
-                                                               </option>
-                                                           ))}
-                                                       </select>
-                                                   ) : (
-                                                       // IPL: Autocomplete input
-                                                   <div className="relative">
-                                                       <input
-                                                           type="text"
-                                                           value={formData.venue}
-                                                           onChange={(e) => {
-                                                               setFormData({ ...formData, venue: e.target.value });
-                                                               setVenueSearchQuery(e.target.value);
-                                                           }}
-                                                           onFocus={() => setVenueSearchQuery(formData.venue)}
-                                                           className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 pr-10 text-white focus:outline-none focus:border-ipl-gold transition-colors"
-                                                           placeholder="Search or select venue..."
-                                                           required
-                                                       />
-                                                       <svg 
-                                                           className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"
-                                                           fill="none" 
-                                                           stroke="currentColor" 
-                                                           viewBox="0 0 24 24"
-                                                       >
-                                                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                                                       </svg>
-                                                   </div>
-                                                   )}
-                                                   
-                                                   {/* Venue Suggestions Dropdown (IPL only) */}
-                                                   {currentLeague === 'ipl' && venueSearchQuery && (
-                                                       <div className="absolute z-20 w-full mt-2 glass-effect rounded-lg shadow-xl border border-white/10 max-h-[300px] overflow-y-auto scrollbar-thin scrollbar-thumb-ipl-gold/50 scrollbar-track-white/5">
-                                                           {IPL_VENUES
-                                                               .filter(venue => 
-                                                                   venue.toLowerCase().includes(venueSearchQuery.toLowerCase())
-                                                               )
-                                                               .map((venue, index) => {
-                                                                   const [stadiumName, city] = venue.split(',').map(s => s.trim());
-                                                                   return (
-                                                                       <button
-                                                                           key={index}
-                                                                           type="button"
-                                                                           onClick={() => {
-                                                                               setFormData({ ...formData, venue });
-                                                                               setVenueSearchQuery('');
-                                                                           }}
-                                                                           className="w-full px-4 py-3 text-left hover:bg-white/10 transition-colors flex items-center space-x-3 border-b border-white/5 last:border-0"
-                                                                       >
-                                                                           <div className="flex items-center justify-center w-10 h-10 rounded-full bg-ipl-purple/30 flex-shrink-0">
-                                                                               <svg className="w-5 h-5 text-ipl-gold" fill="currentColor" viewBox="0 0 20 20">
-                                                                                   <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
-                                                                               </svg>
-                                                                           </div>
-                                                                           <div className="flex-1 min-w-0">
-                                                                               <div className="text-white font-medium truncate">{stadiumName}</div>
-                                                                               <div className="text-xs text-gray-400">📍 {city}</div>
-                                                                           </div>
-                                                                       </button>
-                                                                   );
-                                                               })}
-                                                           {IPL_VENUES.filter(venue => 
-                                                               venue.toLowerCase().includes(venueSearchQuery.toLowerCase())
-                                                           ).length === 0 && (
-                                                               <div className="px-4 py-8 text-center text-gray-400">
-                                                                   <svg className="w-12 h-12 mx-auto mb-2 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                                                   </svg>
-                                                                   <p>No venues found</p>
-                                                                   <p className="text-xs mt-1">Type to search or enter custom venue</p>
-                                                               </div>
-                                                           )}
-                                                       </div>
-                                                   )}
-                                               </div>
+                                            {formData.team1Id === formData.team2Id && formData.team1Id && (
+                                                <p className="text-xs text-red-400 flex items-center gap-1.5">
+                                                    <IconX className="w-3.5 h-3.5" /> Same team selected — please choose different teams
+                                                </p>
+                                            )}
 
-                                                <div>
-                                                    <label className="block text-sm font-medium text-gray-300 mb-2">Status</label>
-                                                    <select
-                                                        value={formData.status}
-                                                        onChange={(e) => setFormData({ ...formData, status: e.target.value as 'upcoming' | 'live' | 'completed' | 'cancelled' })}
-                                                        className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-ipl-gold transition-colors"
-                                                    >
-                                                        <option value="upcoming">Scheduled</option>
-                                                        <option value="live">Live</option>
-                                                        <option value="completed">Completed</option>
-                                                        <option value="cancelled">Cancelled</option>
-                                                    </select>
+                                            <div className="flex justify-between pt-2">
+                                                <motion.button type="button" onClick={() => setFormStep(1)} whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
+                                                    className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-white/10 text-gray-300 hover:text-white hover:border-white/25 text-sm font-medium transition-all"
+                                                    style={{ background: 'rgba(255,255,255,0.04)' }}
+                                                >
+                                                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg>
+                                                    Back
+                                                </motion.button>
+                                                <motion.button type="button" onClick={() => setFormStep(3)} whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
+                                                    className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-yellow-500 to-amber-500 text-black text-sm font-bold shadow-md hover:shadow-yellow-500/30 transition-all"
+                                                >
+                                                    Next: Venue & Status
+                                                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" /></svg>
+                                                </motion.button>
+                                            </div>
+                                        </motion.div>
+                                    )}
+
+                                    {formStep === 3 && (
+                                        <motion.div
+                                            key="step3"
+                                            initial={{ opacity: 0, x: 20 }}
+                                            animate={{ opacity: 1, x: 0 }}
+                                            exit={{ opacity: 0, x: -20 }}
+                                            transition={{ duration: 0.28 }}
+                                            className="space-y-5"
+                                        >
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                                <div className="md:col-span-2 space-y-1.5 relative">
+                                                    <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                                                        Venue
+                                                        {currentLeague === 'wpl' && (
+                                                            <span className="ml-2 normal-case font-normal text-purple-400">WPL 2026 venues only</span>
+                                                        )}
+                                                    </label>
+                                                    {currentLeague === 'wpl' ? (
+                                                        <div className="relative">
+                                                            <MapPin className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
+                                                            <select
+                                                                value={formData.venue}
+                                                                onChange={(e) => setFormData({ ...formData, venue: e.target.value })}
+                                                                className="w-full pl-10 pr-4 py-3 rounded-xl border border-white/10 text-white text-sm focus:outline-none focus:border-purple-500/50 focus:ring-2 focus:ring-purple-500/15 transition-all appearance-none"
+                                                                style={{ background: 'rgba(255,255,255,0.06)', colorScheme: 'dark' }}
+                                                                required
+                                                            >
+                                                                <option value="">Select a venue...</option>
+                                                                {WPL_VENUES.map((venue, index) => (
+                                                                    <option key={index} value={venue} className="bg-gray-900 text-white">{venue}</option>
+                                                                ))}
+                                                            </select>
+                                                            <svg className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
+                                                        </div>
+                                                    ) : (
+                                                        <div className="relative">
+                                                            <MapPin className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none z-10" />
+                                                            <input
+                                                                type="text"
+                                                                value={formData.venue}
+                                                                onChange={(e) => {
+                                                                    setFormData({ ...formData, venue: e.target.value });
+                                                                    setVenueSearchQuery(e.target.value);
+                                                                }}
+                                                                onFocus={() => setVenueSearchQuery(formData.venue)}
+                                                                className="w-full pl-10 pr-10 py-3 rounded-xl border border-white/10 text-white text-sm focus:outline-none focus:border-yellow-500/50 focus:ring-2 focus:ring-yellow-500/15 transition-all"
+                                                                style={{ background: 'rgba(255,255,255,0.06)', colorScheme: 'dark' }}
+                                                                placeholder="Search or type a stadium..."
+                                                                required
+                                                            />
+                                                            <svg className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                                                        </div>
+                                                    )}
+
+                                                    {/* Venue Suggestions Dropdown */}
+                                                    {currentLeague === 'ipl' && venueSearchQuery && (
+                                                        <div className="absolute z-20 left-0 right-0 mt-1 rounded-xl shadow-2xl border border-white/10 overflow-hidden max-h-[280px] overflow-y-auto scrollbar-thin scrollbar-thumb-yellow-500/30 scrollbar-track-white/5"
+                                                            style={{ background: 'rgba(14,18,32,0.98)', backdropFilter: 'blur(20px)' }}
+                                                        >
+                                                            {IPL_VENUES
+                                                                .filter(venue => venue.toLowerCase().includes(venueSearchQuery.toLowerCase()))
+                                                                .map((venue, index) => {
+                                                                    const [stadiumName, city] = venue.split(',').map(s => s.trim());
+                                                                    return (
+                                                                        <button
+                                                                            key={index}
+                                                                            type="button"
+                                                                            onClick={() => {
+                                                                                setFormData({ ...formData, venue });
+                                                                                setVenueSearchQuery('');
+                                                                            }}
+                                                                            className="w-full px-4 py-3 text-left hover:bg-white/8 transition-colors flex items-center gap-3 border-b border-white/5 last:border-0"
+                                                                        >
+                                                                            <div className="w-8 h-8 rounded-lg bg-yellow-500/10 border border-yellow-500/20 flex items-center justify-center flex-shrink-0">
+                                                                                <MapPin className="w-4 h-4 text-yellow-400" />
+                                                                            </div>
+                                                                            <div className="flex-1 min-w-0">
+                                                                                <div className="text-white text-sm font-medium truncate">{stadiumName}</div>
+                                                                                <div className="text-xs text-gray-500">{city}</div>
+                                                                            </div>
+                                                                        </button>
+                                                                    );
+                                                                })
+                                                            }
+                                                            {IPL_VENUES.filter(v => v.toLowerCase().includes(venueSearchQuery.toLowerCase())).length === 0 && (
+                                                                <div className="px-4 py-6 text-center text-gray-500 text-sm">
+                                                                    No venues matched — you can type a custom venue
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    )}
+                                                </div>
+
+                                                <div className="space-y-1.5">
+                                                    <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider">Match Status</label>
+                                                    <div className="grid grid-cols-2 gap-2">
+                                                        {(['upcoming', 'live', 'completed', 'cancelled'] as const).map((s) => {
+                                                            const cfg: Record<string, { label: string; color: string; ring: string }> = {
+                                                                upcoming: { label: 'Scheduled', color: 'border-blue-500/40 bg-blue-500/10 text-blue-300', ring: 'ring-blue-500/30' },
+                                                                live:     { label: 'Live',      color: 'border-red-500/40 bg-red-500/10 text-red-300',   ring: 'ring-red-500/30' },
+                                                                completed:{ label: 'Completed', color: 'border-emerald-500/40 bg-emerald-500/10 text-emerald-300', ring: 'ring-emerald-500/30' },
+                                                                cancelled:{ label: 'Cancelled', color: 'border-gray-500/40 bg-gray-500/10 text-gray-400', ring: 'ring-gray-500/30' },
+                                                            };
+                                                            const c = cfg[s];
+                                                            const isActive = formData.status === s;
+                                                            return (
+                                                                <motion.button
+                                                                    key={s}
+                                                                    type="button"
+                                                                    onClick={() => setFormData({ ...formData, status: s })}
+                                                                    whileTap={{ scale: 0.95 }}
+                                                                    className={`px-3 py-2.5 rounded-xl border text-xs font-semibold transition-all duration-200 ${isActive ? c.color + ' ring-2 ' + c.ring : 'border-white/8 text-gray-500 hover:border-white/20 hover:text-gray-300'}`}
+                                                                    style={isActive ? {} : { background: 'rgba(255,255,255,0.03)' }}
+                                                                >
+                                                                    {c.label}
+                                                                </motion.button>
+                                                            );
+                                                        })}
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
 
-                                        <div className="flex justify-between">
-                                            <button
-                                                type="button"
-                                                onClick={() => setFormStep(2)}
-                                                className="glass-effect text-white font-semibold py-3 px-6 rounded-lg hover:bg-white/10 transition-all duration-200"
-                                            >
-                                                Previous
-                                            </button>
-                                            <button
-                                                type="submit"
-                                                disabled={isSubmitting}
-                                                className="ipl-button disabled:opacity-50"
-                                            >
-                                                {isSubmitting ? 'Saving...' : editingId ? 'Update Match' : 'Create Match'}
-                                            </button>
-                                        </div>
-                                    </div>
-                                )}
-                            </form>
-                        </div>
+                                            {/* Summary preview */}
+                                            {(formData.team1Id && formData.team2Id && formData.date) && (
+                                                <motion.div
+                                                    initial={{ opacity: 0, y: 6 }}
+                                                    animate={{ opacity: 1, y: 0 }}
+                                                    className="p-4 rounded-xl border border-white/10"
+                                                    style={{ background: 'rgba(255,255,255,0.025)' }}
+                                                >
+                                                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2.5">Match Summary</p>
+                                                    <div className="flex flex-wrap gap-x-6 gap-y-1.5 text-sm">
+                                                        <span className="text-gray-300">
+                                                            <span className="text-white font-semibold">{teams.find(t => t.id === formData.team1Id)?.shortName}</span>
+                                                            <span className="text-gray-500 mx-2">vs</span>
+                                                            <span className="text-white font-semibold">{teams.find(t => t.id === formData.team2Id)?.shortName}</span>
+                                                        </span>
+                                                        {formData.date && <span className="text-gray-400">{new Date(formData.date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>}
+                                                        {formData.time && <span className="text-gray-400">{formatTime(formData.time)}</span>}
+                                                        {formData.venue && <span className="text-gray-400 truncate max-w-[220px]">{formData.venue.split(',')[0]}</span>}
+                                                    </div>
+                                                </motion.div>
+                                            )}
+
+                                            <div className="flex justify-between pt-2">
+                                                <motion.button type="button" onClick={() => setFormStep(2)} whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
+                                                    className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-white/10 text-gray-300 hover:text-white hover:border-white/25 text-sm font-medium transition-all"
+                                                    style={{ background: 'rgba(255,255,255,0.04)' }}
+                                                >
+                                                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg>
+                                                    Back
+                                                </motion.button>
+                                                <motion.button
+                                                    type="submit"
+                                                    disabled={isSubmitting}
+                                                    whileHover={{ scale: isSubmitting ? 1 : 1.03 }}
+                                                    whileTap={{ scale: isSubmitting ? 1 : 0.97 }}
+                                                    className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold shadow-md transition-all disabled:opacity-50 disabled:cursor-not-allowed ${editingId ? 'bg-gradient-to-r from-yellow-500 to-amber-500 text-black hover:shadow-yellow-500/30' : 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white hover:shadow-blue-500/30'}`}
+                                                >
+                                                    {isSubmitting ? (
+                                                        <>
+                                                            <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                                                            Saving…
+                                                        </>
+                                                    ) : editingId ? (
+                                                        <><IconEdit className="w-4 h-4" /> Update Match</>
+                                                    ) : (
+                                                        <><IconPlus className="w-4 h-4" /> Create Match</>
+                                                    )}
+                                                </motion.button>
+                                            </div>
+                                        </motion.div>
+                                    )}
+                                </form>
+                            </div>
+                        </motion.div>
                     )}
 
                     {showPlayoffForm && (
-                        <div className="glass-effect rounded-xl p-8 mb-8 border border-purple-500/30">
-                            <div className="flex justify-between items-center mb-6">
-                                <div>
-                                    <h2 className="text-2xl font-bold text-white">
-                                        Create Playoff Match
-                                    </h2>
-                                    <p className="text-gray-400 text-sm mt-1">Fixed dates, times, and venues for playoff matches</p>
+                        <motion.div
+                            key="playoff-form"
+                            initial={{ opacity: 0, y: -16, scale: 0.98 }}
+                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                            exit={{ opacity: 0, y: -12, scale: 0.98 }}
+                            transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+                            className="relative overflow-hidden rounded-2xl mb-8 border border-purple-500/20"
+                            style={{ background: 'linear-gradient(160deg, rgba(14,10,32,0.99) 0%, rgba(10,8,22,0.99) 100%)' }}
+                        >
+                            {/* Top accent line */}
+                            <div className="h-1 w-full bg-gradient-to-r from-purple-600 via-fuchsia-500 to-violet-600" />
+
+                            {/* Ambient glow */}
+                            <div className="absolute top-0 left-0 right-0 h-40 opacity-10 pointer-events-none bg-gradient-to-b from-purple-500/20 to-transparent" />
+
+                            <div className="relative p-6 lg:p-8">
+                                <div className="flex items-start justify-between mb-6">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 bg-purple-500/15 border border-purple-500/30">
+                                            <Zap className="w-5 h-5 text-purple-400" />
+                                        </div>
+                                        <div>
+                                            <h2 className="text-xl font-bold text-white">Create Playoff Match</h2>
+                                            <p className="text-xs text-gray-500 mt-0.5">Pre-filled dates, times & venues — editable as needed</p>
+                                        </div>
+                                    </div>
+                                    <button onClick={resetForm} className="p-2 rounded-xl text-gray-500 hover:text-white hover:bg-white/8 transition-all duration-200">
+                                        <IconX className="w-5 h-5" />
+                                    </button>
                                 </div>
-                                <button onClick={resetForm} className="text-gray-400 hover:text-white transition-colors">
-                                    <IconX className="w-6 h-6" />
-                                </button>
-                            </div>
 
                             {error && (
-                                <div className="mb-6 p-4 bg-red-500/10 border border-red-500/30 rounded-lg text-red-400">
+                                <motion.div
+                                    initial={{ opacity: 0, x: -8 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    className="mb-6 p-3.5 bg-red-500/10 border border-red-500/25 rounded-xl text-red-400 text-sm flex items-center gap-2.5"
+                                >
+                                    <IconX className="w-4 h-4 flex-shrink-0" />
                                     {error}
-                                </div>
+                                </motion.div>
                             )}
 
                             <form onSubmit={async (e) => {
@@ -2177,180 +2393,207 @@ export default function AdminMatches() {
                                     setIsSubmitting(false);
                                 }
                             }}>
-                                <div className="space-y-6">
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-300 mb-2">
-                                            Playoff Type <span className="text-red-400">*</span>
+                                <div className="space-y-5">
+                                    <div className="space-y-1.5">
+                                        <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                                            Playoff Type <span className="text-red-400 normal-case font-normal">required</span>
                                         </label>
-                                        <select
-                                            value={selectedPlayoffType || ''}
-                                            onChange={(e) => {
-                                                const playoffType = e.target.value as PlayoffType;
-                                                setSelectedPlayoffType(playoffType);
-                                                if (playoffType) {
-                                                    const details = getPlayoffMatchDetails(playoffType, currentLeague);
-                                                    if (details) {
-                                                        setFormData(prev => ({
-                                                            ...prev,
-                                                            date: details.date,
-                                                            time: details.time,
-                                                            venue: details.venue,
-                                                            playoffType: playoffType
-                                                        }));
+                                        <div className="relative">
+                                            <Zap className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-purple-400 pointer-events-none" />
+                                            <select
+                                                value={selectedPlayoffType || ''}
+                                                onChange={(e) => {
+                                                    const playoffType = e.target.value as PlayoffType;
+                                                    setSelectedPlayoffType(playoffType);
+                                                    if (playoffType) {
+                                                        const details = getPlayoffMatchDetails(playoffType, currentLeague);
+                                                        if (details) {
+                                                            setFormData(prev => ({
+                                                                ...prev,
+                                                                date: details.date,
+                                                                time: details.time,
+                                                                venue: details.venue,
+                                                                playoffType: playoffType
+                                                            }));
+                                                        }
                                                     }
-                                                }
-                                            }}
-                                            className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-purple-500 transition-colors"
-                                            required
-                                        >
-                                            <option value="">Select playoff type...</option>
-                                            {getPlayoffTypes().map(type => (
-                                                <option key={type.value || 'none'} value={type.value || ''} className="bg-gray-900 text-white">
-                                                    {type.label}
-                                                </option>
-                                            ))}
-                                        </select>
+                                                }}
+                                                className="w-full pl-10 pr-4 py-3 rounded-xl border border-purple-500/20 text-white text-sm focus:outline-none focus:border-purple-500/60 focus:ring-2 focus:ring-purple-500/20 transition-all appearance-none"
+                                                style={{ background: 'rgba(168,85,247,0.06)', colorScheme: 'dark' }}
+                                                required
+                                            >
+                                                <option value="">Choose a playoff type…</option>
+                                                {getPlayoffTypes().map(type => (
+                                                    <option key={type.value || 'none'} value={type.value || ''} className="bg-gray-900 text-white">
+                                                        {type.label}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                            <svg className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
+                                        </div>
                                     </div>
 
                                     {selectedPlayoffType && (() => {
                                         const details = getPlayoffMatchDetails(selectedPlayoffType, currentLeague);
                                         if (!details) return null;
                                         return (
-                                            <>
-                                                <div className="bg-purple-500/10 border border-purple-500/30 rounded-lg p-4 space-y-4">
-                                                    <div className="flex items-center gap-2 text-purple-300 font-semibold">
-                                                        <Calendar className="w-5 h-5" />
-                                                        <span>Match Details (Editable)</span>
+                                            <motion.div
+                                                initial={{ opacity: 0, y: 8 }}
+                                                animate={{ opacity: 1, y: 0 }}
+                                                transition={{ duration: 0.28 }}
+                                                className="space-y-4"
+                                            >
+                                                {/* Editable details */}
+                                                <div className="rounded-xl border border-purple-500/20 overflow-hidden" style={{ background: 'rgba(168,85,247,0.04)' }}>
+                                                    <div className="px-4 py-3 border-b border-purple-500/15 flex items-center gap-2">
+                                                        <Calendar className="w-4 h-4 text-purple-400" />
+                                                        <span className="text-sm font-semibold text-purple-300">Match Details</span>
+                                                        <span className="ml-auto text-xs text-gray-500">Pre-filled · editable</span>
                                                     </div>
-                                                    
-                                                    <div>
-                                                        <label className="block text-sm font-medium text-gray-300 mb-2">
-                                                            Date <span className="text-red-400">*</span>
-                                                        </label>
-                                                        <input
-                                                            type="date"
-                                                            value={formData.date || details.date}
-                                                            onChange={(e) => setFormData(prev => ({ ...prev, date: e.target.value }))}
-                                                            className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-purple-500 transition-colors"
-                                                            required
-                                                        />
-                                                    </div>
-
-                                                    <div>
-                                                        <label className="block text-sm font-medium text-gray-300 mb-2">
-                                                            Time <span className="text-red-400">*</span>
-                                                        </label>
-                                                        {currentLeague === 'wpl' ? (
-                                                            <select
-                                                                value={formData.time || details.time}
-                                                                onChange={(e) => setFormData(prev => ({ ...prev, time: e.target.value }))}
-                                                                className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-purple-500 transition-colors"
-                                                                required
-                                                            >
-                                                                <option value="">Select a time...</option>
-                                                                {WPL_TIMES.map((timeOption, index) => (
-                                                                    <option key={index} value={timeOption.ist} className="bg-gray-900 text-white">
-                                                                        {timeOption.display}
-                                                                    </option>
-                                                                ))}
-                                                            </select>
-                                                        ) : (
-                                                            <input
-                                                                type="time"
-                                                                value={formData.time || details.time}
-                                                                onChange={(e) => setFormData(prev => ({ ...prev, time: e.target.value }))}
-                                                                className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-purple-500 transition-colors"
-                                                                required
-                                                            />
-                                                        )}
-                                                    </div>
-
-                                                    <div>
-                                                        <label className="block text-sm font-medium text-gray-300 mb-2">
-                                                            Venue <span className="text-red-400">*</span>
-                                                        </label>
-                                                        {currentLeague === 'wpl' ? (
-                                                            <select
-                                                                value={formData.venue || details.venue}
-                                                                onChange={(e) => setFormData(prev => ({ ...prev, venue: e.target.value }))}
-                                                                className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-purple-500 transition-colors"
-                                                                required
-                                                            >
-                                                                <option value="">Select a venue...</option>
-                                                                {WPL_VENUES.map((venue, index) => (
-                                                                    <option key={index} value={venue} className="bg-gray-900 text-white">
-                                                                        {venue}
-                                                                    </option>
-                                                                ))}
-                                                            </select>
-                                                        ) : (
+                                                    <div className="p-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+                                                        <div className="space-y-1.5">
+                                                            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider">Date</label>
                                                             <div className="relative">
+                                                                <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-500 pointer-events-none" />
                                                                 <input
-                                                                    type="text"
-                                                                    value={formData.venue || details.venue}
-                                                                    onChange={(e) => {
-                                                                        setFormData(prev => ({ ...prev, venue: e.target.value }));
-                                                                        setVenueSearchQuery(e.target.value);
-                                                                    }}
-                                                                    onFocus={() => setVenueSearchQuery(formData.venue || details.venue)}
-                                                                    className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 pr-10 text-white focus:outline-none focus:border-purple-500 transition-colors"
-                                                                    placeholder="Enter or select venue..."
+                                                                    type="date"
+                                                                    value={formData.date || details.date}
+                                                                    onChange={(e) => setFormData(prev => ({ ...prev, date: e.target.value }))}
+                                                                    className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-white/8 text-white text-sm focus:outline-none focus:border-purple-500/50 focus:ring-2 focus:ring-purple-500/15 transition-all"
+                                                                    style={{ background: 'rgba(255,255,255,0.05)', colorScheme: 'dark' }}
                                                                     required
                                                                 />
-                                                                <MapPin className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
                                                             </div>
-                                                        )}
+                                                        </div>
+                                                        <div className="space-y-1.5">
+                                                            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider">Time (IST)</label>
+                                                            {currentLeague === 'wpl' ? (
+                                                                <div className="relative">
+                                                                    <Clock className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-500 pointer-events-none" />
+                                                                    <select
+                                                                        value={formData.time || details.time}
+                                                                        onChange={(e) => setFormData(prev => ({ ...prev, time: e.target.value }))}
+                                                                        className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-white/8 text-white text-sm focus:outline-none focus:border-purple-500/50 transition-all appearance-none"
+                                                                        style={{ background: 'rgba(255,255,255,0.05)', colorScheme: 'dark' }}
+                                                                        required
+                                                                    >
+                                                                        <option value="">Select…</option>
+                                                                        {WPL_TIMES.map((timeOption, index) => (
+                                                                            <option key={index} value={timeOption.ist} className="bg-gray-900 text-white">{timeOption.display}</option>
+                                                                        ))}
+                                                                    </select>
+                                                                </div>
+                                                            ) : (
+                                                                <div className="relative">
+                                                                    <Clock className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-500 pointer-events-none" />
+                                                                    <input
+                                                                        type="time"
+                                                                        value={formData.time || details.time}
+                                                                        onChange={(e) => setFormData(prev => ({ ...prev, time: e.target.value }))}
+                                                                        className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-white/8 text-white text-sm focus:outline-none focus:border-purple-500/50 transition-all"
+                                                                        style={{ background: 'rgba(255,255,255,0.05)', colorScheme: 'dark' }}
+                                                                        required
+                                                                    />
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                        <div className="space-y-1.5">
+                                                            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider">Venue</label>
+                                                            {currentLeague === 'wpl' ? (
+                                                                <div className="relative">
+                                                                    <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-500 pointer-events-none" />
+                                                                    <select
+                                                                        value={formData.venue || details.venue}
+                                                                        onChange={(e) => setFormData(prev => ({ ...prev, venue: e.target.value }))}
+                                                                        className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-white/8 text-white text-sm focus:outline-none focus:border-purple-500/50 transition-all appearance-none"
+                                                                        style={{ background: 'rgba(255,255,255,0.05)', colorScheme: 'dark' }}
+                                                                        required
+                                                                    >
+                                                                        <option value="">Select…</option>
+                                                                        {WPL_VENUES.map((venue, index) => (
+                                                                            <option key={index} value={venue} className="bg-gray-900 text-white">{venue}</option>
+                                                                        ))}
+                                                                    </select>
+                                                                </div>
+                                                            ) : (
+                                                                <div className="relative">
+                                                                    <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-500 pointer-events-none" />
+                                                                    <input
+                                                                        type="text"
+                                                                        value={formData.venue || details.venue}
+                                                                        onChange={(e) => {
+                                                                            setFormData(prev => ({ ...prev, venue: e.target.value }));
+                                                                            setVenueSearchQuery(e.target.value);
+                                                                        }}
+                                                                        onFocus={() => setVenueSearchQuery(formData.venue || details.venue)}
+                                                                        className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-white/8 text-white text-sm focus:outline-none focus:border-purple-500/50 transition-all"
+                                                                        style={{ background: 'rgba(255,255,255,0.05)', colorScheme: 'dark' }}
+                                                                        placeholder="Stadium, City"
+                                                                        required
+                                                                    />
+                                                                </div>
+                                                            )}
+                                                        </div>
                                                     </div>
-                                                    
-                                                    <p className="text-xs text-purple-300 mt-2">
-                                                        💡 Default values are pre-filled, but you can edit them as needed.
-                                                    </p>
                                                 </div>
 
-                                                <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4 space-y-3">
-                                                    <div className="flex items-center gap-2 text-blue-300 font-semibold">
-                                                        <Users className="w-5 h-5" />
-                                                        <span>Teams (To Be Determined)</span>
+                                                {/* TBD Teams display */}
+                                                <div className="rounded-xl border border-blue-500/20 overflow-hidden" style={{ background: 'rgba(59,130,246,0.04)' }}>
+                                                    <div className="px-4 py-3 border-b border-blue-500/15 flex items-center gap-2">
+                                                        <Users className="w-4 h-4 text-blue-400" />
+                                                        <span className="text-sm font-semibold text-blue-300">Teams (To Be Determined)</span>
                                                     </div>
-                                                    <div className="grid grid-cols-2 gap-4 text-sm">
-                                                        <div>
-                                                            <span className="text-gray-400">Team 1:</span>
-                                                            <span className="text-white ml-2 font-medium">{details.team1Label}</span>
+                                                    <div className="px-4 py-4">
+                                                        <div className="flex items-center justify-center gap-4">
+                                                            <div className="flex-1 py-2.5 px-4 rounded-xl border border-white/8 text-center" style={{ background: 'rgba(255,255,255,0.03)' }}>
+                                                                <p className="text-xs text-gray-500 mb-1">Team 1</p>
+                                                                <p className="text-sm font-semibold text-white">{details.team1Label}</p>
+                                                            </div>
+                                                            <div className="px-3 py-1.5 rounded-full border border-white/10 text-xs font-extrabold text-gray-400 flex-shrink-0" style={{ background: 'rgba(255,255,255,0.04)' }}>VS</div>
+                                                            <div className="flex-1 py-2.5 px-4 rounded-xl border border-white/8 text-center" style={{ background: 'rgba(255,255,255,0.03)' }}>
+                                                                <p className="text-xs text-gray-500 mb-1">Team 2</p>
+                                                                <p className="text-sm font-semibold text-white">{details.team2Label}</p>
+                                                            </div>
                                                         </div>
-                                                        <div>
-                                                            <span className="text-gray-400">Team 2:</span>
-                                                            <span className="text-white ml-2 font-medium">{details.team2Label}</span>
-                                                        </div>
+                                                        <p className="text-xs text-gray-500 mt-3 text-center">
+                                                            {currentLeague === 'wpl'
+                                                                ? 'Placeholders — will update after league stage standings are confirmed'
+                                                                : 'Teams determined from league standings · can be updated later'}
+                                                        </p>
                                                     </div>
-                                                    <p className="text-xs text-gray-400 mt-2">
-                                                        {currentLeague === 'wpl' 
-                                                            ? 'These are placeholders. Teams will be determined from the 5 WPL teams based on points table standings after the league stage. You can update them later with the actual teams.'
-                                                            : 'Teams will be determined based on league standings. You can update them later.'}
-                                                    </p>
                                                 </div>
-                                            </>
+                                            </motion.div>
                                         );
                                     })()}
 
-                                    <div className="flex justify-end gap-3 pt-4 border-t border-white/10">
-                                        <button
-                                            type="button"
-                                            onClick={resetForm}
-                                            className="glass-effect text-white font-semibold py-3 px-6 rounded-lg hover:bg-white/10 transition-all duration-200"
+                                    <div className="flex justify-end gap-3 pt-4 border-t border-white/8">
+                                        <motion.button type="button" onClick={resetForm} whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
+                                            className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-white/10 text-gray-300 hover:text-white hover:border-white/25 text-sm font-medium transition-all"
+                                            style={{ background: 'rgba(255,255,255,0.04)' }}
                                         >
                                             Cancel
-                                        </button>
-                                        <button
+                                        </motion.button>
+                                        <motion.button
                                             type="submit"
                                             disabled={isSubmitting || !selectedPlayoffType}
-                                            className="ipl-button bg-purple-600 hover:bg-purple-700 disabled:opacity-50"
+                                            whileHover={{ scale: (isSubmitting || !selectedPlayoffType) ? 1 : 1.03 }}
+                                            whileTap={{ scale: (isSubmitting || !selectedPlayoffType) ? 1 : 0.97 }}
+                                            className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-fuchsia-600 text-white text-sm font-bold shadow-md hover:shadow-purple-500/30 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
                                         >
-                                            {isSubmitting ? 'Creating...' : 'Create Playoff Match'}
-                                        </button>
+                                            {isSubmitting ? (
+                                                <>
+                                                    <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                                                    Creating…
+                                                </>
+                                            ) : (
+                                                <><Zap className="w-4 h-4" /> Create Playoff Match</>
+                                            )}
+                                        </motion.button>
                                     </div>
                                 </div>
                             </form>
-                        </div>
+                            </div>
+                        </motion.div>
                     )}
 
                     {viewMode === 'grid' ? (
