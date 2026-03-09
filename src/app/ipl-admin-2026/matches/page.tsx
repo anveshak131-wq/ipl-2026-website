@@ -375,10 +375,14 @@ export default function AdminMatches() {
         const dataLines = hasHeader ? lines.slice(1) : lines;
 
         // Detect IPL-style format: Match No, Match Day, Date, Day, Start, Home, Away, Venue (8 cols)
+        // OR cricinfo/2024 style: Match Number, Round Number, Date, Location, Home Team, Away Team, Result (7 cols)
         // vs simple format: date, time, team1, team2, venue, status (6 cols)
-        const isIplFormat = hasHeader
+        const isCricinfo2024Format = hasHeader &&
+            (firstCols.includes('match number') || firstCols.includes('round number') ||
+             (firstCols.includes('location') && firstCols.includes('home team')));
+        const isIplFormat = isCricinfo2024Format ? false : (hasHeader
             ? firstCols.includes('match no') || firstCols.includes('start')
-            : splitLine(dataLines[0] ?? '').length >= 7;
+            : splitLine(dataLines[0] ?? '').length >= 7);
 
         // Normalise common city-name variants so CSV spellings match DB spellings
         const normaliseName = (s: string) =>
@@ -410,7 +414,24 @@ export default function AdminMatches() {
 
                 let rawDate = '', rawTime = '', rawTeam1 = '', rawTeam2 = '', rawVenue = '', rawStatus = '';
 
-                if (isIplFormat) {
+                if (isCricinfo2024Format) {
+                    // Match Number(0), Round Number(1), Date+Time(2), Location(3), Home Team(4), Away Team(5), Result(6)
+                    // Date format: DD/MM/YYYY HH:MM  →  YYYY-MM-DD + HH:MM
+                    const rawDT = cols[2]?.trim() ?? '';
+                    const dtMatch = rawDT.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})\s+(\d{1,2}:\d{2})/);
+                    if (dtMatch) {
+                        const [, dd, mm, yyyy, hhmm] = dtMatch;
+                        rawDate = `${yyyy}-${mm.padStart(2,'0')}-${dd.padStart(2,'0')}`;
+                        rawTime = hhmm;
+                    } else {
+                        rawDate = rawDT;
+                        rawTime = '';
+                    }
+                    rawVenue  = cols[3]?.trim() ?? '';
+                    rawTeam1  = cols[4]?.trim() ?? '';
+                    rawTeam2  = cols[5]?.trim() ?? '';
+                    rawStatus = '';
+                } else if (isIplFormat) {
                     // Match No(0), Match Day(1), Date(2), Day(3), Start(4), Home(5), Away(6), Venue(7)
                     rawDate   = cols[2]?.trim() ?? '';
                     const rawStart = cols[4]?.trim() ?? '';
