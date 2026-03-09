@@ -42,7 +42,7 @@ import { Match, Team } from '@/types';
 import { api } from '@/lib/data';
 import PointsSystemDisplay from '@/components/admin/matches/PointsSystemDisplay';
 import ModernMatchCard from '@/components/admin/matches/ModernMatchCard';
-import { Search } from 'lucide-react';
+import { Search, Upload, Download, AlertTriangle, CheckCircle, X as XIcon, FileText } from 'lucide-react';
 
 const IconTable = ({ className }: { className?: string }) => (
     <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -169,6 +169,26 @@ export default function AdminMatches() {
     const [showPlayoffForm, setShowPlayoffForm] = useState(false);
     const [selectedPlayoffType, setSelectedPlayoffType] = useState<PlayoffType>(null);
 
+    // CSV Upload state
+    type CsvRow = {
+        rowNum: number;
+        date: string;
+        time: string;
+        team1Raw: string;
+        team2Raw: string;
+        venue: string;
+        status: string;
+        team1Id: string | null;
+        team2Id: string | null;
+        errors: string[];
+        valid: boolean;
+    };
+    const [showCsvUpload, setShowCsvUpload] = useState(false);
+    const [csvRows, setCsvRows] = useState<CsvRow[]>([]);
+    const [csvFileName, setCsvFileName] = useState('');
+    const [csvImporting, setCsvImporting] = useState(false);
+    const csvInputRef = useRef<HTMLInputElement>(null);
+
     // Generate available seasons when league changes
     useEffect(() => {
         const currentYear = new Date().getFullYear();
@@ -293,6 +313,149 @@ export default function AdminMatches() {
         return () => clearInterval(interval);
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []); // Run once on mount, then check every minute
+
+    // ─── CSV helpers ────────────────────────────────────────────────────────────
+    const downloadCsvTemplate = () => {
+        const header = 'date,time,team1,team2,venue,status';
+        const example1 = `${selectedSeason}-03-22,19:30,MI,CSK,Wankhede Stadium\, Mumbai,upcoming`;
+        const example2 = `${selectedSeason}-03-25,15:30,RCB,SRH,M. Chinnaswamy Stadium\, Bengaluru,upcoming`;
+        const blob = new Blob([`${header}\n${example1}\n${example2}\n`], { type: 'text/csv' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${currentLeague.toUpperCase()}_${selectedSeason}_schedule_template.csv`;
+        a.click();
+        URL.revokeObjectURL(url);
+    };
+
+    const parseCsv = (text: string) => {
+        const lines = text.split(/\r?\n/).filter(l => l.trim());
+        if (!lines.length) return [];
+        // Detect if first row is a header
+        const firstLower = lines[0].toLowerCase();
+        const hasHeader = firstLower.includes('date') || firstLower.includes('team');
+        const dataLines = hasHeader ? lines.slice(1) : lines;
+
+        return dataLines.map((line, i): CsvRow => {
+            // Split by comma but respect quoted fields
+            const cols: string[] = [];
+            let cur = '';
+            let inQuotes = false;
+            for (const ch of line) {
+                if (ch === '"') { inQuotes = !inQuotes; }
+                else if (ch === ',' && !inQuotes) { cols.push(cur.trim()); cur = ''; }
+                else { cur += ch; }
+            }
+            cols.push(cur.trim());
+
+            const [rawDate='', rawTime='', rawTeam1='', rawTeam2='', rawVenue='', rawStatus=''] = cols;
+            const errs: string[] = [];
+
+            // Validate date
+            const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+            if (!rawDate) errs.push('Date missing');
+            else if (!dateRegex.test(rawDate)) errs.push(`Date must be YYYY-MM-DD (got: ${rawDate})`);
+
+            // Validate time
+            const timeRegex = /^\d{1,2}:\d{2}$/;
+            if (!rawTime) errs.push('Time missing');
+            else if (!timeRegex.test(rawTime)) errs.push(`Time must be HH:MM (got: ${rawTime})`);
+
+            // Match teams
+            const findTeam = (raw: string) => {
+                const norm = raw.trim().toLowerCase();
+                return teams.find(t =>
+                    t.shortName?.toLowerCase() === norm ||
+                    t.name?.toLowerCase() === norm ||
+                    t.shortName?.toLowerCase().includes(norm) ||
+                    norm.includes(t.shortName?.toLowerCase() ?? '')
+                ) ?? null;
+            };
+            const t1 = rawTeam1 ? findTeam(rawTeam1) : null;
+            const t2 = rawTeam2 ? findTeam(rawTeam2) : null;
+            if (!rawTeam1) errs.push('Team 1 missing');
+            else if (!t1) errs.push(`Team 1 not found: "${rawTeam1}"`);
+            if (!rawTeam2) errs.push('Team 2 missing');
+            else if (!t2) errs.push(`Team 2 not found: "${rawTeam2}"`);
+            if (t1 && t2 && t1.id === t2.id) errs.push('Team 1 and Team 2 are the same');
+            if (!rawVenue) errs.push('Venue missing');
+
+            const validStatuses = ['upcoming','live','completed','cancelled'];
+            const status = rawStatus.toLowerCase().trim() || 'upcoming';
+            if (rawStatus && !validStatuses.includes(status)) errs.push(`Invalid status: "${rawStatus}"`);
+
+            return {
+                rowNum: i + (hasHeader ? 2 : 1),
+                date: rawDate,
+                time: rawTime,
+                team1Raw: rawTeam1,
+                team2Raw: rawTeam2,
+                venue: rawVenue,
+                status,
+                team1Id: t1?.id ?? null,
+                team2Id: t2?.id ?? null,
+                errors: errs,
+                valid: errs.length === 0,
+            };
+        });
+    };
+
+    const handleCsvFile = (file: File) => {
+        setCsvFileName(file.name);
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const text = e.target?.result as string;
+            setCsvRows(parseCsv(text));
+        };
+        reader.readAsText(file);
+    };
+
+    const handleCsvImport = async () => {
+        const valid = csvRows.filter(r => r.valid);
+        if (!valid.length) return;
+        setCsvImporting(true);
+        let created = 0;
+        let failed = 0;
+        try {
+            const promises = valid.map(async (row) => {
+                try {
+                    const newMatch = await api.createMatch({
+                        date: row.date,
+                        time: row.time,
+                        venue: row.venue,
+                        team1Id: row.team1Id!,
+                        team2Id: row.team2Id!,
+                        status: row.status as 'upcoming' | 'live' | 'completed' | 'cancelled',
+                        league: currentLeague,
+                        playoffType: null,
+                    });
+                    created++;
+                    return newMatch;
+                } catch {
+                    failed++;
+                    return null;
+                }
+            });
+            const results = await Promise.all(promises);
+            const newMatches = results.filter(Boolean) as Match[];
+            const allMatches = recalculateMatchNumbers([...matches, ...newMatches]);
+            setMatches(allMatches);
+            showSuccess(`Imported ${created} match${created !== 1 ? 'es' : ''}${failed ? `, ${failed} failed` : ''} — season ${selectedSeason}`);
+            setShowCsvUpload(false);
+            setCsvRows([]);
+            setCsvFileName('');
+            // Switch season view to the uploaded season
+            if (valid.length > 0) {
+                const year = parseInt(valid[0].date.split('-')[0]);
+                if (!isNaN(year)) setSelectedSeason(year);
+            }
+        } catch (err) {
+            showError('Import failed unexpectedly');
+        } finally {
+            setCsvImporting(false);
+        }
+    };
+    // ────────────────────────────────────────────────────────────────────────────
 
     const fetchInitialData = async () => {
         try {
@@ -1416,11 +1579,43 @@ export default function AdminMatches() {
                                         }
                                         setShowForm(true);
                                         setShowPlayoffForm(false);
+                                        setShowCsvUpload(false);
                                     }}
                                 className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-400 hover:to-yellow-500 text-black text-sm font-bold shadow-md hover:shadow-yellow-500/30 transition-all duration-200"
                             >
                                 <IconPlus className="w-4 h-4" />
                                 <span>Create Match</span>
+                            </button>
+                            {/* CSV Upload button */}
+                            <input
+                                ref={csvInputRef}
+                                type="file"
+                                accept=".csv,text/csv"
+                                className="hidden"
+                                onChange={(e) => {
+                                    const file = e.target.files?.[0];
+                                    if (file) handleCsvFile(file);
+                                    e.target.value = '';
+                                }}
+                            />
+                            <button
+                                onClick={() => {
+                                    setShowCsvUpload(v => !v);
+                                    setShowForm(false);
+                                    setShowPlayoffForm(false);
+                                    setCsvRows([]);
+                                    setCsvFileName('');
+                                }}
+                                className={`flex items-center gap-2 px-4 py-2 rounded-xl border text-sm font-semibold transition-all duration-200 ${
+                                    showCsvUpload
+                                        ? 'bg-emerald-500/20 border-emerald-500/50 text-emerald-300'
+                                        : 'border-white/10 text-gray-300 hover:text-white hover:border-white/25'
+                                }`}
+                                style={!showCsvUpload ? { background: 'rgba(255,255,255,0.05)' } : {}}
+                                title="Upload season schedule via CSV"
+                            >
+                                <Upload className="w-4 h-4" />
+                                <span className="hidden sm:inline">Upload CSV</span>
                             </button>
                             </div>
                             </div>
@@ -2650,6 +2845,208 @@ export default function AdminMatches() {
                                     </div>
                                 </div>
                             </form>
+                            </div>
+                        </motion.div>
+                    )}
+
+                    {/* ── CSV Upload Panel ── */}
+                    {showCsvUpload && (
+                        <motion.div
+                            key="csv-upload-panel"
+                            initial={{ opacity: 0, y: -14, scale: 0.98 }}
+                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                            exit={{ opacity: 0, y: -10, scale: 0.98 }}
+                            transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+                            className="relative overflow-hidden rounded-2xl mb-8 border border-emerald-500/20"
+                            style={{ background: 'linear-gradient(160deg, rgba(5,20,15,0.99) 0%, rgba(5,12,10,0.99) 100%)' }}
+                        >
+                            <div className="h-1 w-full bg-gradient-to-r from-emerald-500 via-teal-400 to-cyan-500" />
+                            <div className="absolute top-0 left-0 right-0 h-32 pointer-events-none bg-gradient-to-b from-emerald-500/8 to-transparent" />
+
+                            <div className="relative p-6 lg:p-8">
+                                {/* Header */}
+                                <div className="flex items-start justify-between mb-6">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center flex-shrink-0">
+                                            <Upload className="w-5 h-5 text-emerald-400" />
+                                        </div>
+                                        <div>
+                                            <h2 className="text-xl font-bold text-white">Upload Match Schedule</h2>
+                                            <p className="text-xs text-gray-500 mt-0.5">
+                                                Import matches for <span className="text-emerald-400 font-semibold">{currentLeague.toUpperCase()} {selectedSeason}</span> from a CSV file
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <button onClick={() => { setShowCsvUpload(false); setCsvRows([]); setCsvFileName(''); }}
+                                        className="p-2 rounded-xl text-gray-500 hover:text-white hover:bg-white/8 transition-all">
+                                        <XIcon className="w-5 h-5" />
+                                    </button>
+                                </div>
+
+                                {/* Format info + template download */}
+                                <div className="mb-5 p-4 rounded-xl border border-white/8 flex flex-col sm:flex-row sm:items-center gap-4" style={{ background: 'rgba(255,255,255,0.03)' }}>
+                                    <div className="flex-1 min-w-0">
+                                        <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">Required CSV Columns</p>
+                                        <div className="flex flex-wrap gap-2">
+                                            {['date (YYYY-MM-DD)', 'time (HH:MM)', 'team1', 'team2', 'venue', 'status (optional)'].map(col => (
+                                                <span key={col} className="px-2 py-0.5 rounded-md bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-xs font-mono">{col}</span>
+                                            ))}
+                                        </div>
+                                        <p className="text-xs text-gray-600 mt-1.5">Use team short names (MI, CSK, RCB…) or full names. Status defaults to <code className="text-gray-400">upcoming</code>.</p>
+                                    </div>
+                                    <button
+                                        onClick={downloadCsvTemplate}
+                                        className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-emerald-500/30 text-emerald-400 hover:text-emerald-200 hover:border-emerald-500/60 text-sm font-semibold transition-all flex-shrink-0"
+                                        style={{ background: 'rgba(16,185,129,0.07)' }}
+                                    >
+                                        <Download className="w-4 h-4" />
+                                        Download Template
+                                    </button>
+                                </div>
+
+                                {/* Drop zone */}
+                                <div
+                                    className="mb-5 relative border-2 border-dashed border-emerald-500/25 hover:border-emerald-500/50 rounded-xl p-8 text-center cursor-pointer transition-all duration-200 group"
+                                    style={{ background: 'rgba(16,185,129,0.03)' }}
+                                    onClick={() => csvInputRef.current?.click()}
+                                    onDragOver={(e) => { e.preventDefault(); e.currentTarget.style.borderColor = 'rgba(16,185,129,0.6)'; }}
+                                    onDragLeave={(e) => { e.currentTarget.style.borderColor = ''; }}
+                                    onDrop={(e) => {
+                                        e.preventDefault();
+                                        e.currentTarget.style.borderColor = '';
+                                        const file = e.dataTransfer.files?.[0];
+                                        if (file && (file.name.endsWith('.csv') || file.type === 'text/csv')) handleCsvFile(file);
+                                    }}
+                                >
+                                    {csvFileName ? (
+                                        <div className="flex items-center justify-center gap-3">
+                                            <FileText className="w-8 h-8 text-emerald-400" />
+                                            <div className="text-left">
+                                                <p className="text-sm font-semibold text-white">{csvFileName}</p>
+                                                <p className="text-xs text-gray-500">{csvRows.length} rows detected · <span className="text-emerald-400">{csvRows.filter(r => r.valid).length} valid</span>{csvRows.filter(r => !r.valid).length > 0 && <span className="text-red-400"> · {csvRows.filter(r => !r.valid).length} errors</span>}</p>
+                                            </div>
+                                            <button onClick={(e) => { e.stopPropagation(); setCsvRows([]); setCsvFileName(''); }}
+                                                className="ml-2 p-1 rounded-lg text-gray-500 hover:text-white hover:bg-white/10 transition-all">
+                                                <XIcon className="w-4 h-4" />
+                                            </button>
+                                        </div>
+                                    ) : (
+                                        <>
+                                            <Upload className="w-8 h-8 text-emerald-500/50 mx-auto mb-2 group-hover:text-emerald-400 transition-colors" />
+                                            <p className="text-sm text-gray-400 group-hover:text-gray-200 transition-colors">Drop your CSV here or <span className="text-emerald-400 font-semibold">click to browse</span></p>
+                                            <p className="text-xs text-gray-600 mt-1">.csv files only</p>
+                                        </>
+                                    )}
+                                </div>
+
+                                {/* Preview table */}
+                                {csvRows.length > 0 && (
+                                    <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.25 }} className="mb-5">
+                                        <div className="flex items-center justify-between mb-2.5">
+                                            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Preview — {csvRows.length} rows</p>
+                                            <div className="flex items-center gap-3 text-xs">
+                                                <span className="flex items-center gap-1 text-emerald-400"><CheckCircle className="w-3.5 h-3.5" />{csvRows.filter(r => r.valid).length} valid</span>
+                                                {csvRows.filter(r => !r.valid).length > 0 && (
+                                                    <span className="flex items-center gap-1 text-red-400"><AlertTriangle className="w-3.5 h-3.5" />{csvRows.filter(r => !r.valid).length} errors</span>
+                                                )}
+                                            </div>
+                                        </div>
+                                        <div className="rounded-xl border border-white/8 overflow-hidden">
+                                            <div className="overflow-x-auto max-h-72 overflow-y-auto scrollbar-thin scrollbar-thumb-emerald-500/30 scrollbar-track-white/5">
+                                                <table className="w-full text-xs">
+                                                    <thead>
+                                                        <tr className="border-b border-white/10" style={{ background: 'rgba(255,255,255,0.05)' }}>
+                                                            <th className="text-left px-3 py-2.5 text-gray-500 font-semibold w-8">#</th>
+                                                            <th className="text-left px-3 py-2.5 text-gray-500 font-semibold">Date</th>
+                                                            <th className="text-left px-3 py-2.5 text-gray-500 font-semibold">Time</th>
+                                                            <th className="text-left px-3 py-2.5 text-gray-500 font-semibold">Team 1</th>
+                                                            <th className="text-left px-3 py-2.5 text-gray-500 font-semibold">Team 2</th>
+                                                            <th className="text-left px-3 py-2.5 text-gray-500 font-semibold">Venue</th>
+                                                            <th className="text-left px-3 py-2.5 text-gray-500 font-semibold">Status</th>
+                                                            <th className="text-left px-3 py-2.5 text-gray-500 font-semibold">Issues</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {csvRows.map((row) => (
+                                                            <tr
+                                                                key={row.rowNum}
+                                                                className={`border-b border-white/5 last:border-0 ${
+                                                                    row.valid
+                                                                        ? 'bg-emerald-500/5 hover:bg-emerald-500/10'
+                                                                        : 'bg-red-500/8 hover:bg-red-500/12'
+                                                                }`}
+                                                            >
+                                                                <td className="px-3 py-2 text-gray-600">{row.rowNum}</td>
+                                                                <td className="px-3 py-2 text-gray-300 font-mono">{row.date || <span className="text-red-400">—</span>}</td>
+                                                                <td className="px-3 py-2 text-gray-300 font-mono">{row.time || <span className="text-red-400">—</span>}</td>
+                                                                <td className="px-3 py-2">
+                                                                    {row.team1Id
+                                                                        ? <span className="text-emerald-300 font-semibold">{teams.find(t => t.id === row.team1Id)?.shortName ?? row.team1Raw}</span>
+                                                                        : <span className="text-red-400">{row.team1Raw || '—'}</span>
+                                                                    }
+                                                                </td>
+                                                                <td className="px-3 py-2">
+                                                                    {row.team2Id
+                                                                        ? <span className="text-emerald-300 font-semibold">{teams.find(t => t.id === row.team2Id)?.shortName ?? row.team2Raw}</span>
+                                                                        : <span className="text-red-400">{row.team2Raw || '—'}</span>
+                                                                    }
+                                                                </td>
+                                                                <td className="px-3 py-2 text-gray-300 max-w-[180px] truncate" title={row.venue}>{row.venue || <span className="text-red-400">—</span>}</td>
+                                                                <td className="px-3 py-2">
+                                                                    <span className={`px-2 py-0.5 rounded-md text-[11px] font-semibold ${
+                                                                        row.status === 'live' ? 'bg-red-500/15 text-red-300' :
+                                                                        row.status === 'completed' ? 'bg-emerald-500/15 text-emerald-300' :
+                                                                        row.status === 'cancelled' ? 'bg-gray-500/15 text-gray-400' :
+                                                                        'bg-blue-500/15 text-blue-300'
+                                                                    }`}>{row.status || 'upcoming'}</span>
+                                                                </td>
+                                                                <td className="px-3 py-2">
+                                                                    {row.valid
+                                                                        ? <CheckCircle className="w-3.5 h-3.5 text-emerald-400" />
+                                                                        : <span className="text-red-400 text-[11px] leading-tight">{row.errors.join(' · ')}</span>
+                                                                    }
+                                                                </td>
+                                                            </tr>
+                                                        ))}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </motion.div>
+                                )}
+
+                                {/* Action row */}
+                                <div className="flex items-center justify-between gap-3">
+                                    <button
+                                        onClick={() => csvInputRef.current?.click()}
+                                        className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-white/10 text-gray-400 hover:text-white hover:border-white/25 text-sm font-medium transition-all"
+                                        style={{ background: 'rgba(255,255,255,0.04)' }}
+                                    >
+                                        <FileText className="w-4 h-4" />
+                                        {csvFileName ? 'Change File' : 'Select File'}
+                                    </button>
+                                    <div className="flex items-center gap-2">
+                                        {csvRows.filter(r => !r.valid).length > 0 && csvRows.filter(r => r.valid).length > 0 && (
+                                            <p className="text-xs text-yellow-400/80 hidden sm:block">
+                                                <AlertTriangle className="w-3 h-3 inline mr-1" />
+                                                Only valid rows will be imported
+                                            </p>
+                                        )}
+                                        <motion.button
+                                            onClick={handleCsvImport}
+                                            disabled={csvImporting || csvRows.filter(r => r.valid).length === 0}
+                                            whileHover={{ scale: (csvImporting || csvRows.filter(r => r.valid).length === 0) ? 1 : 1.03 }}
+                                            whileTap={{ scale: (csvImporting || csvRows.filter(r => r.valid).length === 0) ? 1 : 0.97 }}
+                                            className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 text-black text-sm font-bold shadow-md hover:shadow-emerald-500/30 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                                        >
+                                            {csvImporting ? (
+                                                <><svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>Importing…</>
+                                            ) : (
+                                                <><Upload className="w-4 h-4" />Import {csvRows.filter(r => r.valid).length > 0 ? `${csvRows.filter(r => r.valid).length} Match${csvRows.filter(r => r.valid).length !== 1 ? 'es' : ''}` : 'Matches'}</>
+                                            )}
+                                        </motion.button>
+                                    </div>
+                                </div>
                             </div>
                         </motion.div>
                     )}
