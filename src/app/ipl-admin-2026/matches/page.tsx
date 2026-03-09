@@ -479,43 +479,37 @@ export default function AdminMatches() {
         const valid = csvRows.filter(r => r.valid);
         if (!valid.length) return;
         setCsvImporting(true);
-        let created = 0;
-        let failed = 0;
         try {
-            const promises = valid.map(async (row) => {
-                try {
-                    const newMatch = await api.createMatch({
-                        date: row.date,
-                        time: row.time,
-                        venue: row.venue,
-                        team1Id: row.team1Id!,
-                        team2Id: row.team2Id!,
-                        status: row.status as 'upcoming' | 'live' | 'completed' | 'cancelled',
-                        league: currentLeague,
-                        playoffType: null,
-                    });
-                    created++;
-                    return newMatch;
-                } catch {
-                    failed++;
-                    return null;
-                }
-            });
-            const results = await Promise.all(promises);
-            const newMatches = results.filter(Boolean) as Match[];
+            // Send all valid rows in ONE request → single atomic KV write (no race condition)
+            const payload = valid.map(row => ({
+                date: row.date,
+                time: row.time,
+                venue: row.venue,
+                team1Id: row.team1Id!,
+                team2Id: row.team2Id!,
+                status: row.status as 'upcoming' | 'live' | 'completed' | 'cancelled',
+                league: currentLeague,
+                playoffType: null as null,
+            }));
+            const result = await api.bulkCreateMatches(payload);
+            const newMatches = result.created as Match[];
             const allMatches = recalculateMatchNumbers([...matches, ...newMatches]);
             setMatches(allMatches);
-            showSuccess(`Imported ${created} match${created !== 1 ? 'es' : ''}${failed ? `, ${failed} failed` : ''} — season ${selectedSeason}`);
+            const skipped = csvRows.length - valid.length;
+            showSuccess(
+                `Imported ${result.count} match${result.count !== 1 ? 'es' : ''}` +
+                (skipped ? ` · ${skipped} row${skipped !== 1 ? 's' : ''} skipped (validation errors)` : '') +
+                ` — season ${selectedSeason}`
+            );
             setShowCsvUpload(false);
             setCsvRows([]);
             setCsvFileName('');
-            // Switch season view to the imported season year
             if (valid.length > 0) {
                 const year = parseInt(valid[0].date.split('-')[0]);
                 if (!isNaN(year)) setSelectedSeason(year);
             }
-        } catch {
-            showError('Import failed unexpectedly');
+        } catch (err: any) {
+            showError(err?.message || 'Import failed unexpectedly');
         } finally {
             setCsvImporting(false);
         }

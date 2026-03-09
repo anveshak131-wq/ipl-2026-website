@@ -506,6 +506,30 @@ export const api = {
     }
   },
   
+  bulkCreateMatches: async (
+    matches: Array<Omit<Match, 'id' | 'team1' | 'team2'> & { team1Id: string; team2Id: string }>
+  ): Promise<{ created: Match[]; count: number }> => {
+    try {
+      const token = localStorage.getItem('admin_token') || sessionStorage.getItem('admin_token') || localStorage.getItem('adminToken');
+      const response = await fetch('/api/matches?bulk=true', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ matches })
+      });
+      if (!response.ok) {
+        const body = await response.text();
+        throw new Error(`Bulk create failed (${response.status}): ${body}`);
+      }
+      return await response.json();
+    } catch (error) {
+      console.error('Error bulk creating matches:', error);
+      throw error;
+    }
+  },
+
   createMatch: async (match: Omit<Match, 'id' | 'team1' | 'team2'> & { team1Id: string; team2Id: string }): Promise<Match> => {
     try {
       const token = localStorage.getItem('adminToken');

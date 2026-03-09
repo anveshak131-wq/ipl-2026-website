@@ -333,6 +333,74 @@ async function handleGetRequest(context) {
   }
 }
 
+// POST (bulk) - Create multiple matches in one atomic KV write
+async function handleBulkPostRequest(context) {
+  const { env, request } = context;
+
+  if (!verifyAdminToken(request)) {
+    return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+      status: 401, headers: { 'Content-Type': 'application/json' }
+    });
+  }
+
+  try {
+    const body = await request.json();
+    const incoming = Array.isArray(body.matches) ? body.matches : [];
+    if (!incoming.length) {
+      return new Response(JSON.stringify({ error: 'No matches provided' }), {
+        status: 400, headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
+    // Validate each row has required fields
+    for (const m of incoming) {
+      if (!m.date || !m.time || !m.venue || !m.team1Id || !m.team2Id) {
+        return new Response(JSON.stringify({ error: `Missing required fields in match: ${JSON.stringify(m)}` }), {
+          status: 400, headers: { 'Content-Type': 'application/json' }
+        });
+      }
+    }
+
+    // Read existing matches ONCE
+    let matches = await env.IPL_CACHE.get('matches', 'json') || [];
+    let nextId = Math.max(...matches.map(m => parseInt(m.id) || 0), 0) + 1;
+
+    // Fetch teams for response formatting
+    let allTeams = await env.IPL_CACHE.get('teams', 'json');
+    if (!allTeams || !allTeams.length) allTeams = mockTeams;
+
+    const created = incoming.map(m => {
+      const newMatch = {
+        id: String(nextId++),
+        league: m.league || 'ipl',
+        date: m.date,
+        time: m.time,
+        venue: m.venue,
+        team1Id: m.team1Id,
+        team2Id: m.team2Id,
+        status: m.status || 'upcoming',
+        ...(m.playoffType ? { playoffType: m.playoffType } : {}),
+      };
+      matches.push(newMatch);
+      return newMatch;
+    });
+
+    // Single atomic write
+    await env.IPL_CACHE.put('matches', JSON.stringify(matches));
+
+    return new Response(JSON.stringify({
+      success: true,
+      created: created.map(m => formatMatch(m, allTeams)),
+      count: created.length
+    }), { status: 201, headers: { 'Content-Type': 'application/json' } });
+  } catch (error) {
+    console.error('Error bulk creating matches:', error);
+    return new Response(JSON.stringify({ error: `Bulk create failed: ${error.message}` }), {
+      status: 500, headers: { 'Content-Type': 'application/json' }
+    });
+  }
+}
+
 // POST - Create a new match
 async function handlePostRequest(context) {
   const { env, request } = context;
@@ -603,9 +671,13 @@ export async function onRequest(context) {
     case 'GET':
       response = await handleGetRequest(context);
       break;
-    case 'POST':
-      response = await handlePostRequest(context);
+    case 'POST': {
+      const postUrl = new URL(request.url);
+      response = postUrl.searchParams.get('bulk') === 'true'
+        ? await handleBulkPostRequest(context)
+        : await handlePostRequest(context);
       break;
+    }
     case 'PUT':
       response = await handlePutRequest(context);
       break;
