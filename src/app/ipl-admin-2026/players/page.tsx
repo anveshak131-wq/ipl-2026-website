@@ -1640,77 +1640,142 @@ export default function AdminPlayers() {
     doc.addPage();
     drawChartNotesPage();
 
-    const pdfColumns = [
-      { key: 'name', label: 'Name' },
-      { key: 'role', label: 'Role' },
-      { key: 'teamShortName', label: 'Team' },
-      { key: 'age', label: 'Age' },
-      { key: 'nationality', label: 'Nat' },
-      { key: 'matches', label: 'M' },
-      { key: 'runs', label: 'Runs' },
-      { key: 'wickets', label: 'Wkts' },
-      { key: 'average', label: 'Avg' },
-      { key: 'strikeRate', label: 'SR' },
-      { key: 'economy', label: 'Econ' },
-      { key: 'fifties', label: '50s' },
-      { key: 'hundreds', label: '100s' },
-      { key: 'isCaptain', label: 'C' }
-    ];
-
     const decimalFields = new Set(['average', 'strikeRate', 'economy', 'bowlingAverage']);
-    const pdfRows = rows.map(row =>
-      pdfColumns.map(column => {
-        const value = (row as any)[column.key];
-        if (typeof value === 'boolean') return value ? 'Yes' : 'No';
-        if (typeof value === 'number' && Number.isFinite(value)) {
-          return decimalFields.has(column.key) ? value.toFixed(2) : value.toString();
-        }
-        return value ?? '';
-      })
+    const numericFields = new Set([
+      'age',
+      'jerseyNumber',
+      'matches',
+      'runs',
+      'wickets',
+      'highest',
+      'fours',
+      'sixes',
+      'fifties',
+      'hundreds',
+      'maidens',
+      'fiveWickets',
+      'lastAuctionYear',
+      'transferFee'
+    ]);
+
+    const formatPdfCell = (columnKey: string, value: unknown) => {
+      if (typeof value === 'boolean') return value ? 'Yes' : 'No';
+      if (typeof value === 'number' && Number.isFinite(value)) {
+        return decimalFields.has(columnKey) ? value.toFixed(2) : value.toString();
+      }
+      if (value === null || value === undefined || value === '') return '';
+      return String(value);
+    };
+
+    const pdfColumnGroups = [
+      [
+        'id',
+        'name',
+        'role',
+        'allrounderType',
+        'teamId',
+        'teamName',
+        'teamShortName',
+        'age',
+        'dateOfBirth',
+        'nationality',
+        'jerseyNumber',
+        'isCaptain'
+      ],
+      [
+        'battingStyle',
+        'bowlingStyle',
+        'league',
+        'photoUrl',
+        'matches',
+        'runs',
+        'wickets',
+        'average',
+        'bowlingAverage',
+        'strikeRate',
+        'economy'
+      ],
+      [
+        'highest',
+        'fours',
+        'sixes',
+        'fifties',
+        'hundreds',
+        'bestBowling',
+        'maidens',
+        'fiveWickets',
+        'lastAuctionYear',
+        'acquiredVia',
+        'transferable',
+        'transferFee',
+        'transferNotes',
+        'performanceGrade',
+        'performanceLabel',
+        'performanceColor'
+      ]
+    ].map(group =>
+      group
+        .map(key => exportColumns.find(column => column.key === key))
+        .filter(Boolean) as Array<(typeof exportColumns)[number]>
     );
 
-    doc.addPage();
-    const tableStartY = 130;
+    pdfColumnGroups.forEach((pdfColumns, groupIndex) => {
+      doc.addPage();
+      const tableStartY = 120;
+      const groupTitle = `Player Data ${groupIndex + 1} of ${pdfColumnGroups.length}`;
+      const groupSubtitle = pdfColumns.map(column => column.label).join(' • ');
 
-    autoTable(doc, {
-      head: [pdfColumns.map(column => column.label)],
-      body: pdfRows,
-      startY: tableStartY,
-      margin: { top: 90, left: 40, right: 40, bottom: 50 },
-      theme: 'striped',
-      styles: {
-        fontSize: 8.5,
-        cellPadding: 4,
-        overflow: 'linebreak',
-        textColor: [60, 36, 16],
-        lineColor: theme.cardBorder,
-        lineWidth: 0.1
-      },
-      headStyles: {
-        fillColor: theme.tableHeader,
-        textColor: 255,
-        fontStyle: 'bold',
-        halign: 'center'
-      },
-      alternateRowStyles: {
-        fillColor: theme.tableAltRow
-      },
-      columnStyles: {
-        3: { halign: 'right' },
-        5: { halign: 'right' },
-        6: { halign: 'right' },
-        7: { halign: 'right' },
-        8: { halign: 'right' },
-        9: { halign: 'right' },
-        10: { halign: 'right' },
-        11: { halign: 'right' },
-        12: { halign: 'right' },
-        13: { halign: 'center' }
-      },
-      willDrawPage: (data) => {
-        const pageNumber = doc.internal.getCurrentPageInfo().pageNumber;
-        drawPageFrame(pageNumber);
-      }
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(13);
+      doc.setTextColor(60, 36, 16);
+      doc.text(groupTitle, 40, 92);
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8);
+      doc.setTextColor(...theme.mutedText);
+      doc.text(groupSubtitle, 40, 106, { maxWidth: pageWidth - 80 });
+
+      const pdfRows = rows.map(row =>
+        pdfColumns.map(column => formatPdfCell(column.key, (row as any)[column.key]))
+      );
+
+      const columnStyles = pdfColumns.reduce((acc, column, index) => {
+        if (numericFields.has(column.key) || decimalFields.has(column.key)) {
+          acc[index] = { halign: 'right' };
+        } else if (column.key === 'isCaptain' || column.key === 'transferable') {
+          acc[index] = { halign: 'center' };
+        }
+        return acc;
+      }, {} as Record<number, { halign: 'right' | 'center' }>);
+
+      autoTable(doc, {
+        head: [pdfColumns.map(column => column.label)],
+        body: pdfRows,
+        startY: tableStartY,
+        margin: { top: 90, left: 40, right: 40, bottom: 50 },
+        theme: 'striped',
+        styles: {
+          fontSize: 7.5,
+          cellPadding: 3,
+          overflow: 'linebreak',
+          textColor: [60, 36, 16],
+          lineColor: theme.cardBorder,
+          lineWidth: 0.1
+        },
+        headStyles: {
+          fillColor: theme.tableHeader,
+          textColor: 255,
+          fontStyle: 'bold',
+          halign: 'center'
+        },
+        alternateRowStyles: {
+          fillColor: theme.tableAltRow
+        },
+        columnStyles,
+        willDrawPage: () => {
+          const pageNumber = doc.internal.getCurrentPageInfo().pageNumber;
+          drawPageFrame(pageNumber);
+        }
+      });
     });
 
     const totalPages = doc.getNumberOfPages();
