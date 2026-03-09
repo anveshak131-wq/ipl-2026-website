@@ -549,26 +549,27 @@ const BowlingStatsPage = () => {
     <>
       <div className="flex-1 bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950 min-h-screen overflow-x-hidden">
         {/* Hero Header */}
-        <div className="bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600 p-8 shadow-2xl">
-          <div className="max-w-7xl mx-auto">
+        <div className="relative bg-gradient-to-r from-amber-600 via-orange-600 to-rose-600 p-8 shadow-2xl overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-shimmer pointer-events-none" />
+          <div className="max-w-7xl mx-auto relative z-10">
             <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-              <div>
+              <div className="animate-in slide-in-from-left duration-700">
                 <h1 className="text-4xl lg:text-5xl font-bold text-white mb-2 flex items-center gap-3">
-                  <div className="w-12 h-12 bg-white/20 backdrop-blur rounded-xl flex items-center justify-center">
+                  <div className="w-12 h-12 bg-white/20 backdrop-blur rounded-xl flex items-center justify-center transform group-hover:rotate-12 group-hover:scale-110 transition-all duration-300 shadow-lg shadow-white/20">
                     <TrendingDown className="w-6 h-6 text-white" />
                   </div>
-                  Bowling Statistics
+                  <span className="bg-gradient-to-r from-white via-amber-100 to-white bg-clip-text text-transparent">Bowling Statistics</span>
                 </h1>
-                <p className="text-green-100 text-lg">Comprehensive bowling performance analytics</p>
+                <p className="text-amber-100 text-lg font-medium tracking-wide">Comprehensive bowling performance analytics</p>
               </div>
-              <div className="flex flex-wrap gap-4">
-                <div className="bg-white/10 backdrop-blur rounded-xl p-4 text-center min-w-[120px]">
-                  <div className="text-3xl font-bold text-white">{summaryStats.activeBowlers}</div>
-                  <div className="text-green-100 text-sm mt-1">Active Bowlers</div>
+              <div className="flex flex-wrap gap-4 animate-in slide-in-from-right duration-700">
+                <div className="bg-white/10 backdrop-blur rounded-xl p-4 text-center min-w-[120px] border border-white/20 hover:bg-white/20 hover:scale-105 transition-all duration-300 cursor-pointer shadow-lg hover:shadow-2xl hover:shadow-amber-500/50">
+                  <div className="text-3xl font-bold text-white animate-in zoom-in duration-500">{summaryStats.activeBowlers}</div>
+                  <div className="text-amber-100 text-sm mt-1 font-semibold">Active Bowlers</div>
                 </div>
-                <div className="bg-white/10 backdrop-blur rounded-xl p-4 text-center min-w-[120px]">
-                  <div className="text-3xl font-bold text-white">{teams.length}</div>
-                  <div className="text-green-100 text-sm mt-1">Teams</div>
+                <div className="bg-white/10 backdrop-blur rounded-xl p-4 text-center min-w-[120px] border border-white/20 hover:bg-white/20 hover:scale-105 transition-all duration-300 cursor-pointer shadow-lg hover:shadow-2xl hover:shadow-indigo-500/50">
+                  <div className="text-3xl font-bold text-white animate-in zoom-in duration-500 delay-100">{teams.length}</div>
+                  <div className="text-amber-100 text-sm mt-1 font-semibold">Teams</div>
                 </div>
               </div>
             </div>
