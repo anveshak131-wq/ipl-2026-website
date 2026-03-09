@@ -475,19 +475,20 @@ export async function exportPointsTableToPDF(data: PointsTableExportData): Promi
   }
 
   // ── Dark Palette (Cosmic Purple) ─────────────────────────────────────────────
-  const C_BG:      [number, number, number] = [8,   4,  22];    // near-black violet
-  const C_BGHDR:   [number, number, number] = [16,  8,  45];    // deep indigo-violet header
-  const C_ROW1:    [number, number, number] = [20,  12, 48];    // mid violet row
-  const C_ROW2:    [number, number, number] = [12,  7,  32];    // darker violet row
-  const C_QUAL:    [number, number, number] = [22,  14, 58];    // qualified row — brighter violet tint
-  const C_GRID:    [number, number, number] = [60,  35, 110];   // grid lines
-  const C_GOLD:    [number, number, number] = [220, 120, 255];  // bright violet accent (primary)
-  const C_RED:     [number, number, number] = [255, 75,  160];  // hot magenta accent
-  const C_WHITE:   [number, number, number] = [245, 240, 255];  // near-white lavender text
-  const C_MUTED:   [number, number, number] = [195, 182, 235];  // bright muted lavender (visible on dark)
-  const C_GREEN:   [number, number, number] = [90,  255, 185];  // bright mint (positive NRR)
-  const C_REDTXT:  [number, number, number] = [255, 120, 145];  // coral-pink (negative NRR)
-  const C_EMERALD: [number, number, number] = [130, 255, 215];  // bright teal (qualified status)
+  const C_BG:      [number, number, number] = [10,   5,  28];   // near-black violet page bg
+  const C_BGHDR:   [number, number, number] = [42,  18,  95];   // VISIBLE deep purple header (much brighter)
+  const C_BGHDR2:  [number, number, number] = [30,  14,  68];   // badge bg (between bg and header)
+  const C_ROW1:    [number, number, number] = [22,  14,  52];   // mid violet row
+  const C_ROW2:    [number, number, number] = [14,   8,  36];   // darker violet row
+  const C_QUAL:    [number, number, number] = [28,  18,  72];   // qualified row
+  const C_GRID:    [number, number, number] = [75,  45, 140];   // grid lines
+  const C_GOLD:    [number, number, number] = [220, 120, 255];  // bright violet accent
+  const C_RED:     [number, number, number] = [255,  75, 160];  // hot magenta
+  const C_WHITE:   [number, number, number] = [248, 242, 255];  // near-white lavender
+  const C_MUTED:   [number, number, number] = [200, 188, 240];  // bright muted lavender
+  const C_GREEN:   [number, number, number] = [90,  255, 185];  // bright mint
+  const C_REDTXT:  [number, number, number] = [255, 120, 145];  // coral-pink
+  const C_EMERALD: [number, number, number] = [130, 255, 215];  // bright teal
 
   // Team brand colours
   const TEAM_COLORS: Record<string, [number, number, number]> = {
@@ -506,7 +507,7 @@ export async function exportPointsTableToPDF(data: PointsTableExportData): Promi
   const PW = doc.internal.pageSize.getWidth();
   const PH = doc.internal.pageSize.getHeight();
   const MX = 12;
-  const HDR_H = 32;
+  const HDR_H = 38;   // taller header so content isn't cramped
 
   // ── Helpers ───────────────────────────────────────────────────────────────────
   const paintBg = () => {
@@ -515,66 +516,62 @@ export async function exportPointsTableToPDF(data: PointsTableExportData): Promi
   };
 
   const paintHeader = () => {
-    // Header bg
+    // Header bg — clearly visible purple band
     doc.setFillColor(C_BGHDR[0], C_BGHDR[1], C_BGHDR[2]);
     doc.rect(0, 0, PW, HDR_H, 'F');
-    // Gold top rule
+    // Bright violet top rule
     doc.setFillColor(C_GOLD[0], C_GOLD[1], C_GOLD[2]);
-    doc.rect(0, 0, PW, 1.5, 'F');
-    // Gold left accent stripe
+    doc.rect(0, 0, PW, 2, 'F');
+    // Left accent stripe
     doc.setFillColor(C_GOLD[0], C_GOLD[1], C_GOLD[2]);
-    doc.rect(0, 0, 4, HDR_H, 'F');
-    // Red right accent stripe
+    doc.rect(0, 0, 5, HDR_H, 'F');
+    // Magenta right accent stripe
     doc.setFillColor(C_RED[0], C_RED[1], C_RED[2]);
-    doc.rect(PW - 4, 0, 4, HDR_H, 'F');
+    doc.rect(PW - 5, 0, 5, HDR_H, 'F');
     // Bottom separator
     doc.setFillColor(C_GRID[0], C_GRID[1], C_GRID[2]);
-    doc.rect(0, HDR_H - 0.5, PW, 0.5, 'F');
+    doc.rect(0, HDR_H - 0.6, PW, 0.6, 'F');
 
     // Left: "IPL" + year
-    doc.setFontSize(20);
+    doc.setFontSize(22);
     doc.setFont('helvetica', 'bold');
     doc.setTextColor(C_GOLD[0], C_GOLD[1], C_GOLD[2]);
-    doc.text('IPL', MX + 4, HDR_H / 2 + 3);
+    doc.text('IPL', MX + 6, HDR_H / 2 + 4);
+    const iplW = doc.getTextWidth('IPL');
     doc.setTextColor(C_WHITE[0], C_WHITE[1], C_WHITE[2]);
-    doc.text(String(year), MX + 22, HDR_H / 2 + 3);
-    doc.setFontSize(7);
+    doc.text(String(year), MX + 6 + iplW + 3, HDR_H / 2 + 4);
+    doc.setFontSize(7.5);
     doc.setFont('helvetica', 'normal');
     doc.setTextColor(C_MUTED[0], C_MUTED[1], C_MUTED[2]);
-    doc.text('INDIAN PREMIER LEAGUE', MX + 4, HDR_H / 2 + 8.5);
+    doc.text('INDIAN PREMIER LEAGUE', MX + 6, HDR_H / 2 + 10);
 
     // Right: "POINTS TABLE"
-    doc.setFontSize(15);
+    doc.setFontSize(16);
     doc.setFont('helvetica', 'bold');
     doc.setTextColor(C_WHITE[0], C_WHITE[1], C_WHITE[2]);
-    doc.text('POINTS TABLE', PW - MX - 4, HDR_H / 2 + 3, { align: 'right' });
-    doc.setFontSize(7);
+    doc.text('POINTS TABLE', PW - MX - 6, HDR_H / 2 + 4, { align: 'right' });
+    doc.setFontSize(7.5);
     doc.setFont('helvetica', 'normal');
     doc.setTextColor(C_MUTED[0], C_MUTED[1], C_MUTED[2]);
-    doc.text(`Season ${year}`, PW - MX - 4, HDR_H / 2 + 8.5, { align: 'right' });
+    doc.text(`Season ${year}`, PW - MX - 6, HDR_H / 2 + 10, { align: 'right' });
   };
 
   const paintFooter = (pageNum: number, totalPages: number) => {
     const FY = PH - 8;
-    doc.setFillColor(C_BGHDR[0], C_BGHDR[1], C_BGHDR[2]);
-    doc.rect(0, FY - 2, PW, 10, 'F');
+    doc.setFillColor(C_BGHDR[0], C_BGHDR[1], C_BGHDR[2]);  // same bright header color so footer is visible
+    doc.rect(0, FY - 2, PW, 12, 'F');
     doc.setFillColor(C_GOLD[0], C_GOLD[1], C_GOLD[2]);
-    doc.rect(0, FY - 2, PW, 0.6, 'F');
-    doc.setFontSize(7);
+    doc.rect(0, FY - 2, PW, 0.8, 'F');
+    doc.setFontSize(7.5);
     doc.setFont('helvetica', 'normal');
     doc.setTextColor(C_MUTED[0], C_MUTED[1], C_MUTED[2]);
-    doc.text(`IPL ${year} · Points Table`, MX, FY + 3);
-    doc.text(`Page ${pageNum} / ${totalPages}`, PW - MX, FY + 3, { align: 'right' });
-    doc.text(new Date().toLocaleString(), PW / 2, FY + 3, { align: 'center' });
+    doc.text(`IPL ${year} · Points Table`, MX, FY + 4);
+    doc.text(`Page ${pageNum} / ${totalPages}`, PW - MX, FY + 4, { align: 'right' });
+    doc.text(new Date().toLocaleString(), PW / 2, FY + 4, { align: 'center' });
   };
 
-  // ── First page ────────────────────────────────────────────────────────────────
-  paintBg();
-  paintHeader();
-
-  let cursorY = HDR_H + 7;
-
-  // ── Stat badges ───────────────────────────────────────────────────────────────
+  // ── Page-1 chrome content (badges + filter notice) ───────────────────────────
+  // Drawn inside willDrawPage so paintBg() doesn't wipe them
   const totalTeams = teams.length;
   const qualifiedCount = teams.filter(t => t.qualified).length;
   const topTeam = teams[0]; // already sorted by points→NRR
@@ -583,45 +580,39 @@ export async function exportPointsTableToPDF(data: PointsTableExportData): Promi
   const badges: Badge[] = [
     { label: 'TOTAL TEAMS', value: String(totalTeams),   accent: C_GOLD },
     { label: 'QUALIFIED',   value: String(qualifiedCount), accent: C_EMERALD },
-    { label: 'SEASON',      value: String(year),          accent: [80, 140, 220] },
+    { label: 'SEASON',      value: String(year),          accent: [80, 170, 255] as [number,number,number] },
     { label: 'LEADER',      value: topTeam?.shortName || topTeam?.name || '—',
       accent: teamColor(topTeam?.shortName || '') }
   ];
 
   const badgeW = (PW - MX * 2 - 9) / 4;
-  const badgeH = 16;
-  badges.forEach((b, i) => {
-    const bx = MX + i * (badgeW + 3);
-    doc.setFillColor(C_BGHDR[0], C_BGHDR[1], C_BGHDR[2]);
-    doc.roundedRect(bx, cursorY, badgeW, badgeH, 1.5, 1.5, 'F');
-    // Left colour pip
-    doc.setFillColor(b.accent[0], b.accent[1], b.accent[2]);
-    doc.roundedRect(bx, cursorY, 3, badgeH, 1, 1, 'F');
-    // Label
-    doc.setFontSize(5.5);
-    doc.setFont('helvetica', 'bold');
-    doc.setTextColor(b.accent[0], b.accent[1], b.accent[2]);
-    doc.text(b.label, bx + 5.5, cursorY + 5);
-    // Value
-    doc.setFontSize(12);
-    doc.setFont('helvetica', 'bold');
-    doc.setTextColor(C_WHITE[0], C_WHITE[1], C_WHITE[2]);
-    doc.text(b.value, bx + 5.5, cursorY + 12.5);
-  });
+  const badgeH = 18;
+  const badgesY = HDR_H + 7;
 
-  cursorY += badgeH + 5;
+  const drawBadges = () => {
+    badges.forEach((b, i) => {
+      const bx = MX + i * (badgeW + 3);
+      doc.setFillColor(C_BGHDR2[0], C_BGHDR2[1], C_BGHDR2[2]);
+      doc.roundedRect(bx, badgesY, badgeW, badgeH, 2, 2, 'F');
+      doc.setDrawColor(b.accent[0], b.accent[1], b.accent[2]);
+      doc.setLineWidth(0.6);
+      doc.roundedRect(bx, badgesY, badgeW, badgeH, 2, 2, 'S');
+      doc.setFillColor(b.accent[0], b.accent[1], b.accent[2]);
+      doc.roundedRect(bx, badgesY, 4, badgeH, 1.5, 1.5, 'F');
+      doc.setFontSize(6.5);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(b.accent[0], b.accent[1], b.accent[2]);
+      doc.text(b.label, bx + 7, badgesY + 6.5);
+      doc.setFontSize(13);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(C_WHITE[0], C_WHITE[1], C_WHITE[2]);
+      doc.text(b.value, bx + 7, badgesY + 14.5);
+    });
+  };
 
-  // Filter notice
-  if (filtered || searchTerm) {
-    doc.setFontSize(7.5);
-    doc.setFont('helvetica', 'italic');
-    doc.setTextColor(C_GOLD[0], C_GOLD[1], C_GOLD[2]);
-    const note = filtered
-      ? `Filtered Results${searchTerm ? ` — "${searchTerm}"` : ''}`
-      : `Search: "${searchTerm}"`;
-    doc.text(note, MX, cursorY);
-    cursorY += 5;
-  }
+  // Pre-calculate table startY (no drawing yet — drawing happens in willDrawPage)
+  let tableStartY = badgesY + badgeH + 6;
+  if (filtered || searchTerm) tableStartY += 6;
 
   // ── Table ─────────────────────────────────────────────────────────────────────
   const tableHeaders = ['#', 'Team', 'M', 'W', 'L', 'NR', 'Pts', 'NRR', 'Status'];
@@ -644,8 +635,8 @@ export async function exportPointsTableToPDF(data: PointsTableExportData): Promi
   autoTable(doc, {
     head: [tableHeaders],
     body: tableBody,
-    startY: cursorY,
-    margin: { top: HDR_H + 7, left: MX, right: MX, bottom: 14 },
+    startY: tableStartY,
+    margin: { top: HDR_H + 7, left: MX, right: MX, bottom: 16 },
     theme: 'plain',
     styles: {
       fontSize: 8.5,
@@ -660,7 +651,7 @@ export async function exportPointsTableToPDF(data: PointsTableExportData): Promi
       fillColor: C_BGHDR,
       textColor: C_GOLD,
       fontStyle: 'bold',
-      fontSize: 8,
+      fontSize: 8.5,
       cellPadding: { top: 4, bottom: 4, left: 3, right: 3 }
     },
     alternateRowStyles: { fillColor: C_ROW2 },
@@ -720,8 +711,23 @@ export async function exportPointsTableToPDF(data: PointsTableExportData): Promi
       }
     },
     willDrawPage: (pd: any) => {
+      // Paint bg + header on every page (this must happen before cells render)
       paintBg();
-      if (pd.pageNumber > 1) paintHeader();
+      paintHeader();
+      // Page 1 only: draw stat badges and optional filter notice
+      if (pd.pageNumber === 1) {
+        drawBadges();
+        if (filtered || searchTerm) {
+          const noteY = badgesY + badgeH + 5;
+          doc.setFontSize(7.5);
+          doc.setFont('helvetica', 'italic');
+          doc.setTextColor(C_GOLD[0], C_GOLD[1], C_GOLD[2]);
+          const note = filtered
+            ? `Filtered Results${searchTerm ? ` — "${searchTerm}"` : ''}`
+            : `Search: "${searchTerm}"`;
+          doc.text(note, MX, noteY);
+        }
+      }
     },
     didDrawPage: (pd: any) => {
       const totalPages = doc.internal.getNumberOfPages();
