@@ -369,6 +369,13 @@ export default function AdminMatches() {
             if (mm) return `${yyyy}-${mm}-${dd.padStart(2, '0')}`;
         }
 
+        const textualMonthFirst = value.match(/^([A-Za-z]+)\s+(\d{1,2})\s+(\d{4})$/);
+        if (textualMonthFirst) {
+            const [, monthRaw, dd, yyyy] = textualMonthFirst;
+            const mm = monthMap[monthRaw.toLowerCase()];
+            if (mm) return `${yyyy}-${mm}-${dd.padStart(2, '0')}`;
+        }
+
         return value;
     };
 
@@ -392,11 +399,19 @@ export default function AdminMatches() {
         return pdfjsLib;
     };
 
-    const extractPdfLines = async (file: File): Promise<string[]> => {
+    const extractPdfFixtureCsv = async (file: File): Promise<string> => {
         const pdfjsLib = await loadPdfJs();
         const buffer = await file.arrayBuffer();
         const pdf = await pdfjsLib.getDocument({ data: buffer }).promise;
-        const lines: string[] = [];
+        const rows: string[] = [];
+        const columnStops = [93.2, 211.7, 270.4, 340.1];
+        const getColumnIndex = (x: number) => {
+            if (x < columnStops[0]) return 0;
+            if (x < columnStops[1]) return 1;
+            if (x < columnStops[2]) return 2;
+            if (x < columnStops[3]) return 3;
+            return 4;
+        };
 
         for (let pageNo = 1; pageNo <= pdf.numPages; pageNo += 1) {
             const page = await pdf.getPage(pageNo);
@@ -409,47 +424,43 @@ export default function AdminMatches() {
                 if (!text) return;
                 const x = item.transform?.[4] ?? 0;
                 const y = item.transform?.[5] ?? 0;
-                const key = (Math.round(y / 2) * 2).toString();
+                const key = (Math.round(y / 3) * 3).toString();
                 if (!groups.has(key)) groups.set(key, []);
                 groups.get(key)!.push({ x, text });
             });
 
-            const pageLines = Array.from(groups.entries())
+            const pageRows = Array.from(groups.entries())
                 .sort((a, b) => Number(b[0]) - Number(a[0]))
-                .map(([, group]) =>
+                .map(([, group]) => {
+                    const columns = ['', '', '', '', ''];
                     group
                         .sort((a, b) => a.x - b.x)
-                        .map((entry) => entry.text)
-                        .join(' ')
-                        .replace(/\s+/g, ' ')
-                        .trim()
-                )
-                .filter(Boolean);
+                        .forEach((entry) => {
+                            const idx = getColumnIndex(entry.x);
+                            columns[idx] = `${columns[idx]} ${entry.text}`.trim();
+                        });
+                    return columns.map(col => col.replace(/\s+/g, ' ').trim());
+                })
+                .filter((cols) => cols.some(Boolean));
 
-            lines.push(...pageLines);
+            pageRows.forEach((cols) => {
+                const joined = cols.join(' ').trim();
+                if (!joined) return;
+                if (/^sheet\d*$/i.test(cols[0]) || /^page\s+\d+/i.test(joined) || /ipl 20\d{2} schedule/i.test(joined)) return;
+                if (/^match\b/i.test(joined) && /stadium/i.test(joined)) return;
+                if (!cols[0] || !/\d+|qualifier|eliminator|final/i.test(cols[0])) return;
+
+                const match = cols[0].replace(/\s+/g, ' ').trim();
+                const teamCell = cols[1].replace(/\s+/g, ' ').trim();
+                const timeCell = cols[2].replace(/\s+/g, ' ').trim().toUpperCase();
+                const dateCell = normalizeImportedDate(cols[3].replace(/\s+/g, ' ').replace(/,\s*/g, ' ').trim());
+                const venueCell = cols[4].replace(/\s+/g, ' ').trim();
+
+                rows.push([match, teamCell, timeCell, dateCell, venueCell].join(','));
+            });
         }
 
-        return lines;
-    };
-
-    const parsePdfFixtureLines = (lines: string[]): string => {
-        const cleaned = lines
-            .map(line => line.replace(/\s+/g, ' ').trim())
-            .filter(line => line && !/^page\s+\d+/i.test(line));
-
         const header = 'Match,Team,Time (IST),Date,Stadium/City';
-        const rows: string[] = [];
-
-        const rowRegex = /^(\d+)\s+(.+?)\s+(\d{1,2}:\d{2}\s*(?:AM|PM))\s+(\d{1,2}\s+[A-Za-z]+\s+\d{4})\s+(.+)$/i;
-
-        cleaned.forEach((line) => {
-            if (/^match\b/i.test(line) && /\bteam\b/i.test(line) && /\bdate\b/i.test(line)) return;
-            const match = line.match(rowRegex);
-            if (!match) return;
-            const [, matchNo, teamCell, time, date, venue] = match;
-            rows.push([matchNo, teamCell, time.toUpperCase().replace(/\s+/g, ''), normalizeImportedDate(date), venue].join(','));
-        });
-
         return [header, ...rows].join('\n');
     };
 
@@ -644,8 +655,7 @@ export default function AdminMatches() {
         setCsvFileName(file.name);
         try {
             if (file.name.toLowerCase().endsWith('.pdf') || file.type === 'application/pdf') {
-                const lines = await extractPdfLines(file);
-                const csvText = parsePdfFixtureLines(lines);
+                const csvText = await extractPdfFixtureCsv(file);
                 setCsvRows(parseCsv(csvText));
                 return;
             }
