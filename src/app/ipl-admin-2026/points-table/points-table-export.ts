@@ -717,14 +717,8 @@ export async function exportPointsTableToPDF(data: PointsTableExportData): Promi
   });
 
   // ═══════════════════════════════════════════════════════════════════════════════
-  // PAGE 2 — Analytics & Charts
+  // Shared chart constants & insight data (computed once, used across pages 2-4)
   // ═══════════════════════════════════════════════════════════════════════════════
-  doc.addPage();
-  fill(BG); doc.rect(0, 0, PW, PH, 'F');
-  paintHeader(2);
-  paintFooter(2, doc.internal.getNumberOfPages());
-
-  let cy = CONTENT_TOP + 4;
 
   // Helper: solid horizontal bar (with optional glow halo for emphasis)
   const hBar = (x: number, y: number, w: number, h: number, color: RGB, glow = false) => {
@@ -732,162 +726,43 @@ export async function exportPointsTableToPDF(data: PointsTableExportData): Promi
     fill(color); doc.rect(x, y, w, h, 'F');
   };
 
-  const BAR_LBL_W  = 30;
-  const BAR_AREA_W = CW - BAR_LBL_W - 26;
-  const BAR_AREA_X = MX + BAR_LBL_W;
-  const barH       = Math.min(6.5, 60 / Math.max(1, teams.length));
-  const barGap     = 1.0;
-
-  // ── Chart 1: Points Bar Chart ─────────────────────────────────────────────────
-  cy = sectionTitle(cy, `CHART 1 — POINTS COMPARISON (Season ${year})`, VIOLET);
-  const CHART1_H = 68;
-  const maxPts   = Math.max(1, ...teams.map(t => safeNumber(t.points, 0)));
-
-  fill(HDRFILL2); doc.rect(MX, cy, CW, CHART1_H, 'F');
-
-  // X axis grid + tick labels
-  [0, 0.25, 0.5, 0.75, 1].forEach(frac => {
-    const tick = Math.round(frac * maxPts);
-    const tx   = BAR_AREA_X + frac * BAR_AREA_W;
-    stroke(GRID); doc.setLineWidth(0.15);
-    doc.line(tx, cy + 2, tx, cy + CHART1_H - 8);
-    doc.setFont('helvetica', 'normal'); doc.setFontSize(5.5); txt(DIM);
-    doc.text(String(tick), tx, cy + CHART1_H - 4, { align: 'center' });
-  });
-
-  teams.forEach((team, i) => {
-    const pts  = safeNumber(team.points, 0);
-    const w    = (pts / maxPts) * BAR_AREA_W;
-    const by2  = cy + 6 + i * (barH + barGap);
-    const clr  = tclr(team.shortName || '');
-    const isQ  = team.qualified;
-    doc.setFont('helvetica', isQ ? 'bold' : 'normal'); doc.setFontSize(6.5);
-    txt(isQ ? clr : MUTED);
-    doc.text((team.shortName || team.name || '?').substring(0, 8), BAR_AREA_X - 2, by2 + barH * 0.72, { align: 'right' });
-    hBar(BAR_AREA_X, by2, Math.max(1, w), barH, clr, isQ);
-    doc.setFont('helvetica', 'bold'); doc.setFontSize(5.5);
-    if (w > 4) { txt(WHITE); doc.text(String(pts), BAR_AREA_X + w - 1.5, by2 + barH * 0.72, { align: 'right' }); }
-    else { txt(clr); doc.text(String(pts), BAR_AREA_X + w + 2, by2 + barH * 0.72); }
-  });
-
-  // Legend (right column)
-  const LEG_X = MX + CW - 24;
-  doc.setFont('helvetica', 'bold'); doc.setFontSize(6); txt(VIOLET);
-  doc.text('LEGEND', LEG_X, cy + 8);
-  teams.slice(0, 10).forEach((team, i) => {
-    const clr = tclr(team.shortName || '');
-    const ly  = cy + 12 + i * 5.5;
-    fill(clr); doc.rect(LEG_X, ly - 3.5, 4, 3.5, 'F');
-    doc.setFont('helvetica', 'normal'); doc.setFontSize(5.5); txt(MUTED);
-    doc.text((team.shortName || '?').substring(0, 5), LEG_X + 5.5, ly - 0.5);
-    if (team.qualified) { txt(TEAL); doc.text('✓', LEG_X + 18, ly - 0.5); }
-  });
-  cy += CHART1_H + 5;
-
-  // ── Chart 2: Stacked Win / Loss / NR Bars ────────────────────────────────────
-  cy = sectionTitle(cy, `CHART 2 — WIN / LOSS / NO RESULT BREAKDOWN (Season ${year})`, MINT);
-  const CHART2_H = 68;
-  const maxM     = Math.max(1, ...teams.map(t => safeNumber(t.matchesPlayed, 0)));
-
-  fill(HDRFILL2); doc.rect(MX, cy, CW, CHART2_H, 'F');
-  [0, 0.25, 0.5, 0.75, 1].forEach(frac => {
-    const tx2 = BAR_AREA_X + frac * BAR_AREA_W;
-    stroke(GRID); doc.setLineWidth(0.15);
-    doc.line(tx2, cy + 2, tx2, cy + CHART2_H - 8);
-    doc.setFont('helvetica', 'normal'); doc.setFontSize(5.5); txt(DIM);
-    doc.text(String(Math.round(frac * maxM)), tx2, cy + CHART2_H - 4, { align: 'center' });
-  });
-
-  teams.forEach((team, i) => {
-    const played = safeNumber(team.matchesPlayed, 0);
-    const wins   = safeNumber(team.wins, 0);
-    const losses = safeNumber(team.losses, 0);
-    const nr     = safeNumber(team.noResult, 0);
-    const by2    = cy + 6 + i * (barH + barGap);
-    const scale  = BAR_AREA_W / maxM;
-    const isQ    = team.qualified;
-    doc.setFont('helvetica', isQ ? 'bold' : 'normal'); doc.setFontSize(6.5);
-    txt(isQ ? tclr(team.shortName || '') : MUTED);
-    doc.text((team.shortName || team.name || '?').substring(0, 8), BAR_AREA_X - 2, by2 + barH * 0.72, { align: 'right' });
-    let sx = BAR_AREA_X;
-    if (wins   > 0) { hBar(sx, by2, wins   * scale, barH, MINT);  sx += wins   * scale; }
-    if (losses > 0) { hBar(sx, by2, losses * scale, barH, CORAL); sx += losses * scale; }
-    if (nr     > 0) { hBar(sx, by2, nr     * scale, barH, DIM); }
-    if (played > 0) {
-      doc.setFont('helvetica', 'normal'); doc.setFontSize(5.5); txt(MUTED);
-      doc.text(`${wins}W ${losses}L${nr > 0 ? ` ${nr}NR` : ''}`, BAR_AREA_X + played * scale + 2, by2 + barH * 0.72);
-    }
-  });
-
-  const L2X = MX + CW - 24;
-  doc.setFont('helvetica', 'bold'); doc.setFontSize(6); txt(MINT); doc.text('LEGEND', L2X, cy + 8);
-  ([[MINT, 'Wins'], [CORAL, 'Losses'], [DIM, 'No Result']] as [RGB, string][]).forEach(([c, l], i) => {
-    fill(c); doc.rect(L2X, cy + 12 + i * 6 - 3.5, 4, 3.5, 'F');
-    doc.setFont('helvetica', 'normal'); doc.setFontSize(5.5); txt(MUTED);
-    doc.text(l, L2X + 5.5, cy + 12 + i * 6 - 0.5);
-  });
-  cy += CHART2_H + 5;
-
-  // ── Chart 3: NRR Diverging Bars ───────────────────────────────────────────────
-  cy = sectionTitle(cy, 'CHART 3 — NET RUN RATE (Above / Below Zero)', CORAL);
-  const CHART3_H = 62;
-  const maxNRR   = Math.max(0.01, ...teams.map(t => Math.abs(safeNumber(t.netRunRate, 0))));
-  const CENTER_X = BAR_AREA_X + BAR_AREA_W / 2;
-  const HALF_W   = BAR_AREA_W / 2;
-
-  fill(HDRFILL2); doc.rect(MX, cy, CW, CHART3_H, 'F');
-  stroke(GRID); doc.setLineWidth(0.4);
-  doc.line(CENTER_X, cy + 2, CENTER_X, cy + CHART3_H - 8);
-  doc.setFont('helvetica', 'normal'); doc.setFontSize(5.5); txt(DIM);
-  doc.text(`-${maxNRR.toFixed(2)}`, CENTER_X - HALF_W, cy + CHART3_H - 4, { align: 'left' });
-  doc.text('0', CENTER_X, cy + CHART3_H - 4, { align: 'center' });
-  doc.text(`+${maxNRR.toFixed(2)}`, CENTER_X + HALF_W, cy + CHART3_H - 4, { align: 'right' });
-
-  teams.forEach((team, i) => {
-    const nrr  = safeNumber(team.netRunRate, 0);
-    const bw3  = (Math.abs(nrr) / maxNRR) * HALF_W;
-    const by2  = cy + 5 + i * (barH + barGap);
-    const isQ  = team.qualified;
-    const clr: RGB = nrr >= 0 ? MINT : CORAL;
-    doc.setFont('helvetica', isQ ? 'bold' : 'normal'); doc.setFontSize(6.5);
-    txt(isQ ? tclr(team.shortName || '') : MUTED);
-    doc.text((team.shortName || '?').substring(0, 8), CENTER_X - 2, by2 + barH * 0.72, { align: 'right' });
-    if (nrr >= 0) hBar(CENTER_X, by2, Math.max(0.5, bw3), barH, clr, isQ);
-    else          hBar(CENTER_X - Math.max(0.5, bw3), by2, Math.max(0.5, bw3), barH, clr, isQ);
-    const nrrStr = (nrr >= 0 ? '+' : '') + nrr.toFixed(3);
-    doc.setFont('helvetica', 'bold'); doc.setFontSize(5.5); txt(clr);
-    if (nrr >= 0) doc.text(nrrStr, CENTER_X + bw3 + 2, by2 + barH * 0.72);
-    else          doc.text(nrrStr, CENTER_X - bw3 - 2, by2 + barH * 0.72, { align: 'right' });
-  });
-
-  const L3X = MX + CW - 28;
-  doc.setFont('helvetica', 'bold'); doc.setFontSize(6); txt(CORAL); doc.text('LEGEND', L3X, cy + 8);
-  ([[MINT, 'Positive NRR'], [CORAL, 'Negative NRR']] as [RGB, string][]).forEach(([c, l], i) => {
-    fill(c); doc.rect(L3X, cy + 12 + i * 7 - 3.5, 4, 3.5, 'F');
-    doc.setFont('helvetica', 'normal'); doc.setFontSize(5.5); txt(MUTED);
-    doc.text(l, L3X + 5.5, cy + 12 + i * 7 - 0.5);
-  });
-  cy += CHART3_H + 6;
-
-  // ── Chart Explanations ────────────────────────────────────────────────────────
-  cy = sectionTitle(cy, 'CHART EXPLANATIONS & DATA INSIGHTS', AMBER);
-
-  const writePara = (title: string, body: string, accent: RGB) => {
-    doc.setFont('helvetica', 'bold'); doc.setFontSize(7.5); txt(accent);
-    doc.text(title, MX, cy); cy += 5.5;
-    doc.setFont('helvetica', 'normal'); doc.setFontSize(7); txt(WHITE);
-    const lines = doc.splitTextToSize(body, CW);
-    doc.text(lines, MX, cy);
-    cy += lines.length * 4.5 + 4;
+  // Helper: new chart page (bg + header + footer placeholder)
+  const newChartPage = (pageNum: number) => {
+    doc.addPage();
+    fill(BG); doc.rect(0, 0, PW, PH, 'F');
+    paintHeader(pageNum);
+    paintFooter(pageNum, pageNum); // will be re-stamped once total is known
   };
 
-  const topPts      = safeNumber(topTeam?.points, 0);
-  const bottomTeam  = teams[teams.length - 1];
-  const bottomPts   = safeNumber(bottomTeam?.points, 0);
-  const ptsDiff     = topPts - bottomPts;
-  const bestNRR     = [...teams].sort((a, b) => safeNumber(b.netRunRate, 0) - safeNumber(a.netRunRate, 0))[0];
-  const worstNRR    = [...teams].sort((a, b) => safeNumber(a.netRunRate, 0) - safeNumber(b.netRunRate, 0))[0];
-  const bestWinRate = [...teams].sort((a, b) => {
+  // Helper: explanation paragraph at current cy
+  let cy = CONTENT_TOP + 4; // reused per page
+  const writePara = (title: string, body: string, accent: RGB) => {
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(8); txt(accent);
+    doc.text(title, MX, cy); cy += 6;
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(7.5); txt(WHITE);
+    const lines = doc.splitTextToSize(body, CW);
+    doc.text(lines, MX, cy);
+    cy += lines.length * 4.8 + 5;
+  };
+
+  const BAR_LBL_W   = 32;
+  const BAR_AREA_W  = CW - BAR_LBL_W - 22;
+  const BAR_AREA_X  = MX + BAR_LBL_W;
+  const barH        = Math.min(9, 130 / Math.max(1, teams.length));
+  const barGap      = 1.5;
+  const CHART_BIG_H = Math.round(10 + teams.length * (barH + barGap) + 14); // auto-sized
+
+  // Pre-compute insights
+  const maxPts     = Math.max(1, ...teams.map(t => safeNumber(t.points, 0)));
+  const maxM       = Math.max(1, ...teams.map(t => safeNumber(t.matchesPlayed, 0)));
+  const maxNRR     = Math.max(0.01, ...teams.map(t => Math.abs(safeNumber(t.netRunRate, 0))));
+  const topPts     = safeNumber(topTeam?.points, 0);
+  const bottomTeam = teams[teams.length - 1];
+  const bottomPts  = safeNumber(bottomTeam?.points, 0);
+  const ptsDiff    = topPts - bottomPts;
+  const bestNRR    = [...teams].sort((a, b) => safeNumber(b.netRunRate, 0) - safeNumber(a.netRunRate, 0))[0];
+  const worstNRR   = [...teams].sort((a, b) => safeNumber(a.netRunRate, 0) - safeNumber(b.netRunRate, 0))[0];
+  const bestWinRate= [...teams].sort((a, b) => {
     const ra = safeNumber(a.matchesPlayed, 0) > 0 ? safeNumber(a.wins, 0) / safeNumber(a.matchesPlayed, 0) : 0;
     const rb = safeNumber(b.matchesPlayed, 0) > 0 ? safeNumber(b.wins, 0) / safeNumber(b.matchesPlayed, 0) : 0;
     return rb - ra;
@@ -895,52 +770,223 @@ export async function exportPointsTableToPDF(data: PointsTableExportData): Promi
   const bwrPct = safeNumber(bestWinRate?.matchesPlayed, 0) > 0
     ? Math.round((safeNumber(bestWinRate.wins, 0) / safeNumber(bestWinRate.matchesPlayed, 0)) * 100) : 0;
 
+  // ═══════════════════════════════════════════════════════════════════════════════
+  // PAGE 2 — Chart 1: Points Comparison
+  // ═══════════════════════════════════════════════════════════════════════════════
+  newChartPage(2);
+  cy = CONTENT_TOP + 4;
+  cy = sectionTitle(cy, `CHART 1 — POINTS COMPARISON  ·  Season ${year}`, VIOLET);
+
+  fill(HDRFILL2); doc.rect(MX, cy, CW, CHART_BIG_H, 'F');
+
+  // X axis grid + tick labels
+  [0, 0.25, 0.5, 0.75, 1].forEach(frac => {
+    const tick = Math.round(frac * maxPts);
+    const tx   = BAR_AREA_X + frac * BAR_AREA_W;
+    stroke(GRID); doc.setLineWidth(0.2);
+    doc.line(tx, cy + 4, tx, cy + CHART_BIG_H - 10);
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(6.5); txt(DIM);
+    doc.text(String(tick), tx, cy + CHART_BIG_H - 4, { align: 'center' });
+    // X axis label
+    doc.setFontSize(5.5); txt(GRID);
+    doc.text('pts', tx + 1, cy + CHART_BIG_H - 1.5, { align: 'center' });
+  });
+
+  teams.forEach((team, i) => {
+    const pts  = safeNumber(team.points, 0);
+    const w    = (pts / maxPts) * BAR_AREA_W;
+    const by2  = cy + 8 + i * (barH + barGap);
+    const clr  = tclr(team.shortName || '');
+    const isQ  = team.qualified;
+    // Team label
+    doc.setFont('helvetica', isQ ? 'bold' : 'normal'); doc.setFontSize(7.5);
+    txt(isQ ? clr : MUTED);
+    doc.text((team.shortName || team.name || '?').substring(0, 8), BAR_AREA_X - 2, by2 + barH * 0.72, { align: 'right' });
+    // Bar
+    hBar(BAR_AREA_X, by2, Math.max(1.5, w), barH, clr, isQ);
+    // Value label
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(6.5);
+    if (w > 6) { txt(WHITE); doc.text(String(pts), BAR_AREA_X + w - 2, by2 + barH * 0.72, { align: 'right' }); }
+    else { txt(clr); doc.text(String(pts), BAR_AREA_X + w + 2.5, by2 + barH * 0.72); }
+  });
+
+  // Legend
+  const LEG_X = MX + CW - 26;
+  doc.setFont('helvetica', 'bold'); doc.setFontSize(7); txt(VIOLET);
+  doc.text('LEGEND', LEG_X, cy + 10);
+  teams.forEach((team, i) => {
+    const clr = tclr(team.shortName || '');
+    const ly  = cy + 17 + i * 7;
+    fill(clr); doc.rect(LEG_X, ly - 4.5, 5, 4.5, 'F');
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(6.5); txt(MUTED);
+    doc.text((team.shortName || '?').substring(0, 5), LEG_X + 6.5, ly - 0.5);
+    if (team.qualified) { txt(TEAL); doc.text('✓', LEG_X + 22, ly - 0.5); }
+  });
+
+  cy += CHART_BIG_H + 8;
+  cy = sectionTitle(cy, 'DATA INSIGHT — CHART 1', VIOLET);
   writePara(
-    'Chart 1 — Points Comparison',
-    `Each horizontal bar represents total league points accumulated by a team in IPL ${year}. ` +
-    `Bars are coloured with each team's brand colour; qualified teams are highlighted with a glow. ` +
-    `The scale runs from 0 to ${maxPts} points (season maximum). ` +
-    `${topTeam?.shortName || topTeam?.name || 'The leader'} topped the table with ${topPts} pts, ` +
-    `while ${bottomTeam?.shortName || bottomTeam?.name || 'the bottom team'} finished last with ${bottomPts} pts ` +
-    `— a gap of ${ptsDiff} points between 1st and last. Tick marks at 0, 25%, 50%, 75%, 100% of ${maxPts}.`,
+    'Points Comparison — Explanation',
+    `Each horizontal bar shows the total league points earned by a team in IPL ${year}. ` +
+    `Bars use each team's brand colour; a soft glow marks playoff-qualified teams (✓ in legend). ` +
+    `Scale: 0 → ${maxPts} pts (season maximum, tick marks every 25%). ` +
+    `Data used: points column from the official standings. ` +
+    `${topTeam?.shortName || topTeam?.name || 'The leader'} led with ${topPts} pts; ` +
+    `${bottomTeam?.shortName || bottomTeam?.name || 'bottom team'} finished last with ${bottomPts} pts ` +
+    `— a ${ptsDiff}-point gap between 1st and last place.`,
     VIOLET
   );
 
+  // ═══════════════════════════════════════════════════════════════════════════════
+  // PAGE 3 — Chart 2: Win / Loss / NR Breakdown
+  // ═══════════════════════════════════════════════════════════════════════════════
+  newChartPage(3);
+  cy = CONTENT_TOP + 4;
+  cy = sectionTitle(cy, `CHART 2 — WIN / LOSS / NO RESULT  ·  Season ${year}`, MINT);
+
+  fill(HDRFILL2); doc.rect(MX, cy, CW, CHART_BIG_H, 'F');
+
+  [0, 0.25, 0.5, 0.75, 1].forEach(frac => {
+    const tx2 = BAR_AREA_X + frac * BAR_AREA_W;
+    stroke(GRID); doc.setLineWidth(0.2);
+    doc.line(tx2, cy + 4, tx2, cy + CHART_BIG_H - 10);
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(6.5); txt(DIM);
+    doc.text(String(Math.round(frac * maxM)), tx2, cy + CHART_BIG_H - 4, { align: 'center' });
+    doc.setFontSize(5.5); txt(GRID);
+    doc.text('games', tx2, cy + CHART_BIG_H - 1, { align: 'center' });
+  });
+
+  teams.forEach((team, i) => {
+    const played = safeNumber(team.matchesPlayed, 0);
+    const wins   = safeNumber(team.wins, 0);
+    const losses = safeNumber(team.losses, 0);
+    const nr     = safeNumber(team.noResult, 0);
+    const by2    = cy + 8 + i * (barH + barGap);
+    const scale  = BAR_AREA_W / maxM;
+    const isQ    = team.qualified;
+    doc.setFont('helvetica', isQ ? 'bold' : 'normal'); doc.setFontSize(7.5);
+    txt(isQ ? tclr(team.shortName || '') : MUTED);
+    doc.text((team.shortName || team.name || '?').substring(0, 8), BAR_AREA_X - 2, by2 + barH * 0.72, { align: 'right' });
+    let sx = BAR_AREA_X;
+    if (wins   > 0) { hBar(sx, by2, wins   * scale, barH, MINT,  isQ); sx += wins   * scale; }
+    if (losses > 0) { hBar(sx, by2, losses * scale, barH, CORAL, false); sx += losses * scale; }
+    if (nr     > 0) { hBar(sx, by2, nr     * scale, barH, DIM,   false); }
+    if (played > 0) {
+      doc.setFont('helvetica', 'bold'); doc.setFontSize(6.5); txt(MUTED);
+      doc.text(`${wins}W  ${losses}L${nr > 0 ? `  ${nr}NR` : ''}`, BAR_AREA_X + played * scale + 2.5, by2 + barH * 0.72);
+    }
+  });
+
+  // Legend
+  const L2X = MX + CW - 26;
+  doc.setFont('helvetica', 'bold'); doc.setFontSize(7); txt(MINT); doc.text('LEGEND', L2X, cy + 10);
+  ([[MINT, 'Wins'], [CORAL, 'Losses'], [DIM, 'No Result']] as [RGB, string][]).forEach(([c, l], i) => {
+    fill(c); doc.rect(L2X, cy + 17 + i * 9 - 4.5, 5, 4.5, 'F');
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(6.5); txt(MUTED);
+    doc.text(l, L2X + 6.5, cy + 17 + i * 9 - 0.5);
+  });
+
+  cy += CHART_BIG_H + 8;
+  cy = sectionTitle(cy, 'DATA INSIGHT — CHART 2', MINT);
   writePara(
-    'Chart 2 — Win / Loss / No Result Breakdown',
-    `Each stacked bar shows the composition of matches — Wins (mint), Losses (coral), No Results (grey). ` +
-    `A mint-heavy bar indicates a dominant season; a balanced or coral bar indicates struggle. ` +
-    `${bestWinRate?.shortName || bestWinRate?.name || 'The top team'} had the best win rate at ${bwrPct}% ` +
-    `(${safeNumber(bestWinRate?.wins, 0)}W from ${safeNumber(bestWinRate?.matchesPlayed, 0)} games). ` +
-    `Data: wins, losses, no-result counts from IPL ${year} season records.`,
+    'Win / Loss / No Result — Explanation',
+    `Each bar is a stacked breakdown of every match a team played in IPL ${year}. ` +
+    `Mint green = Wins, Coral = Losses, Grey = No Results. ` +
+    `A mint-dominated bar signals a dominant season; a coral-heavy bar indicates consistent struggle. ` +
+    `Data used: matchesPlayed, wins, losses, noResult fields from standings. ` +
+    `${bestWinRate?.shortName || bestWinRate?.name || 'The top team'} achieved the highest win rate — ` +
+    `${bwrPct}% (${safeNumber(bestWinRate?.wins, 0)} wins from ${safeNumber(bestWinRate?.matchesPlayed, 0)} games). ` +
+    `Scale: 0 → ${maxM} matches (season maximum, tick marks every 25%).`,
     MINT
   );
 
+  // ═══════════════════════════════════════════════════════════════════════════════
+  // PAGE 4 — Chart 3: Net Run Rate (NRR) Diverging
+  // ═══════════════════════════════════════════════════════════════════════════════
+  newChartPage(4);
+  cy = CONTENT_TOP + 4;
+  cy = sectionTitle(cy, 'CHART 3 — NET RUN RATE (Above / Below Zero)', CORAL);
+
+  const CENTER_X = BAR_AREA_X + BAR_AREA_W / 2;
+  const HALF_W   = BAR_AREA_W / 2;
+
+  fill(HDRFILL2); doc.rect(MX, cy, CW, CHART_BIG_H, 'F');
+
+  // Centre zero line
+  stroke(CORAL); doc.setLineWidth(0.5);
+  doc.line(CENTER_X, cy + 4, CENTER_X, cy + CHART_BIG_H - 10);
+  // Axis labels
+  doc.setFont('helvetica', 'normal'); doc.setFontSize(6.5); txt(DIM);
+  doc.text(`-${maxNRR.toFixed(2)}`, CENTER_X - HALF_W, cy + CHART_BIG_H - 4, { align: 'left' });
+  doc.text('0.000', CENTER_X, cy + CHART_BIG_H - 4, { align: 'center' });
+  doc.text(`+${maxNRR.toFixed(2)}`, CENTER_X + HALF_W, cy + CHART_BIG_H - 4, { align: 'right' });
+  // Quarter guide lines
+  [-0.5, 0.5].forEach(frac => {
+    const gx = CENTER_X + frac * BAR_AREA_W;
+    stroke(GRID); doc.setLineWidth(0.15);
+    doc.line(gx, cy + 4, gx, cy + CHART_BIG_H - 10);
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(5.5); txt(DIM);
+    const lab = (frac > 0 ? '+' : '') + (frac * maxNRR).toFixed(2);
+    doc.text(lab, gx, cy + CHART_BIG_H - 4, { align: 'center' });
+  });
+
+  teams.forEach((team, i) => {
+    const nrr  = safeNumber(team.netRunRate, 0);
+    const bw3  = (Math.abs(nrr) / maxNRR) * HALF_W;
+    const by2  = cy + 8 + i * (barH + barGap);
+    const isQ  = team.qualified;
+    const clr: RGB = nrr >= 0 ? MINT : CORAL;
+    doc.setFont('helvetica', isQ ? 'bold' : 'normal'); doc.setFontSize(7.5);
+    txt(isQ ? tclr(team.shortName || '') : MUTED);
+    doc.text((team.shortName || '?').substring(0, 8), CENTER_X - 2, by2 + barH * 0.72, { align: 'right' });
+    if (nrr >= 0) hBar(CENTER_X, by2, Math.max(0.8, bw3), barH, clr, isQ);
+    else          hBar(CENTER_X - Math.max(0.8, bw3), by2, Math.max(0.8, bw3), barH, clr, isQ);
+    const nrrStr = (nrr >= 0 ? '+' : '') + nrr.toFixed(3);
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(6.5); txt(clr);
+    if (nrr >= 0) doc.text(nrrStr, CENTER_X + bw3 + 2.5, by2 + barH * 0.72);
+    else          doc.text(nrrStr, CENTER_X - bw3 - 2.5, by2 + barH * 0.72, { align: 'right' });
+  });
+
+  // Legend
+  const L3X = MX + CW - 26;
+  doc.setFont('helvetica', 'bold'); doc.setFontSize(7); txt(CORAL); doc.text('LEGEND', L3X, cy + 10);
+  ([[MINT, 'Positive NRR'], [CORAL, 'Negative NRR'], [CORAL, '── Zero line']] as [RGB, string][]).forEach(([c, l], i) => {
+    fill(c); doc.rect(L3X, cy + 17 + i * 9 - 4.5, 5, 4.5, 'F');
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(6.5); txt(MUTED);
+    doc.text(l, L3X + 6.5, cy + 17 + i * 9 - 0.5);
+  });
+
+  cy += CHART_BIG_H + 8;
+  cy = sectionTitle(cy, 'DATA INSIGHT — CHART 3', CORAL);
   writePara(
-    'Chart 3 — Net Run Rate (NRR)',
-    `NRR = (runs scored per over) − (runs conceded per over) across all matches. ` +
-    `Bars extending right (mint) = positive NRR; bars extending left (coral) = negative. ` +
-    `Centre line = NRR 0.000. ` +
-    `${bestNRR?.shortName || bestNRR?.name || 'The top team'} led with NRR ` +
+    'Net Run Rate — Explanation',
+    `NRR = (total runs scored ÷ total overs faced) − (total runs conceded ÷ total overs bowled) across all league matches. ` +
+    `Bars extending right (mint) indicate a positive NRR — team scored faster than they conceded. ` +
+    `Bars extending left (coral) indicate a negative NRR. ` +
+    `The coral vertical line marks NRR = 0.000. Quarter lines guide scale interpretation. ` +
+    `Data used: netRunRate field from the standings (scale: −${maxNRR.toFixed(3)} to +${maxNRR.toFixed(3)}). ` +
+    `${bestNRR?.shortName || bestNRR?.name || 'The top team'} recorded the best NRR of ` +
     `${(safeNumber(bestNRR?.netRunRate, 0) >= 0 ? '+' : '')}${safeNumber(bestNRR?.netRunRate, 0).toFixed(3)}, ` +
-    `while ${worstNRR?.shortName || worstNRR?.name || 'the bottom team'} trailed at ${safeNumber(worstNRR?.netRunRate, 0).toFixed(3)}. ` +
-    `NRR is the primary tiebreaker when teams are level on points — a critical metric for playoff qualification.`,
+    `while ${worstNRR?.shortName || worstNRR?.name || 'the bottom team'} had the lowest at ` +
+    `${safeNumber(worstNRR?.netRunRate, 0).toFixed(3)}. ` +
+    `NRR is the first tiebreaker when teams are level on points — critical for playoff qualification.`,
     CORAL
   );
 
-  // Copyright block
-  cy += 2;
-  fill(HDRFILL2); doc.rect(MX, cy, CW, 12, 'F');
-  stroke(VIOLET); doc.setLineWidth(0.4); doc.rect(MX, cy, CW, 12, 'S');
-  doc.setFont('helvetica', 'bold'); doc.setFontSize(7.5); txt(VIOLET);
-  doc.text(`© ${new Date().getFullYear()} SportsUp99 — IPL ${year} Points Table Report`, MX + 4, cy + 5);
-  doc.setFont('helvetica', 'normal'); doc.setFontSize(6); txt(DIM);
+  // Copyright block (page 4)
+  cy += 3;
+  fill(HDRFILL2); doc.rect(MX, cy, CW, 14, 'F');
+  stroke(VIOLET); doc.setLineWidth(0.4); doc.rect(MX, cy, CW, 14, 'S');
+  fill(VIOLET); doc.rect(MX, cy, 3, 14, 'F');
+  doc.setFont('helvetica', 'bold'); doc.setFontSize(8); txt(VIOLET);
+  doc.text(`© ${new Date().getFullYear()} SportsUp99 — IPL ${year} Points Table Report`, MX + 6, cy + 6);
+  doc.setFont('helvetica', 'normal'); doc.setFontSize(6.5); txt(DIM);
   doc.text(
     `This report is generated by SportsUp99 admin tools. All IPL data belongs to BCCI / IPL. For internal use only.`,
-    MX + 4, cy + 10
+    MX + 6, cy + 12
   );
 
-  // Re-stamp footers with final page count
+  // Re-stamp all footers with final page count
   const totalPgs = doc.internal.getNumberOfPages();
   for (let p = 1; p <= totalPgs; p++) {
     doc.setPage(p);
