@@ -187,6 +187,7 @@ export default function AdminMatches() {
     const [csvRows, setCsvRows] = useState<CsvRow[]>([]);
     const [csvFileName, setCsvFileName] = useState('');
     const [csvImporting, setCsvImporting] = useState(false);
+    const [pdfGenerating, setPdfGenerating] = useState(false);
     const csvInputRef = useRef<HTMLInputElement>(null);
 
     // Season selector — declared before the effects that reference them
@@ -519,6 +520,257 @@ export default function AdminMatches() {
             showError(err?.message || 'Import failed unexpectedly');
         } finally {
             setCsvImporting(false);
+        }
+    };
+    // ────────────────────────────────────────────────────────────────────────────
+
+    // ─── PDF Export ─────────────────────────────────────────────────────────────
+    const handleDownloadPdf = async () => {
+        if (!seasonMatches.length) { showError('No matches to export for this season'); return; }
+        setPdfGenerating(true);
+        try {
+            const [{ default: jsPDF }, { default: autoTable }] = await Promise.all([
+                import('jspdf'),
+                import('jspdf-autotable'),
+            ]);
+
+            const isWpl = currentLeague === 'wpl';
+            const league = currentLeague.toUpperCase();
+
+            // ── Colour palette
+            const BG: [number,number,number]       = [8,  10, 18];
+            const BGHDR: [number,number,number]    = [14, 19, 33];
+            const BGROW1: [number,number,number]   = [14, 18, 30];
+            const BGROW2: [number,number,number]   = [10, 13, 22];
+            const BGHDRROW: [number,number,number] = [20, 26, 46];
+            const ACC: [number,number,number]      = isWpl ? [147,51,234] : [245,158,11];
+            const ACC2: [number,number,number]     = isWpl ? [236,72,153] : [239,68,68];
+            const WHITE: [number,number,number]    = [255,255,255];
+            const GRAY4: [number,number,number]    = [155,163,174];
+            const GRAY6: [number,number,number]    = [75,85,99];
+            const DONE: [number,number,number]     = [16,185,129];
+            const UP: [number,number,number]       = [99,149,246];
+            const LIVE_C: [number,number,number]   = [239,68,68];
+            const CANC: [number,number,number]     = [75,85,99];
+
+            // ── Team brand colours (brightened for dark-bg legibility)
+            const TEAM_CLR: Record<string,[number,number,number]> = {
+                'MI':   [80,140,220], 'CSK':  [252,210,50],  'RCB':  [240,90,90],
+                'KKR':  [180,130,255],'SRH':  [255,145,60],  'RR':   [240,110,200],
+                'GT':   [80,195,215], 'PBKS': [230,90,90],   'DC':   [80,175,255],
+                'LSG':  [175,240,90], 'MI-W': [80,140,220],  'RCB-W':[240,90,90],
+                'DC-W': [80,175,255], 'GG':   [255,185,60],  'UPW':  [80,215,155],
+            };
+            const teamClr = (sn: string): [number,number,number] => TEAM_CLR[sn] ?? [200,200,220];
+            const statusClr = (s: string): [number,number,number] =>
+                s === 'completed' ? DONE : s === 'live' ? LIVE_C : s === 'cancelled' ? CANC : UP;
+
+            // ── Fake horizontal gradient (N thin rects)
+            const gradRect = (d: any, x: number, y: number, w: number, h: number,
+                              c1: [number,number,number], c2: [number,number,number], n = 28) => {
+                const sh = h / n;
+                for (let i = 0; i < n; i++) {
+                    const t = i / (n - 1);
+                    d.setFillColor(
+                        Math.round(c1[0] + (c2[0]-c1[0])*t),
+                        Math.round(c1[1] + (c2[1]-c1[1])*t),
+                        Math.round(c1[2] + (c2[2]-c1[2])*t),
+                    );
+                    d.rect(x, y + i*sh, w, sh + 0.3, 'F');
+                }
+            };
+
+            const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+            const W = doc.internal.pageSize.getWidth();   // 297
+            const H = doc.internal.pageSize.getHeight();  // 210
+            const HDR_H = 33;
+            const FTR_H = 11;
+
+            const totalM = seasonMatches.length;
+            const doneM  = seasonMatches.filter(m => m.status === 'completed').length;
+            const upM    = seasonMatches.filter(m => m.status === 'upcoming').length;
+            const liveM  = seasonMatches.filter(m => m.status === 'live').length;
+
+            // ── Chrome: draws bg + header + footer on the current page
+            const drawChrome = (pageNum: number, totalPages: number) => {
+                // Full-page background
+                doc.setFillColor(...BG);
+                doc.rect(0, 0, W, H, 'F');
+
+                // Header dark base
+                doc.setFillColor(...BGHDR);
+                doc.rect(0, 0, W, HDR_H, 'F');
+
+                // Gradient accent bar (top 5mm)
+                gradRect(doc, 0, 0, W, 5, ACC, ACC2);
+
+                // Left vertical accent stripe
+                doc.setFillColor(...ACC);
+                doc.rect(0, 0, 4, HDR_H, 'F');
+
+                // Decorative diagonal slash lines (right header flair)
+                doc.setDrawColor(ACC[0], ACC[1], ACC[2]);
+                doc.setLineWidth(0.18);
+                for (let i = 0; i < 7; i++) {
+                    const sx = W - 65 + i * 10;
+                    doc.line(sx, 0, sx + HDR_H * 0.8, HDR_H);
+                }
+
+                // League name in accent colour
+                doc.setFont('helvetica', 'bold');
+                doc.setFontSize(24);
+                doc.setTextColor(...ACC);
+                doc.text(league, 11, 18);
+                const lgW = doc.getTextWidth(league);
+
+                // Year in white
+                doc.setFontSize(24);
+                doc.setTextColor(...WHITE);
+                doc.text(String(selectedSeason), 11 + lgW + 3, 18);
+
+                // Subtitle
+                doc.setFontSize(7);
+                doc.setFont('helvetica', 'normal');
+                doc.setTextColor(...GRAY4);
+                doc.text('SEASON SCHEDULE', 11, 24);
+                doc.text(`${doneM} of ${totalM} matches completed`, 11, 29.5);
+
+                // Stats badges top-right
+                const badges: Array<{label: string; val: number; clr: [number,number,number]}> = [
+                    { label: 'TOTAL',    val: totalM, clr: WHITE  },
+                    { label: 'DONE',     val: doneM,  clr: DONE   },
+                    { label: 'UPCOMING', val: upM,    clr: UP     },
+                    ...(liveM > 0 ? [{ label: 'LIVE', val: liveM, clr: LIVE_C }] : []),
+                ];
+                let bx = W - 8;
+                for (let i = badges.length - 1; i >= 0; i--) {
+                    const b = badges[i];
+                    doc.setFontSize(7);
+                    doc.setFont('helvetica', 'bold');
+                    const lbl = `${b.label}  ${b.val}`;
+                    const bw = doc.getTextWidth(lbl) + 8;
+                    bx -= bw;
+                    // Dark tinted badge fill
+                    doc.setFillColor(Math.round(b.clr[0]*0.12), Math.round(b.clr[1]*0.12), Math.round(b.clr[2]*0.12));
+                    doc.roundedRect(bx, 13, bw, 8.5, 2, 2, 'F');
+                    doc.setDrawColor(...b.clr);
+                    doc.setLineWidth(0.3);
+                    doc.roundedRect(bx, 13, bw, 8.5, 2, 2, 'S');
+                    doc.setTextColor(...b.clr);
+                    doc.text(lbl, bx + 4, 18.8);
+                    bx -= 3;
+                }
+
+                // Thin separator under header
+                doc.setDrawColor(...ACC);
+                doc.setLineWidth(0.3);
+                doc.line(4, HDR_H, W, HDR_H);
+
+                // Footer bar
+                doc.setFillColor(11, 15, 26);
+                doc.rect(0, H - FTR_H, W, FTR_H, 'F');
+                doc.setDrawColor(...ACC);
+                doc.setLineWidth(0.4);
+                doc.line(0, H - FTR_H, W, H - FTR_H);
+
+                // Footer accent left pip
+                doc.setFillColor(...ACC);
+                doc.rect(0, H - FTR_H, 4, FTR_H, 'F');
+
+                const genDate = new Date().toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' });
+                doc.setFontSize(6.5);
+                doc.setFont('helvetica', 'normal');
+                doc.setTextColor(...GRAY6);
+                doc.text(`${league} ${selectedSeason}  ·  Generated ${genDate}  ·  sportsup99`, 9, H - 3.5);
+
+                doc.setFont('helvetica', 'bold');
+                doc.setTextColor(...GRAY4);
+                doc.text(`${pageNum}  /  ${totalPages}`, W - 18, H - 3.5);
+            };
+
+            // ── Table data
+            const rows = [...seasonMatches]
+                .sort((a, b) => a.date.localeCompare(b.date) || (a.time||'').localeCompare(b.time||''))
+                .map((match) => {
+                    const dt = new Date(match.date + 'T00:00:00');
+                    const day = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][dt.getDay()] ?? '';
+                    const dateFmt = dt.toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' });
+                    const t1 = match.team1.shortName || match.team1.name || '?';
+                    const t2 = match.team2.shortName || match.team2.name || '?';
+                    const venue = (match.venue || '—') + (match.playoffType ? `  [${match.playoffType.replace(/-/g,' ')}]` : '');
+                    return [
+                        String(getMatchNumberDisplay(match, matches)),
+                        `${day}  ${dateFmt}`,
+                        formatTimeIST(match.time),
+                        t1,
+                        t2,
+                        venue,
+                        (match.status || 'upcoming'),
+                    ];
+                });
+
+            // willDrawPage: draw dark bg before any cells are placed
+            autoTable(doc, {
+                startY: HDR_H + 3,
+                margin: { top: HDR_H + 3, left: 6, right: 6, bottom: FTR_H + 3 },
+                head: [['#', 'Date', 'Time (IST)', 'Home', 'Away', 'Venue / Type', 'Status']],
+                body: rows,
+                theme: 'plain',
+                styles: {
+                    font: 'helvetica',
+                    fontSize: 7.5,
+                    cellPadding: { top: 3, bottom: 3, left: 4, right: 3 },
+                    textColor: [205, 210, 225],
+                    lineWidth: 0,
+                    overflow: 'ellipsize',
+                    minCellHeight: 9,
+                },
+                headStyles: {
+                    fillColor: BGHDRROW,
+                    textColor: ACC,
+                    fontStyle: 'bold',
+                    fontSize: 7.5,
+                    minCellHeight: 9,
+                },
+                columnStyles: {
+                    0: { cellWidth: 12, halign: 'center', fontStyle: 'bold' },
+                    1: { cellWidth: 42 },
+                    2: { cellWidth: 27, halign: 'center' },
+                    3: { cellWidth: 33, halign: 'right',  fontStyle: 'bold' },
+                    4: { cellWidth: 33, halign: 'left',   fontStyle: 'bold' },
+                    5: { cellWidth: 'auto' },
+                    6: { cellWidth: 27, halign: 'center', fontStyle: 'bold' },
+                },
+                didParseCell: (data: any) => {
+                    if (data.section !== 'body') return;
+                    data.cell.styles.fillColor = data.row.index % 2 === 0 ? BGROW2 : BGROW1;
+                    const col = data.column.index;
+                    const raw = String(data.cell.raw);
+                    if (col === 3 || col === 4) data.cell.styles.textColor = teamClr(raw);
+                    if (col === 6) data.cell.styles.textColor = statusClr(raw.toLowerCase());
+                    if (col === 0) data.cell.styles.textColor = [...ACC] as [number,number,number];
+                },
+                willDrawPage: () => {
+                    // Lay dark background so cells don't render on white
+                    doc.setFillColor(...BG);
+                    doc.rect(0, 0, W, H, 'F');
+                },
+            });
+
+            // Post-process: stamp chrome on all pages now that total is known
+            const totalPages = (doc.internal as any).pages.length - 1;
+            for (let p = 1; p <= totalPages; p++) {
+                doc.setPage(p);
+                drawChrome(p, totalPages);
+            }
+
+            doc.save(`${league}_${selectedSeason}_Match_Schedule.pdf`);
+            showSuccess(`PDF saved — ${league} ${selectedSeason} (${totalM} matches)`);
+        } catch (err: any) {
+            console.error('PDF generation failed:', err);
+            showError('PDF generation failed');
+        } finally {
+            setPdfGenerating(false);
         }
     };
     // ────────────────────────────────────────────────────────────────────────────
@@ -1744,6 +1996,17 @@ export default function AdminMatches() {
                             >
                                 <Upload className="w-4 h-4" />
                                 <span className="hidden sm:inline">Upload CSV</span>
+                            </button>
+                            {/* PDF Download */}
+                            <button
+                                onClick={handleDownloadPdf}
+                                disabled={pdfGenerating || !seasonMatches.length}
+                                className="flex items-center gap-2 px-4 py-2 rounded-xl border border-white/10 text-sm font-semibold transition-all duration-200 text-gray-300 hover:text-white hover:border-white/25 disabled:opacity-40 disabled:cursor-not-allowed"
+                                style={{ background: 'rgba(255,255,255,0.05)' }}
+                                title={`Download ${currentLeague.toUpperCase()} ${selectedSeason} schedule as PDF`}
+                            >
+                                <Download className="w-4 h-4" />
+                                <span className="hidden sm:inline">{pdfGenerating ? 'Generating…' : 'Export PDF'}</span>
                             </button>
                             </div>
                             </div>
