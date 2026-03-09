@@ -189,15 +189,22 @@ export default function AdminMatches() {
     const [csvImporting, setCsvImporting] = useState(false);
     const csvInputRef = useRef<HTMLInputElement>(null);
 
-    // Generate available seasons when league changes
+    // Generate available seasons when league changes; restore last-used season from localStorage
     useEffect(() => {
         const currentYear = new Date().getFullYear();
         const startYear = currentLeague === 'wpl' ? 2023 : 2008;
         const seasons: number[] = [];
         for (let y = startYear; y <= currentYear; y++) seasons.push(y);
         setAvailableSeasons(seasons);
-        setSelectedSeason(currentYear);
+        // Restore persisted season for this league, fall back to current year
+        const stored = parseInt(localStorage.getItem(`adminMatchesSeason_${currentLeague}`) ?? '');
+        setSelectedSeason((stored >= startYear && stored <= currentYear) ? stored : currentYear);
     }, [currentLeague]);
+
+    // Persist selected season so page refresh remembers it
+    useEffect(() => {
+        localStorage.setItem(`adminMatchesSeason_${currentLeague}`, String(selectedSeason));
+    }, [selectedSeason, currentLeague]);
 
     // Season selector
     const [selectedSeason, setSelectedSeason] = useState<number>(new Date().getFullYear());
@@ -527,6 +534,21 @@ export default function AdminMatches() {
             const matchesWithNumbers = recalculateMatchNumbers(matchesData);
             setMatches(matchesWithNumbers);
             setTeams(teamsData);
+
+            // Auto-select the most recent season that actually has matches,
+            // so a page refresh never lands on an empty season view.
+            if (matchesWithNumbers.length > 0) {
+                const yearsWithMatches = Array.from(
+                    new Set(matchesWithNumbers.map(m => {
+                        try { return new Date(m.date + 'T00:00:00').getFullYear(); } catch { return null; }
+                    }).filter(Boolean) as number[])
+                ).sort((a, b) => b - a); // newest first
+
+                setSelectedSeason(prev => {
+                    if (yearsWithMatches.includes(prev)) return prev; // current choice is valid
+                    return yearsWithMatches[0]; // jump to most recent year that has matches
+                });
+            }
         } catch (error) {
             console.error('Failed to fetch data:', error);
             setError('Failed to load matches');
