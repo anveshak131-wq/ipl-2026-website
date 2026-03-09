@@ -579,69 +579,69 @@ const BowlingStatsPage = () => {
         <div className="max-w-7xl mx-auto p-6 lg:p-8">
           {/* Summary Cards */}
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 mb-8">
-            <div className="bg-gradient-to-br from-green-600 to-green-700 rounded-xl p-5 shadow-lg border border-green-500/30">
+            <div className="bg-gradient-to-br from-amber-600 via-amber-600 to-orange-700 rounded-2xl p-5 shadow-xl border border-amber-400/30 hover:border-amber-400/60 transition-all duration-300 hover:scale-105 hover:shadow-2xl cursor-pointer group">
               <div className="flex items-center justify-between mb-2">
-                <Target className="w-5 h-5 text-green-200" />
+                <Target className="w-5 h-5 text-amber-100 group-hover:scale-110 transition-transform" />
               </div>
-              <div className="text-2xl font-bold text-white">{summaryStats.totalWickets.toLocaleString()}</div>
-              <div className="text-green-100 text-xs mt-1">Total Wickets</div>
+              <div className="text-2xl font-bold text-white group-hover:scale-105 transition-transform">{summaryStats.totalWickets.toLocaleString()}</div>
+              <div className="text-amber-100 text-xs mt-1 font-semibold uppercase tracking-wider">Total Wickets</div>
             </div>
-            <div className="bg-gradient-to-br from-emerald-600 to-emerald-700 rounded-xl p-5 shadow-lg border border-emerald-500/30">
+            <div className="bg-gradient-to-br from-orange-600 via-orange-600 to-rose-700 rounded-2xl p-5 shadow-xl border border-orange-400/30 hover:border-orange-400/60 transition-all duration-300 hover:scale-105 hover:shadow-2xl cursor-pointer group">
               <div className="flex items-center justify-between mb-2">
-                <TrendingDown className="w-5 h-5 text-emerald-200" />
+                <TrendingDown className="w-5 h-5 text-orange-100 group-hover:scale-110 transition-transform" />
               </div>
-              <div className="text-2xl font-bold text-white">{summaryStats.bestEconomy}</div>
-              <div className="text-emerald-100 text-xs mt-1">Best Economy</div>
+              <div className="text-2xl font-bold text-white group-hover:scale-105 transition-transform">{summaryStats.bestEconomy}</div>
+              <div className="text-orange-100 text-xs mt-1 font-semibold uppercase tracking-wider">Best Economy</div>
             </div>
-            <div className="bg-gradient-to-br from-teal-600 to-teal-700 rounded-xl p-5 shadow-lg border border-teal-500/30">
+            <div className="bg-gradient-to-br from-rose-600 via-rose-600 to-pink-700 rounded-2xl p-5 shadow-xl border border-rose-400/30 hover:border-rose-400/60 transition-all duration-300 hover:scale-105 hover:shadow-2xl cursor-pointer group">
               <div className="flex items-center justify-between mb-2">
-                <Award className="w-5 h-5 text-teal-200" />
+                <Award className="w-5 h-5 text-rose-100 group-hover:scale-110 transition-transform" />
               </div>
-              <div className="text-2xl font-bold text-white">{summaryStats.totalFiveWickets}</div>
-              <div className="text-teal-100 text-xs mt-1">5-Wicket Hauls</div>
+              <div className="text-2xl font-bold text-white group-hover:scale-105 transition-transform">{summaryStats.totalFiveWickets}</div>
+              <div className="text-rose-100 text-xs mt-1 font-semibold uppercase tracking-wider">5-Wicket Hauls</div>
             </div>
-            <div className="bg-gradient-to-br from-cyan-600 to-cyan-700 rounded-xl p-5 shadow-lg border border-cyan-500/30">
+            <div className="bg-gradient-to-br from-pink-600 via-pink-600 to-fuchsia-700 rounded-2xl p-5 shadow-xl border border-pink-400/30 hover:border-pink-400/60 transition-all duration-300 hover:scale-105 hover:shadow-2xl cursor-pointer group">
               <div className="flex items-center justify-between mb-2">
-                <Zap className="w-5 h-5 text-cyan-200" />
+                <Zap className="w-5 h-5 text-pink-100 group-hover:scale-110 transition-transform" />
               </div>
-              <div className="text-2xl font-bold text-white">{summaryStats.totalMaidens}</div>
-              <div className="text-cyan-100 text-xs mt-1">Maiden Overs</div>
+              <div className="text-2xl font-bold text-white group-hover:scale-105 transition-transform">{summaryStats.totalMaidens}</div>
+              <div className="text-pink-100 text-xs mt-1 font-semibold uppercase tracking-wider">Maiden Overs</div>
             </div>
-            <div className="bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl p-5 shadow-lg border border-blue-500/30">
+            <div className="bg-gradient-to-br from-purple-600 via-purple-600 to-indigo-700 rounded-2xl p-5 shadow-xl border border-purple-400/30 hover:border-purple-400/60 transition-all duration-300 hover:scale-105 hover:shadow-2xl cursor-pointer group">
               <div className="flex items-center justify-between mb-2">
-                <Target className="w-5 h-5 text-blue-200" />
+                <Target className="w-5 h-5 text-purple-100 group-hover:scale-110 transition-transform" />
               </div>
-              <div className="text-2xl font-bold text-white">{summaryStats.avgWickets}</div>
-              <div className="text-blue-100 text-xs mt-1">Avg Wickets/Bowler</div>
+              <div className="text-2xl font-bold text-white group-hover:scale-105 transition-transform">{summaryStats.avgWickets}</div>
+              <div className="text-purple-100 text-xs mt-1 font-semibold uppercase tracking-wider">Avg Wickets/Bowler</div>
             </div>
-            <div className="bg-gradient-to-br from-indigo-600 to-indigo-700 rounded-xl p-5 shadow-lg border border-indigo-500/30">
+            <div className="bg-gradient-to-br from-indigo-600 via-indigo-600 to-slate-700 rounded-2xl p-5 shadow-xl border border-indigo-400/30 hover:border-indigo-400/60 transition-all duration-300 hover:scale-105 hover:shadow-2xl cursor-pointer group">
               <div className="flex items-center justify-between mb-2">
-                <Filter className="w-5 h-5 text-indigo-200" />
+                <Filter className="w-5 h-5 text-indigo-200 group-hover:scale-110 transition-transform" />
               </div>
-              <div className="text-2xl font-bold text-white">{filteredAndSortedPlayers.length}</div>
-              <div className="text-indigo-100 text-xs mt-1">Filtered Players</div>
+              <div className="text-2xl font-bold text-white group-hover:scale-105 transition-transform">{filteredAndSortedPlayers.length}</div>
+              <div className="text-indigo-100 text-xs mt-1 font-semibold uppercase tracking-wider">Filtered Players</div>
             </div>
           </div>
 
           {/* Search and Filters */}
-          <div className="bg-gray-800/50 backdrop-blur rounded-xl p-6 mb-6 border border-gray-700/50">
+          <div className="bg-gradient-to-r from-gray-800/60 via-gray-800/40 to-gray-800/60 backdrop-blur-md rounded-2xl p-6 mb-6 border border-gray-700/50 shadow-xl hover:shadow-2xl transition-all duration-300 animate-in fade-in-50 slide-in-from-bottom-4 duration-700">
             <div className="flex flex-col md:flex-row gap-4">
-              <div className="flex-1 relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <div className="flex-1 relative group">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-amber-400 transition-colors" />
                 <input
                   type="text"
                   placeholder="Search players..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 bg-gray-900/50 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  className="w-full pl-10 pr-4 py-2.5 bg-gray-900/60 border border-gray-700 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all hover:bg-gray-900/80"
                 />
               </div>
-              <div className="relative">
-                <Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <div className="relative group">
+                <Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-orange-400 transition-colors" />
                 <select
                   value={selectedTeam}
                   onChange={(e) => setSelectedTeam(e.target.value)}
-                  className="pl-10 pr-8 py-2.5 bg-gray-900/50 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent appearance-none cursor-pointer"
+                  className="pl-10 pr-8 py-2.5 bg-gray-900/60 border border-gray-700 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all appearance-none cursor-pointer hover:bg-gray-900/80"
                 >
                   <option value="all">All Teams</option>
                   {teams.map(team => (
@@ -649,13 +649,13 @@ const BowlingStatsPage = () => {
                   ))}
                 </select>
               </div>
-              <div className="flex gap-2 bg-gray-900/50 rounded-lg p-1 border border-gray-700">
+              <div className="flex gap-2 bg-gray-900/60 rounded-xl p-1 border border-gray-700">
                 <button
                   onClick={() => setViewMode('table')}
                   className={`px-4 py-2 rounded-lg transition-all flex items-center gap-2 ${
                     viewMode === 'table'
-                      ? 'bg-green-600 text-white shadow-lg'
-                      : 'text-gray-400 hover:text-white'
+                      ? 'bg-amber-600 text-white shadow-lg scale-105'
+                      : 'text-gray-400 hover:text-white hover:bg-gray-800'
                   }`}
                 >
                   <Table2 className="w-4 h-4" />
@@ -665,8 +665,8 @@ const BowlingStatsPage = () => {
                   onClick={() => setViewMode('teams')}
                   className={`px-4 py-2 rounded-lg transition-all flex items-center gap-2 ${
                     viewMode === 'teams'
-                      ? 'bg-green-600 text-white shadow-lg'
-                      : 'text-gray-400 hover:text-white'
+                      ? 'bg-amber-600 text-white shadow-lg scale-105'
+                      : 'text-gray-400 hover:text-white hover:bg-gray-800'
                   }`}
                 >
                   <LayoutGrid className="w-4 h-4" />
