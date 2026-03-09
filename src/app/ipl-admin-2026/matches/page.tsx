@@ -410,8 +410,9 @@ export default function AdminMatches() {
         const pdfjsLib = await loadPdfJs();
         const buffer = await file.arrayBuffer();
         const pdf = await pdfjsLib.getDocument({ data: buffer }).promise;
-        const rows: string[] = [];
+        let rows: string[] = [];
         const fallbackLines: string[] = [];
+        const rawLines: string[] = [];
         const columnStops = [93.2, 211.7, 270.4, 340.1];
         const getColumnIndex = (x: number) => {
             if (x < columnStops[0]) return 0;
@@ -420,6 +421,7 @@ export default function AdminMatches() {
             if (x < columnStops[3]) return 3;
             return 4;
         };
+        const timePattern = /\d{1,2}(?::\d{2})?\s*(?:AM|PM)$/i;
 
         for (let pageNo = 1; pageNo <= pdf.numPages; pageNo += 1) {
             const page = await pdf.getPage(pageNo);
@@ -451,6 +453,18 @@ export default function AdminMatches() {
                 })
                 .filter((cols) => cols.some(Boolean));
 
+            rawLines.push(
+                ...Array.from(groups.entries())
+                    .sort((a, b) => Number(b[0]) - Number(a[0]))
+                    .map(([, group]) => group
+                        .sort((a, b) => a.x - b.x)
+                        .map((entry) => entry.text)
+                        .join(' ')
+                        .replace(/\s+/g, ' ')
+                        .trim())
+                    .filter(Boolean)
+            );
+
             fallbackLines.push(
                 ...pageRows.map(cols => cols.join(' ').replace(/\s+/g, ' ').trim()).filter(Boolean)
             );
@@ -470,6 +484,62 @@ export default function AdminMatches() {
 
                 rows.push([match, teamCell, timeCell, dateCell, venueCell].join(','));
             });
+        }
+
+        const legacyRows = (() => {
+            const cleaned = rawLines
+                .map((line) => line.replace(/\s+/g, ' ').trim())
+                .filter((line) =>
+                    line &&
+                    !/^sheet\d*$/i.test(line) &&
+                    !/^page\s+\d+/i.test(line) &&
+                    !/ipl 20\d{2} schedule/i.test(line) &&
+                    !/^date\b/i.test(line) &&
+                    !/^venue\b/i.test(line) &&
+                    !/^match\b/i.test(line) &&
+                    !/^time\b/i.test(line)
+                );
+
+            const logicalLines: string[] = [];
+            let buffer = '';
+
+            cleaned.forEach((line) => {
+                if (!buffer) {
+                    buffer = line;
+                } else if (/^\d{1,2}$/.test(buffer) && /^[A-Za-z]+\b/.test(line)) {
+                    buffer = `${buffer} ${line}`;
+                } else if (/^\d{1,2}\s+[A-Za-z]+$/i.test(buffer) && /^\d{4}\b/.test(line)) {
+                    buffer = `${buffer} ${line}`;
+                } else if (/^[A-Za-z]+$/i.test(buffer) && /^\d{1,2}\s+[A-Za-z]+\b/i.test(line)) {
+                    buffer = line;
+                } else if (!timePattern.test(buffer)) {
+                    buffer = `${buffer} ${line}`.replace(/\s+/g, ' ').trim();
+                } else {
+                    logicalLines.push(buffer);
+                    buffer = line;
+                }
+
+                if (timePattern.test(buffer)) {
+                    logicalLines.push(buffer);
+                    buffer = '';
+                }
+            });
+
+            if (buffer && timePattern.test(buffer)) {
+                logicalLines.push(buffer);
+            }
+
+            return logicalLines.flatMap((line, index) => {
+                const match = line.match(/^(\d{1,2}\s+[A-Za-z]+(?:\s+\d{4})?)\s+(.+?)\s+(.+?\bvs\b.+?)\s+(\d{1,2}(?::\d{2})?\s*(?:AM|PM))$/i);
+                if (!match) return [];
+
+                const [, rawDate, venue, teamsCell, rawTime] = match;
+                return [`${index + 1},${teamsCell},${rawTime.toUpperCase().replace(/\s+/g, '')},${normalizeImportedDate(rawDate)},${venue}`];
+            });
+        })();
+
+        if (legacyRows.length >= Math.max(rows.length, 10)) {
+            rows = legacyRows;
         }
 
         if (!rows.length) {
