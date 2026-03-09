@@ -383,6 +383,13 @@ export default function AdminMatches() {
             if (mm) return `${yyyy}-${mm}-${dd.padStart(2, '0')}`;
         }
 
+        const textualMonthFirstNoYear = value.match(/^([A-Za-z]+)\s+(\d{1,2})$/);
+        if (textualMonthFirstNoYear) {
+            const [, monthRaw, dd] = textualMonthFirstNoYear;
+            const mm = monthMap[monthRaw.toLowerCase()];
+            if (mm) return `${selectedSeason}-${mm}-${dd.padStart(2, '0')}`;
+        }
+
         return value;
     };
 
@@ -538,8 +545,66 @@ export default function AdminMatches() {
             });
         })();
 
-        if (legacyRows.length >= Math.max(rows.length, 10)) {
-            rows = legacyRows;
+        const textFlowRows = (() => {
+            const cleaned = rawLines
+                .map((line) => line.replace(/\s+/g, ' ').trim())
+                .filter((line) =>
+                    line &&
+                    !/^pdfmyurl\.com$/i.test(line) &&
+                    !/^\* accuracy of content/i.test(line) &&
+                    !/^copyright by /i.test(line) &&
+                    !/^ipl 20\d{2} schedule$/i.test(line) &&
+                    !/^date and time$/i.test(line) &&
+                    !/^match details and series$/i.test(line)
+                );
+
+            const parsedRows: string[] = [];
+            const dayPattern = /^(Mon|Tue|Wed|Thu|Fri|Sat|Sun)\b/i;
+
+            for (let i = 0; i < cleaned.length; i += 1) {
+                if (!dayPattern.test(cleaned[i])) continue;
+
+                let rawDate = cleaned[i].replace(dayPattern, '').trim();
+                if (/^[A-Za-z]+$/i.test(rawDate) && /^\d{1,2}$/.test(cleaned[i + 1] ?? '')) {
+                    rawDate = `${rawDate} ${cleaned[i + 1]}`;
+                    i += 1;
+                }
+
+                const timeLine = cleaned[i + 1] ?? '';
+                const matchLine = cleaned[i + 2] ?? '';
+                const teamsLine = cleaned[i + 3] ?? '';
+                if (!/\d{1,2}:\d{2}\s*local/i.test(timeLine) || !/ipl\s*-/i.test(matchLine) || !/\bvs\b/i.test(teamsLine)) {
+                    continue;
+                }
+
+                const rawTime = timeLine.match(/(\d{1,2}:\d{2})\s*local/i)?.[1] ?? '';
+                const matchLabel = matchLine.replace(/\s+/g, ' ').trim().replace(/\s*IPL\s*-\s*$/i, '');
+                let venueIndex = i + 4;
+                while (/^\(.*\)$/.test(cleaned[venueIndex] ?? '')) {
+                    venueIndex += 1;
+                }
+
+                const venueLine = cleaned[venueIndex] ?? '';
+                if (!venueLine) continue;
+
+                parsedRows.push([
+                    matchLabel || `${parsedRows.length + 1}`,
+                    teamsLine,
+                    rawTime,
+                    normalizeImportedDate(`${rawDate} ${selectedSeason}`),
+                    venueLine,
+                ].join(','));
+
+                i = venueIndex;
+            }
+
+            return parsedRows;
+        })();
+
+        const bestParsedRows = [rows, legacyRows, textFlowRows]
+            .sort((a, b) => b.length - a.length)[0];
+        if (bestParsedRows.length >= 10) {
+            rows = bestParsedRows;
         }
 
         if (!rows.length) {
