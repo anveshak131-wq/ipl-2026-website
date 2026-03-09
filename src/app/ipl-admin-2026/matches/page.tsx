@@ -558,21 +558,21 @@ export default function AdminMatches() {
             const isWpl = currentLeague === 'wpl';
             const league = currentLeague.toUpperCase();
 
-            // ── Colour palette
-            const BG: [number,number,number]       = [8,  10, 18];
-            const BGHDR: [number,number,number]    = [14, 19, 33];
-            const BGROW1: [number,number,number]   = [14, 18, 30];
-            const BGROW2: [number,number,number]   = [10, 13, 22];
-            const BGHDRROW: [number,number,number] = [20, 26, 46];
-            const ACC: [number,number,number]      = isWpl ? [147,51,234] : [245,158,11];
-            const ACC2: [number,number,number]     = isWpl ? [236,72,153] : [239,68,68];
-            const WHITE: [number,number,number]    = [255,255,255];
-            const GRAY4: [number,number,number]    = [155,163,174];
-            const GRAY6: [number,number,number]    = [75,85,99];
-            const DONE: [number,number,number]     = [16,185,129];
-            const UP: [number,number,number]       = [99,149,246];
-            const LIVE_C: [number,number,number]   = [239,68,68];
-            const CANC: [number,number,number]     = [75,85,99];
+            // ── Colour palette  (Midnight Navy — dark bg, bright IPL gold/red accents)
+            const BG: [number,number,number]       = [7,   9,  20];   // near-black navy
+            const BGHDR: [number,number,number]    = [11,  15, 35];   // deep indigo header band
+            const BGROW1: [number,number,number]   = [15,  20, 42];   // lighter navy row
+            const BGROW2: [number,number,number]   = [9,   13, 28];   // darker navy row
+            const BGHDRROW: [number,number,number] = [18,  24, 52];   // column header row
+            const ACC: [number,number,number]      = isWpl ? [167,80,250] : [252,191,20];   // vivid gold / violet
+            const ACC2: [number,number,number]     = isWpl ? [244,90,172] : [240,60,60];    // red / pink
+            const WHITE: [number,number,number]    = [238,244,255];   // soft blue-white
+            const GRAY4: [number,number,number]    = [148,162,210];   // blue-tinted muted
+            const GRAY6: [number,number,number]    = [72,  85,130];   // dimmer muted
+            const DONE: [number,number,number]     = [52, 220,150];   // bright emerald
+            const UP: [number,number,number]       = [100,170,255];   // bright sky blue
+            const LIVE_C: [number,number,number]   = [255, 75, 75];   // vivid red live
+            const CANC: [number,number,number]     = [90, 100,130];   // grey cancelled
 
             // ── Team brand colours (brightened for dark-bg legibility)
             const TEAM_CLR: Record<string,[number,number,number]> = {
@@ -686,7 +686,7 @@ export default function AdminMatches() {
                 doc.line(4, HDR_H, W, HDR_H);
 
                 // Footer bar
-                doc.setFillColor(11, 15, 26);
+                doc.setFillColor(8, 11, 24);
                 doc.rect(0, H - FTR_H, W, FTR_H, 'F');
                 doc.setDrawColor(...ACC);
                 doc.setLineWidth(0.4);
@@ -739,7 +739,7 @@ export default function AdminMatches() {
                     font: 'helvetica',
                     fontSize: 7.5,
                     cellPadding: { top: 3, bottom: 3, left: 4, right: 3 },
-                    textColor: [205, 210, 225],
+                    textColor: [222, 230, 255],   // bright blue-white body text
                     lineWidth: 0,
                     overflow: 'ellipsize',
                     minCellHeight: 9,
