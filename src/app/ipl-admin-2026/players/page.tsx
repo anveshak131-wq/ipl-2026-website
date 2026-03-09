@@ -1667,6 +1667,8 @@ export default function AdminPlayers() {
       return String(value);
     };
 
+    const playerIdentityColumns = ['id', 'name', 'role', 'teamShortName'];
+
     const pdfColumnGroups = [
       [
         'id',
@@ -1683,6 +1685,7 @@ export default function AdminPlayers() {
         'isCaptain'
       ],
       [
+        ...playerIdentityColumns,
         'battingStyle',
         'bowlingStyle',
         'league',
@@ -1696,6 +1699,7 @@ export default function AdminPlayers() {
         'economy'
       ],
       [
+        ...playerIdentityColumns,
         'highest',
         'fours',
         'sixes',
