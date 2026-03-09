@@ -1723,62 +1723,71 @@ export default function AdminPlayers() {
         .filter(Boolean) as Array<(typeof exportColumns)[number]>
     );
 
-    pdfColumnGroups.forEach((pdfColumns, groupIndex) => {
-      doc.addPage();
-      const tableStartY = 120;
-      const groupTitle = `Player Data ${groupIndex + 1} of ${pdfColumnGroups.length}`;
-      const groupSubtitle = pdfColumns.map(column => column.label).join(' • ');
+    rows.forEach((row, rowIndex) => {
+      pdfColumnGroups.forEach((pdfColumns, groupIndex) => {
+        doc.addPage();
+        const tableStartY = 120;
+        const playerName = formatPdfCell('name', row.name) || `Player ${rowIndex + 1}`;
+        const groupTitle = `${playerName} • Data ${groupIndex + 1} of ${pdfColumnGroups.length}`;
+        const playerMeta = [
+          `ID: ${formatPdfCell('id', row.id)}`,
+          `Role: ${formatPdfCell('role', row.role)}`,
+          `Team: ${formatPdfCell('teamShortName', row.teamShortName)}`
+        ].join(' • ');
+        const groupSubtitle = pdfColumns.map(column => column.label).join(' • ');
 
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(13);
-      doc.setTextColor(60, 36, 16);
-      doc.text(groupTitle, 40, 92);
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(8);
-      doc.setTextColor(...theme.mutedText);
-      doc.text(groupSubtitle, 40, 106, { maxWidth: pageWidth - 80 });
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(13);
+        doc.setTextColor(60, 36, 16);
+        doc.text(groupTitle, 40, 92);
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(8);
+        doc.setTextColor(...theme.mutedText);
+        doc.text(playerMeta, 40, 104, { maxWidth: pageWidth - 80 });
+        doc.text(groupSubtitle, 40, 116, { maxWidth: pageWidth - 80 });
 
-      const pdfRows = rows.map(row =>
-        pdfColumns.map(column => formatPdfCell(column.key, (row as any)[column.key]))
-      );
+        const pdfRows = [
+          pdfColumns.map(column => formatPdfCell(column.key, (row as any)[column.key]))
+        ];
 
-      const columnStyles = pdfColumns.reduce((acc, column, index) => {
-        if (numericFields.has(column.key) || decimalFields.has(column.key)) {
-          acc[index] = { halign: 'right' };
-        } else if (column.key === 'isCaptain' || column.key === 'transferable') {
-          acc[index] = { halign: 'center' };
-        }
-        return acc;
-      }, {} as Record<number, { halign: 'right' | 'center' }>);
+        const columnStyles = pdfColumns.reduce((acc, column, index) => {
+          if (numericFields.has(column.key) || decimalFields.has(column.key)) {
+            acc[index] = { halign: 'right' };
+          } else if (column.key === 'isCaptain' || column.key === 'transferable') {
+            acc[index] = { halign: 'center' };
+          }
+          return acc;
+        }, {} as Record<number, { halign: 'right' | 'center' }>);
 
-      autoTable(doc, {
-        head: [pdfColumns.map(column => column.label)],
-        body: pdfRows,
-        startY: tableStartY,
-        margin: { top: 90, left: 40, right: 40, bottom: 50 },
-        theme: 'striped',
-        styles: {
-          fontSize: 7.5,
-          cellPadding: 3,
-          overflow: 'linebreak',
-          textColor: [60, 36, 16],
-          lineColor: theme.cardBorder,
-          lineWidth: 0.1
-        },
-        headStyles: {
-          fillColor: theme.tableHeader,
-          textColor: 255,
-          fontStyle: 'bold',
-          halign: 'center'
-        },
-        alternateRowStyles: {
-          fillColor: theme.tableAltRow
-        },
-        columnStyles,
-        willDrawPage: () => {
-          const pageNumber = doc.internal.getCurrentPageInfo().pageNumber;
-          drawPageFrame(pageNumber);
-        }
+        autoTable(doc, {
+          head: [pdfColumns.map(column => column.label)],
+          body: pdfRows,
+          startY: tableStartY,
+          margin: { top: 90, left: 40, right: 40, bottom: 50 },
+          theme: 'striped',
+          styles: {
+            fontSize: 7.5,
+            cellPadding: 3,
+            overflow: 'linebreak',
+            textColor: [60, 36, 16],
+            lineColor: theme.cardBorder,
+            lineWidth: 0.1
+          },
+          headStyles: {
+            fillColor: theme.tableHeader,
+            textColor: 255,
+            fontStyle: 'bold',
+            halign: 'center'
+          },
+          alternateRowStyles: {
+            fillColor: theme.tableAltRow
+          },
+          columnStyles,
+          willDrawPage: () => {
+            const pageNumber = doc.internal.getCurrentPageInfo().pageNumber;
+            drawPageFrame(pageNumber);
+          }
+        });
       });
     });
 
