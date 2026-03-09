@@ -591,13 +591,11 @@ export default function AdminMatches() {
             const upM    = seasonMatches.filter(m => m.status === 'upcoming').length;
             const liveM  = seasonMatches.filter(m => m.status === 'live').length;
 
-            // ── Chrome: draws bg + header + footer on the current page
+            // ── Chrome: draws header + footer on the current page.
+            // NOTE: does NOT repaint the full-page bg — willDrawPage already
+            // did that before cells were drawn; redrawing here would wipe the table.
             const drawChrome = (pageNum: number, totalPages: number) => {
-                // Full-page background
-                doc.setFillColor(...BG);
-                doc.rect(0, 0, W, H, 'F');
-
-                // Header dark base
+                // Re-paint header band opaquely (covers any table bleed-in)
                 doc.setFillColor(...BGHDR);
                 doc.rect(0, 0, W, HDR_H, 'F');
 
