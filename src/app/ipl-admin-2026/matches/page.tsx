@@ -336,6 +336,123 @@ export default function AdminMatches() {
         return `${String(h).padStart(2, '0')}:${min}`;
     };
 
+    const monthMap: Record<string, string> = {
+        jan: '01', january: '01',
+        feb: '02', february: '02',
+        mar: '03', march: '03',
+        apr: '04', april: '04',
+        may: '05',
+        jun: '06', june: '06',
+        jul: '07', july: '07',
+        aug: '08', august: '08',
+        sep: '09', sept: '09', september: '09',
+        oct: '10', october: '10',
+        nov: '11', november: '11',
+        dec: '12', december: '12',
+    };
+
+    const normalizeImportedDate = (raw: string): string => {
+        const value = raw.trim().replace(/\s+/g, ' ');
+        if (!value) return '';
+        if (/^\d{4}-\d{2}-\d{2}$/.test(value)) return value;
+
+        const slash = value.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+        if (slash) {
+            const [, dd, mm, yyyy] = slash;
+            return `${yyyy}-${mm.padStart(2, '0')}-${dd.padStart(2, '0')}`;
+        }
+
+        const textual = value.match(/^(\d{1,2})\s+([A-Za-z]+)\s+(\d{4})$/);
+        if (textual) {
+            const [, dd, monthRaw, yyyy] = textual;
+            const mm = monthMap[monthRaw.toLowerCase()];
+            if (mm) return `${yyyy}-${mm}-${dd.padStart(2, '0')}`;
+        }
+
+        return value;
+    };
+
+    const loadPdfJs = async (): Promise<any> => {
+        if (typeof window === 'undefined') return null;
+        const existing = (window as any).pdfjsLib;
+        if (existing) return existing;
+
+        await new Promise<void>((resolve, reject) => {
+            const script = document.createElement('script');
+            script.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js';
+            script.async = true;
+            script.onload = () => resolve();
+            script.onerror = () => reject(new Error('Failed to load PDF parser'));
+            document.head.appendChild(script);
+        });
+
+        const pdfjsLib = (window as any).pdfjsLib;
+        if (!pdfjsLib) throw new Error('PDF parser unavailable');
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
+        return pdfjsLib;
+    };
+
+    const extractPdfLines = async (file: File): Promise<string[]> => {
+        const pdfjsLib = await loadPdfJs();
+        const buffer = await file.arrayBuffer();
+        const pdf = await pdfjsLib.getDocument({ data: buffer }).promise;
+        const lines: string[] = [];
+
+        for (let pageNo = 1; pageNo <= pdf.numPages; pageNo += 1) {
+            const page = await pdf.getPage(pageNo);
+            const content = await page.getTextContent();
+            const items = (content.items || []) as Array<{ str?: string; transform?: number[] }>;
+            const groups = new Map<string, Array<{ x: number; text: string }>>();
+
+            items.forEach((item) => {
+                const text = String(item.str || '').trim();
+                if (!text) return;
+                const x = item.transform?.[4] ?? 0;
+                const y = item.transform?.[5] ?? 0;
+                const key = (Math.round(y / 2) * 2).toString();
+                if (!groups.has(key)) groups.set(key, []);
+                groups.get(key)!.push({ x, text });
+            });
+
+            const pageLines = Array.from(groups.entries())
+                .sort((a, b) => Number(b[0]) - Number(a[0]))
+                .map(([, group]) =>
+                    group
+                        .sort((a, b) => a.x - b.x)
+                        .map((entry) => entry.text)
+                        .join(' ')
+                        .replace(/\s+/g, ' ')
+                        .trim()
+                )
+                .filter(Boolean);
+
+            lines.push(...pageLines);
+        }
+
+        return lines;
+    };
+
+    const parsePdfFixtureLines = (lines: string[]): string => {
+        const cleaned = lines
+            .map(line => line.replace(/\s+/g, ' ').trim())
+            .filter(line => line && !/^page\s+\d+/i.test(line));
+
+        const header = 'Match,Team,Time (IST),Date,Stadium/City';
+        const rows: string[] = [];
+
+        const rowRegex = /^(\d+)\s+(.+?)\s+(\d{1,2}:\d{2}\s*(?:AM|PM))\s+(\d{1,2}\s+[A-Za-z]+\s+\d{4})\s+(.+)$/i;
+
+        cleaned.forEach((line) => {
+            if (/^match\b/i.test(line) && /\bteam\b/i.test(line) && /\bdate\b/i.test(line)) return;
+            const match = line.match(rowRegex);
+            if (!match) return;
+            const [, matchNo, teamCell, time, date, venue] = match;
+            rows.push([matchNo, teamCell, time.toUpperCase().replace(/\s+/g, ''), normalizeImportedDate(date), venue].join(','));
+        });
+
+        return [header, ...rows].join('\n');
+    };
+
     const downloadCsvTemplate = () => {
         const header = 'Match No,Match Day,Date,Day,Start,Home,Away,Venue';
         const rows = [
@@ -453,7 +570,7 @@ export default function AdminMatches() {
                     rawStatus = '';
                 } else if (isPdfFixtureFormat) {
                     // Match(0), Team(1), Time(IST)(2), Date(3), Stadium/City(4)
-                    rawDate = cols[3]?.trim() ?? '';
+                    rawDate = normalizeImportedDate(cols[3]?.trim() ?? '');
                     rawTime = cols[2]?.trim() ?? '';
                     rawVenue = cols[4]?.trim() ?? '';
                     [rawTeam1, rawTeam2] = splitFixtureTeams(cols[1] ?? '');
@@ -523,14 +640,27 @@ export default function AdminMatches() {
             .filter((r): r is CsvRow => r !== null);
     };
 
-    const handleCsvFile = (file: File) => {
+    const handleCsvFile = async (file: File) => {
         setCsvFileName(file.name);
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            const text = e.target?.result as string;
-            setCsvRows(parseCsv(text));
-        };
-        reader.readAsText(file);
+        try {
+            if (file.name.toLowerCase().endsWith('.pdf') || file.type === 'application/pdf') {
+                const lines = await extractPdfLines(file);
+                const csvText = parsePdfFixtureLines(lines);
+                setCsvRows(parseCsv(csvText));
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const text = e.target?.result as string;
+                setCsvRows(parseCsv(text));
+            };
+            reader.readAsText(file);
+        } catch (err: any) {
+            showError(err?.message || 'Failed to parse uploaded file');
+            setCsvRows([]);
+            setCsvFileName('');
+        }
     };
 
     const handleCsvImport = async () => {
@@ -2018,7 +2148,7 @@ export default function AdminMatches() {
                             <input
                                 ref={csvInputRef}
                                 type="file"
-                                accept=".csv,text/csv"
+                                accept=".csv,text/csv,.pdf,application/pdf"
                                 className="hidden"
                                 onChange={(e) => {
                                     const file = e.target.files?.[0];
@@ -3312,7 +3442,7 @@ export default function AdminMatches() {
                                         <div>
                                             <h2 className="text-xl font-bold text-white">Upload Match Schedule</h2>
                                             <p className="text-xs text-gray-500 mt-0.5">
-                                                Import matches for <span className="text-emerald-400 font-semibold">{currentLeague.toUpperCase()} {selectedSeason}</span> from a CSV file
+                                                Import matches for <span className="text-emerald-400 font-semibold">{currentLeague.toUpperCase()} {selectedSeason}</span> from a CSV or fixture-table PDF
                                             </p>
                                         </div>
                                     </div>
@@ -3325,13 +3455,16 @@ export default function AdminMatches() {
                                 {/* Format info + template download */}
                                 <div className="mb-5 p-4 rounded-xl border border-white/8 flex flex-col sm:flex-row sm:items-center gap-4" style={{ background: 'rgba(255,255,255,0.03)' }}>
                                     <div className="flex-1 min-w-0">
-                                        <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">IPL Schedule CSV Format</p>
+                                        <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">Supported Formats</p>
                                         <div className="flex flex-wrap gap-2">
                                             {['Match No', 'Match Day', 'Date (YYYY-MM-DD)', 'Day', 'Start (7:30PM)', 'Home', 'Away', 'Venue'].map(col => (
                                                 <span key={col} className="px-2 py-0.5 rounded-md bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-xs font-mono">{col}</span>
                                             ))}
+                                            {['Match', 'Team (Punjab vs Mumbai)', 'Time (IST)', 'Date', 'Stadium/City'].map(col => (
+                                                <span key={col} className="px-2 py-0.5 rounded-md bg-cyan-500/10 border border-cyan-500/20 text-cyan-300 text-xs font-mono">{col}</span>
+                                            ))}
                                         </div>
-                                        <p className="text-xs text-gray-600 mt-1.5">Matches the official IPL schedule format. Use team full names (e.g. <code className="text-gray-400">Mumbai Indians</code>). TBD playoff rows are skipped automatically.</p>
+                                        <p className="text-xs text-gray-600 mt-1.5">Accepts official schedule CSVs and fixture-table PDFs. For PDF tables, the team cell can be like <code className="text-gray-400">Punjab vs Mumbai</code>. TBD playoff rows are skipped automatically.</p>
                                     </div>
                                     <button
                                         onClick={downloadCsvTemplate}
@@ -3354,7 +3487,7 @@ export default function AdminMatches() {
                                         e.preventDefault();
                                         e.currentTarget.style.borderColor = '';
                                         const file = e.dataTransfer.files?.[0];
-                                        if (file && (file.name.endsWith('.csv') || file.type === 'text/csv')) handleCsvFile(file);
+                                        if (file && (file.name.toLowerCase().endsWith('.csv') || file.type === 'text/csv' || file.name.toLowerCase().endsWith('.pdf') || file.type === 'application/pdf')) handleCsvFile(file);
                                     }}
                                 >
                                     {csvFileName ? (
@@ -3372,8 +3505,8 @@ export default function AdminMatches() {
                                     ) : (
                                         <>
                                             <Upload className="w-8 h-8 text-emerald-500/50 mx-auto mb-2 group-hover:text-emerald-400 transition-colors" />
-                                            <p className="text-sm text-gray-400 group-hover:text-gray-200 transition-colors">Drop your CSV here or <span className="text-emerald-400 font-semibold">click to browse</span></p>
-                                            <p className="text-xs text-gray-600 mt-1">.csv files only</p>
+                                            <p className="text-sm text-gray-400 group-hover:text-gray-200 transition-colors">Drop your CSV or PDF here or <span className="text-emerald-400 font-semibold">click to browse</span></p>
+                                            <p className="text-xs text-gray-600 mt-1">.csv and fixture-table .pdf files supported</p>
                                         </>
                                     )}
                                 </div>
