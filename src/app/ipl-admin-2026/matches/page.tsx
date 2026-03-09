@@ -380,6 +380,11 @@ export default function AdminMatches() {
         const isCricinfo2024Format = hasHeader &&
             (firstCols.includes('match number') || firstCols.includes('round number') ||
              (firstCols.includes('location') && firstCols.includes('home team')));
+        const isPdfFixtureFormat = hasHeader &&
+            firstCols.includes('team') &&
+            (firstCols.includes('time (ist)') || firstCols.includes('time')) &&
+            firstCols.includes('date') &&
+            (firstCols.includes('stadium/city') || firstCols.includes('stadium') || firstCols.includes('city'));
         const isIplFormat = isCricinfo2024Format ? false : (hasHeader
             ? firstCols.includes('match no') || firstCols.includes('start')
             : splitLine(dataLines[0] ?? '').length >= 7);
@@ -414,6 +419,15 @@ export default function AdminMatches() {
             }) ?? null;
         };
 
+        const splitFixtureTeams = (raw: string): [string, string] => {
+            const value = raw.trim();
+            const parts = value.split(/\s+(?:vs|v)\s+/i);
+            if (parts.length >= 2) {
+                return [parts[0]?.trim() ?? '', parts.slice(1).join(' vs ').trim()];
+            }
+            return ['', ''];
+        };
+
         return dataLines
             .map((line, i): CsvRow | null => {
                 const cols = splitLine(line);
@@ -437,6 +451,15 @@ export default function AdminMatches() {
                     rawTeam1  = cols[4]?.trim() ?? '';
                     rawTeam2  = cols[5]?.trim() ?? '';
                     rawStatus = '';
+                } else if (isPdfFixtureFormat) {
+                    // Match(0), Team(1), Time(IST)(2), Date(3), Stadium/City(4)
+                    rawDate = cols[3]?.trim() ?? '';
+                    rawTime = cols[2]?.trim() ?? '';
+                    rawVenue = cols[4]?.trim() ?? '';
+                    [rawTeam1, rawTeam2] = splitFixtureTeams(cols[1] ?? '');
+                    rawStatus = '';
+                    const converted = to24h(rawTime);
+                    rawTime = converted ?? rawTime;
                 } else if (isIplFormat) {
                     // Match No(0), Match Day(1), Date(2), Day(3), Start(4), Home(5), Away(6), Venue(7)
                     rawDate   = cols[2]?.trim() ?? '';
