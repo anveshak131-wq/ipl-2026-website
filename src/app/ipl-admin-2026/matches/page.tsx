@@ -1333,13 +1333,42 @@ export default function AdminMatches() {
         });
     };
 
-    const formatTime = (timeStr: string) => {
-        const [hours, minutes] = timeStr.split(':');
-        const hour = parseInt(hours);
-        const ampm = hour >= 12 ? 'PM' : 'AM';
-        const displayHour = hour % 12 || 12;
-        return `${displayHour}:${minutes} ${ampm}`;
+    /** Format an IST 24-h "HH:MM" string → "7:30 PM IST" */
+    const formatTimeIST = (timeStr: string): string => {
+        if (!timeStr) return '—';
+        const [hh, mm] = timeStr.split(':').map(Number);
+        if (isNaN(hh) || isNaN(mm)) return timeStr;
+        const ampm = hh >= 12 ? 'PM' : 'AM';
+        const h12 = hh % 12 || 12;
+        return `${h12}:${String(mm).padStart(2, '0')} ${ampm} IST`;
     };
+
+    /**
+     * Convert an IST time to the viewer's local timezone.
+     * Returns { localStr, tzAbbr } if the viewer is NOT in IST,
+     * returns null if the viewer already is in IST (+05:30).
+     */
+    const formatTimeLocal = (timeStr: string, dateStr: string): { localStr: string; tzAbbr: string } | null => {
+        if (!timeStr || !dateStr) return null;
+        try {
+            const dt = new Date(`${dateStr}T${timeStr}:00+05:30`);
+            if (isNaN(dt.getTime())) return null;
+            // Check if viewer's offset equals IST (+330 min)
+            const viewerOffset = -dt.getTimezoneOffset();
+            if (viewerOffset === 330) return null; // already IST
+            const h = dt.getHours();
+            const m = dt.getMinutes();
+            const ampm = h >= 12 ? 'PM' : 'AM';
+            const h12 = h % 12 || 12;
+            const tzAbbr = new Intl.DateTimeFormat('en', { timeZoneName: 'short' })
+                .formatToParts(dt)
+                .find(p => p.type === 'timeZoneName')?.value ?? '';
+            return { localStr: `${h12}:${String(m).padStart(2, '0')} ${ampm}`, tzAbbr };
+        } catch { return null; }
+    };
+
+    // Backward-compat alias used in plain-string contexts (form previews etc.)
+    const formatTime = formatTimeIST;
 
     // Auth handled by layout, no need for auth check
 
@@ -3291,7 +3320,19 @@ export default function AdminMatches() {
                                                 </td>
                                                 <td className="px-4 py-4 whitespace-nowrap" style={{ width: '160px' }}>
                                                     <div className="text-sm text-white font-medium">{formatDate(match.date)}</div>
-                                                    <div className="text-xs text-gray-400">{formatTime(match.time)}</div>
+                                                    <div className="text-xs text-gray-400">
+                                                        {(() => {
+                                                            const local = formatTimeLocal(match.time, match.date);
+                                                            return local ? (
+                                                                <span title={formatTimeIST(match.time)}>
+                                                                    {local.localStr} <span className="text-gray-600">{local.tzAbbr}</span>
+                                                                    <span className="ml-1 text-[10px] text-gray-600">({formatTimeIST(match.time)})</span>
+                                                                </span>
+                                                            ) : (
+                                                                <span>{formatTimeIST(match.time)}</span>
+                                                            );
+                                                        })()}
+                                                    </div>
                                                 </td>
                                                 <td className="px-4 py-4" style={{ minWidth: '350px' }}>
                                                     {/* WPL Playoff Helper Text */}
@@ -3718,7 +3759,17 @@ export default function AdminMatches() {
                                                 <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
                                                     <div className="flex items-center gap-4">
                                                         <div className="text-sm text-gray-400 font-medium min-w-[80px]">
-                                                            {formatTime(match.time)}
+                                                            {(() => {
+                                                                const local = formatTimeLocal(match.time, match.date);
+                                                                return local ? (
+                                                                    <span title={formatTimeIST(match.time)}>
+                                                                        {local.localStr} <span className="text-gray-500 text-xs">{local.tzAbbr}</span>
+                                                                        <div className="text-[10px] text-gray-600 font-normal">{formatTimeIST(match.time)}</div>
+                                                                    </span>
+                                                                ) : (
+                                                                    <span>{formatTimeIST(match.time)}</span>
+                                                                );
+                                                            })()}
                                                         </div>
 
                                                         <div className="flex items-center gap-3">
