@@ -1160,20 +1160,21 @@ export default function AdminMatches() {
                     {/* Mobile Search */}
                     <div className="md:hidden mb-6">
                         <div className="relative">
-                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                            <Search className="absolute left-3.5 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-500" />
                             <input
                                 type="text"
                                 placeholder="Search matches..."
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                className="glass-effect pl-10 pr-4 py-2.5 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-ipl-gold/50 w-full transition-all"
+                                className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-white/10 text-white placeholder-gray-600 focus:outline-none focus:border-yellow-500/40 focus:ring-2 focus:ring-yellow-500/20 transition-all text-sm"
+                                style={{ background: 'rgba(255,255,255,0.05)' }}
                             />
                         </div>
                     </div>
 
                     <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-8">
                         <div>
-                            <div className="mb-2 text-xs text-gray-400 flex items-center gap-1">
+                            <div className="mb-2 text-xs text-gray-500 flex items-center gap-1.5">
                                 <button
                                     type="button"
                                     onClick={() => router.push('/ipl-admin-2026/dashboard')}
@@ -1181,7 +1182,7 @@ export default function AdminMatches() {
                                 >
                                     Admin
                                 </button>
-                                <span className="text-gray-600">/</span>
+                                <span className="text-gray-700">/</span>
                                 <button
                                     type="button"
                                     onClick={() => router.push('/ipl-admin-2026/teams')}
@@ -1189,64 +1190,86 @@ export default function AdminMatches() {
                                 >
                                     Competition
                                 </button>
-                                <span className="text-gray-600">/</span>
-                                <span className="text-gray-300">Matches</span>
+                                <span className="text-gray-700">/</span>
+                                <span className="text-gray-400">Matches</span>
                             </div>
-                            <h1 className="text-4xl font-bold bg-gradient-to-r from-white via-gray-200 to-gray-400 bg-clip-text text-transparent mb-2">
-                                Manage Matches
-                            </h1>
-                            <p className="text-gray-400">{filteredMatches.length} matches found</p>
+                            <div className="flex items-center gap-3 flex-wrap">
+                                <h1 className="text-3xl lg:text-4xl font-extrabold bg-gradient-to-r from-white via-gray-100 to-gray-400 bg-clip-text text-transparent tracking-tight">
+                                    Manage Matches
+                                </h1>
+                                {statusCounts.live > 0 && (
+                                    <motion.span
+                                        initial={{ opacity: 0, scale: 0.8 }}
+                                        animate={{ opacity: 1, scale: 1 }}
+                                        className="flex items-center gap-1.5 px-3 py-1 bg-red-500/15 border border-red-500/40 rounded-full text-xs font-bold text-red-400"
+                                    >
+                                        <span className="relative flex h-2 w-2">
+                                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                                            <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+                                        </span>
+                                        {statusCounts.live} LIVE
+                                    </motion.span>
+                                )}
+                            </div>
+                            <p className="text-gray-500 text-sm mt-1">
+                                {filteredMatches.length} of {matches.length} matches
+                            </p>
                         </div>
 
-                        <div className="flex items-center gap-3">
-                            <div className="glass-effect rounded-lg p-1 flex items-center gap-1">
+                        <div className="flex items-center gap-3 flex-wrap">
+                            {/* View Mode Toggle */}
+                            <div className="flex items-center gap-1 p-1 rounded-xl border border-white/10" style={{ background: 'rgba(255,255,255,0.04)' }}>
                                 <button
                                     onClick={() => setViewMode('table')}
-                                    className={`p-2 rounded transition-all duration-200 ${viewMode === 'table'
-                                            ? 'bg-gradient-to-r from-ipl-gold to-ipl-purple text-white'
-                                            : 'text-gray-400 hover:text-white'
-                                        }`}
+                                    className={`p-2 rounded-lg transition-all duration-200 ${viewMode === 'table'
+                                        ? 'bg-gradient-to-r from-ipl-gold/80 to-ipl-purple/80 text-white shadow-md'
+                                        : 'text-gray-500 hover:text-white hover:bg-white/8'
+                                    }`}
                                     title="Table View"
                                 >
-                                    <IconTable className="w-5 h-5" />
+                                    <IconTable className="w-4 h-4" />
                                 </button>
                                 <button
                                     onClick={() => setViewMode('timeline')}
-                                    className={`p-2 rounded transition-all duration-200 ${viewMode === 'timeline'
-                                            ? 'bg-gradient-to-r from-ipl-gold to-ipl-purple text-white'
-                                            : 'text-gray-400 hover:text-white'
-                                        }`}
+                                    className={`p-2 rounded-lg transition-all duration-200 ${viewMode === 'timeline'
+                                        ? 'bg-gradient-to-r from-ipl-gold/80 to-ipl-purple/80 text-white shadow-md'
+                                        : 'text-gray-500 hover:text-white hover:bg-white/8'
+                                    }`}
                                     title="Timeline View"
                                 >
-                                    <IconTimeline className="w-5 h-5" />
+                                    <IconTimeline className="w-4 h-4" />
                                 </button>
                                 <button
                                     onClick={() => setViewMode('analytics')}
-                                    className={`p-2 rounded transition-all duration-200 ${viewMode === 'analytics'
-                                            ? 'bg-gradient-to-r from-ipl-gold to-ipl-purple text-white'
-                                            : 'text-gray-400 hover:text-white'
-                                        }`}
+                                    className={`p-2 rounded-lg transition-all duration-200 ${viewMode === 'analytics'
+                                        ? 'bg-gradient-to-r from-ipl-gold/80 to-ipl-purple/80 text-white shadow-md'
+                                        : 'text-gray-500 hover:text-white hover:bg-white/8'
+                                    }`}
                                     title="Analytics & Charts"
                                 >
-                                    <BarChart3 className="w-5 h-5" />
+                                    <BarChart3 className="w-4 h-4" />
                                 </button>
                             </div>
 
                             <button
                                 onClick={() => setShowFilters(!showFilters)}
-                                className={`glass-effect p-2.5 rounded-lg transition-all duration-200 ${showFilters ? 'bg-gradient-to-r from-ipl-gold to-ipl-purple text-white' : 'text-gray-400 hover:text-white'
-                                    }`}
+                                className={`p-2 rounded-xl border transition-all duration-200 ${showFilters
+                                    ? 'bg-gradient-to-r from-ipl-gold/80 to-ipl-purple/80 text-white border-white/20 shadow-md'
+                                    : 'text-gray-400 hover:text-white border-white/10 hover:border-white/20'
+                                }`}
+                                style={!showFilters ? { background: 'rgba(255,255,255,0.04)' } : {}}
                             >
-                                <IconFilter className="w-5 h-5" />
+                                <IconFilter className="w-4 h-4" />
                             </button>
 
-                            <div className="flex items-center gap-3">
+                            <div className="flex items-center gap-2">
                                 {/* Calendar Export Dropdown */}
                                 <div className="relative group">
                                     <button
-                                        className="glass-effect px-4 py-2.5 rounded-lg text-gray-300 hover:text-white font-semibold hover:bg-white/10 transition-all duration-200 flex items-center gap-2"
+                                        className="flex items-center gap-2 px-3 py-2 rounded-xl border border-white/10 text-gray-300 hover:text-white hover:border-white/25 transition-all duration-200 text-sm font-medium"
+                                        style={{ background: 'rgba(255,255,255,0.04)' }}
                                     >
-                                        <Calendar className="w-5 h-5" />
+                                        <Calendar className="w-4 h-4" />
                                         <span className="hidden sm:inline">Calendar</span>
                                     </button>
                                     <div className="absolute right-0 top-full mt-2 w-72 glass-effect rounded-lg border border-white/10 p-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 shadow-xl">
@@ -1307,26 +1330,27 @@ export default function AdminMatches() {
                                         </div>
                                     </div>
                                 </div>
-                            <div className="flex items-center gap-3">
+                            <div className="flex items-center gap-2">
                             <button
                                     onClick={() => {
                                         setShowPlayoffForm(true);
                                         setShowForm(false);
                                     }}
-                                    className="ipl-button flex items-center gap-2 bg-purple-600 hover:bg-purple-700"
+                                    className="flex items-center gap-2 px-4 py-2 rounded-xl bg-purple-600/80 hover:bg-purple-600 text-white text-sm font-semibold border border-purple-500/50 hover:border-purple-400/70 transition-all duration-200 shadow-md hover:shadow-purple-500/25"
                                     title="Create playoff match (Eliminator, Final, etc.)"
                                 >
-                                    <IconPlus className="w-5 h-5" />
-                                    Create Playoff Match
+                                    <IconPlus className="w-4 h-4" />
+                                    <span className="hidden sm:inline">Playoff Match</span>
+                                    <span className="sm:hidden">Playoff</span>
                                 </button>
                                 {matches.length > 0 && (
                                 <button
                                     onClick={handleClearAllMatches}
                                     disabled={isSubmitting}
-                                    className="glass-effect px-4 py-2.5 rounded-lg bg-gradient-to-r from-red-600 to-red-700 text-white font-semibold hover:shadow-lg hover:shadow-red-500/50 transition-all duration-200 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-red-600/20 hover:bg-red-600/40 text-red-400 hover:text-red-300 text-sm font-medium border border-red-500/30 hover:border-red-500/50 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                                     title="Clear all matches from database"
                                 >
-                                    <IconTrash className="w-5 h-5" />
+                                    <IconTrash className="w-4 h-4" />
                                     <span className="hidden sm:inline">Clear All</span>
                                 </button>
                             )}
@@ -1335,10 +1359,10 @@ export default function AdminMatches() {
                                         setShowForm(true);
                                         setShowPlayoffForm(false);
                                     }}
-                                className="ipl-button flex items-center gap-2"
+                                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-400 hover:to-yellow-500 text-black text-sm font-bold shadow-md hover:shadow-yellow-500/30 transition-all duration-200"
                             >
-                                <IconPlus className="w-5 h-5" />
-                                Create Match
+                                <IconPlus className="w-4 h-4" />
+                                <span>Create Match</span>
                             </button>
                             </div>
                             </div>
@@ -1346,9 +1370,11 @@ export default function AdminMatches() {
                                 href="/matches"
                                 target="_blank"
                                 rel="noreferrer"
-                                className="glass-effect px-3 py-2 rounded-lg text-[11px] text-gray-200 hover:bg-white/10 border border-white/15"
+                                className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-white/10 text-xs text-gray-400 hover:text-white hover:border-white/25 transition-all duration-200"
+                                style={{ background: 'rgba(255,255,255,0.04)' }}
                             >
-                                View public /matches
+                                <ExternalLink className="w-3.5 h-3.5" />
+                                Public page
                             </a>
                         </div>
                     </div>
@@ -1356,99 +1382,119 @@ export default function AdminMatches() {
                     {/* Global status summary */}
                     <StaggeredList className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6" staggerDelay={0.1}>
                         <motion.div
-                            className="bg-gradient-to-br from-slate-800/40 to-slate-900/40 backdrop-blur-xl rounded-2xl p-6 border border-slate-700/50 hover:border-slate-500/50 transition-all duration-300 hover:shadow-2xl hover:scale-[1.02] cursor-pointer"
+                            className="relative overflow-hidden rounded-2xl p-5 border border-white/10 hover:border-slate-400/40 cursor-pointer group transition-all duration-300"
+                            style={{ background: 'linear-gradient(145deg, rgba(30,35,50,0.9) 0%, rgba(15,18,28,0.95) 100%)' }}
                             onClick={() => setFilters({ ...filters, status: 'all' })}
-                            whileHover={{ scale: 1.02 }}
+                            whileHover={{ scale: 1.03, y: -2 }}
                         >
-                            <div className="flex items-center justify-between mb-4">
-                                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-slate-500 to-slate-600 flex items-center justify-center shadow-lg">
-                                    <Calendar className="w-6 h-6 text-white" />
+                            <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-slate-400/50 to-transparent" />
+                            <div className="absolute top-0 right-0 w-20 h-20 bg-slate-500/10 rounded-full -mr-8 -mt-8 pointer-events-none" />
+                            <div className="flex items-start justify-between mb-3">
+                                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-slate-400 to-slate-600 flex items-center justify-center shadow-lg shadow-slate-700/50">
+                                    <Calendar className="w-5 h-5 text-white" />
                                 </div>
-                                <div className="text-right">
-                                    <p className="text-3xl font-bold text-white">{statusCounts.total}</p>
-                                    <p className="text-xs text-gray-400">Total</p>
-                                </div>
+                                <span className="text-3xl font-extrabold text-white tabular-nums">{statusCounts.total}</span>
                             </div>
-                            <div className="flex items-center justify-between">
-                                <span className="text-sm text-gray-300 font-medium">All matches</span>
-                                <div className="flex items-center text-xs text-slate-400 font-semibold bg-slate-500/10 px-2 py-1 rounded-full">
-                                    <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                                    </svg>
-                                    100%
-                                </div>
+                            <p className="text-sm font-semibold text-slate-300 mb-0.5">All Matches</p>
+                            <p className="text-xs text-slate-500">Total scheduled</p>
+                            <div className="mt-3 h-1 rounded-full bg-white/10 overflow-hidden">
+                                <motion.div
+                                    className="h-full bg-gradient-to-r from-slate-400 to-slate-500 rounded-full"
+                                    initial={{ width: 0 }}
+                                    animate={{ width: '100%' }}
+                                    transition={{ duration: 0.8, delay: 0.2 }}
+                                />
                             </div>
                         </motion.div>
+
                         <motion.div
-                            className="bg-gradient-to-br from-slate-800/40 to-slate-900/40 backdrop-blur-xl rounded-2xl p-6 border border-slate-700/50 hover:border-blue-500/50 transition-all duration-300 hover:shadow-2xl hover:scale-[1.02] cursor-pointer"
+                            className="relative overflow-hidden rounded-2xl p-5 border border-white/10 hover:border-blue-500/40 cursor-pointer group transition-all duration-300"
+                            style={{ background: 'linear-gradient(145deg, rgba(20,30,55,0.9) 0%, rgba(12,18,40,0.95) 100%)' }}
                             onClick={() => setFilters({ ...filters, status: 'upcoming' })}
-                            whileHover={{ scale: 1.02 }}
+                            whileHover={{ scale: 1.03, y: -2 }}
                         >
-                            <div className="flex items-center justify-between mb-4">
-                                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center shadow-lg">
-                                    <Clock className="w-6 h-6 text-white" />
+                            <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-blue-400/50 to-transparent" />
+                            <div className="absolute top-0 right-0 w-20 h-20 bg-blue-500/10 rounded-full -mr-8 -mt-8 pointer-events-none" />
+                            <div className="flex items-start justify-between mb-3">
+                                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-700/50">
+                                    <Clock className="w-5 h-5 text-white" />
                                 </div>
-                                <div className="text-right">
-                                    <p className="text-3xl font-bold text-white">{statusCounts.upcoming}</p>
-                                    <p className="text-xs text-gray-400">Upcoming</p>
-                                </div>
+                                <span className="text-3xl font-extrabold text-white tabular-nums">{statusCounts.upcoming}</span>
                             </div>
-                            <div className="flex items-center justify-between">
-                                <span className="text-sm text-gray-300 font-medium">Scheduled</span>
-                                <div className="flex items-center text-xs text-blue-400 font-semibold bg-blue-500/10 px-2 py-1 rounded-full">
-                                    <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                                    </svg>
-                                    {statusCounts.total > 0 ? ((statusCounts.upcoming / statusCounts.total) * 100).toFixed(0) : 0}%
-                                </div>
+                            <p className="text-sm font-semibold text-blue-200 mb-0.5">Upcoming</p>
+                            <p className="text-xs text-blue-500/70">
+                                {statusCounts.total > 0 ? ((statusCounts.upcoming / statusCounts.total) * 100).toFixed(0) : 0}% of total
+                            </p>
+                            <div className="mt-3 h-1 rounded-full bg-white/10 overflow-hidden">
+                                <motion.div
+                                    className="h-full bg-gradient-to-r from-blue-400 to-cyan-400 rounded-full"
+                                    initial={{ width: 0 }}
+                                    animate={{ width: `${statusCounts.total > 0 ? (statusCounts.upcoming / statusCounts.total) * 100 : 0}%` }}
+                                    transition={{ duration: 0.9, delay: 0.3 }}
+                                />
                             </div>
                         </motion.div>
+
                         <motion.div
-                            className="bg-gradient-to-br from-slate-800/40 to-slate-900/40 backdrop-blur-xl rounded-2xl p-6 border border-slate-700/50 hover:border-red-500/50 transition-all duration-300 hover:shadow-2xl hover:scale-[1.02] cursor-pointer"
+                            className="relative overflow-hidden rounded-2xl p-5 border border-white/10 hover:border-red-500/40 cursor-pointer group transition-all duration-300"
+                            style={{ background: 'linear-gradient(145deg, rgba(40,15,20,0.9) 0%, rgba(28,10,14,0.95) 100%)' }}
                             onClick={() => setFilters({ ...filters, status: 'live' })}
-                            whileHover={{ scale: 1.02 }}
+                            whileHover={{ scale: 1.03, y: -2 }}
                         >
-                            <div className="flex items-center justify-between mb-4">
-                                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-red-500 to-pink-600 flex items-center justify-center shadow-lg">
-                                    <Zap className="w-6 h-6 text-white" />
+                            <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-red-400/60 to-transparent" />
+                            <div className="absolute top-0 right-0 w-20 h-20 bg-red-500/10 rounded-full -mr-8 -mt-8 pointer-events-none" />
+                            <div className="flex items-start justify-between mb-3">
+                                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-red-500 to-rose-600 flex items-center justify-center shadow-lg shadow-red-700/50">
+                                    {statusCounts.live > 0 ? (
+                                        <span className="relative flex h-3 w-3">
+                                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-60"></span>
+                                            <span className="relative inline-flex rounded-full h-3 w-3 bg-white"></span>
+                                        </span>
+                                    ) : (
+                                        <Zap className="w-5 h-5 text-white" />
+                                    )}
                                 </div>
-                                <div className="text-right">
-                                    <p className="text-3xl font-bold text-white">{statusCounts.live}</p>
-                                    <p className="text-xs text-gray-400">Live</p>
-                                </div>
+                                <span className={`text-3xl font-extrabold tabular-nums ${statusCounts.live > 0 ? 'text-red-300 animate-pulse' : 'text-white'}`}>{statusCounts.live}</span>
                             </div>
-                            <div className="flex items-center justify-between">
-                                <span className="text-sm text-gray-300 font-medium">In progress</span>
-                                <div className="flex items-center text-xs text-red-400 font-semibold bg-red-500/10 px-2 py-1 rounded-full">
-                                    <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                                    </svg>
-                                    {statusCounts.total > 0 ? ((statusCounts.live / statusCounts.total) * 100).toFixed(0) : 0}%
-                                </div>
+                            <p className="text-sm font-semibold text-red-200 mb-0.5">Live Now</p>
+                            <p className="text-xs text-red-500/70">
+                                {statusCounts.total > 0 ? ((statusCounts.live / statusCounts.total) * 100).toFixed(0) : 0}% of total
+                            </p>
+                            <div className="mt-3 h-1 rounded-full bg-white/10 overflow-hidden">
+                                <motion.div
+                                    className="h-full bg-gradient-to-r from-red-400 to-rose-400 rounded-full"
+                                    initial={{ width: 0 }}
+                                    animate={{ width: `${statusCounts.total > 0 ? (statusCounts.live / statusCounts.total) * 100 : 0}%` }}
+                                    transition={{ duration: 0.9, delay: 0.4 }}
+                                />
                             </div>
                         </motion.div>
+
                         <motion.div
-                            className="bg-gradient-to-br from-slate-800/40 to-slate-900/40 backdrop-blur-xl rounded-2xl p-6 border border-slate-700/50 hover:border-green-500/50 transition-all duration-300 hover:shadow-2xl hover:scale-[1.02] cursor-pointer"
+                            className="relative overflow-hidden rounded-2xl p-5 border border-white/10 hover:border-emerald-500/40 cursor-pointer group transition-all duration-300"
+                            style={{ background: 'linear-gradient(145deg, rgba(15,35,25,0.9) 0%, rgba(10,22,16,0.95) 100%)' }}
                             onClick={() => setFilters({ ...filters, status: 'completed' })}
-                            whileHover={{ scale: 1.02 }}
+                            whileHover={{ scale: 1.03, y: -2 }}
                         >
-                            <div className="flex items-center justify-between mb-4">
-                                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center shadow-lg">
-                                    <CheckCircle2 className="w-6 h-6 text-white" />
+                            <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-emerald-400/50 to-transparent" />
+                            <div className="absolute top-0 right-0 w-20 h-20 bg-emerald-500/10 rounded-full -mr-8 -mt-8 pointer-events-none" />
+                            <div className="flex items-start justify-between mb-3">
+                                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-lg shadow-emerald-700/50">
+                                    <CheckCircle2 className="w-5 h-5 text-white" />
                                 </div>
-                                <div className="text-right">
-                                    <p className="text-3xl font-bold text-white">{statusCounts.completed}</p>
-                                    <p className="text-xs text-gray-400">Completed</p>
-                                </div>
+                                <span className="text-3xl font-extrabold text-white tabular-nums">{statusCounts.completed}</span>
                             </div>
-                            <div className="flex items-center justify-between">
-                                <span className="text-sm text-gray-300 font-medium">Finished</span>
-                                <div className="flex items-center text-xs text-green-400 font-semibold bg-green-500/10 px-2 py-1 rounded-full">
-                                    <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                                    </svg>
-                                    {statusCounts.total > 0 ? ((statusCounts.completed / statusCounts.total) * 100).toFixed(0) : 0}%
-                                </div>
+                            <p className="text-sm font-semibold text-emerald-200 mb-0.5">Completed</p>
+                            <p className="text-xs text-emerald-500/70">
+                                {statusCounts.total > 0 ? ((statusCounts.completed / statusCounts.total) * 100).toFixed(0) : 0}% done
+                            </p>
+                            <div className="mt-3 h-1 rounded-full bg-white/10 overflow-hidden">
+                                <motion.div
+                                    className="h-full bg-gradient-to-r from-emerald-400 to-teal-400 rounded-full"
+                                    initial={{ width: 0 }}
+                                    animate={{ width: `${statusCounts.total > 0 ? (statusCounts.completed / statusCounts.total) * 100 : 0}%` }}
+                                    transition={{ duration: 0.9, delay: 0.5 }}
+                                />
                             </div>
                         </motion.div>
                     </StaggeredList>
@@ -1563,14 +1609,25 @@ export default function AdminMatches() {
                     </div>
 
                     {showFilters && (
-                        <div className="glass-effect rounded-xl p-6 mb-6 border border-white/10">
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+                        <motion.div
+                            initial={{ opacity: 0, y: -8 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -8 }}
+                            className="rounded-2xl p-5 mb-6 border border-white/10"
+                            style={{ background: 'linear-gradient(145deg, rgba(20,25,40,0.95) 0%, rgba(12,14,22,0.98) 100%)' }}
+                        >
+                            <div className="flex items-center gap-2 mb-4">
+                                <IconFilter className="w-4 h-4 text-yellow-500" />
+                                <span className="text-sm font-semibold text-white">Filters</span>
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3">
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-300 mb-2">Status</label>
+                                    <label className="block text-xs font-medium text-gray-500 mb-1.5">Status</label>
                                     <select
                                         value={filters.status}
                                         onChange={(e) => setFilters({ ...filters, status: e.target.value })}
-                                        className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-ipl-gold transition-colors"
+                                        className="w-full rounded-xl px-3 py-2 text-white text-sm focus:outline-none focus:border-yellow-500/40 border border-white/10 transition-colors"
+                                        style={{ background: 'rgba(255,255,255,0.06)' }}
                                     >
                                         <option value="all">All Status</option>
                                         <option value="upcoming">Scheduled</option>
@@ -1580,31 +1637,34 @@ export default function AdminMatches() {
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-300 mb-2">Date From</label>
+                                    <label className="block text-xs font-medium text-gray-500 mb-1.5">Date From</label>
                                     <input
                                         type="date"
                                         value={filters.dateFrom}
                                         onChange={(e) => setFilters({ ...filters, dateFrom: e.target.value })}
-                                        className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-ipl-gold transition-colors"
+                                        className="w-full rounded-xl px-3 py-2 text-white text-sm focus:outline-none focus:border-yellow-500/40 border border-white/10 transition-colors"
+                                        style={{ background: 'rgba(255,255,255,0.06)' }}
                                     />
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-300 mb-2">Date To</label>
+                                    <label className="block text-xs font-medium text-gray-500 mb-1.5">Date To</label>
                                     <input
                                         type="date"
                                         value={filters.dateTo}
                                         onChange={(e) => setFilters({ ...filters, dateTo: e.target.value })}
-                                        className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-ipl-gold transition-colors"
+                                        className="w-full rounded-xl px-3 py-2 text-white text-sm focus:outline-none focus:border-yellow-500/40 border border-white/10 transition-colors"
+                                        style={{ background: 'rgba(255,255,255,0.06)' }}
                                     />
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-300 mb-2">Team</label>
+                                    <label className="block text-xs font-medium text-gray-500 mb-1.5">Team</label>
                                     <select
                                         value={filters.team}
                                         onChange={(e) => setFilters({ ...filters, team: e.target.value })}
-                                        className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-ipl-gold transition-colors"
+                                        className="w-full rounded-xl px-3 py-2 text-white text-sm focus:outline-none focus:border-yellow-500/40 border border-white/10 transition-colors"
+                                        style={{ background: 'rgba(255,255,255,0.06)' }}
                                     >
                                         <option value="all">All Teams</option>
                                         {teams.map(team => (
@@ -1614,11 +1674,12 @@ export default function AdminMatches() {
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-300 mb-2">Venue</label>
+                                    <label className="block text-xs font-medium text-gray-500 mb-1.5">Venue</label>
                                     <select
                                         value={filters.venue}
                                         onChange={(e) => setFilters({ ...filters, venue: e.target.value })}
-                                        className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-ipl-gold transition-colors"
+                                        className="w-full rounded-xl px-3 py-2 text-white text-sm focus:outline-none focus:border-yellow-500/40 border border-white/10 transition-colors"
+                                        style={{ background: 'rgba(255,255,255,0.06)' }}
                                     >
                                         <option value="all">All Venues</option>
                                         {venues.map(venue => (
@@ -1631,12 +1692,13 @@ export default function AdminMatches() {
                             <div className="mt-4 flex justify-end">
                                 <button
                                     onClick={() => setFilters({ status: 'all', dateFrom: '', dateTo: '', team: 'all', venue: 'all' })}
-                                    className="text-sm text-gray-400 hover:text-white transition-colors"
+                                    className="text-xs text-gray-500 hover:text-yellow-400 transition-colors flex items-center gap-1.5"
                                 >
-                                    Clear Filters
+                                    <IconX className="w-3.5 h-3.5" />
+                                    Clear all filters
                                 </button>
                             </div>
-                        </div>
+                        </motion.div>
                     )}
 
                     {showForm && (
@@ -2868,19 +2930,27 @@ export default function AdminMatches() {
                             {matchesByDate.map(([date, dateMatches]) => (
                                         <motion.div 
                                             key={date} 
-                                            className="glass-effect rounded-xl p-6 border border-white/10"
-                                            whileHover={{ scale: 1.01 }}
+                                            className="rounded-2xl border border-white/10 overflow-hidden"
+                                            style={{ background: 'linear-gradient(145deg, rgba(15,20,30,0.92) 0%, rgba(10,12,20,0.96) 100%)' }}
+                                            whileHover={{ scale: 1.005 }}
                                         >
-                                    <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-                                        <div className="w-1 h-6 bg-gradient-to-b from-ipl-gold to-ipl-purple rounded-full"></div>
-                                        {formatDate(date)}
-                                    </h3>
-                                            <StaggeredList className="space-y-4" staggerDelay={0.05}>
+                                    <div className="px-6 py-4 border-b border-white/8 flex items-center gap-3" style={{ background: 'rgba(255,255,255,0.03)' }}>
+                                        <div className="flex flex-col items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br from-yellow-500/20 to-purple-500/20 border border-white/15 flex-shrink-0">
+                                            <span className="text-xs font-bold text-gray-400">{new Date(date + 'T00:00:00').toLocaleDateString('en-US',{month:'short'}).toUpperCase()}</span>
+                                            <span className="text-lg font-extrabold text-white leading-none">{new Date(date + 'T00:00:00').getDate()}</span>
+                                        </div>
+                                        <div>
+                                            <h3 className="text-base font-bold text-white">{formatDate(date)}</h3>
+                                            <p className="text-xs text-gray-500">{dateMatches.length} match{dateMatches.length !== 1 ? 'es' : ''}</p>
+                                        </div>
+                                        <div className="ml-auto h-px flex-1 bg-gradient-to-r from-white/10 to-transparent max-w-xs" />
+                                    </div>
+                                            <StaggeredList className="divide-y divide-white/5" staggerDelay={0.05}>
                                         {dateMatches.map((match) => (
                                                     <motion.div
                                                 key={match.id}
-                                                className="bg-white/5 rounded-lg p-4 hover:bg-white/10 transition-all duration-200 border border-white/5"
-                                                        whileHover={{ scale: 1.02, backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
+                                                className="px-6 py-4 hover:bg-white/4 transition-all duration-200"
+                                                        whileHover={{ x: 2 }}
                                             >
                                                 {/* WPL Playoff Helper Text */}
                                                 {match.league === 'wpl' && match.playoffType && 
@@ -3117,8 +3187,9 @@ export default function AdminMatches() {
                                                     </div>
 
                                                     <div className="flex items-center gap-3 flex-wrap">
-                                                        <div className="text-sm text-gray-400">
-                                                            📍 {match.venue}
+                                                        <div className="flex items-center gap-1.5 text-xs text-gray-500">
+                                                            <MapPin className="w-3 h-3 text-rose-500 flex-shrink-0" />
+                                                            <span className="truncate max-w-[180px]">{match.venue.split(',')[0]}</span>
                                                         </div>
                                                         <div className="flex items-center gap-3">
                                                             {getStatusBadge(match.status)}
@@ -3143,7 +3214,7 @@ export default function AdminMatches() {
                                                                         className="w-4 h-4 rounded border-white/20 bg-white/5 text-green-500 focus:ring-green-500/20 cursor-pointer"
                                                                         disabled={isSubmitting}
                                                                     />
-                                                                    <span className="text-xs text-gray-400 group-hover:text-green-400 transition-colors">Completed</span>
+                                                                    <span className="text-xs text-gray-500 group-hover:text-green-400 transition-colors">Done</span>
                                                                 </label>
                                                                 <label className="flex items-center gap-2 cursor-pointer group">
                                                                     <input
@@ -3165,25 +3236,25 @@ export default function AdminMatches() {
                                                                         className="w-4 h-4 rounded border-white/20 bg-white/5 text-red-500 focus:ring-red-500/20 cursor-pointer"
                                                                         disabled={isSubmitting}
                                                                     />
-                                                                    <span className="text-xs text-gray-400 group-hover:text-red-400 transition-colors">Cancelled</span>
+                                                                    <span className="text-xs text-gray-500 group-hover:text-red-400 transition-colors">Cancelled</span>
                                                                 </label>
                                                             </div>
                                                         </div>
-                                                        <div className="flex items-center gap-2">
+                                                        <div className="flex items-center gap-1">
                                                             <button
                                                                 onClick={() => handleEdit(match)}
-                                                                className="p-2 text-ipl-gold hover:bg-ipl-gold/10 rounded-lg transition-all duration-200"
+                                                                className="p-1.5 text-yellow-500/80 hover:text-yellow-400 hover:bg-yellow-500/10 rounded-lg transition-all duration-200"
                                                                 title="Edit"
                                                             >
-                                                                <IconEdit className="w-4 h-4" />
+                                                                <IconEdit className="w-3.5 h-3.5" />
                                                             </button>
                                                             <button
                                                                 onClick={() => handleDelete(match.id)}
                                                                 disabled={isSubmitting}
                                                                 title={(match as any)._isMock ? 'Remove sample match' : 'Delete Match'}
-                                                                className="p-2 text-red-400 hover:bg-red-500/10 rounded-lg transition-all duration-200 disabled:opacity-50"
+                                                                className="p-1.5 text-red-500/70 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all duration-200 disabled:opacity-50"
                                                             >
-                                                                <IconTrash className="w-4 h-4" />
+                                                                <IconTrash className="w-3.5 h-3.5" />
                                                             </button>
                                                         </div>
                                                     </div>
