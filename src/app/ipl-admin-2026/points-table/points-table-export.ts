@@ -474,29 +474,29 @@ export async function exportPointsTableToPDF(data: PointsTableExportData): Promi
     return;
   }
 
-  // ── Dark Palette ──────────────────────────────────────────────────────────────
-  const C_BG:      [number, number, number] = [8,   10,  18];
-  const C_BGHDR:   [number, number, number] = [14,  19,  33];
-  const C_ROW1:    [number, number, number] = [14,  18,  30];
-  const C_ROW2:    [number, number, number] = [20,  25,  42];
-  const C_QUAL:    [number, number, number] = [10,  30,  20];
-  const C_GRID:    [number, number, number] = [35,  45,  75];
-  const C_GOLD:    [number, number, number] = [245, 158, 11];
-  const C_RED:     [number, number, number] = [239,  68, 68];
-  const C_WHITE:   [number, number, number] = [230, 235, 255];
-  const C_MUTED:   [number, number, number] = [110, 120, 155];
-  const C_GREEN:   [number, number, number] = [52,  211, 153];
-  const C_REDTXT:  [number, number, number] = [248, 113, 113];
-  const C_EMERALD: [number, number, number] = [16,  185, 129];
+  // ── Dark Palette (Cosmic Purple) ─────────────────────────────────────────────
+  const C_BG:      [number, number, number] = [8,   4,  22];    // near-black violet
+  const C_BGHDR:   [number, number, number] = [16,  8,  45];    // deep indigo-violet header
+  const C_ROW1:    [number, number, number] = [20,  12, 48];    // mid violet row
+  const C_ROW2:    [number, number, number] = [12,  7,  32];    // darker violet row
+  const C_QUAL:    [number, number, number] = [22,  14, 58];    // qualified row — brighter violet tint
+  const C_GRID:    [number, number, number] = [60,  35, 110];   // grid lines
+  const C_GOLD:    [number, number, number] = [190, 80, 255];   // vivid violet accent (primary)
+  const C_RED:     [number, number, number] = [255, 55, 140];   // hot magenta accent
+  const C_WHITE:   [number, number, number] = [240, 232, 255];  // lavender-white text
+  const C_MUTED:   [number, number, number] = [130, 110, 180];  // muted lavender
+  const C_GREEN:   [number, number, number] = [80,  255, 180];  // bright mint (positive NRR)
+  const C_REDTXT:  [number, number, number] = [255, 100, 130];  // coral-pink (negative NRR)
+  const C_EMERALD: [number, number, number] = [120, 255, 210];  // bright teal (qualified status)
 
   // Team brand colours
   const TEAM_COLORS: Record<string, [number, number, number]> = {
-    MI:   [80,  140, 220],  CSK:  [252, 210,  50],  RCB:  [240,  90,  90],
-    KKR:  [160, 100, 220],  SRH:  [255, 140,  40],  DC:   [80,  140, 220],
-    PBKS: [220,  60,  60],  RR:   [240, 100, 160],  GT:   [100, 180, 200],
-    LSG:  [80,  200, 180],  DD:   [80,  140, 220],  KTK:  [160, 100, 220],
-    PWI:  [220,  60,  60],  DEC:  [255, 140,  40],  COC:  [100, 180, 200],
-    RPS:  [240, 100, 160]
+    MI:   [90,  160, 255],  CSK:  [255, 220,  60],  RCB:  [255, 100, 100],
+    KKR:  [200, 130, 255],  SRH:  [255, 160,  50],  DC:   [90,  170, 255],
+    PBKS: [255,  80,  80],  RR:   [255, 120, 200],  GT:   [90,  210, 230],
+    LSG:  [90,  230, 190],  DD:   [90,  160, 255],  KTK:  [200, 130, 255],
+    PWI:  [255,  80,  80],  DEC:  [255, 160,  50],  COC:  [90,  210, 230],
+    RPS:  [255, 120, 200]
   };
   const teamColor = (shortName: string): [number, number, number] =>
     TEAM_COLORS[(shortName || '').toUpperCase().trim()] ?? C_GOLD;
