@@ -1723,17 +1723,24 @@ export default function AdminPlayers() {
         .filter(Boolean) as Array<(typeof exportColumns)[number]>
     );
 
-    rows.forEach((row, rowIndex) => {
+    const rowsPerChunk = 18;
+    const rowChunks: typeof rows[] = rows.reduce((chunks: typeof rows[], row, index) => {
+      const chunkIndex = Math.floor(index / rowsPerChunk);
+      if (!chunks[chunkIndex]) chunks[chunkIndex] = [];
+      chunks[chunkIndex].push(row);
+      return chunks;
+    }, []);
+
+    rowChunks.forEach((rowChunk, chunkIndex) => {
       pdfColumnGroups.forEach((pdfColumns, groupIndex) => {
         doc.addPage();
         const tableStartY = 120;
-        const playerName = formatPdfCell('name', row.name) || `Player ${rowIndex + 1}`;
-        const groupTitle = `${playerName} • Data ${groupIndex + 1} of ${pdfColumnGroups.length}`;
-        const playerMeta = [
-          `ID: ${formatPdfCell('id', row.id)}`,
-          `Role: ${formatPdfCell('role', row.role)}`,
-          `Team: ${formatPdfCell('teamShortName', row.teamShortName)}`
-        ].join(' • ');
+        const startPlayerNumber = chunkIndex * rowsPerChunk + 1;
+        const endPlayerNumber = startPlayerNumber + rowChunk.length - 1;
+        const firstPlayerName = formatPdfCell('name', rowChunk[0]?.name) || `Player ${startPlayerNumber}`;
+        const lastPlayerName = formatPdfCell('name', rowChunk[rowChunk.length - 1]?.name) || `Player ${endPlayerNumber}`;
+        const groupTitle = `Players ${startPlayerNumber}-${endPlayerNumber} • Data ${groupIndex + 1} of ${pdfColumnGroups.length}`;
+        const playerMeta = `${firstPlayerName} to ${lastPlayerName} • ${rowChunk.length} players`;
         const groupSubtitle = pdfColumns.map(column => column.label).join(' • ');
 
         doc.setFont('helvetica', 'bold');
@@ -1746,9 +1753,9 @@ export default function AdminPlayers() {
         doc.text(playerMeta, 40, 104, { maxWidth: pageWidth - 80 });
         doc.text(groupSubtitle, 40, 116, { maxWidth: pageWidth - 80 });
 
-        const pdfRows = [
+        const pdfRows = rowChunk.map(row =>
           pdfColumns.map(column => formatPdfCell(column.key, (row as any)[column.key]))
-        ];
+        );
 
         const columnStyles = pdfColumns.reduce((acc, column, index) => {
           if (numericFields.has(column.key) || decimalFields.has(column.key)) {
