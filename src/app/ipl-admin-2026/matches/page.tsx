@@ -315,11 +315,27 @@ export default function AdminMatches() {
     }, []); // Run once on mount, then check every minute
 
     // ─── CSV helpers ────────────────────────────────────────────────────────────
+
+    /** Convert 12-hour time (e.g. "7:30PM", "3:30 PM") to 24-hour "HH:MM" */
+    const to24h = (raw: string): string | null => {
+        const m = raw.trim().match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
+        if (!m) return null;
+        let h = parseInt(m[1], 10);
+        const min = m[2];
+        const period = m[3].toUpperCase();
+        if (period === 'AM' && h === 12) h = 0;
+        if (period === 'PM' && h !== 12) h += 12;
+        return `${String(h).padStart(2, '0')}:${min}`;
+    };
+
     const downloadCsvTemplate = () => {
-        const header = 'date,time,team1,team2,venue,status';
-        const example1 = `${selectedSeason}-03-22,19:30,MI,CSK,Wankhede Stadium\, Mumbai,upcoming`;
-        const example2 = `${selectedSeason}-03-25,15:30,RCB,SRH,M. Chinnaswamy Stadium\, Bengaluru,upcoming`;
-        const blob = new Blob([`${header}\n${example1}\n${example2}\n`], { type: 'text/csv' });
+        const header = 'Match No,Match Day,Date,Day,Start,Home,Away,Venue';
+        const rows = [
+            `1,1,${selectedSeason}-03-22,Sat,7:30PM,Mumbai Indians,Chennai Super Kings,Mumbai`,
+            `2,2,${selectedSeason}-03-23,Sun,3:30PM,Royal Challengers Bengaluru,Kolkata Knight Riders,Bengaluru`,
+            `3,2,${selectedSeason}-03-23,Sun,7:30PM,Sunrisers Hyderabad,Delhi Capitals,Hyderabad`,
+        ];
+        const blob = new Blob([`${header}\n${rows.join('\n')}\n`], { type: 'text/csv' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
@@ -328,76 +344,113 @@ export default function AdminMatches() {
         URL.revokeObjectURL(url);
     };
 
-    const parseCsv = (text: string) => {
+    const parseCsv = (text: string): CsvRow[] => {
         const lines = text.split(/\r?\n/).filter(l => l.trim());
         if (!lines.length) return [];
-        // Detect if first row is a header
-        const firstLower = lines[0].toLowerCase();
-        const hasHeader = firstLower.includes('date') || firstLower.includes('team');
-        const dataLines = hasHeader ? lines.slice(1) : lines;
 
-        return dataLines.map((line, i): CsvRow => {
-            // Split by comma but respect quoted fields
+        // Quoted-aware column splitter
+        const splitLine = (line: string): string[] => {
             const cols: string[] = [];
             let cur = '';
-            let inQuotes = false;
+            let inQ = false;
             for (const ch of line) {
-                if (ch === '"') { inQuotes = !inQuotes; }
-                else if (ch === ',' && !inQuotes) { cols.push(cur.trim()); cur = ''; }
+                if (ch === '"') { inQ = !inQ; }
+                else if (ch === ',' && !inQ) { cols.push(cur.trim()); cur = ''; }
                 else { cur += ch; }
             }
             cols.push(cur.trim());
+            return cols;
+        };
 
-            const [rawDate='', rawTime='', rawTeam1='', rawTeam2='', rawVenue='', rawStatus=''] = cols;
-            const errs: string[] = [];
+        const firstCols = splitLine(lines[0]).map(c => c.toLowerCase());
+        const hasHeader = firstCols.some(c => ['date','match no','start','home','away'].includes(c));
+        const dataLines = hasHeader ? lines.slice(1) : lines;
 
-            // Validate date
-            const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
-            if (!rawDate) errs.push('Date missing');
-            else if (!dateRegex.test(rawDate)) errs.push(`Date must be YYYY-MM-DD (got: ${rawDate})`);
+        // Detect IPL-style format: Match No, Match Day, Date, Day, Start, Home, Away, Venue (8 cols)
+        // vs simple format: date, time, team1, team2, venue, status (6 cols)
+        const isIplFormat = hasHeader
+            ? firstCols.includes('match no') || firstCols.includes('start')
+            : splitLine(dataLines[0] ?? '').length >= 7;
 
-            // Validate time
-            const timeRegex = /^\d{1,2}:\d{2}$/;
-            if (!rawTime) errs.push('Time missing');
-            else if (!timeRegex.test(rawTime)) errs.push(`Time must be HH:MM (got: ${rawTime})`);
+        const findTeam = (raw: string) => {
+            const norm = raw.trim().toLowerCase();
+            if (!norm || norm === 'tbd') return null;
+            return teams.find(t =>
+                t.shortName?.toLowerCase() === norm ||
+                t.name?.toLowerCase() === norm ||
+                t.name?.toLowerCase().includes(norm) ||
+                norm.includes(t.name?.toLowerCase() ?? '') ||
+                norm.includes(t.shortName?.toLowerCase() ?? '')
+            ) ?? null;
+        };
 
-            // Match teams
-            const findTeam = (raw: string) => {
-                const norm = raw.trim().toLowerCase();
-                return teams.find(t =>
-                    t.shortName?.toLowerCase() === norm ||
-                    t.name?.toLowerCase() === norm ||
-                    t.shortName?.toLowerCase().includes(norm) ||
-                    norm.includes(t.shortName?.toLowerCase() ?? '')
-                ) ?? null;
-            };
-            const t1 = rawTeam1 ? findTeam(rawTeam1) : null;
-            const t2 = rawTeam2 ? findTeam(rawTeam2) : null;
-            if (!rawTeam1) errs.push('Team 1 missing');
-            else if (!t1) errs.push(`Team 1 not found: "${rawTeam1}"`);
-            if (!rawTeam2) errs.push('Team 2 missing');
-            else if (!t2) errs.push(`Team 2 not found: "${rawTeam2}"`);
-            if (t1 && t2 && t1.id === t2.id) errs.push('Team 1 and Team 2 are the same');
-            if (!rawVenue) errs.push('Venue missing');
+        return dataLines
+            .map((line, i): CsvRow | null => {
+                const cols = splitLine(line);
 
-            const validStatuses = ['upcoming','live','completed','cancelled'];
-            const status = rawStatus.toLowerCase().trim() || 'upcoming';
-            if (rawStatus && !validStatuses.includes(status)) errs.push(`Invalid status: "${rawStatus}"`);
+                let rawDate = '', rawTime = '', rawTeam1 = '', rawTeam2 = '', rawVenue = '', rawStatus = '';
 
-            return {
-                rowNum: i + (hasHeader ? 2 : 1),
-                date: rawDate,
-                time: rawTime,
-                team1Raw: rawTeam1,
-                team2Raw: rawTeam2,
-                venue: rawVenue,
-                status,
-                team1Id: t1?.id ?? null,
-                team2Id: t2?.id ?? null,
-                errors: errs,
-                valid: errs.length === 0,
-            };
-        });
+                if (isIplFormat) {
+                    // Match No(0), Match Day(1), Date(2), Day(3), Start(4), Home(5), Away(6), Venue(7)
+                    rawDate   = cols[2]?.trim() ?? '';
+                    const rawStart = cols[4]?.trim() ?? '';
+                    rawTeam1  = cols[5]?.trim() ?? '';
+                    rawTeam2  = cols[6]?.trim() ?? '';
+                    rawVenue  = cols[7]?.trim() ?? '';
+                    rawStatus = '';
+                    // Convert 12h → 24h
+                    const converted = to24h(rawStart);
+                    rawTime = converted ?? rawStart;
+                } else {
+                    // Simple 6-col format
+                    [rawDate='', rawTime='', rawTeam1='', rawTeam2='', rawVenue='', rawStatus=''] = cols;
+                }
+
+                // Skip rows where both teams are TBD (playoff placeholders)
+                const isTbd = rawTeam1.toUpperCase() === 'TBD' && rawTeam2.toUpperCase() === 'TBD';
+                if (isTbd) return null; // silently skip
+
+                const errs: string[] = [];
+
+                // Date
+                const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+                if (!rawDate) errs.push('Date missing');
+                else if (!dateRegex.test(rawDate)) errs.push(`Date must be YYYY-MM-DD (got: ${rawDate})`);
+
+                // Time
+                const timeRegex = /^\d{1,2}:\d{2}$/;
+                if (!rawTime) errs.push('Time missing');
+                else if (!timeRegex.test(rawTime)) errs.push(`Time must be HH:MM or 7:30PM (got: ${rawTime})`);
+
+                // Teams
+                const t1 = findTeam(rawTeam1);
+                const t2 = findTeam(rawTeam2);
+                if (!rawTeam1) errs.push('Home team missing');
+                else if (!t1) errs.push(`Home team not found: "${rawTeam1}"`);
+                if (!rawTeam2) errs.push('Away team missing');
+                else if (!t2) errs.push(`Away team not found: "${rawTeam2}"`);
+                if (t1 && t2 && t1.id === t2.id) errs.push('Home and Away are the same team');
+                if (!rawVenue) errs.push('Venue missing');
+
+                const validStatuses = ['upcoming','live','completed','cancelled'];
+                const status = rawStatus.toLowerCase().trim() || 'upcoming';
+                if (rawStatus && !validStatuses.includes(status)) errs.push(`Invalid status: "${rawStatus}"`);
+
+                return {
+                    rowNum: i + (hasHeader ? 2 : 1),
+                    date: rawDate,
+                    time: rawTime,
+                    team1Raw: rawTeam1,
+                    team2Raw: rawTeam2,
+                    venue: rawVenue,
+                    status,
+                    team1Id: t1?.id ?? null,
+                    team2Id: t2?.id ?? null,
+                    errors: errs,
+                    valid: errs.length === 0,
+                };
+            })
+            .filter((r): r is CsvRow => r !== null);
     };
 
     const handleCsvFile = (file: File) => {
@@ -444,12 +497,12 @@ export default function AdminMatches() {
             setShowCsvUpload(false);
             setCsvRows([]);
             setCsvFileName('');
-            // Switch season view to the uploaded season
+            // Switch season view to the imported season year
             if (valid.length > 0) {
                 const year = parseInt(valid[0].date.split('-')[0]);
                 if (!isNaN(year)) setSelectedSeason(year);
             }
-        } catch (err) {
+        } catch {
             showError('Import failed unexpectedly');
         } finally {
             setCsvImporting(false);
@@ -2886,13 +2939,13 @@ export default function AdminMatches() {
                                 {/* Format info + template download */}
                                 <div className="mb-5 p-4 rounded-xl border border-white/8 flex flex-col sm:flex-row sm:items-center gap-4" style={{ background: 'rgba(255,255,255,0.03)' }}>
                                     <div className="flex-1 min-w-0">
-                                        <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">Required CSV Columns</p>
+                                        <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">IPL Schedule CSV Format</p>
                                         <div className="flex flex-wrap gap-2">
-                                            {['date (YYYY-MM-DD)', 'time (HH:MM)', 'team1', 'team2', 'venue', 'status (optional)'].map(col => (
+                                            {['Match No', 'Match Day', 'Date (YYYY-MM-DD)', 'Day', 'Start (7:30PM)', 'Home', 'Away', 'Venue'].map(col => (
                                                 <span key={col} className="px-2 py-0.5 rounded-md bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-xs font-mono">{col}</span>
                                             ))}
                                         </div>
-                                        <p className="text-xs text-gray-600 mt-1.5">Use team short names (MI, CSK, RCB…) or full names. Status defaults to <code className="text-gray-400">upcoming</code>.</p>
+                                        <p className="text-xs text-gray-600 mt-1.5">Matches the official IPL schedule format. Use team full names (e.g. <code className="text-gray-400">Mumbai Indians</code>). TBD playoff rows are skipped automatically.</p>
                                     </div>
                                     <button
                                         onClick={downloadCsvTemplate}
