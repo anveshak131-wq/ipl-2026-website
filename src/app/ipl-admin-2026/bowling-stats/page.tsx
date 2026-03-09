@@ -437,26 +437,26 @@ const BowlingStatsPage = () => {
       return sortDirection === 'asc' ? aVal - bVal : bVal - aVal;
     });
 
-          {/* Search and Filters */}
-          <div className="bg-gradient-to-r from-gray-800/60 via-gray-800/40 to-gray-800/60 backdrop-blur-md rounded-2xl p-6 mb-6 border border-gray-700/50 shadow-xl hover:shadow-2xl transition-all duration-300 animate-in fade-in-50 slide-in-from-bottom-4 duration-700">
-            <div className="flex flex-col md:flex-row gap-4">
-              <div className="flex-1 relative group">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-amber-400 transition-colors" />
-                <input
-                  type="text"
-                  placeholder="Search players..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 bg-gray-900/60 border border-gray-700 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all hover:bg-gray-900/80"
-                />
-              </div>
-              <div className="relative group">
-                <Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-orange-400 transition-colors" />
-                <select
-                  value={selectedTeam}
-                  onChange={(e) => setSelectedTeam(e.target.value)}
-                  className="pl-10 pr-8 py-2.5 bg-gray-900/60 border border-gray-700 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all appearance-none cursor-pointer hover:bg-gray-900/80"
-                >
+    return filtered;
+  }, [players, searchQuery, selectedTeam, sortField, sortDirection]);
+
+  // Calculate summary stats
+  const summaryStats = useMemo(() => {
+    // Filter players based on team selection and search query first
+    const playersForStats = players.filter(player => {
+      // Only show IPL players
+      const isIPL = (player.league || 'ipl') === 'ipl';
+      const matchesSearch = player.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                           player.teamId?.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesTeam = selectedTeam === 'all' || player.teamId === selectedTeam;
+      return isIPL && matchesSearch && matchesTeam;
+    });
+    
+    const activeBowlers = playersForStats.filter(p => p.stats?.bowlingInnings > 0 || p.stats?.wickets > 0);
+    
+    // If search query is active, show individual player stats instead of aggregated
+    if (searchQuery.trim() !== '') {
+      if (activeBowlers.length === 0) {
         return { activeBowlers: 0, totalWickets: 0, totalFiveWickets: 0, totalMaidens: 0, bestEconomy: '0.00', avgWickets: 0 };
       }
       // For search results, show individual stats (not aggregated)
@@ -464,30 +464,30 @@ const BowlingStatsPage = () => {
       const player = activeBowlers[0];
       const wickets = player.stats?.wickets || 0;
       const fiveWickets = player.stats?.fiveWickets || 0;
-              <div className="flex gap-2 bg-gray-900/60 rounded-xl p-1 border border-gray-700">
-                <button
-                  onClick={() => setViewMode('table')}
-                  className={`px-4 py-2 rounded-lg transition-all flex items-center gap-2 ${
-                    viewMode === 'table'
-                      ? 'bg-amber-600 text-white shadow-lg scale-105'
-                      : 'text-gray-400 hover:text-white hover:bg-gray-800'
-                  }`}
-                >
-                  <Table2 className="w-4 h-4" />
-                  Table
-                </button>
-                <button
-                  onClick={() => setViewMode('teams')}
-                  className={`px-4 py-2 rounded-lg transition-all flex items-center gap-2 ${
-                    viewMode === 'teams'
-                      ? 'bg-amber-600 text-white shadow-lg scale-105'
-                      : 'text-gray-400 hover:text-white hover:bg-gray-800'
-                  }`}
-                >
-                  <LayoutGrid className="w-4 h-4" />
-                  Teams
-                </button>
-              </div>
+      const maidens = player.stats?.maidens || 0;
+      const economy = parseFloat(player.stats?.economy) || 0;
+      const avgWickets = wickets; // For individual player, avg is just their wickets
+
+      return { 
+        activeBowlers: activeBowlers.length, 
+        totalWickets: wickets, 
+        totalFiveWickets: fiveWickets, 
+        totalMaidens: maidens, 
+        bestEconomy: economy.toFixed(2),
+        avgWickets: avgWickets
+      };
+    }
+    
+    // Normal aggregated stats for team filter only (no search)
+    const totalWickets = activeBowlers.reduce((sum, p) => sum + (p.stats?.wickets || 0), 0);
+    const totalFiveWickets = activeBowlers.reduce((sum, p) => sum + (p.stats?.fiveWickets || 0), 0);
+    const totalMaidens = activeBowlers.reduce((sum, p) => sum + (p.stats?.maidens || 0), 0);
+    const economies = activeBowlers
+      .map(p => parseFloat(p.stats?.economy) || Infinity)
+      .filter(e => e !== Infinity);
+    const bestEconomy = economies.length > 0 ? Math.min(...economies) : 0;
+    const avgWickets = activeBowlers.length > 0 ? (totalWickets / activeBowlers.length).toFixed(1) : 0;
+
     return { 
       activeBowlers: activeBowlers.length, 
       totalWickets, 
@@ -500,7 +500,7 @@ const BowlingStatsPage = () => {
 
   const SortIcon = ({ field }: { field: string }) => {
     if (sortField !== field) return <SortAsc className="w-4 h-4 text-gray-500 opacity-0 group-hover:opacity-100" />;
-    return sortDirection === 'asc' ? <ChevronUp className="w-4 h-4 text-amber-400" /> : <ChevronDown className="w-4 h-4 text-amber-400" />;
+    return sortDirection === 'asc' ? <ChevronUp className="w-4 h-4 text-green-400" /> : <ChevronDown className="w-4 h-4 text-green-400" />;
   };
 
   if (isCheckingAuth) {
@@ -547,82 +547,78 @@ const BowlingStatsPage = () => {
 
   return (
     <>
-      <div className="flex-1 bg-gradient-to-br from-slate-950 via-indigo-950 to-slate-950 min-h-screen overflow-x-hidden relative">
-        {/* Animated background overlay */}
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-indigo-900/20 via-transparent to-purple-900/20 pointer-events-none animate-pulse" style={{ animationDuration: '8s' }}></div>
-        
+      <div className="flex-1 bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950 min-h-screen overflow-x-hidden">
         {/* Hero Header */}
-        <div className="relative bg-gradient-to-r from-amber-600 via-orange-600 to-rose-600 p-8 shadow-2xl overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-shimmer"></div>
-          <div className="max-w-7xl mx-auto relative z-10">
+        <div className="bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600 p-8 shadow-2xl">
+          <div className="max-w-7xl mx-auto">
             <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-              <div className="animate-in slide-in-from-left duration-700">
-                <h1 className="text-4xl lg:text-5xl font-bold text-white mb-2 flex items-center gap-3 group">
-                  <div className="w-12 h-12 bg-white/20 backdrop-blur rounded-xl flex items-center justify-center transform group-hover:rotate-12 group-hover:scale-110 transition-all duration-300 shadow-lg shadow-white/20">
+              <div>
+                <h1 className="text-4xl lg:text-5xl font-bold text-white mb-2 flex items-center gap-3">
+                  <div className="w-12 h-12 bg-white/20 backdrop-blur rounded-xl flex items-center justify-center">
                     <TrendingDown className="w-6 h-6 text-white" />
                   </div>
-                  <span className="bg-gradient-to-r from-white via-amber-100 to-white bg-clip-text text-transparent">Bowling Statistics</span>
+                  Bowling Statistics
                 </h1>
-                <p className="text-amber-100 text-lg font-medium tracking-wide">Comprehensive bowling performance analytics</p>
+                <p className="text-green-100 text-lg">Comprehensive bowling performance analytics</p>
               </div>
-              <div className="flex flex-wrap gap-4 animate-in slide-in-from-right duration-700">
-                <div className="bg-white/10 backdrop-blur rounded-xl p-4 text-center min-w-[120px] border border-white/20 hover:bg-white/20 hover:scale-105 transition-all duration-300 cursor-pointer shadow-lg hover:shadow-2xl hover:shadow-amber-500/50">
-                  <div className="text-3xl font-bold text-white animate-in zoom-in duration-500">{summaryStats.activeBowlers}</div>
-                  <div className="text-amber-100 text-sm mt-1 font-semibold">Active Bowlers</div>
+              <div className="flex flex-wrap gap-4">
+                <div className="bg-white/10 backdrop-blur rounded-xl p-4 text-center min-w-[120px]">
+                  <div className="text-3xl font-bold text-white">{summaryStats.activeBowlers}</div>
+                  <div className="text-green-100 text-sm mt-1">Active Bowlers</div>
                 </div>
-                <div className="bg-white/10 backdrop-blur rounded-xl p-4 text-center min-w-[120px] border border-white/20 hover:bg-white/20 hover:scale-105 transition-all duration-300 cursor-pointer shadow-lg hover:shadow-2xl hover:shadow-indigo-500/50">
-                  <div className="text-3xl font-bold text-white animate-in zoom-in duration-500 delay-100">{teams.length}</div>
-                  <div className="text-amber-100 text-sm mt-1 font-semibold">Teams</div>
+                <div className="bg-white/10 backdrop-blur rounded-xl p-4 text-center min-w-[120px]">
+                  <div className="text-3xl font-bold text-white">{teams.length}</div>
+                  <div className="text-green-100 text-sm mt-1">Teams</div>
                 </div>
               </div>
             </div>
           </div>
         </div>
 
-        <div className="max-w-7xl mx-auto p-6 lg:p-8 relative z-10">
+        <div className="max-w-7xl mx-auto p-6 lg:p-8">
           {/* Summary Cards */}
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 mb-8">
-            <div className="bg-gradient-to-br from-amber-600 via-amber-600 to-orange-700 rounded-2xl p-5 shadow-xl border border-amber-400/30 hover:border-amber-400/60 transition-all duration-300 hover:scale-105 hover:shadow-2xl cursor-pointer group">
+            <div className="bg-gradient-to-br from-green-600 to-green-700 rounded-xl p-5 shadow-lg border border-green-500/30">
               <div className="flex items-center justify-between mb-2">
-                <Target className="w-5 h-5 text-amber-100 group-hover:scale-110 transition-transform" />
+                <Target className="w-5 h-5 text-green-200" />
               </div>
-              <div className="text-2xl font-bold text-white group-hover:scale-105 transition-transform">{summaryStats.totalWickets.toLocaleString()}</div>
-              <div className="text-amber-100 text-xs mt-1 font-semibold uppercase tracking-wider">Total Wickets</div>
+              <div className="text-2xl font-bold text-white">{summaryStats.totalWickets.toLocaleString()}</div>
+              <div className="text-green-100 text-xs mt-1">Total Wickets</div>
             </div>
-            <div className="bg-gradient-to-br from-orange-600 via-orange-600 to-rose-700 rounded-2xl p-5 shadow-xl border border-orange-400/30 hover:border-orange-400/60 transition-all duration-300 hover:scale-105 hover:shadow-2xl cursor-pointer group">
+            <div className="bg-gradient-to-br from-emerald-600 to-emerald-700 rounded-xl p-5 shadow-lg border border-emerald-500/30">
               <div className="flex items-center justify-between mb-2">
-                <TrendingDown className="w-5 h-5 text-orange-100 group-hover:scale-110 transition-transform" />
+                <TrendingDown className="w-5 h-5 text-emerald-200" />
               </div>
-              <div className="text-2xl font-bold text-white group-hover:scale-105 transition-transform">{summaryStats.bestEconomy}</div>
-              <div className="text-orange-100 text-xs mt-1 font-semibold uppercase tracking-wider">Best Economy</div>
+              <div className="text-2xl font-bold text-white">{summaryStats.bestEconomy}</div>
+              <div className="text-emerald-100 text-xs mt-1">Best Economy</div>
             </div>
-            <div className="bg-gradient-to-br from-rose-600 via-rose-600 to-pink-700 rounded-2xl p-5 shadow-xl border border-rose-400/30 hover:border-rose-400/60 transition-all duration-300 hover:scale-105 hover:shadow-2xl cursor-pointer group">
+            <div className="bg-gradient-to-br from-teal-600 to-teal-700 rounded-xl p-5 shadow-lg border border-teal-500/30">
               <div className="flex items-center justify-between mb-2">
-                <Award className="w-5 h-5 text-rose-100 group-hover:scale-110 transition-transform" />
+                <Award className="w-5 h-5 text-teal-200" />
               </div>
-              <div className="text-2xl font-bold text-white group-hover:scale-105 transition-transform">{summaryStats.totalFiveWickets}</div>
-              <div className="text-rose-100 text-xs mt-1 font-semibold uppercase tracking-wider">5-Wicket Hauls</div>
+              <div className="text-2xl font-bold text-white">{summaryStats.totalFiveWickets}</div>
+              <div className="text-teal-100 text-xs mt-1">5-Wicket Hauls</div>
             </div>
-            <div className="bg-gradient-to-br from-pink-600 via-pink-600 to-fuchsia-700 rounded-2xl p-5 shadow-xl border border-pink-400/30 hover:border-pink-400/60 transition-all duration-300 hover:scale-105 hover:shadow-2xl cursor-pointer group">
+            <div className="bg-gradient-to-br from-cyan-600 to-cyan-700 rounded-xl p-5 shadow-lg border border-cyan-500/30">
               <div className="flex items-center justify-between mb-2">
-                <Zap className="w-5 h-5 text-pink-100 group-hover:scale-110 transition-transform" />
+                <Zap className="w-5 h-5 text-cyan-200" />
               </div>
-              <div className="text-2xl font-bold text-white group-hover:scale-105 transition-transform">{summaryStats.totalMaidens}</div>
-              <div className="text-pink-100 text-xs mt-1 font-semibold uppercase tracking-wider">Maiden Overs</div>
+              <div className="text-2xl font-bold text-white">{summaryStats.totalMaidens}</div>
+              <div className="text-cyan-100 text-xs mt-1">Maiden Overs</div>
             </div>
-            <div className="bg-gradient-to-br from-purple-600 via-purple-600 to-indigo-700 rounded-2xl p-5 shadow-xl border border-purple-400/30 hover:border-purple-400/60 transition-all duration-300 hover:scale-105 hover:shadow-2xl cursor-pointer group">
+            <div className="bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl p-5 shadow-lg border border-blue-500/30">
               <div className="flex items-center justify-between mb-2">
-                <Target className="w-5 h-5 text-purple-100 group-hover:scale-110 transition-transform" />
+                <Target className="w-5 h-5 text-blue-200" />
               </div>
-              <div className="text-2xl font-bold text-white group-hover:scale-105 transition-transform">{summaryStats.avgWickets}</div>
-              <div className="text-purple-100 text-xs mt-1 font-semibold uppercase tracking-wider">Avg Wickets/Bowler</div>
+              <div className="text-2xl font-bold text-white">{summaryStats.avgWickets}</div>
+              <div className="text-blue-100 text-xs mt-1">Avg Wickets/Bowler</div>
             </div>
-            <div className="bg-gradient-to-br from-indigo-600 via-indigo-600 to-slate-700 rounded-2xl p-5 shadow-xl border border-indigo-400/30 hover:border-indigo-400/60 transition-all duration-300 hover:scale-105 hover:shadow-2xl cursor-pointer group">
+            <div className="bg-gradient-to-br from-indigo-600 to-indigo-700 rounded-xl p-5 shadow-lg border border-indigo-500/30">
               <div className="flex items-center justify-between mb-2">
-                <Filter className="w-5 h-5 text-indigo-200 group-hover:scale-110 transition-transform" />
+                <Filter className="w-5 h-5 text-indigo-200" />
               </div>
-              <div className="text-2xl font-bold text-white group-hover:scale-105 transition-transform">{filteredAndSortedPlayers.length}</div>
-              <div className="text-indigo-100 text-xs mt-1 font-semibold uppercase tracking-wider">Filtered Players</div>
+              <div className="text-2xl font-bold text-white">{filteredAndSortedPlayers.length}</div>
+              <div className="text-indigo-100 text-xs mt-1">Filtered Players</div>
             </div>
           </div>
 
@@ -769,7 +765,7 @@ const BowlingStatsPage = () => {
                         <tr key={player.id} className="hover:bg-gray-800/50 transition-colors group">
                           <td className="px-6 py-4">
                             <div className="flex items-center gap-3">
-                              <div className="w-10 h-10 bg-gradient-to-br from-amber-500 via-orange-500 to-rose-600 rounded-xl flex items-center justify-center text-white font-bold text-sm shadow-lg group-hover:scale-110 group-hover:rotate-6 transition-all duration-300">
+                              <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-teal-600 rounded-lg flex items-center justify-center text-white font-bold text-sm">
                                 {player.name?.charAt(0) || '?'}
                   </div>
                   <div>
@@ -781,9 +777,9 @@ const BowlingStatsPage = () => {
                           <td className="px-6 py-4">
                             <div className="flex items-center gap-2">
                               <span className="font-bold text-white">{wickets}</span>
-                              <div className="w-16 h-2 bg-gray-700/50 rounded-full overflow-hidden shadow-inner">
+                              <div className="w-16 h-1.5 bg-gray-700 rounded-full overflow-hidden">
                                 <div 
-                                  className="h-full bg-gradient-to-r from-amber-500 via-orange-500 to-rose-500 transition-all duration-700 shadow-lg shadow-amber-500/50"
+                                  className="h-full bg-gradient-to-r from-green-500 to-teal-500 transition-all"
                                   style={{ width: `${wicketsPercentage}%` }}
                                 />
                   </div>
@@ -866,7 +862,7 @@ const BowlingStatsPage = () => {
                           <td className="px-6 py-4">
                 <button
                               onClick={() => handleEditPlayer(player)}
-                              className="mx-auto flex items-center gap-2 px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl transition-all duration-300 text-sm font-medium shadow-lg hover:shadow-xl hover:scale-105 group-hover:shadow-amber-500/50"
+                              className="mx-auto flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors text-sm font-medium"
                             >
                               <Edit2 className="w-4 h-4" />
                               Edit
@@ -894,12 +890,12 @@ const BowlingStatsPage = () => {
                   const teamMaidens = teamPlayers.reduce((sum, p) => sum + (p.stats?.maidens || 0), 0);
 
                   return (
-                    <div key={team.id} className="bg-gradient-to-br from-gray-800/50 via-gray-800/40 to-gray-800/50 backdrop-blur-md rounded-3xl border border-gray-700/50 overflow-hidden shadow-2xl hover:shadow-amber-500/20 transition-all duration-500 animate-in fade-in-50" style={{ animationDelay: `${teamIndex * 100}ms` }}>
+                    <div key={team.id} className="bg-gray-800/30 backdrop-blur rounded-2xl border border-gray-700/50 overflow-hidden shadow-xl">
                       {/* Team Header */}
-                      <div className="bg-gradient-to-r from-amber-600/20 via-orange-600/20 to-rose-600/20 p-6 border-b border-gray-700/50 relative overflow-hidden group">
+                      <div className="bg-gradient-to-r from-green-600/20 via-emerald-600/20 to-teal-600/20 p-6 border-b border-gray-700/50">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-4">
-                            <div className="w-16 h-16 bg-gradient-to-br from-amber-500 via-orange-500 to-rose-600 rounded-2xl flex items-center justify-center text-white font-bold text-xl shadow-xl group-hover:scale-110 group-hover:rotate-6 transition-all duration-300">
+                            <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-teal-600 rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg">
                               {team.shortName || team.name.charAt(0)}
                             </div>
                             <div>
@@ -952,26 +948,25 @@ const BowlingStatsPage = () => {
                                   </div>
                                 </div>
 
-                                <div className="p-6">
-                                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                                    {teamPlayers.map((player, playerIndex) => {
-                                      const wickets = player.stats?.wickets || 0;
-                                      const maxWickets = Math.max(...teamPlayers.map(p => p.stats?.wickets || 0), 1);
-                                      const wicketsPercentage = (wickets / maxWickets) * 100;
-                                      const overs = player.stats?.balls ? Math.floor(player.stats.balls / 6) : 0;
-                                      const balls = player.stats?.balls ? player.stats.balls % 6 : 0;
-                                      const oversDisplay = overs > 0 ? `${overs}.${balls}` : '0.0';
-
-                                      return (
-                                        <div
-                                          key={player.id}
-                                          className="bg-gradient-to-br from-gray-700/60 via-gray-800/60 to-gray-800/60 rounded-2xl p-5 border border-gray-600/50 hover:border-amber-500/60 transition-all duration-300 hover:shadow-xl hover:shadow-amber-500/30 group hover:scale-105 cursor-pointer animate-in fade-in-50 zoom-in-95"
-                                          style={{ animationDelay: `${playerIndex * 50}ms` }}
-                                        >
+                                <div className="space-y-2 mb-4">
+                                  <div className="flex items-center justify-between">
+                                    <span className="text-gray-400 text-sm">Wickets</span>
+                                    <span className="font-bold text-white">{wickets}</span>
+                                  </div>
+                                  <div className="w-full h-1.5 bg-gray-700 rounded-full overflow-hidden">
+                                    <div
+                                      className="h-full bg-gradient-to-r from-green-500 to-teal-500 transition-all"
+                                      style={{ width: `${wicketsPercentage}%` }}
+                                    />
+                                  </div>
+                                  <div className="grid grid-cols-2 gap-2 mt-3">
+                                    <div className="bg-gray-900/50 rounded-lg p-2 text-center">
+                                      <div className="text-green-400 font-semibold">
+                                        {(() => {
                                           if (player.stats?.bowlingAverage && typeof player.stats.bowlingAverage === 'string' && player.stats.bowlingAverage !== '0' && player.stats.bowlingAverage !== '-') {
-                                            <div className="w-12 h-12 bg-gradient-to-br from-amber-500 via-orange-500 to-rose-600 rounded-xl flex items-center justify-center text-white font-bold text-sm shadow-lg group-hover:scale-110 group-hover:rotate-6 transition-all duration-300">
-                                              {player.name?.charAt(0) || '?'}
-                                            </div>
+                                            return player.stats.bowlingAverage;
+                                          }
+                                          if (player.stats?.bowlingAverage && typeof player.stats.bowlingAverage === 'number' && player.stats.bowlingAverage > 0) {
                                             return player.stats.bowlingAverage.toFixed(2);
                                           }
                                           const wickets = player.stats?.wickets || 0;
@@ -983,12 +978,12 @@ const BowlingStatsPage = () => {
                                         })()}
                                       </div>
                                       <div className="text-xs text-gray-400">Avg</div>
-                                            <div className="w-full h-2 bg-gray-900/60 rounded-full overflow-hidden shadow-inner">
-                                              <div
-                                                className="h-full bg-gradient-to-r from-amber-500 via-orange-500 to-rose-500 transition-all duration-700 shadow-lg shadow-amber-500/50"
-                                                style={{ width: `${wicketsPercentage}%` }}
-                                              />
-                                            </div>
+                                    </div>
+                                    <div className="bg-gray-900/50 rounded-lg p-2 text-center">
+                                      <div className="text-emerald-400 font-semibold">
+                                        {(() => {
+                                          if (player.stats?.economy && typeof player.stats.economy === 'string' && player.stats.economy !== '0' && player.stats.economy !== '-') {
+                                            return player.stats.economy;
                                           }
                                           if (player.stats?.economy && typeof player.stats.economy === 'number' && player.stats.economy > 0) {
                                             return player.stats.economy.toFixed(2);
