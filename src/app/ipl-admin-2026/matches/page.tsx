@@ -369,6 +369,13 @@ export default function AdminMatches() {
             if (mm) return `${yyyy}-${mm}-${dd.padStart(2, '0')}`;
         }
 
+        const textualNoYear = value.match(/^(\d{1,2})\s+([A-Za-z]+)$/);
+        if (textualNoYear) {
+            const [, dd, monthRaw] = textualNoYear;
+            const mm = monthMap[monthRaw.toLowerCase()];
+            if (mm) return `${selectedSeason}-${mm}-${dd.padStart(2, '0')}`;
+        }
+
         const textualMonthFirst = value.match(/^([A-Za-z]+)\s+(\d{1,2})\s+(\d{4})$/);
         if (textualMonthFirst) {
             const [, monthRaw, dd, yyyy] = textualMonthFirst;
@@ -404,6 +411,7 @@ export default function AdminMatches() {
         const buffer = await file.arrayBuffer();
         const pdf = await pdfjsLib.getDocument({ data: buffer }).promise;
         const rows: string[] = [];
+        const fallbackLines: string[] = [];
         const columnStops = [93.2, 211.7, 270.4, 340.1];
         const getColumnIndex = (x: number) => {
             if (x < columnStops[0]) return 0;
@@ -443,6 +451,10 @@ export default function AdminMatches() {
                 })
                 .filter((cols) => cols.some(Boolean));
 
+            fallbackLines.push(
+                ...pageRows.map(cols => cols.join(' ').replace(/\s+/g, ' ').trim()).filter(Boolean)
+            );
+
             pageRows.forEach((cols) => {
                 const joined = cols.join(' ').trim();
                 if (!joined) return;
@@ -458,6 +470,23 @@ export default function AdminMatches() {
 
                 rows.push([match, teamCell, timeCell, dateCell, venueCell].join(','));
             });
+        }
+
+        if (!rows.length) {
+            const fallbackRows = fallbackLines.flatMap((line, index) => {
+                const compact = line.replace(/\s+/g, ' ').trim();
+                if (!compact || /^sheet\d*$/i.test(compact) || /^page\s+\d+/i.test(compact) || /ipl 20\d{2} schedule/i.test(compact)) {
+                    return [];
+                }
+
+                const match = compact.match(/^(\d{1,2}\s+[A-Za-z]+(?:\s+\d{4})?)\s+(.+?)\s+(.+?\bvs\b.+?)\s+(\d{1,2}(?::\d{2})?\s*(?:AM|PM))$/i);
+                if (!match) return [];
+
+                const [, rawDate, venue, teamsCell, rawTime] = match;
+                return [`${index + 1},${teamsCell},${rawTime.toUpperCase().replace(/\s+/g, '')},${normalizeImportedDate(rawDate)},${venue}`];
+            });
+
+            rows.push(...fallbackRows);
         }
 
         const header = 'Match,Team,Time (IST),Date,Stadium/City';
@@ -524,6 +553,7 @@ export default function AdminMatches() {
              .replace(/bombay/g, 'mumbai')
              .replace(/madras/g, 'chennai')
              .replace(/calcutta/g, 'kolkata')
+             .replace(/chennai\s+supers\s+kings/g, 'chennai super kings')
              .replace(/delhi daredevils/g, 'delhi capitals')
              .replace(/kings xi punjab/g, 'punjab kings')
              .replace(/kings eleven punjab/g, 'punjab kings')
@@ -602,6 +632,10 @@ export default function AdminMatches() {
                 } else {
                     // Simple 6-col format
                     [rawDate='', rawTime='', rawTeam1='', rawTeam2='', rawVenue='', rawStatus=''] = cols;
+                }
+
+                if (!rawDate && !rawTime && !rawTeam1 && !rawTeam2 && !rawVenue && !rawStatus) {
+                    return null;
                 }
 
                 // Skip rows where both teams are TBD (playoff placeholders)
