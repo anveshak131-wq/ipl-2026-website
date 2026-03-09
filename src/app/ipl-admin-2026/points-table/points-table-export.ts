@@ -481,13 +481,13 @@ export async function exportPointsTableToPDF(data: PointsTableExportData): Promi
   const C_ROW2:    [number, number, number] = [12,  7,  32];    // darker violet row
   const C_QUAL:    [number, number, number] = [22,  14, 58];    // qualified row — brighter violet tint
   const C_GRID:    [number, number, number] = [60,  35, 110];   // grid lines
-  const C_GOLD:    [number, number, number] = [190, 80, 255];   // vivid violet accent (primary)
-  const C_RED:     [number, number, number] = [255, 55, 140];   // hot magenta accent
-  const C_WHITE:   [number, number, number] = [240, 232, 255];  // lavender-white text
-  const C_MUTED:   [number, number, number] = [130, 110, 180];  // muted lavender
-  const C_GREEN:   [number, number, number] = [80,  255, 180];  // bright mint (positive NRR)
-  const C_REDTXT:  [number, number, number] = [255, 100, 130];  // coral-pink (negative NRR)
-  const C_EMERALD: [number, number, number] = [120, 255, 210];  // bright teal (qualified status)
+  const C_GOLD:    [number, number, number] = [220, 120, 255];  // bright violet accent (primary)
+  const C_RED:     [number, number, number] = [255, 75,  160];  // hot magenta accent
+  const C_WHITE:   [number, number, number] = [245, 240, 255];  // near-white lavender text
+  const C_MUTED:   [number, number, number] = [195, 182, 235];  // bright muted lavender (visible on dark)
+  const C_GREEN:   [number, number, number] = [90,  255, 185];  // bright mint (positive NRR)
+  const C_REDTXT:  [number, number, number] = [255, 120, 145];  // coral-pink (negative NRR)
+  const C_EMERALD: [number, number, number] = [130, 255, 215];  // bright teal (qualified status)
 
   // Team brand colours
   const TEAM_COLORS: Record<string, [number, number, number]> = {
@@ -652,7 +652,9 @@ export async function exportPointsTableToPDF(data: PointsTableExportData): Promi
       cellPadding: { top: 3.5, bottom: 3.5, left: 3, right: 3 },
       lineWidth: 0.18,
       lineColor: C_GRID,
-      overflow: 'linebreak'
+      overflow: 'linebreak',
+      textColor: C_WHITE,       // default bright text — prevents invisible black-on-dark
+      fillColor: C_ROW1,        // default row bg
     },
     headStyles: {
       fillColor: C_BGHDR,
@@ -685,9 +687,9 @@ export async function exportPointsTableToPDF(data: PointsTableExportData): Promi
         cellData.cell.styles.textColor = C_WHITE;
         cellData.cell.styles.fontStyle = 'normal';
 
-        // Rank column
+        // Rank column — always light so number is visible
         if (colIdx === 0) {
-          cellData.cell.styles.textColor = isQual ? C_GOLD : C_MUTED;
+          cellData.cell.styles.textColor = isQual ? C_GOLD : C_WHITE;
           if (isQual) cellData.cell.styles.fontStyle = 'bold';
         }
         // Team name: brand colour + bold
@@ -706,13 +708,13 @@ export async function exportPointsTableToPDF(data: PointsTableExportData): Promi
           cellData.cell.styles.textColor = nrr >= 0 ? C_GREEN : C_REDTXT;
           cellData.cell.styles.fontStyle = 'bold';
         }
-        // Status: emerald / muted
+        // Status: emerald / light-muted (both must be visible on dark bg)
         if (colIdx === 8) {
           if (isQual) {
             cellData.cell.styles.textColor = C_EMERALD;
             cellData.cell.styles.fontStyle = 'bold';
           } else {
-            cellData.cell.styles.textColor = C_MUTED;
+            cellData.cell.styles.textColor = C_MUTED; // now brightened to [195,182,235]
           }
         }
       }
