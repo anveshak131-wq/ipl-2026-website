@@ -4,7 +4,9 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAdminData } from '@/contexts/AdminDataContext';
 import { useLeague } from '@/contexts/LeagueContext';
-import { Search, Filter, Edit2, X, TrendingUp, Award, Target, Zap, ChevronDown, ChevronUp, SortAsc, SortDesc, User, Shirt, Calendar, BarChart3, Target as TargetIcon, Award as AwardIcon, Zap as ZapIcon, Hash, Activity, LayoutGrid, Table2 } from 'lucide-react';
+import ModernDialog from '@/components/admin/ModernDialog';
+import { exportStatsData } from '@/lib/admin/statsExportUtils';
+import { Search, Filter, Edit2, X, TrendingUp, Award, Target, Zap, ChevronDown, ChevronUp, SortAsc, SortDesc, User, Shirt, Calendar, BarChart3, Target as TargetIcon, Award as AwardIcon, Zap as ZapIcon, Hash, Activity, LayoutGrid, Table2, Download, FileDown, FileText, Database } from 'lucide-react';
 
 const BattingStatsPage = () => {
   const router = useRouter();
@@ -19,6 +21,8 @@ const BattingStatsPage = () => {
   const [sortField, setSortField] = useState<string>('runs');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
   const [viewMode, setViewMode] = useState<'table' | 'teams'>('table');
+  const [showExportModal, setShowExportModal] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
   const [editForm, setEditForm] = useState({
     name: '',
     role: '',
@@ -507,6 +511,34 @@ const BattingStatsPage = () => {
     return sortDirection === 'asc' ? <ChevronUp className="w-4 h-4 text-blue-400" /> : <ChevronDown className="w-4 h-4 text-blue-400" />;
   };
 
+  const getSelectedTeamLabel = useCallback(() => {
+    if (selectedTeam === 'all') return 'All Teams';
+    return teams.find((team) => team.id === selectedTeam)?.name || 'Selected Team';
+  }, [selectedTeam, teams]);
+
+  const handleExport = useCallback(async (format: 'pdf' | 'csv' | 'sql') => {
+    if (filteredAndSortedPlayers.length === 0) {
+      alert('No players match the current filters.');
+      return;
+    }
+
+    try {
+      setIsExporting(true);
+      exportStatsData(format, filteredAndSortedPlayers, teams, {
+        kind: 'batting',
+        league: currentLeague,
+        teamLabel: getSelectedTeamLabel(),
+        searchQuery: searchQuery.trim()
+      });
+      setShowExportModal(false);
+    } catch (exportError) {
+      console.error('Failed to export batting stats:', exportError);
+      alert('Failed to export batting stats. Please try again.');
+    } finally {
+      setIsExporting(false);
+    }
+  }, [currentLeague, filteredAndSortedPlayers, getSelectedTeamLabel, searchQuery, teams]);
+
   if (isCheckingAuth) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-950">
@@ -683,6 +715,14 @@ const BattingStatsPage = () => {
                   Teams
                 </button>
               </div>
+              <button
+                onClick={() => setShowExportModal(true)}
+                disabled={filteredAndSortedPlayers.length === 0}
+                className="px-4 py-2.5 bg-gradient-to-r from-amber-700 via-cyan-700 to-sky-700 hover:from-amber-600 hover:via-cyan-600 hover:to-sky-600 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl transition-all duration-300 flex items-center justify-center gap-2 shadow-lg hover:shadow-cyan-500/30"
+              >
+                <Download className="w-4 h-4" />
+                Export
+              </button>
             </div>
           </div>
 
@@ -1026,6 +1066,90 @@ const BattingStatsPage = () => {
             </div>
           )}
         </div>
+
+        <ModernDialog
+          isOpen={showExportModal}
+          onClose={() => setShowExportModal(false)}
+          title="Export Batting Stats"
+          description="Download the currently filtered batting dataset as PDF, CSV, or SQL."
+          variant="default"
+          size="lg"
+          icon={
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-700 via-cyan-700 to-sky-700 flex items-center justify-center shadow-lg">
+              <Download className="w-6 h-6 text-white" />
+            </div>
+          }
+        >
+          <div className="space-y-6">
+            <div className="p-4 bg-slate-900/70 border border-white/10 rounded-xl">
+              <p className="text-sm text-gray-200">
+                Export scope: {currentLeague.toUpperCase()} • {getSelectedTeamLabel()} • {filteredAndSortedPlayers.length} players
+              </p>
+              <p className="text-xs text-gray-400 mt-1">
+                Current search: {searchQuery.trim() || 'None'}.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <button
+                onClick={() => handleExport('pdf')}
+                disabled={isExporting}
+                className="p-4 bg-slate-900/60 hover:bg-slate-800/70 border border-cyan-500/20 rounded-xl transition-all duration-300 hover:scale-[1.02] disabled:opacity-50"
+              >
+                <div className="flex flex-col items-center gap-3">
+                  <div className="w-12 h-12 rounded-lg bg-cyan-500/15 flex items-center justify-center">
+                    <FileDown className="w-6 h-6 text-cyan-300" />
+                  </div>
+                  <div className="text-center">
+                    <p className="text-white font-medium">PDF</p>
+                    <p className="text-xs text-gray-400">Dark oil-paint report</p>
+                  </div>
+                </div>
+              </button>
+
+              <button
+                onClick={() => handleExport('csv')}
+                disabled={isExporting}
+                className="p-4 bg-slate-900/60 hover:bg-slate-800/70 border border-emerald-500/20 rounded-xl transition-all duration-300 hover:scale-[1.02] disabled:opacity-50"
+              >
+                <div className="flex flex-col items-center gap-3">
+                  <div className="w-12 h-12 rounded-lg bg-emerald-500/15 flex items-center justify-center">
+                    <FileText className="w-6 h-6 text-emerald-300" />
+                  </div>
+                  <div className="text-center">
+                    <p className="text-white font-medium">CSV</p>
+                    <p className="text-xs text-gray-400">Sheets-ready export</p>
+                  </div>
+                </div>
+              </button>
+
+              <button
+                onClick={() => handleExport('sql')}
+                disabled={isExporting}
+                className="p-4 bg-slate-900/60 hover:bg-slate-800/70 border border-amber-500/20 rounded-xl transition-all duration-300 hover:scale-[1.02] disabled:opacity-50"
+              >
+                <div className="flex flex-col items-center gap-3">
+                  <div className="w-12 h-12 rounded-lg bg-amber-500/15 flex items-center justify-center">
+                    <Database className="w-6 h-6 text-amber-300" />
+                  </div>
+                  <div className="text-center">
+                    <p className="text-white font-medium">SQL</p>
+                    <p className="text-xs text-gray-400">Import-ready table dump</p>
+                  </div>
+                </div>
+              </button>
+            </div>
+
+            {isExporting && (
+              <div className="p-4 bg-cyan-500/10 border border-cyan-500/30 rounded-xl">
+                <div className="flex items-center gap-3">
+                  <div className="w-5 h-5 border-2 border-cyan-300 border-t-transparent rounded-full animate-spin" />
+                  <p className="text-cyan-200 text-sm">Exporting batting stats...</p>
+                </div>
+              </div>
+            )}
+          </div>
+        </ModernDialog>
 
         {/* Edit Modal */}
         {showEditModal && (
