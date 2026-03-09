@@ -372,16 +372,28 @@ export default function AdminMatches() {
             ? firstCols.includes('match no') || firstCols.includes('start')
             : splitLine(dataLines[0] ?? '').length >= 7;
 
+        // Normalise common city-name variants so CSV spellings match DB spellings
+        const normaliseName = (s: string) =>
+            s.toLowerCase()
+             .replace(/bengaluru/g, 'bangalore')   // RCB
+             .replace(/bombay/g, 'mumbai')
+             .replace(/madras/g, 'chennai')
+             .replace(/calcutta/g, 'kolkata')
+             .replace(/\s+/g, ' ')
+             .trim();
+
         const findTeam = (raw: string) => {
-            const norm = raw.trim().toLowerCase();
+            const norm = normaliseName(raw);
             if (!norm || norm === 'tbd') return null;
-            return teams.find(t =>
-                t.shortName?.toLowerCase() === norm ||
-                t.name?.toLowerCase() === norm ||
-                t.name?.toLowerCase().includes(norm) ||
-                norm.includes(t.name?.toLowerCase() ?? '') ||
-                norm.includes(t.shortName?.toLowerCase() ?? '')
-            ) ?? null;
+            return teams.find(t => {
+                const tName = normaliseName(t.name ?? '');
+                const tShort = (t.shortName ?? '').toLowerCase();
+                return tShort === norm ||
+                    tName === norm ||
+                    tName.includes(norm) ||
+                    norm.includes(tName) ||
+                    norm.includes(tShort);
+            }) ?? null;
         };
 
         return dataLines
