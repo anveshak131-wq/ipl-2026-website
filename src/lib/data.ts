@@ -455,11 +455,12 @@ export const api = {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': token ? `Bearer ${token}` : ''
+          'Authorization': `Bearer ${token}`
         }
       });
       if (!response.ok) {
-        throw new Error('Failed to clear matches');
+        const body = await response.text();
+        throw new Error(`Failed to clear matches (${response.status}): ${body}`);
       }
       return await response.json();
     } catch (error) {
