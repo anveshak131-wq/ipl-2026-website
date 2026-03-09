@@ -169,6 +169,20 @@ export default function AdminMatches() {
     const [showPlayoffForm, setShowPlayoffForm] = useState(false);
     const [selectedPlayoffType, setSelectedPlayoffType] = useState<PlayoffType>(null);
 
+    // Generate available seasons when league changes
+    useEffect(() => {
+        const currentYear = new Date().getFullYear();
+        const startYear = currentLeague === 'wpl' ? 2023 : 2008;
+        const seasons: number[] = [];
+        for (let y = startYear; y <= currentYear; y++) seasons.push(y);
+        setAvailableSeasons(seasons);
+        setSelectedSeason(currentYear);
+    }, [currentLeague]);
+
+    // Season selector
+    const [selectedSeason, setSelectedSeason] = useState<number>(new Date().getFullYear());
+    const [availableSeasons, setAvailableSeasons] = useState<number[]>([]);
+
     // Update formData.league and reset venue/time when league changes
     useEffect(() => {
         setFormData(prev => ({
@@ -310,8 +324,16 @@ export default function AdminMatches() {
       return uniqueVenues;
     }, [matches]);
 
+    // Season-scoped matches (before other filters)
+    const seasonMatches = useMemo(() => {
+        return matches.filter(m => {
+            try { return new Date(m.date + 'T00:00:00').getFullYear() === selectedSeason; }
+            catch { return true; }
+        });
+    }, [matches, selectedSeason]);
+
     const filteredMatches = useMemo(() => {
-        return matches.filter(match => {
+        return seasonMatches.filter(match => {
             if (filters.status !== 'all' && match.status !== filters.status) return false;
             if (filters.dateFrom && match.date < filters.dateFrom) return false;
             if (filters.dateTo && match.date > filters.dateTo) return false;
@@ -336,7 +358,7 @@ export default function AdminMatches() {
             
             return true;
         });
-    }, [matches, filters, searchQuery]);
+    }, [seasonMatches, filters, searchQuery]);
 
     const matchesByDate = useMemo(() => {
         const grouped: { [key: string]: Match[] } = {};
@@ -350,13 +372,13 @@ export default function AdminMatches() {
     }, [filteredMatches]);
 
     const statusCounts = useMemo(() => {
-        const total = matches.length;
-        const upcoming = matches.filter(m => m.status === 'upcoming').length;
-        const live = matches.filter(m => m.status === 'live').length;
-        const completed = matches.filter(m => m.status === 'completed').length;
+        const total = seasonMatches.length;
+        const upcoming = seasonMatches.filter(m => m.status === 'upcoming').length;
+        const live = seasonMatches.filter(m => m.status === 'live').length;
+        const completed = seasonMatches.filter(m => m.status === 'completed').length;
 
         return { total, upcoming, live, completed };
-    }, [matches]);
+    }, [seasonMatches]);
 
     // Chart data computations
     const matchesByStatusChart = useMemo<ChartDataPoint[]>(() => {
@@ -1197,6 +1219,10 @@ export default function AdminMatches() {
                                 <h1 className="text-3xl lg:text-4xl font-extrabold bg-gradient-to-r from-white via-gray-100 to-gray-400 bg-clip-text text-transparent tracking-tight">
                                     Manage Matches
                                 </h1>
+                                {/* Season badge */}
+                                <span className="px-2.5 py-1 rounded-lg text-xs font-bold bg-yellow-500/15 border border-yellow-500/30 text-yellow-400">
+                                    {currentLeague.toUpperCase()} {selectedSeason}
+                                </span>
                                 {statusCounts.live > 0 && (
                                     <motion.span
                                         initial={{ opacity: 0, scale: 0.8 }}
@@ -1212,8 +1238,33 @@ export default function AdminMatches() {
                                 )}
                             </div>
                             <p className="text-gray-500 text-sm mt-1">
-                                {filteredMatches.length} of {matches.length} matches
+                                {filteredMatches.length} of {seasonMatches.length} matches · {matches.length} total all seasons
                             </p>
+
+                            {/* Season picker */}
+                            <div className="mt-3 flex items-center gap-2 flex-wrap">
+                                <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider flex-shrink-0">Season:</span>
+                                <div className="flex items-center gap-1 flex-wrap">
+                                    {availableSeasons.slice().reverse().map(year => (
+                                        <motion.button
+                                            key={year}
+                                            onClick={() => setSelectedSeason(year)}
+                                            whileHover={{ scale: 1.06 }}
+                                            whileTap={{ scale: 0.94 }}
+                                            className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all duration-200 border ${
+                                                selectedSeason === year
+                                                    ? currentLeague === 'wpl'
+                                                        ? 'bg-purple-500/20 border-purple-500/50 text-purple-300'
+                                                        : 'bg-yellow-500/20 border-yellow-500/50 text-yellow-300'
+                                                    : 'border-white/8 text-gray-500 hover:text-gray-300 hover:border-white/20'
+                                            }`}
+                                            style={selectedSeason !== year ? { background: 'rgba(255,255,255,0.03)' } : {}}
+                                        >
+                                            {year}
+                                        </motion.button>
+                                    ))}
+                                </div>
+                            </div>
                         </div>
 
                         <div className="flex items-center gap-3 flex-wrap">
@@ -1356,6 +1407,13 @@ export default function AdminMatches() {
                             )}
                             <button
                                     onClick={() => {
+                                        // Pre-fill date with Jan 1 of the selected season so the form defaults to that year
+                                        if (!editingId) {
+                                            setFormData(prev => ({
+                                                ...prev,
+                                                date: `${selectedSeason}-01-01`,
+                                            }));
+                                        }
                                         setShowForm(true);
                                         setShowPlayoffForm(false);
                                     }}
