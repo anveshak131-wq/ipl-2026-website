@@ -126,6 +126,7 @@ export async function onRequest(context) {
           id: "5",
           name: "Punjab Kings",
           shortName: "PBKS",
+          aliases: ["Kings XI Punjab", "Kings Eleven Punjab"],
           league: "ipl",
           logo: "/logos/pbks_logo_2026.svg",
           colors: { primary: "#ED1C24", secondary: "#000000" },

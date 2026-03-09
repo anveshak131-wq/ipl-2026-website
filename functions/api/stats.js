@@ -141,6 +141,12 @@ export async function onRequest(context) {
 // Helper function to normalize team names for consistency
 function normalizeTeamName(name) {
   if (!name) return 'Unknown Team';
+  const trimmed = String(name).trim();
+  const lower = trimmed.toLowerCase();
+
+  if (lower === 'kings xi punjab' || lower === 'kings eleven punjab') {
+    return 'Punjab Kings';
+  }
   
   // Map of variations to standardized names
   const teamNameMap = {
@@ -152,7 +158,7 @@ function normalizeTeamName(name) {
   };
   
   // Check if the name needs normalization
-  return teamNameMap[name] || name;
+  return teamNameMap[trimmed] || trimmed;
 }
 
 function calculateStatsFromScorecards(scorecards) {

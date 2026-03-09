@@ -43,6 +43,7 @@ const mockTeams = [
     league: 'ipl',
     name: 'Punjab Kings',
     shortName: 'PBKS',
+    aliases: ['Kings XI Punjab', 'Kings Eleven Punjab'],
     logo: '/logos/kxip_logo_new.svg',
     colors: { primary: '#ED1D24', secondary: '#FBDD0B' }
   },

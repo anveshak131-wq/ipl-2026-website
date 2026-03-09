@@ -68,6 +68,7 @@ export const mockTeams: Team[] = [
     league: 'ipl',
     name: 'Punjab Kings',
     shortName: 'PBKS',
+    aliases: ['Kings XI Punjab', 'Kings Eleven Punjab'],
     logo: '/logos/pbks_logo_2026_animated.svg',
     description: 'Known for their explosive batting and never-say-die attitude',
     colors: { primary: '#ED1D24', secondary: '#FBDD0B' },

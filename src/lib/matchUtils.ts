@@ -1,14 +1,5 @@
 import { Match } from '@/types';
-
-const normalize = (s?: string) =>
-  (s || '')
-    .replace(/\s+\(wpl\)|\s+\(ipl\)/gi, '')
-    .replace(/\s+women/gi, '')
-    .replace(/bengaluru/gi, 'bangalore')
-    .replace(/bangalo re/gi, 'bangalore') // Fix typo in results
-    .replace(/\W+/g, ' ')
-    .trim()
-    .toLowerCase();
+import { normalizeTeamNameForMatch } from '@/lib/teamNameUtils';
 
 const earliestIndex = (text: string, words: string[]) => {
   let idx = -1;
@@ -23,16 +14,16 @@ export function getMatchResult(match: Match, teamId: string) {
   if (!match.result) return 'unknown';
 
   const team = match.team1.id === teamId ? match.team1 : match.team2;
-  const normalizedResult = normalize(String(match.result));
+  const normalizedResult = normalizeTeamNameForMatch(String(match.result));
 
   if (normalizedResult.includes('no result') || normalizedResult.includes('abandoned')) return 'nr';
 
   // Create team name variants for matching
   const teamVariants = [
-    normalize(team.name),
-    normalize(team.shortName),
-    normalize(team.name?.replace(/-W$/i, '')),
-    normalize(team.shortName?.replace(/-W$/i, '')),
+    normalizeTeamNameForMatch(team.name),
+    normalizeTeamNameForMatch(team.shortName),
+    normalizeTeamNameForMatch(team.name?.replace(/-W$/i, '')),
+    normalizeTeamNameForMatch(team.shortName?.replace(/-W$/i, '')),
   ].filter(Boolean);
 
   // Check if any team variant appears in the result

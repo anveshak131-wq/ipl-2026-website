@@ -12,6 +12,7 @@ export interface Team {
   league: League; // IPL or WPL
   name: string;
   shortName: string;
+  aliases?: string[];
   logo: string;
   description: string;
   colors: {
