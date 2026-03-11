@@ -536,6 +536,23 @@ export const api = {
 
   getMatches: async (league?: 'ipl' | 'wpl'): Promise<Match[]> => {
     try {
+      // Browser-side cache to avoid refetching on every navigation
+      if (typeof window !== 'undefined') {
+        const cacheKey = `matches_cache_${league || 'all'}`;
+        const cachedRaw = sessionStorage.getItem(cacheKey) || localStorage.getItem(cacheKey);
+        if (cachedRaw) {
+          try {
+            const cached = JSON.parse(cachedRaw) as { ts: number; data: Match[] };
+            const maxAgeMs = 2 * 60 * 1000; // 2 minutes is enough for schedule data
+            if (Date.now() - cached.ts < maxAgeMs && Array.isArray(cached.data)) {
+              return cached.data;
+            }
+          } catch (err) {
+            console.warn('API: Failed to parse cached matches, ignoring cache', err);
+          }
+        }
+      }
+
       const url = league ? `/api/matches?league=${league}` : '/api/matches';
       const response = await fetch(url);
       if (!response.ok) {
@@ -561,6 +578,17 @@ export const api = {
           const matchLeague = match.league || 'ipl';
           return matchLeague === league;
         });
+      }
+
+      if (typeof window !== 'undefined') {
+        const cacheKey = `matches_cache_${league || 'all'}`;
+        const payload = JSON.stringify({ ts: Date.now(), data: matches });
+        try {
+          sessionStorage.setItem(cacheKey, payload);
+          localStorage.setItem(cacheKey, payload);
+        } catch (err) {
+          console.warn('API: Failed to write matches cache', err);
+        }
       }
       
       return matches;

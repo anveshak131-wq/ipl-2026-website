@@ -1,11 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useDeferredValue } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import MatchCard from '@/components/matches/MatchCard';
-import ModernMatchesGrid from '@/components/home/ModernMatchesGrid';
 import { Match } from '@/types';
 import { api } from '@/lib/data';
 import { useLeague } from '@/contexts/LeagueContext';
@@ -18,7 +17,6 @@ import GradientText from '@/components/ui/GradientText';
 export default function MatchesPage() {
   const { currentLeague, setCurrentLeague } = useLeague();
   const [matches, setMatches] = useState<Match[]>([]);
-  const [filteredMatches, setFilteredMatches] = useState<Match[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'upcoming' | 'live' | 'completed'>('all');
   const [availableSeasons, setAvailableSeasons] = useState<number[]>([]);
@@ -55,7 +53,6 @@ export default function MatchesPage() {
       try {
         const matchesData = await api.getMatches(currentLeague);
         setMatches(matchesData);
-        setFilteredMatches(matchesData);
       } catch (error) {
         console.error('Failed to fetch matches:', error);
       } finally {
@@ -66,15 +63,16 @@ export default function MatchesPage() {
     fetchMatches();
   }, [currentLeague]); // Re-fetch when league changes
 
-  useEffect(() => {
-    const filtered = matches.filter(match => {
+  const filteredMatches = useMemo(() => {
+    return matches.filter(match => {
       const matchesStatus = filter === 'all' || match.status === filter;
       const matchYear = getMatchYear(match.date);
       const matchesSeason = selectedSeason === 'all' || matchYear === selectedSeason;
       return matchesStatus && matchesSeason;
     });
-    setFilteredMatches(filtered);
   }, [filter, matches, selectedSeason]);
+
+  const deferredMatches = useDeferredValue(filteredMatches);
 
   useEffect(() => {
     const seasons = Array.from(new Set(
@@ -318,7 +316,7 @@ export default function MatchesPage() {
 
           {/* Matches Grid */}
           <AnimatePresence mode="wait">
-            {filteredMatches.length > 0 ? (
+            {deferredMatches.length > 0 ? (
               <motion.div 
                 className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
                 initial="hidden"
@@ -332,7 +330,7 @@ export default function MatchesPage() {
                   },
                 }}
               >
-                {filteredMatches.map((match, index) => (
+                {deferredMatches.map((match, index) => (
                   <motion.div
                     key={match.id}
                     initial={{ opacity: 0, y: 50, scale: 0.9 }}
@@ -367,7 +365,7 @@ export default function MatchesPage() {
           </AnimatePresence>
 
           {/* Pagination - Premium Design */}
-          {filteredMatches.length > 0 && (
+          {deferredMatches.length > 0 && (
             <div className="text-center mt-12 animate-fade-in" style={{ animationDelay: '200ms' }}>
               <button 
                 onClick={() => alert('Loading more matches...')} 
