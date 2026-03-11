@@ -636,7 +636,7 @@ export default function AdminMatches() {
             if (!columns.length) return [];
 
             const dayPattern = /^(Mon|Tue|Wed|Thu|Fri|Sat|Sun)$/i;
-            const datePattern = /^\d{1,2}\/\d{1,2}\/\d{2}$/;
+            const datePattern = /^\d{1,2}\/\d{1,2}\/\d{2,4}$/;
             const matchPattern = /^\d{1,2}$/;
             const teamTokens = [
                 'indians', 'kings', 'royals', 'super kings', 'super giants',
@@ -656,7 +656,9 @@ export default function AdminMatches() {
                         bestIndex = index;
                     }
                 });
-                return bestScore >= 10 ? bestIndex : -1;
+                if (bestScore === 0) return -1;
+                const minAccept = Math.max(3, Math.ceil(columns[0]?.lines.length ? columns[0].lines.length * 0.25 : 5));
+                return bestScore >= minAccept ? bestIndex : -1;
             };
 
             const dateIndex = pickBest((line) => datePattern.test(line));
