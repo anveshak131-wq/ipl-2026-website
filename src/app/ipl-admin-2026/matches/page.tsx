@@ -426,6 +426,7 @@ export default function AdminMatches() {
         let rows: string[] = [];
         const fallbackLines: string[] = [];
         const rawLines: string[] = [];
+        const rawItems: Array<{ x: number; y: number; text: string }> = [];
         const defaultColumnStops = [93.2, 211.7, 270.4, 340.1];
         const getColumnIndex = (x: number, stops: number[]) => {
             for (let i = 0; i < stops.length; i += 1) {
@@ -451,6 +452,7 @@ export default function AdminMatches() {
                 const key = (Math.round(y / 3) * 3).toString();
                 if (!groups.has(key)) groups.set(key, []);
                 groups.get(key)!.push({ x, text });
+                rawItems.push({ x, y, text });
             });
 
             const headerRow = Array.from(groups.values())
@@ -577,6 +579,147 @@ export default function AdminMatches() {
             });
         }
 
+        const columnarRows = (() => {
+            if (!rawItems.length) return [];
+
+            const cleanedItems = rawItems.filter((item) => {
+                const text = item.text.replace(/\s+/g, ' ').trim();
+                if (!text) return false;
+                if (/^match$/i.test(text) || /^no$/i.test(text) || /^date$/i.test(text) || /^day$/i.test(text)) return false;
+                if (/^time$/i.test(text) || /^home$/i.test(text) || /^away$/i.test(text) || /^venue$/i.test(text)) return false;
+                if (/^ipl 20\d{2} schedule$/i.test(text)) return false;
+                if (/^iplt20\.com$/i.test(text)) return false;
+                if (/^please note that this schedule/i.test(text)) return false;
+                if (/^title sponsor|premier partners|official|strategic|timeout|umpire partner/i.test(text)) return false;
+                return true;
+            });
+
+            if (!cleanedItems.length) return [];
+
+            const sortedByX = cleanedItems.slice().sort((a, b) => a.x - b.x);
+            const clusters: Array<{ x: number; items: Array<{ x: number; y: number; text: string }> }> = [];
+            const xThreshold = 14;
+
+            sortedByX.forEach((item) => {
+                const last = clusters[clusters.length - 1];
+                if (!last || Math.abs(item.x - last.x) > xThreshold) {
+                    clusters.push({ x: item.x, items: [item] });
+                } else {
+                    last.items.push(item);
+                    last.x = (last.x + item.x) / 2;
+                }
+            });
+
+            const columns = clusters
+                .map((cluster) => {
+                    const itemsByY = cluster.items.slice().sort((a, b) => b.y - a.y);
+                    const lines: string[] = [];
+                    let buffer = '';
+                    let lastY: number | null = null;
+                    itemsByY.forEach((item) => {
+                        if (lastY !== null && Math.abs(item.y - lastY) > 2.5) {
+                            if (buffer) lines.push(buffer.trim());
+                            buffer = item.text;
+                        } else {
+                            buffer = buffer ? `${buffer} ${item.text}` : item.text;
+                        }
+                        lastY = item.y;
+                    });
+                    if (buffer) lines.push(buffer.trim());
+                    return {
+                        x: cluster.x,
+                        lines: lines.map(line => line.replace(/\s+/g, ' ').trim()).filter(Boolean),
+                    };
+                })
+                .filter(col => col.lines.length >= 5);
+
+            if (!columns.length) return [];
+
+            const dayPattern = /^(Mon|Tue|Wed|Thu|Fri|Sat|Sun)$/i;
+            const datePattern = /^\d{1,2}\/\d{1,2}\/\d{2}$/;
+            const matchPattern = /^\d{1,2}$/;
+            const teamTokens = [
+                'indians', 'kings', 'royals', 'super kings', 'super giants',
+                'titans', 'sunrisers', 'capitals', 'knight riders', 'challengers',
+            ];
+
+            const scoreColumn = (col: { lines: string[] }, predicate: (line: string) => boolean) =>
+                col.lines.reduce((acc, line) => acc + (predicate(line) ? 1 : 0), 0);
+
+            const pickBest = (predicate: (line: string) => boolean) => {
+                let bestIndex = -1;
+                let bestScore = 0;
+                columns.forEach((col, index) => {
+                    const score = scoreColumn(col, predicate);
+                    if (score > bestScore) {
+                        bestScore = score;
+                        bestIndex = index;
+                    }
+                });
+                return bestScore >= 10 ? bestIndex : -1;
+            };
+
+            const dateIndex = pickBest((line) => datePattern.test(line));
+            const timeIndex = pickBest((line) => timePattern.test(line));
+            const dayIndex = pickBest((line) => dayPattern.test(line));
+            const matchIndex = pickBest((line) => matchPattern.test(line));
+
+            const remaining = columns.map((col, index) => ({ col, index }))
+                .filter(({ index }) => ![dateIndex, timeIndex, dayIndex, matchIndex].includes(index));
+
+            const teamScores = remaining.map(({ col, index }) => ({
+                index,
+                score: scoreColumn(col, (line) =>
+                    teamTokens.some(token => line.toLowerCase().includes(token))
+                ),
+                x: col.x,
+                lines: col.lines,
+            })).sort((a, b) => b.score - a.score);
+
+            if (teamScores.length < 2 || teamScores[0].score < 8 || teamScores[1].score < 8) {
+                return [];
+            }
+
+            const [teamA, teamB] = teamScores.slice(0, 2).sort((a, b) => a.x - b.x);
+            const venueCandidate = remaining
+                .filter(({ index }) => index !== teamA.index && index !== teamB.index)
+                .map(({ col, index }) => ({ index, lines: col.lines }))
+                .sort((a, b) => b.lines.length - a.lines.length)[0];
+
+            if (!venueCandidate || dateIndex === -1 || timeIndex === -1) return [];
+
+            const dateLines = columns[dateIndex].lines;
+            const timeLines = columns[timeIndex].lines;
+            const matchLines = matchIndex === -1 ? [] : columns[matchIndex].lines;
+            const homeLines = teamA.lines;
+            const awayLines = teamB.lines;
+            const venueLines = venueCandidate.lines;
+
+            const rowCount = Math.min(
+                dateLines.length,
+                timeLines.length,
+                homeLines.length,
+                awayLines.length,
+                venueLines.length,
+                matchLines.length ? matchLines.length : Number.MAX_SAFE_INTEGER
+            );
+
+            if (rowCount < 10) return [];
+
+            const parsed: string[] = [];
+            for (let i = 0; i < rowCount; i += 1) {
+                const match = matchLines[i] ?? `${i + 1}`;
+                const dateCell = normalizeImportedDate(dateLines[i]);
+                const timeRaw = timeLines[i].toUpperCase().replace(/\s+/g, '');
+                const timeCell = to24h(timeRaw) ?? timeRaw;
+                const teamCell = `${homeLines[i]} vs ${awayLines[i]}`.replace(/\s+/g, ' ').trim();
+                const venueCell = venueLines[i];
+                parsed.push([match, teamCell, timeCell, dateCell, venueCell].join(','));
+            }
+
+            return parsed;
+        })();
+
         const legacyRows = (() => {
             const cleaned = rawLines
                 .map((line) => line.replace(/\s+/g, ' ').trim())
@@ -685,7 +828,7 @@ export default function AdminMatches() {
             return parsedRows;
         })();
 
-        const bestParsedRows = [rows, legacyRows, textFlowRows]
+        const bestParsedRows = [rows, legacyRows, textFlowRows, columnarRows]
             .sort((a, b) => b.length - a.length)[0];
         if (bestParsedRows.length >= 10) {
             rows = bestParsedRows;
