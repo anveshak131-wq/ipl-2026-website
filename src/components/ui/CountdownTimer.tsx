@@ -8,9 +8,10 @@ interface CountdownTimerProps {
   onComplete?: () => void;
   className?: string;
   matchTime?: string; // Optional match time to combine with date
+  variant?: 'default' | 'compact'; // compact for tight card layouts
 }
 
-export default function CountdownTimer({ targetDate, onComplete, className = '', matchTime }: CountdownTimerProps) {
+export default function CountdownTimer({ targetDate, onComplete, className = '', matchTime, variant = 'default' }: CountdownTimerProps) {
   const [timeLeft, setTimeLeft] = useState({
     days: 0,
     hours: 0,
@@ -20,6 +21,7 @@ export default function CountdownTimer({ targetDate, onComplete, className = '',
   const [isExpired, setIsExpired] = useState(false);
   const [flipKey, setFlipKey] = useState(0);
   const prevSecondsRef = useRef(0);
+  const isCompact = variant === 'compact';
 
   useEffect(() => {
     const calculateTimeLeft = () => {
@@ -71,7 +73,7 @@ export default function CountdownTimer({ targetDate, onComplete, className = '',
   if (isExpired) {
     return (
       <motion.div 
-        className={`inline-flex items-center justify-center gap-3 px-8 py-4 rounded-2xl bg-gradient-to-r from-emerald-500 via-green-500 to-teal-500 shadow-2xl ${className}`}
+        className={`inline-flex items-center justify-center gap-3 ${isCompact ? 'px-4 py-2 text-sm rounded-xl' : 'px-8 py-4 text-base rounded-2xl'} bg-gradient-to-r from-emerald-500 via-green-500 to-teal-500 shadow-2xl ${className}`}
         initial={{ scale: 0, rotate: -180 }}
         animate={{ scale: 1, rotate: 0 }}
         transition={{ type: "spring", stiffness: 150, damping: 12 }}
@@ -82,9 +84,9 @@ export default function CountdownTimer({ targetDate, onComplete, className = '',
           }}
           transition={{ duration: 0.6, repeat: Infinity, repeatDelay: 2 }}
         >
-          <span className="text-3xl">⚡</span>
+          <span className={isCompact ? 'text-xl' : 'text-3xl'}>⚡</span>
         </motion.div>
-        <span className="text-white font-black text-xl tracking-tight">LIVE NOW</span>
+        <span className={`text-white font-black tracking-tight ${isCompact ? 'text-base' : 'text-xl'}`}>LIVE NOW</span>
       </motion.div>
     );
   }
@@ -92,11 +94,17 @@ export default function CountdownTimer({ targetDate, onComplete, className = '',
   const TimeUnit = ({ value, label, isSeconds = false }: { value: number; label: string; isSeconds?: boolean }) => {
     const displayValue = String(value).padStart(2, '0');
     const digits = displayValue.split('');
+    const digitWidth = isCompact ? 'w-11' : 'w-14';
+    const digitHeight = isCompact ? 'h-16' : 'h-20';
+    const labelText = isCompact ? 'text-[10px]' : 'text-xs';
+    const numberText = isCompact ? 'text-3xl' : 'text-5xl';
+    const gap = isCompact ? 'gap-1.5' : 'gap-2';
+    const unitGap = isCompact ? 'gap-2' : 'gap-3';
 
     return (
-      <div className="flex flex-col items-center gap-3">
+      <div className={`flex flex-col items-center ${unitGap}`}>
         {/* Digits container */}
-        <div className="flex gap-2">
+        <div className={`flex ${gap}`}>
           {digits.map((digit, idx) => (
             <motion.div
               key={`${label}-${idx}`}
@@ -115,7 +123,7 @@ export default function CountdownTimer({ targetDate, onComplete, className = '',
               />
               
               {/* Digit card */}
-              <div className="relative w-14 h-20 rounded-xl overflow-hidden bg-gradient-to-br from-slate-800 via-slate-900 to-black shadow-2xl border border-white/10">
+              <div className={`relative ${digitWidth} ${digitHeight} rounded-xl overflow-hidden bg-gradient-to-br from-slate-800 via-slate-900 to-black shadow-2xl border border-white/10`}>
                 {/* Top highlight */}
                 <div className="absolute top-0 left-0 right-0 h-8 bg-gradient-to-b from-white/[0.05] to-transparent pointer-events-none" />
                 
@@ -124,7 +132,7 @@ export default function CountdownTimer({ targetDate, onComplete, className = '',
                   <AnimatePresence mode="wait">
                     <motion.span
                       key={`${label}-${digit}-${value}`}
-                      className="text-5xl font-black tabular-nums"
+                      className={`${numberText} font-black tabular-nums`}
                       style={{
                         background: 'linear-gradient(135deg, #06b6d4 0%, #3b82f6 50%, #8b5cf6 100%)',
                         WebkitBackgroundClip: 'text',
@@ -165,7 +173,7 @@ export default function CountdownTimer({ targetDate, onComplete, className = '',
         </div>
         
         {/* Label */}
-        <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">
+        <span className={`${labelText} font-bold text-slate-400 uppercase tracking-widest`}>
           {label}
         </span>
       </div>
@@ -173,7 +181,7 @@ export default function CountdownTimer({ targetDate, onComplete, className = '',
   };
 
   return (
-    <div className={`relative inline-flex items-center justify-center gap-4 p-6 rounded-3xl bg-gradient-to-br from-slate-900/50 via-slate-800/50 to-slate-900/50 backdrop-blur-xl border border-white/5 ${className}`}>
+      <div className={`relative inline-flex items-center justify-center ${isCompact ? 'gap-3 p-3 rounded-2xl' : 'gap-4 p-6 rounded-3xl'} bg-gradient-to-br from-slate-900/50 via-slate-800/50 to-slate-900/50 backdrop-blur-xl border border-white/5 ${className}`}>
       {/* Subtle background pattern */}
       <div className="absolute inset-0 opacity-5 rounded-3xl" 
            style={{
@@ -216,4 +224,3 @@ export default function CountdownTimer({ targetDate, onComplete, className = '',
     </div>
   );
 }
-
