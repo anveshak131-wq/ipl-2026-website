@@ -362,6 +362,12 @@ export default function AdminMatches() {
             return `${yyyy}-${mm.padStart(2, '0')}-${dd.padStart(2, '0')}`;
         }
 
+        const shortSlash = value.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2})$/);
+        if (shortSlash) {
+            const [, dd, mm, yy] = shortSlash;
+            return `20${yy}-${mm.padStart(2, '0')}-${dd.padStart(2, '0')}`;
+        }
+
         const textual = value.match(/^(\d{1,2})\s+([A-Za-z]+)\s+(\d{4})$/);
         if (textual) {
             const [, dd, monthRaw, yyyy] = textual;
@@ -420,15 +426,16 @@ export default function AdminMatches() {
         let rows: string[] = [];
         const fallbackLines: string[] = [];
         const rawLines: string[] = [];
-        const columnStops = [93.2, 211.7, 270.4, 340.1];
-        const getColumnIndex = (x: number) => {
-            if (x < columnStops[0]) return 0;
-            if (x < columnStops[1]) return 1;
-            if (x < columnStops[2]) return 2;
-            if (x < columnStops[3]) return 3;
-            return 4;
+        const defaultColumnStops = [93.2, 211.7, 270.4, 340.1];
+        const getColumnIndex = (x: number, stops: number[]) => {
+            for (let i = 0; i < stops.length; i += 1) {
+                if (x < stops[i]) return i;
+            }
+            return stops.length;
         };
         const timePattern = /\d{1,2}(?::\d{2})?\s*(?:AM|PM)$/i;
+        let dynamicStops: number[] | null = null;
+        let dynamicColumns = 5;
 
         for (let pageNo = 1; pageNo <= pdf.numPages; pageNo += 1) {
             const page = await pdf.getPage(pageNo);
@@ -446,14 +453,78 @@ export default function AdminMatches() {
                 groups.get(key)!.push({ x, text });
             });
 
+            const headerRow = Array.from(groups.values())
+                .map((group) => group
+                    .slice()
+                    .sort((a, b) => a.x - b.x))
+                .find((group) => {
+                    const joined = group.map(item => item.text).join(' ').toLowerCase();
+                    return joined.includes('match') &&
+                        joined.includes('date') &&
+                        joined.includes('day') &&
+                        joined.includes('time') &&
+                        joined.includes('home') &&
+                        joined.includes('away') &&
+                        joined.includes('venue');
+                });
+
+            if (headerRow) {
+                const anchors: Array<{ label: string; x: number }> = [];
+                const pushAnchor = (label: string, x: number | null) => {
+                    if (x !== null && Number.isFinite(x)) anchors.push({ label, x });
+                };
+                const sortedHeader = headerRow.slice().sort((a, b) => a.x - b.x);
+                let matchX: number | null = null;
+                let dateX: number | null = null;
+                let dayX: number | null = null;
+                let timeX: number | null = null;
+                let homeX: number | null = null;
+                let awayX: number | null = null;
+                let venueX: number | null = null;
+
+                sortedHeader.forEach((item) => {
+                    const lower = item.text.toLowerCase();
+                    if (lower === 'match' || lower === 'no') {
+                        matchX = matchX === null ? item.x : Math.min(matchX, item.x);
+                        return;
+                    }
+                    if (lower === 'date') { dateX ??= item.x; return; }
+                    if (lower === 'day') { dayX ??= item.x; return; }
+                    if (lower === 'time') { timeX ??= item.x; return; }
+                    if (lower === 'home') { homeX ??= item.x; return; }
+                    if (lower === 'away') { awayX ??= item.x; return; }
+                    if (lower === 'venue') { venueX ??= item.x; }
+                });
+
+                pushAnchor('match', matchX);
+                pushAnchor('date', dateX);
+                pushAnchor('day', dayX);
+                pushAnchor('time', timeX);
+                pushAnchor('home', homeX);
+                pushAnchor('away', awayX);
+                pushAnchor('venue', venueX);
+
+                const sortedAnchors = anchors.sort((a, b) => a.x - b.x);
+                if (sortedAnchors.length >= 5) {
+                    dynamicColumns = sortedAnchors.length;
+                    dynamicStops = sortedAnchors.slice(1).map((anchor, index) => {
+                        const prev = sortedAnchors[index].x;
+                        return (prev + anchor.x) / 2;
+                    });
+                }
+            }
+
+            const stops = dynamicStops ?? defaultColumnStops;
+            const columnCount = dynamicStops ? dynamicColumns : 5;
+
             const pageRows = Array.from(groups.entries())
                 .sort((a, b) => Number(b[0]) - Number(a[0]))
                 .map(([, group]) => {
-                    const columns = ['', '', '', '', ''];
+                    const columns = Array.from({ length: columnCount }, () => '');
                     group
                         .sort((a, b) => a.x - b.x)
                         .forEach((entry) => {
-                            const idx = getColumnIndex(entry.x);
+                            const idx = getColumnIndex(entry.x, stops);
                             columns[idx] = `${columns[idx]} ${entry.text}`.trim();
                         });
                     return columns.map(col => col.replace(/\s+/g, ' ').trim());
@@ -480,8 +551,21 @@ export default function AdminMatches() {
                 const joined = cols.join(' ').trim();
                 if (!joined) return;
                 if (/^sheet\d*$/i.test(cols[0]) || /^page\s+\d+/i.test(joined) || /ipl 20\d{2} schedule/i.test(joined)) return;
-                if (/^match\b/i.test(joined) && /stadium/i.test(joined)) return;
+                if (/^match\b/i.test(joined) && /stadium|venue/i.test(joined)) return;
                 if (!cols[0] || !/\d+|qualifier|eliminator|final/i.test(cols[0])) return;
+
+                if (cols.length >= 7) {
+                    const match = cols[0].replace(/\s+/g, ' ').trim();
+                    const dateCell = normalizeImportedDate(cols[1].replace(/\s+/g, ' ').replace(/,\s*/g, ' ').trim());
+                    const timeCell = cols[3].replace(/\s+/g, ' ').trim().toUpperCase();
+                    const home = cols[4].replace(/\s+/g, ' ').trim();
+                    const away = cols[5].replace(/\s+/g, ' ').trim();
+                    const venueCell = cols[6].replace(/\s+/g, ' ').trim();
+                    const teamCell = `${home} vs ${away}`.trim();
+
+                    rows.push([match, teamCell, timeCell, dateCell, venueCell].join(','));
+                    return;
+                }
 
                 const match = cols[0].replace(/\s+/g, ' ').trim();
                 const teamCell = cols[1].replace(/\s+/g, ' ').trim();
