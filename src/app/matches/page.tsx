@@ -21,6 +21,27 @@ export default function MatchesPage() {
   const [filteredMatches, setFilteredMatches] = useState<Match[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'upcoming' | 'live' | 'completed'>('all');
+  const [availableSeasons, setAvailableSeasons] = useState<number[]>([]);
+  const [selectedSeason, setSelectedSeason] = useState<number | 'all'>(2026);
+
+  const getMatchYear = (dateString: string): number | null => {
+    const parsed = new Date(dateString);
+    if (!isNaN(parsed.getTime())) return parsed.getFullYear();
+    const match = dateString.match(/(20\d{2}|19\d{2})/);
+    return match ? parseInt(match[1], 10) : null;
+  };
+
+  const seasonOptions: Array<number | 'all'> = availableSeasons.length > 0
+    ? [...availableSeasons]
+    : [2026];
+  if (seasonOptions.length > 1 && seasonOptions[0] !== 'all') {
+    seasonOptions.unshift('all');
+  }
+
+  const seasonLabel = selectedSeason === 'all' ? 'All Seasons' : selectedSeason;
+  const subtitleSeason = selectedSeason === 'all'
+    ? 'all available seasons'
+    : `${seasonLabel} season`;
 
   // Default to IPL for matches page (unless on /wpl/matches)
   useEffect(() => {
@@ -46,12 +67,37 @@ export default function MatchesPage() {
   }, [currentLeague]); // Re-fetch when league changes
 
   useEffect(() => {
-    if (filter === 'all') {
-      setFilteredMatches(matches);
-    } else {
-      setFilteredMatches(matches.filter(match => match.status === filter));
+    const filtered = matches.filter(match => {
+      const matchesStatus = filter === 'all' || match.status === filter;
+      const matchYear = getMatchYear(match.date);
+      const matchesSeason = selectedSeason === 'all' || matchYear === selectedSeason;
+      return matchesStatus && matchesSeason;
+    });
+    setFilteredMatches(filtered);
+  }, [filter, matches, selectedSeason]);
+
+  useEffect(() => {
+    const seasons = Array.from(new Set(
+      matches
+        .map(match => getMatchYear(match.date))
+        .filter((year): year is number => typeof year === 'number' && !Number.isNaN(year))
+    )).sort((a, b) => b - a);
+
+    setAvailableSeasons(seasons);
+
+    const preferred = 2026;
+    if (seasons.length === 0) {
+      setSelectedSeason('all');
+      return;
     }
-  }, [filter, matches]);
+
+    const defaultSeason = seasons.includes(preferred) ? preferred : seasons[0];
+
+    setSelectedSeason(prev => {
+      if (prev === 'all') return defaultSeason;
+      return seasons.includes(prev) ? prev : defaultSeason;
+    });
+  }, [matches]);
 
   if (isLoading) {
     return (
@@ -148,9 +194,9 @@ export default function MatchesPage() {
               }}
             >
               {currentLeague === 'wpl' ? (
-                <>WPL 2026 <GradientText gradient="from-purple-400 via-pink-400 to-rose-400" animate>Fixtures</GradientText></>
+                <>WPL {seasonLabel} <GradientText gradient="from-purple-400 via-pink-400 to-rose-400" animate>Fixtures</GradientText></>
               ) : (
-                <>IPL 2026 <GradientText gradient="from-indigo-400 via-purple-400 to-pink-400" animate>Fixtures</GradientText></>
+                <>IPL {seasonLabel} <GradientText gradient="from-indigo-400 via-purple-400 to-pink-400" animate>Fixtures</GradientText></>
               )}
             </motion.h1>
             <motion.p 
@@ -160,10 +206,49 @@ export default function MatchesPage() {
               transition={{ duration: 0.6, delay: 0.2 }}
             >
               {currentLeague === 'wpl' 
-                ? 'Live scores, upcoming matches, and detailed fixtures for the entire WPL 2026 season'
-                : 'Live scores, upcoming matches, and detailed fixtures for the entire IPL 2026 season'
+                ? `Live scores, upcoming matches, and detailed fixtures for the ${subtitleSeason} of the WPL`
+                : `Live scores, upcoming matches, and detailed fixtures for the ${subtitleSeason} of the IPL`
               }
             </motion.p>
+            <div className="mt-3 text-sm text-slate-300 font-semibold tracking-tight">
+              Showing {selectedSeason === 'all' ? 'all available seasons' : `${selectedSeason} season`} · {filteredMatches.length} match{filteredMatches.length === 1 ? '' : 'es'}
+            </div>
+          </div>
+
+          {/* Season selector */}
+          <div className="mb-8 animate-fade-in" style={{ animationDelay: '120ms' }}>
+            <div className="flex flex-wrap items-center gap-3">
+              <span className="text-[11px] uppercase tracking-[0.3em] text-slate-400 font-semibold">Season</span>
+              {seasonOptions.map((season) => {
+                const isAll = season === 'all';
+                const isActive = selectedSeason === season;
+                const label = isAll ? 'All' : season;
+                return (
+                  <button
+                    key={season}
+                    onClick={() => setSelectedSeason(season)}
+                    className={`relative px-4 py-2 rounded-lg text-sm font-bold transition-all duration-300 border backdrop-blur-sm ${
+                      isActive
+                        ? 'text-white shadow-xl'
+                        : 'text-slate-200 hover:text-white'
+                    }`}
+                    style={isActive ? {
+                      background: 'linear-gradient(135deg, #6366f1, #9333ea)',
+                      borderColor: 'rgba(147, 51, 234, 0.4)',
+                      boxShadow: '0 12px 30px rgba(99, 102, 241, 0.35)',
+                    } : {
+                      background: 'linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.04))',
+                      borderColor: 'rgba(255,255,255,0.12)',
+                    }}
+                  >
+                    {label} {(!isAll && season === 2026) ? '· Default' : ''}
+                  </button>
+                );
+              })}
+            </div>
+            <p className="text-slate-400 text-sm mt-2">
+              Defaulting to 2026 when available. Pick past seasons to see archived fixtures stored in the database.
+            </p>
           </div>
 
           {/* Filter Tabs - Premium Design */}
