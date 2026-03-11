@@ -210,8 +210,8 @@ export default function MatchCard({ match, index = 0, players }: MatchCardProps)
               <CountdownTimer 
                 targetDate={match.date} 
                 matchTime={match.time}
-                variant="compact"
-                className="w-full max-w-full justify-start"
+                variant="panel"
+                className="w-full max-w-full"
               />
             </div>
           )}

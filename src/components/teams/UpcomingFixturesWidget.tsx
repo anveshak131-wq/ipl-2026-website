@@ -260,8 +260,9 @@ export default function UpcomingFixturesWidget({ team, matches: providedMatches,
                         <div className="pt-4 border-t border-slate-700/50">
                           <CountdownTimer 
                             targetDate={match.date} 
-                            matchTime={match.time} 
-                            className="text-sm font-bold text-transparent bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text" 
+                            matchTime={match.time}
+                            variant="panel"
+                            className="w-full"
                           />
                         </div>
                       </div>
