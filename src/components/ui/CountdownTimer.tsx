@@ -8,7 +8,7 @@ interface CountdownTimerProps {
   onComplete?: () => void;
   className?: string;
   matchTime?: string; // Optional match time to combine with date
-  variant?: 'default' | 'compact'; // compact for tight card layouts
+  variant?: 'default' | 'compact' | 'panel'; // panel for tight match card layouts
 }
 
 export default function CountdownTimer({ targetDate, onComplete, className = '', matchTime, variant = 'default' }: CountdownTimerProps) {
@@ -22,6 +22,7 @@ export default function CountdownTimer({ targetDate, onComplete, className = '',
   const [flipKey, setFlipKey] = useState(0);
   const prevSecondsRef = useRef(0);
   const isCompact = variant === 'compact';
+  const isPanel = variant === 'panel';
 
   useEffect(() => {
     const calculateTimeLeft = () => {
@@ -73,7 +74,7 @@ export default function CountdownTimer({ targetDate, onComplete, className = '',
   if (isExpired) {
     return (
       <motion.div 
-        className={`inline-flex items-center justify-center gap-3 ${isCompact ? 'px-4 py-2 text-sm rounded-xl' : 'px-8 py-4 text-base rounded-2xl'} bg-gradient-to-r from-emerald-500 via-green-500 to-teal-500 shadow-2xl ${className}`}
+        className={`inline-flex items-center justify-center gap-3 ${isPanel ? 'px-3 py-1.5 text-xs rounded-lg' : isCompact ? 'px-4 py-2 text-sm rounded-xl' : 'px-8 py-4 text-base rounded-2xl'} bg-gradient-to-r from-emerald-500 via-green-500 to-teal-500 shadow-2xl ${className}`}
         initial={{ scale: 0, rotate: -180 }}
         animate={{ scale: 1, rotate: 0 }}
         transition={{ type: "spring", stiffness: 150, damping: 12 }}
@@ -86,8 +87,49 @@ export default function CountdownTimer({ targetDate, onComplete, className = '',
         >
           <span className={isCompact ? 'text-xl' : 'text-3xl'}>⚡</span>
         </motion.div>
-        <span className={`text-white font-black tracking-tight ${isCompact ? 'text-base' : 'text-xl'}`}>LIVE NOW</span>
+        <span className={`text-white font-black tracking-tight ${isPanel ? 'text-sm' : isCompact ? 'text-base' : 'text-xl'}`}>LIVE NOW</span>
       </motion.div>
+    );
+  }
+
+  // Panel variant: compact 4-unit row that fits inside match cards
+  if (isPanel) {
+    const units = [
+      { value: timeLeft.days, label: 'DAYS' },
+      { value: timeLeft.hours, label: 'HRS' },
+      { value: timeLeft.minutes, label: 'MIN' },
+      { value: timeLeft.seconds, label: 'SEC' },
+    ];
+    return (
+      <div className={`flex items-stretch gap-1.5 w-full ${className}`}>
+        {units.map(({ value, label }, i) => (
+          <div key={label} className="flex-1 flex flex-col items-center gap-0.5">
+            <div className="w-full relative overflow-hidden rounded-lg bg-gradient-to-br from-slate-800 via-slate-900 to-black border border-white/10 shadow-lg flex items-center justify-center h-10">
+              <div className="absolute top-0 left-0 right-0 h-4 bg-gradient-to-b from-white/[0.06] to-transparent pointer-events-none" />
+              <AnimatePresence mode="wait">
+                <motion.span
+                  key={`${label}-${value}`}
+                  className="text-xl font-black tabular-nums leading-none"
+                  style={{
+                    background: 'linear-gradient(135deg, #06b6d4 0%, #3b82f6 50%, #8b5cf6 100%)',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    backgroundClip: 'text',
+                  }}
+                  initial={{ y: label === 'SEC' ? 8 : 0, opacity: 0, scale: 0.7 }}
+                  animate={{ y: 0, opacity: 1, scale: 1 }}
+                  exit={{ y: label === 'SEC' ? -8 : 0, opacity: 0, scale: 0.7 }}
+                  transition={{ duration: 0.25, ease: 'easeOut' }}
+                >
+                  {String(value).padStart(2, '0')}
+                </motion.span>
+              </AnimatePresence>
+              <div className="absolute bottom-0 left-0 right-0 h-3 bg-gradient-to-t from-black/30 to-transparent pointer-events-none" />
+            </div>
+            <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">{label}</span>
+          </div>
+        ))}
+      </div>
     );
   }
 
