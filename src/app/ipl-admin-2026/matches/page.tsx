@@ -830,10 +830,14 @@ export default function AdminMatches() {
             return parsedRows;
         })();
 
-        const bestParsedRows = [rows, legacyRows, textFlowRows, columnarRows]
-            .sort((a, b) => b.length - a.length)[0];
-        if (bestParsedRows.length >= 10) {
-            rows = bestParsedRows;
+        if (columnarRows.length >= 10) {
+            rows = columnarRows;
+        } else {
+            const bestParsedRows = [rows, legacyRows, textFlowRows]
+                .sort((a, b) => b.length - a.length)[0];
+            if (bestParsedRows.length >= 10) {
+                rows = bestParsedRows;
+            }
         }
 
         if (!rows.length) {
