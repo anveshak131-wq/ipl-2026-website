@@ -10,8 +10,6 @@ import { api } from '@/lib/data';
 import { useLeague } from '@/contexts/LeagueContext';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import Icon from '@/components/ui/Icon';
-import AuroraBackground from '@/components/ui/AuroraBackground';
-import AnimatedSection from '@/components/ui/AnimatedSection';
 import GradientText from '@/components/ui/GradientText';
 import { getMatchNumberDisplay } from '@/lib/matchNumberUtils';
 import { exportToICal, type CalendarEvent } from '@/lib/admin/exportUtils';
@@ -157,22 +155,16 @@ export default function MatchesPage() {
 
   const pageOilTheme = currentLeague === 'wpl'
     ? {
-        base: 'linear-gradient(145deg, #12091d 0%, #1f0f32 30%, #101a36 62%, #081628 100%)',
-        depth: 'radial-gradient(100% 120% at 50% 55%, rgba(9,11,20,0) 0%, rgba(9,11,20,0.45) 72%, rgba(5,8,18,0.82) 100%)',
-        glowTop: 'radial-gradient(80% 68% at 14% 8%, rgba(244,114,182,0.42) 0%, rgba(168,85,247,0.2) 52%, transparent 76%)',
-        glowBottom: 'radial-gradient(70% 62% at 84% 88%, rgba(34,211,238,0.36) 0%, rgba(14,165,233,0.16) 52%, transparent 78%)',
-        brushA: 'linear-gradient(110deg, rgba(236,72,153,0.26), rgba(168,85,247,0.14), rgba(59,130,246,0.08))',
-        brushB: 'linear-gradient(110deg, rgba(56,189,248,0.2), rgba(45,212,191,0.1), rgba(244,114,182,0.06))',
-        shimmer: 'linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,0.08), rgba(255,255,255,0))',
+        base: 'linear-gradient(155deg, #10071d 0%, #1c0b2d 38%, #142244 72%, #0a172f 100%)',
+        hazeA: 'radial-gradient(82% 70% at 14% 12%, rgba(236,72,153,0.26) 0%, rgba(168,85,247,0.1) 55%, transparent 80%)',
+        hazeB: 'radial-gradient(75% 66% at 88% 88%, rgba(34,211,238,0.22) 0%, rgba(56,189,248,0.09) 55%, transparent 80%)',
+        brush: 'linear-gradient(112deg, rgba(244,114,182,0.18), rgba(147,51,234,0.08), rgba(56,189,248,0.04))',
       }
     : {
-        base: 'linear-gradient(145deg, #130c12 0%, #26111d 30%, #17233a 62%, #0a1b2b 100%)',
-        depth: 'radial-gradient(100% 120% at 50% 55%, rgba(9,11,20,0) 0%, rgba(9,11,20,0.45) 72%, rgba(5,8,18,0.82) 100%)',
-        glowTop: 'radial-gradient(82% 70% at 14% 10%, rgba(251,146,60,0.4) 0%, rgba(239,68,68,0.18) 50%, transparent 76%)',
-        glowBottom: 'radial-gradient(70% 60% at 84% 88%, rgba(56,189,248,0.34) 0%, rgba(99,102,241,0.16) 50%, transparent 78%)',
-        brushA: 'linear-gradient(112deg, rgba(245,158,11,0.24), rgba(236,72,153,0.12), rgba(99,102,241,0.08))',
-        brushB: 'linear-gradient(112deg, rgba(34,211,238,0.2), rgba(59,130,246,0.1), rgba(251,146,60,0.08))',
-        shimmer: 'linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,0.08), rgba(255,255,255,0))',
+        base: 'linear-gradient(155deg, #120a12 0%, #221018 38%, #1a2845 72%, #0d1c33 100%)',
+        hazeA: 'radial-gradient(82% 70% at 14% 12%, rgba(251,146,60,0.24) 0%, rgba(236,72,153,0.09) 55%, transparent 80%)',
+        hazeB: 'radial-gradient(74% 66% at 88% 88%, rgba(99,102,241,0.2) 0%, rgba(56,189,248,0.08) 55%, transparent 80%)',
+        brush: 'linear-gradient(112deg, rgba(245,158,11,0.16), rgba(236,72,153,0.08), rgba(99,102,241,0.04))',
       };
 
   // Default to IPL for matches page (unless on /wpl/matches)
@@ -245,116 +237,102 @@ export default function MatchesPage() {
 
   return (
     <div className="min-h-screen">
-      <AuroraBackground />
       <Navbar />
       
       <main className="relative py-16 min-h-screen overflow-hidden section-match-bg">
-        {/* Oil-canvas base */}
+        {/* Clean oil-canvas background */}
         <div className="absolute inset-0" style={{ background: pageOilTheme.base }} />
+        <div className="absolute inset-0" style={{ background: pageOilTheme.hazeA, mixBlendMode: 'screen' }} />
+        <div className="absolute inset-0" style={{ background: pageOilTheme.hazeB, mixBlendMode: 'screen' }} />
 
-        {/* Large paint lights */}
         <motion.div
-          className="absolute inset-0"
-          style={{ background: pageOilTheme.glowTop, mixBlendMode: 'screen' }}
-          animate={{ x: [0, 14, 0], y: [0, -10, 0], scale: [1, 1.03, 1] }}
-          transition={{ duration: 14, repeat: Infinity, ease: 'easeInOut' }}
+          className="absolute -top-28 left-[-14%] w-[74%] h-[36%] rounded-[120px] blur-2xl opacity-85"
+          style={{ background: pageOilTheme.brush, transform: 'rotate(-9deg)' }}
+          animate={{ x: [0, 10, 0], y: [0, -8, 0] }}
+          transition={{ duration: 18, repeat: Infinity, ease: 'easeInOut' }}
         />
         <motion.div
-          className="absolute inset-0"
-          style={{ background: pageOilTheme.glowBottom, mixBlendMode: 'screen' }}
-          animate={{ x: [0, -14, 0], y: [0, 10, 0], scale: [1, 1.04, 1] }}
-          transition={{ duration: 16, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
+          className="absolute -bottom-24 right-[-10%] w-[70%] h-[34%] rounded-[120px] blur-2xl opacity-70"
+          style={{ background: pageOilTheme.brush, transform: 'rotate(8deg)' }}
+          animate={{ x: [0, -10, 0], y: [0, 8, 0] }}
+          transition={{ duration: 21, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
         />
 
-        {/* Painterly brush strokes */}
         <div
-          className="absolute -top-24 left-[-10%] w-[72%] h-[36%] rounded-[120px] blur-2xl"
-          style={{ background: pageOilTheme.brushA, transform: 'rotate(-8deg)' }}
-        />
-        <div
-          className="absolute -bottom-20 right-[-12%] w-[68%] h-[34%] rounded-[120px] blur-2xl"
-          style={{ background: pageOilTheme.brushB, transform: 'rotate(9deg)' }}
-        />
-
-        {/* Subtle moving sheen */}
-        <motion.div
-          className="absolute inset-y-0 -left-1/2 w-[40%] opacity-40"
-          style={{ background: pageOilTheme.shimmer, filter: 'blur(16px)' }}
-          animate={{ x: ['0%', '360%'] }}
-          transition={{ duration: 18, repeat: Infinity, ease: 'linear' }}
+          className="absolute inset-0 opacity-[0.08]"
+          style={{
+            backgroundImage:
+              'repeating-linear-gradient(0deg, rgba(255,255,255,0.05) 0px, rgba(255,255,255,0.05) 1px, transparent 1px, transparent 4px), repeating-linear-gradient(90deg, rgba(255,255,255,0.04) 0px, rgba(255,255,255,0.04) 1px, transparent 1px, transparent 4px)',
+            mixBlendMode: 'soft-light',
+          }}
         />
 
-        {/* Colorful droplets */}
         <motion.div
-          className="absolute top-20 right-20 w-24 h-24 rounded-full blur-2xl"
-          style={{ background: 'radial-gradient(circle, rgba(255,255,255,0.24), rgba(255,255,255,0.05), transparent 75%)' }}
-          animate={{ y: [0, -10, 0], x: [0, 8, 0] }}
-          transition={{ duration: 9, repeat: Infinity, ease: 'easeInOut' }}
-        />
-        <motion.div
-          className="absolute bottom-24 left-16 w-20 h-20 rounded-full blur-2xl"
+          className="absolute top-16 right-16 w-20 h-20 rounded-full blur-2xl"
           style={{
             background: currentLeague === 'wpl'
-              ? 'radial-gradient(circle, rgba(244,114,182,0.35), rgba(168,85,247,0.1), transparent 75%)'
-              : 'radial-gradient(circle, rgba(251,146,60,0.34), rgba(245,158,11,0.1), transparent 75%)'
+              ? 'radial-gradient(circle, rgba(236,72,153,0.3), rgba(168,85,247,0.08), transparent 75%)'
+              : 'radial-gradient(circle, rgba(251,146,60,0.28), rgba(236,72,153,0.08), transparent 75%)',
           }}
-          animate={{ y: [0, 10, 0], x: [0, -8, 0] }}
-          transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
+          animate={{ y: [0, -10, 0] }}
+          transition={{ duration: 11, repeat: Infinity, ease: 'easeInOut' }}
         />
 
-        {/* Depth/vignette for readability */}
-        <div className="absolute inset-0" style={{ background: pageOilTheme.depth }} />
+        <div
+          className="absolute inset-0"
+          style={{ background: 'radial-gradient(circle at 50% 42%, transparent 0%, rgba(2,6,23,0.24) 64%, rgba(2,6,23,0.58) 100%)' }}
+        />
         
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Header */}
-          <div className="mb-12 animate-slide-up">
-            <div className="inline-flex items-center space-x-2 mb-4">
-              <span className={`px-3 py-1 rounded-full text-xs font-bold border flex items-center gap-2 backdrop-blur-sm hover:scale-105 cursor-default animate-bounce-in transition-all duration-300 ${
-                currentLeague === 'wpl' 
-                  ? 'bg-purple-500/20 border-purple-500/30 text-purple-300 hover:bg-purple-500/30'
-                  : 'bg-white/10 border-white/20 text-ipl-gold hover:bg-white/15'
-              }`}>
-                <Icon name="cricket" size={16} /> {currentLeague === 'wpl' ? 'WPL' : 'IPL'} MATCH SCHEDULE
-              </span>
+          <motion.div
+            className="mb-8 rounded-3xl border border-white/15 bg-black/30 backdrop-blur-xl shadow-[0_20px_60px_rgba(0,0,0,0.35)] p-6 md:p-8"
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.45 }}
+          >
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold border mb-4"
+                 style={currentLeague === 'wpl'
+                   ? { background: 'rgba(168,85,247,0.15)', borderColor: 'rgba(168,85,247,0.35)', color: '#e9d5ff' }
+                   : { background: 'rgba(245,158,11,0.14)', borderColor: 'rgba(245,158,11,0.32)', color: '#fde68a' }}>
+              <Icon name="cricket" size={14} />
+              {currentLeague === 'wpl' ? 'WPL MATCH SCHEDULE' : 'IPL MATCH SCHEDULE'}
             </div>
-            <motion.h1 
-              className="text-5xl md:text-6xl font-black mb-4 tracking-tight"
-              initial={{ opacity: 0, y: -20 }}
+
+            <motion.h1
+              className="text-4xl md:text-5xl font-black mb-3 tracking-tight"
+              initial={{ opacity: 0, y: -12 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
+              transition={{ duration: 0.5 }}
               style={{
-                background: 'linear-gradient(135deg, #ffffff 0%, #e2e8f0 50%, #cbd5e1 100%)',
+                background: 'linear-gradient(135deg, #ffffff 0%, #e5e7eb 55%, #cbd5e1 100%)',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
                 backgroundClip: 'text',
               }}
             >
               {currentLeague === 'wpl' ? (
-                <>WPL {seasonLabel} <GradientText gradient="from-purple-400 via-pink-400 to-rose-400" animate>Fixtures</GradientText></>
+                <>WPL {seasonLabel} <GradientText gradient="from-fuchsia-300 via-pink-300 to-rose-300" animate>Fixtures</GradientText></>
               ) : (
-                <>IPL {seasonLabel} <GradientText gradient="from-indigo-400 via-purple-400 to-pink-400" animate>Fixtures</GradientText></>
+                <>IPL {seasonLabel} <GradientText gradient="from-amber-300 via-orange-300 to-rose-300" animate>Fixtures</GradientText></>
               )}
             </motion.h1>
-            <motion.p 
-              className="text-slate-200 text-lg max-w-2xl leading-relaxed"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-            >
-              {currentLeague === 'wpl' 
-                ? `Live scores, upcoming matches, and detailed fixtures for the ${subtitleSeason} of the WPL`
-                : `Live scores, upcoming matches, and detailed fixtures for the ${subtitleSeason} of the IPL`
-              }
-            </motion.p>
-            <div className="mt-3 text-sm text-slate-300 font-semibold tracking-tight">
+
+            <p className="text-slate-200/90 text-base md:text-lg max-w-3xl leading-relaxed">
+              {currentLeague === 'wpl'
+                ? `Live scores, upcoming matches, and full fixture details for the ${subtitleSeason} of the WPL.`
+                : `Live scores, upcoming matches, and full fixture details for the ${subtitleSeason} of the IPL.`}
+            </p>
+
+            <div className="mt-4 inline-flex items-center rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-slate-200">
               Showing {selectedSeason === 'all' ? 'all available seasons' : `${selectedSeason} season`} · {filteredMatches.length} match{filteredMatches.length === 1 ? '' : 'es'}
             </div>
-          </div>
+          </motion.div>
 
-          {/* Season selector */}
-          <div className="mb-8 animate-fade-in" style={{ animationDelay: '120ms' }}>
-            <div className="flex flex-wrap items-center gap-3">
-              <span className="text-[11px] uppercase tracking-[0.3em] text-slate-400 font-semibold">Season</span>
+          {/* Season + Calendar Actions */}
+          <div className="mb-6 rounded-2xl border border-white/12 bg-black/25 backdrop-blur-xl p-4 md:p-5 shadow-[0_12px_32px_rgba(0,0,0,0.28)]">
+            <div className="flex flex-wrap items-center gap-2.5">
+              <span className="text-[11px] uppercase tracking-[0.28em] text-slate-400 font-semibold mr-1">Season</span>
               {seasonOptions.map((season) => {
                 const isAll = season === 'all';
                 const isActive = selectedSeason === season;
@@ -363,18 +341,18 @@ export default function MatchesPage() {
                   <button
                     key={season}
                     onClick={() => setSelectedSeason(season)}
-                    className={`relative px-4 py-2 rounded-lg text-sm font-bold transition-all duration-300 border backdrop-blur-sm ${
-                      isActive
-                        ? 'text-white shadow-xl'
-                        : 'text-slate-200 hover:text-white'
+                    className={`px-4 py-2 rounded-lg text-sm font-semibold border transition-all duration-200 ${
+                      isActive ? 'text-white' : 'text-slate-200 hover:text-white'
                     }`}
                     style={isActive ? {
-                      background: 'linear-gradient(135deg, #6366f1, #9333ea)',
-                      borderColor: 'rgba(147, 51, 234, 0.4)',
-                      boxShadow: '0 12px 30px rgba(99, 102, 241, 0.35)',
+                      background: currentLeague === 'wpl'
+                        ? 'linear-gradient(135deg, rgba(168,85,247,0.42), rgba(236,72,153,0.35))'
+                        : 'linear-gradient(135deg, rgba(245,158,11,0.42), rgba(236,72,153,0.32))',
+                      borderColor: 'rgba(255,255,255,0.3)',
+                      boxShadow: '0 8px 20px rgba(0,0,0,0.25)',
                     } : {
-                      background: 'linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.04))',
-                      borderColor: 'rgba(255,255,255,0.12)',
+                      background: 'rgba(255,255,255,0.06)',
+                      borderColor: 'rgba(255,255,255,0.14)',
                     }}
                   >
                     {label} {(!isAll && season === 2026) ? '· Default' : ''}
@@ -382,35 +360,34 @@ export default function MatchesPage() {
                 );
               })}
             </div>
-            <p className="text-slate-400 text-sm mt-2">
-              Defaulting to 2026 when available. Pick past seasons to see archived fixtures stored in the database.
+
+            <p className="text-slate-400 text-sm mt-2.5">
+              Defaulting to 2026 when available. Pick past seasons to browse archived fixtures.
             </p>
 
-            <div className="mt-4 flex flex-wrap items-center gap-3">
+            <div className="mt-4 flex flex-wrap items-center gap-2.5">
               <button
                 onClick={() => handleDownloadIcalSeason(TARGET_CALENDAR_SEASON)}
-                className="group relative px-4 py-2.5 rounded-lg text-sm font-bold border transition-all duration-300"
+                className="px-4 py-2.5 rounded-lg text-sm font-semibold border transition-colors"
                 style={{
-                  background: 'linear-gradient(135deg, rgba(16,185,129,0.22), rgba(20,184,166,0.14))',
-                  borderColor: 'rgba(16,185,129,0.45)',
+                  background: 'rgba(16,185,129,0.16)',
+                  borderColor: 'rgba(16,185,129,0.38)',
                   color: '#d1fae5',
-                  boxShadow: '0 8px 22px rgba(16,185,129,0.2)',
                 }}
               >
-                <span className="relative z-10">Add {TARGET_CALENDAR_SEASON} to iCal</span>
+                Add {TARGET_CALENDAR_SEASON} to iCal
               </button>
 
               <button
                 onClick={() => handleAddSeasonToGoogleCalendar(TARGET_CALENDAR_SEASON)}
-                className="group relative px-4 py-2.5 rounded-lg text-sm font-bold border transition-all duration-300"
+                className="px-4 py-2.5 rounded-lg text-sm font-semibold border transition-colors"
                 style={{
-                  background: 'linear-gradient(135deg, rgba(59,130,246,0.24), rgba(99,102,241,0.14))',
-                  borderColor: 'rgba(59,130,246,0.45)',
+                  background: 'rgba(59,130,246,0.16)',
+                  borderColor: 'rgba(59,130,246,0.38)',
                   color: '#dbeafe',
-                  boxShadow: '0 8px 22px rgba(59,130,246,0.2)',
                 }}
               >
-                <span className="relative z-10">Add {TARGET_CALENDAR_SEASON} to Google Calendar</span>
+                Add {TARGET_CALENDAR_SEASON} to Google Calendar
               </button>
 
               <span className="text-xs text-slate-400">
@@ -419,68 +396,37 @@ export default function MatchesPage() {
             </div>
           </div>
 
-          {/* Filter Tabs - Premium Design */}
-          <div className="flex justify-start mb-12 overflow-x-auto animate-fade-in" style={{ animationDelay: '160ms' }}>
-            <div className="inline-flex space-x-2 p-1.5 rounded-xl backdrop-blur-xl border-2 border-white/10 shadow-xl transition-all duration-300"
-                 style={{
-                   background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05))',
-                 }}>
+          {/* Filter Tabs */}
+          <div className="mb-10 rounded-2xl border border-white/12 bg-black/20 backdrop-blur-xl p-3 shadow-[0_12px_30px_rgba(0,0,0,0.26)]">
+            <div className="flex flex-wrap gap-2">
               {[
-                { key: 'all', label: 'All Matches', icon: 'stats' as const, color: '#6366f1', gradient: 'from-indigo-500 to-purple-500' },
-                { key: 'upcoming', label: 'Upcoming', icon: 'target' as const, color: '#3b82f6', gradient: 'from-blue-500 to-cyan-500' },
-                { key: 'live', label: 'Live', icon: 'cricket' as const, color: '#ef4444', gradient: 'from-red-500 to-pink-500' },
-                { key: 'completed', label: 'Completed', icon: 'trophy' as const, color: '#10b981', gradient: 'from-emerald-500 to-teal-500' }
-              ].map((tab) => (
-                <button
-                  key={tab.key}
-                  onClick={() => setFilter(tab.key as 'all' | 'upcoming' | 'live' | 'completed')}
-                  className={`group relative overflow-hidden px-6 py-3 rounded-lg text-sm font-bold transition-all duration-500 whitespace-nowrap flex items-center gap-2 transform hover:scale-105 ${
-                    filter === tab.key ? 'scale-105' : ''
-                  }`}
-                  style={filter === tab.key ? {
-                    background: `linear-gradient(135deg, ${tab.color}, ${tab.color}dd)`,
-                    color: '#fff',
-                    boxShadow: `0 10px 30px ${tab.color}50, 0 0 50px ${tab.color}30, inset 0 1px 0 rgba(255, 255, 255, 0.2)`,
-                    border: `2px solid ${tab.color}80`,
-                  } : {
-                    background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.04))',
-                    color: '#cbd5e1',
-                    border: '2px solid rgba(255, 255, 255, 0.1)',
-                  }}
-                  onMouseEnter={(e) => {
-                    if (filter !== tab.key) {
-                      e.currentTarget.style.color = '#fff';
-                      e.currentTarget.style.background = `linear-gradient(135deg, ${tab.color}25, ${tab.color}15)`;
-                      e.currentTarget.style.borderColor = `${tab.color}50`;
-                      e.currentTarget.style.boxShadow = `0 4px 16px ${tab.color}20`;
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (filter !== tab.key) {
-                      e.currentTarget.style.color = '#cbd5e1';
-                      e.currentTarget.style.background = 'linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.04))';
-                      e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.1)';
-                      e.currentTarget.style.boxShadow = 'none';
-                    }
-                  }}
-                >
-                  {/* Shimmer effect for active tab */}
-                  {filter === tab.key && (
-                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent transform translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-1000" />
-                  )}
-                  
-                  <Icon name={tab.icon} size={16} />
-                  <span className="relative z-10">{tab.label}</span>
-                  
-                  {/* Pulse effect for active tab */}
-                  {filter === tab.key && (
-                    <div 
-                      className="absolute inset-0 rounded-lg border-2 opacity-0 group-hover:opacity-100 animate-ping"
-                      style={{ borderColor: tab.color }}
-                    />
-                  )}
-                </button>
-              ))}
+                { key: 'all', label: 'All Matches', icon: 'stats' as const, color: '#94a3b8' },
+                { key: 'upcoming', label: 'Upcoming', icon: 'target' as const, color: '#3b82f6' },
+                { key: 'live', label: 'Live', icon: 'cricket' as const, color: '#ef4444' },
+                { key: 'completed', label: 'Completed', icon: 'trophy' as const, color: '#10b981' }
+              ].map((tab) => {
+                const isActive = filter === tab.key;
+                return (
+                  <button
+                    key={tab.key}
+                    onClick={() => setFilter(tab.key as 'all' | 'upcoming' | 'live' | 'completed')}
+                    className="px-4 py-2.5 rounded-lg text-sm font-semibold whitespace-nowrap flex items-center gap-2 border transition-all duration-200"
+                    style={isActive ? {
+                      background: `linear-gradient(135deg, ${tab.color}66, ${tab.color}33)`,
+                      color: '#ffffff',
+                      borderColor: `${tab.color}aa`,
+                      boxShadow: `0 6px 18px ${tab.color}35`,
+                    } : {
+                      background: 'rgba(255,255,255,0.04)',
+                      color: '#cbd5e1',
+                      borderColor: 'rgba(255,255,255,0.12)',
+                    }}
+                  >
+                    <Icon name={tab.icon} size={15} />
+                    {tab.label}
+                  </button>
+                );
+              })}
             </div>
           </div>
 
@@ -519,7 +465,7 @@ export default function MatchesPage() {
               </motion.div>
           ) : (
             <div className="text-center py-12 animate-fade-in" style={{ animationDelay: '220ms' }}>
-              <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm border border-white/10 p-8 max-w-md mx-auto">
+              <div className="relative overflow-hidden rounded-2xl bg-black/25 backdrop-blur-xl border border-white/12 p-8 max-w-md mx-auto">
                 <svg className="w-16 h-16 mx-auto mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
@@ -534,45 +480,29 @@ export default function MatchesPage() {
           )}
           </AnimatePresence>
 
-          {/* Pagination - Premium Design */}
+          {/* Pagination */}
           {deferredMatches.length > 0 && (
             <div className="text-center mt-12 animate-fade-in" style={{ animationDelay: '200ms' }}>
               <button 
                 onClick={() => alert('Loading more matches...')} 
-                className="group relative overflow-hidden rounded-xl font-bold text-lg px-10 py-4 transition-all duration-500 transform hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+                className="group relative overflow-hidden rounded-xl font-semibold text-base px-8 py-3.5 transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
                 style={{
-                  background: 'linear-gradient(135deg, #7C3AED 0%, #9333EA 50%, #A855F7 100%)',
-                  boxShadow: '0 10px 40px rgba(124, 58, 237, 0.4), 0 0 60px rgba(147, 51, 234, 0.2)',
-                  border: '2px solid rgba(124, 58, 237, 0.5)',
+                  background: currentLeague === 'wpl'
+                    ? 'linear-gradient(135deg, rgba(168,85,247,0.8), rgba(236,72,153,0.75))'
+                    : 'linear-gradient(135deg, rgba(245,158,11,0.82), rgba(236,72,153,0.72))',
+                  boxShadow: '0 12px 28px rgba(0,0,0,0.3)',
+                  border: '1px solid rgba(255,255,255,0.22)',
                   color: '#fff',
                 }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.boxShadow = '0 20px 60px rgba(124, 58, 237, 0.6), 0 0 80px rgba(147, 51, 234, 0.4)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.boxShadow = '0 10px 40px rgba(124, 58, 237, 0.4), 0 0 60px rgba(147, 51, 234, 0.2)';
-                }}
               >
-                {/* Shimmer effect */}
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/25 to-transparent transform translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-1000" />
-                
-                {/* Glow effect */}
-                <div 
-                  className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-xl -z-10"
-                  style={{
-                    background: 'radial-gradient(circle, rgba(124, 58, 237, 0.6), transparent)',
-                  }}
-                />
-                
-                <span className="relative z-10 flex items-center justify-center gap-2 font-black tracking-tight">
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
+
+                <span className="relative z-10 flex items-center justify-center gap-2">
                   Load More Matches
-                  <svg className="w-5 h-5 transform group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-4 h-4 transform group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                   </svg>
                 </span>
-                
-                {/* Pulse animation ring */}
-                <div className="absolute inset-0 rounded-xl border-2 opacity-0 group-hover:opacity-100 animate-ping border-purple-500" />
               </button>
             </div>
           )}
