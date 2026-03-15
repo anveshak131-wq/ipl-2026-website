@@ -13,8 +13,13 @@ import Icon from '@/components/ui/Icon';
 import AuroraBackground from '@/components/ui/AuroraBackground';
 import AnimatedSection from '@/components/ui/AnimatedSection';
 import GradientText from '@/components/ui/GradientText';
+import { getMatchNumberDisplay } from '@/lib/matchNumberUtils';
+import { exportToICal, type CalendarEvent } from '@/lib/admin/exportUtils';
 
 export default function MatchesPage() {
+  const TARGET_CALENDAR_SEASON = 2026;
+  const MATCH_DURATION_MINUTES = 240;
+
   const { currentLeague, setCurrentLeague } = useLeague();
   const [matches, setMatches] = useState<Match[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -27,6 +32,115 @@ export default function MatchesPage() {
     if (!isNaN(parsed.getTime())) return parsed.getFullYear();
     const match = dateString.match(/(20\d{2}|19\d{2})/);
     return match ? parseInt(match[1], 10) : null;
+  };
+
+  const parseTimeTo24Hour = (timeString: string): { hours: number; minutes: number } | null => {
+    const clean = timeString.trim();
+
+    // Supports 24h format: "19:30"
+    const hhmmMatch = clean.match(/^(\d{1,2}):(\d{2})$/);
+    if (hhmmMatch) {
+      const hours = parseInt(hhmmMatch[1], 10);
+      const minutes = parseInt(hhmmMatch[2], 10);
+      if (hours >= 0 && hours <= 23 && minutes >= 0 && minutes <= 59) {
+        return { hours, minutes };
+      }
+    }
+
+    // Supports 12h format: "7:30 PM"
+    const ampmMatch = clean.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
+    if (ampmMatch) {
+      let hours = parseInt(ampmMatch[1], 10);
+      const minutes = parseInt(ampmMatch[2], 10);
+      const meridiem = ampmMatch[3].toUpperCase();
+
+      if (hours < 1 || hours > 12 || minutes < 0 || minutes > 59) return null;
+      if (meridiem === 'PM' && hours !== 12) hours += 12;
+      if (meridiem === 'AM' && hours === 12) hours = 0;
+
+      return { hours, minutes };
+    }
+
+    return null;
+  };
+
+  const getMatchStartDateUTC = (dateString: string, timeString: string): Date | null => {
+    try {
+      const [yearStr, monthStr, dayStr] = dateString.split('-');
+      const year = Number(yearStr);
+      const month = Number(monthStr);
+      const day = Number(dayStr);
+      const parsedTime = parseTimeTo24Hour(timeString);
+
+      if (!year || !month || !day || !parsedTime) return null;
+
+      // Match times are stored in IST; convert IST to UTC for calendar standards.
+      const istTimestamp = Date.UTC(year, month - 1, day, parsedTime.hours, parsedTime.minutes, 0);
+      const utcTimestamp = istTimestamp - (5.5 * 60 * 60 * 1000);
+      return new Date(utcTimestamp);
+    } catch {
+      return null;
+    }
+  };
+
+  const buildSeasonCalendarEvents = (season: number): CalendarEvent[] => {
+    const seasonMatches = matches.filter((match) => getMatchYear(match.date) === season);
+
+    return seasonMatches
+      .map((match) => {
+        const startDate = getMatchStartDateUTC(match.date, match.time);
+        if (!startDate) return null;
+
+        const endDate = new Date(startDate.getTime() + MATCH_DURATION_MINUTES * 60 * 1000);
+        const matchNumber = getMatchNumberDisplay(match);
+        const leagueLabel = (match.league || currentLeague || 'ipl').toUpperCase();
+
+        const descriptionParts = [
+          `${leagueLabel} ${season} fixture`,
+          matchNumber && matchNumber !== 'TBD' ? `Match: ${matchNumber}` : undefined,
+          `Status: ${match.status.toUpperCase()}`,
+          `Venue: ${match.venue}`,
+          'Source: SportsUP99',
+        ].filter(Boolean);
+
+        return {
+          title: `${match.team1.shortName} vs ${match.team2.shortName} • ${leagueLabel} ${season}`,
+          description: descriptionParts.join('\n'),
+          location: match.venue,
+          startDate,
+          endDate,
+        };
+      })
+      .filter((event): event is CalendarEvent => event !== null);
+  };
+
+  const season2026MatchCount = useMemo(
+    () => matches.filter((match) => getMatchYear(match.date) === TARGET_CALENDAR_SEASON).length,
+    [matches]
+  );
+
+  const handleDownloadIcalSeason = (season: number = TARGET_CALENDAR_SEASON) => {
+    const events = buildSeasonCalendarEvents(season);
+    if (events.length === 0) {
+      alert(`No matches found for season ${season} to export.`);
+      return;
+    }
+
+    const leagueCode = (currentLeague || 'ipl').toLowerCase();
+    exportToICal(events, `${leagueCode}-${season}-fixtures.ics`);
+  };
+
+  const handleAddSeasonToGoogleCalendar = (season: number = TARGET_CALENDAR_SEASON) => {
+    const events = buildSeasonCalendarEvents(season);
+    if (events.length === 0) {
+      alert(`No matches found for season ${season} to export.`);
+      return;
+    }
+
+    const leagueCode = (currentLeague || 'ipl').toLowerCase();
+    exportToICal(events, `${leagueCode}-${season}-fixtures.ics`);
+    window.open('https://calendar.google.com/calendar/u/0/r/settings/export', '_blank', 'noopener,noreferrer');
+    alert('ICS downloaded. In Google Calendar, go to Settings > Import & export > Import and upload the file.');
   };
 
   const seasonOptions: Array<number | 'all'> = availableSeasons.length > 0
@@ -247,6 +361,38 @@ export default function MatchesPage() {
             <p className="text-slate-400 text-sm mt-2">
               Defaulting to 2026 when available. Pick past seasons to see archived fixtures stored in the database.
             </p>
+
+            <div className="mt-4 flex flex-wrap items-center gap-3">
+              <button
+                onClick={() => handleDownloadIcalSeason(TARGET_CALENDAR_SEASON)}
+                className="group relative px-4 py-2.5 rounded-lg text-sm font-bold border transition-all duration-300"
+                style={{
+                  background: 'linear-gradient(135deg, rgba(16,185,129,0.22), rgba(20,184,166,0.14))',
+                  borderColor: 'rgba(16,185,129,0.45)',
+                  color: '#d1fae5',
+                  boxShadow: '0 8px 22px rgba(16,185,129,0.2)',
+                }}
+              >
+                <span className="relative z-10">Add {TARGET_CALENDAR_SEASON} to iCal</span>
+              </button>
+
+              <button
+                onClick={() => handleAddSeasonToGoogleCalendar(TARGET_CALENDAR_SEASON)}
+                className="group relative px-4 py-2.5 rounded-lg text-sm font-bold border transition-all duration-300"
+                style={{
+                  background: 'linear-gradient(135deg, rgba(59,130,246,0.24), rgba(99,102,241,0.14))',
+                  borderColor: 'rgba(59,130,246,0.45)',
+                  color: '#dbeafe',
+                  boxShadow: '0 8px 22px rgba(59,130,246,0.2)',
+                }}
+              >
+                <span className="relative z-10">Add {TARGET_CALENDAR_SEASON} to Google Calendar</span>
+              </button>
+
+              <span className="text-xs text-slate-400">
+                {season2026MatchCount} match{season2026MatchCount === 1 ? '' : 'es'} in {TARGET_CALENDAR_SEASON}
+              </span>
+            </div>
           </div>
 
           {/* Filter Tabs - Premium Design */}
