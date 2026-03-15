@@ -76,7 +76,18 @@ export default function ModernMatchesGrid({ matches, isLoading = false }: Modern
         <>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredMatches.slice(0, displayCount).map((match, idx) => (
-            <Link key={match.id} href={`/matches/${match.id}`}>
+            <Link
+              key={match.id}
+              href={{
+                pathname: `/matches/${match.id}`,
+                query: {
+                  league: match.league || 'ipl',
+                  date: match.date || '',
+                  team1Id: String(match.team1?.id || ''),
+                  team2Id: String(match.team2?.id || ''),
+                },
+              }}
+            >
               <AnimatedCard delay={idx} hover="lift" className="h-full p-6 cursor-pointer group">
                 {/* Status badge and share */}
                 <div className="flex items-center justify-between mb-4">

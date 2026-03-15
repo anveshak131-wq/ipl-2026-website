@@ -94,6 +94,7 @@ async function fetchPublishedScorecard(matchId: string): Promise<PublishedScorec
 export default function MatchCenterPage({ backHref = '/matches', preferredLeague }: MatchCenterPageProps) {
   const params = useParams<{ matchId: string }>();
   const searchParams = useSearchParams();
+  const searchKey = searchParams.toString();
   const matchId = typeof params?.matchId === 'string' ? decodeURIComponent(params.matchId) : '';
 
   const { setCurrentLeague } = useLeague();
@@ -131,8 +132,8 @@ export default function MatchCenterPage({ backHref = '/matches', preferredLeague
         const allMatches = leagueMatchLists.flat();
         const sameIdMatches = allMatches.filter((item) => String(item.id) === matchId);
 
-        const selectedMatch = (sameIdMatches.length > 0
-          ? [...sameIdMatches].sort((a, b) => {
+        const sortedByScore = (items: Match[]) => {
+          return [...items].sort((a, b) => {
               const score = (item: Match) => {
                 let value = 0;
                 const itemYear = Number.parseInt(String(item.date || '').slice(0, 4), 10);
@@ -164,8 +165,35 @@ export default function MatchCenterPage({ backHref = '/matches', preferredLeague
               };
 
               return score(b) - score(a);
-            })[0]
-          : null);
+            });
+        };
+
+        let selectedMatch: Match | null = sameIdMatches.length > 0 ? sortedByScore(sameIdMatches)[0] : null;
+
+        // Hint-first disambiguation: if URL contains date + team IDs, prefer that exact fixture
+        // even when there are duplicate/legacy IDs in storage.
+        if (hintedDate && hintedTeam1Id && hintedTeam2Id) {
+          const hintedMatches = allMatches.filter((item) => {
+            if (hintedLeague && item.league !== hintedLeague) {
+              return false;
+            }
+
+            if (item.date !== hintedDate) {
+              return false;
+            }
+
+            const itemTeam1 = String(item.team1?.id || '');
+            const itemTeam2 = String(item.team2?.id || '');
+            const exactOrder = itemTeam1 === hintedTeam1Id && itemTeam2 === hintedTeam2Id;
+            const swappedOrder = itemTeam1 === hintedTeam2Id && itemTeam2 === hintedTeam1Id;
+
+            return exactOrder || swappedOrder;
+          });
+
+          if (hintedMatches.length > 0) {
+            selectedMatch = sortedByScore(hintedMatches)[0];
+          }
+        }
 
         if (!selectedMatch) {
           if (!cancelled) {
@@ -208,7 +236,7 @@ export default function MatchCenterPage({ backHref = '/matches', preferredLeague
     return () => {
       cancelled = true;
     };
-  }, [matchId, preferredLeague, setCurrentLeague]);
+  }, [matchId, preferredLeague, searchKey, setCurrentLeague]);
   
 
   const matchNumber = useMemo(() => {
