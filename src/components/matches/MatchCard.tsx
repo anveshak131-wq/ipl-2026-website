@@ -31,7 +31,14 @@ export default function MatchCard({ match, index = 0, players, detailHref }: Mat
   const matchCenterHref = detailHref || `/matches/${match.id}`;
 
   const openMatchCenter = () => {
-    router.push(matchCenterHref);
+    const query = new URLSearchParams({
+      league: match.league || 'ipl',
+      date: match.date || '',
+      team1Id: String(match.team1?.id || ''),
+      team2Id: String(match.team2?.id || ''),
+    });
+    const separator = matchCenterHref.includes('?') ? '&' : '?';
+    router.push(`${matchCenterHref}${separator}${query.toString()}`);
   };
 
   useEffect(() => {

@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useParams } from 'next/navigation';
+import { useParams, useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { ArrowLeft, FileText, Lock, Trophy, Users } from 'lucide-react';
 
@@ -93,6 +93,7 @@ async function fetchPublishedScorecard(matchId: string): Promise<PublishedScorec
 
 export default function MatchCenterPage({ backHref = '/matches', preferredLeague }: MatchCenterPageProps) {
   const params = useParams<{ matchId: string }>();
+  const searchParams = useSearchParams();
   const matchId = typeof params?.matchId === 'string' ? decodeURIComponent(params.matchId) : '';
 
   const { setCurrentLeague } = useLeague();
@@ -117,13 +118,54 @@ export default function MatchCenterPage({ backHref = '/matches', preferredLeague
       setError(null);
 
       try {
+        const hintedLeague = searchParams.get('league');
+        const hintedDate = searchParams.get('date');
+        const hintedTeam1Id = searchParams.get('team1Id');
+        const hintedTeam2Id = searchParams.get('team2Id');
+
         const leagues: League[] = preferredLeague
           ? [preferredLeague, preferredLeague === 'ipl' ? 'wpl' : 'ipl']
           : ['ipl', 'wpl'];
 
         const leagueMatchLists = await Promise.all(leagues.map((league) => api.getMatches(league)));
         const allMatches = leagueMatchLists.flat();
-        const selectedMatch = allMatches.find((item) => item.id === matchId) || null;
+        const sameIdMatches = allMatches.filter((item) => String(item.id) === matchId);
+
+        const selectedMatch = (sameIdMatches.length > 0
+          ? [...sameIdMatches].sort((a, b) => {
+              const score = (item: Match) => {
+                let value = 0;
+                const itemYear = Number.parseInt(String(item.date || '').slice(0, 4), 10);
+
+                if (!Number.isNaN(itemYear)) {
+                  value += itemYear;
+                }
+                if (preferredLeague && item.league === preferredLeague) {
+                  value += 10_000;
+                }
+                if (hintedLeague && item.league === hintedLeague) {
+                  value += 8_000;
+                }
+                if (hintedDate && item.date === hintedDate) {
+                  value += 5_000;
+                }
+
+                const itemTeam1 = String(item.team1?.id || '');
+                const itemTeam2 = String(item.team2?.id || '');
+
+                if (hintedTeam1Id && hintedTeam2Id) {
+                  const exactOrder = itemTeam1 === hintedTeam1Id && itemTeam2 === hintedTeam2Id;
+                  const swappedOrder = itemTeam1 === hintedTeam2Id && itemTeam2 === hintedTeam1Id;
+                  if (exactOrder) value += 3_000;
+                  else if (swappedOrder) value += 1_500;
+                }
+
+                return value;
+              };
+
+              return score(b) - score(a);
+            })[0]
+          : null);
 
         if (!selectedMatch) {
           if (!cancelled) {
@@ -167,6 +209,7 @@ export default function MatchCenterPage({ backHref = '/matches', preferredLeague
       cancelled = true;
     };
   }, [matchId, preferredLeague, setCurrentLeague]);
+  
 
   const matchNumber = useMemo(() => {
     if (!match) return 'TBD';
