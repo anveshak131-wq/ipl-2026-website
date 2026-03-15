@@ -142,236 +142,421 @@ export default function MatchCard({ match, index = 0, players }: MatchCardProps)
   const isCompleted = match.status === 'completed';
   const matchNumberDisplay = getMatchNumberDisplay(match);
 
-  const cardBorderStyle = isLive
-    ? '2px solid rgba(239, 68, 68, 0.6)'
+  // Oil-palette per status: rich multi-stop gradients
+  const oilBg = isLive
+    ? 'linear-gradient(135deg, #1a0505 0%, #2d0a18 25%, #1e0d2e 50%, #0d1a2e 75%, #0a1a1a 100%)'
     : isCompleted
-    ? '2px solid rgba(16, 185, 129, 0.25)'
-    : '2px solid rgba(255, 255, 255, 0.08)';
+    ? 'linear-gradient(135deg, #050f0a 0%, #0a1e18 25%, #091530 50%, #0f1020 75%, #0a0f18 100%)'
+    : 'linear-gradient(135deg, #07051a 0%, #130a2e 25%, #1a0a2e 50%, #0d1030 75%, #050a1a 100%)';
 
-  const cardGlowStyle = isLive
-    ? '0 0 40px rgba(239, 68, 68, 0.15), 0 20px 60px rgba(0,0,0,0.4)'
-    : '0 20px 60px rgba(0,0,0,0.35)';
+  const oilOrb1 = isLive
+    ? 'radial-gradient(ellipse at 0% 0%, rgba(239,68,68,0.35) 0%, rgba(220,38,38,0.15) 40%, transparent 70%)'
+    : isCompleted
+    ? 'radial-gradient(ellipse at 0% 0%, rgba(16,185,129,0.3) 0%, rgba(20,184,166,0.15) 40%, transparent 70%)'
+    : 'radial-gradient(ellipse at 0% 0%, rgba(99,102,241,0.35) 0%, rgba(139,92,246,0.18) 40%, transparent 70%)';
+
+  const oilOrb2 = isLive
+    ? 'radial-gradient(ellipse at 100% 100%, rgba(245,158,11,0.3) 0%, rgba(251,146,60,0.15) 40%, transparent 70%)'
+    : isCompleted
+    ? 'radial-gradient(ellipse at 100% 100%, rgba(34,211,238,0.25) 0%, rgba(16,185,129,0.12) 40%, transparent 70%)'
+    : 'radial-gradient(ellipse at 100% 100%, rgba(236,72,153,0.3) 0%, rgba(244,114,182,0.15) 40%, transparent 70%)';
+
+  const oilOrb3 = isLive
+    ? 'radial-gradient(ellipse at 100% 0%, rgba(168,85,247,0.2) 0%, rgba(192,132,252,0.08) 50%, transparent 70%)'
+    : isCompleted
+    ? 'radial-gradient(ellipse at 100% 0%, rgba(99,102,241,0.2) 0%, rgba(139,92,246,0.08) 50%, transparent 70%)'
+    : 'radial-gradient(ellipse at 100% 0%, rgba(34,211,238,0.2) 0%, rgba(14,165,233,0.08) 50%, transparent 70%)';
+
+  const borderGlow = isLive
+    ? '0 0 0 1px rgba(239,68,68,0.5), 0 0 40px rgba(239,68,68,0.12), 0 24px 64px rgba(0,0,0,0.7)'
+    : isCompleted
+    ? '0 0 0 1px rgba(16,185,129,0.3), 0 0 30px rgba(16,185,129,0.08), 0 24px 64px rgba(0,0,0,0.65)'
+    : '0 0 0 1px rgba(99,102,241,0.3), 0 0 30px rgba(99,102,241,0.08), 0 24px 64px rgba(0,0,0,0.65)';
+
+  const accentLine = isLive
+    ? 'linear-gradient(90deg, transparent, rgba(239,68,68,0.8), rgba(245,158,11,0.8), rgba(168,85,247,0.6), transparent)'
+    : isCompleted
+    ? 'linear-gradient(90deg, transparent, rgba(16,185,129,0.8), rgba(34,211,238,0.8), rgba(99,102,241,0.6), transparent)'
+    : 'linear-gradient(90deg, transparent, rgba(99,102,241,0.8), rgba(236,72,153,0.8), rgba(245,158,11,0.6), transparent)';
 
   return (
     <>
       <motion.div
-        className="group relative overflow-hidden rounded-2xl cursor-default select-none"
-        style={{
-          background: 'linear-gradient(145deg, rgba(255,255,255,0.07) 0%, rgba(255,255,255,0.03) 100%)',
-          backdropFilter: 'blur(20px)',
-          border: cardBorderStyle,
-          boxShadow: cardGlowStyle,
-        }}
+        className="group relative overflow-hidden rounded-3xl cursor-default select-none"
+        style={{ background: oilBg, boxShadow: borderGlow }}
         whileHover={{
-          y: -6,
+          y: -8,
           boxShadow: isLive
-            ? '0 0 60px rgba(239,68,68,0.25), 0 30px 80px rgba(0,0,0,0.5)'
-            : '0 0 40px rgba(99,102,241,0.2), 0 30px 80px rgba(0,0,0,0.5)',
-          borderColor: isLive ? 'rgba(239,68,68,0.8)' : isCompleted ? 'rgba(16,185,129,0.5)' : 'rgba(99,102,241,0.5)',
-          transition: { duration: 0.25, ease: 'easeOut' },
+            ? '0 0 0 1px rgba(239,68,68,0.7), 0 0 70px rgba(239,68,68,0.2), 0 36px 80px rgba(0,0,0,0.8)'
+            : isCompleted
+            ? '0 0 0 1px rgba(16,185,129,0.5), 0 0 60px rgba(16,185,129,0.15), 0 36px 80px rgba(0,0,0,0.75)'
+            : '0 0 0 1px rgba(99,102,241,0.6), 0 0 60px rgba(139,92,246,0.18), 0 36px 80px rgba(0,0,0,0.75)',
+          transition: { duration: 0.28, ease: 'easeOut' },
         }}
       >
-        {/* Live pulse ring */}
+        {/* ── OIL LAYER 1: large ambient blobs ── */}
+        <div className="absolute inset-0 pointer-events-none" style={{ background: oilOrb1 }} />
+        <div className="absolute inset-0 pointer-events-none" style={{ background: oilOrb2 }} />
+        <div className="absolute inset-0 pointer-events-none" style={{ background: oilOrb3 }} />
+
+        {/* ── OIL LAYER 2: mid-card iridescent sweep ── */}
+        <div
+          className="absolute inset-0 pointer-events-none opacity-20"
+          style={{
+            background: 'conic-gradient(from 200deg at 60% 50%, #7c3aed22, #06b6d422, #ec489922, #f59e0b22, #7c3aed22)',
+          }}
+        />
+
+        {/* ── DIAGONAL LIGHT STREAK (top-left to bottom-right) ── */}
+        <div
+          className="absolute pointer-events-none"
+          style={{
+            top: '-30%', left: '-10%',
+            width: '55%', height: '200%',
+            transform: 'rotate(-25deg)',
+            background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.025), transparent)',
+          }}
+        />
+
+        {/* ── TOP RAINBOW ACCENT LINE ── */}
+        <div
+          className="absolute top-0 left-0 right-0 h-[2px] pointer-events-none"
+          style={{ background: accentLine }}
+        />
+
+        {/* ── LIVE RING ── */}
         {isLive && (
           <motion.div
-            className="absolute inset-0 rounded-2xl pointer-events-none"
-            style={{ border: '2px solid rgba(239,68,68,0.4)' }}
-            animate={{ opacity: [0.4, 1, 0.4] }}
-            transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
+            className="absolute inset-0 rounded-3xl pointer-events-none"
+            style={{ boxShadow: 'inset 0 0 0 1.5px rgba(239,68,68,0.35)' }}
+            animate={{ opacity: [0.5, 1, 0.5] }}
+            transition={{ duration: 1.6, repeat: Infinity, ease: 'easeInOut' }}
           />
         )}
 
-        {/* Hover shimmer overlay */}
-        <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none">
-          <div
-            className="absolute inset-0 rounded-2xl"
-            style={{
-              background: isLive
-                ? 'linear-gradient(135deg, rgba(239,68,68,0.06), rgba(220,38,38,0.03))'
-                : isCompleted
-                ? 'linear-gradient(135deg, rgba(16,185,129,0.06), rgba(5,150,105,0.03))'
-                : 'linear-gradient(135deg, rgba(99,102,241,0.08), rgba(147,51,234,0.04))',
-            }}
-          />
-        </div>
+        {/* ── HOVER SHEEN ── */}
+        <motion.div
+          className="absolute inset-0 pointer-events-none rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+          style={{
+            background: 'linear-gradient(135deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.01) 50%, rgba(255,255,255,0.04) 100%)',
+          }}
+        />
 
         <div className="relative flex flex-col">
 
-          {/* ── TOP HEADER BAR ── */}
-          <div className="flex items-center justify-between px-5 pt-4 pb-3 border-b border-white/[0.06]">
-            {/* Status badge */}
-            <div className="flex items-center gap-2">
+          {/* ── HEADER ── */}
+          <div className="flex items-center justify-between px-5 pt-5 pb-3">
+            <div className="flex items-center gap-2 flex-wrap">
               {isLive ? (
                 <motion.span
                   className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-black tracking-widest uppercase"
                   style={{
-                    background: 'linear-gradient(135deg, rgba(239,68,68,0.25), rgba(220,38,38,0.15))',
-                    border: '1px solid rgba(239,68,68,0.5)',
-                    color: '#f87171',
+                    background: 'linear-gradient(135deg, rgba(239,68,68,0.3), rgba(220,38,38,0.18))',
+                    border: '1px solid rgba(239,68,68,0.55)',
+                    color: '#fca5a5',
+                    boxShadow: '0 0 16px rgba(239,68,68,0.25)',
                   }}
-                  animate={{ opacity: [1, 0.7, 1] }}
-                  transition={{ duration: 1.2, repeat: Infinity, ease: 'easeInOut' }}
+                  animate={{ opacity: [1, 0.65, 1] }}
+                  transition={{ duration: 1.1, repeat: Infinity }}
                 >
                   <motion.span
-                    className="w-2 h-2 rounded-full bg-red-500 inline-block"
-                    animate={{ scale: [1, 1.4, 1], opacity: [1, 0.5, 1] }}
-                    transition={{ duration: 1, repeat: Infinity }}
+                    className="w-2 h-2 rounded-full bg-red-400 inline-block"
+                    animate={{ scale: [1, 1.5, 1], opacity: [1, 0.4, 1] }}
+                    transition={{ duration: 0.9, repeat: Infinity }}
                   />
-                  LIVE
+                  LIVE NOW
                 </motion.span>
               ) : isCompleted ? (
                 <span
                   className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider"
                   style={{
-                    background: 'rgba(16,185,129,0.15)',
-                    border: '1px solid rgba(16,185,129,0.3)',
-                    color: '#34d399',
+                    background: 'linear-gradient(135deg, rgba(16,185,129,0.2), rgba(6,182,212,0.12))',
+                    border: '1px solid rgba(16,185,129,0.4)',
+                    color: '#6ee7b7',
+                    boxShadow: '0 0 12px rgba(16,185,129,0.15)',
                   }}
                 >
-                  <Trophy size={10} /> Completed
+                  <Trophy size={10} strokeWidth={2.5} /> Completed
                 </span>
               ) : (
                 <span
                   className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider"
                   style={{
-                    background: 'rgba(99,102,241,0.15)',
-                    border: '1px solid rgba(99,102,241,0.3)',
-                    color: '#a5b4fc',
+                    background: 'linear-gradient(135deg, rgba(99,102,241,0.22), rgba(168,85,247,0.14))',
+                    border: '1px solid rgba(99,102,241,0.45)',
+                    color: '#c4b5fd',
+                    boxShadow: '0 0 12px rgba(99,102,241,0.2)',
                   }}
                 >
-                  <Zap size={10} /> Upcoming
+                  <Zap size={10} strokeWidth={2.5} /> Upcoming
                 </span>
               )}
 
-              {/* Playoff type badge */}
               {match.playoffType && (
                 <span
-                  className="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider"
+                  className="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider"
                   style={{
-                    background: 'rgba(245,158,11,0.15)',
-                    border: '1px solid rgba(245,158,11,0.3)',
-                    color: '#fbbf24',
+                    background: 'linear-gradient(135deg, rgba(245,158,11,0.22), rgba(251,146,60,0.14))',
+                    border: '1px solid rgba(245,158,11,0.45)',
+                    color: '#fde68a',
+                    boxShadow: '0 0 10px rgba(245,158,11,0.15)',
                   }}
                 >
-                  {match.playoffType}
+                  ⚡ {match.playoffType}
                 </span>
               )}
             </div>
 
-            {/* Match number */}
             {matchNumberDisplay && matchNumberDisplay !== 'TBD' && (
               <span
-                className="text-[11px] font-bold tracking-wider"
-                style={{ color: 'rgba(255,215,0,0.7)' }}
+                className="text-[11px] font-black tracking-widest px-2 py-1 rounded-lg"
+                style={{
+                  background: 'rgba(255,215,0,0.08)',
+                  border: '1px solid rgba(255,215,0,0.2)',
+                  color: 'rgba(255,215,0,0.85)',
+                  boxShadow: '0 0 10px rgba(255,215,0,0.1)',
+                }}
               >
                 {matchNumberDisplay}
               </span>
             )}
           </div>
 
-          {/* ── TEAMS HERO SECTION ── */}
-          <div className="px-5 py-5">
-            <div className="flex items-center justify-between gap-3">
+          {/* ── TEAMS BATTLE ARENA ── */}
+          <div className="px-4 py-2 pb-4">
 
-              {/* Team 1 */}
-              <div className="flex-1 flex flex-col items-center gap-2 min-w-0">
+            {/* Decorative cricket pitch strip */}
+            <div
+              className="absolute left-1/2 -translate-x-1/2 w-[3px] pointer-events-none"
+              style={{
+                top: '80px', height: '120px',
+                background: isLive
+                  ? 'linear-gradient(to bottom, transparent, rgba(239,68,68,0.4), rgba(245,158,11,0.4), transparent)'
+                  : isCompleted
+                  ? 'linear-gradient(to bottom, transparent, rgba(16,185,129,0.35), rgba(34,211,238,0.35), transparent)'
+                  : 'linear-gradient(to bottom, transparent, rgba(99,102,241,0.4), rgba(236,72,153,0.35), transparent)',
+                filter: 'blur(1px)',
+              }}
+            />
+
+            <div className="flex items-center justify-between gap-2">
+
+              {/* ── TEAM 1 ── */}
+              <div className="flex-1 flex flex-col items-center gap-2.5 min-w-0">
+                {/* Logo with multi-ring glow */}
                 <motion.div
-                  className="relative w-[68px] h-[68px] rounded-2xl flex items-center justify-center overflow-hidden flex-shrink-0"
-                  style={{
-                    background: 'linear-gradient(145deg, rgba(255,255,255,0.1), rgba(255,255,255,0.04))',
-                    border: '1.5px solid rgba(255,255,255,0.12)',
-                    boxShadow: '0 8px 24px rgba(0,0,0,0.3)',
-                  }}
-                  whileHover={{ scale: 1.08, transition: { duration: 0.2 } }}
+                  className="relative flex items-center justify-center flex-shrink-0"
+                  whileHover={{ scale: 1.1, transition: { duration: 0.2 } }}
                 >
-                  {renderTeamLogo(match.team1)}
+                  {/* outer glow ring */}
+                  <div
+                    className="absolute inset-[-8px] rounded-2xl opacity-40 group-hover:opacity-70 transition-opacity duration-400"
+                    style={{
+                      background: isLive
+                        ? 'radial-gradient(circle, rgba(239,68,68,0.5), transparent 70%)'
+                        : isCompleted
+                        ? 'radial-gradient(circle, rgba(16,185,129,0.45), transparent 70%)'
+                        : 'radial-gradient(circle, rgba(99,102,241,0.5), transparent 70%)',
+                      filter: 'blur(6px)',
+                    }}
+                  />
+                  {/* inner ring */}
+                  <div
+                    className="absolute inset-[-2px] rounded-2xl"
+                    style={{
+                      background: 'transparent',
+                      border: '1px solid rgba(255,255,255,0.12)',
+                      boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.08)',
+                    }}
+                  />
+                  <div
+                    className="relative w-[76px] h-[76px] rounded-2xl flex items-center justify-center overflow-hidden"
+                    style={{
+                      background: 'linear-gradient(145deg, rgba(255,255,255,0.12), rgba(255,255,255,0.04))',
+                      border: '1.5px solid rgba(255,255,255,0.15)',
+                      boxShadow: '0 8px 32px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.1)',
+                    }}
+                  >
+                    {renderTeamLogo(match.team1)}
+                  </div>
                 </motion.div>
+
                 <div className="text-center w-full">
-                  <p className="text-white font-black text-base leading-tight tracking-tight">
+                  <p
+                    className="font-black text-base leading-tight tracking-tight"
+                    style={{
+                      background: 'linear-gradient(135deg, #ffffff, #e2e8f0)',
+                      WebkitBackgroundClip: 'text',
+                      WebkitTextFillColor: 'transparent',
+                    }}
+                  >
                     {match.team1.shortName}
                   </p>
-                  <p className="text-gray-500 text-[10px] mt-0.5 truncate max-w-[90px] mx-auto">
+                  <p className="text-[10px] mt-0.5 truncate max-w-[90px] mx-auto" style={{ color: 'rgba(148,163,184,0.7)' }}>
                     {match.team1.name}
                   </p>
                 </div>
-                {/* Score for team1 */}
+
+                {/* Score display */}
                 {(match.score || match.team1Score) && (
-                  <div className="text-center">
+                  <div
+                    className="text-center px-3 py-1.5 rounded-xl"
+                    style={{
+                      background: 'rgba(255,255,255,0.06)',
+                      border: '1px solid rgba(255,255,255,0.1)',
+                    }}
+                  >
                     {match.team1Score ? (
-                      <p className="text-white font-black text-lg leading-none">{match.team1Score}</p>
+                      <p className="font-black text-base leading-none" style={{ color: '#f1f5f9' }}>{match.team1Score}</p>
                     ) : match.score ? (
                       <>
-                        <p className="text-white font-black text-xl leading-none">
+                        <p className="font-black text-xl leading-none" style={{
+                          background: 'linear-gradient(135deg, #fff, #94a3b8)',
+                          WebkitBackgroundClip: 'text',
+                          WebkitTextFillColor: 'transparent',
+                        }}>
                           {match.score.team1.runs}
-                          <span className="text-gray-400 font-bold text-base">/{match.score.team1.wickets}</span>
+                          <span style={{ WebkitTextFillColor: 'rgba(148,163,184,0.7)', fontSize: '0.85em' }}>/{match.score.team1.wickets}</span>
                         </p>
-                        <p className="text-gray-500 text-[11px] mt-0.5">{match.score.team1.overs} ov</p>
+                        <p className="text-[10px] mt-0.5" style={{ color: 'rgba(148,163,184,0.6)' }}>{match.score.team1.overs} ov</p>
                       </>
                     ) : null}
                   </div>
                 )}
               </div>
 
-              {/* VS CENTER */}
-              <div className="flex flex-col items-center gap-1.5 flex-shrink-0">
-                <div
-                  className="w-px h-8"
+              {/* ── VS CLASH CENTER ── */}
+              <div className="flex flex-col items-center gap-0 flex-shrink-0 px-1">
+                {/* top beam */}
+                <div className="w-[1.5px] h-10" style={{
+                  background: isLive
+                    ? 'linear-gradient(to bottom, transparent, rgba(239,68,68,0.5), rgba(245,158,11,0.4))'
+                    : isCompleted
+                    ? 'linear-gradient(to bottom, transparent, rgba(16,185,129,0.5), rgba(34,211,238,0.4))'
+                    : 'linear-gradient(to bottom, transparent, rgba(99,102,241,0.5), rgba(236,72,153,0.4))',
+                }} />
+
+                {/* VS pill */}
+                <motion.div
                   style={{
-                    background: 'linear-gradient(to bottom, transparent, rgba(255,255,255,0.15), transparent)',
+                    background: isLive
+                      ? 'linear-gradient(135deg, #7f1d1d, #450a0a, #1c0533)'
+                      : isCompleted
+                      ? 'linear-gradient(135deg, #052e16, #014d2e, #0c1a3e)'
+                      : 'linear-gradient(135deg, #1e1b4b, #3b0764, #1e1b4b)',
+                    border: isLive
+                      ? '1.5px solid rgba(239,68,68,0.5)'
+                      : isCompleted
+                      ? '1.5px solid rgba(16,185,129,0.5)'
+                      : '1.5px solid rgba(99,102,241,0.5)',
+                    boxShadow: isLive
+                      ? '0 0 24px rgba(239,68,68,0.3), 0 0 48px rgba(239,68,68,0.1)'
+                      : isCompleted
+                      ? '0 0 24px rgba(16,185,129,0.3), 0 0 48px rgba(16,185,129,0.1)'
+                      : '0 0 24px rgba(99,102,241,0.3), 0 0 48px rgba(99,102,241,0.1)',
                   }}
-                />
-                <div
-                  className="px-3 py-1.5 rounded-xl text-xs font-black tracking-widest"
-                  style={{
-                    background: 'linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05))',
-                    border: '1px solid rgba(255,255,255,0.12)',
-                    color: 'rgba(255,255,255,0.5)',
-                    boxShadow: isLive ? '0 0 20px rgba(239,68,68,0.2)' : 'none',
-                  }}
+                  className="px-3 py-2 rounded-xl"
+                  animate={isLive ? { boxShadow: [
+                    '0 0 20px rgba(239,68,68,0.3)', '0 0 36px rgba(239,68,68,0.5)', '0 0 20px rgba(239,68,68,0.3)'
+                  ]} : {}}
+                  transition={{ duration: 1.4, repeat: Infinity }}
                 >
-                  VS
-                </div>
-                <div
-                  className="w-px h-8"
-                  style={{
-                    background: 'linear-gradient(to bottom, transparent, rgba(255,255,255,0.15), transparent)',
-                  }}
-                />
+                  <span
+                    className="text-[13px] font-black tracking-widest"
+                    style={{
+                      background: isLive
+                        ? 'linear-gradient(135deg, #fca5a5, #fb923c, #f87171)'
+                        : isCompleted
+                        ? 'linear-gradient(135deg, #6ee7b7, #67e8f9, #34d399)'
+                        : 'linear-gradient(135deg, #c4b5fd, #f9a8d4, #a5b4fc)',
+                      WebkitBackgroundClip: 'text',
+                      WebkitTextFillColor: 'transparent',
+                    }}
+                  >
+                    VS
+                  </span>
+                </motion.div>
+
+                {/* bottom beam */}
+                <div className="w-[1.5px] h-10" style={{
+                  background: isLive
+                    ? 'linear-gradient(to bottom, rgba(245,158,11,0.4), rgba(239,68,68,0.5), transparent)'
+                    : isCompleted
+                    ? 'linear-gradient(to bottom, rgba(34,211,238,0.4), rgba(16,185,129,0.5), transparent)'
+                    : 'linear-gradient(to bottom, rgba(236,72,153,0.4), rgba(99,102,241,0.5), transparent)',
+                }} />
               </div>
 
-              {/* Team 2 */}
-              <div className="flex-1 flex flex-col items-center gap-2 min-w-0">
+              {/* ── TEAM 2 ── */}
+              <div className="flex-1 flex flex-col items-center gap-2.5 min-w-0">
                 <motion.div
-                  className="relative w-[68px] h-[68px] rounded-2xl flex items-center justify-center overflow-hidden flex-shrink-0"
-                  style={{
-                    background: 'linear-gradient(145deg, rgba(255,255,255,0.1), rgba(255,255,255,0.04))',
-                    border: '1.5px solid rgba(255,255,255,0.12)',
-                    boxShadow: '0 8px 24px rgba(0,0,0,0.3)',
-                  }}
-                  whileHover={{ scale: 1.08, transition: { duration: 0.2 } }}
+                  className="relative flex items-center justify-center flex-shrink-0"
+                  whileHover={{ scale: 1.1, transition: { duration: 0.2 } }}
                 >
-                  {renderTeamLogo(match.team2)}
+                  <div
+                    className="absolute inset-[-8px] rounded-2xl opacity-40 group-hover:opacity-70 transition-opacity duration-400"
+                    style={{
+                      background: isLive
+                        ? 'radial-gradient(circle, rgba(245,158,11,0.5), transparent 70%)'
+                        : isCompleted
+                        ? 'radial-gradient(circle, rgba(34,211,238,0.45), transparent 70%)'
+                        : 'radial-gradient(circle, rgba(236,72,153,0.5), transparent 70%)',
+                      filter: 'blur(6px)',
+                    }}
+                  />
+                  <div
+                    className="absolute inset-[-2px] rounded-2xl"
+                    style={{ border: '1px solid rgba(255,255,255,0.12)', boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.08)' }}
+                  />
+                  <div
+                    className="relative w-[76px] h-[76px] rounded-2xl flex items-center justify-center overflow-hidden"
+                    style={{
+                      background: 'linear-gradient(145deg, rgba(255,255,255,0.12), rgba(255,255,255,0.04))',
+                      border: '1.5px solid rgba(255,255,255,0.15)',
+                      boxShadow: '0 8px 32px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.1)',
+                    }}
+                  >
+                    {renderTeamLogo(match.team2)}
+                  </div>
                 </motion.div>
+
                 <div className="text-center w-full">
-                  <p className="text-white font-black text-base leading-tight tracking-tight">
+                  <p
+                    className="font-black text-base leading-tight tracking-tight"
+                    style={{
+                      background: 'linear-gradient(135deg, #ffffff, #e2e8f0)',
+                      WebkitBackgroundClip: 'text',
+                      WebkitTextFillColor: 'transparent',
+                    }}
+                  >
                     {match.team2.shortName}
                   </p>
-                  <p className="text-gray-500 text-[10px] mt-0.5 truncate max-w-[90px] mx-auto">
+                  <p className="text-[10px] mt-0.5 truncate max-w-[90px] mx-auto" style={{ color: 'rgba(148,163,184,0.7)' }}>
                     {match.team2.name}
                   </p>
                 </div>
-                {/* Score for team2 */}
+
                 {(match.score || match.team2Score) && (
-                  <div className="text-center">
+                  <div
+                    className="text-center px-3 py-1.5 rounded-xl"
+                    style={{
+                      background: 'rgba(255,255,255,0.06)',
+                      border: '1px solid rgba(255,255,255,0.1)',
+                    }}
+                  >
                     {match.team2Score ? (
-                      <p className="text-white font-black text-lg leading-none">{match.team2Score}</p>
+                      <p className="font-black text-base leading-none" style={{ color: '#f1f5f9' }}>{match.team2Score}</p>
                     ) : match.score ? (
                       <>
-                        <p className="text-white font-black text-xl leading-none">
+                        <p className="font-black text-xl leading-none" style={{
+                          background: 'linear-gradient(135deg, #fff, #94a3b8)',
+                          WebkitBackgroundClip: 'text',
+                          WebkitTextFillColor: 'transparent',
+                        }}>
                           {match.score.team2.runs}
-                          <span className="text-gray-400 font-bold text-base">/{match.score.team2.wickets}</span>
+                          <span style={{ WebkitTextFillColor: 'rgba(148,163,184,0.7)', fontSize: '0.85em' }}>/{match.score.team2.wickets}</span>
                         </p>
-                        <p className="text-gray-500 text-[11px] mt-0.5">{match.score.team2.overs} ov</p>
+                        <p className="text-[10px] mt-0.5" style={{ color: 'rgba(148,163,184,0.6)' }}>{match.score.team2.overs} ov</p>
                       </>
                     ) : null}
                   </div>
@@ -384,7 +569,10 @@ export default function MatchCard({ match, index = 0, players }: MatchCardProps)
               (String(match.team1.id).includes('tbd-') || String(match.team2.id).includes('tbd-') ||
                match.team1.shortName?.includes('Place') || match.team2.shortName?.includes('Place') ||
                match.team1.shortName === 'Winner of Eliminator' || match.team2.shortName === 'Winner of Eliminator') && (
-                <div className="mt-3 rounded-xl px-3 py-2" style={{ background: 'rgba(139,92,246,0.1)', border: '1px solid rgba(139,92,246,0.25)' }}>
+                <div className="mt-4 rounded-2xl px-3 py-2.5" style={{
+                  background: 'linear-gradient(135deg, rgba(139,92,246,0.12), rgba(99,102,241,0.06))',
+                  border: '1px solid rgba(139,92,246,0.3)',
+                }}>
                   <p className="text-[11px] text-purple-300 text-center leading-snug">
                     💡 Placeholders from 5 WPL teams, determined by points table
                   </p>
@@ -393,24 +581,39 @@ export default function MatchCard({ match, index = 0, players }: MatchCardProps)
             )}
           </div>
 
+          {/* ── DIVIDER ── */}
+          <div className="mx-5 h-px mb-4" style={{
+            background: isLive
+              ? 'linear-gradient(90deg, transparent, rgba(239,68,68,0.3), rgba(245,158,11,0.3), rgba(168,85,247,0.2), transparent)'
+              : isCompleted
+              ? 'linear-gradient(90deg, transparent, rgba(16,185,129,0.3), rgba(34,211,238,0.25), rgba(99,102,241,0.2), transparent)'
+              : 'linear-gradient(90deg, transparent, rgba(99,102,241,0.3), rgba(236,72,153,0.25), rgba(245,158,11,0.2), transparent)',
+          }} />
+
           {/* ── RESULT BAR ── */}
           {match.result && (
             <div
-              className="mx-5 mb-4 px-4 py-2.5 rounded-xl"
+              className="mx-5 mb-4 px-4 py-3 rounded-2xl"
               style={{
-                background: 'linear-gradient(135deg, rgba(255,215,0,0.1), rgba(245,158,11,0.06))',
-                border: '1px solid rgba(255,215,0,0.2)',
+                background: 'linear-gradient(135deg, rgba(255,215,0,0.12), rgba(245,158,11,0.06), rgba(251,146,60,0.05))',
+                border: '1px solid rgba(255,215,0,0.25)',
+                boxShadow: '0 0 20px rgba(255,215,0,0.06), inset 0 1px 0 rgba(255,215,0,0.1)',
               }}
             >
-              <p className="text-[12px] font-bold text-center leading-snug"
-                 style={{ color: '#fbbf24' }}>
-                <Trophy size={11} className="inline mr-1.5 mb-0.5" />
-                {match.result}
+              <p
+                className="text-[12px] font-bold text-center leading-snug"
+                style={{
+                  background: 'linear-gradient(135deg, #fde68a, #fbbf24, #f59e0b)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                }}
+              >
+                🏆 {match.result}
               </p>
             </div>
           )}
 
-          {/* ── COUNTDOWN (upcoming) ── */}
+          {/* ── COUNTDOWN ── */}
           {match.status === 'upcoming' && (
             <div className="mx-5 mb-4">
               <CountdownTimer
@@ -422,57 +625,56 @@ export default function MatchCard({ match, index = 0, players }: MatchCardProps)
             </div>
           )}
 
-          {/* ── INFO FOOTER ── */}
+          {/* ── INFO STRIP ── */}
           <div
-            className="mx-5 mb-4 rounded-xl overflow-hidden"
+            className="mx-5 mb-4 rounded-2xl overflow-hidden"
             style={{
               background: 'rgba(255,255,255,0.04)',
-              border: '1px solid rgba(255,255,255,0.07)',
+              border: '1px solid rgba(255,255,255,0.08)',
+              boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.04)',
             }}
           >
-            <div className="flex items-center gap-3 px-3 py-2.5 border-b border-white/[0.05]">
-              <Calendar size={11} className="text-gray-500 flex-shrink-0" />
-              <span className="text-gray-300 text-[12px] font-semibold">
+            <div className="flex items-center gap-2.5 px-3.5 py-2.5" style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+              <Calendar size={11} style={{ color: isLive ? '#f87171' : isCompleted ? '#34d399' : '#a5b4fc', flexShrink: 0 }} />
+              <span className="text-[12px] font-semibold" style={{ color: '#e2e8f0' }}>
                 {formatDate(match.date)}
               </span>
             </div>
-            <div className="flex items-center gap-3 px-3 py-2.5 border-b border-white/[0.05]">
-              <Clock size={11} className="text-gray-500 flex-shrink-0" />
-              <span className="text-gray-300 text-[12px]">
+            <div className="flex items-center gap-2.5 px-3.5 py-2.5" style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+              <Clock size={11} style={{ color: isLive ? '#fb923c' : isCompleted ? '#67e8f9' : '#c4b5fd', flexShrink: 0 }} />
+              <span className="text-[12px]" style={{ color: '#cbd5e1' }}>
                 {formatMatchTime(match.time, match.date)}
               </span>
             </div>
-            <div className="flex items-start gap-3 px-3 py-2.5">
-              <MapPin size={11} className="text-gray-500 flex-shrink-0 mt-0.5" />
-              <span className="text-gray-400 text-[12px] leading-snug line-clamp-2">
+            <div className="flex items-start gap-2.5 px-3.5 py-2.5">
+              <MapPin size={11} style={{ color: 'rgba(148,163,184,0.6)', flexShrink: 0, marginTop: '1px' }} />
+              <span className="text-[12px] leading-snug line-clamp-2" style={{ color: 'rgba(148,163,184,0.8)' }}>
                 {match.venue}
               </span>
             </div>
           </div>
 
-          {/* ── ACTION BUTTONS ── */}
+          {/* ── BUTTONS ── */}
           <div className="px-5 pb-5 flex gap-2.5">
-            {/* Playing 11 Button */}
             {match.playing11 && players && players.length > 0 && (
               <motion.button
                 onClick={() => setShowPlaying11Modal(true)}
-                className="group relative overflow-hidden flex-1 rounded-xl py-3 text-sm font-black tracking-tight flex items-center justify-center gap-2"
+                className="group/btn relative overflow-hidden flex-1 rounded-2xl py-3 text-sm font-black tracking-tight flex items-center justify-center gap-2"
                 style={{
-                  background: 'linear-gradient(135deg, #F59E0B, #D97706)',
-                  border: '1.5px solid rgba(245,158,11,0.4)',
+                  background: 'linear-gradient(135deg, #92400e, #b45309, #d97706)',
+                  border: '1.5px solid rgba(245,158,11,0.45)',
                   color: '#fff',
-                  boxShadow: '0 6px 24px rgba(245,158,11,0.3)',
+                  boxShadow: '0 6px 28px rgba(180,83,9,0.4), inset 0 1px 0 rgba(255,255,255,0.15)',
                 }}
-                whileHover={{ scale: 1.03, boxShadow: '0 10px 36px rgba(245,158,11,0.5)' }}
+                whileHover={{ scale: 1.03, boxShadow: '0 12px 40px rgba(245,158,11,0.55), inset 0 1px 0 rgba(255,255,255,0.2)' }}
                 whileTap={{ scale: 0.97 }}
               >
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-120%] group-hover:translate-x-[120%] transition-transform duration-700" />
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/25 to-transparent -translate-x-full group-hover/btn:translate-x-full transition-transform duration-700" />
                 <Users size={14} className="relative z-10" />
                 <span className="relative z-10">Playing 11</span>
               </motion.button>
             )}
 
-            {/* Main CTA Button */}
             <motion.button
               onClick={() => {
                 if (match.status === 'completed' || match.status === 'live') {
@@ -483,46 +685,52 @@ export default function MatchCard({ match, index = 0, players }: MatchCardProps)
                   alert('Opening stream...');
                 }
               }}
-              className="group relative overflow-hidden flex-1 rounded-xl py-3 text-sm font-black tracking-tight flex items-center justify-center gap-2"
+              className="group/btn relative overflow-hidden flex-1 rounded-2xl py-3 text-sm font-black tracking-tight flex items-center justify-center gap-2"
               style={{
                 background: isLive
-                  ? 'linear-gradient(135deg, #EF4444, #DC2626)'
+                  ? 'linear-gradient(135deg, #7f1d1d, #991b1b, #dc2626)'
                   : isCompleted
-                  ? 'linear-gradient(135deg, #10B981, #059669)'
-                  : 'linear-gradient(135deg, #6366f1, #9333ea)',
+                  ? 'linear-gradient(135deg, #052e16, #065f46, #059669)'
+                  : 'linear-gradient(135deg, #1e1b4b, #4c1d95, #7c3aed)',
                 border: isLive
-                  ? '1.5px solid rgba(239,68,68,0.4)'
+                  ? '1.5px solid rgba(239,68,68,0.5)'
                   : isCompleted
-                  ? '1.5px solid rgba(16,185,129,0.4)'
-                  : '1.5px solid rgba(99,102,241,0.4)',
+                  ? '1.5px solid rgba(16,185,129,0.5)'
+                  : '1.5px solid rgba(99,102,241,0.5)',
                 color: '#fff',
                 boxShadow: isLive
-                  ? '0 6px 24px rgba(239,68,68,0.35)'
+                  ? '0 6px 28px rgba(220,38,38,0.4), inset 0 1px 0 rgba(255,255,255,0.12)'
                   : isCompleted
-                  ? '0 6px 24px rgba(16,185,129,0.3)'
-                  : '0 6px 24px rgba(99,102,241,0.3)',
+                  ? '0 6px 28px rgba(5,150,105,0.35), inset 0 1px 0 rgba(255,255,255,0.12)'
+                  : '0 6px 28px rgba(124,58,237,0.4), inset 0 1px 0 rgba(255,255,255,0.12)',
               }}
               whileHover={{
                 scale: 1.03,
                 boxShadow: isLive
-                  ? '0 10px 36px rgba(239,68,68,0.55)'
+                  ? '0 14px 44px rgba(239,68,68,0.6), inset 0 1px 0 rgba(255,255,255,0.18)'
                   : isCompleted
-                  ? '0 10px 36px rgba(16,185,129,0.5)'
-                  : '0 10px 36px rgba(99,102,241,0.5)',
+                  ? '0 14px 44px rgba(16,185,129,0.5), inset 0 1px 0 rgba(255,255,255,0.18)'
+                  : '0 14px 44px rgba(124,58,237,0.55), inset 0 1px 0 rgba(255,255,255,0.18)',
               }}
               whileTap={{ scale: 0.97 }}
             >
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-120%] group-hover:translate-x-[120%] transition-transform duration-700" />
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover/btn:translate-x-full transition-transform duration-700" />
               <span className="relative z-10">
-                {isLive && 'Live Score'}
+                {isLive && '🔴 Live Score'}
                 {isCompleted && 'Scorecard'}
                 {match.status === 'upcoming' && 'Set Reminder'}
               </span>
-              <ChevronRight size={15} className="relative z-10 group-hover:translate-x-0.5 transition-transform duration-200" />
+              <ChevronRight size={15} className="relative z-10 group-hover/btn:translate-x-1 transition-transform duration-200" />
             </motion.button>
           </div>
 
         </div>
+
+        {/* ── BOTTOM RAINBOW ACCENT LINE ── */}
+        <div
+          className="absolute bottom-0 left-0 right-0 h-[1.5px] pointer-events-none opacity-60"
+          style={{ background: accentLine }}
+        />
       </motion.div>
 
       {/* Scorecard Modal - Using Portal */}
