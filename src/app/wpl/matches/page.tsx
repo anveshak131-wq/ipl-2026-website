@@ -256,7 +256,12 @@ export default function WPLMatchesPage() {
                     }}
                     whileHover={{ y: -8, transition: { duration: 0.2 } }}
                   >
-                    <MatchCard match={match} index={index} players={players} />
+                    <MatchCard
+                      match={match}
+                      index={index}
+                      players={players}
+                      detailHref={`/wpl/matches/${match.id}`}
+                    />
                   </motion.div>
                 ))}
               </motion.div>

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Match, Player } from '@/types';
 import { getAnimatedLogoPath, getLogoPath } from '@/lib/logoUtils';
@@ -17,14 +18,21 @@ interface MatchCardProps {
   match: Match;
   index?: number;
   players?: Player[]; // Optional players data for playing XI display
+  detailHref?: string;
 }
 
-export default function MatchCard({ match, index = 0, players }: MatchCardProps) {
+export default function MatchCard({ match, index = 0, players, detailHref }: MatchCardProps) {
+  const router = useRouter();
   const [showScorecardModal, setShowScorecardModal] = useState(false);
   const [showPlaying11Modal, setShowPlaying11Modal] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [scorecard, setScorecard] = useState<any>(null);
   const [loadingScorecard, setLoadingScorecard] = useState(false);
+  const matchCenterHref = detailHref || `/matches/${match.id}`;
+
+  const openMatchCenter = () => {
+    router.push(matchCenterHref);
+  };
 
   useEffect(() => {
     setMounted(true);
@@ -262,9 +270,19 @@ export default function MatchCard({ match, index = 0, players }: MatchCardProps)
   return (
     <>
       <motion.div
-        className="group relative overflow-hidden rounded-3xl cursor-default select-none"
+        className="group relative overflow-hidden rounded-3xl cursor-pointer select-none"
         style={{ background: palette.bg, boxShadow: borderGlow }}
         whileHover={{ y: -8, boxShadow: hoverGlow, transition: { duration: 0.28, ease: 'easeOut' } }}
+        onClick={openMatchCenter}
+        onKeyDown={(event) => {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            openMatchCenter();
+          }
+        }}
+        role="link"
+        tabIndex={0}
+        aria-label={`Open match center for ${match.team1.shortName} vs ${match.team2.shortName}`}
       >
         {/* ── OIL LAYER 1: large ambient blobs ── */}
         <div className="absolute inset-0 pointer-events-none" style={{ background: palette.orb1 }} />
@@ -688,7 +706,10 @@ export default function MatchCard({ match, index = 0, players }: MatchCardProps)
           <div className="px-5 pb-5 flex gap-2.5">
             {match.playing11 && players && players.length > 0 && (
               <motion.button
-                onClick={() => setShowPlaying11Modal(true)}
+                onClick={(event) => {
+                  event.stopPropagation();
+                  setShowPlaying11Modal(true);
+                }}
                 className="group/btn relative overflow-hidden flex-1 rounded-2xl py-3 text-sm font-black tracking-tight flex items-center justify-center gap-2"
                 style={{
                   background: 'linear-gradient(135deg, #92400e, #b45309, #d97706)',
@@ -706,14 +727,9 @@ export default function MatchCard({ match, index = 0, players }: MatchCardProps)
             )}
 
             <motion.button
-              onClick={() => {
-                if (match.status === 'completed' || match.status === 'live') {
-                  setShowScorecardModal(true);
-                } else if (match.status === 'upcoming') {
-                  alert('Reminder set!');
-                } else {
-                  alert('Opening stream...');
-                }
+              onClick={(event) => {
+                event.stopPropagation();
+                openMatchCenter();
               }}
               className="group/btn relative overflow-hidden flex-1 rounded-2xl py-3 text-sm font-black tracking-tight flex items-center justify-center gap-2"
               style={{
@@ -745,11 +761,7 @@ export default function MatchCard({ match, index = 0, players }: MatchCardProps)
               whileTap={{ scale: 0.97 }}
             >
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover/btn:translate-x-full transition-transform duration-700" />
-              <span className="relative z-10">
-                {isLive && '🔴 Live Score'}
-                {isCompleted && 'Scorecard'}
-                {match.status === 'upcoming' && 'Set Reminder'}
-              </span>
+              <span className="relative z-10">Match Center</span>
               <ChevronRight size={15} className="relative z-10 group-hover/btn:translate-x-1 transition-transform duration-200" />
             </motion.button>
           </div>
