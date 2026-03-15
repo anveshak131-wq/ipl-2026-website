@@ -157,18 +157,22 @@ export default function MatchesPage() {
 
   const pageOilTheme = currentLeague === 'wpl'
     ? {
-        base: 'linear-gradient(140deg, #0a0318 0%, #12062a 28%, #1c0830 45%, #0b1430 68%, #051025 100%)',
-        layerA: 'radial-gradient(120% 90% at 8% 10%, rgba(236,72,153,0.34) 0%, rgba(236,72,153,0.12) 42%, transparent 72%)',
-        layerB: 'radial-gradient(95% 85% at 92% 18%, rgba(168,85,247,0.3) 0%, rgba(168,85,247,0.1) 44%, transparent 72%)',
-        layerC: 'radial-gradient(100% 90% at 88% 88%, rgba(34,211,238,0.28) 0%, rgba(14,165,233,0.1) 45%, transparent 72%)',
-        conic: 'conic-gradient(from 210deg at 50% 50%, rgba(236,72,153,0.18), rgba(168,85,247,0.16), rgba(34,211,238,0.16), rgba(245,158,11,0.14), rgba(236,72,153,0.18))',
+        base: 'linear-gradient(145deg, #12091d 0%, #1f0f32 30%, #101a36 62%, #081628 100%)',
+        depth: 'radial-gradient(100% 120% at 50% 55%, rgba(9,11,20,0) 0%, rgba(9,11,20,0.45) 72%, rgba(5,8,18,0.82) 100%)',
+        glowTop: 'radial-gradient(80% 68% at 14% 8%, rgba(244,114,182,0.42) 0%, rgba(168,85,247,0.2) 52%, transparent 76%)',
+        glowBottom: 'radial-gradient(70% 62% at 84% 88%, rgba(34,211,238,0.36) 0%, rgba(14,165,233,0.16) 52%, transparent 78%)',
+        brushA: 'linear-gradient(110deg, rgba(236,72,153,0.26), rgba(168,85,247,0.14), rgba(59,130,246,0.08))',
+        brushB: 'linear-gradient(110deg, rgba(56,189,248,0.2), rgba(45,212,191,0.1), rgba(244,114,182,0.06))',
+        shimmer: 'linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,0.08), rgba(255,255,255,0))',
       }
     : {
-        base: 'linear-gradient(140deg, #070314 0%, #100523 26%, #1b092f 44%, #0e1735 66%, #05111f 100%)',
-        layerA: 'radial-gradient(120% 90% at 8% 12%, rgba(245,158,11,0.34) 0%, rgba(245,158,11,0.12) 42%, transparent 72%)',
-        layerB: 'radial-gradient(100% 85% at 92% 15%, rgba(99,102,241,0.32) 0%, rgba(99,102,241,0.12) 44%, transparent 72%)',
-        layerC: 'radial-gradient(96% 90% at 86% 86%, rgba(236,72,153,0.28) 0%, rgba(168,85,247,0.11) 45%, transparent 72%)',
-        conic: 'conic-gradient(from 200deg at 50% 50%, rgba(99,102,241,0.18), rgba(236,72,153,0.16), rgba(245,158,11,0.15), rgba(34,211,238,0.14), rgba(99,102,241,0.18))',
+        base: 'linear-gradient(145deg, #130c12 0%, #26111d 30%, #17233a 62%, #0a1b2b 100%)',
+        depth: 'radial-gradient(100% 120% at 50% 55%, rgba(9,11,20,0) 0%, rgba(9,11,20,0.45) 72%, rgba(5,8,18,0.82) 100%)',
+        glowTop: 'radial-gradient(82% 70% at 14% 10%, rgba(251,146,60,0.4) 0%, rgba(239,68,68,0.18) 50%, transparent 76%)',
+        glowBottom: 'radial-gradient(70% 60% at 84% 88%, rgba(56,189,248,0.34) 0%, rgba(99,102,241,0.16) 50%, transparent 78%)',
+        brushA: 'linear-gradient(112deg, rgba(245,158,11,0.24), rgba(236,72,153,0.12), rgba(99,102,241,0.08))',
+        brushB: 'linear-gradient(112deg, rgba(34,211,238,0.2), rgba(59,130,246,0.1), rgba(251,146,60,0.08))',
+        shimmer: 'linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,0.08), rgba(255,255,255,0))',
       };
 
   // Default to IPL for matches page (unless on /wpl/matches)
@@ -245,81 +249,61 @@ export default function MatchesPage() {
       <Navbar />
       
       <main className="relative py-16 min-h-screen overflow-hidden section-match-bg">
-        {/* Oil-color atmospheric background layers */}
+        {/* Oil-canvas base */}
         <div className="absolute inset-0" style={{ background: pageOilTheme.base }} />
-        <div className="absolute inset-0" style={{ background: pageOilTheme.layerA, mixBlendMode: 'screen' }} />
-        <div className="absolute inset-0" style={{ background: pageOilTheme.layerB, mixBlendMode: 'screen' }} />
-        <div className="absolute inset-0" style={{ background: pageOilTheme.layerC, mixBlendMode: 'screen' }} />
 
-        {/* Iridescent sweep */}
+        {/* Large paint lights */}
         <motion.div
-          className="absolute inset-[-20%] opacity-30"
-          style={{ background: pageOilTheme.conic, filter: 'blur(80px)' }}
-          animate={{ rotate: [0, 360] }}
-          transition={{ duration: 120, repeat: Infinity, ease: 'linear' }}
-        />
-
-        {/* Fine color grain to avoid flat gradients */}
-        <div
-          className="absolute inset-0 opacity-[0.10]"
-          style={{
-            backgroundImage:
-              'repeating-linear-gradient(0deg, rgba(255,255,255,0.06) 0px, rgba(255,255,255,0.06) 1px, transparent 1px, transparent 3px), repeating-linear-gradient(90deg, rgba(255,255,255,0.04) 0px, rgba(255,255,255,0.04) 1px, transparent 1px, transparent 3px)',
-            mixBlendMode: 'soft-light',
-          }}
-        />
-
-        {/* Floating color blobs */}
-        <motion.div
-          className="absolute -top-16 -right-10 w-[28rem] h-[28rem] rounded-full blur-3xl"
-          style={{
-            background: currentLeague === 'wpl'
-              ? 'radial-gradient(circle, rgba(236,72,153,0.38), rgba(168,85,247,0.22), transparent 70%)'
-              : 'radial-gradient(circle, rgba(245,158,11,0.36), rgba(236,72,153,0.2), transparent 70%)',
-          }}
-          animate={{ y: [0, -28, 0], x: [0, 18, 0], scale: [1, 1.12, 1] }}
-          transition={{ duration: 11, repeat: Infinity, ease: 'easeInOut' }}
-        />
-        <motion.div
-          className="absolute -bottom-24 left-[-6rem] w-[24rem] h-[24rem] rounded-full blur-3xl"
-          style={{
-            background: currentLeague === 'wpl'
-              ? 'radial-gradient(circle, rgba(34,211,238,0.34), rgba(14,165,233,0.18), transparent 70%)'
-              : 'radial-gradient(circle, rgba(99,102,241,0.34), rgba(168,85,247,0.18), transparent 70%)',
-          }}
-          animate={{ y: [0, 26, 0], x: [0, -16, 0], scale: [1, 1.16, 1] }}
-          transition={{ duration: 13, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
-        />
-        <motion.div
-          className="absolute top-[34%] left-[42%] w-[20rem] h-[20rem] rounded-full blur-3xl"
-          style={{
-            background: currentLeague === 'wpl'
-              ? 'radial-gradient(circle, rgba(250,204,21,0.24), rgba(236,72,153,0.16), transparent 70%)'
-              : 'radial-gradient(circle, rgba(34,211,238,0.22), rgba(59,130,246,0.14), transparent 70%)',
-          }}
-          animate={{ y: [0, -18, 0], x: [0, 14, 0], scale: [1, 1.2, 1] }}
-          transition={{ duration: 15, repeat: Infinity, ease: 'easeInOut', delay: 2 }}
-        />
-
-        {/* Decorative neon arcs */}
-        <motion.div
-          className="absolute -top-24 left-[8%] w-[34rem] h-[34rem] rounded-full border pointer-events-none"
-          style={{ borderColor: 'rgba(255,255,255,0.1)', boxShadow: '0 0 60px rgba(255,255,255,0.06)', clipPath: 'inset(0 45% 40% 0)' }}
-          animate={{ rotate: [0, 12, 0], opacity: [0.4, 0.7, 0.4] }}
+          className="absolute inset-0"
+          style={{ background: pageOilTheme.glowTop, mixBlendMode: 'screen' }}
+          animate={{ x: [0, 14, 0], y: [0, -10, 0], scale: [1, 1.03, 1] }}
           transition={{ duration: 14, repeat: Infinity, ease: 'easeInOut' }}
         />
         <motion.div
-          className="absolute -bottom-28 right-[4%] w-[28rem] h-[28rem] rounded-full border pointer-events-none"
-          style={{ borderColor: 'rgba(255,255,255,0.08)', boxShadow: '0 0 50px rgba(255,255,255,0.05)', clipPath: 'inset(35% 0 0 48%)' }}
-          animate={{ rotate: [0, -14, 0], opacity: [0.35, 0.65, 0.35] }}
+          className="absolute inset-0"
+          style={{ background: pageOilTheme.glowBottom, mixBlendMode: 'screen' }}
+          animate={{ x: [0, -14, 0], y: [0, 10, 0], scale: [1, 1.04, 1] }}
           transition={{ duration: 16, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
         />
 
-        {/* Soft dark vignette for readable content */}
+        {/* Painterly brush strokes */}
         <div
-          className="absolute inset-0"
-          style={{ background: 'radial-gradient(circle at 50% 42%, transparent 0%, rgba(2,6,23,0.15) 58%, rgba(2,6,23,0.5) 100%)' }}
+          className="absolute -top-24 left-[-10%] w-[72%] h-[36%] rounded-[120px] blur-2xl"
+          style={{ background: pageOilTheme.brushA, transform: 'rotate(-8deg)' }}
         />
+        <div
+          className="absolute -bottom-20 right-[-12%] w-[68%] h-[34%] rounded-[120px] blur-2xl"
+          style={{ background: pageOilTheme.brushB, transform: 'rotate(9deg)' }}
+        />
+
+        {/* Subtle moving sheen */}
+        <motion.div
+          className="absolute inset-y-0 -left-1/2 w-[40%] opacity-40"
+          style={{ background: pageOilTheme.shimmer, filter: 'blur(16px)' }}
+          animate={{ x: ['0%', '360%'] }}
+          transition={{ duration: 18, repeat: Infinity, ease: 'linear' }}
+        />
+
+        {/* Colorful droplets */}
+        <motion.div
+          className="absolute top-20 right-20 w-24 h-24 rounded-full blur-2xl"
+          style={{ background: 'radial-gradient(circle, rgba(255,255,255,0.24), rgba(255,255,255,0.05), transparent 75%)' }}
+          animate={{ y: [0, -10, 0], x: [0, 8, 0] }}
+          transition={{ duration: 9, repeat: Infinity, ease: 'easeInOut' }}
+        />
+        <motion.div
+          className="absolute bottom-24 left-16 w-20 h-20 rounded-full blur-2xl"
+          style={{
+            background: currentLeague === 'wpl'
+              ? 'radial-gradient(circle, rgba(244,114,182,0.35), rgba(168,85,247,0.1), transparent 75%)'
+              : 'radial-gradient(circle, rgba(251,146,60,0.34), rgba(245,158,11,0.1), transparent 75%)'
+          }}
+          animate={{ y: [0, 10, 0], x: [0, -8, 0] }}
+          transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
+        />
+
+        {/* Depth/vignette for readability */}
+        <div className="absolute inset-0" style={{ background: pageOilTheme.depth }} />
         
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Header */}
