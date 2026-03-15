@@ -142,69 +142,139 @@ export default function MatchCard({ match, index = 0, players }: MatchCardProps)
   const isCompleted = match.status === 'completed';
   const matchNumberDisplay = getMatchNumberDisplay(match);
 
-  // Oil-palette per status: rich multi-stop gradients
-  const oilBg = isLive
-    ? 'linear-gradient(135deg, #1a0505 0%, #2d0a18 25%, #1e0d2e 50%, #0d1a2e 75%, #0a1a1a 100%)'
-    : isCompleted
-    ? 'linear-gradient(135deg, #050f0a 0%, #0a1e18 25%, #091530 50%, #0f1020 75%, #0a0f18 100%)'
-    : 'linear-gradient(135deg, #07051a 0%, #130a2e 25%, #1a0a2e 50%, #0d1030 75%, #050a1a 100%)';
+  // ── 10 distinct oil-paint palettes cycling by card index ──────────────────
+  // Each palette: [bg, orb1-topleft, orb2-bottomright, orb3-topright, conicMix, borderRGB, accentA, accentB, accentC]
+  const OIL_PALETTES = [
+    // 0 – Vermillion × Ultramarine (classic war contrast)
+    {
+      bg: 'linear-gradient(145deg, #120204 0%, #1e0508 28%, #0b0d1e 55%, #06081a 80%, #080210 100%)',
+      orb1: 'radial-gradient(ellipse at 5% 5%, rgba(196,44,18,0.45) 0%, rgba(180,30,10,0.2) 45%, transparent 72%)',
+      orb2: 'radial-gradient(ellipse at 95% 95%, rgba(18,52,174,0.42) 0%, rgba(12,40,140,0.2) 45%, transparent 72%)',
+      orb3: 'radial-gradient(ellipse at 90% 5%, rgba(210,140,10,0.28) 0%, rgba(180,110,8,0.12) 50%, transparent 72%)',
+      conic: 'conic-gradient(from 180deg at 55% 50%, #c42c1222,#1234ae22,#d28c0a22,#c42c1222)',
+      borderRgb: '196,44,18',
+      accentA: 'rgba(196,44,18,0.9)', accentB: 'rgba(210,140,10,0.85)', accentC: 'rgba(18,52,174,0.7)',
+    },
+    // 1 – Viridian × Burnt Sienna (earth + sea)
+    {
+      bg: 'linear-gradient(145deg, #020e08 0%, #041a0e 28%, #100b04 55%, #0e0804 80%, #040c06 100%)',
+      orb1: 'radial-gradient(ellipse at 5% 5%, rgba(20,130,80,0.42) 0%, rgba(14,100,60,0.2) 45%, transparent 72%)',
+      orb2: 'radial-gradient(ellipse at 95% 95%, rgba(170,75,15,0.42) 0%, rgba(140,60,10,0.2) 45%, transparent 72%)',
+      orb3: 'radial-gradient(ellipse at 90% 5%, rgba(224,184,40,0.26) 0%, rgba(200,160,30,0.12) 50%, transparent 72%)',
+      conic: 'conic-gradient(from 120deg at 55% 50%, #14825022,#aa4b0f22,#e0b82822,#14825022)',
+      borderRgb: '20,130,80',
+      accentA: 'rgba(20,130,80,0.9)', accentB: 'rgba(224,184,40,0.85)', accentC: 'rgba(170,75,15,0.7)',
+    },
+    // 2 – Prussian Blue × Venetian Red (Old Masters drama)
+    {
+      bg: 'linear-gradient(145deg, #020714 0%, #030b1e 28%, #180608 55%, #120404 80%, #040410 100%)',
+      orb1: 'radial-gradient(ellipse at 5% 5%, rgba(10,50,130,0.48) 0%, rgba(8,38,110,0.22) 45%, transparent 72%)',
+      orb2: 'radial-gradient(ellipse at 95% 95%, rgba(190,55,35,0.42) 0%, rgba(160,40,25,0.2) 45%, transparent 72%)',
+      orb3: 'radial-gradient(ellipse at 90% 5%, rgba(240,198,58,0.28) 0%, rgba(220,178,40,0.12) 50%, transparent 72%)',
+      conic: 'conic-gradient(from 240deg at 55% 50%, #0a328222,#be372322,#f0c63a22,#0a328222)',
+      borderRgb: '10,50,130',
+      accentA: 'rgba(10,50,130,0.9)', accentB: 'rgba(240,198,58,0.85)', accentC: 'rgba(190,55,35,0.7)',
+    },
+    // 3 – Cerulean × Chrome Orange (sky + fire)
+    {
+      bg: 'linear-gradient(145deg, #020a12 0%, #051428 28%, #1a0c02 55%, #120a02 80%, #030a14 100%)',
+      orb1: 'radial-gradient(ellipse at 5% 5%, rgba(38,148,218,0.44) 0%, rgba(28,120,190,0.2) 45%, transparent 72%)',
+      orb2: 'radial-gradient(ellipse at 95% 95%, rgba(230,118,18,0.44) 0%, rgba(200,95,12,0.2) 45%, transparent 72%)',
+      orb3: 'radial-gradient(ellipse at 90% 5%, rgba(48,210,140,0.22) 0%, rgba(36,180,118,0.1) 50%, transparent 72%)',
+      conic: 'conic-gradient(from 60deg at 55% 50%, #2694da22,#e6761222,#30d28c22,#2694da22)',
+      borderRgb: '38,148,218',
+      accentA: 'rgba(38,148,218,0.9)', accentB: 'rgba(230,118,18,0.85)', accentC: 'rgba(48,210,140,0.7)',
+    },
+    // 4 – Cobalt Violet × Raw Umber (dusk pigments)
+    {
+      bg: 'linear-gradient(145deg, #090210 0%, #110318 28%, #100804 55%, #0c0602 80%, #08020e 100%)',
+      orb1: 'radial-gradient(ellipse at 5% 5%, rgba(110,38,185,0.45) 0%, rgba(88,28,160,0.2) 45%, transparent 72%)',
+      orb2: 'radial-gradient(ellipse at 95% 95%, rgba(130,68,16,0.42) 0%, rgba(108,55,12,0.2) 45%, transparent 72%)',
+      orb3: 'radial-gradient(ellipse at 90% 5%, rgba(56,168,228,0.24) 0%, rgba(40,140,200,0.1) 50%, transparent 72%)',
+      conic: 'conic-gradient(from 300deg at 55% 50%, #6e26b922,#824410,#38a8e422,#6e26b922)',
+      borderRgb: '110,38,185',
+      accentA: 'rgba(110,38,185,0.9)', accentB: 'rgba(56,168,228,0.85)', accentC: 'rgba(130,68,16,0.7)',
+    },
+    // 5 – Sap Green × Alizarin Crimson (garden + blood)
+    {
+      bg: 'linear-gradient(145deg, #030d04 0%, #061808 28%, #180408 55%, #120206 80%, #040c06 100%)',
+      orb1: 'radial-gradient(ellipse at 5% 5%, rgba(58,165,58,0.4) 0%, rgba(42,138,42,0.18) 45%, transparent 72%)',
+      orb2: 'radial-gradient(ellipse at 95% 95%, rgba(184,18,55,0.42) 0%, rgba(158,14,45,0.2) 45%, transparent 72%)',
+      orb3: 'radial-gradient(ellipse at 90% 5%, rgba(78,18,188,0.24) 0%, rgba(60,12,162,0.1) 50%, transparent 72%)',
+      conic: 'conic-gradient(from 150deg at 55% 50%, #3aa53a22,#b8123722,#4e12bc22,#3aa53a22)',
+      borderRgb: '58,165,58',
+      accentA: 'rgba(58,165,58,0.9)', accentB: 'rgba(184,18,55,0.85)', accentC: 'rgba(78,18,188,0.7)',
+    },
+    // 6 – Cadmium Yellow × Phthalo Blue (sunlit storm)
+    {
+      bg: 'linear-gradient(145deg, #0e0b02 0%, #1a1202 28%, #020a18 55%, #02081a 80%, #0c0a02 100%)',
+      orb1: 'radial-gradient(ellipse at 5% 5%, rgba(228,165,8,0.42) 0%, rgba(200,142,6,0.2) 45%, transparent 72%)',
+      orb2: 'radial-gradient(ellipse at 95% 95%, rgba(8,62,168,0.44) 0%, rgba(6,48,144,0.2) 45%, transparent 72%)',
+      orb3: 'radial-gradient(ellipse at 90% 5%, rgba(205,28,28,0.24) 0%, rgba(180,20,20,0.1) 50%, transparent 72%)',
+      conic: 'conic-gradient(from 90deg at 55% 50%, #e4a50822,#083ea822,#cd1c1c22,#e4a50822)',
+      borderRgb: '228,165,8',
+      accentA: 'rgba(228,165,8,0.9)', accentB: 'rgba(8,62,168,0.85)', accentC: 'rgba(205,28,28,0.7)',
+    },
+    // 7 – Naples Yellow × Payne's Grey (warm dusk fog)
+    {
+      bg: 'linear-gradient(145deg, #0e0c04 0%, #1a1606 28%, #080c12 55%, #060a12 80%, #0c0a04 100%)',
+      orb1: 'radial-gradient(ellipse at 5% 5%, rgba(226,198,56,0.38) 0%, rgba(200,172,42,0.18) 45%, transparent 72%)',
+      orb2: 'radial-gradient(ellipse at 95% 95%, rgba(48,78,138,0.4) 0%, rgba(38,62,118,0.18) 45%, transparent 72%)',
+      orb3: 'radial-gradient(ellipse at 90% 5%, rgba(195,78,120,0.26) 0%, rgba(170,60,100,0.12) 50%, transparent 72%)',
+      conic: 'conic-gradient(from 330deg at 55% 50%, #e2c63822,#304e8a22,#c34e7822,#e2c63822)',
+      borderRgb: '226,198,56',
+      accentA: 'rgba(226,198,56,0.9)', accentB: 'rgba(195,78,120,0.85)', accentC: 'rgba(48,78,138,0.7)',
+    },
+    // 8 – Indigo × Gold Ochre (midnight royalty)
+    {
+      bg: 'linear-gradient(145deg, #060218 0%, #0a0228 28%, #160e02 55%, #100a02 80%, #060218 100%)',
+      orb1: 'radial-gradient(ellipse at 5% 5%, rgba(68,28,188,0.46) 0%, rgba(52,18,162,0.2) 45%, transparent 72%)',
+      orb2: 'radial-gradient(ellipse at 95% 95%, rgba(204,150,8,0.42) 0%, rgba(178,128,6,0.2) 45%, transparent 72%)',
+      orb3: 'radial-gradient(ellipse at 90% 5%, rgba(16,158,118,0.24) 0%, rgba(12,132,98,0.1) 50%, transparent 72%)',
+      conic: 'conic-gradient(from 210deg at 55% 50%, #441cbc22,#cc960822,#109e7622,#441cbc22)',
+      borderRgb: '68,28,188',
+      accentA: 'rgba(68,28,188,0.9)', accentB: 'rgba(204,150,8,0.88)', accentC: 'rgba(16,158,118,0.7)',
+    },
+    // 9 – Rose Madder × Emerald (venetian blossom)
+    {
+      bg: 'linear-gradient(145deg, #140206 0%, #1e0408 28%, #021812 55%, #021410 80%, #140206 100%)',
+      orb1: 'radial-gradient(ellipse at 5% 5%, rgba(195,24,75,0.44) 0%, rgba(168,18,62,0.2) 45%, transparent 72%)',
+      orb2: 'radial-gradient(ellipse at 95% 95%, rgba(8,168,88,0.42) 0%, rgba(6,144,72,0.2) 45%, transparent 72%)',
+      orb3: 'radial-gradient(ellipse at 90% 5%, rgba(228,138,8,0.26) 0%, rgba(200,118,6,0.12) 50%, transparent 72%)',
+      conic: 'conic-gradient(from 270deg at 55% 50%, #c3184b22,#08a85822,#e48a0822,#c3184b22)',
+      borderRgb: '195,24,75',
+      accentA: 'rgba(195,24,75,0.9)', accentB: 'rgba(228,138,8,0.85)', accentC: 'rgba(8,168,88,0.7)',
+    },
+  ] as const;
 
-  const oilOrb1 = isLive
-    ? 'radial-gradient(ellipse at 0% 0%, rgba(239,68,68,0.35) 0%, rgba(220,38,38,0.15) 40%, transparent 70%)'
-    : isCompleted
-    ? 'radial-gradient(ellipse at 0% 0%, rgba(16,185,129,0.3) 0%, rgba(20,184,166,0.15) 40%, transparent 70%)'
-    : 'radial-gradient(ellipse at 0% 0%, rgba(99,102,241,0.35) 0%, rgba(139,92,246,0.18) 40%, transparent 70%)';
+  const palette = OIL_PALETTES[index % OIL_PALETTES.length];
 
-  const oilOrb2 = isLive
-    ? 'radial-gradient(ellipse at 100% 100%, rgba(245,158,11,0.3) 0%, rgba(251,146,60,0.15) 40%, transparent 70%)'
-    : isCompleted
-    ? 'radial-gradient(ellipse at 100% 100%, rgba(34,211,238,0.25) 0%, rgba(16,185,129,0.12) 40%, transparent 70%)'
-    : 'radial-gradient(ellipse at 100% 100%, rgba(236,72,153,0.3) 0%, rgba(244,114,182,0.15) 40%, transparent 70%)';
-
-  const oilOrb3 = isLive
-    ? 'radial-gradient(ellipse at 100% 0%, rgba(168,85,247,0.2) 0%, rgba(192,132,252,0.08) 50%, transparent 70%)'
-    : isCompleted
-    ? 'radial-gradient(ellipse at 100% 0%, rgba(99,102,241,0.2) 0%, rgba(139,92,246,0.08) 50%, transparent 70%)'
-    : 'radial-gradient(ellipse at 100% 0%, rgba(34,211,238,0.2) 0%, rgba(14,165,233,0.08) 50%, transparent 70%)';
-
+  // Status-based overrides for glow/hover only
+  const statusBorderRgb = isLive ? '239,68,68' : isCompleted ? '16,185,129' : `${palette.borderRgb}`;
   const borderGlow = isLive
-    ? '0 0 0 1px rgba(239,68,68,0.5), 0 0 40px rgba(239,68,68,0.12), 0 24px 64px rgba(0,0,0,0.7)'
-    : isCompleted
-    ? '0 0 0 1px rgba(16,185,129,0.3), 0 0 30px rgba(16,185,129,0.08), 0 24px 64px rgba(0,0,0,0.65)'
-    : '0 0 0 1px rgba(99,102,241,0.3), 0 0 30px rgba(99,102,241,0.08), 0 24px 64px rgba(0,0,0,0.65)';
-
-  const accentLine = isLive
-    ? 'linear-gradient(90deg, transparent, rgba(239,68,68,0.8), rgba(245,158,11,0.8), rgba(168,85,247,0.6), transparent)'
-    : isCompleted
-    ? 'linear-gradient(90deg, transparent, rgba(16,185,129,0.8), rgba(34,211,238,0.8), rgba(99,102,241,0.6), transparent)'
-    : 'linear-gradient(90deg, transparent, rgba(99,102,241,0.8), rgba(236,72,153,0.8), rgba(245,158,11,0.6), transparent)';
+    ? `0 0 0 1px rgba(239,68,68,0.55), 0 0 40px rgba(239,68,68,0.14), 0 24px 64px rgba(0,0,0,0.75)`
+    : `0 0 0 1px rgba(${palette.borderRgb},0.45), 0 0 32px rgba(${palette.borderRgb},0.1), 0 24px 64px rgba(0,0,0,0.72)`;
+  const hoverGlow = isLive
+    ? `0 0 0 1px rgba(239,68,68,0.75), 0 0 70px rgba(239,68,68,0.22), 0 36px 80px rgba(0,0,0,0.85)`
+    : `0 0 0 1px rgba(${palette.borderRgb},0.65), 0 0 60px rgba(${palette.borderRgb},0.18), 0 36px 80px rgba(0,0,0,0.82)`;
+  const accentLine = `linear-gradient(90deg, transparent, ${palette.accentA}, ${palette.accentB}, ${palette.accentC}, transparent)`;
 
   return (
     <>
       <motion.div
         className="group relative overflow-hidden rounded-3xl cursor-default select-none"
-        style={{ background: oilBg, boxShadow: borderGlow }}
-        whileHover={{
-          y: -8,
-          boxShadow: isLive
-            ? '0 0 0 1px rgba(239,68,68,0.7), 0 0 70px rgba(239,68,68,0.2), 0 36px 80px rgba(0,0,0,0.8)'
-            : isCompleted
-            ? '0 0 0 1px rgba(16,185,129,0.5), 0 0 60px rgba(16,185,129,0.15), 0 36px 80px rgba(0,0,0,0.75)'
-            : '0 0 0 1px rgba(99,102,241,0.6), 0 0 60px rgba(139,92,246,0.18), 0 36px 80px rgba(0,0,0,0.75)',
-          transition: { duration: 0.28, ease: 'easeOut' },
-        }}
+        style={{ background: palette.bg, boxShadow: borderGlow }}
+        whileHover={{ y: -8, boxShadow: hoverGlow, transition: { duration: 0.28, ease: 'easeOut' } }}
       >
         {/* ── OIL LAYER 1: large ambient blobs ── */}
-        <div className="absolute inset-0 pointer-events-none" style={{ background: oilOrb1 }} />
-        <div className="absolute inset-0 pointer-events-none" style={{ background: oilOrb2 }} />
-        <div className="absolute inset-0 pointer-events-none" style={{ background: oilOrb3 }} />
+        <div className="absolute inset-0 pointer-events-none" style={{ background: palette.orb1 }} />
+        <div className="absolute inset-0 pointer-events-none" style={{ background: palette.orb2 }} />
+        <div className="absolute inset-0 pointer-events-none" style={{ background: palette.orb3 }} />
 
         {/* ── OIL LAYER 2: mid-card iridescent sweep ── */}
         <div
-          className="absolute inset-0 pointer-events-none opacity-20"
-          style={{
-            background: 'conic-gradient(from 200deg at 60% 50%, #7c3aed22, #06b6d422, #ec489922, #f59e0b22, #7c3aed22)',
-          }}
+          className="absolute inset-0 pointer-events-none opacity-[0.18]"
+          style={{ background: palette.conic }}
         />
 
         {/* ── DIAGONAL LIGHT STREAK (top-left to bottom-right) ── */}
@@ -330,11 +400,7 @@ export default function MatchCard({ match, index = 0, players }: MatchCardProps)
               className="absolute left-1/2 -translate-x-1/2 w-[3px] pointer-events-none"
               style={{
                 top: '80px', height: '120px',
-                background: isLive
-                  ? 'linear-gradient(to bottom, transparent, rgba(239,68,68,0.4), rgba(245,158,11,0.4), transparent)'
-                  : isCompleted
-                  ? 'linear-gradient(to bottom, transparent, rgba(16,185,129,0.35), rgba(34,211,238,0.35), transparent)'
-                  : 'linear-gradient(to bottom, transparent, rgba(99,102,241,0.4), rgba(236,72,153,0.35), transparent)',
+                background: `linear-gradient(to bottom, transparent, ${palette.accentA}, ${palette.accentB}, transparent)`,
                 filter: 'blur(1px)',
               }}
             />
@@ -352,11 +418,7 @@ export default function MatchCard({ match, index = 0, players }: MatchCardProps)
                   <div
                     className="absolute inset-[-8px] rounded-2xl opacity-40 group-hover:opacity-70 transition-opacity duration-400"
                     style={{
-                      background: isLive
-                        ? 'radial-gradient(circle, rgba(239,68,68,0.5), transparent 70%)'
-                        : isCompleted
-                        ? 'radial-gradient(circle, rgba(16,185,129,0.45), transparent 70%)'
-                        : 'radial-gradient(circle, rgba(99,102,241,0.5), transparent 70%)',
+                      background: `radial-gradient(circle, ${palette.accentA}, transparent 70%)`,
                       filter: 'blur(6px)',
                     }}
                   />
@@ -429,46 +491,28 @@ export default function MatchCard({ match, index = 0, players }: MatchCardProps)
               <div className="flex flex-col items-center gap-0 flex-shrink-0 px-1">
                 {/* top beam */}
                 <div className="w-[1.5px] h-10" style={{
-                  background: isLive
-                    ? 'linear-gradient(to bottom, transparent, rgba(239,68,68,0.5), rgba(245,158,11,0.4))'
-                    : isCompleted
-                    ? 'linear-gradient(to bottom, transparent, rgba(16,185,129,0.5), rgba(34,211,238,0.4))'
-                    : 'linear-gradient(to bottom, transparent, rgba(99,102,241,0.5), rgba(236,72,153,0.4))',
+                  background: `linear-gradient(to bottom, transparent, ${palette.accentA}, ${palette.accentB})`,
                 }} />
 
                 {/* VS pill */}
                 <motion.div
                   style={{
-                    background: isLive
-                      ? 'linear-gradient(135deg, #7f1d1d, #450a0a, #1c0533)'
-                      : isCompleted
-                      ? 'linear-gradient(135deg, #052e16, #014d2e, #0c1a3e)'
-                      : 'linear-gradient(135deg, #1e1b4b, #3b0764, #1e1b4b)',
-                    border: isLive
-                      ? '1.5px solid rgba(239,68,68,0.5)'
-                      : isCompleted
-                      ? '1.5px solid rgba(16,185,129,0.5)'
-                      : '1.5px solid rgba(99,102,241,0.5)',
-                    boxShadow: isLive
-                      ? '0 0 24px rgba(239,68,68,0.3), 0 0 48px rgba(239,68,68,0.1)'
-                      : isCompleted
-                      ? '0 0 24px rgba(16,185,129,0.3), 0 0 48px rgba(16,185,129,0.1)'
-                      : '0 0 24px rgba(99,102,241,0.3), 0 0 48px rgba(99,102,241,0.1)',
+                    background: `linear-gradient(135deg, rgba(${palette.borderRgb},0.25), rgba(0,0,0,0.6), rgba(${palette.borderRgb},0.15))`,
+                    border: `1.5px solid rgba(${palette.borderRgb},0.55)`,
+                    boxShadow: `0 0 22px rgba(${palette.borderRgb},0.32), 0 0 44px rgba(${palette.borderRgb},0.12)`,
                   }}
                   className="px-3 py-2 rounded-xl"
-                  animate={isLive ? { boxShadow: [
-                    '0 0 20px rgba(239,68,68,0.3)', '0 0 36px rgba(239,68,68,0.5)', '0 0 20px rgba(239,68,68,0.3)'
-                  ]} : {}}
-                  transition={{ duration: 1.4, repeat: Infinity }}
+                  animate={{ boxShadow: [
+                    `0 0 18px rgba(${palette.borderRgb},0.28)`,
+                    `0 0 34px rgba(${palette.borderRgb},0.5)`,
+                    `0 0 18px rgba(${palette.borderRgb},0.28)`,
+                  ]}}
+                  transition={{ duration: 1.6, repeat: Infinity }}
                 >
                   <span
                     className="text-[13px] font-black tracking-widest"
                     style={{
-                      background: isLive
-                        ? 'linear-gradient(135deg, #fca5a5, #fb923c, #f87171)'
-                        : isCompleted
-                        ? 'linear-gradient(135deg, #6ee7b7, #67e8f9, #34d399)'
-                        : 'linear-gradient(135deg, #c4b5fd, #f9a8d4, #a5b4fc)',
+                      background: `linear-gradient(135deg, ${palette.accentA}, ${palette.accentB}, ${palette.accentC})`,
                       WebkitBackgroundClip: 'text',
                       WebkitTextFillColor: 'transparent',
                     }}
@@ -479,11 +523,7 @@ export default function MatchCard({ match, index = 0, players }: MatchCardProps)
 
                 {/* bottom beam */}
                 <div className="w-[1.5px] h-10" style={{
-                  background: isLive
-                    ? 'linear-gradient(to bottom, rgba(245,158,11,0.4), rgba(239,68,68,0.5), transparent)'
-                    : isCompleted
-                    ? 'linear-gradient(to bottom, rgba(34,211,238,0.4), rgba(16,185,129,0.5), transparent)'
-                    : 'linear-gradient(to bottom, rgba(236,72,153,0.4), rgba(99,102,241,0.5), transparent)',
+                  background: `linear-gradient(to bottom, ${palette.accentB}, ${palette.accentA}, transparent)`,
                 }} />
               </div>
 
@@ -496,11 +536,7 @@ export default function MatchCard({ match, index = 0, players }: MatchCardProps)
                   <div
                     className="absolute inset-[-8px] rounded-2xl opacity-40 group-hover:opacity-70 transition-opacity duration-400"
                     style={{
-                      background: isLive
-                        ? 'radial-gradient(circle, rgba(245,158,11,0.5), transparent 70%)'
-                        : isCompleted
-                        ? 'radial-gradient(circle, rgba(34,211,238,0.45), transparent 70%)'
-                        : 'radial-gradient(circle, rgba(236,72,153,0.5), transparent 70%)',
+                      background: `radial-gradient(circle, ${palette.accentC}, transparent 70%)`,
                       filter: 'blur(6px)',
                     }}
                   />
@@ -582,13 +618,7 @@ export default function MatchCard({ match, index = 0, players }: MatchCardProps)
           </div>
 
           {/* ── DIVIDER ── */}
-          <div className="mx-5 h-px mb-4" style={{
-            background: isLive
-              ? 'linear-gradient(90deg, transparent, rgba(239,68,68,0.3), rgba(245,158,11,0.3), rgba(168,85,247,0.2), transparent)'
-              : isCompleted
-              ? 'linear-gradient(90deg, transparent, rgba(16,185,129,0.3), rgba(34,211,238,0.25), rgba(99,102,241,0.2), transparent)'
-              : 'linear-gradient(90deg, transparent, rgba(99,102,241,0.3), rgba(236,72,153,0.25), rgba(245,158,11,0.2), transparent)',
-          }} />
+          <div className="mx-5 h-px mb-4" style={{ background: accentLine }} />
 
           {/* ── RESULT BAR ── */}
           {match.result && (
