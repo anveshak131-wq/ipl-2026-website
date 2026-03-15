@@ -1,18 +1,17 @@
 "use client";
 
-import { useState, Fragment, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import Image from 'next/image';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Match, Player } from '@/types';
 import { getAnimatedLogoPath, getLogoPath } from '@/lib/logoUtils';
-import RCBLottie from '@/components/ui/RCBLottie';
-import RCBLionLogo from '@/components/RCBLion/RCBLionLogo';
 import { CustomEmoji } from '@/components/emoji/Emoji';
 import { formatMatchTime } from '@/lib/timeUtils';
 import { getMatchNumberDisplay } from '@/lib/matchNumberUtils';
 import CountdownTimer from '@/components/ui/CountdownTimer';
 import Playing11Display from '@/components/matches/Playing11Display';
-import { X } from 'lucide-react';
+import { X, MapPin, Calendar, Clock, Trophy, Zap, Users, ChevronRight } from 'lucide-react';
 
 interface MatchCardProps {
   match: Match;
@@ -67,28 +66,6 @@ export default function MatchCard({ match, index = 0, players }: MatchCardProps)
       day: 'numeric',
       year: 'numeric'
     });
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'live':
-        return 'bg-red-500/20 text-red-400 border-red-500/30 animate-pulse';
-      case 'completed':
-        return 'bg-green-500/20 text-green-400 border-green-500/30';
-      default:
-        return 'bg-blue-500/20 text-blue-400 border-blue-500/30';
-    }
-  };
-
-  const getStatusText = (status: string) => {
-    switch (status) {
-      case 'live':
-        return ' LIVE';
-      case 'completed':
-        return ' Completed';
-      default:
-        return ' Upcoming';
-    }
   };
 
   const renderTeamLogo = (team: Match['team1']) => {
@@ -161,260 +138,392 @@ export default function MatchCard({ match, index = 0, players }: MatchCardProps)
     );
   };
 
+  const isLive = match.status === 'live';
+  const isCompleted = match.status === 'completed';
+  const matchNumberDisplay = getMatchNumberDisplay(match);
+
+  const cardBorderStyle = isLive
+    ? '2px solid rgba(239, 68, 68, 0.6)'
+    : isCompleted
+    ? '2px solid rgba(16, 185, 129, 0.25)'
+    : '2px solid rgba(255, 255, 255, 0.08)';
+
+  const cardGlowStyle = isLive
+    ? '0 0 40px rgba(239, 68, 68, 0.15), 0 20px 60px rgba(0,0,0,0.4)'
+    : '0 20px 60px rgba(0,0,0,0.35)';
+
   return (
     <>
-      <div
-        className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm border border-white/10 hover:border-ipl-gold/50 transition-all duration-300 hover:shadow-2xl hover:shadow-ipl-gold/20 transform hover:scale-105 animate-scale-in"
-        style={{ animationDelay: `${index * 80}ms` }}
+      <motion.div
+        className="group relative overflow-hidden rounded-2xl cursor-default select-none"
+        style={{
+          background: 'linear-gradient(145deg, rgba(255,255,255,0.07) 0%, rgba(255,255,255,0.03) 100%)',
+          backdropFilter: 'blur(20px)',
+          border: cardBorderStyle,
+          boxShadow: cardGlowStyle,
+        }}
+        whileHover={{
+          y: -6,
+          boxShadow: isLive
+            ? '0 0 60px rgba(239,68,68,0.25), 0 30px 80px rgba(0,0,0,0.5)'
+            : '0 0 40px rgba(99,102,241,0.2), 0 30px 80px rgba(0,0,0,0.5)',
+          borderColor: isLive ? 'rgba(239,68,68,0.8)' : isCompleted ? 'rgba(16,185,129,0.5)' : 'rgba(99,102,241,0.5)',
+          transition: { duration: 0.25, ease: 'easeOut' },
+        }}
       >
-      {/* Animated background on hover */}
-      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-        <div className="absolute inset-0 bg-gradient-to-br from-ipl-gold/10 to-ipl-purple/10" />
-      </div>
+        {/* Live pulse ring */}
+        {isLive && (
+          <motion.div
+            className="absolute inset-0 rounded-2xl pointer-events-none"
+            style={{ border: '2px solid rgba(239,68,68,0.4)' }}
+            animate={{ opacity: [0.4, 1, 0.4] }}
+            transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
+          />
+        )}
 
-      {/* Content */}
-      <div className="relative p-6 md:p-8 space-y-4">
-        {/* Status Badge and Match Number */}
-        <div className="flex justify-between items-center">
-          <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold border ${getStatusColor(match.status)}`}>
-            {getStatusText(match.status)}
-          </span>
-          {(() => {
-            const matchNumberDisplay = getMatchNumberDisplay(match);
-            if (matchNumberDisplay && matchNumberDisplay !== 'TBD') {
-              return (
-                <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-ipl-gold/20 text-ipl-gold border border-ipl-gold/30">
-                  {matchNumberDisplay}
-                </span>
-              );
-            }
-            return null;
-          })()}
+        {/* Hover shimmer overlay */}
+        <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none">
+          <div
+            className="absolute inset-0 rounded-2xl"
+            style={{
+              background: isLive
+                ? 'linear-gradient(135deg, rgba(239,68,68,0.06), rgba(220,38,38,0.03))'
+                : isCompleted
+                ? 'linear-gradient(135deg, rgba(16,185,129,0.06), rgba(5,150,105,0.03))'
+                : 'linear-gradient(135deg, rgba(99,102,241,0.08), rgba(147,51,234,0.04))',
+            }}
+          />
         </div>
 
-        {/* Date and Time */}
-        <div className="space-y-3">
-          <div>
-            <p className="text-white font-bold text-base flex items-center gap-2">
-              <CustomEmoji type="calendar" size={14} /> {formatDate(match.date)}
-            </p>
-            <p className="text-gray-300 text-sm mt-1 flex items-center gap-2 flex-wrap">
-              <CustomEmoji type="clock" size={14} /> 
-              <span>{formatMatchTime(match.time, match.date)}</span>
-            </p>
+        <div className="relative flex flex-col">
+
+          {/* ── TOP HEADER BAR ── */}
+          <div className="flex items-center justify-between px-5 pt-4 pb-3 border-b border-white/[0.06]">
+            {/* Status badge */}
+            <div className="flex items-center gap-2">
+              {isLive ? (
+                <motion.span
+                  className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-black tracking-widest uppercase"
+                  style={{
+                    background: 'linear-gradient(135deg, rgba(239,68,68,0.25), rgba(220,38,38,0.15))',
+                    border: '1px solid rgba(239,68,68,0.5)',
+                    color: '#f87171',
+                  }}
+                  animate={{ opacity: [1, 0.7, 1] }}
+                  transition={{ duration: 1.2, repeat: Infinity, ease: 'easeInOut' }}
+                >
+                  <motion.span
+                    className="w-2 h-2 rounded-full bg-red-500 inline-block"
+                    animate={{ scale: [1, 1.4, 1], opacity: [1, 0.5, 1] }}
+                    transition={{ duration: 1, repeat: Infinity }}
+                  />
+                  LIVE
+                </motion.span>
+              ) : isCompleted ? (
+                <span
+                  className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider"
+                  style={{
+                    background: 'rgba(16,185,129,0.15)',
+                    border: '1px solid rgba(16,185,129,0.3)',
+                    color: '#34d399',
+                  }}
+                >
+                  <Trophy size={10} /> Completed
+                </span>
+              ) : (
+                <span
+                  className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider"
+                  style={{
+                    background: 'rgba(99,102,241,0.15)',
+                    border: '1px solid rgba(99,102,241,0.3)',
+                    color: '#a5b4fc',
+                  }}
+                >
+                  <Zap size={10} /> Upcoming
+                </span>
+              )}
+
+              {/* Playoff type badge */}
+              {match.playoffType && (
+                <span
+                  className="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider"
+                  style={{
+                    background: 'rgba(245,158,11,0.15)',
+                    border: '1px solid rgba(245,158,11,0.3)',
+                    color: '#fbbf24',
+                  }}
+                >
+                  {match.playoffType}
+                </span>
+              )}
+            </div>
+
+            {/* Match number */}
+            {matchNumberDisplay && matchNumberDisplay !== 'TBD' && (
+              <span
+                className="text-[11px] font-bold tracking-wider"
+                style={{ color: 'rgba(255,215,0,0.7)' }}
+              >
+                {matchNumberDisplay}
+              </span>
+            )}
           </div>
-          
-          {/* Countdown Timer for Upcoming Matches */}
+
+          {/* ── TEAMS HERO SECTION ── */}
+          <div className="px-5 py-5">
+            <div className="flex items-center justify-between gap-3">
+
+              {/* Team 1 */}
+              <div className="flex-1 flex flex-col items-center gap-2 min-w-0">
+                <motion.div
+                  className="relative w-[68px] h-[68px] rounded-2xl flex items-center justify-center overflow-hidden flex-shrink-0"
+                  style={{
+                    background: 'linear-gradient(145deg, rgba(255,255,255,0.1), rgba(255,255,255,0.04))',
+                    border: '1.5px solid rgba(255,255,255,0.12)',
+                    boxShadow: '0 8px 24px rgba(0,0,0,0.3)',
+                  }}
+                  whileHover={{ scale: 1.08, transition: { duration: 0.2 } }}
+                >
+                  {renderTeamLogo(match.team1)}
+                </motion.div>
+                <div className="text-center w-full">
+                  <p className="text-white font-black text-base leading-tight tracking-tight">
+                    {match.team1.shortName}
+                  </p>
+                  <p className="text-gray-500 text-[10px] mt-0.5 truncate max-w-[90px] mx-auto">
+                    {match.team1.name}
+                  </p>
+                </div>
+                {/* Score for team1 */}
+                {(match.score || match.team1Score) && (
+                  <div className="text-center">
+                    {match.team1Score ? (
+                      <p className="text-white font-black text-lg leading-none">{match.team1Score}</p>
+                    ) : match.score ? (
+                      <>
+                        <p className="text-white font-black text-xl leading-none">
+                          {match.score.team1.runs}
+                          <span className="text-gray-400 font-bold text-base">/{match.score.team1.wickets}</span>
+                        </p>
+                        <p className="text-gray-500 text-[11px] mt-0.5">{match.score.team1.overs} ov</p>
+                      </>
+                    ) : null}
+                  </div>
+                )}
+              </div>
+
+              {/* VS CENTER */}
+              <div className="flex flex-col items-center gap-1.5 flex-shrink-0">
+                <div
+                  className="w-px h-8"
+                  style={{
+                    background: 'linear-gradient(to bottom, transparent, rgba(255,255,255,0.15), transparent)',
+                  }}
+                />
+                <div
+                  className="px-3 py-1.5 rounded-xl text-xs font-black tracking-widest"
+                  style={{
+                    background: 'linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05))',
+                    border: '1px solid rgba(255,255,255,0.12)',
+                    color: 'rgba(255,255,255,0.5)',
+                    boxShadow: isLive ? '0 0 20px rgba(239,68,68,0.2)' : 'none',
+                  }}
+                >
+                  VS
+                </div>
+                <div
+                  className="w-px h-8"
+                  style={{
+                    background: 'linear-gradient(to bottom, transparent, rgba(255,255,255,0.15), transparent)',
+                  }}
+                />
+              </div>
+
+              {/* Team 2 */}
+              <div className="flex-1 flex flex-col items-center gap-2 min-w-0">
+                <motion.div
+                  className="relative w-[68px] h-[68px] rounded-2xl flex items-center justify-center overflow-hidden flex-shrink-0"
+                  style={{
+                    background: 'linear-gradient(145deg, rgba(255,255,255,0.1), rgba(255,255,255,0.04))',
+                    border: '1.5px solid rgba(255,255,255,0.12)',
+                    boxShadow: '0 8px 24px rgba(0,0,0,0.3)',
+                  }}
+                  whileHover={{ scale: 1.08, transition: { duration: 0.2 } }}
+                >
+                  {renderTeamLogo(match.team2)}
+                </motion.div>
+                <div className="text-center w-full">
+                  <p className="text-white font-black text-base leading-tight tracking-tight">
+                    {match.team2.shortName}
+                  </p>
+                  <p className="text-gray-500 text-[10px] mt-0.5 truncate max-w-[90px] mx-auto">
+                    {match.team2.name}
+                  </p>
+                </div>
+                {/* Score for team2 */}
+                {(match.score || match.team2Score) && (
+                  <div className="text-center">
+                    {match.team2Score ? (
+                      <p className="text-white font-black text-lg leading-none">{match.team2Score}</p>
+                    ) : match.score ? (
+                      <>
+                        <p className="text-white font-black text-xl leading-none">
+                          {match.score.team2.runs}
+                          <span className="text-gray-400 font-bold text-base">/{match.score.team2.wickets}</span>
+                        </p>
+                        <p className="text-gray-500 text-[11px] mt-0.5">{match.score.team2.overs} ov</p>
+                      </>
+                    ) : null}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* WPL TBD notice */}
+            {match.league === 'wpl' && match.playoffType && (
+              (String(match.team1.id).includes('tbd-') || String(match.team2.id).includes('tbd-') ||
+               match.team1.shortName?.includes('Place') || match.team2.shortName?.includes('Place') ||
+               match.team1.shortName === 'Winner of Eliminator' || match.team2.shortName === 'Winner of Eliminator') && (
+                <div className="mt-3 rounded-xl px-3 py-2" style={{ background: 'rgba(139,92,246,0.1)', border: '1px solid rgba(139,92,246,0.25)' }}>
+                  <p className="text-[11px] text-purple-300 text-center leading-snug">
+                    💡 Placeholders from 5 WPL teams, determined by points table
+                  </p>
+                </div>
+              )
+            )}
+          </div>
+
+          {/* ── RESULT BAR ── */}
+          {match.result && (
+            <div
+              className="mx-5 mb-4 px-4 py-2.5 rounded-xl"
+              style={{
+                background: 'linear-gradient(135deg, rgba(255,215,0,0.1), rgba(245,158,11,0.06))',
+                border: '1px solid rgba(255,215,0,0.2)',
+              }}
+            >
+              <p className="text-[12px] font-bold text-center leading-snug"
+                 style={{ color: '#fbbf24' }}>
+                <Trophy size={11} className="inline mr-1.5 mb-0.5" />
+                {match.result}
+              </p>
+            </div>
+          )}
+
+          {/* ── COUNTDOWN (upcoming) ── */}
           {match.status === 'upcoming' && (
-            <div className="pt-2 pb-1">
-              <CountdownTimer 
-                targetDate={match.date} 
+            <div className="mx-5 mb-4">
+              <CountdownTimer
+                targetDate={match.date}
                 matchTime={match.time}
                 variant="panel"
-                className="w-full max-w-full"
+                className="w-full"
               />
             </div>
           )}
-        </div>
 
-        {/* Teams */}
-        <div className="space-y-4">
-          {/* WPL Playoff Helper Text */}
-          {match.league === 'wpl' && match.playoffType && (
-            (String(match.team1.id).includes('tbd-') || String(match.team2.id).includes('tbd-') || 
-             match.team1.shortName?.includes('Place') || match.team2.shortName?.includes('Place') ||
-             match.team1.shortName === 'Winner of Eliminator' || match.team2.shortName === 'Winner of Eliminator') && (
-              <div className="bg-purple-500/10 border border-purple-500/30 rounded-lg p-2 mb-2">
-                <p className="text-xs text-purple-300 text-center">
-                  💡 These are placeholders from the 5 WPL teams, determined by points table standings
-                </p>
-              </div>
-            )
-          )}
-          
-          {/* Team 1 */}
-          <div className="flex items-center space-x-3">
-            <div className="w-12 h-12 rounded-full bg-black/30 border border-white/10 flex items-center justify-center flex-shrink-0 overflow-hidden">
-              {renderTeamLogo(match.team1)}
-            </div>
-            <div className="flex-1">
-              <p className="text-white font-semibold text-sm">
-                {match.team1.shortName}
-              </p>
-              <p className="text-gray-400 text-xs">
-                {match.team1.name}
-              </p>
-            </div>
-            {match.score && (
-              <div className="text-right">
-                <p className="text-white font-bold text-sm">
-                  {match.score.team1.runs}/{match.score.team1.wickets}
-                </p>
-                <p className="text-gray-400 text-xs">
-                  {match.score.team1.overs} ov
-                </p>
-              </div>
-            )}
-          </div>
-
-          {/* VS divider */}
-          <div className="flex items-center space-x-2">
-            <div className="flex-1 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
-            <span className="text-gray-400 font-semibold text-sm px-2">VS</span>
-            <div className="flex-1 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
-          </div>
-
-          {/* Team 2 */}
-          <div className="flex items-center space-x-3">
-            <div className="w-12 h-12 rounded-full bg-black/30 border border-white/10 flex items-center justify-center flex-shrink-0 overflow-hidden">
-              {renderTeamLogo(match.team2)}
-            </div>
-            <div className="flex-1">
-              <p className="text-white font-semibold text-sm">
-                {match.team2.shortName}
-              </p>
-              <p className="text-gray-400 text-xs">
-                {match.team2.name}
-              </p>
-            </div>
-            {match.score && (
-              <div className="text-right">
-                <p className="text-white font-bold text-sm">
-                  {match.score.team2.runs}/{match.score.team2.wickets}
-                </p>
-                <p className="text-gray-400 text-xs">
-                  {match.score.team2.overs} ov
-                </p>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Venue */}
-        <div className="text-xs text-gray-300 flex items-center pt-2">
-          <svg className="w-3 h-3 mr-1.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-          </svg>
-          {match.venue}
-        </div>
-
-        {/* Result */}
-        {match.result && (
-          <div className="text-xs text-ipl-gold font-semibold pt-2 border-t border-white/10">
-            <div className="max-w-full overflow-hidden">
-              <span className="block truncate whitespace-nowrap">{match.result}</span>
-            </div>
-          </div>
-        )}
-
-        {/* Action Buttons - Premium Design */}
-        <div className="flex gap-3 mt-4">
-          {/* Playing 11 Button */}
-          {match.playing11 && players && players.length > 0 && (
-            <button
-              onClick={() => setShowPlaying11Modal(true)}
-              className="group flex-1 relative overflow-hidden rounded-xl font-bold text-sm py-3 transition-all duration-500 transform hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
-              style={{
-                background: 'linear-gradient(135deg, #F59E0B 0%, #D97706 50%, #B45309 100%)',
-                boxShadow: '0 10px 40px rgba(245, 158, 11, 0.4), 0 0 60px rgba(217, 119, 6, 0.3)',
-                border: '2px solid rgba(245, 158, 11, 0.5)',
-                color: '#fff',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.boxShadow = '0 20px 60px rgba(245, 158, 11, 0.6), 0 0 80px rgba(217, 119, 6, 0.5)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.boxShadow = '0 10px 40px rgba(245, 158, 11, 0.4), 0 0 60px rgba(217, 119, 6, 0.3)';
-              }}
-            >
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/25 to-transparent transform translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-1000" />
-              <span className="relative z-10 flex items-center justify-center gap-2 font-black tracking-tight">
-                Playing 11
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-                </svg>
-              </span>
-            </button>
-          )}
-
-          {/* Main Action Button */}
-          <button
-            onClick={() => {
-              // Show scorecard if it exists (for any match status)
-              if (match.scorecard || match.status === 'completed' || match.status === 'live') {
-                setShowScorecardModal(true);
-              } else if (match.status === 'upcoming') {
-                alert('Reminder set!');
-              } else {
-                alert('Opening stream...');
-              }
-            }} 
-            className="group flex-1 relative overflow-hidden rounded-xl font-bold text-sm py-3 transition-all duration-500 transform hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+          {/* ── INFO FOOTER ── */}
+          <div
+            className="mx-5 mb-4 rounded-xl overflow-hidden"
             style={{
-              background: match.status === 'live' 
-                ? 'linear-gradient(135deg, #EF4444 0%, #DC2626 50%, #B91C1C 100%)'
-                : match.status === 'completed'
-                ? 'linear-gradient(135deg, #10B981 0%, #059669 50%, #047857 100%)'
-                : 'linear-gradient(135deg, #7C3AED 0%, #9333EA 50%, #A855F7 100%)',
-              boxShadow: match.status === 'live'
-                ? '0 10px 40px rgba(239, 68, 68, 0.4), 0 0 60px rgba(220, 38, 38, 0.3)'
-                : match.status === 'completed'
-                ? '0 10px 40px rgba(16, 185, 129, 0.4), 0 0 60px rgba(5, 150, 105, 0.3)'
-                : '0 10px 40px rgba(124, 58, 237, 0.4), 0 0 60px rgba(147, 51, 234, 0.2)',
-              border: match.status === 'live'
-                ? '2px solid rgba(239, 68, 68, 0.5)'
-                : match.status === 'completed'
-                ? '2px solid rgba(16, 185, 129, 0.5)'
-                : '2px solid rgba(124, 58, 237, 0.5)',
-              color: '#fff',
-            }}
-            onMouseEnter={(e) => {
-              if (match.status === 'live') {
-                e.currentTarget.style.boxShadow = '0 20px 60px rgba(239, 68, 68, 0.6), 0 0 80px rgba(220, 38, 38, 0.5)';
-              } else if (match.status === 'completed') {
-                e.currentTarget.style.boxShadow = '0 20px 60px rgba(16, 185, 129, 0.6), 0 0 80px rgba(5, 150, 105, 0.5)';
-              } else {
-                e.currentTarget.style.boxShadow = '0 20px 60px rgba(124, 58, 237, 0.6), 0 0 80px rgba(147, 51, 234, 0.4)';
-              }
-            }}
-            onMouseLeave={(e) => {
-              if (match.status === 'live') {
-                e.currentTarget.style.boxShadow = '0 10px 40px rgba(239, 68, 68, 0.4), 0 0 60px rgba(220, 38, 38, 0.3)';
-              } else if (match.status === 'completed') {
-                e.currentTarget.style.boxShadow = '0 10px 40px rgba(16, 185, 129, 0.4), 0 0 60px rgba(5, 150, 105, 0.3)';
-              } else {
-                e.currentTarget.style.boxShadow = '0 10px 40px rgba(124, 58, 237, 0.4), 0 0 60px rgba(147, 51, 234, 0.2)';
-              }
+              background: 'rgba(255,255,255,0.04)',
+              border: '1px solid rgba(255,255,255,0.07)',
             }}
           >
-            {/* Shimmer effect */}
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/25 to-transparent transform translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-1000" />
-            
-            {/* Glow effect */}
-            <div 
-              className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-xl -z-10"
-              style={{
-                background: match.status === 'live'
-                  ? 'radial-gradient(circle, rgba(239, 68, 68, 0.6), transparent)'
-                  : match.status === 'completed'
-                  ? 'radial-gradient(circle, rgba(16, 185, 129, 0.6), transparent)'
-                  : 'radial-gradient(circle, rgba(124, 58, 237, 0.6), transparent)',
+            <div className="flex items-center gap-3 px-3 py-2.5 border-b border-white/[0.05]">
+              <Calendar size={11} className="text-gray-500 flex-shrink-0" />
+              <span className="text-gray-300 text-[12px] font-semibold">
+                {formatDate(match.date)}
+              </span>
+            </div>
+            <div className="flex items-center gap-3 px-3 py-2.5 border-b border-white/[0.05]">
+              <Clock size={11} className="text-gray-500 flex-shrink-0" />
+              <span className="text-gray-300 text-[12px]">
+                {formatMatchTime(match.time, match.date)}
+              </span>
+            </div>
+            <div className="flex items-start gap-3 px-3 py-2.5">
+              <MapPin size={11} className="text-gray-500 flex-shrink-0 mt-0.5" />
+              <span className="text-gray-400 text-[12px] leading-snug line-clamp-2">
+                {match.venue}
+              </span>
+            </div>
+          </div>
+
+          {/* ── ACTION BUTTONS ── */}
+          <div className="px-5 pb-5 flex gap-2.5">
+            {/* Playing 11 Button */}
+            {match.playing11 && players && players.length > 0 && (
+              <motion.button
+                onClick={() => setShowPlaying11Modal(true)}
+                className="group relative overflow-hidden flex-1 rounded-xl py-3 text-sm font-black tracking-tight flex items-center justify-center gap-2"
+                style={{
+                  background: 'linear-gradient(135deg, #F59E0B, #D97706)',
+                  border: '1.5px solid rgba(245,158,11,0.4)',
+                  color: '#fff',
+                  boxShadow: '0 6px 24px rgba(245,158,11,0.3)',
+                }}
+                whileHover={{ scale: 1.03, boxShadow: '0 10px 36px rgba(245,158,11,0.5)' }}
+                whileTap={{ scale: 0.97 }}
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-120%] group-hover:translate-x-[120%] transition-transform duration-700" />
+                <Users size={14} className="relative z-10" />
+                <span className="relative z-10">Playing 11</span>
+              </motion.button>
+            )}
+
+            {/* Main CTA Button */}
+            <motion.button
+              onClick={() => {
+                if (match.status === 'completed' || match.status === 'live') {
+                  setShowScorecardModal(true);
+                } else if (match.status === 'upcoming') {
+                  alert('Reminder set!');
+                } else {
+                  alert('Opening stream...');
+                }
               }}
-            />
-            
-            <span className="relative z-10 flex items-center justify-center gap-2 font-black tracking-tight">
-              {match.status === 'upcoming' && 'Set Reminder'}
-              {match.status === 'live' && 'View Details'}
-              {match.status === 'completed' && 'Show Scorecard'}
-              <svg className="w-4 h-4 transform group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-              </svg>
-            </span>
-          </button>
+              className="group relative overflow-hidden flex-1 rounded-xl py-3 text-sm font-black tracking-tight flex items-center justify-center gap-2"
+              style={{
+                background: isLive
+                  ? 'linear-gradient(135deg, #EF4444, #DC2626)'
+                  : isCompleted
+                  ? 'linear-gradient(135deg, #10B981, #059669)'
+                  : 'linear-gradient(135deg, #6366f1, #9333ea)',
+                border: isLive
+                  ? '1.5px solid rgba(239,68,68,0.4)'
+                  : isCompleted
+                  ? '1.5px solid rgba(16,185,129,0.4)'
+                  : '1.5px solid rgba(99,102,241,0.4)',
+                color: '#fff',
+                boxShadow: isLive
+                  ? '0 6px 24px rgba(239,68,68,0.35)'
+                  : isCompleted
+                  ? '0 6px 24px rgba(16,185,129,0.3)'
+                  : '0 6px 24px rgba(99,102,241,0.3)',
+              }}
+              whileHover={{
+                scale: 1.03,
+                boxShadow: isLive
+                  ? '0 10px 36px rgba(239,68,68,0.55)'
+                  : isCompleted
+                  ? '0 10px 36px rgba(16,185,129,0.5)'
+                  : '0 10px 36px rgba(99,102,241,0.5)',
+              }}
+              whileTap={{ scale: 0.97 }}
+            >
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-120%] group-hover:translate-x-[120%] transition-transform duration-700" />
+              <span className="relative z-10">
+                {isLive && 'Live Score'}
+                {isCompleted && 'Scorecard'}
+                {match.status === 'upcoming' && 'Set Reminder'}
+              </span>
+              <ChevronRight size={15} className="relative z-10 group-hover:translate-x-0.5 transition-transform duration-200" />
+            </motion.button>
+          </div>
+
         </div>
-      </div>
-    </div>
+      </motion.div>
 
       {/* Scorecard Modal - Using Portal */}
       {mounted && showScorecardModal && createPortal(
@@ -469,7 +578,7 @@ export default function MatchCard({ match, index = 0, players }: MatchCardProps)
                 </div>
                 <div className="p-4 bg-white/5 rounded-xl">
                   <div className="text-gray-400 text-sm">Date & Time</div>
-                  <div className="text-white font-semibold">{formatDate(match.date)} • {formatMatchTime(match.time)}</div>
+                  <div className="text-white font-semibold">{formatDate(match.date)} • {formatMatchTime(match.time, match.date)}</div>
                 </div>
               </div>
 
