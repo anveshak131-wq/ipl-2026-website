@@ -89,6 +89,7 @@ interface Innings {
 }
 
 const DRAFT_KEY_PREFIX = 'ipl_scorecard_draft_';
+const DEFAULT_SEASON_YEAR = 2026;
 function getDraftKey(matchId: string) {
   return `${DRAFT_KEY_PREFIX}${matchId}`;
 }
@@ -96,6 +97,13 @@ function parseUpdatedAt(obj: { updatedAt?: string } | null): number {
   if (!obj?.updatedAt) return 0;
   const t = new Date(obj.updatedAt).getTime();
   return isNaN(t) ? 0 : t;
+}
+function getSeasonYear(dateString: string | undefined | null): number | null {
+  if (!dateString) return null;
+  const parsed = new Date(dateString);
+  if (!isNaN(parsed.getTime())) return parsed.getFullYear();
+  const match = String(dateString).match(/(19|20)\d{2}/);
+  return match ? parseInt(match[0], 10) : null;
 }
 
 interface Scorecard {
@@ -135,6 +143,21 @@ export default function ScorecardAdminPage() {
   const [activeTab, setActiveTab] = useState<'matchInfo' | 'innings1' | 'innings2'>('matchInfo');
   const [activeInnings, setActiveInnings] = useState(0);
   const [saving, setSaving] = useState(false);
+  const [seasonYear, setSeasonYear] = useState<number | null>(DEFAULT_SEASON_YEAR);
+
+  const availableSeasonYears = React.useMemo(() => {
+    const years = new Set<number>([DEFAULT_SEASON_YEAR]);
+    for (const match of matches) {
+      const year = getSeasonYear(match.date);
+      if (year) years.add(year);
+    }
+    return Array.from(years).sort((a, b) => b - a);
+  }, [matches]);
+
+  const visibleMatches = React.useMemo(() => {
+    if (seasonYear === null) return matches;
+    return matches.filter((match) => getSeasonYear(match.date) === seasonYear);
+  }, [matches, seasonYear]);
 
   useEffect(() => {
     fetchMatches();
@@ -2148,9 +2171,41 @@ export default function ScorecardAdminPage() {
         {!selectedMatch && (
           <div>
             <h2 className="text-2xl font-bold mb-6">Select a Match</h2>
+
+            <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <label className="block text-sm text-gray-400 mb-2">Season</label>
+                <select
+                  value={seasonYear === null ? 'all' : String(seasonYear)}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setSeasonYear(value === 'all' ? null : parseInt(value, 10) || DEFAULT_SEASON_YEAR);
+                  }}
+                  className="bg-gray-800 p-3 rounded border border-gray-700 text-white"
+                >
+                  {availableSeasonYears.map((year) => (
+                    <option key={year} value={String(year)}>
+                      {year}
+                      {year === DEFAULT_SEASON_YEAR ? ' (Current)' : ''}
+                    </option>
+                  ))}
+                  <option value="all">All seasons</option>
+                </select>
+              </div>
+
+              <div className="text-sm text-gray-400">
+                Showing {visibleMatches.length} match{visibleMatches.length === 1 ? '' : 'es'}
+              </div>
+            </div>
+
+            {visibleMatches.length === 0 && (
+              <div className="mb-8 p-6 rounded-lg bg-gray-800/50 border border-gray-700 text-gray-300">
+                No matches found for {seasonYear ?? 'all'} season.
+              </div>
+            )}
             
             {/* Published Scorecards Section */}
-            {matches.some(match => scorecards.some(sc => sc.matchInfo?.matchId === match.id && sc.draft === false)) && (
+            {visibleMatches.some(match => scorecards.some(sc => sc.matchInfo?.matchId === match.id && sc.draft === false)) && (
               <div className="mb-8">
                 <div className="flex items-center gap-2 mb-4">
                   <div className="w-3 h-3 bg-green-500 rounded-full"></div>
@@ -2158,7 +2213,7 @@ export default function ScorecardAdminPage() {
                   <span className="text-sm text-gray-400">(Live and visible to public)</span>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {matches
+                  {visibleMatches
                     .filter(match => scorecards.some(sc => sc.matchInfo?.matchId === match.id && sc.draft === false))
                     .map((match) => {
                       const scorecard = scorecards.find(sc => sc.matchInfo?.matchId === match.id);
@@ -2199,7 +2254,7 @@ export default function ScorecardAdminPage() {
             )}
 
             {/* Draft Scorecards Section */}
-            {matches.some(match => scorecards.some(sc => sc.matchInfo?.matchId === match.id && sc.draft !== false)) && (
+            {visibleMatches.some(match => scorecards.some(sc => sc.matchInfo?.matchId === match.id && sc.draft !== false)) && (
               <div className="mb-8">
                 <div className="flex items-center gap-2 mb-4">
                   <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
@@ -2207,7 +2262,7 @@ export default function ScorecardAdminPage() {
                   <span className="text-sm text-gray-400">(Saved but not published)</span>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {matches
+                  {visibleMatches
                     .filter(match => scorecards.some(sc => sc.matchInfo?.matchId === match.id && sc.draft !== false))
                     .map((match) => {
                       const scorecard = scorecards.find(sc => sc.matchInfo?.matchId === match.id);
@@ -2248,7 +2303,7 @@ export default function ScorecardAdminPage() {
             )}
 
             {/* Matches without Scorecards */}
-            {matches.some(match => !scorecards.some(sc => sc.matchInfo?.matchId === match.id)) && (
+            {visibleMatches.some(match => !scorecards.some(sc => sc.matchInfo?.matchId === match.id)) && (
               <div>
                 <div className="flex items-center gap-2 mb-4">
                   <div className="w-3 h-3 bg-gray-500 rounded-full"></div>
@@ -2256,7 +2311,7 @@ export default function ScorecardAdminPage() {
                   <span className="text-sm text-gray-500">(No scorecard created yet)</span>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {matches
+                  {visibleMatches
                     .filter(match => !scorecards.some(sc => sc.matchInfo?.matchId === match.id))
                     .map((match) => (
                       <button
@@ -2285,19 +2340,19 @@ export default function ScorecardAdminPage() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
                 <div>
                   <div className="text-2xl font-bold text-green-400">
-                    {matches.filter(match => scorecards.some(sc => sc.matchInfo?.matchId === match.id && sc.draft === false)).length}
+                    {visibleMatches.filter(match => scorecards.some(sc => sc.matchInfo?.matchId === match.id && sc.draft === false)).length}
                   </div>
                   <div className="text-sm text-gray-400">Published</div>
                 </div>
                 <div>
                   <div className="text-2xl font-bold text-yellow-400">
-                    {matches.filter(match => scorecards.some(sc => sc.matchInfo?.matchId === match.id && sc.draft !== false)).length}
+                    {visibleMatches.filter(match => scorecards.some(sc => sc.matchInfo?.matchId === match.id && sc.draft !== false)).length}
                   </div>
                   <div className="text-sm text-gray-400">Drafts</div>
                 </div>
                 <div>
                   <div className="text-2xl font-bold text-gray-400">
-                    {matches.filter(match => !scorecards.some(sc => sc.matchInfo?.matchId === match.id)).length}
+                    {visibleMatches.filter(match => !scorecards.some(sc => sc.matchInfo?.matchId === match.id)).length}
                   </div>
                   <div className="text-sm text-gray-400">New Matches</div>
                 </div>
