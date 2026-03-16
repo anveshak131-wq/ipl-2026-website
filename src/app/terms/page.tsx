@@ -2,72 +2,81 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { motion } from "framer-motion";
-import { TermsLanguage, termsTranslations } from "@/lib/terms-translations";
 
 const REQUIRED_TERMS_VERSION = "1.1";
+const FALLBACK_LAST_UPDATED = "March 16, 2026";
+const CONTACT_EMAIL = "sportsup99.info@gmail.com";
+
+type LegalPanel = { id: string; title: string; body: string };
+
+function formatDate(value: string) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return date.toLocaleDateString(undefined, {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+}
+
+function parsePanels(raw: string, prefix: string): LegalPanel[] | null {
+  try {
+    const maybeJson = JSON.parse(raw);
+    if (!Array.isArray(maybeJson)) return null;
+
+    const parsed = maybeJson
+      .map((item: any, index: number) => {
+        if (!item) return null;
+        const title =
+          typeof item.title === "string" && item.title.trim()
+            ? item.title
+            : `Panel ${index + 1}`;
+        const body = typeof item.body === "string" ? item.body : "";
+        const id =
+          typeof item.id === "string" && item.id.trim()
+            ? item.id
+            : `${prefix}-${index + 1}`;
+        if (!body.trim()) return null;
+        return { id, title, body };
+      })
+      .filter((panel): panel is LegalPanel => panel !== null);
+
+    return parsed.length > 0 ? parsed : null;
+  } catch {
+    return null;
+  }
+}
 
 export default function TermsPage() {
   const [customContent, setCustomContent] = useState<string | null>(null);
-  const [panels, setPanels] = useState<
-    { id: string; title: string; body: string }[] | null
-  >(null);
-  const [language, setLanguage] = useState<TermsLanguage>("en");
-  const t = termsTranslations[language];
+  const [updatedAt, setUpdatedAt] = useState<string | null>(null);
+  const [panels, setPanels] = useState<LegalPanel[] | null>(null);
 
   useEffect(() => {
+    let cancelled = false;
+
     const load = async () => {
       try {
         const res = await fetch("/api/legal?page=terms");
         if (!res.ok) return;
         const data = await res.json();
         if (data?.content && typeof data.content === "string") {
+          if (cancelled) return;
           const raw = data.content as string;
           setCustomContent(raw);
-
-          try {
-            const maybeJson = JSON.parse(raw);
-            if (Array.isArray(maybeJson)) {
-              const parsed = maybeJson
-                .map((item: any, index: number) => {
-                  if (!item) return null;
-                  const title =
-                    typeof item.title === "string" && item.title.trim()
-                      ? item.title
-                      : `Panel ${index + 1}`;
-                  const body =
-                    typeof item.body === "string" ? item.body : "";
-                  const id =
-                    typeof item.id === "string" && item.id.trim()
-                      ? item.id
-                      : `terms-${index + 1}`;
-                  if (!body.trim()) return null;
-                  return { id, title, body };
-                })
-                .filter(
-                  (
-                    panel,
-                  ): panel is { id: string; title: string; body: string } =>
-                    panel !== null,
-                );
-              if (parsed.length > 0) {
-                setPanels(parsed);
-              }
-            }
-          } catch {
-            // Treat as legacy single-string content
-          }
+          setUpdatedAt(typeof data.updatedAt === "string" ? data.updatedAt : null);
+          setPanels(parsePanels(raw, "terms"));
         }
       } catch (e) {
         console.error("Failed to load terms content", e);
       }
-    
-    return undefined;
-    return undefined;
-    return undefined;
-    return undefined;
-    return undefined;};
+    };
+
     load();
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   return (
@@ -81,9 +90,13 @@ export default function TermsPage() {
             <h1 className="text-3xl md:text-4xl font-bold tracking-tight">
               Terms of Service
             </h1>
+            <p className="mt-2 text-xs text-gray-500">
+              Version {REQUIRED_TERMS_VERSION} • Last updated:{" "}
+              {updatedAt ? formatDate(updatedAt) : FALLBACK_LAST_UPDATED}
+            </p>
             <p className="mt-3 text-sm md:text-base text-gray-400 max-w-2xl">
-              Please read these terms carefully. By using this site, you agree to the
-              conditions of use for the SportsUP18 IPL 2026 demo experience.
+              Please read these terms carefully. By using SportsUP18 (IPL &amp; WPL 2026),
+              you agree to the conditions below.
             </p>
           </div>
           <Link
@@ -95,43 +108,25 @@ export default function TermsPage() {
         </header>
 
         {/* Legal navigation pills */}
-        <nav className="mb-10 flex flex-wrap gap-3 justify-between items-center text-xs md:text-sm">
-          <div className="flex flex-wrap gap-3">
-            <Link
-              href="/legal"
-              className="px-4 py-2 rounded-full border border-white/15 bg-white/5 text-gray-200 hover:bg-white/10 transition-colors"
-            >
-              Legal Information
-            </Link>
-            <Link
-              href="/privacy"
-              className="px-4 py-2 rounded-full border border-white/15 bg-white/5 text-gray-200 hover:bg-white/10 transition-colors"
-            >
-              Privacy Policy
-            </Link>
-            <Link
-              href="/terms"
-              className="px-4 py-2 rounded-full border border-ipl-gold/70 bg-ipl-gold/10 text-ipl-gold font-semibold tracking-wide shadow-sm shadow-yellow-900/40"
-            >
-              Terms of Service
-            </Link>
-          </div>
-          
-          {/* Language Selector */}
-          <select
-            value={language}
-            onChange={(e) => setLanguage(e.target.value as TermsLanguage)}
-            className="px-4 py-2 rounded-full border border-white/15 bg-white/5 text-gray-200 hover:bg-white/10 transition-colors text-xs md:text-sm cursor-pointer"
-            aria-label="Select language"
+        <nav className="mb-10 flex flex-wrap gap-3 text-xs md:text-sm">
+          <Link
+            href="/legal"
+            className="px-4 py-2 rounded-full border border-white/15 bg-white/5 text-gray-200 hover:bg-white/10 transition-colors"
           >
-            <option value="en">English</option>
-            <option value="es">Español</option>
-            <option value="hi">हिन्दी</option>
-            <option value="fr">Français</option>
-            <option value="te">తెలుగు</option>
-            <option value="kn">ಕನ್ನಡ</option>
-            <option value="ta">தமிழ்</option>
-          </select>
+            Legal Information
+          </Link>
+          <Link
+            href="/privacy"
+            className="px-4 py-2 rounded-full border border-white/15 bg-white/5 text-gray-200 hover:bg-white/10 transition-colors"
+          >
+            Privacy Policy
+          </Link>
+          <Link
+            href="/terms"
+            className="px-4 py-2 rounded-full border border-ipl-gold/70 bg-ipl-gold/10 text-ipl-gold font-semibold tracking-wide shadow-sm shadow-yellow-900/40"
+          >
+            Terms of Service
+          </Link>
         </nav>
 
         {panels && panels.length > 0 ? (
@@ -160,73 +155,140 @@ export default function TermsPage() {
         ) : (
           <section className="space-y-6 mb-10">
             <div className="rounded-2xl border border-white/10 bg-slate-900/60 p-6">
-              <h2 className="text-lg font-semibold mb-3">1. Nature of the service</h2>
+              <h2 className="text-lg font-semibold mb-3">1. Acceptance &amp; updates</h2>
               <p className="text-sm text-gray-300 leading-relaxed">
-                SportsUp99 is a fan-built demo experience for exploring IPL-style product
-                flows for the IPL 2026 season. It is not an official IPL or BCCI property.
-                All content is provided on an "as-is" basis for experimentation, learning,
-                and entertainment only.
+                By accessing or using SportsUP18, you agree to these Terms of Service and
+                our{" "}
+                <Link
+                  href="/privacy"
+                  className="text-ipl-gold hover:text-ipl-gold/80 underline underline-offset-4 font-semibold"
+                >
+                  Privacy Policy
+                </Link>
+                . If you do not agree, do not use the service. We may update these terms
+                from time to time; continued use after updates means you accept the new
+                terms.
               </p>
             </div>
 
             <div className="rounded-2xl border border-white/10 bg-slate-900/60 p-6 space-y-3">
-              <h2 className="text-lg font-semibold mb-2">2. Acceptable use</h2>
+              <h2 className="text-lg font-semibold mb-2">2. Nature of the service</h2>
+              <p className="text-sm text-gray-300 leading-relaxed">
+                SportsUP18 is an independent, fan-made IPL &amp; WPL 2026 experience
+                platform. It is not affiliated with or endorsed by the BCCI, IPL, WPL, or
+                any franchise. Features may change, break, or be reset as the project
+                evolves.
+              </p>
+              <p className="text-sm text-gray-400 leading-relaxed">
+                Content is provided for information, learning, and entertainment only and
+                must not be used for betting, gambling, or financial decisions.
+              </p>
+            </div>
+
+            <div className="rounded-2xl border border-white/10 bg-slate-900/60 p-6 space-y-3">
+              <h2 className="text-lg font-semibold mb-2">3. Accounts &amp; eligibility</h2>
               <ul className="list-disc list-inside text-sm text-gray-300 space-y-1">
-                <li>No harassment, hate speech, or abusive content in chat or usernames.</li>
-                <li>No spam, automated scripts, or attempts to overload the service.</li>
-                <li>No use of the platform for betting, gambling, or financial decisions.</li>
-                <li>No attempts to reverse engineer, attack, or misuse the infrastructure.</li>
+                <li>
+                  You are responsible for the activity on your account and for keeping
+                  your credentials secure.
+                </li>
+                <li>
+                  You agree to provide accurate information when creating an account.
+                </li>
+                <li>
+                  The service is not intended for children under 13 (or the age of digital
+                  consent where you live).
+                </li>
               </ul>
             </div>
 
             <div className="rounded-2xl border border-white/10 bg-slate-900/60 p-6 space-y-3">
-              <h2 className="text-lg font-semibold mb-2">3. Accounts & moderation</h2>
+              <h2 className="text-lg font-semibold mb-2">4. User content &amp; moderation</h2>
               <p className="text-sm text-gray-300 leading-relaxed">
-                Admins may block or remove accounts that violate these terms or harm the
-                experience for others. Blocking prevents chat participation; deletion may
-                remove associated data where technically possible.
+                SportsUP18 may include user-generated content (for example, live chat).
+                You are solely responsible for what you post. We may remove content or
+                restrict accounts at any time to keep the community safe or to enforce
+                these terms.
               </p>
             </div>
 
             <div className="rounded-2xl border border-white/10 bg-slate-900/60 p-6 space-y-3">
-              <h2 className="text-lg font-semibold mb-2">4. No warranties</h2>
+              <h2 className="text-lg font-semibold mb-2">5. Acceptable use</h2>
+              <ul className="list-disc list-inside text-sm text-gray-300 space-y-1">
+                <li>No harassment, hate speech, or abusive content in chat or usernames.</li>
+                <li>No spam, automated scripts, or attempts to overload the service.</li>
+                <li>No use of the platform for betting, gambling, or financial decisions.</li>
+                <li>
+                  No attempts to reverse engineer, attack, exploit vulnerabilities, or
+                  misuse the infrastructure.
+                </li>
+                <li>
+                  No posting of content that is unlawful, infringes rights, or violates
+                  others' privacy.
+                </li>
+              </ul>
+            </div>
+
+            <div className="rounded-2xl border border-white/10 bg-slate-900/60 p-6 space-y-3">
+              <h2 className="text-lg font-semibold mb-2">6. Notifications &amp; emails</h2>
               <p className="text-sm text-gray-300 leading-relaxed">
-                The service is provided without any guarantees of availability, accuracy,
-                or fitness for a particular purpose. Features may change, break, or be
-                reset at any time without notice as the project evolves.
+                If you opt in, we may send service emails such as match reminders. You can
+                opt out of non-essential emails via settings (if available) or by contacting
+                us.
               </p>
             </div>
 
             <div className="rounded-2xl border border-white/10 bg-slate-900/60 p-6 space-y-3">
-              <h2 className="text-lg font-semibold mb-2">5. Limitation of liability</h2>
+              <h2 className="text-lg font-semibold mb-2">
+                7. Intellectual property &amp; trademarks
+              </h2>
+              <p className="text-sm text-gray-300 leading-relaxed">
+                The SportsUP18 site, UI/UX, and code are owned by the project owner.
+                Third-party trademarks (including league/team names and logos) belong to
+                their respective owners and may be used only for identification.
+              </p>
+            </div>
+
+            <div className="rounded-2xl border border-white/10 bg-slate-900/60 p-6 space-y-3">
+              <h2 className="text-lg font-semibold mb-2">8. Disclaimers</h2>
+              <p className="text-sm text-gray-300 leading-relaxed">
+                The service is provided on an &quot;as is&quot; and &quot;as available&quot;
+                basis without warranties of any kind. We do not guarantee availability,
+                accuracy, or fitness for a particular purpose.
+              </p>
+            </div>
+
+            <div className="rounded-2xl border border-white/10 bg-slate-900/60 p-6 space-y-3">
+              <h2 className="text-lg font-semibold mb-2">9. Limitation of liability</h2>
               <p className="text-sm text-gray-300 leading-relaxed">
                 To the maximum extent permitted by applicable law, the project owner is
-                not liable for any damages resulting from the use or inability to use this
-                demo platform, including loss of data, opportunities, or any indirect or
-                consequential losses.
+                not liable for any indirect, incidental, special, consequential, or
+                punitive damages, or any loss of data or profits arising from your use of
+                the service.
               </p>
             </div>
 
             <div className="rounded-2xl border border-white/10 bg-slate-900/60 p-6 space-y-3">
-              <h2 className="text-lg font-semibold mb-2">6. Changes to these terms</h2>
+              <h2 className="text-lg font-semibold mb-2">10. Termination</h2>
               <p className="text-sm text-gray-300 leading-relaxed">
-                These terms may be updated as the project evolves. If you continue to use
-                the platform after updates are published, you agree to the revised terms.
+                We may suspend or terminate access to the service at any time if we believe
+                you have violated these terms or if it is necessary to protect users or the
+                service.
               </p>
             </div>
 
             <div className="rounded-2xl border border-white/10 bg-slate-900/60 p-6 space-y-3">
-              <h2 className="text-lg font-semibold mb-2">7. Contact</h2>
+              <h2 className="text-lg font-semibold mb-2">11. Contact</h2>
               <p className="text-sm text-gray-300 leading-relaxed">
                 For questions about these Terms of Service, please contact us by email:
               </p>
               <p className="text-sm text-gray-200">
                 Email:{" "}
                 <a
-                  href="mailto:sportsup99.info@gmail.com"
+                  href={`mailto:${CONTACT_EMAIL}`}
                   className="text-ipl-gold hover:text-ipl-gold/80 underline underline-offset-4 font-semibold"
                 >
-                  sportsup99.info@gmail.com
+                  {CONTACT_EMAIL}
                 </a>
               </p>
             </div>
@@ -246,19 +308,19 @@ export default function TermsPage() {
               </p>
             </div>
             <a
-              href="mailto:sportsup99.info@gmail.com"
+              href={`mailto:${CONTACT_EMAIL}`}
               className="inline-flex items-center gap-2 rounded-full bg-ipl-gold text-slate-900 px-4 py-2 text-xs md:text-sm font-semibold shadow-md shadow-yellow-900/40 hover:bg-yellow-300 transition-colors"
             >
               <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-black/10">
                 @
               </span>
-              <span className="whitespace-nowrap">sportsup99.info@gmail.com</span>
+              <span className="whitespace-nowrap">{CONTACT_EMAIL}</span>
             </a>
           </div>
         </section>
 
         <footer className="border-t border-white/10 pt-6 mt-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-3 text-xs text-gray-500">
-          <p>&copy; {new Date().getFullYear()} SportsUp99 IPL 2026 Experience Platform.</p>
+          <p>&copy; {new Date().getFullYear()} SportsUP18 IPL &amp; WPL 2026 Experience Platform.</p>
           <div className="flex flex-wrap gap-4">
             <Link href="/legal" className="hover:text-ipl-gold transition-colors">
               Legal

@@ -21,11 +21,11 @@ interface LegalContentState {
 // These mirror the public fallback content but can be tuned over time.
 const defaultTemplates: LegalContentState = {
   legal:
-    'SportsUp99 is an independent IPL 2026 experience platform created for fans to explore match data, team information, and modern sports product design. It is not an official product of the BCCI, IPL, or any franchise. All team names, logos, and trademarks belong to their respective owners and are used here strictly for illustrative and educational purposes.',
+    'SportsUP18 is an independent, fan-made IPL & WPL 2026 experience platform. It is not affiliated with or endorsed by the BCCI, IPL, WPL, or any franchise. Team/league names and trademarks belong to their respective owners and are used for identification only. Rights/takedown requests: sportsup99.info@gmail.com.',
   privacy:
-    'SportsUp99 is a demo IPL 2026 experience platform. We store only the minimum information required to support features such as authentication, live chat, and engagement analytics. No personal data is sold or shared with third parties for advertising or profiling.',
+    'SportsUP18 collects limited information to operate the service (accounts, live chat, notifications, and security). We do not sell personal information or share it for third-party advertising. Privacy requests: sportsup99.info@gmail.com.',
   terms:
-    'SportsUp99 is a fan-built demo experience for exploring IPL-style product flows, not an official IPL or BCCI property. All content is provided on an "as-is" basis for experimentation, learning, and entertainment only.',
+    'By using SportsUP18, you agree to our Terms of Service and Privacy Policy. The service is provided “as is” for information and entertainment only and must not be used for betting or gambling. We may moderate content and restrict accounts for violations. Questions: sportsup99.info@gmail.com.',
 };
 
 export default function AdminLegalPage() {
@@ -157,12 +157,7 @@ export default function AdminLegalPage() {
       } catch (err) {
         console.error('Failed to load legal page', key, err);
       }
-    
-    return undefined;
-    return undefined;
-    return undefined;
-    return undefined;
-    return undefined;};
+    };
 
     loadContentFor('legal');
     loadContentFor('privacy');

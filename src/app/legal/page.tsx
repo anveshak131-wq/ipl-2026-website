@@ -3,65 +3,79 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 
+type LegalPanel = { id: string; title: string; body: string };
+
+const FALLBACK_LAST_UPDATED = "March 16, 2026";
+const CONTACT_EMAIL = "sportsup99.info@gmail.com";
+
+function formatDate(value: string) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return date.toLocaleDateString(undefined, {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+}
+
+function parsePanels(raw: string, prefix: string): LegalPanel[] | null {
+  try {
+    const maybeJson = JSON.parse(raw);
+    if (!Array.isArray(maybeJson)) return null;
+
+    const parsed = maybeJson
+      .map((item: any, index: number) => {
+        if (!item) return null;
+        const title =
+          typeof item.title === "string" && item.title.trim()
+            ? item.title
+            : `Panel ${index + 1}`;
+        const body = typeof item.body === "string" ? item.body : "";
+        const id =
+          typeof item.id === "string" && item.id.trim()
+            ? item.id
+            : `${prefix}-${index + 1}`;
+        if (!body.trim()) return null;
+        return { id, title, body };
+      })
+      .filter((panel): panel is LegalPanel => panel !== null);
+
+    return parsed.length > 0 ? parsed : null;
+  } catch {
+    return null;
+  }
+}
+
 export default function LegalPage() {
   const [customContent, setCustomContent] = useState<string | null>(null);
-  const [panels, setPanels] = useState<
-    { id: string; title: string; body: string }[] | null
-  >(null);
+  const [updatedAt, setUpdatedAt] = useState<string | null>(null);
+  const [panels, setPanels] = useState<LegalPanel[] | null>(null);
 
   useEffect(() => {
+    let cancelled = false;
+
     const load = async () => {
       try {
         const res = await fetch("/api/legal?page=legal");
         if (!res.ok) return;
         const data = await res.json();
         if (data?.content && typeof data.content === "string") {
+          if (cancelled) return;
           const raw = data.content as string;
           setCustomContent(raw);
-
-          try {
-            const maybeJson = JSON.parse(raw);
-            if (Array.isArray(maybeJson)) {
-              const parsed = maybeJson
-                .map((item: any, index: number) => {
-                  if (!item) return null;
-                  const title =
-                    typeof item.title === "string" && item.title.trim()
-                      ? item.title
-                      : `Panel ${index + 1}`;
-                  const body =
-                    typeof item.body === "string" ? item.body : "";
-                  const id =
-                    typeof item.id === "string" && item.id.trim()
-                      ? item.id
-                      : `legal-${index + 1}`;
-                  if (!body.trim()) return null;
-                  return { id, title, body };
-                })
-                .filter(
-                  (
-                    panel,
-                  ): panel is { id: string; title: string; body: string } =>
-                    panel !== null,
-                );
-              if (parsed.length > 0) {
-                setPanels(parsed);
-              }
-            }
-          } catch {
-            // Treat as legacy single-string content
-          }
+          setUpdatedAt(typeof data.updatedAt === "string" ? data.updatedAt : null);
+          setPanels(parsePanels(raw, "legal"));
         }
       } catch (e) {
         console.error("Failed to load legal content", e);
       }
-    
-    return undefined;
-    return undefined;
-    return undefined;
-    return undefined;
-    return undefined;};
+    };
+
     load();
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   return (
@@ -75,10 +89,13 @@ export default function LegalPage() {
             <h1 className="text-3xl md:text-4xl font-bold tracking-tight">
               Legal Information
             </h1>
+            <p className="mt-2 text-xs text-gray-500">
+              Last updated:{" "}
+              {updatedAt ? formatDate(updatedAt) : FALLBACK_LAST_UPDATED}
+            </p>
             <p className="mt-3 text-sm md:text-base text-gray-400 max-w-2xl">
-              Transparency, fair use of IPL references, and user trust are important here.
-              This page explains how SportsUP18 presents legal notices and ownership
-              information in a clear, human-friendly way.
+              This page contains legal notices, trademark attribution, and instructions
+              for rights holders who want content corrected or removed from SportsUP18.
             </p>
           </div>
           <Link
@@ -140,32 +157,32 @@ export default function LegalPage() {
               <div className="rounded-2xl border border-white/10 bg-slate-900/60 p-6 shadow-lg shadow-black/40">
                 <h2 className="text-lg font-semibold mb-3">Publisher / Operator</h2>
                 <p className="text-sm text-gray-300 leading-relaxed">
-                  SportsUp99 is an independent IPL 2026 experience platform created for
-                  fans to explore match data, team information, and modern sports product
-                  design. It is not an official product of the BCCI, IPL, or any
-                  franchise.
+                  SportsUP18 is an independent, fan-made IPL &amp; WPL 2026 experience
+                  platform for exploring match data, team information, and modern sports
+                  product design. It is not an official product and is not affiliated
+                  with or endorsed by the BCCI, IPL, WPL, or any franchise.
                 </p>
                 <p className="mt-4 text-sm text-gray-400">
-                  All team names, logos, and trademarks belong to their respective owners
-                  and are used here strictly for illustrative and educational purposes.
+                  This site may reference league/team names for identification. All
+                  trademarks and copyrighted materials are the property of their
+                  respective owners.
                 </p>
               </div>
 
               <div className="rounded-2xl border border-white/10 bg-slate-900/60 p-6 shadow-lg shadow-black/40">
                 <h2 className="text-lg font-semibold mb-3">Contact</h2>
                 <p className="text-sm text-gray-300 leading-relaxed">
-                  For questions about this project, data handling, or to request removal of
-                  content, please reach out via email. We aim to respond within 3–5
-                  business days.
+                  For questions about this site, data handling, or rights/takedown
+                  requests, please email us. We aim to respond within 3–5 business days.
                 </p>
                 <div className="mt-4 text-sm text-gray-200">
                   <p className="font-medium">Project Contact</p>
-                  <p className="text-gray-300">anvesh (project owner)</p>
+                  <p className="text-gray-300">SportsUP18 (project owner)</p>
                   <a
-                    href="mailto:contact@example.com"
+                    href={`mailto:${CONTACT_EMAIL}`}
                     className="text-ipl-gold hover:text-ipl-gold/80 underline underline-offset-4"
                   >
-                    contact@example.com
+                    {CONTACT_EMAIL}
                   </a>
                 </div>
               </div>
@@ -177,19 +194,46 @@ export default function LegalPage() {
                 <p className="text-sm text-gray-300 leading-relaxed">
                   All match data, scores, analytics, and engagement components displayed on
                   this site are for demonstration and entertainment only. They must not be
-                  used for betting or gambling of any kind. No guarantees are made regarding
-                  the accuracy, completeness, or real-time nature of the information
-                  presented.
+                  used for betting or gambling of any kind. No guarantees are made about
+                  accuracy, completeness, or real-time availability.
                 </p>
               </div>
 
               <div className="rounded-2xl border border-white/10 bg-slate-900/60 p-6">
-                <h2 className="text-lg font-semibold mb-3">Intellectual Property</h2>
+                <h2 className="text-lg font-semibold mb-3">
+                  Trademarks &amp; affiliation
+                </h2>
                 <p className="text-sm text-gray-300 leading-relaxed">
-                  The UI, UX flows, and underlying code for this IPL 2026 platform are
-                  original work by the project owner. Team brands, league marks, and
-                  player likenesses, if shown, are used as fictional placeholders to
-                  illustrate sports technology concepts.
+                  IPL, WPL, BCCI, team names, team logos, and other brand features may be
+                  trademarks of their respective owners. Any such marks are used only for
+                  identification and informational purposes. SportsUP18 is not affiliated
+                  with or endorsed by any rights holder.
+                </p>
+              </div>
+
+              <div className="rounded-2xl border border-white/10 bg-slate-900/60 p-6">
+                <h2 className="text-lg font-semibold mb-3">Copyright &amp; takedown requests</h2>
+                <p className="text-sm text-gray-300 leading-relaxed">
+                  If you believe content on this site infringes your rights, please email{" "}
+                  <a
+                    href={`mailto:${CONTACT_EMAIL}`}
+                    className="text-ipl-gold hover:text-ipl-gold/80 underline underline-offset-4 font-semibold"
+                  >
+                    {CONTACT_EMAIL}
+                  </a>{" "}
+                  with (1) your name and a way to contact you, (2) the URL(s) of the
+                  content, (3) a description of the rights you believe are infringed, and
+                  (4) the action you are requesting (remove, correct, attribute). We will
+                  review and respond as quickly as possible.
+                </p>
+              </div>
+
+              <div className="rounded-2xl border border-white/10 bg-slate-900/60 p-6">
+                <h2 className="text-lg font-semibold mb-3">Site content</h2>
+                <p className="text-sm text-gray-300 leading-relaxed">
+                  The UI/UX and underlying code are original work by the project owner.
+                  User-generated content (for example, live chat) is posted by users and
+                  may be moderated or removed to keep the community safe.
                 </p>
               </div>
             </section>
@@ -209,20 +253,20 @@ export default function LegalPage() {
               </p>
             </div>
             <a
-              href="mailto:sportsup99.info@gmail.com"
+              href={`mailto:${CONTACT_EMAIL}`}
               className="inline-flex items-center gap-2 rounded-full bg-ipl-gold text-slate-900 px-4 py-2 text-xs md:text-sm font-semibold shadow-md shadow-yellow-900/40 hover:bg-yellow-300 transition-colors"
             >
               <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-black/10">
                 @
               </span>
-              <span className="whitespace-nowrap">sportsup99.info@gmail.com</span>
+              <span className="whitespace-nowrap">{CONTACT_EMAIL}</span>
             </a>
           </div>
         </section>
 
         <footer className="border-t border-white/10 pt-6 mt-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-3 text-xs text-gray-500">
           <p>
-            &copy; {new Date().getFullYear()} SportsUp99 IPL 2026 Experience Platform.
+            &copy; {new Date().getFullYear()} SportsUP18 IPL &amp; WPL 2026 Experience Platform.
             All rights reserved.
           </p>
           <div className="flex flex-wrap gap-4">

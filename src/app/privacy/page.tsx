@@ -3,65 +3,78 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 
+type LegalPanel = { id: string; title: string; body: string };
+
+const FALLBACK_LAST_UPDATED = "March 16, 2026";
+
+function formatDate(value: string) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return date.toLocaleDateString(undefined, {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+}
+
+function parsePanels(raw: string, prefix: string): LegalPanel[] | null {
+  try {
+    const maybeJson = JSON.parse(raw);
+    if (!Array.isArray(maybeJson)) return null;
+
+    const parsed = maybeJson
+      .map((item: any, index: number) => {
+        if (!item) return null;
+        const title =
+          typeof item.title === "string" && item.title.trim()
+            ? item.title
+            : `Panel ${index + 1}`;
+        const body = typeof item.body === "string" ? item.body : "";
+        const id =
+          typeof item.id === "string" && item.id.trim()
+            ? item.id
+            : `${prefix}-${index + 1}`;
+        if (!body.trim()) return null;
+        return { id, title, body };
+      })
+      .filter((panel): panel is LegalPanel => panel !== null);
+
+    return parsed.length > 0 ? parsed : null;
+  } catch {
+    return null;
+  }
+}
+
 export default function PrivacyPage() {
   const [customContent, setCustomContent] = useState<string | null>(null);
-  const [panels, setPanels] = useState<
-    { id: string; title: string; body: string }[] | null
-  >(null);
+  const [updatedAt, setUpdatedAt] = useState<string | null>(null);
+  const [panels, setPanels] = useState<LegalPanel[] | null>(null);
 
   useEffect(() => {
+    let cancelled = false;
+
     const load = async () => {
       try {
         const res = await fetch("/api/legal?page=privacy");
         if (!res.ok) return;
         const data = await res.json();
         if (data?.content && typeof data.content === "string") {
+          if (cancelled) return;
           const raw = data.content as string;
           setCustomContent(raw);
-
-          try {
-            const maybeJson = JSON.parse(raw);
-            if (Array.isArray(maybeJson)) {
-              const parsed = maybeJson
-                .map((item: any, index: number) => {
-                  if (!item) return null;
-                  const title =
-                    typeof item.title === "string" && item.title.trim()
-                      ? item.title
-                      : `Panel ${index + 1}`;
-                  const body =
-                    typeof item.body === "string" ? item.body : "";
-                  const id =
-                    typeof item.id === "string" && item.id.trim()
-                      ? item.id
-                      : `privacy-${index + 1}`;
-                  if (!body.trim()) return null;
-                  return { id, title, body };
-                })
-                .filter(
-                  (
-                    panel,
-                  ): panel is { id: string; title: string; body: string } =>
-                    panel !== null,
-                );
-              if (parsed.length > 0) {
-                setPanels(parsed);
-              }
-            }
-          } catch {
-            // Treat as legacy single-string content
-          }
+          setUpdatedAt(typeof data.updatedAt === "string" ? data.updatedAt : null);
+          setPanels(parsePanels(raw, "privacy"));
         }
       } catch (e) {
         console.error("Failed to load privacy content", e);
       }
-    
-    return undefined;
-    return undefined;
-    return undefined;
-    return undefined;
-    return undefined;};
+    };
+
     load();
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   return (
@@ -75,11 +88,14 @@ export default function PrivacyPage() {
             <h1 className="text-3xl md:text-4xl font-bold tracking-tight">
               Privacy Policy
             </h1>
+            <p className="mt-2 text-xs text-gray-500">
+              Last updated:{" "}
+              {updatedAt ? formatDate(updatedAt) : FALLBACK_LAST_UPDATED}
+            </p>
             <p className="mt-3 text-sm md:text-base text-gray-400 max-w-2xl">
-              This page explains what information is collected when you use the
-              SportsUP18 IPL 2026 experience, how that information is used, and the
-              choices you have. It is written to be human-readable first while still
-              covering the key legal points.
+              This page explains what information is collected when you use SportsUP18
+              (IPL &amp; WPL 2026), how it is used, and the choices you have. It is
+              written to be human-readable first while still covering key legal points.
             </p>
           </div>
           <Link
@@ -138,77 +154,161 @@ export default function PrivacyPage() {
         ) : (
           <section className="space-y-6 mb-10">
             <div className="rounded-2xl border border-white/10 bg-slate-900/60 p-6">
-              <h2 className="text-lg font-semibold mb-3">1. Overview</h2>
+              <h2 className="text-lg font-semibold mb-3">1. Summary</h2>
               <p className="text-sm text-gray-300 leading-relaxed">
-                SportsUp99 is a demo IPL 2026 experience platform. We store only the
-                minimum information required to support features like authentication, live
-                chat, and engagement analytics. No personal data is sold or shared with
-                third parties for advertising or profiling.
+                SportsUP18 is a fan-made IPL &amp; WPL 2026 experience platform. We
+                collect and process a small amount of information to operate the service
+                (accounts, live chat, notifications, and basic security). We do not sell
+                personal information.
               </p>
-            </div>
-
-            <div className="rounded-2xl border border-white/10 bg-slate-900/60 p-6 space-y-3">
-              <h2 className="text-lg font-semibold mb-2">2. Data we collect</h2>
-              <p className="text-sm text-gray-300">When you use the platform, we may process:</p>
-              <ul className="list-disc list-inside text-sm text-gray-300 space-y-1">
+              <ul className="mt-4 list-disc list-inside text-sm text-gray-300 space-y-1">
                 <li>
-                  <span className="font-medium">Account data</span> – email address, display
-                  name, and a secure password hash when you create an account.
+                  We use your email and display name to create and secure an account.
                 </li>
                 <li>
-                  <span className="font-medium">Usage data</span> – basic technical
-                  information such as browser type, approximate region, and timestamps of
-                  logins or activity events.
+                  We store chat messages and interactions to power live features and
+                  moderation.
                 </li>
                 <li>
-                  <span className="font-medium">Engagement data</span> – chat messages,
-                  match interactions, and heartbeat pings used purely to populate live
-                  dashboards and moderation tools.
+                  We use cookies/localStorage for sign-in and preferences.
                 </li>
               </ul>
             </div>
 
             <div className="rounded-2xl border border-white/10 bg-slate-900/60 p-6 space-y-3">
-              <h2 className="text-lg font-semibold mb-2">3. How we use your data</h2>
-              <p className="text-sm text-gray-300">We use this information to:</p>
+              <h2 className="text-lg font-semibold mb-2">2. Information we collect</h2>
+              <p className="text-sm text-gray-300">
+                Depending on how you use SportsUP18, we may process:
+              </p>
               <ul className="list-disc list-inside text-sm text-gray-300 space-y-1">
-                <li>Authenticate you into the platform and keep your session secure.</li>
-                <li>Render live engagement features such as active users and chat.</li>
-                <li>Moderate abuse, spam, or behavior that violates community rules.</li>
-                <li>Improve the UX and reliability of the demo experience over time.</li>
+                <li>
+                  <span className="font-medium">Account data</span> – email address,
+                  display name, and a salted password hash.
+                </li>
+                <li>
+                  <span className="font-medium">Preferences</span> – league selection,
+                  notification settings, and other in-app preferences you choose.
+                </li>
+                <li>
+                  <span className="font-medium">User content</span> – chat messages and
+                  related metadata (timestamps, match ID, moderation flags).
+                </li>
+                <li>
+                  <span className="font-medium">Device &amp; log data</span> – IP address
+                  (typically via hosting/CDN logs), browser type, and timestamps of
+                  requests or sign-ins.
+                </li>
+                <li>
+                  <span className="font-medium">Email data</span> – if you opt in to match
+                  reminders/notifications, we process your email address and delivery
+                  events (e.g., sent timestamps).
+                </li>
               </ul>
             </div>
 
             <div className="rounded-2xl border border-white/10 bg-slate-900/60 p-6 space-y-3">
-              <h2 className="text-lg font-semibold mb-2">4. Cookies & local storage</h2>
-              <p className="text-sm text-gray-300 leading-relaxed">
-                The platform uses tokens stored in local storage or cookies to keep you
-                signed in. These tokens are only used for authentication and are not
-                shared with third parties. You can clear them at any time by logging out
-                or clearing your browser storage.
-              </p>
-            </div>
-
-            <div className="rounded-2xl border border-white/10 bg-slate-900/60 p-6 space-y-3">
-              <h2 className="text-lg font-semibold mb-2">5. Data retention</h2>
-              <p className="text-sm text-gray-300 leading-relaxed">
-                Accounts, chat messages, and engagement events are retained only as long as
-                needed to support the demo use case. Admins may periodically purge data as
-                part of maintenance or when resetting the environment.
-              </p>
-            </div>
-
-            <div className="rounded-2xl border border-white/10 bg-slate-900/60 p-6 space-y-3">
-              <h2 className="text-lg font-semibold mb-2">6. Your choices</h2>
+              <h2 className="text-lg font-semibold mb-2">3. How we use information</h2>
+              <p className="text-sm text-gray-300">We use information to:</p>
               <ul className="list-disc list-inside text-sm text-gray-300 space-y-1">
-                <li>You can delete your account by contacting the project owner.</li>
-                <li>You can request that specific chat messages be removed or anonymized.</li>
-                <li>You can opt out of the experience entirely by not signing up.</li>
+                <li>Provide the service (accounts, live scores, chat, and features).</li>
+                <li>Authenticate users, prevent abuse, and keep the service secure.</li>
+                <li>Moderate content and enforce our Terms of Service.</li>
+                <li>Send notifications you enable (e.g., match reminders).</li>
+                <li>Debug, improve, and measure performance and reliability.</li>
               </ul>
             </div>
 
             <div className="rounded-2xl border border-white/10 bg-slate-900/60 p-6 space-y-3">
-              <h2 className="text-lg font-semibold mb-2">7. Contact</h2>
+              <h2 className="text-lg font-semibold mb-2">4. How we share information</h2>
+              <p className="text-sm text-gray-300 leading-relaxed">
+                We may share information with:
+              </p>
+              <ul className="list-disc list-inside text-sm text-gray-300 space-y-1">
+                <li>
+                  <span className="font-medium">Service providers</span> – hosting/CDN and
+                  storage providers (for example, Cloudflare Pages and KV) and email
+                  delivery providers (for example, Resend, SendGrid, Mailgun, or Elastic
+                  Email) when sending notifications.
+                </li>
+                <li>
+                  <span className="font-medium">Security providers</span> – anti-abuse
+                  services such as Cloudflare Turnstile (if enabled).
+                </li>
+                <li>
+                  <span className="font-medium">Legal &amp; safety</span> – when required
+                  by law, to protect users, or to protect the integrity of the service.
+                </li>
+              </ul>
+              <p className="text-sm text-gray-400 leading-relaxed">
+                We do not share personal information for third-party advertising.
+              </p>
+            </div>
+
+            <div className="rounded-2xl border border-white/10 bg-slate-900/60 p-6 space-y-3">
+              <h2 className="text-lg font-semibold mb-2">5. Cookies &amp; local storage</h2>
+              <p className="text-sm text-gray-300 leading-relaxed">
+                SportsUP18 uses cookies and/or localStorage to keep you signed in and to
+                remember preferences (for example, league selection and terms acceptance).
+                You can clear these at any time by logging out or clearing your browser
+                data.
+              </p>
+            </div>
+
+            <div className="rounded-2xl border border-white/10 bg-slate-900/60 p-6 space-y-3">
+              <h2 className="text-lg font-semibold mb-2">6. Data retention</h2>
+              <p className="text-sm text-gray-300 leading-relaxed">
+                We retain data for as long as needed to operate the service, then delete
+                or aggregate it. Typical retention periods include:
+              </p>
+              <ul className="list-disc list-inside text-sm text-gray-300 space-y-1">
+                <li>
+                  <span className="font-medium">Accounts</span> – stored while the account
+                  is active (and may expire after extended inactivity).
+                </li>
+                <li>
+                  <span className="font-medium">Auth tokens</span> – typically up to 30 days.
+                </li>
+                <li>
+                  <span className="font-medium">Chat messages</span> – typically up to 7 days
+                  (and capped per match).
+                </li>
+                <li>
+                  <span className="font-medium">Email logs/unsubscribe tokens</span> – typically
+                  up to 30 days.
+                </li>
+              </ul>
+            </div>
+
+            <div className="rounded-2xl border border-white/10 bg-slate-900/60 p-6 space-y-3">
+              <h2 className="text-lg font-semibold mb-2">7. Your choices &amp; rights</h2>
+              <ul className="list-disc list-inside text-sm text-gray-300 space-y-1">
+                <li>
+                  <span className="font-medium">Email notifications</span> – you can opt in or
+                  out via settings (if available) or by contacting us.
+                </li>
+                <li>
+                  <span className="font-medium">Access/deletion</span> – you can request
+                  access to or deletion of your account data, and request removal of specific
+                  chat messages where technically feasible.
+                </li>
+                <li>
+                  <span className="font-medium">Browser controls</span> – you can clear cookies
+                  and localStorage at any time.
+                </li>
+              </ul>
+            </div>
+
+            <div className="rounded-2xl border border-white/10 bg-slate-900/60 p-6 space-y-3">
+              <h2 className="text-lg font-semibold mb-2">8. Security</h2>
+              <p className="text-sm text-gray-300 leading-relaxed">
+                We use reasonable safeguards designed to protect information, including
+                TLS in transit and salted password hashing. No method of transmission or
+                storage is 100% secure, so we cannot guarantee absolute security.
+              </p>
+            </div>
+
+            <div className="rounded-2xl border border-white/10 bg-slate-900/60 p-6 space-y-3">
+              <h2 className="text-lg font-semibold mb-2">9. Contact</h2>
               <p className="text-sm text-gray-300 leading-relaxed">
                 If you have any questions about this Privacy Policy or want to exercise a
                 data-related right, please contact us by email:
@@ -252,7 +352,7 @@ export default function PrivacyPage() {
         </section>
 
         <footer className="border-t border-white/10 pt-6 mt-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-3 text-xs text-gray-500">
-          <p>&copy; {new Date().getFullYear()} SportsUp99 IPL 2026 Experience Platform.</p>
+          <p>&copy; {new Date().getFullYear()} SportsUP18 IPL &amp; WPL 2026 Experience Platform.</p>
           <div className="flex flex-wrap gap-4">
             <Link href="/legal" className="hover:text-ipl-gold transition-colors">
               Legal
