@@ -200,26 +200,41 @@ export default function MatchesPage() {
 
   const deferredMatches = useDeferredValue(filteredMatches);
 
+  const seasonsWithMatches = useMemo(() => {
+    const counts = new Map<number, number>();
+    for (const m of matches) {
+      const year = getMatchYear(m.date);
+      if (typeof year === 'number' && !Number.isNaN(year)) {
+        counts.set(year, (counts.get(year) ?? 0) + 1);
+      }
+    }
+    return Array.from(counts.entries())
+      .sort((a, b) => b[0] - a[0])
+      .map(([year, count]) => ({ year, count }));
+  }, [matches]);
+
+  const selectedSeasonTotalMatches = useMemo(() => {
+    if (selectedSeason === 'all') return matches.length;
+    return seasonsWithMatches.find((s) => s.year === selectedSeason)?.count ?? 0;
+  }, [matches.length, seasonsWithMatches, selectedSeason]);
+
+  const latestSeasonWithMatches = seasonsWithMatches[0]?.year;
+
   useEffect(() => {
-    const seasons = Array.from(new Set(
-      matches
-        .map(match => getMatchYear(match.date))
-        .filter((year): year is number => typeof year === 'number' && !Number.isNaN(year))
-    )).sort((a, b) => b - a);
+    const seasonsFromData = matches
+      .map(match => getMatchYear(match.date))
+      .filter((year): year is number => typeof year === 'number' && !Number.isNaN(year));
+
+    const seasons = Array.from(new Set([...seasonsFromData, TARGET_CALENDAR_SEASON]))
+      .sort((a, b) => b - a);
 
     setAvailableSeasons(seasons);
 
-    const preferred = 2026;
-    if (seasons.length === 0) {
-      setSelectedSeason('all');
-      return;
-    }
-
-    const defaultSeason = seasons.includes(preferred) ? preferred : seasons[0];
-
+    // Do not auto-switch away from the user's chosen season.
+    // If a season has no matches, show an empty state and let the user switch manually.
     setSelectedSeason(prev => {
-      if (prev === 'all') return defaultSeason;
-      return seasons.includes(prev) ? prev : defaultSeason;
+      if (prev === 'all') return TARGET_CALENDAR_SEASON;
+      return prev;
     });
   }, [matches]);
 
@@ -355,15 +370,28 @@ export default function MatchesPage() {
                       borderColor: 'rgba(255,255,255,0.14)',
                     }}
                   >
-                    {label} {(!isAll && season === 2026) ? '· Default' : ''}
+                    {label} {(!isAll && season === TARGET_CALENDAR_SEASON) ? '· Default' : ''}
                   </button>
                 );
               })}
             </div>
 
             <p className="text-slate-400 text-sm mt-2.5">
-              Defaulting to 2026 when available. Pick past seasons to browse archived fixtures.
+              Defaulting to {TARGET_CALENDAR_SEASON}. Pick past seasons to browse archived fixtures.
             </p>
+
+            {selectedSeason !== 'all' && selectedSeasonTotalMatches === 0 && latestSeasonWithMatches && latestSeasonWithMatches !== selectedSeason && (
+              <div className="mt-3 rounded-xl border border-amber-500/25 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">
+                No matches found for season {selectedSeason}. Latest season with matches: {latestSeasonWithMatches}.
+                <button
+                  type="button"
+                  onClick={() => setSelectedSeason(latestSeasonWithMatches)}
+                  className="ml-3 inline-flex items-center rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-1 text-xs font-semibold text-amber-50 hover:bg-amber-500/15"
+                >
+                  Switch to {latestSeasonWithMatches}
+                </button>
+              </div>
+            )}
 
             <div className="mt-4 flex flex-wrap items-center gap-2.5">
               <button

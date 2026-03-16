@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo, useRef } from 'react';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useLeague } from '@/contexts/LeagueContext';
 import { motion } from 'framer-motion';
 import { Calendar, Clock, Zap, CheckCircle2, Users, TrendingUp, CheckSquare, Square, BarChart3, Calendar as CalendarIcon, MapPin, Grid3x3, Copy, ExternalLink } from 'lucide-react';
@@ -128,6 +128,7 @@ const WPL_TIMES = [
 
 export default function AdminMatches() {
     const router = useRouter();
+    const searchParams = useSearchParams();
     const { currentLeague } = useLeague();
     const { toasts, success: showSuccess, error: showError, closeToast } = useToast();
     const [matches, setMatches] = useState<Match[]>([]);
@@ -193,6 +194,17 @@ export default function AdminMatches() {
     // Season selector — declared before the effects that reference them
     const [selectedSeason, setSelectedSeason] = useState<number>(new Date().getFullYear());
     const [availableSeasons, setAvailableSeasons] = useState<number[]>([]);
+
+    const seasonParamAppliedRef = useRef(false);
+    useEffect(() => {
+        if (seasonParamAppliedRef.current) return;
+        const raw = searchParams?.get('season');
+        if (!raw) return;
+        const parsed = parseInt(raw, 10);
+        if (!Number.isFinite(parsed) || parsed < 1900 || parsed > 2200) return;
+        seasonParamAppliedRef.current = true;
+        setSelectedSeason(parsed);
+    }, [searchParams]);
 
     // Generate available seasons when league changes; restore last-used season from localStorage
     useEffect(() => {
@@ -1376,21 +1388,6 @@ export default function AdminMatches() {
             const matchesWithNumbers = recalculateMatchNumbers(matchesData);
             setMatches(matchesWithNumbers);
             setTeams(teamsData);
-
-            // Auto-select the most recent season that actually has matches,
-            // so a page refresh never lands on an empty season view.
-            if (matchesWithNumbers.length > 0) {
-                const yearsWithMatches = Array.from(
-                    new Set(matchesWithNumbers.map(m => {
-                        try { return new Date(m.date + 'T00:00:00').getFullYear(); } catch { return null; }
-                    }).filter(Boolean) as number[])
-                ).sort((a, b) => b - a); // newest first
-
-                setSelectedSeason(prev => {
-                    if (yearsWithMatches.includes(prev)) return prev; // current choice is valid
-                    return yearsWithMatches[0]; // jump to most recent year that has matches
-                });
-            }
         } catch (error) {
             console.error('Failed to fetch data:', error);
             setError('Failed to load matches');
@@ -1408,6 +1405,21 @@ export default function AdminMatches() {
     const venues = useMemo(() => {
       const uniqueVenues = Array.from(new Set(matches.map(m => m.venue)));
       return uniqueVenues;
+    }, [matches]);
+
+    const yearsWithMatches = useMemo(() => {
+        const counts = new Map<number, number>();
+        for (const m of matches) {
+            const raw = typeof m?.date === 'string' ? m.date : '';
+            const yearMatch = raw.match(/\b(19|20)\d{2}\b/);
+            const year = yearMatch ? parseInt(yearMatch[0], 10) : null;
+            if (typeof year === 'number' && !Number.isNaN(year)) {
+                counts.set(year, (counts.get(year) ?? 0) + 1);
+            }
+        }
+        return Array.from(counts.entries())
+            .sort((a, b) => b[0] - a[0])
+            .map(([year, count]) => ({ year, count }));
     }, [matches]);
 
     // Season-scoped matches (before other filters)
@@ -2398,6 +2410,19 @@ export default function AdminMatches() {
                                     </motion.button>
                                 )}
                             </div>
+
+                            {seasonMatches.length === 0 && matches.length > 0 && yearsWithMatches.length > 0 && (
+                                <div className="mt-3 rounded-xl border border-yellow-500/20 bg-yellow-500/5 px-4 py-3 text-sm text-yellow-200">
+                                    No matches found in season {selectedSeason}. Latest season with matches: {yearsWithMatches[0].year} ({yearsWithMatches[0].count} match{yearsWithMatches[0].count === 1 ? '' : 'es'}).
+                                    <button
+                                        type="button"
+                                        onClick={() => setSelectedSeason(yearsWithMatches[0].year)}
+                                        className="ml-3 inline-flex items-center rounded-lg border border-yellow-500/30 bg-yellow-500/10 px-3 py-1 text-xs font-semibold text-yellow-100 hover:bg-yellow-500/15"
+                                    >
+                                        Switch to {yearsWithMatches[0].year}
+                                    </button>
+                                </div>
+                            )}
                         </div>
 
                         <div className="flex items-center gap-3 flex-wrap">

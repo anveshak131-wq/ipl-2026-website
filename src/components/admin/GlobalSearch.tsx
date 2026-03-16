@@ -171,7 +171,7 @@ export default function GlobalSearch({ onClose }: GlobalSearchProps) {
                 type: 'match' as const,
                 title: `${match.team1?.shortName} vs ${match.team2?.shortName}`,
                 description: match.venue || match.date,
-                href: `/ipl-admin-2026/matches`,
+                href: `/ipl-admin-2026/matches?season=2026`,
                 icon: <Calendar className="w-4 h-4" />,
               }));
             searchResults.push(...matchMatches);
@@ -195,7 +195,7 @@ export default function GlobalSearch({ onClose }: GlobalSearchProps) {
     const pages: { title: string; href: string; icon: React.ReactNode }[] = [
       { title: 'Dashboard', href: '/ipl-admin-2026/dashboard', icon: <FileText className="w-4 h-4" /> },
       { title: 'Teams', href: '/ipl-admin-2026/teams', icon: <Users className="w-4 h-4" /> },
-      { title: 'Matches', href: '/ipl-admin-2026/matches', icon: <Calendar className="w-4 h-4" /> },
+      { title: 'Matches', href: '/ipl-admin-2026/matches?season=2026', icon: <Calendar className="w-4 h-4" /> },
       { title: 'Players', href: '/ipl-admin-2026/players', icon: <Users className="w-4 h-4" /> },
       { title: 'News', href: '/ipl-admin-2026/news', icon: <FileText className="w-4 h-4" /> },
       { title: 'Content Hub', href: '/ipl-admin-2026/content', icon: <FileText className="w-4 h-4" /> },
@@ -357,4 +357,3 @@ export default function GlobalSearch({ onClose }: GlobalSearchProps) {
     </AnimatePresence>
   );
 }
-

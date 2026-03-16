@@ -284,7 +284,7 @@ export default function AdminDashboard() {
       title: 'Match Control',
       description: 'Schedule & manage fixtures',
       icon: Calendar,
-      path: '/ipl-admin-2026/matches',
+      path: '/ipl-admin-2026/matches?season=2026',
       color: 'violet',
       gradient: 'from-violet-500/10 to-violet-600/5',
       borderColor: 'border-violet-500/20',

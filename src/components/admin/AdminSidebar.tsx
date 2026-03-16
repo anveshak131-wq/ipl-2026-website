@@ -358,7 +358,7 @@ export default function AdminSidebar({ currentPage = '' }: AdminSidebarProps) {
         shortcut: 'T',
       },
       {
-        href: '/ipl-admin-2026/matches',
+        href: '/ipl-admin-2026/matches?season=2026',
         label: 'Matches',
         icon: (
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
