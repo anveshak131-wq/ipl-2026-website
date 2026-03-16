@@ -175,6 +175,27 @@ const mockTeams = [
 // No default/sample matches - start with empty array
 // Users must create matches through the admin panel
 
+const IPL_TEAM_IDS = new Set(['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '16', '17', '18', '19', '20']);
+const WPL_TEAM_IDS = new Set(['11', '12', '13', '14', '15']);
+
+function normalizeLeague(value) {
+  return value === 'ipl' || value === 'wpl' ? value : null;
+}
+
+function inferMatchLeague(match) {
+  const explicit = normalizeLeague(match?.league);
+
+  const team1Id = String(match?.team1Id ?? match?.team1?.id ?? '');
+  const team2Id = String(match?.team2Id ?? match?.team2?.id ?? '');
+
+  let teamBased = null;
+  if (WPL_TEAM_IDS.has(team1Id) || WPL_TEAM_IDS.has(team2Id)) teamBased = 'wpl';
+  if (IPL_TEAM_IDS.has(team1Id) || IPL_TEAM_IDS.has(team2Id)) teamBased = teamBased || 'ipl';
+
+  if (explicit && teamBased && explicit !== teamBased) return teamBased;
+  return explicit || teamBased || null;
+}
+
 // Helper function to verify admin token
 function verifyAdminToken(request) {
   // Auth is enforced at the Cloudflare Pages middleware/layout level.
@@ -307,15 +328,30 @@ async function handleGetRequest(context) {
     }
     
     // Ensure all matches have league property (migration for existing data)
-    matches = matches.map(match => ({
-      ...match,
-      league: match.league || 'ipl' // Default to 'ipl' if missing
-    }));
+    let needsUpdate = false;
+    matches = matches.map((match) => {
+      const inferred = inferMatchLeague(match);
+      const nextLeague = inferred || match.league || 'ipl';
+      if (match.league !== nextLeague) {
+        needsUpdate = true;
+        return { ...match, league: nextLeague };
+      }
+      if (!match.league) {
+        // Guarantee the property exists for consistent filtering on the client.
+        needsUpdate = true;
+        return { ...match, league: nextLeague };
+      }
+      return match;
+    });
+
+    if (needsUpdate) {
+      await env.IPL_CACHE.put('matches', JSON.stringify(matches));
+    }
     
     // Filter by league if specified
     if (league && (league === 'ipl' || league === 'wpl')) {
       matches = matches.filter(match => {
-        const matchLeague = match.league || 'ipl';
+        const matchLeague = inferMatchLeague(match) || match.league || 'ipl';
         return matchLeague === league;
       });
     }

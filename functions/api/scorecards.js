@@ -10,6 +10,44 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'Content-Type, Authorization',
 };
 
+const IPL_TEAM_IDS = new Set(['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '16', '17', '18', '19', '20']);
+const WPL_TEAM_IDS = new Set(['11', '12', '13', '14', '15']);
+
+function normalizeLeague(value) {
+  return value === 'ipl' || value === 'wpl' ? value : null;
+}
+
+function inferLeagueFromScorecard(scorecard) {
+  const explicit = normalizeLeague(scorecard?.league);
+
+  const team1Id = String(scorecard?.matchInfo?.team1?.id ?? scorecard?.matchInfo?.team1Id ?? '');
+  const team2Id = String(scorecard?.matchInfo?.team2?.id ?? scorecard?.matchInfo?.team2Id ?? '');
+
+  let teamBased = null;
+  if (WPL_TEAM_IDS.has(team1Id) || WPL_TEAM_IDS.has(team2Id)) teamBased = 'wpl';
+  if (IPL_TEAM_IDS.has(team1Id) || IPL_TEAM_IDS.has(team2Id)) teamBased = teamBased || 'ipl';
+
+  // If the stored league conflicts with team IDs, trust team IDs.
+  if (explicit && teamBased && explicit !== teamBased) return teamBased;
+  if (explicit) return explicit;
+  if (teamBased) return teamBased;
+
+  const team1Name = String(scorecard?.matchInfo?.team1?.name || '').toLowerCase();
+  const team2Name = String(scorecard?.matchInfo?.team2?.name || '').toLowerCase();
+  if (team1Name.includes('(wpl)') || team2Name.includes('(wpl)')) return 'wpl';
+
+  return null;
+}
+
+function getScorecardTimestamp(scorecard) {
+  const candidates = [scorecard?.updatedAt, scorecard?.publishedAt, scorecard?.createdAt];
+  for (const value of candidates) {
+    const t = new Date(value).getTime();
+    if (!Number.isNaN(t)) return t;
+  }
+  return 0;
+}
+
 // Helper: basic admin token check (presence of Bearer token)
 function verifyAdminToken(request) {
   const authHeader = request.headers.get('authorization');
@@ -36,13 +74,14 @@ export async function onRequest(context) {
     const url = new URL(request.url);
     const isMatchQuery = url.searchParams.has('matchId');
     const matchId = url.searchParams.get('matchId');
+    const leagueParam = normalizeLeague(url.searchParams.get('league'));
 
     // GET scorecard(s)
     if (request.method === 'GET') {
       if (isMatchQuery && matchId) {
         // Get all scorecards for a specific match
         const list = await env.IPL_CACHE.list({ prefix: 'scorecard_' });
-        const scorecards = [];
+        let scorecards = [];
         
         for (const item of list.keys) {
           try {
@@ -54,6 +93,12 @@ export async function onRequest(context) {
             console.error(`Error parsing scorecard ${item.name}:`, error);
           }
         }
+
+        if (leagueParam) {
+          scorecards = scorecards.filter((sc) => inferLeagueFromScorecard(sc) === leagueParam);
+        }
+
+        scorecards.sort((a, b) => getScorecardTimestamp(b) - getScorecardTimestamp(a));
         
         return new Response(JSON.stringify(scorecards), {
           status: 200,
@@ -62,7 +107,7 @@ export async function onRequest(context) {
       } else {
         // Get all scorecards
         const list = await env.IPL_CACHE.list({ prefix: 'scorecard_' });
-        const scorecards = [];
+        let scorecards = [];
         
         for (const item of list.keys) {
           try {
@@ -72,6 +117,12 @@ export async function onRequest(context) {
             console.error(`Error parsing scorecard ${item.name}:`, error);
           }
         }
+
+        if (leagueParam) {
+          scorecards = scorecards.filter((sc) => inferLeagueFromScorecard(sc) === leagueParam);
+        }
+
+        scorecards.sort((a, b) => getScorecardTimestamp(b) - getScorecardTimestamp(a));
         
         return new Response(JSON.stringify(scorecards), {
           status: 200,
@@ -133,4 +184,3 @@ export async function onRequest(context) {
     });
   }
 }
-

@@ -83,9 +83,13 @@ function getMatchYear(dateString: string | undefined | null): number | null {
   return match ? parseInt(match[1], 10) : null;
 }
 
-async function fetchPublishedScorecard(matchId: string): Promise<PublishedScorecard | null> {
+async function fetchPublishedScorecard(matchId: string, league?: League): Promise<PublishedScorecard | null> {
   try {
-    const response = await fetch(`/api/scorecards?matchId=${matchId}`);
+    const query = new URLSearchParams({ matchId });
+    if (league) {
+      query.set('league', league);
+    }
+    const response = await fetch(`/api/scorecards?${query.toString()}`);
     if (!response.ok) {
       return null;
     }
@@ -216,7 +220,7 @@ export default function MatchCenterPage({ backHref = '/matches', preferredLeague
 
         const [leaguePlayers, publishedScorecard] = await Promise.all([
           api.getPlayers(undefined, selectedMatch.league),
-          fetchPublishedScorecard(selectedMatch.id),
+          fetchPublishedScorecard(selectedMatch.id, selectedMatch.league),
         ]);
 
         if (cancelled) {

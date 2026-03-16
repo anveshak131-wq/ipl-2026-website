@@ -54,7 +54,10 @@ export default function MatchCard({ match, index = 0, players, detailHref }: Mat
   const fetchScorecard = async () => {
     setLoadingScorecard(true);
     try {
-      const response = await fetch(`/api/scorecards?matchId=${match.id}`);
+      const league = match.league || 'ipl';
+      const response = await fetch(
+        `/api/scorecards?matchId=${encodeURIComponent(match.id)}&league=${encodeURIComponent(league)}`
+      );
       if (response.ok) {
         const data = await response.json();
         console.log('Scorecard API response:', data);

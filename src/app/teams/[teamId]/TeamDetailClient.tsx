@@ -251,7 +251,11 @@ export default function TeamDetailClient({ teamId, league }: TeamDetailClientPro
   const fetchScorecard = async (matchId: string) => {
     setLoadingScorecard(true);
     try {
-      const response = await fetch(`/api/scorecards?matchId=${matchId}`);
+      const query = new URLSearchParams({ matchId });
+      if (league) {
+        query.set('league', league);
+      }
+      const response = await fetch(`/api/scorecards?${query.toString()}`);
       if (response.ok) {
         const data = await response.json();
         const scorecards = Array.isArray(data) ? data : [];

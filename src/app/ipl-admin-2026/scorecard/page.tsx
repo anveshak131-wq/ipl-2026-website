@@ -210,7 +210,7 @@ export default function ScorecardAdminPage() {
     let remoteScorecard: Scorecard | null = null;
     try {
       const base = typeof window !== 'undefined' ? window.location.origin : '';
-      const response = await fetch(`${base}/api/scorecards?matchId=${encodeURIComponent(match.id)}`);
+      const response = await fetch(`${base}/api/scorecards?matchId=${encodeURIComponent(match.id)}&league=ipl`);
       if (response.ok) {
         const data = await response.json();
         if (data && data.length > 0) {

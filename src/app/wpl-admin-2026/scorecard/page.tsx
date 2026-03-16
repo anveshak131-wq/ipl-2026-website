@@ -188,7 +188,7 @@ export default function ScorecardAdminPage() {
     setLoading(true);
     setMessage('');
     try {
-      const response = await fetch(`/api/scorecards?matchId=${match.id}`);
+      const response = await fetch(`/api/scorecards?matchId=${encodeURIComponent(match.id)}&league=wpl`);
       if (response.ok) {
         const data = await response.json();
         if (data && data.length > 0) {

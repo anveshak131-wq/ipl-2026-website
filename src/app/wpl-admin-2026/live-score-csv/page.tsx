@@ -344,7 +344,7 @@ export default function LiveScoreCSVPage() {
       }
       // Toss info from scorecard
       try {
-        const tossResp = await fetch(`/api/scorecards?matchId=${encodeURIComponent(selectedMatch)}`);
+        const tossResp = await fetch(`/api/scorecards?matchId=${encodeURIComponent(selectedMatch)}&league=wpl`);
         if (tossResp.ok) {
           const scorecards = await tossResp.json();
           if (Array.isArray(scorecards) && scorecards.length > 0) {
