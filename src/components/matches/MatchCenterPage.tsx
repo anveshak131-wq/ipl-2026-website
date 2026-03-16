@@ -73,6 +73,16 @@ const sectionAnimation = {
   visible: { opacity: 1, y: 0 },
 };
 
+const TARGET_CALENDAR_SEASON = 2026;
+
+function getMatchYear(dateString: string | undefined | null): number | null {
+  if (!dateString) return null;
+  const parsed = new Date(dateString);
+  if (!isNaN(parsed.getTime())) return parsed.getFullYear();
+  const match = String(dateString).match(/(20\d{2}|19\d{2})/);
+  return match ? parseInt(match[1], 10) : null;
+}
+
 async function fetchPublishedScorecard(matchId: string): Promise<PublishedScorecard | null> {
   try {
     const response = await fetch(`/api/scorecards?matchId=${matchId}`);
@@ -130,17 +140,15 @@ export default function MatchCenterPage({ backHref = '/matches', preferredLeague
 
         const leagueMatchLists = await Promise.all(leagues.map((league) => api.getMatches(league)));
         const allMatches = leagueMatchLists.flat();
-        const sameIdMatches = allMatches.filter((item) => String(item.id) === matchId);
+        const seasonMatches = allMatches.filter((item) => getMatchYear(item.date) === TARGET_CALENDAR_SEASON);
+        const sameIdMatches = seasonMatches.filter((item) => String(item.id) === matchId);
 
         const sortedByScore = (items: Match[]) => {
           return [...items].sort((a, b) => {
               const score = (item: Match) => {
                 let value = 0;
-                const itemYear = Number.parseInt(String(item.date || '').slice(0, 4), 10);
-
-                if (!Number.isNaN(itemYear)) {
-                  value += itemYear;
-                }
+                const itemYear = getMatchYear(item.date) || 0;
+                value += itemYear;
                 if (preferredLeague && item.league === preferredLeague) {
                   value += 10_000;
                 }
@@ -173,7 +181,7 @@ export default function MatchCenterPage({ backHref = '/matches', preferredLeague
         // Hint-first disambiguation: if URL contains date + team IDs, prefer that exact fixture
         // even when there are duplicate/legacy IDs in storage.
         if (hintedDate && hintedTeam1Id && hintedTeam2Id) {
-          const hintedMatches = allMatches.filter((item) => {
+          const hintedMatches = seasonMatches.filter((item) => {
             if (hintedLeague && item.league !== hintedLeague) {
               return false;
             }
@@ -331,12 +339,56 @@ export default function MatchCenterPage({ backHref = '/matches', preferredLeague
     ? match.team2.logo
     : getAnimatedLogoPath(match.team2.id, match.team2.shortName || '', match.league);
 
+  const pageOilTheme = match.league === 'wpl'
+    ? {
+        base: 'linear-gradient(155deg, #10071d 0%, #1c0b2d 38%, #142244 72%, #0a172f 100%)',
+        hazeA: 'radial-gradient(82% 70% at 14% 12%, rgba(236,72,153,0.26) 0%, rgba(168,85,247,0.1) 55%, transparent 80%)',
+        hazeB: 'radial-gradient(75% 66% at 88% 88%, rgba(34,211,238,0.22) 0%, rgba(56,189,248,0.09) 55%, transparent 80%)',
+        brush: 'linear-gradient(112deg, rgba(244,114,182,0.18), rgba(147,51,234,0.08), rgba(56,189,248,0.04))',
+      }
+    : {
+        base: 'linear-gradient(155deg, #120a12 0%, #221018 38%, #1a2845 72%, #0d1c33 100%)',
+        hazeA: 'radial-gradient(82% 70% at 14% 12%, rgba(251,146,60,0.24) 0%, rgba(236,72,153,0.09) 55%, transparent 80%)',
+        hazeB: 'radial-gradient(74% 66% at 88% 88%, rgba(99,102,241,0.2) 0%, rgba(56,189,248,0.08) 55%, transparent 80%)',
+        brush: 'linear-gradient(112deg, rgba(245,158,11,0.16), rgba(236,72,153,0.08), rgba(99,102,241,0.04))',
+      };
+
   return (
     <div className="min-h-screen text-white bg-[#070b17]">
       <Navbar />
 
       <main className="relative overflow-hidden px-4 py-10 sm:px-6 lg:px-8">
-        <div className="absolute inset-0 bg-[radial-gradient(75%_75%_at_10%_5%,rgba(45,212,191,0.2),transparent),radial-gradient(65%_65%_at_90%_85%,rgba(245,158,11,0.16),transparent),radial-gradient(50%_50%_at_50%_45%,rgba(99,102,241,0.12),transparent),linear-gradient(168deg,#070b17_0%,#111b2e_45%,#171a33_100%)]" />
+        {/* Oil-canvas background */}
+        <div className="absolute inset-0" style={{ background: pageOilTheme.base }} />
+        <div className="absolute inset-0" style={{ background: pageOilTheme.hazeA, mixBlendMode: 'screen' }} />
+        <div className="absolute inset-0" style={{ background: pageOilTheme.hazeB, mixBlendMode: 'screen' }} />
+
+        <motion.div
+          className="absolute -top-32 left-[-14%] w-[72%] h-[36%] rounded-[120px] blur-2xl opacity-80"
+          style={{ background: pageOilTheme.brush, transform: 'rotate(-8deg)' }}
+          animate={{ x: [0, 10, 0], y: [0, -8, 0] }}
+          transition={{ duration: 18, repeat: Infinity, ease: 'easeInOut' }}
+        />
+        <motion.div
+          className="absolute -bottom-28 right-[-12%] w-[70%] h-[34%] rounded-[120px] blur-2xl opacity-70"
+          style={{ background: pageOilTheme.brush, transform: 'rotate(9deg)' }}
+          animate={{ x: [0, -10, 0], y: [0, 8, 0] }}
+          transition={{ duration: 21, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
+        />
+
+        <div
+          className="absolute inset-0 opacity-[0.08]"
+          style={{
+            backgroundImage:
+              'repeating-linear-gradient(0deg, rgba(255,255,255,0.05) 0px, rgba(255,255,255,0.05) 1px, transparent 1px, transparent 4px), repeating-linear-gradient(90deg, rgba(255,255,255,0.04) 0px, rgba(255,255,255,0.04) 1px, transparent 1px, transparent 4px)',
+            mixBlendMode: 'soft-light',
+          }}
+        />
+
+        <div
+          className="absolute inset-0"
+          style={{ background: 'radial-gradient(circle at 50% 42%, transparent 0%, rgba(2,6,23,0.24) 64%, rgba(2,6,23,0.58) 100%)' }}
+        />
 
         <motion.div
           className="absolute -top-24 right-[-12%] h-72 w-72 rounded-full blur-3xl"

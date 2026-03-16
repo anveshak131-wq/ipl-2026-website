@@ -137,8 +137,7 @@ export default function Playing11Page() {
     document.addEventListener('visibilitychange', handleVisibilityChange);
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
-    
-    return undefined;};
+    };
   }, [isAuthenticated, currentLeague, loadData]);
 
   const selectedMatch = useMemo(
@@ -382,7 +381,7 @@ export default function Playing11Page() {
     }
   };
 
-  const handleSave = async () => {
+  const handleSave = async ({ publish }: { publish: boolean }) => {
     if (!selectedMatch) return;
 
     if (team1Playing11.length !== 11 || team2Playing11.length !== 11) {
@@ -394,6 +393,8 @@ export default function Playing11Page() {
     try {
       const token = localStorage.getItem('adminToken');
       
+      const existingSetAt = (selectedMatch as any).playing11?.setAt;
+
       // Update match with playing 11
       // Use the match update API format
       const response = await fetch(`/api/matches?id=${selectedMatch.id}`, {
@@ -414,7 +415,7 @@ export default function Playing11Page() {
           playing11: {
             team1: team1Playing11,
             team2: team2Playing11,
-            setAt: new Date().toISOString(), // Timestamp when admin set playing 11
+            ...(publish ? { setAt: new Date().toISOString() } : (existingSetAt ? { setAt: existingSetAt } : {})),
           },
           impactPlayer: {
             team1: team1ImpactPlayer ? {
@@ -1132,9 +1133,20 @@ export default function Playing11Page() {
               </div>
 
               {/* Save Button */}
-              <div className="flex justify-end">
+              <div className="flex flex-col items-end gap-3">
+                {selectedMatch.playing11?.setAt ? (
+                  <div className="text-xs text-emerald-300 bg-emerald-500/10 border border-emerald-500/25 px-3 py-1 rounded-full">
+                    Published: {new Date(selectedMatch.playing11.setAt).toLocaleString()}
+                  </div>
+                ) : (
+                  <div className="text-xs text-gray-400 bg-white/5 border border-white/10 px-3 py-1 rounded-full">
+                    Draft only (not visible to end users)
+                  </div>
+                )}
+
+                <div className="flex flex-wrap justify-end gap-3">
                 <button
-                  onClick={handleSave}
+                  onClick={() => handleSave({ publish: false })}
                   disabled={team1Playing11.length !== 11 || team2Playing11.length !== 11 || saveStatus === 'saving'}
                   className={`
                     px-8 py-4 rounded-xl font-bold flex items-center gap-2 transition-all
@@ -1148,8 +1160,27 @@ export default function Playing11Page() {
                   `}
                 >
                   <Save className="w-5 h-5" />
-                  {saveStatus === 'saving' ? 'Saving...' : 'Save Playing 11'}
+                  {saveStatus === 'saving' ? 'Saving...' : 'Save Draft'}
                 </button>
+
+                <button
+                  onClick={() => handleSave({ publish: true })}
+                  disabled={team1Playing11.length !== 11 || team2Playing11.length !== 11 || saveStatus === 'saving'}
+                  className={`
+                    px-8 py-4 rounded-xl font-bold flex items-center gap-2 transition-all
+                    ${team1Playing11.length === 11 && team2Playing11.length === 11
+                      ? 'bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 text-white shadow-lg hover:shadow-xl'
+                      : 'bg-slate-700 text-gray-400 cursor-not-allowed'
+                    }
+                    disabled:opacity-50 disabled:cursor-not-allowed
+                  `}
+                >
+                  <CheckCircle2 className="w-5 h-5" />
+                  {saveStatus === 'saving'
+                    ? 'Publishing...'
+                    : (selectedMatch.playing11?.setAt ? 'Republish Playing 11' : 'Publish Playing 11')}
+                </button>
+                </div>
               </div>
             </div>
           ) : (

@@ -18,12 +18,20 @@ import WPLFloatingParticles from '@/components/animations/WPLFloatingParticles';
 import { WPLColors } from '@/lib/wplColors';
 
 export default function WPLMatchesPage() {
+  const TARGET_CALENDAR_SEASON = 2026;
   const { currentLeague, setCurrentLeague } = useLeague();
   const [matches, setMatches] = useState<Match[]>([]);
   const [filteredMatches, setFilteredMatches] = useState<Match[]>([]);
   const [players, setPlayers] = useState<Player[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'upcoming' | 'live' | 'completed'>('all');
+
+  const getMatchYear = (dateString: string): number | null => {
+    const parsed = new Date(dateString);
+    if (!isNaN(parsed.getTime())) return parsed.getFullYear();
+    const match = dateString.match(/(20\d{2}|19\d{2})/);
+    return match ? parseInt(match[1], 10) : null;
+  };
 
   // Set league to WPL when page loads
   useEffect(() => {
@@ -41,7 +49,7 @@ export default function WPLMatchesPage() {
         ]);
         setMatches(matchesData);
         setPlayers(playersData);
-        setFilteredMatches(matchesData);
+        setFilteredMatches(matchesData.filter((match) => getMatchYear(match.date) === TARGET_CALENDAR_SEASON));
       } catch (error) {
         console.error('Failed to fetch WPL matches:', error);
       } finally {
@@ -54,9 +62,13 @@ export default function WPLMatchesPage() {
 
   useEffect(() => {
     if (filter === 'all') {
-      setFilteredMatches(matches);
+      setFilteredMatches(matches.filter((match) => getMatchYear(match.date) === TARGET_CALENDAR_SEASON));
     } else {
-      setFilteredMatches(matches.filter(match => match.status === filter));
+      setFilteredMatches(
+        matches.filter(
+          (match) => match.status === filter && getMatchYear(match.date) === TARGET_CALENDAR_SEASON
+        )
+      );
     }
   }, [filter, matches]);
 
@@ -288,4 +300,3 @@ export default function WPLMatchesPage() {
     </div>
   );
 }
-

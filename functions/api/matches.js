@@ -287,6 +287,7 @@ async function handleGetRequest(context) {
     // Get league query parameter
     const url = new URL(request.url);
     const league = url.searchParams.get('league');
+    const matchId = url.searchParams.get('id');
     
     // Try to get matches from KV storage
     const kvMatches = await env.IPL_CACHE.get('matches', 'json');
@@ -338,7 +339,8 @@ async function handleGetRequest(context) {
           // Update matches with scorecard results
           formattedMatches.forEach(match => {
             if (match.status === 'completed' && !match.result) {
-              const scorecard = scorecards.find(sc => sc.matchId === match.id);
+              // Only use published scorecards to avoid leaking draft results.
+              const scorecard = scorecards.find(sc => sc.matchId === match.id && sc.draft === false);
               if (scorecard && scorecard.result && scorecard.result.winner) {
                 // Create result text from scorecard
                 const winnerTeam = allTeams.find(t => t.name === scorecard.result.winner);
@@ -360,6 +362,27 @@ async function handleGetRequest(context) {
       console.error('Error syncing scorecard results:', error);
     }
     
+    if (matchId) {
+      const selected = formattedMatches.find((m) => String(m.id) === String(matchId)) || null;
+      if (!selected) {
+        return new Response(JSON.stringify({ error: 'Match not found' }), {
+          status: 404,
+          headers: {
+            'Content-Type': 'application/json',
+            'Cache-Control': 'no-cache, no-store, must-revalidate'
+          }
+        });
+      }
+
+      return new Response(JSON.stringify(selected), {
+        status: 200,
+        headers: {
+          'Content-Type': 'application/json',
+          'Cache-Control': 'no-cache, no-store, must-revalidate'
+        }
+      });
+    }
+
     return new Response(JSON.stringify(formattedMatches), {
       status: 200,
       headers: {

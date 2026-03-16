@@ -1,8 +1,8 @@
 /**
  * Utility functions for managing Playing XI visibility
  * Rules:
- * - Admins can set playing 11 at any time
- * - End users can only see playing 11 if it's within 30 minutes of match start
+ * - Admins can set playing 11 at any time (draft)
+ * - End users can only see playing 11 once it has been published (playing11SetAt exists)
  */
 
 /**
@@ -24,21 +24,11 @@ export function canViewPlaying11(
     return true;
   }
 
-  // For regular users, playing 11 is visible only 30 minutes before match
-  const now = new Date();
-  const [year, month, day] = matchDate.split('-').map(Number);
-  const [hours, minutes] = matchTime.split(':').map(Number);
-
-  // Create match start time
-  const matchStartTime = new Date(year, month - 1, day, hours, minutes, 0);
-
-  // Calculate visibility window: 30 minutes before match
-  const visibilityStartTime = new Date(matchStartTime.getTime() - 30 * 60 * 1000);
-
-  // Playing 11 is visible if:
-  // 1. Current time is within 30 minutes of match start
-  // 2. Playing 11 has been set (playing11SetAt exists)
-  return now >= visibilityStartTime && !!playing11SetAt;
+  // End users only see Playing XI after admin publishes it (setAt timestamp).
+  if (!playing11SetAt) return false;
+  const publishedAt = Date.parse(playing11SetAt);
+  if (!Number.isNaN(publishedAt) && Date.now() < publishedAt) return false;
+  return true;
 }
 
 /**
@@ -51,11 +41,11 @@ export function getPlaying11VisibilityTime(
   matchDate: string,
   matchTime: string
 ): Date {
+  // Legacy helper: previously exposed a 30-minute window before match start.
+  // Now playing XI becomes visible on publish time; callers should rely on setAt.
   const [year, month, day] = matchDate.split('-').map(Number);
   const [hours, minutes] = matchTime.split(':').map(Number);
-
-  const matchStartTime = new Date(year, month - 1, day, hours, minutes, 0);
-  return new Date(matchStartTime.getTime() - 30 * 60 * 1000);
+  return new Date(year, month - 1, day, hours, minutes, 0);
 }
 
 /**
@@ -89,32 +79,5 @@ export function getPlaying11VisibilityMessage(
   matchDate: string,
   matchTime: string
 ): string {
-  const visibilityTime = getPlaying11VisibilityTime(matchDate, matchTime);
-  const now = new Date();
-
-  if (visibilityTime <= now) {
-    return 'Playing XI will be visible soon';
-  }
-
-  const diffMs = visibilityTime.getTime() - now.getTime();
-  const diffMins = Math.ceil(diffMs / (1000 * 60));
-
-  if (diffMins <= 0) {
-    return 'Playing XI is being revealed';
-  }
-
-  if (diffMins === 1) {
-    return 'Playing XI will be revealed in 1 minute';
-  }
-
-  if (diffMins < 60) {
-    return `Playing XI will be revealed in ${diffMins} minutes`;
-  }
-
-  const diffHours = Math.ceil(diffMins / 60);
-  if (diffHours === 1) {
-    return 'Playing XI will be revealed in about 1 hour';
-  }
-
-  return `Playing XI will be revealed in about ${diffHours} hours`;
+  return 'Playing XI will appear once admin publishes it.';
 }

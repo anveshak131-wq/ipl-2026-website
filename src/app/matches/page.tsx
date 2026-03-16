@@ -22,8 +22,6 @@ export default function MatchesPage() {
   const [matches, setMatches] = useState<Match[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'upcoming' | 'live' | 'completed'>('all');
-  const [availableSeasons, setAvailableSeasons] = useState<number[]>([]);
-  const [selectedSeason, setSelectedSeason] = useState<number | 'all'>(2026);
 
   const getMatchYear = (dateString: string): number | null => {
     const parsed = new Date(dateString);
@@ -141,17 +139,8 @@ export default function MatchesPage() {
     alert('ICS downloaded. In Google Calendar, go to Settings > Import & export > Import and upload the file.');
   };
 
-  const seasonOptions: Array<number | 'all'> = availableSeasons.length > 0
-    ? [...availableSeasons]
-    : [2026];
-  if (seasonOptions.length > 1 && seasonOptions[0] !== 'all') {
-    seasonOptions.unshift('all');
-  }
-
-  const seasonLabel = selectedSeason === 'all' ? 'All Seasons' : selectedSeason;
-  const subtitleSeason = selectedSeason === 'all'
-    ? 'all available seasons'
-    : `${seasonLabel} season`;
+  const seasonLabel = TARGET_CALENDAR_SEASON;
+  const subtitleSeason = `${TARGET_CALENDAR_SEASON} season`;
 
   const pageOilTheme = currentLeague === 'wpl'
     ? {
@@ -193,35 +182,12 @@ export default function MatchesPage() {
     return matches.filter(match => {
       const matchesStatus = filter === 'all' || match.status === filter;
       const matchYear = getMatchYear(match.date);
-      const matchesSeason = selectedSeason === 'all' || matchYear === selectedSeason;
+      const matchesSeason = matchYear === TARGET_CALENDAR_SEASON;
       return matchesStatus && matchesSeason;
     });
-  }, [filter, matches, selectedSeason]);
+  }, [filter, matches]);
 
   const deferredMatches = useDeferredValue(filteredMatches);
-
-  useEffect(() => {
-    const seasons = Array.from(new Set(
-      matches
-        .map(match => getMatchYear(match.date))
-        .filter((year): year is number => typeof year === 'number' && !Number.isNaN(year))
-    )).sort((a, b) => b - a);
-
-    setAvailableSeasons(seasons);
-
-    const preferred = 2026;
-    if (seasons.length === 0) {
-      setSelectedSeason('all');
-      return;
-    }
-
-    const defaultSeason = seasons.includes(preferred) ? preferred : seasons[0];
-
-    setSelectedSeason(prev => {
-      if (prev === 'all') return defaultSeason;
-      return seasons.includes(prev) ? prev : defaultSeason;
-    });
-  }, [matches]);
 
   if (isLoading) {
     return (
@@ -325,75 +291,62 @@ export default function MatchesPage() {
             </p>
 
             <div className="mt-4 inline-flex items-center rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-slate-200">
-              Showing {selectedSeason === 'all' ? 'all available seasons' : `${selectedSeason} season`} · {filteredMatches.length} match{filteredMatches.length === 1 ? '' : 'es'}
+              Showing {TARGET_CALENDAR_SEASON} season · {filteredMatches.length} match{filteredMatches.length === 1 ? '' : 'es'}
             </div>
           </motion.div>
 
           {/* Season + Calendar Actions */}
           <div className="mb-6 rounded-2xl border border-white/12 bg-black/25 backdrop-blur-xl p-4 md:p-5 shadow-[0_12px_32px_rgba(0,0,0,0.28)]">
-            <div className="flex flex-wrap items-center gap-2.5">
-              <span className="text-[11px] uppercase tracking-[0.28em] text-slate-400 font-semibold mr-1">Season</span>
-              {seasonOptions.map((season) => {
-                const isAll = season === 'all';
-                const isActive = selectedSeason === season;
-                const label = isAll ? 'All' : season;
-                return (
-                  <button
-                    key={season}
-                    onClick={() => setSelectedSeason(season)}
-                    className={`px-4 py-2 rounded-lg text-sm font-semibold border transition-all duration-200 ${
-                      isActive ? 'text-white' : 'text-slate-200 hover:text-white'
-                    }`}
-                    style={isActive ? {
-                      background: currentLeague === 'wpl'
-                        ? 'linear-gradient(135deg, rgba(168,85,247,0.42), rgba(236,72,153,0.35))'
-                        : 'linear-gradient(135deg, rgba(245,158,11,0.42), rgba(236,72,153,0.32))',
-                      borderColor: 'rgba(255,255,255,0.3)',
-                      boxShadow: '0 8px 20px rgba(0,0,0,0.25)',
-                    } : {
-                      background: 'rgba(255,255,255,0.06)',
-                      borderColor: 'rgba(255,255,255,0.14)',
-                    }}
-                  >
-                    {label} {(!isAll && season === 2026) ? '· Default' : ''}
-                  </button>
-                );
-              })}
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div className="flex flex-wrap items-center gap-2.5">
+                <span className="text-[11px] uppercase tracking-[0.28em] text-slate-400 font-semibold mr-1">Season</span>
+                <span
+                  className="px-4 py-2 rounded-lg text-sm font-semibold border text-white"
+                  style={{
+                    background: currentLeague === 'wpl'
+                      ? 'linear-gradient(135deg, rgba(168,85,247,0.42), rgba(236,72,153,0.35))'
+                      : 'linear-gradient(135deg, rgba(245,158,11,0.42), rgba(236,72,153,0.32))',
+                    borderColor: 'rgba(255,255,255,0.3)',
+                    boxShadow: '0 8px 20px rgba(0,0,0,0.25)',
+                  }}
+                >
+                  {TARGET_CALENDAR_SEASON}
+                </span>
+                <span className="text-xs text-slate-400">
+                  {season2026MatchCount} match{season2026MatchCount === 1 ? '' : 'es'}
+                </span>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2.5">
+                <button
+                  onClick={() => handleDownloadIcalSeason(TARGET_CALENDAR_SEASON)}
+                  className="px-4 py-2.5 rounded-lg text-sm font-semibold border transition-colors"
+                  style={{
+                    background: 'rgba(16,185,129,0.16)',
+                    borderColor: 'rgba(16,185,129,0.38)',
+                    color: '#d1fae5',
+                  }}
+                >
+                  Add {TARGET_CALENDAR_SEASON} to iCal
+                </button>
+
+                <button
+                  onClick={() => handleAddSeasonToGoogleCalendar(TARGET_CALENDAR_SEASON)}
+                  className="px-4 py-2.5 rounded-lg text-sm font-semibold border transition-colors"
+                  style={{
+                    background: 'rgba(59,130,246,0.16)',
+                    borderColor: 'rgba(59,130,246,0.38)',
+                    color: '#dbeafe',
+                  }}
+                >
+                  Add {TARGET_CALENDAR_SEASON} to Google Calendar
+                </button>
+              </div>
             </div>
 
-            <p className="text-slate-400 text-sm mt-2.5">
-              Defaulting to 2026 when available. Pick past seasons to browse archived fixtures.
+            <p className="text-slate-400 text-sm mt-3">
+              Only {TARGET_CALENDAR_SEASON} fixtures are shown on this page.
             </p>
-
-            <div className="mt-4 flex flex-wrap items-center gap-2.5">
-              <button
-                onClick={() => handleDownloadIcalSeason(TARGET_CALENDAR_SEASON)}
-                className="px-4 py-2.5 rounded-lg text-sm font-semibold border transition-colors"
-                style={{
-                  background: 'rgba(16,185,129,0.16)',
-                  borderColor: 'rgba(16,185,129,0.38)',
-                  color: '#d1fae5',
-                }}
-              >
-                Add {TARGET_CALENDAR_SEASON} to iCal
-              </button>
-
-              <button
-                onClick={() => handleAddSeasonToGoogleCalendar(TARGET_CALENDAR_SEASON)}
-                className="px-4 py-2.5 rounded-lg text-sm font-semibold border transition-colors"
-                style={{
-                  background: 'rgba(59,130,246,0.16)',
-                  borderColor: 'rgba(59,130,246,0.38)',
-                  color: '#dbeafe',
-                }}
-              >
-                Add {TARGET_CALENDAR_SEASON} to Google Calendar
-              </button>
-
-              <span className="text-xs text-slate-400">
-                {season2026MatchCount} match{season2026MatchCount === 1 ? '' : 'es'} in {TARGET_CALENDAR_SEASON}
-              </span>
-            </div>
           </div>
 
           {/* Filter Tabs */}

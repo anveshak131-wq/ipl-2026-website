@@ -148,21 +148,21 @@ export default function ScorecardAdminPage() {
 
   const fetchMatches = async () => {
     try {
-      const data = await dataApi.getMatches('ipl');
-      console.log('Fetched IPL matches:', data);
+      const data = await dataApi.getMatches('wpl');
+      console.log('Fetched WPL matches:', data);
       setMatches(data || []);
       if (!data || data.length === 0) {
-        setMessage('⚠ No IPL matches found. Please check Cloudflare KV data.');
+        setMessage('⚠ No WPL matches found. Please check Cloudflare KV data.');
       }
     } catch (err) {
       console.error('Error fetching matches:', err);
-      setMessage('❌ Error fetching IPL matches');
+      setMessage('❌ Error fetching WPL matches');
     }
   };
 
   const fetchAllScorecards = async () => {
     try {
-      const response = await fetch('/api/scorecards?league=ipl');
+      const response = await fetch('/api/scorecards?league=wpl');
       if (response.ok) {
         const data = await response.json();
         setScorecards(data || []);
@@ -174,12 +174,12 @@ export default function ScorecardAdminPage() {
 
   const fetchPlayers = async () => {
     try {
-      const data = await dataApi.getPlayers(undefined, 'ipl');
-      console.log('Fetched IPL players:', data);
+      const data = await dataApi.getPlayers(undefined, 'wpl');
+      console.log('Fetched WPL players:', data);
       setPlayers(data || []);
     } catch (err) {
       console.error('Error fetching players:', err);
-      setMessage('❌ Error fetching IPL players');
+      setMessage('❌ Error fetching WPL players');
     }
   };
 
@@ -214,7 +214,7 @@ export default function ScorecardAdminPage() {
   const initializeScorecard = (match: Match): Scorecard => {
     return {
       matchId: match.id,
-      league: 'ipl',
+      league: 'wpl',
       matchInfo: {
         matchId: match.id,
         team1: match.team1,
@@ -298,6 +298,63 @@ export default function ScorecardAdminPage() {
     return initializeInningsData(scorecard.innings[activeInnings]);
   };
 
+  // Sync match summary fields only when the scorecard is published.
+  // This prevents draft scorecards leaking toss/scores/results to public pages.
+  const syncMatchFromPublishedScorecard = async (published: Scorecard, token: string) => {
+    if (!published?.matchId) return;
+    if (published.draft !== false) return;
+
+    try {
+      const matchesResponse = await fetch(`/api/matches?id=${published.matchId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (!matchesResponse.ok) return;
+      const match = await matchesResponse.json();
+
+      const team1Score = published.innings?.find((inn) => inn.battingTeamId === published.matchInfo.team1.id);
+      const team2Score = published.innings?.find((inn) => inn.battingTeamId === published.matchInfo.team2.id);
+
+      const team1ScoreStr = team1Score
+        ? `${team1Score.totalRuns || 0}/${team1Score.totalWickets || 0} (${team1Score.totalOvers || 0} overs)`
+        : undefined;
+      const team2ScoreStr = team2Score
+        ? `${team2Score.totalRuns || 0}/${team2Score.totalWickets || 0} (${team2Score.totalOvers || 0} overs)`
+        : undefined;
+
+      const tossWinner = published.matchInfo.toss?.winner === published.matchInfo.team1.name ? 'team1' : 'team2';
+
+      await fetch('/api/matches', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          ...match,
+          team1Score: team1ScoreStr,
+          team2Score: team2ScoreStr,
+          result: published.result?.winner
+            ? `${published.result.winner} won by ${published.result.margin}`
+            : match.result,
+          status: published.result?.winner ? 'completed' : match.status,
+          matchState: {
+            ...match.matchState,
+            toss: published.matchInfo.toss?.winner
+              ? {
+                  winner: tossWinner,
+                  decision: published.matchInfo.toss.decision,
+                  timestamp: Date.now(),
+                }
+              : match.matchState?.toss,
+          },
+        }),
+      });
+    } catch {
+      // Ignore errors: scorecard save/publish should succeed even if match sync fails.
+    }
+  };
+
   const handleSaveScorecard = async () => {
     if (!scorecard) return;
     setSaving(true);
@@ -328,57 +385,8 @@ export default function ScorecardAdminPage() {
       const saved = await response.json();
       setScorecard(saved);
       
-      // Also update match with scores, result, and toss info if available
-      if (scorecard.matchId) {
-        try {
-          const matchesResponse = await fetch(`/api/matches?id=${scorecard.matchId}`, {
-            headers: { 'Authorization': `Bearer ${token}` }
-          });
-          
-          if (matchesResponse.ok) {
-            const match = await matchesResponse.json();
-            
-            // Calculate scores from innings
-            const team1Score = scorecard.innings.find(inn => inn.battingTeamId === scorecard.matchInfo.team1.id);
-            const team2Score = scorecard.innings.find(inn => inn.battingTeamId === scorecard.matchInfo.team2.id);
-            
-            const team1ScoreStr = team1Score 
-              ? `${team1Score.totalRuns || 0}/${team1Score.totalWickets || 0} (${team1Score.totalOvers || 0} overs)`
-              : undefined;
-            const team2ScoreStr = team2Score 
-              ? `${team2Score.totalRuns || 0}/${team2Score.totalWickets || 0} (${team2Score.totalOvers || 0} overs)`
-              : undefined;
-            
-            const tossWinner = scorecard.matchInfo.toss?.winner === scorecard.matchInfo.team1.name ? 'team1' : 'team2';
-            
-            await fetch('/api/matches', {
-              method: 'PUT',
-              headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`,
-              },
-              body: JSON.stringify({
-                ...match,
-                team1Score: team1ScoreStr,
-                team2Score: team2ScoreStr,
-                result: scorecard.result?.winner ? `${scorecard.result.winner} won by ${scorecard.result.margin}` : match.result,
-                status: scorecard.result?.winner ? 'completed' : match.status,
-                matchState: {
-                  ...match.matchState,
-                  toss: scorecard.matchInfo.toss?.winner ? {
-                    winner: tossWinner,
-                    decision: scorecard.matchInfo.toss.decision,
-                    timestamp: Date.now(),
-                  } : match.matchState?.toss,
-                },
-              }),
-            });
-          }
-        } catch (matchErr) {
-          console.error('Error updating match with scorecard data:', matchErr);
-          // Don't fail the scorecard save if match update fails
-        }
-      }
+      // Only update public match summary when scorecard is published.
+      await syncMatchFromPublishedScorecard(saved, token);
       
       setMessage('✓ Scorecard saved successfully!');
       setTimeout(() => setMessage(''), 3000);
@@ -418,6 +426,7 @@ export default function ScorecardAdminPage() {
 
       const updatedScorecard = await response.json();
       setScorecard(updatedScorecard);
+      await syncMatchFromPublishedScorecard(updatedScorecard, token);
       setMessage('✓ Scorecard published successfully!');
       setTimeout(() => setMessage(''), 3000);
     } catch (err) {

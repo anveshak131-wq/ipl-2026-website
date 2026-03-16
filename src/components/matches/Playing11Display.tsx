@@ -1,6 +1,6 @@
 /**
  * Component to display playing 11 for end users
- * Enforces 30-minute visibility rule before match starts
+ * End users only see playing 11 once admin publishes it (playing11.setAt)
  */
 
 'use client';
