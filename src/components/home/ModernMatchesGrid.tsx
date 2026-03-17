@@ -14,8 +14,58 @@ interface ModernMatchesGridProps {
   isLoading?: boolean;
 }
 
+const IST_OFFSET_MS = 5.5 * 60 * 60 * 1000;
+
+function parseTimeTo24Hour(timeString: string): { hours: number; minutes: number } | null {
+  const clean = timeString.trim();
+
+  // Supports 24h format: "19:30"
+  const hhmmMatch = clean.match(/^(\d{1,2}):(\d{2})$/);
+  if (hhmmMatch) {
+    const hours = parseInt(hhmmMatch[1], 10);
+    const minutes = parseInt(hhmmMatch[2], 10);
+    if (hours >= 0 && hours <= 23 && minutes >= 0 && minutes <= 59) {
+      return { hours, minutes };
+    }
+  }
+
+  // Supports 12h format: "7:30 PM"
+  const ampmMatch = clean.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
+  if (ampmMatch) {
+    let hours = parseInt(ampmMatch[1], 10);
+    const minutes = parseInt(ampmMatch[2], 10);
+    const meridiem = ampmMatch[3].toUpperCase();
+
+    if (hours < 1 || hours > 12 || minutes < 0 || minutes > 59) return null;
+    if (meridiem === 'PM' && hours !== 12) hours += 12;
+    if (meridiem === 'AM' && hours === 12) hours = 0;
+
+    return { hours, minutes };
+  }
+
+  return null;
+}
+
+function getMatchStartTimestampUTC(match: Match): number | null {
+  try {
+    const [yearStr, monthStr, dayStr] = match.date.split('-');
+    const year = Number(yearStr);
+    const month = Number(monthStr);
+    const day = Number(dayStr);
+    const parsedTime = parseTimeTo24Hour(match.time);
+
+    if (!year || !month || !day || !parsedTime) return null;
+
+    // Match times are stored in IST; convert IST to UTC for comparisons.
+    const istTimestamp = Date.UTC(year, month - 1, day, parsedTime.hours, parsedTime.minutes, 0);
+    return istTimestamp - IST_OFFSET_MS;
+  } catch {
+    return null;
+  }
+}
+
 export default function ModernMatchesGrid({ matches, isLoading = false }: ModernMatchesGridProps) {
-  const [selectedFilter, setSelectedFilter] = useState<'all' | 'upcoming' | 'live' | 'completed'>('all');
+  const [selectedFilter, setSelectedFilter] = useState<'all' | 'upcoming' | 'live' | 'completed'>('upcoming');
   const [filteredMatches, setFilteredMatches] = useState<Match[]>([]);
   const [displayCount, setDisplayCount] = useState(6);
   const itemsPerPage = 6;
@@ -26,15 +76,45 @@ export default function ModernMatchesGrid({ matches, isLoading = false }: Modern
   }, [selectedFilter]);
 
   useEffect(() => {
-    const now = new Date();
-    let filtered = matches;
+    const now = Date.now();
+    let filtered: Match[] = [];
+
+    const sortAsc = (items: Match[]) =>
+      [...items].sort((a, b) => (getMatchStartTimestampUTC(a) ?? 0) - (getMatchStartTimestampUTC(b) ?? 0));
+    const sortDesc = (items: Match[]) =>
+      [...items].sort((a, b) => (getMatchStartTimestampUTC(b) ?? 0) - (getMatchStartTimestampUTC(a) ?? 0));
 
     if (selectedFilter === 'upcoming') {
-      filtered = matches.filter((m) => new Date(m.date) > now);
-    } else if (selectedFilter === 'completed') {
-      filtered = matches.filter((m) => m.status === 'completed');
+      filtered = sortAsc(
+        matches.filter((m) => {
+          if (m.status !== 'upcoming') return false;
+          const start = getMatchStartTimestampUTC(m);
+          return start ? start > now : new Date(m.date).getTime() > now;
+        })
+      );
     } else if (selectedFilter === 'live') {
-      filtered = matches.filter((m) => m.status === 'live');
+      filtered = sortAsc(matches.filter((m) => m.status === 'live'));
+    } else if (selectedFilter === 'completed') {
+      filtered = sortDesc(matches.filter((m) => m.status === 'completed'));
+    } else {
+      const statusOrder: Record<Match['status'], number> = {
+        live: 0,
+        upcoming: 1,
+        completed: 2,
+        cancelled: 3,
+      };
+
+      filtered = [...matches].sort((a, b) => {
+        const statusDiff = statusOrder[a.status] - statusOrder[b.status];
+        if (statusDiff !== 0) return statusDiff;
+
+        const aStart = getMatchStartTimestampUTC(a) ?? 0;
+        const bStart = getMatchStartTimestampUTC(b) ?? 0;
+        if (a.status === 'completed') {
+          return bStart - aStart;
+        }
+        return aStart - bStart;
+      });
     }
 
     setFilteredMatches(filtered);

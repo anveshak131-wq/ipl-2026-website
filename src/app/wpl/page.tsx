@@ -50,6 +50,7 @@ import { getAnimatedLogoPath } from '@/lib/logoUtils';
 export default function WPLHomePage() {
   const router = useRouter();
   const { currentLeague, setCurrentLeague } = useLeague();
+  const TARGET_SEASON_YEAR = 2026;
   const [showTermsModal, setShowTermsModal] = useState(false);
   const [lastAcceptanceDate, setLastAcceptanceDate] = useState<string | null>(null);
   const [needsReAcceptance, setNeedsReAcceptance] = useState(false);
@@ -66,6 +67,16 @@ export default function WPLHomePage() {
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
   const springConfig = { damping: 50, stiffness: 100 };
+
+  const getMatchYear = (dateString: string): number | null => {
+    const parsed = new Date(dateString);
+    if (!isNaN(parsed.getTime())) return parsed.getFullYear();
+    const match = dateString.match(/(20\d{2}|19\d{2})/);
+    return match ? parseInt(match[1], 10) : null;
+  };
+
+  const filterSeasonMatches = (items: Match[]): Match[] =>
+    items.filter((match) => getMatchYear(match.date) === TARGET_SEASON_YEAR);
   
   // Set league to WPL when page loads
   useEffect(() => {
@@ -198,11 +209,12 @@ export default function WPLHomePage() {
         );
         
         setTeams(teamsWithPlayers);
-        setMatches(matchesData);
+        const seasonMatches = filterSeasonMatches(matchesData);
+        setMatches(seasonMatches);
         setNews(filteredNews);
 
         // Check if there's a live match
-        const liveMatch = matchesData.some((match) => match.status === 'live');
+        const liveMatch = seasonMatches.some((match) => match.status === 'live');
         if (liveMatch) {
           setHasLiveMatch(true);
           setShowConfetti(true);
@@ -223,8 +235,9 @@ export default function WPLHomePage() {
         try {
           const matchesData = await api.getMatches('wpl');
           if (matchesData && Array.isArray(matchesData)) {
-            setMatches(matchesData);
-            const liveMatch = matchesData.some((match) => match.status === 'live');
+            const seasonMatches = filterSeasonMatches(matchesData);
+            setMatches(seasonMatches);
+            const liveMatch = seasonMatches.some((match) => match.status === 'live');
             if (liveMatch && !hasLiveMatch) {
               setHasLiveMatch(true);
               setShowConfetti(true);
@@ -865,7 +878,7 @@ export default function WPLHomePage() {
         {/* Matches Grid - Enhanced */}
         {isLoading ? (
           <MatchesSkeleton />
-        ) : matches.length > 0 ? (
+        ) : (
           <section className="relative py-24 overflow-hidden">
             <div 
               className="absolute inset-0"
@@ -918,10 +931,10 @@ export default function WPLHomePage() {
                   <ArrowRight className="w-5 h-5 group-hover:translate-x-2 transition-transform" />
                 </Link>
               </motion.div>
-              <ModernMatchesGrid matches={matches.slice(0, 6)} />
+              <ModernMatchesGrid matches={matches} />
             </div>
           </section>
-        ) : null}
+        )}
 
         {/* Stats Section - Enhanced */}
         {!isLoading && (
