@@ -74,8 +74,6 @@ export default function Navbar() {
     // Explore & Discover
     { href: getLeagueAwareHref('/teams'), label: 'Teams', emoji: 'trophy' },
     { href: getLeagueAwareHref('/news'), label: 'News', emoji: 'fire' },
-    // Match Day - IPL only
-    ...(currentLeague === 'ipl' ? [{ href: '/matchday', label: 'Match Day', emoji: 'venue' as NavEmojiName }] : []),
     // Fan Stories temporarily hidden from end-user navigation
     // { href: '/stories', label: 'Fan Stories', emoji: 'people' },
     // Analytics & Insights - WPL gets leaderboard, IPL gets stats
