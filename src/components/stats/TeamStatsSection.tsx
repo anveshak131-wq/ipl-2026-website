@@ -272,10 +272,10 @@ export default function TeamStatsSection({
                         {agg.totalWickets.toLocaleString()}
                       </td>
                       <td className="py-3 px-4 text-right font-semibold text-gray-100">
-                        {agg.avgStrikeRate ? agg.avgStrikeRate.toFixed(1) : '—'}
+                        {agg.avgStrikeRate.toFixed(1)}
                       </td>
                       <td className="py-3 px-4 text-right font-semibold text-gray-100">
-                        {agg.avgRunsPerMatch ? agg.avgRunsPerMatch.toFixed(1) : '—'}
+                        {agg.avgRunsPerMatch.toFixed(1)}
                       </td>
                     </tr>
                   );

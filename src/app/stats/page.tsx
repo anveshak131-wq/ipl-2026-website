@@ -144,18 +144,28 @@ export default function StatsPage() {
         setPlayers(finalPlayers);
         setTeams(finalTeams);
 
-        const playerTeamMap = new Map<string, { wickets: number; strikeRateSum: number; strikeRateCount: number }>();
+        const playerTeamMap = new Map<string, {
+          runs: number;
+          wickets: number;
+          matches: number;
+          strikeRateSum: number;
+          strikeRateCount: number;
+        }>();
         finalPlayers.forEach((player) => {
           const key = String(player.teamId || '').trim();
           if (!key) return;
 
           const existing = playerTeamMap.get(key) || {
+            runs: 0,
             wickets: 0,
+            matches: 0,
             strikeRateSum: 0,
             strikeRateCount: 0,
           };
 
+          existing.runs += safeNumber(player.stats?.runs);
           existing.wickets += safeNumber(player.stats?.wickets);
+          existing.matches += safeNumber(player.stats?.matches);
           const strikeRate = safeNumber(player.stats?.strikeRate);
           if (strikeRate > 0) {
             existing.strikeRateSum += strikeRate;
@@ -169,51 +179,73 @@ export default function StatsPage() {
           ? teamStatsResponse.teamStats
           : [];
 
-        const mappedTeamAggregates: TeamAggregate[] = teamStats
-          .map((teamStat) => {
-            const rawTeamId = teamStat.teamId !== undefined && teamStat.teamId !== null
-              ? String(teamStat.teamId)
-              : '';
-            const teamNameToken = normalizeTeamToken(teamStat.teamName);
+        const findTeamByStatRow = (teamStat: TeamStatsApiRow): Team | null => {
+          const rawTeamId = teamStat.teamId !== undefined && teamStat.teamId !== null
+            ? String(teamStat.teamId)
+            : '';
+          const teamNameToken = normalizeTeamToken(teamStat.teamName);
 
-            const resolvedTeam =
-              finalTeams.find((team) => String(team.id) === rawTeamId) ||
-              finalTeams.find((team) => {
-                const teamName = normalizeTeamToken(team.name);
-                const shortName = normalizeTeamToken(team.shortName);
-                return teamNameToken.length > 0 && (
-                  teamName === teamNameToken ||
-                  shortName === teamNameToken ||
-                  teamName.includes(teamNameToken) ||
-                  teamNameToken.includes(teamName)
-                );
-              }) ||
-              null;
+          return (
+            finalTeams.find((team) => String(team.id) === rawTeamId) ||
+            finalTeams.find((team) => {
+              const teamName = normalizeTeamToken(team.name);
+              const shortName = normalizeTeamToken(team.shortName);
+              return teamNameToken.length > 0 && (
+                teamName === teamNameToken ||
+                shortName === teamNameToken ||
+                teamName.includes(teamNameToken) ||
+                teamNameToken.includes(teamName)
+              );
+            }) ||
+            null
+          );
+        };
 
-            const resolvedTeamId = resolvedTeam?.id || rawTeamId;
-            const playerFallback = resolvedTeamId ? playerTeamMap.get(resolvedTeamId) : undefined;
+        const scorecardStatsByTeamId = new Map<string, TeamStatsApiRow>();
+        teamStats.forEach((teamStat) => {
+          const resolvedTeam = findTeamByStatRow(teamStat);
+          if (resolvedTeam?.id) {
+            scorecardStatsByTeamId.set(resolvedTeam.id, teamStat);
+            return;
+          }
 
-            const totalRuns = safeNumber(teamStat.runsScored);
-            const totalMatches = safeNumber(teamStat.matches);
-            const totalWickets = Math.max(
-              safeNumber(teamStat.wicketsTaken),
-              playerFallback?.wickets || 0
-            );
+          const rawTeamId = teamStat.teamId !== undefined && teamStat.teamId !== null
+            ? String(teamStat.teamId)
+            : '';
+          if (rawTeamId) {
+            scorecardStatsByTeamId.set(rawTeamId, teamStat);
+          }
+        });
+
+        const mappedTeamAggregates: TeamAggregate[] = finalTeams
+          .map((team) => {
+            const scorecardStats = scorecardStatsByTeamId.get(team.id);
+            const playerFallback = playerTeamMap.get(team.id);
+
+            const scoreRuns = safeNumber(scorecardStats?.runsScored);
+            const scoreWickets = safeNumber(scorecardStats?.wicketsTaken);
+            const scoreMatches = safeNumber(scorecardStats?.matches);
+
+            // Use scorecard performance when innings totals exist; otherwise use player aggregates.
+            const hasScorePerformance = scoreRuns > 0 || scoreWickets > 0;
+
+            const totalRuns = hasScorePerformance ? scoreRuns : (playerFallback?.runs || 0);
+            const totalWickets = hasScorePerformance ? scoreWickets : (playerFallback?.wickets || 0);
+            const totalMatches = hasScorePerformance
+              ? scoreMatches
+              : (playerFallback?.matches || scoreMatches || 0);
             const avgStrikeRate = playerFallback && playerFallback.strikeRateCount > 0
               ? playerFallback.strikeRateSum / playerFallback.strikeRateCount
               : 0;
 
             return {
-              team: resolvedTeam,
+              team,
               totalRuns,
               totalWickets,
               totalMatches,
               avgRunsPerMatch: totalMatches > 0 ? totalRuns / totalMatches : 0,
               avgStrikeRate,
             };
-          })
-          .filter((aggregate) => {
-            return aggregate.team !== null || aggregate.totalRuns > 0 || aggregate.totalMatches > 0;
           })
           .sort((a, b) => b.totalRuns - a.totalRuns || b.totalWickets - a.totalWickets);
 
