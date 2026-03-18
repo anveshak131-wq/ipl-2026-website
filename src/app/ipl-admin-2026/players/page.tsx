@@ -943,12 +943,292 @@ export default function AdminPlayers() {
     const dataRows = rows.map(row =>
       exportColumns.map(column => formatSpreadsheetValue((row as any)[column.key]))
     );
-
-    const worksheet = XLSX.utils.aoa_to_sheet([headerRow, ...dataRows]);
     const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Players');
 
-    return XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+    const toNumber = (value: unknown) => {
+      if (typeof value === 'number' && Number.isFinite(value)) return value;
+      const parsed = Number(value);
+      return Number.isFinite(parsed) ? parsed : 0;
+    };
+
+    const setAutoColumnWidths = (sheet: XLSX.WorkSheet, tableRows: any[][]) => {
+      const widths = headerRow.map((_, colIndex) => {
+        const maxLength = Math.max(
+          ...tableRows.map(row => String(row[colIndex] ?? '').length),
+          headerRow[colIndex].length
+        );
+        return { wch: Math.min(Math.max(maxLength + 2, 10), 42) };
+      });
+      sheet['!cols'] = widths;
+    };
+
+    const setCellStyle = (sheet: XLSX.WorkSheet, rowIndex: number, colIndex: number, style: any) => {
+      const cellRef = XLSX.utils.encode_cell({ r: rowIndex, c: colIndex });
+      const cell = (sheet as any)[cellRef];
+      if (!cell) return;
+      cell.s = { ...(cell.s || {}), ...style };
+    };
+
+    const baseBorder = {
+      top: { style: 'thin', color: { rgb: 'D9D9D9' } },
+      right: { style: 'thin', color: { rgb: 'D9D9D9' } },
+      bottom: { style: 'thin', color: { rgb: 'D9D9D9' } },
+      left: { style: 'thin', color: { rgb: 'D9D9D9' } }
+    };
+
+    const styleHeaderRow = (sheet: XLSX.WorkSheet, rowIndex: number, totalCols: number) => {
+      for (let col = 0; col < totalCols; col += 1) {
+        setCellStyle(sheet, rowIndex, col, {
+          font: { bold: true, color: { rgb: 'FFFFFFFF' } },
+          fill: { fgColor: { rgb: '1F4E78' } },
+          alignment: { horizontal: 'center', vertical: 'center', wrapText: true },
+          border: baseBorder
+        });
+      }
+    };
+
+    const styleDataRows = (sheet: XLSX.WorkSheet, startRow: number, endRow: number, totalCols: number) => {
+      for (let rowIndex = startRow; rowIndex <= endRow; rowIndex += 1) {
+        const altFill = rowIndex % 2 === 0 ? 'F7FBFF' : 'FFFFFF';
+        for (let col = 0; col < totalCols; col += 1) {
+          setCellStyle(sheet, rowIndex, col, {
+            fill: { fgColor: { rgb: altFill } },
+            alignment: { horizontal: col <= 1 ? 'left' : 'center', vertical: 'center', wrapText: true },
+            border: baseBorder
+          });
+        }
+      }
+    };
+
+    const tableRows = [headerRow, ...dataRows];
+    const playersSheet = XLSX.utils.aoa_to_sheet(tableRows);
+    setAutoColumnWidths(playersSheet, tableRows);
+    playersSheet['!autofilter'] = { ref: `A1:${XLSX.utils.encode_cell({ r: 0, c: headerRow.length - 1 })}` };
+    styleHeaderRow(playersSheet, 0, headerRow.length);
+    if (tableRows.length > 1) {
+      styleDataRows(playersSheet, 1, tableRows.length - 1, headerRow.length);
+    }
+    XLSX.utils.book_append_sheet(workbook, playersSheet, 'Sheet 1 - Players');
+
+    const pivotMap = new Map<string, {
+      teamName: string;
+      role: string;
+      playerCount: number;
+      captainCount: number;
+      totalRuns: number;
+      totalWickets: number;
+      totalMatches: number;
+      totalAge: number;
+      ageCount: number;
+      strikeRateTotal: number;
+      strikeRateCount: number;
+      economyTotal: number;
+      economyCount: number;
+    }>();
+
+    rows.forEach((row) => {
+      const teamName = String(row.teamName || 'Unknown');
+      const role = String(row.role || 'Unknown');
+      const key = `${teamName}__${role}`;
+      const existing = pivotMap.get(key) || {
+        teamName,
+        role,
+        playerCount: 0,
+        captainCount: 0,
+        totalRuns: 0,
+        totalWickets: 0,
+        totalMatches: 0,
+        totalAge: 0,
+        ageCount: 0,
+        strikeRateTotal: 0,
+        strikeRateCount: 0,
+        economyTotal: 0,
+        economyCount: 0
+      };
+
+      existing.playerCount += 1;
+      if (row.isCaptain === true) existing.captainCount += 1;
+      existing.totalRuns += toNumber(row.runs);
+      existing.totalWickets += toNumber(row.wickets);
+      existing.totalMatches += toNumber(row.matches);
+
+      const age = toNumber(row.age);
+      if (age > 0) {
+        existing.totalAge += age;
+        existing.ageCount += 1;
+      }
+
+      const strikeRate = toNumber(row.strikeRate);
+      if (strikeRate > 0) {
+        existing.strikeRateTotal += strikeRate;
+        existing.strikeRateCount += 1;
+      }
+
+      const economy = toNumber(row.economy);
+      if (economy > 0) {
+        existing.economyTotal += economy;
+        existing.economyCount += 1;
+      }
+
+      pivotMap.set(key, existing);
+    });
+
+    const pivotHeaders = [
+      'Team',
+      'Role',
+      'Player Count',
+      'Captain Count',
+      'Total Runs',
+      'Total Wickets',
+      'Total Matches',
+      'Avg Age',
+      'Avg Strike Rate',
+      'Avg Economy'
+    ];
+
+    const pivotDataRows = Array.from(pivotMap.values())
+      .sort((a, b) => (a.teamName + a.role).localeCompare(b.teamName + b.role))
+      .map((entry) => [
+        entry.teamName,
+        entry.role,
+        entry.playerCount,
+        entry.captainCount,
+        entry.totalRuns,
+        entry.totalWickets,
+        entry.totalMatches,
+        entry.ageCount ? Number((entry.totalAge / entry.ageCount).toFixed(2)) : 0,
+        entry.strikeRateCount ? Number((entry.strikeRateTotal / entry.strikeRateCount).toFixed(2)) : 0,
+        entry.economyCount ? Number((entry.economyTotal / entry.economyCount).toFixed(2)) : 0
+      ]);
+
+    const pivotSheetRows: (string | number | boolean)[][] = [
+      ['Players Pivot Summary'],
+      [`Generated at: ${new Date().toLocaleString()}`],
+      [],
+      pivotHeaders,
+      ...pivotDataRows
+    ];
+
+    const pivotSheet = XLSX.utils.aoa_to_sheet(pivotSheetRows);
+    pivotSheet['!merges'] = [XLSX.utils.decode_range(`A1:${XLSX.utils.encode_cell({ r: 0, c: pivotHeaders.length - 1 })}`)];
+    const pivotWidths = pivotHeaders.map((header, colIndex) => {
+      const maxLength = Math.max(
+        header.length,
+        ...pivotDataRows.map(row => String(row[colIndex] ?? '').length)
+      );
+      return { wch: Math.min(Math.max(maxLength + 2, 10), 30) };
+    });
+    pivotSheet['!cols'] = pivotWidths;
+    setCellStyle(pivotSheet, 0, 0, {
+      font: { bold: true, color: { rgb: 'FFFFFFFF' }, sz: 13 },
+      fill: { fgColor: { rgb: '1F4E78' } },
+      alignment: { horizontal: 'left', vertical: 'center' },
+      border: baseBorder
+    });
+    setCellStyle(pivotSheet, 1, 0, {
+      font: { italic: true, color: { rgb: '5B6975' } },
+      alignment: { horizontal: 'left' }
+    });
+    styleHeaderRow(pivotSheet, 3, pivotHeaders.length);
+    if (pivotSheetRows.length > 4) {
+      styleDataRows(pivotSheet, 4, pivotSheetRows.length - 1, pivotHeaders.length);
+    }
+    XLSX.utils.book_append_sheet(workbook, pivotSheet, 'Sheet 2 - Pivot');
+
+    const teamRunTotals = new Map<string, number>();
+    const roleStrikeRates = new Map<string, { total: number; count: number }>();
+    const roleDistribution = new Map<string, number>();
+
+    rows.forEach((row) => {
+      const teamName = String(row.teamName || 'Unknown');
+      const role = String(row.role || 'Unknown');
+
+      teamRunTotals.set(teamName, (teamRunTotals.get(teamName) || 0) + toNumber(row.runs));
+      roleDistribution.set(role, (roleDistribution.get(role) || 0) + 1);
+
+      const strikeRate = toNumber(row.strikeRate);
+      if (strikeRate > 0) {
+        const entry = roleStrikeRates.get(role) || { total: 0, count: 0 };
+        entry.total += strikeRate;
+        entry.count += 1;
+        roleStrikeRates.set(role, entry);
+      }
+    });
+
+    const teamRunRows = Array.from(teamRunTotals.entries())
+      .sort((a, b) => b[1] - a[1])
+      .map(([team, totalRuns]) => [team, totalRuns]);
+
+    const roleStrikeRateRows = Array.from(roleStrikeRates.entries())
+      .map(([role, values]) => [role, values.count ? Number((values.total / values.count).toFixed(2)) : 0])
+      .sort((a, b) => String(a[0]).localeCompare(String(b[0])));
+
+    const roleDistributionRows = Array.from(roleDistribution.entries())
+      .sort((a, b) => b[1] - a[1])
+      .map(([role, count]) => [role, count]);
+
+    const chartSheetRows: (string | number | boolean)[][] = [];
+    const sectionTitleRows: number[] = [];
+    const sectionHeaderRows: number[] = [];
+
+    chartSheetRows.push(['Players Chart Data']);
+    sectionTitleRows.push(chartSheetRows.length - 1);
+    chartSheetRows.push(['Use Excel Insert > Charts to create bar, line, and pie visuals from these tables.']);
+    chartSheetRows.push([]);
+
+    chartSheetRows.push(['Bar Chart - Team Total Runs']);
+    sectionTitleRows.push(chartSheetRows.length - 1);
+    chartSheetRows.push(['Team', 'Total Runs']);
+    sectionHeaderRows.push(chartSheetRows.length - 1);
+    teamRunRows.forEach((row) => chartSheetRows.push(row));
+    chartSheetRows.push([]);
+
+    chartSheetRows.push(['Line Chart - Role Average Strike Rate']);
+    sectionTitleRows.push(chartSheetRows.length - 1);
+    chartSheetRows.push(['Role', 'Average Strike Rate']);
+    sectionHeaderRows.push(chartSheetRows.length - 1);
+    roleStrikeRateRows.forEach((row) => chartSheetRows.push(row));
+    chartSheetRows.push([]);
+
+    chartSheetRows.push(['Pie Chart - Player Count by Role']);
+    sectionTitleRows.push(chartSheetRows.length - 1);
+    chartSheetRows.push(['Role', 'Player Count']);
+    sectionHeaderRows.push(chartSheetRows.length - 1);
+    roleDistributionRows.forEach((row) => chartSheetRows.push(row));
+
+    const chartSheet = XLSX.utils.aoa_to_sheet(chartSheetRows);
+    const chartColCount = 2;
+    const chartColWidths = Array.from({ length: chartColCount }, (_, colIndex) => {
+      const maxLength = Math.max(...chartSheetRows.map(row => String(row[colIndex] ?? '').length), 16);
+      return { wch: Math.min(Math.max(maxLength + 2, 14), 42) };
+    });
+    chartSheet['!cols'] = chartColWidths;
+
+    sectionTitleRows.forEach((rowIndex) => {
+      setCellStyle(chartSheet, rowIndex, 0, {
+        font: { bold: true, color: { rgb: '1F4E78' }, sz: rowIndex === 0 ? 13 : 11 },
+        alignment: { horizontal: 'left', vertical: 'center' }
+      });
+    });
+
+    sectionHeaderRows.forEach((rowIndex) => {
+      styleHeaderRow(chartSheet, rowIndex, chartColCount);
+    });
+
+    for (let rowIndex = 0; rowIndex < chartSheetRows.length; rowIndex += 1) {
+      for (let colIndex = 0; colIndex < chartColCount; colIndex += 1) {
+        const isSectionHeader = sectionHeaderRows.includes(rowIndex);
+        if (isSectionHeader) continue;
+        setCellStyle(chartSheet, rowIndex, colIndex, {
+          border: baseBorder,
+          alignment: { horizontal: colIndex === 0 ? 'left' : 'center', vertical: 'center' }
+        });
+      }
+    }
+
+    XLSX.utils.book_append_sheet(workbook, chartSheet, 'Sheet 3 - Charts');
+
+    return XLSX.write(workbook, { bookType: 'xlsx', type: 'array', cellStyles: true });
   };
 
   const exportToPDF = (playersToExport: Player[]) => {
