@@ -1287,12 +1287,196 @@ export default function AdminPlayers() {
       .sort((a, b) => b[1] - a[1])
       .map(([role, count]) => [role, count]);
 
+    type ChartPoint = { label: string; value: number };
+
+    // Render chart visuals on a canvas and embed them as PNGs in the workbook.
+    const createCanvasBase = (title: string, width = 860, height = 300) => {
+      if (typeof document === 'undefined') return null;
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return null;
+
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillRect(0, 0, width, height);
+      ctx.strokeStyle = '#D0DEE9';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(0.5, 0.5, width - 1, height - 1);
+
+      ctx.fillStyle = '#1F4E79';
+      ctx.font = 'bold 20px Calibri';
+      ctx.fillText(title, 20, 32);
+
+      return { canvas, ctx, width, height };
+    };
+
+    const renderBarChartImage = (title: string, points: ChartPoint[]) => {
+      const base = createCanvasBase(title);
+      if (!base) return null;
+      const { canvas, ctx, width, height } = base;
+
+      const left = 70;
+      const right = width - 30;
+      const top = 60;
+      const bottom = height - 55;
+      const chartWidth = right - left;
+      const chartHeight = bottom - top;
+
+      const maxValue = Math.max(...points.map(p => p.value), 1);
+
+      ctx.strokeStyle = '#90A9BC';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(left, top);
+      ctx.lineTo(left, bottom);
+      ctx.lineTo(right, bottom);
+      ctx.stroke();
+
+      const barGap = 10;
+      const barWidth = points.length ? (chartWidth - barGap * (points.length + 1)) / points.length : chartWidth;
+
+      points.forEach((point, index) => {
+        const barHeight = (point.value / maxValue) * (chartHeight - 16);
+        const x = left + barGap + index * (barWidth + barGap);
+        const y = bottom - barHeight;
+
+        const grad = ctx.createLinearGradient(x, y, x, bottom);
+        grad.addColorStop(0, '#2E7D32');
+        grad.addColorStop(1, '#81C784');
+        ctx.fillStyle = grad;
+        ctx.fillRect(x, y, barWidth, barHeight);
+
+        ctx.fillStyle = '#1F4E79';
+        ctx.font = '11px Calibri';
+        ctx.textAlign = 'center';
+        ctx.fillText(String(Math.round(point.value)), x + barWidth / 2, y - 6);
+
+        ctx.fillStyle = '#1D2B36';
+        const label = point.label.length > 10 ? `${point.label.slice(0, 10)}...` : point.label;
+        ctx.fillText(label, x + barWidth / 2, bottom + 16);
+      });
+
+      return canvas.toDataURL('image/png');
+    };
+
+    const renderLineChartImage = (title: string, points: ChartPoint[]) => {
+      const base = createCanvasBase(title);
+      if (!base) return null;
+      const { canvas, ctx, width, height } = base;
+
+      const left = 70;
+      const right = width - 30;
+      const top = 60;
+      const bottom = height - 55;
+      const chartWidth = right - left;
+      const chartHeight = bottom - top;
+
+      const maxValue = Math.max(...points.map(p => p.value), 1);
+
+      ctx.strokeStyle = '#90A9BC';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(left, top);
+      ctx.lineTo(left, bottom);
+      ctx.lineTo(right, bottom);
+      ctx.stroke();
+
+      if (points.length > 1) {
+        ctx.strokeStyle = '#1F4E79';
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        points.forEach((point, index) => {
+          const x = left + (index / (points.length - 1)) * chartWidth;
+          const y = bottom - (point.value / maxValue) * (chartHeight - 16);
+          if (index === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        });
+        ctx.stroke();
+      }
+
+      points.forEach((point, index) => {
+        const x = points.length > 1 ? left + (index / (points.length - 1)) * chartWidth : left + chartWidth / 2;
+        const y = bottom - (point.value / maxValue) * (chartHeight - 16);
+
+        ctx.fillStyle = '#2E7D32';
+        ctx.beginPath();
+        ctx.arc(x, y, 4, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = '#1F4E79';
+        ctx.font = '11px Calibri';
+        ctx.textAlign = 'center';
+        ctx.fillText(String(Math.round(point.value * 100) / 100), x, y - 8);
+
+        ctx.fillStyle = '#1D2B36';
+        const label = point.label.length > 12 ? `${point.label.slice(0, 12)}...` : point.label;
+        ctx.fillText(label, x, bottom + 16);
+      });
+
+      return canvas.toDataURL('image/png');
+    };
+
+    const renderPieChartImage = (title: string, points: ChartPoint[]) => {
+      const base = createCanvasBase(title);
+      if (!base) return null;
+      const { canvas, ctx, width, height } = base;
+
+      const total = Math.max(points.reduce((sum, point) => sum + point.value, 0), 1);
+      const centerX = Math.floor(width * 0.33);
+      const centerY = Math.floor(height * 0.58);
+      const radius = Math.min(90, Math.floor(height * 0.3));
+
+      const palette = ['#1F4E79', '#2E7D32', '#42A5F5', '#66BB6A', '#FFB74D', '#8D6E63', '#AB47BC'];
+      let start = -Math.PI / 2;
+
+      points.forEach((point, index) => {
+        const fraction = point.value / total;
+        const end = start + fraction * Math.PI * 2;
+
+        ctx.beginPath();
+        ctx.moveTo(centerX, centerY);
+        ctx.arc(centerX, centerY, radius, start, end);
+        ctx.closePath();
+        ctx.fillStyle = palette[index % palette.length];
+        ctx.fill();
+
+        start = end;
+      });
+
+      const legendX = Math.floor(width * 0.58);
+      let legendY = 82;
+      points.forEach((point, index) => {
+        const percent = ((point.value / total) * 100).toFixed(1);
+        ctx.fillStyle = palette[index % palette.length];
+        ctx.fillRect(legendX, legendY - 10, 14, 14);
+
+        ctx.fillStyle = '#1D2B36';
+        ctx.font = '12px Calibri';
+        const label = `${point.label} (${percent}%)`;
+        ctx.fillText(label, legendX + 22, legendY + 1);
+        legendY += 24;
+      });
+
+      return canvas.toDataURL('image/png');
+    };
+
+    const addImageToSheet = (worksheet: ExcelJS.Worksheet, base64Image: string | null, row: number, col: number) => {
+      if (!base64Image) return;
+      const imageId = workbook.addImage({ base64: base64Image, extension: 'png' });
+      worksheet.addImage(imageId, {
+        tl: { col: col - 1, row: row - 1 },
+        ext: { width: 620, height: 220 }
+      });
+    };
+
     const addChartSection = (
       worksheet: ExcelJS.Worksheet,
       title: string,
       headers: [string, string],
       sectionRows: Array<[string, number]>,
-      startRow: number
+      startRow: number,
+      chartType: 'bar' | 'line' | 'pie'
     ) => {
       const titleRow = worksheet.getRow(startRow);
       titleRow.getCell(1).value = title;
@@ -1322,15 +1506,27 @@ export default function AdminPlayers() {
         current += 1;
       });
 
-      return current + 2;
+      const chartPoints: ChartPoint[] = sectionRows.map((row) => ({ label: row[0], value: row[1] }));
+      if (chartType === 'bar') {
+        addImageToSheet(worksheet, renderBarChartImage(title, chartPoints), startRow, 4);
+      } else if (chartType === 'line') {
+        addImageToSheet(worksheet, renderLineChartImage(title, chartPoints), startRow, 4);
+      } else {
+        addImageToSheet(worksheet, renderPieChartImage(title, chartPoints), startRow, 4);
+      }
+
+      const minSectionRows = 13;
+      const usedRows = current - startRow;
+      return startRow + Math.max(usedRows, minSectionRows) + 2;
     };
 
     let chartsRowPointer = 3;
-    chartsRowPointer = addChartSection(chartsSheet, 'Team Total Runs', ['Team', 'Total Runs'], teamRunRows as Array<[string, number]>, chartsRowPointer);
-    chartsRowPointer = addChartSection(chartsSheet, 'Role Average Strike Rate', ['Role', 'Average Strike Rate'], roleStrikeRateRows as Array<[string, number]>, chartsRowPointer);
-    addChartSection(chartsSheet, 'Player Distribution by Role', ['Role', 'Player Count'], roleDistributionRows as Array<[string, number]>, chartsRowPointer);
+    chartsSheet.getColumn(3).width = 4;
+    chartsRowPointer = addChartSection(chartsSheet, 'Team Total Runs', ['Team', 'Total Runs'], teamRunRows as Array<[string, number]>, chartsRowPointer, 'bar');
+    chartsRowPointer = addChartSection(chartsSheet, 'Role Average Strike Rate', ['Role', 'Average Strike Rate'], roleStrikeRateRows as Array<[string, number]>, chartsRowPointer, 'line');
+    addChartSection(chartsSheet, 'Player Distribution by Role', ['Role', 'Player Count'], roleDistributionRows as Array<[string, number]>, chartsRowPointer, 'pie');
 
-    autoFitColumns(chartsSheet, 14, 38);
+    autoFitColumns(chartsSheet, 14, 28);
 
     const buffer = await workbook.xlsx.writeBuffer();
     return buffer as ArrayBuffer;
