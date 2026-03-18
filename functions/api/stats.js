@@ -147,18 +147,8 @@ function normalizeTeamName(name) {
   if (lower === 'kings xi punjab' || lower === 'kings eleven punjab') {
     return 'Punjab Kings';
   }
-  
-  // Map of variations to standardized names
-  const teamNameMap = {
-    'Royal Challengers Bangalore': 'Royal Challengers Bengaluru (WPL)',
-    'Mumbai Indians': 'Mumbai Indians (WPL)',
-    'Delhi Capitals': 'Delhi Capitals (WPL)',
-    'Gujarat Giants': 'Gujarat Giants (WPL)',
-    'UP Warriorz': 'UP Warriorz (WPL)',
-  };
-  
-  // Check if the name needs normalization
-  return teamNameMap[trimmed] || trimmed;
+
+  return trimmed;
 }
 
 function calculateStatsFromScorecards(scorecards) {
@@ -390,6 +380,36 @@ function calculateStatsFromScorecards(scorecards) {
       fiveWickets: stats.fiveWickets,
     };
   }).sort((a, b) => b.wickets - a.wickets || a.economy - b.economy);
+
+  const toNumber = (value) => {
+    const parsed = typeof value === 'number' ? value : Number(value);
+    return Number.isFinite(parsed) ? parsed : 0;
+  };
+
+  const normalizeToken = (value) => {
+    if (value === null || value === undefined) return '';
+    return normalizeTeamName(String(value))
+      .toLowerCase()
+      .replace(/\(wpl\)/g, '')
+      .replace(/[^a-z0-9]+/g, '');
+  };
+
+  const resolveTeamKeyByLabel = (label, team1, team2, team1Key, team2Key) => {
+    const token = normalizeToken(label);
+    if (!token) return '';
+
+    const team1Tokens = [team1?.id, team1?.name, team1?.shortName].map(normalizeToken).filter(Boolean);
+    const team2Tokens = [team2?.id, team2?.name, team2?.shortName].map(normalizeToken).filter(Boolean);
+
+    if (team1Tokens.some((candidate) => token === candidate || token.includes(candidate) || candidate.includes(token))) {
+      return team1Key;
+    }
+    if (team2Tokens.some((candidate) => token === candidate || token.includes(candidate) || candidate.includes(token))) {
+      return team2Key;
+    }
+
+    return '';
+  };
   
   // Team statistics
   const teamMap = {};
@@ -397,81 +417,118 @@ function calculateStatsFromScorecards(scorecards) {
   scorecards.forEach(scorecard => {
     const { matchInfo, innings1, innings2 } = scorecard;
     if (!matchInfo) return;
-    
-    const team1 = matchInfo.team1;
-    const team2 = matchInfo.team2;
-    const winner = matchInfo.winner;
-    
-    // Initialize teams
-    [team1, team2].forEach(team => {
-      if (!team || !team.id) return;
-      
-      if (!teamMap[team.id]) {
-        teamMap[team.id] = {
-          teamId: team.id,
-          teamName: team.name || team.shortName || 'Unknown',
+
+    const team1 = matchInfo.team1 || {};
+    const team2 = matchInfo.team2 || {};
+    const team1Key = String(team1.id || '').trim();
+    const team2Key = String(team2.id || '').trim();
+
+    if (!team1Key || !team2Key) {
+      return;
+    }
+
+    const ensureTeam = (teamKey, teamData) => {
+      if (!teamMap[teamKey]) {
+        teamMap[teamKey] = {
+          teamId: teamData.id,
+          teamName: normalizeTeamName(teamData.name || teamData.shortName || 'Unknown'),
           matches: 0,
           wins: 0,
           losses: 0,
           noResult: 0,
           points: 0,
           runsScored: 0,
-          oversPlayed: 0,
           runsConceded: 0,
+          wicketsTaken: 0,
+          wicketsLost: 0,
+          oversPlayed: 0,
           oversBowled: 0,
         };
       }
+      return teamMap[teamKey];
+    };
+
+    const team1Stats = ensureTeam(team1Key, team1);
+    const team2Stats = ensureTeam(team2Key, team2);
+
+    team1Stats.matches += 1;
+    team2Stats.matches += 1;
+
+    const innings = Array.isArray(scorecard.innings) && scorecard.innings.length
+      ? scorecard.innings
+      : [innings1, innings2].filter(Boolean);
+
+    innings.forEach((inning, index) => {
+      if (!inning) return;
+
+      let battingTeamKey = '';
+      const battingTeamId = String(inning.battingTeamId || '').trim();
+      if (battingTeamId && (battingTeamId === team1Key || battingTeamId === team2Key)) {
+        battingTeamKey = battingTeamId;
+      }
+
+      if (!battingTeamKey && inning.battingTeam) {
+        battingTeamKey = resolveTeamKeyByLabel(inning.battingTeam, team1, team2, team1Key, team2Key);
+      }
+
+      if (!battingTeamKey) {
+        battingTeamKey = index === 0 ? team1Key : team2Key;
+      }
+
+      const bowlingTeamKey = battingTeamKey === team1Key ? team2Key : team1Key;
+
+      const runs = toNumber(inning.totalRuns ?? inning.runs);
+      const wickets = toNumber(inning.totalWickets ?? inning.wickets);
+      const overs = toNumber(inning.totalOvers ?? inning.overs);
+
+      if (teamMap[battingTeamKey]) {
+        teamMap[battingTeamKey].runsScored += runs;
+        teamMap[battingTeamKey].wicketsLost += wickets;
+        teamMap[battingTeamKey].oversPlayed += overs;
+      }
+
+      if (teamMap[bowlingTeamKey]) {
+        teamMap[bowlingTeamKey].runsConceded += runs;
+        teamMap[bowlingTeamKey].wicketsTaken += wickets;
+        teamMap[bowlingTeamKey].oversBowled += overs;
+      }
     });
-    
-    // Update match results
-    if (team1?.id && teamMap[team1.id]) {
-      teamMap[team1.id].matches += 1;
-      if (winner === team1.id) {
-        teamMap[team1.id].wins += 1;
-        teamMap[team1.id].points += 2;
-      } else if (winner === team2?.id) {
-        teamMap[team1.id].losses += 1;
+
+    const winnerRaw = scorecard.result?.winner ?? matchInfo.winner;
+    const winnerToken = normalizeToken(winnerRaw);
+    const team1Token = normalizeToken(team1.id);
+    const team2Token = normalizeToken(team2.id);
+
+    let winnerKey = '';
+    if (winnerToken) {
+      if (winnerToken === team1Token) {
+        winnerKey = team1Key;
+      } else if (winnerToken === team2Token) {
+        winnerKey = team2Key;
       } else {
-        teamMap[team1.id].noResult += 1;
-        teamMap[team1.id].points += 1;
-      }
-      
-      // Innings 1 stats (team1 batting)
-      if (innings1) {
-        teamMap[team1.id].runsScored += parseInt(innings1.runs) || 0;
-        teamMap[team1.id].oversPlayed += parseFloat(innings1.overs) || 0;
-      }
-      
-      // Innings 2 stats (team1 bowling)
-      if (innings2) {
-        teamMap[team1.id].runsConceded += parseInt(innings2.runs) || 0;
-        teamMap[team1.id].oversBowled += parseFloat(innings2.overs) || 0;
+        winnerKey = resolveTeamKeyByLabel(winnerRaw, team1, team2, team1Key, team2Key);
       }
     }
-    
-    if (team2?.id && teamMap[team2.id]) {
-      teamMap[team2.id].matches += 1;
-      if (winner === team2.id) {
-        teamMap[team2.id].wins += 1;
-        teamMap[team2.id].points += 2;
-      } else if (winner === team1?.id) {
-        teamMap[team2.id].losses += 1;
-      } else {
-        teamMap[team2.id].noResult += 1;
-        teamMap[team2.id].points += 1;
-      }
-      
-      // Innings 2 stats (team2 batting)
-      if (innings2) {
-        teamMap[team2.id].runsScored += parseInt(innings2.runs) || 0;
-        teamMap[team2.id].oversPlayed += parseFloat(innings2.overs) || 0;
-      }
-      
-      // Innings 1 stats (team2 bowling)
-      if (innings1) {
-        teamMap[team2.id].runsConceded += parseInt(innings1.runs) || 0;
-        teamMap[team2.id].oversBowled += parseFloat(innings1.overs) || 0;
-      }
+
+    const resultHint = [scorecard.result?.winner, scorecard.result?.margin, matchInfo.result]
+      .filter(Boolean)
+      .join(' ')
+      .toLowerCase();
+    const isTieOrNoResult = /(tie|no result|abandon|abandoned|washout|draw)/.test(resultHint);
+
+    if (winnerKey === team1Key) {
+      team1Stats.wins += 1;
+      team1Stats.points += 2;
+      team2Stats.losses += 1;
+    } else if (winnerKey === team2Key) {
+      team2Stats.wins += 1;
+      team2Stats.points += 2;
+      team1Stats.losses += 1;
+    } else if (isTieOrNoResult || !winnerKey) {
+      team1Stats.noResult += 1;
+      team2Stats.noResult += 1;
+      team1Stats.points += 1;
+      team2Stats.points += 1;
     }
   });
   
@@ -492,6 +549,10 @@ function calculateStatsFromScorecards(scorecards) {
       netRunRate: parseFloat(nrr),
       runsScored: stats.runsScored,
       runsConceded: stats.runsConceded,
+      wicketsTaken: stats.wicketsTaken,
+      wicketsLost: stats.wicketsLost,
+      oversPlayed: stats.oversPlayed,
+      oversBowled: stats.oversBowled,
     };
   }).sort((a, b) => b.points - a.points || b.netRunRate - a.netRunRate);
   

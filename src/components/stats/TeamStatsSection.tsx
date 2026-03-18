@@ -187,7 +187,7 @@ export default function TeamStatsSection({
             <div>
               <h2 className="text-2xl md:text-3xl font-black text-white">Team Statistics</h2>
               <p className="text-sm text-gray-400 mt-1">
-                Aggregates are computed from player stats stored in Workers KV.
+                Aggregates are computed from published match scorecards stored in Workers KV.
               </p>
             </div>
           </div>

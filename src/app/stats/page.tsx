@@ -27,6 +27,18 @@ interface TeamAggregate {
   avgStrikeRate: number;
 }
 
+interface TeamStatsApiRow {
+  teamId?: string | number;
+  teamName?: string;
+  matches?: number;
+  runsScored?: number;
+  wicketsTaken?: number;
+}
+
+interface TeamStatsApiResponse {
+  teamStats?: TeamStatsApiRow[];
+}
+
 interface PublishedStats {
   description?: string;
   leaders?: {
@@ -62,6 +74,19 @@ function sortByEconomyAsc(players: Player[]): Player[] {
   return [...players].sort((a, b) => a.stats.economy - b.stats.economy);
 }
 
+function safeNumber(value: unknown): number {
+  const parsed = typeof value === 'number' ? value : Number(value);
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
+function normalizeTeamToken(value: unknown): string {
+  if (value === null || value === undefined) return '';
+  return String(value)
+    .toLowerCase()
+    .replace(/\(wpl\)/g, '')
+    .replace(/[^a-z0-9]+/g, '');
+}
+
 export default function StatsPage() {
   const { currentLeague, setCurrentLeague } = useLeague();
   const router = useRouter();
@@ -83,6 +108,7 @@ export default function StatsPage() {
   const [leadersLimit, setLeadersLimit] = useState<10 | 50>(10);
   const [pointsYear, setPointsYear] = useState<number>(2026);
   const [availablePointsYears, setAvailablePointsYears] = useState<number[]>([]);
+  const [kvTeamAggregates, setKvTeamAggregates] = useState<TeamAggregate[] | null>(null);
   
   // Redirect WPL users away from stats page
   useEffect(() => {
@@ -98,13 +124,100 @@ export default function StatsPage() {
       setIsLoading(true);
       setError(null);
       try {
-        const [playersData, teamsData, settingsData] = await Promise.all([
+        const [playersData, teamsData, settingsData, teamStatsResponse] = await Promise.all([
           api.getPlayers(undefined, currentLeague),
           api.getTeams(currentLeague),
           api.getSettings().catch(() => null),
+          fetch(`/api/stats?league=${currentLeague}&type=teams`)
+            .then(async (response) => {
+              if (!response.ok) {
+                return null;
+              }
+              return response.json() as Promise<TeamStatsApiResponse>;
+            })
+            .catch(() => null),
         ]);
-        setPlayers(playersData || []);
-        setTeams(teamsData || []);
+
+        const finalPlayers = playersData || [];
+        const finalTeams = teamsData || [];
+
+        setPlayers(finalPlayers);
+        setTeams(finalTeams);
+
+        const playerTeamMap = new Map<string, { wickets: number; strikeRateSum: number; strikeRateCount: number }>();
+        finalPlayers.forEach((player) => {
+          const key = String(player.teamId || '').trim();
+          if (!key) return;
+
+          const existing = playerTeamMap.get(key) || {
+            wickets: 0,
+            strikeRateSum: 0,
+            strikeRateCount: 0,
+          };
+
+          existing.wickets += safeNumber(player.stats?.wickets);
+          const strikeRate = safeNumber(player.stats?.strikeRate);
+          if (strikeRate > 0) {
+            existing.strikeRateSum += strikeRate;
+            existing.strikeRateCount += 1;
+          }
+
+          playerTeamMap.set(key, existing);
+        });
+
+        const teamStats = Array.isArray(teamStatsResponse?.teamStats)
+          ? teamStatsResponse.teamStats
+          : [];
+
+        const mappedTeamAggregates: TeamAggregate[] = teamStats
+          .map((teamStat) => {
+            const rawTeamId = teamStat.teamId !== undefined && teamStat.teamId !== null
+              ? String(teamStat.teamId)
+              : '';
+            const teamNameToken = normalizeTeamToken(teamStat.teamName);
+
+            const resolvedTeam =
+              finalTeams.find((team) => String(team.id) === rawTeamId) ||
+              finalTeams.find((team) => {
+                const teamName = normalizeTeamToken(team.name);
+                const shortName = normalizeTeamToken(team.shortName);
+                return teamNameToken.length > 0 && (
+                  teamName === teamNameToken ||
+                  shortName === teamNameToken ||
+                  teamName.includes(teamNameToken) ||
+                  teamNameToken.includes(teamName)
+                );
+              }) ||
+              null;
+
+            const resolvedTeamId = resolvedTeam?.id || rawTeamId;
+            const playerFallback = resolvedTeamId ? playerTeamMap.get(resolvedTeamId) : undefined;
+
+            const totalRuns = safeNumber(teamStat.runsScored);
+            const totalMatches = safeNumber(teamStat.matches);
+            const totalWickets = Math.max(
+              safeNumber(teamStat.wicketsTaken),
+              playerFallback?.wickets || 0
+            );
+            const avgStrikeRate = playerFallback && playerFallback.strikeRateCount > 0
+              ? playerFallback.strikeRateSum / playerFallback.strikeRateCount
+              : 0;
+
+            return {
+              team: resolvedTeam,
+              totalRuns,
+              totalWickets,
+              totalMatches,
+              avgRunsPerMatch: totalMatches > 0 ? totalRuns / totalMatches : 0,
+              avgStrikeRate,
+            };
+          })
+          .filter((aggregate) => {
+            return aggregate.team !== null || aggregate.totalRuns > 0 || aggregate.totalMatches > 0;
+          })
+          .sort((a, b) => b.totalRuns - a.totalRuns || b.totalWickets - a.totalWickets);
+
+        setKvTeamAggregates(mappedTeamAggregates.length > 0 ? mappedTeamAggregates : null);
 
         if (settingsData && (settingsData as any).publishedStats) {
           setPublishedStats((settingsData as any).publishedStats);
@@ -119,6 +232,20 @@ export default function StatsPage() {
 
     fetchData();
   }, [currentLeague]);
+
+  const kvDefaultTeams = useMemo(() => {
+    if (!kvTeamAggregates || kvTeamAggregates.length === 0) {
+      return undefined;
+    }
+
+    const firstTeamId = kvTeamAggregates[0]?.team?.id;
+    const secondTeamId = kvTeamAggregates[1]?.team?.id || firstTeamId;
+
+    return {
+      team1Id: firstTeamId,
+      team2Id: secondTeamId,
+    };
+  }, [kvTeamAggregates]);
 
   // Available years for end-user IPL points table (mirror admin UX)
   useEffect(() => {
@@ -676,8 +803,8 @@ export default function StatsPage() {
                   <TeamStatsSection
                     players={players}
                     teams={teams}
-                    publishedTeamAggregates={publishedStats?.teamAggregates}
-                    defaultTeams={publishedStats?.defaultTeams}
+                    publishedTeamAggregates={kvTeamAggregates || publishedStats?.teamAggregates}
+                    defaultTeams={publishedStats?.defaultTeams || kvDefaultTeams}
                   />
                 </motion.div>
               )}
