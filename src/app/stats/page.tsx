@@ -15,7 +15,8 @@ import StatsHeroSection from '@/components/stats/StatsHeroSection';
 import StatsTabs from '@/components/stats/StatsTabs';
 import LeaderboardSection from '@/components/stats/LeaderboardSection';
 import QuickStatsGrid from '@/components/stats/QuickStatsGrid';
-import { Trophy, Award, TrendingUp, Target, Users, Sparkles, Filter } from 'lucide-react';
+import TeamStatsSection from '@/components/stats/TeamStatsSection';
+import { Trophy, Award, TrendingUp, Target, Sparkles, Filter } from 'lucide-react';
 
 interface TeamAggregate {
   team: Team | null;
@@ -672,17 +673,12 @@ export default function StatsPage() {
                   transition={{ duration: 0.4 }}
                   className="space-y-8"
                 >
-                  <div className="rounded-3xl bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl border border-white/20 p-8">
-                    <div className="flex items-center gap-4 mb-6">
-                      <div className="p-4 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-500 shadow-lg">
-                        <Users className="w-8 h-8 text-white" />
-                      </div>
-                      <h2 className="text-3xl font-black text-white">Team Statistics</h2>
-                    </div>
-                    <p className="text-gray-400">
-                      Team comparison and aggregate statistics coming soon.
-                    </p>
-                  </div>
+                  <TeamStatsSection
+                    players={players}
+                    teams={teams}
+                    publishedTeamAggregates={publishedStats?.teamAggregates}
+                    defaultTeams={publishedStats?.defaultTeams}
+                  />
                 </motion.div>
               )}
             </AnimatePresence>
