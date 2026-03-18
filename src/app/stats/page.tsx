@@ -74,6 +74,30 @@ function sortByEconomyAsc(players: Player[]): Player[] {
   return [...players].sort((a, b) => a.stats.economy - b.stats.economy);
 }
 
+function mergeLeadersWithComputed(
+  published: Player[] | undefined,
+  computed: Player[],
+  sorter: (players: Player[]) => Player[]
+): Player[] {
+  const merged: Player[] = [];
+  const seen = new Set<string>();
+
+  const addPlayers = (list: Player[] | undefined) => {
+    if (!list || list.length === 0) return;
+    list.forEach((player) => {
+      if (!player?.id || seen.has(player.id)) return;
+      seen.add(player.id);
+      merged.push(player);
+    });
+  };
+
+  // Keep published leaders first, then fill remaining slots from computed values.
+  addPlayers(published);
+  addPlayers(computed);
+
+  return sorter(merged).slice(0, 50);
+}
+
 function safeNumber(value: unknown): number {
   const parsed = typeof value === 'number' ? value : Number(value);
   return Number.isFinite(parsed) ? parsed : 0;
@@ -323,31 +347,35 @@ export default function StatsPage() {
   }, [players, currentLeague]);
 
   const topRunScorers = useMemo(() => {
-    const base = publishedStats?.leaders?.topRunScorers?.length
-      ? publishedStats.leaders.topRunScorers
-      : computedTopRunScorers;
-    return sortByRunsDesc(base);
+    return mergeLeadersWithComputed(
+      publishedStats?.leaders?.topRunScorers,
+      computedTopRunScorers,
+      sortByRunsDesc
+    );
   }, [publishedStats?.leaders?.topRunScorers, computedTopRunScorers]);
 
   const topWicketTakers = useMemo(() => {
-    const base = publishedStats?.leaders?.topWicketTakers?.length
-      ? publishedStats.leaders.topWicketTakers
-      : computedTopWicketTakers;
-    return sortByWicketsDesc(base);
+    return mergeLeadersWithComputed(
+      publishedStats?.leaders?.topWicketTakers,
+      computedTopWicketTakers,
+      sortByWicketsDesc
+    );
   }, [publishedStats?.leaders?.topWicketTakers, computedTopWicketTakers]);
 
   const bestStrikeRates = useMemo(() => {
-    const base = publishedStats?.leaders?.bestStrikeRates?.length
-      ? publishedStats.leaders.bestStrikeRates
-      : computedBestStrikeRates;
-    return sortByStrikeRateDesc(base);
+    return mergeLeadersWithComputed(
+      publishedStats?.leaders?.bestStrikeRates,
+      computedBestStrikeRates,
+      sortByStrikeRateDesc
+    );
   }, [publishedStats?.leaders?.bestStrikeRates, computedBestStrikeRates]);
 
   const bestEconomyRates = useMemo(() => {
-    const base = publishedStats?.leaders?.bestEconomyRates?.length
-      ? publishedStats.leaders.bestEconomyRates
-      : computedBestEconomyRates;
-    return sortByEconomyAsc(base);
+    return mergeLeadersWithComputed(
+      publishedStats?.leaders?.bestEconomyRates,
+      computedBestEconomyRates,
+      sortByEconomyAsc
+    );
   }, [publishedStats?.leaders?.bestEconomyRates, computedBestEconomyRates]);
 
   // Calculate totals for hero section
