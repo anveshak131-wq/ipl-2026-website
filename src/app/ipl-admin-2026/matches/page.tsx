@@ -1684,13 +1684,10 @@ export default function AdminMatches() {
             setError(null);
             setShowBulkDeleteModal(false);
 
-            // Delete real matches from backend
+            // Delete real matches from backend in one atomic request.
+            let bulkDeleteResult: { deleted: number; requested: number; notFound?: string[] } | null = null;
             if (realMatches.length > 0) {
-                const deletePromises = realMatches.map(matchId => 
-                api.deleteMatch(matchId)
-            );
-
-            await Promise.all(deletePromises);
+                bulkDeleteResult = await api.bulkDeleteMatches(realMatches);
             }
             
             // Remove both real and mock matches from local state
@@ -1708,13 +1705,23 @@ export default function AdminMatches() {
             
             // Show success message
             let successMessage = '';
-            if (realMatches.length > 0 && mockMatches.length > 0) {
-                successMessage = `${realMatches.length} real match(es) deleted and ${mockMatches.length} sample match(es) removed`;
-            } else if (realMatches.length > 0) {
-                successMessage = `${realMatches.length} match(es) deleted successfully`;
+            const deletedReal = bulkDeleteResult?.deleted ?? realMatches.length;
+            const notFoundCount = bulkDeleteResult?.notFound?.length ?? 0;
+
+            if (deletedReal > 0 && mockMatches.length > 0) {
+                successMessage = `${deletedReal} real match(es) deleted and ${mockMatches.length} sample match(es) removed`;
+            } else if (deletedReal > 0) {
+                successMessage = `${deletedReal} match(es) deleted successfully`;
             } else if (mockMatches.length > 0) {
                 successMessage = `${mockMatches.length} sample match(es) removed`;
+            } else {
+                successMessage = 'No matches were deleted';
             }
+
+            if (notFoundCount > 0) {
+                successMessage += ` (${notFoundCount} already removed)`;
+            }
+
             showSuccess(successMessage);
         } catch (error: any) {
             console.error('Failed to delete matches:', error);

@@ -763,12 +763,59 @@ async function handleDeleteRequest(context) {
     const url = new URL(request.url);
     const matchId = url.searchParams.get('id');
     const clearAll = url.searchParams.get('clearAll') === 'true';
+    const bulkDelete = url.searchParams.get('bulkDelete') === 'true' || url.searchParams.get('bulk') === 'true';
     
     // If clearAll is true, clear all matches from KV storage
     if (clearAll) {
       await env.IPL_CACHE.put('matches', JSON.stringify([]));
       console.log('All matches cleared from KV storage');
       return new Response(JSON.stringify({ success: true, message: 'All matches cleared successfully' }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
+    // Bulk delete matches in one request (atomic KV write)
+    if (bulkDelete) {
+      let body = {};
+      try {
+        body = await request.json();
+      } catch {
+        body = {};
+      }
+
+      const matchIds = Array.isArray(body.matchIds) ? body.matchIds.map(String).filter(Boolean) : [];
+      if (!matchIds.length) {
+        return new Response(JSON.stringify({ error: 'matchIds array is required for bulk delete' }), {
+          status: 400,
+          headers: { 'Content-Type': 'application/json' }
+        });
+      }
+
+      let matches = await env.IPL_CACHE.get('matches', 'json');
+      const kvExists = await env.IPL_CACHE.get('matches');
+      if (kvExists === null) {
+        matches = [];
+      } else {
+        matches = matches || [];
+      }
+
+      const idSet = new Set(matchIds);
+      const existingIds = new Set(matches.map((m) => String(m.id)));
+      const notFound = matchIds.filter((id) => !existingIds.has(id));
+
+      const remainingMatches = matches.filter((m) => !idSet.has(String(m.id)));
+      const deleted = matches.length - remainingMatches.length;
+
+      await env.IPL_CACHE.put('matches', JSON.stringify(remainingMatches));
+
+      return new Response(JSON.stringify({
+        success: true,
+        deleted,
+        requested: matchIds.length,
+        notFound,
+        message: `Deleted ${deleted} match(es)`
+      }), {
         status: 200,
         headers: { 'Content-Type': 'application/json' }
       });

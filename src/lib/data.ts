@@ -693,6 +693,42 @@ export const api = {
     }
   },
 
+  bulkDeleteMatches: async (
+    matchIds: string[]
+  ): Promise<{ success: boolean; deleted: number; requested: number; notFound?: string[]; message?: string }> => {
+    try {
+      if (!Array.isArray(matchIds) || matchIds.length === 0) {
+        throw new Error('No match IDs provided for bulk delete.');
+      }
+
+      const token = getAdminAuthToken();
+      if (!token) {
+        throw new Error('Authentication token not found. Please log in.');
+      }
+
+      const response = await fetch('/api/matches?bulkDelete=true', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ matchIds })
+      });
+
+      if (!response.ok) {
+        const body = await response.text();
+        throw new Error(`Bulk delete failed (${response.status}): ${body}`);
+      }
+
+      const result = await response.json();
+      clearMatchesClientCache();
+      return result;
+    } catch (error) {
+      console.error('Error bulk deleting matches:', error);
+      throw error;
+    }
+  },
+
   createMatch: async (match: Omit<Match, 'id' | 'team1' | 'team2'> & { team1Id: string; team2Id: string }): Promise<Match> => {
     try {
       const token = getAdminAuthToken();
