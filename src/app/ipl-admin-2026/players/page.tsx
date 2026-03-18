@@ -15,7 +15,7 @@ import FlagImage from '@/components/ui/FlagImage';
 import CustomSelect from '@/components/ui/CustomSelect';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
-import * as XLSX from 'xlsx';
+import * as ExcelJS from 'exceljs';
 import { Search, Filter, Edit2, X, Users, TrendingUp, Award, Target, Zap, ChevronDown, ChevronUp, SortAsc, SortDesc, User, Shirt, Calendar, BarChart3, Plus, Trash2, Download, Upload, Shield, Activity, Hash, Grid3x3, List, Eye, Star, Copy, History, FileSpreadsheet, FileText, FileDown, Database, DatabaseBackup } from 'lucide-react';
 import '@/styles/flags.css';
 
@@ -937,13 +937,31 @@ export default function AdminPlayers() {
     return [headers.join(','), ...csvRows].join('\n');
   };
 
-  const exportToExcel = (playersToExport: Player[]) => {
+  const exportToExcel = async (playersToExport: Player[]) => {
     const rows = buildExportRows(playersToExport);
+
+    // ExcelJS theme configuration for a consistent visual system.
+    const THEME = {
+      primary: 'FF1F4E79',
+      secondary: 'FFD9EAF7',
+      accent: 'FF2E7D32',
+      white: 'FFFFFFFF',
+      border: 'FF9FB7C9',
+      text: 'FF1D2B36',
+      lightRed: 'FFFFEBEE',
+      orangeDark: 'FFEF6C00',
+      orangeLight: 'FFFFF3E0',
+      greenLight: 'FFE8F5E9',
+      card: 'FFF5FAFF'
+    };
+
+    const workbook = new ExcelJS.Workbook();
+    workbook.creator = 'SportsUP99';
+    workbook.lastModifiedBy = 'SportsUP99 Admin';
+    workbook.created = new Date();
+    workbook.modified = new Date();
+
     const headerRow = exportColumns.map(column => column.label);
-    const dataRows = rows.map(row =>
-      exportColumns.map(column => formatSpreadsheetValue((row as any)[column.key]))
-    );
-    const workbook = XLSX.utils.book_new();
 
     const toNumber = (value: unknown) => {
       if (typeof value === 'number' && Number.isFinite(value)) return value;
@@ -951,65 +969,123 @@ export default function AdminPlayers() {
       return Number.isFinite(parsed) ? parsed : 0;
     };
 
-    const setAutoColumnWidths = (sheet: XLSX.WorkSheet, tableRows: any[][]) => {
-      const widths = headerRow.map((_, colIndex) => {
-        const maxLength = Math.max(
-          ...tableRows.map(row => String(row[colIndex] ?? '').length),
-          headerRow[colIndex].length
-        );
-        return { wch: Math.min(Math.max(maxLength + 2, 10), 42) };
+    const applyThinBorder = (cell: ExcelJS.Cell) => {
+      cell.border = {
+        top: { style: 'thin', color: { argb: THEME.border } },
+        left: { style: 'thin', color: { argb: THEME.border } },
+        bottom: { style: 'thin', color: { argb: THEME.border } },
+        right: { style: 'thin', color: { argb: THEME.border } }
+      };
+    };
+
+    const applyThickBorder = (cell: ExcelJS.Cell) => {
+      cell.border = {
+        top: { style: 'medium', color: { argb: THEME.border } },
+        left: { style: 'medium', color: { argb: THEME.border } },
+        bottom: { style: 'medium', color: { argb: THEME.border } },
+        right: { style: 'medium', color: { argb: THEME.border } }
+      };
+    };
+
+    const autoFitColumns = (worksheet: ExcelJS.Worksheet, minimum = 10, maximum = 42) => {
+      worksheet.columns.forEach((column) => {
+        let maxLength = minimum;
+        column.eachCell?.({ includeEmpty: true }, (cell) => {
+          const rawValue = cell.value;
+          const text = rawValue === null || rawValue === undefined
+            ? ''
+            : typeof rawValue === 'object' && 'text' in rawValue
+              ? String((rawValue as any).text)
+              : String(rawValue);
+          maxLength = Math.max(maxLength, text.length + 2);
+        });
+        column.width = Math.min(maxLength, maximum);
       });
-      sheet['!cols'] = widths;
     };
 
-    const setCellStyle = (sheet: XLSX.WorkSheet, rowIndex: number, colIndex: number, style: any) => {
-      const cellRef = XLSX.utils.encode_cell({ r: rowIndex, c: colIndex });
-      const cell = (sheet as any)[cellRef];
-      if (!cell) return;
-      cell.s = { ...(cell.s || {}), ...style };
+    const styleHeader = (worksheet: ExcelJS.Worksheet, rowIndex: number, totalCols: number) => {
+      const row = worksheet.getRow(rowIndex);
+      for (let col = 1; col <= totalCols; col += 1) {
+        const cell = row.getCell(col);
+        cell.font = { name: 'Calibri', size: 11, bold: true, color: { argb: THEME.white } };
+        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: THEME.primary } };
+        cell.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };
+        applyThickBorder(cell);
+      }
+      row.height = 22;
     };
 
-    const baseBorder = {
-      top: { style: 'thin', color: { rgb: 'D9D9D9' } },
-      right: { style: 'thin', color: { rgb: 'D9D9D9' } },
-      bottom: { style: 'thin', color: { rgb: 'D9D9D9' } },
-      left: { style: 'thin', color: { rgb: 'D9D9D9' } }
-    };
-
-    const styleHeaderRow = (sheet: XLSX.WorkSheet, rowIndex: number, totalCols: number) => {
-      for (let col = 0; col < totalCols; col += 1) {
-        setCellStyle(sheet, rowIndex, col, {
-          font: { bold: true, color: { rgb: 'FFFFFFFF' } },
-          fill: { fgColor: { rgb: '1F4E78' } },
-          alignment: { horizontal: 'center', vertical: 'center', wrapText: true },
-          border: baseBorder
+    const centerNumericColumns = (worksheet: ExcelJS.Worksheet, numericColumnIndexes: number[], startRow: number, endRow: number) => {
+      for (let rowNumber = startRow; rowNumber <= endRow; rowNumber += 1) {
+        numericColumnIndexes.forEach((colIndex) => {
+          const cell = worksheet.getRow(rowNumber).getCell(colIndex);
+          cell.alignment = { horizontal: 'center', vertical: 'middle' };
         });
       }
     };
 
-    const styleDataRows = (sheet: XLSX.WorkSheet, startRow: number, endRow: number, totalCols: number) => {
-      for (let rowIndex = startRow; rowIndex <= endRow; rowIndex += 1) {
-        const altFill = rowIndex % 2 === 0 ? 'F7FBFF' : 'FFFFFF';
-        for (let col = 0; col < totalCols; col += 1) {
-          setCellStyle(sheet, rowIndex, col, {
-            fill: { fgColor: { rgb: altFill } },
-            alignment: { horizontal: col <= 1 ? 'left' : 'center', vertical: 'center', wrapText: true },
-            border: baseBorder
-          });
-        }
+    // ---------------- Sheet 1: Players ----------------
+    const playersSheet = workbook.addWorksheet('Players');
+    playersSheet.views = [{ state: 'frozen', ySplit: 1 }];
+
+    playersSheet.addRow(headerRow);
+    rows.forEach((row) => {
+      playersSheet.addRow(exportColumns.map(column => formatSpreadsheetValue((row as any)[column.key])));
+    });
+
+    styleHeader(playersSheet, 1, headerRow.length);
+
+    const runsColIndex = exportColumns.findIndex(column => column.key === 'runs') + 1;
+    const wicketsColIndex = exportColumns.findIndex(column => column.key === 'wickets') + 1;
+
+    for (let rowNumber = 2; rowNumber <= playersSheet.rowCount; rowNumber += 1) {
+      const row = playersSheet.getRow(rowNumber);
+      const rowFill = rowNumber % 2 === 0 ? THEME.secondary : THEME.white;
+      for (let col = 1; col <= headerRow.length; col += 1) {
+        const cell = row.getCell(col);
+        cell.font = { name: 'Calibri', size: 10.5, color: { argb: THEME.text } };
+        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: rowFill } };
+        cell.alignment = { horizontal: col <= 2 ? 'left' : 'center', vertical: 'middle', wrapText: true };
+        applyThinBorder(cell);
       }
-    };
-
-    const tableRows = [headerRow, ...dataRows];
-    const playersSheet = XLSX.utils.aoa_to_sheet(tableRows);
-    setAutoColumnWidths(playersSheet, tableRows);
-    playersSheet['!autofilter'] = { ref: `A1:${XLSX.utils.encode_cell({ r: 0, c: headerRow.length - 1 })}` };
-    styleHeaderRow(playersSheet, 0, headerRow.length);
-    if (tableRows.length > 1) {
-      styleDataRows(playersSheet, 1, tableRows.length - 1, headerRow.length);
+      row.height = 20;
     }
-    XLSX.utils.book_append_sheet(workbook, playersSheet, 'Sheet 1 - Players');
 
+    if (playersSheet.rowCount >= 2 && runsColIndex > 0) {
+      const runsRange = `${playersSheet.getColumn(runsColIndex).letter}2:${playersSheet.getColumn(runsColIndex).letter}${playersSheet.rowCount}`;
+      playersSheet.addConditionalFormatting({
+        ref: runsRange,
+        rules: [
+          {
+            type: 'colorScale',
+            cfvo: [{ type: 'min' }, { type: 'max' }],
+            color: [{ argb: THEME.greenLight }, { argb: THEME.accent }]
+          }
+        ] as any
+      });
+    }
+
+    if (playersSheet.rowCount >= 2 && wicketsColIndex > 0) {
+      const wicketsRange = `${playersSheet.getColumn(wicketsColIndex).letter}2:${playersSheet.getColumn(wicketsColIndex).letter}${playersSheet.rowCount}`;
+      playersSheet.addConditionalFormatting({
+        ref: wicketsRange,
+        rules: [
+          {
+            type: 'colorScale',
+            cfvo: [{ type: 'min' }, { type: 'max' }],
+            color: [{ argb: THEME.orangeLight }, { argb: THEME.orangeDark }]
+          }
+        ] as any
+      });
+    }
+
+    playersSheet.autoFilter = {
+      from: { row: 1, column: 1 },
+      to: { row: 1, column: headerRow.length }
+    };
+    autoFitColumns(playersSheet);
+
+    // ---------------- Sheet 2: Summary ----------------
     const pivotMap = new Map<string, {
       teamName: string;
       role: string;
@@ -1030,7 +1106,7 @@ export default function AdminPlayers() {
       const teamName = String(row.teamName || 'Unknown');
       const role = String(row.role || 'Unknown');
       const key = `${teamName}__${role}`;
-      const existing = pivotMap.get(key) || {
+      const entry = pivotMap.get(key) || {
         teamName,
         role,
         playerCount: 0,
@@ -1046,34 +1122,49 @@ export default function AdminPlayers() {
         economyCount: 0
       };
 
-      existing.playerCount += 1;
-      if (row.isCaptain === true) existing.captainCount += 1;
-      existing.totalRuns += toNumber(row.runs);
-      existing.totalWickets += toNumber(row.wickets);
-      existing.totalMatches += toNumber(row.matches);
+      entry.playerCount += 1;
+      if (row.isCaptain === true) entry.captainCount += 1;
+      entry.totalRuns += toNumber(row.runs);
+      entry.totalWickets += toNumber(row.wickets);
+      entry.totalMatches += toNumber(row.matches);
 
       const age = toNumber(row.age);
       if (age > 0) {
-        existing.totalAge += age;
-        existing.ageCount += 1;
+        entry.totalAge += age;
+        entry.ageCount += 1;
       }
 
       const strikeRate = toNumber(row.strikeRate);
       if (strikeRate > 0) {
-        existing.strikeRateTotal += strikeRate;
-        existing.strikeRateCount += 1;
+        entry.strikeRateTotal += strikeRate;
+        entry.strikeRateCount += 1;
       }
 
       const economy = toNumber(row.economy);
       if (economy > 0) {
-        existing.economyTotal += economy;
-        existing.economyCount += 1;
+        entry.economyTotal += economy;
+        entry.economyCount += 1;
       }
 
-      pivotMap.set(key, existing);
+      pivotMap.set(key, entry);
     });
 
-    const pivotHeaders = [
+    const summaryRows = Array.from(pivotMap.values())
+      .sort((a, b) => (a.teamName + a.role).localeCompare(b.teamName + b.role))
+      .map((entry) => ({
+        teamName: entry.teamName,
+        role: entry.role,
+        playerCount: entry.playerCount,
+        captainCount: entry.captainCount,
+        totalRuns: entry.totalRuns,
+        totalWickets: entry.totalWickets,
+        totalMatches: entry.totalMatches,
+        avgAge: entry.ageCount ? Number((entry.totalAge / entry.ageCount).toFixed(2)) : 0,
+        avgStrikeRate: entry.strikeRateCount ? Number((entry.strikeRateTotal / entry.strikeRateCount).toFixed(2)) : 0,
+        avgEconomy: entry.economyCount ? Number((entry.economyTotal / entry.economyCount).toFixed(2)) : 0
+      }));
+
+    const summaryHeaders = [
       'Team',
       'Role',
       'Player Count',
@@ -1086,54 +1177,83 @@ export default function AdminPlayers() {
       'Avg Economy'
     ];
 
-    const pivotDataRows = Array.from(pivotMap.values())
-      .sort((a, b) => (a.teamName + a.role).localeCompare(b.teamName + b.role))
-      .map((entry) => [
-        entry.teamName,
-        entry.role,
-        entry.playerCount,
-        entry.captainCount,
-        entry.totalRuns,
-        entry.totalWickets,
-        entry.totalMatches,
-        entry.ageCount ? Number((entry.totalAge / entry.ageCount).toFixed(2)) : 0,
-        entry.strikeRateCount ? Number((entry.strikeRateTotal / entry.strikeRateCount).toFixed(2)) : 0,
-        entry.economyCount ? Number((entry.economyTotal / entry.economyCount).toFixed(2)) : 0
+    const summarySheet = workbook.addWorksheet('Summary');
+    summarySheet.views = [{ state: 'frozen', ySplit: 4 }];
+
+    summarySheet.addRow(['Players Performance Summary']);
+    summarySheet.mergeCells(1, 1, 1, summaryHeaders.length);
+    summarySheet.addRow([`Generated: ${new Date().toLocaleString()}`]);
+    summarySheet.mergeCells(2, 1, 2, summaryHeaders.length);
+    summarySheet.addRow([]);
+    summarySheet.addRow(summaryHeaders);
+    summaryRows.forEach((row) => {
+      summarySheet.addRow([
+        row.teamName,
+        row.role,
+        row.playerCount,
+        row.captainCount,
+        row.totalRuns,
+        row.totalWickets,
+        row.totalMatches,
+        row.avgAge,
+        row.avgStrikeRate,
+        row.avgEconomy
       ]);
+    });
 
-    const pivotSheetRows: (string | number | boolean)[][] = [
-      ['Players Pivot Summary'],
-      [`Generated at: ${new Date().toLocaleString()}`],
-      [],
-      pivotHeaders,
-      ...pivotDataRows
-    ];
+    const titleCell = summarySheet.getCell(1, 1);
+    titleCell.font = { name: 'Calibri', size: 18, bold: true, color: { argb: THEME.primary } };
+    titleCell.alignment = { horizontal: 'left', vertical: 'middle' };
+    summarySheet.getRow(1).height = 28;
 
-    const pivotSheet = XLSX.utils.aoa_to_sheet(pivotSheetRows);
-    pivotSheet['!merges'] = [XLSX.utils.decode_range(`A1:${XLSX.utils.encode_cell({ r: 0, c: pivotHeaders.length - 1 })}`)];
-    const pivotWidths = pivotHeaders.map((header, colIndex) => {
-      const maxLength = Math.max(
-        header.length,
-        ...pivotDataRows.map(row => String(row[colIndex] ?? '').length)
-      );
-      return { wch: Math.min(Math.max(maxLength + 2, 10), 30) };
-    });
-    pivotSheet['!cols'] = pivotWidths;
-    setCellStyle(pivotSheet, 0, 0, {
-      font: { bold: true, color: { rgb: 'FFFFFFFF' }, sz: 13 },
-      fill: { fgColor: { rgb: '1F4E78' } },
-      alignment: { horizontal: 'left', vertical: 'center' },
-      border: baseBorder
-    });
-    setCellStyle(pivotSheet, 1, 0, {
-      font: { italic: true, color: { rgb: '5B6975' } },
-      alignment: { horizontal: 'left' }
-    });
-    styleHeaderRow(pivotSheet, 3, pivotHeaders.length);
-    if (pivotSheetRows.length > 4) {
-      styleDataRows(pivotSheet, 4, pivotSheetRows.length - 1, pivotHeaders.length);
+    const subtitleCell = summarySheet.getCell(2, 1);
+    subtitleCell.font = { name: 'Calibri', size: 10, italic: true, color: { argb: THEME.text } };
+    subtitleCell.alignment = { horizontal: 'left', vertical: 'middle' };
+
+    styleHeader(summarySheet, 4, summaryHeaders.length);
+
+    const summaryDataStart = 5;
+    const summaryDataEnd = summarySheet.rowCount;
+    const avgRuns = summaryRows.length ? summaryRows.reduce((sum, row) => sum + row.totalRuns, 0) / summaryRows.length : 0;
+    const avgStrike = summaryRows.length ? summaryRows.reduce((sum, row) => sum + row.avgStrikeRate, 0) / summaryRows.length : 0;
+
+    for (let rowNumber = summaryDataStart; rowNumber <= summaryDataEnd; rowNumber += 1) {
+      const row = summarySheet.getRow(rowNumber);
+      const runsValue = toNumber(row.getCell(5).value);
+      const strikeValue = toNumber(row.getCell(9).value);
+
+      for (let col = 1; col <= summaryHeaders.length; col += 1) {
+        const cell = row.getCell(col);
+        cell.font = { name: 'Calibri', size: 10.5, color: { argb: THEME.text } };
+        cell.alignment = { horizontal: col <= 2 ? 'left' : 'center', vertical: 'middle', wrapText: true };
+        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: rowNumber % 2 === 0 ? THEME.secondary : THEME.white } };
+        applyThinBorder(cell);
+      }
+
+      if (runsValue >= avgRuns && runsValue > 0) {
+        const highRunsCell = row.getCell(5);
+        highRunsCell.font = { name: 'Calibri', size: 10.5, bold: true, color: { argb: THEME.accent } };
+      }
+
+      if (strikeValue > 0 && strikeValue < avgStrike * 0.75) {
+        const lowPerformanceCell = row.getCell(9);
+        lowPerformanceCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: THEME.lightRed } };
+      }
     }
-    XLSX.utils.book_append_sheet(workbook, pivotSheet, 'Sheet 2 - Pivot');
+
+    centerNumericColumns(summarySheet, [3, 4, 5, 6, 7, 8, 9, 10], summaryDataStart, summaryDataEnd);
+    autoFitColumns(summarySheet);
+
+    // ---------------- Sheet 3: Charts ----------------
+    const chartsSheet = workbook.addWorksheet('Charts');
+    chartsSheet.views = [{ state: 'frozen', ySplit: 1 }];
+
+    chartsSheet.addRow(['Chart Data Sources']);
+    chartsSheet.mergeCells(1, 1, 1, 2);
+    const chartsTitle = chartsSheet.getCell(1, 1);
+    chartsTitle.font = { name: 'Calibri', size: 14, bold: true, color: { argb: THEME.primary } };
+    chartsTitle.alignment = { horizontal: 'left', vertical: 'middle' };
+    chartsSheet.getRow(1).height = 24;
 
     const teamRunTotals = new Map<string, number>();
     const roleStrikeRates = new Map<string, { total: number; count: number }>();
@@ -1160,75 +1280,60 @@ export default function AdminPlayers() {
       .map(([team, totalRuns]) => [team, totalRuns]);
 
     const roleStrikeRateRows = Array.from(roleStrikeRates.entries())
-      .map(([role, values]) => [role, values.count ? Number((values.total / values.count).toFixed(2)) : 0])
-      .sort((a, b) => String(a[0]).localeCompare(String(b[0])));
+      .sort((a, b) => a[0].localeCompare(b[0]))
+      .map(([role, values]) => [role, values.count ? Number((values.total / values.count).toFixed(2)) : 0]);
 
     const roleDistributionRows = Array.from(roleDistribution.entries())
       .sort((a, b) => b[1] - a[1])
       .map(([role, count]) => [role, count]);
 
-    const chartSheetRows: (string | number | boolean)[][] = [];
-    const sectionTitleRows: number[] = [];
-    const sectionHeaderRows: number[] = [];
+    const addChartSection = (
+      worksheet: ExcelJS.Worksheet,
+      title: string,
+      headers: [string, string],
+      sectionRows: Array<[string, number]>,
+      startRow: number
+    ) => {
+      const titleRow = worksheet.getRow(startRow);
+      titleRow.getCell(1).value = title;
+      titleRow.getCell(1).font = { name: 'Calibri', size: 12, bold: true, color: { argb: THEME.primary } };
+      titleRow.getCell(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: THEME.secondary } };
+      titleRow.getCell(1).alignment = { horizontal: 'left', vertical: 'middle' };
+      titleRow.height = 22;
+      worksheet.mergeCells(startRow, 1, startRow, 2);
+      applyThinBorder(worksheet.getCell(startRow, 1));
 
-    chartSheetRows.push(['Players Chart Data']);
-    sectionTitleRows.push(chartSheetRows.length - 1);
-    chartSheetRows.push(['Use Excel Insert > Charts to create bar, line, and pie visuals from these tables.']);
-    chartSheetRows.push([]);
+      const header = worksheet.getRow(startRow + 1);
+      header.values = [undefined, headers[0], headers[1]];
+      styleHeader(worksheet, startRow + 1, 2);
 
-    chartSheetRows.push(['Bar Chart - Team Total Runs']);
-    sectionTitleRows.push(chartSheetRows.length - 1);
-    chartSheetRows.push(['Team', 'Total Runs']);
-    sectionHeaderRows.push(chartSheetRows.length - 1);
-    teamRunRows.forEach((row) => chartSheetRows.push(row));
-    chartSheetRows.push([]);
-
-    chartSheetRows.push(['Line Chart - Role Average Strike Rate']);
-    sectionTitleRows.push(chartSheetRows.length - 1);
-    chartSheetRows.push(['Role', 'Average Strike Rate']);
-    sectionHeaderRows.push(chartSheetRows.length - 1);
-    roleStrikeRateRows.forEach((row) => chartSheetRows.push(row));
-    chartSheetRows.push([]);
-
-    chartSheetRows.push(['Pie Chart - Player Count by Role']);
-    sectionTitleRows.push(chartSheetRows.length - 1);
-    chartSheetRows.push(['Role', 'Player Count']);
-    sectionHeaderRows.push(chartSheetRows.length - 1);
-    roleDistributionRows.forEach((row) => chartSheetRows.push(row));
-
-    const chartSheet = XLSX.utils.aoa_to_sheet(chartSheetRows);
-    const chartColCount = 2;
-    const chartColWidths = Array.from({ length: chartColCount }, (_, colIndex) => {
-      const maxLength = Math.max(...chartSheetRows.map(row => String(row[colIndex] ?? '').length), 16);
-      return { wch: Math.min(Math.max(maxLength + 2, 14), 42) };
-    });
-    chartSheet['!cols'] = chartColWidths;
-
-    sectionTitleRows.forEach((rowIndex) => {
-      setCellStyle(chartSheet, rowIndex, 0, {
-        font: { bold: true, color: { rgb: '1F4E78' }, sz: rowIndex === 0 ? 13 : 11 },
-        alignment: { horizontal: 'left', vertical: 'center' }
+      let current = startRow + 2;
+      sectionRows.forEach((dataRow, index) => {
+        const row = worksheet.getRow(current);
+        row.values = [undefined, dataRow[0], dataRow[1]];
+        for (let col = 1; col <= 2; col += 1) {
+          const cell = row.getCell(col);
+          cell.font = { name: 'Calibri', size: 10.5, color: { argb: THEME.text } };
+          cell.alignment = { horizontal: col === 1 ? 'left' : 'center', vertical: 'middle' };
+          cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: index % 2 === 0 ? THEME.card : THEME.white } };
+          applyThinBorder(cell);
+        }
+        row.height = 20;
+        current += 1;
       });
-    });
 
-    sectionHeaderRows.forEach((rowIndex) => {
-      styleHeaderRow(chartSheet, rowIndex, chartColCount);
-    });
+      return current + 2;
+    };
 
-    for (let rowIndex = 0; rowIndex < chartSheetRows.length; rowIndex += 1) {
-      for (let colIndex = 0; colIndex < chartColCount; colIndex += 1) {
-        const isSectionHeader = sectionHeaderRows.includes(rowIndex);
-        if (isSectionHeader) continue;
-        setCellStyle(chartSheet, rowIndex, colIndex, {
-          border: baseBorder,
-          alignment: { horizontal: colIndex === 0 ? 'left' : 'center', vertical: 'center' }
-        });
-      }
-    }
+    let chartsRowPointer = 3;
+    chartsRowPointer = addChartSection(chartsSheet, 'Team Total Runs', ['Team', 'Total Runs'], teamRunRows as Array<[string, number]>, chartsRowPointer);
+    chartsRowPointer = addChartSection(chartsSheet, 'Role Average Strike Rate', ['Role', 'Average Strike Rate'], roleStrikeRateRows as Array<[string, number]>, chartsRowPointer);
+    addChartSection(chartsSheet, 'Player Distribution by Role', ['Role', 'Player Count'], roleDistributionRows as Array<[string, number]>, chartsRowPointer);
 
-    XLSX.utils.book_append_sheet(workbook, chartSheet, 'Sheet 3 - Charts');
+    autoFitColumns(chartsSheet, 14, 38);
 
-    return XLSX.write(workbook, { bookType: 'xlsx', type: 'array', cellStyles: true });
+    const buffer = await workbook.xlsx.writeBuffer();
+    return buffer as ArrayBuffer;
   };
 
   const exportToPDF = (playersToExport: Player[]) => {
@@ -2188,7 +2293,7 @@ export default function AdminPlayers() {
           mimeType = 'text/csv';
           break;
         case 'excel':
-          content = exportToExcel(playersToExport);
+          content = await exportToExcel(playersToExport);
           filename = `${baseFilename}.xlsx`;
           mimeType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
           break;

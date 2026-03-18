@@ -24,6 +24,7 @@
     "autoprefixer": "^10.4.22",
     "axios": "^1.13.2",
     "bcryptjs": "^3.0.3",
+    "exceljs": "^4.4.0",
     "framer-motion": "^7.10.3",
     "jsonwebtoken": "^9.0.2",
     "jspdf": "^4.2.0",
