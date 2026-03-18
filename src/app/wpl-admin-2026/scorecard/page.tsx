@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { api as dataApi } from '@/lib/data';
+import { syncScorecardToPlayers } from '@/lib/scorecard-stats-sync';
 import WPLAdminSidebarNew from '@/components/admin/WPLAdminSidebarNew';
 
 interface Match {
@@ -388,6 +389,17 @@ export default function ScorecardAdminPage() {
       // Only update public match summary when scorecard is published.
       await syncMatchFromPublishedScorecard(saved, token);
       
+      // Also sync player stats if scorecard is published
+      if (saved.draft === false) {
+        console.log('💾 Saving: Syncing player stats from published scorecard...');
+        const syncResult = await syncScorecardToPlayers(saved, token);
+        if (syncResult.success) {
+          console.log(`✅ Saved: Player stats synced for ${syncResult.updatedCount} players`);
+        } else if (!syncResult.skipped) {
+          console.warn('⚠️ Saved: Player sync failed', syncResult.error);
+        }
+      }
+      
       setMessage('✓ Scorecard saved successfully!');
       setTimeout(() => setMessage(''), 3000);
     } catch (err) {
@@ -427,8 +439,22 @@ export default function ScorecardAdminPage() {
       const updatedScorecard = await response.json();
       setScorecard(updatedScorecard);
       await syncMatchFromPublishedScorecard(updatedScorecard, token);
-      setMessage('✓ Scorecard published successfully!');
-      setTimeout(() => setMessage(''), 3000);
+      
+      // Sync player stats from scorecard
+      console.log('🔄 Publishing: Syncing player stats from scorecard...');
+      const syncResult = await syncScorecardToPlayers(updatedScorecard, token);
+      if (syncResult.success) {
+        console.log(`✅ Published: Player stats synced for ${syncResult.updatedCount} players`);
+        setMessage(`✓ Scorecard published & ${syncResult.updatedCount} player stats updated!`);
+      } else if (syncResult.skipped) {
+        console.log(`⚠️ Published: Sync skipped (${syncResult.reason})`);
+        setMessage('✓ Scorecard published!');
+      } else {
+        console.warn('⚠️ Published: Player sync failed', syncResult.error);
+        setMessage('✓ Scorecard published! (Player stats sync failed)');
+      }
+      
+      setTimeout(() => setMessage(''), 4000);
     } catch (err) {
       console.error('Error publishing:', err);
       setMessage('✗ Error publishing scorecard');
