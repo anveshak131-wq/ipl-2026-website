@@ -526,30 +526,32 @@ export default function StatsPage() {
               transition={{ duration: 0.6, delay: 0.3 }}
               className="flex flex-wrap items-center justify-between gap-4 mb-8"
             >
-              <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 backdrop-blur-xl border border-white/10">
-                <Filter className="w-4 h-4 text-gray-400" />
-                <span className="text-sm text-gray-400 mr-2">Show:</span>
-                <button
-                    onClick={() => setLeadersLimit(10)}
-                  className={`px-4 py-1.5 rounded-lg font-semibold text-sm transition-all ${
-                      leadersLimit === 10
-                      ? 'bg-gradient-to-r from-orange-500 to-yellow-500 text-white shadow-lg'
-                        : 'text-gray-300 hover:text-white hover:bg-white/10'
-                    }`}
-                  >
-                    Top 10
-                  </button>
+              {activeTab !== 'teams' && (
+                <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 backdrop-blur-xl border border-white/10">
+                  <Filter className="w-4 h-4 text-gray-400" />
+                  <span className="text-sm text-gray-400 mr-2">Show:</span>
                   <button
-                    onClick={() => setLeadersLimit(50)}
-                  className={`px-4 py-1.5 rounded-lg font-semibold text-sm transition-all ${
-                      leadersLimit === 50
-                      ? 'bg-gradient-to-r from-orange-500 to-yellow-500 text-white shadow-lg'
-                        : 'text-gray-300 hover:text-white hover:bg-white/10'
-                    }`}
-                  >
-                    Top 50
-                  </button>
-                </div>
+                      onClick={() => setLeadersLimit(10)}
+                    className={`px-4 py-1.5 rounded-lg font-semibold text-sm transition-all ${
+                        leadersLimit === 10
+                        ? 'bg-gradient-to-r from-orange-500 to-yellow-500 text-white shadow-lg'
+                          : 'text-gray-300 hover:text-white hover:bg-white/10'
+                      }`}
+                    >
+                      Top 10
+                    </button>
+                    <button
+                      onClick={() => setLeadersLimit(50)}
+                    className={`px-4 py-1.5 rounded-lg font-semibold text-sm transition-all ${
+                        leadersLimit === 50
+                        ? 'bg-gradient-to-r from-orange-500 to-yellow-500 text-white shadow-lg'
+                          : 'text-gray-300 hover:text-white hover:bg-white/10'
+                      }`}
+                    >
+                      Top 50
+                    </button>
+                  </div>
+              )}
 
               {publishedStats?.lastUpdated && (
                 <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 backdrop-blur-xl border border-white/10">
