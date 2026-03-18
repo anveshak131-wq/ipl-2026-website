@@ -3,6 +3,7 @@
 
 import { Team, Player, Match, News, Highlight, Content } from '@/types';
 import { sortPlayersByRoleAndAge } from '@/lib/playerSort';
+import { filterMatchesForSeason, filterNewsForSeason, filterTeamsForSeason, SEASON_YEAR } from '@/lib/season';
 
 export const mockTeams: Team[] = [
   {
@@ -390,11 +391,11 @@ export const mockNews: News[] = [
 export const mockHighlights: Highlight[] = [
   {
     id: '1',
-    title: 'Best Catches of IPL 2025',
+    title: 'Best Catches of IPL 2026',
     videoUrl: '/highlights/catches.mp4',
     thumbnail: '/highlights/catches-thumb.jpg',
     matchId: '1',
-    description: 'Watch the most spectacular catches from IPL 2025 season'
+    description: 'Watch the most spectacular catches from the IPL 2026 season'
   },
   {
     id: '2',
@@ -402,7 +403,7 @@ export const mockHighlights: Highlight[] = [
     videoUrl: '/highlights/sixes.mp4',
     thumbnail: '/highlights/sixes-thumb.jpg',
     matchId: '2',
-    description: 'The biggest sixes from the IPL 2025 season'
+    description: 'The biggest sixes from the IPL 2026 season'
   }
 ];
 
@@ -422,13 +423,13 @@ export const api = {
       // Filter by league if specified (double check in case API didn't filter)
       const filtered = league ? teams.filter((team: Team) => team.league === league) : teams;
       console.log('API: After filtering by league:', filtered.length, 'teams for', league || 'all');
-      return filtered;
+      return filterTeamsForSeason(filtered, SEASON_YEAR);
     } catch (error) {
       console.error('API: Error fetching teams, using fallback:', error);
       // Fallback to mock data if API fails
       const fallback = league ? mockTeams.filter(team => team.league === league) : mockTeams;
       console.log('API: Using fallback data:', fallback.length, 'teams for', league || 'all');
-      return fallback;
+      return filterTeamsForSeason(fallback, SEASON_YEAR);
     }
   },
   
@@ -579,6 +580,8 @@ export const api = {
           return matchLeague === league;
         });
       }
+
+      matches = filterMatchesForSeason(matches, SEASON_YEAR);
 
       if (typeof window !== 'undefined') {
         const cacheKey = `matches_cache_${league || 'all'}`;
@@ -765,11 +768,11 @@ export const api = {
           return dateB - dateA;
         });
 
-      return newsItems as unknown as News[];
+      return filterNewsForSeason(newsItems as unknown as News[], SEASON_YEAR);
     } catch (error) {
       console.error('Error fetching news:', error);
       // Fallback to mock data if API fails
-      return mockNews;
+      return filterNewsForSeason(mockNews, SEASON_YEAR);
     }
   },
 
@@ -800,11 +803,11 @@ export const api = {
         (item: Content) => item.type === 'highlight' && isWithinSchedule(item, now),
       );
 
-      return highlights as unknown as Highlight[];
+      return filterNewsForSeason(highlights as unknown as News[], SEASON_YEAR) as unknown as Highlight[];
     } catch (error) {
       console.error('Error fetching highlights:', error);
       // Fallback to mock data if API fails
-      return mockHighlights;
+      return filterNewsForSeason(mockHighlights as unknown as News[], SEASON_YEAR) as unknown as Highlight[];
     }
   },
 

@@ -34,6 +34,7 @@ export async function onRequest(context) {
   if (method === "GET") {
     try {
       const league = url.searchParams.get("league");
+      const includeHistorical = url.searchParams.get("includeHistorical") === "true";
       
       // Hardcoded WPL teams - guaranteed to work
       const wplTeams = [
@@ -42,7 +43,7 @@ export async function onRequest(context) {
           name: "Royal Challengers Bangalore Women",
           shortName: "RCB-W",
           league: "wpl",
-          logo: "/teams/rcb-w.png",
+          logo: "/logos/wpl_rcb_logo_animated.svg",
           colors: { primary: "#EC1C24", secondary: "#000000" },
           description: "RCB Women's team"
         },
@@ -51,7 +52,7 @@ export async function onRequest(context) {
           name: "Mumbai Indians Women",
           shortName: "MI-W",
           league: "wpl",
-          logo: "/teams/mi-w.png",
+          logo: "/logos/wpl_mi_logo_animated.svg",
           colors: { primary: "#004BA0", secondary: "#D1AB3E" },
           description: "MI Women's team"
         },
@@ -60,7 +61,7 @@ export async function onRequest(context) {
           name: "Delhi Capitals Women", 
           shortName: "DC-W",
           league: "wpl",
-          logo: "/teams/dc-w.png",
+          logo: "/logos/wpl_dc_logo_animated.svg",
           colors: { primary: "#0078BC", secondary: "#EF1B26" },
           description: "DC Women's team"
         },
@@ -69,7 +70,7 @@ export async function onRequest(context) {
           name: "Gujarat Giants Women",
           shortName: "GG",
           league: "wpl",
-          logo: "/teams/gg.png",
+          logo: "/logos/wpl_gg_logo_animated.svg",
           colors: { primary: "#F97316", secondary: "#FFD700" },
           description: "Gujarat Giants Women's team"
         },
@@ -78,13 +79,13 @@ export async function onRequest(context) {
           name: "UP Warriorz Women",
           shortName: "UPW",
           league: "wpl",
-          logo: "/teams/upw.png",
+          logo: "/logos/wpl_upw_logo_animated.svg",
           colors: { primary: "#059669", secondary: "#F97316" },
           description: "UP Warriorz Women's team"
         }
       ];
 
-      // Hardcoded IPL teams
+      // Hardcoded IPL 2026 teams (active franchises)
       const iplTeams = [
         {
           id: "1",
@@ -177,7 +178,11 @@ export async function onRequest(context) {
           logo: "/logos/csk_logo_2026.svg",
           colors: { primary: "#FFFF00", secondary: "#0081E8" },
           description: "CSK team"
-        },
+        }
+      ];
+
+      // Optional: historical franchises (not part of the IPL 2026 season)
+      const historicalIplTeams = [
         {
           id: "16",
           name: "Gujarat Lions",
@@ -226,12 +231,14 @@ export async function onRequest(context) {
         }
       ];
 
-      let teams = iplTeams; // Default to IPL
+      const iplTeamsForResponse = includeHistorical ? [...iplTeams, ...historicalIplTeams] : iplTeams;
+
+      let teams = [...iplTeamsForResponse, ...wplTeams]; // Default: return both leagues
       
       if (league === "wpl") {
         teams = wplTeams;
       } else if (league === "ipl") {
-        teams = iplTeams;
+        teams = iplTeamsForResponse;
       }
 
       return new Response(JSON.stringify(teams), {

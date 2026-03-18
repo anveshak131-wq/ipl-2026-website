@@ -69,6 +69,16 @@ const LEAGUE_OIL_THEMES = {
   },
 } as const;
 
+const HOME_OIL_THEME = {
+  base: 'linear-gradient(155deg, #070b17 0%, #0c142b 40%, #0b1f2a 72%, #05060d 100%)',
+  hazeA: 'radial-gradient(82% 70% at 14% 12%, rgba(236,72,153,0.18) 0%, rgba(168,85,247,0.08) 55%, transparent 80%)',
+  hazeB: 'radial-gradient(74% 66% at 88% 88%, rgba(34,211,238,0.18) 0%, rgba(251,191,36,0.07) 55%, transparent 80%)',
+  brush: 'linear-gradient(112deg, rgba(236,72,153,0.16), rgba(34,211,238,0.08), rgba(251,191,36,0.05))',
+  orbA: 'radial-gradient(circle at 32% 28%, rgba(236,72,153,0.22), transparent 70%)',
+  orbB: 'radial-gradient(circle at 78% 68%, rgba(34,211,238,0.18), transparent 72%)',
+  conic: 'conic-gradient(from 210deg at 55% 50%, rgba(236,72,153,0.18), rgba(34,211,238,0.14), rgba(251,191,36,0.10), rgba(236,72,153,0.18))',
+} as const;
+
 export default function Home() {
   const router = useRouter();
   const { setCurrentLeague } = useLeague();
@@ -150,6 +160,9 @@ export default function Home() {
     const allLive = [...iplLiveMatches, ...wplLiveMatches];
     return allLive[0] || null;
   }, [iplLiveMatches, wplLiveMatches]);
+
+  const featuredLiveOil = featuredLiveMatch?.league === 'wpl' ? wplOil : iplOil;
+  const featuredLiveShadows = featuredLiveMatch?.league === 'wpl' ? wplCardShadows : iplCardShadows;
 
   // Get last completed match for each league
   const iplLastMatch = useMemo(() => {
@@ -394,91 +407,97 @@ export default function Home() {
       )}
 
       <main className="relative z-10">
-        {/* Enhanced Hero Section with Mouse Parallax */}
-        <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
-          {/* Animated Grid Background */}
-          <div 
-            className="absolute inset-0 opacity-[0.03]"
-            style={{
-              backgroundImage: `
-                linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)
-              `,
-              backgroundSize: '60px 60px',
-              transform: `translate(${(mousePosition?.x ?? 0) * 0.5}px, ${(mousePosition?.y ?? 0) * 0.5}px)`,
-            }}
-          />
+	        {/* Enhanced Hero Section with Mouse Parallax */}
+	        <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
+	          {/* Oil-canvas backdrop */}
+	          <div className="absolute inset-0 pointer-events-none" style={{ background: HOME_OIL_THEME.base }} />
+	          <div className="absolute inset-0 pointer-events-none" style={{ background: HOME_OIL_THEME.hazeA, mixBlendMode: 'screen' }} />
+	          <div className="absolute inset-0 pointer-events-none" style={{ background: HOME_OIL_THEME.hazeB, mixBlendMode: 'screen' }} />
+	          <div className="absolute inset-0 pointer-events-none opacity-[0.14]" style={{ background: HOME_OIL_THEME.conic, mixBlendMode: 'screen' }} />
 
-          {/* Dynamic Gradient Orbs with Mouse Parallax */}
-            <motion.div
-            className="absolute top-1/4 left-1/4 w-[600px] h-[600px] bg-blue-500/20 rounded-full blur-[120px]"
-            style={{
-              x: useSpring(mouseX, { damping: 50, stiffness: 100 }),
-              y: useSpring(mouseY, { damping: 50, stiffness: 100 }),
-            }}
-              animate={{
-              scale: [1, 1.2, 1],
-              opacity: [0.2, 0.4, 0.2],
-              }}
-              transition={{
-              duration: 20,
-                repeat: Infinity,
-                ease: "easeInOut",
-              }}
-            />
-            <motion.div
-            className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-purple-500/20 rounded-full blur-[120px]"
-            style={{
-              x: useSpring(mouseX, { damping: 50, stiffness: 100 }),
-              y: useSpring(mouseY, { damping: 50, stiffness: 100 }),
-            }}
-              animate={{
-              scale: [1, 1.3, 1],
-              opacity: [0.2, 0.4, 0.2],
-              }}
-              transition={{
-              duration: 25,
-                repeat: Infinity,
-                ease: "easeInOut",
-                delay: 2,
-              }}
-            />
-            <motion.div
-            className="absolute top-1/2 left-1/2 w-[400px] h-[400px] bg-pink-500/15 rounded-full blur-[100px] -translate-x-1/2 -translate-y-1/2"
-              animate={{
-                scale: [1, 1.5, 1],
-              opacity: [0.15, 0.3, 0.15],
-              rotate: [0, 180, 360],
-              }}
-              transition={{
-              duration: 30,
-                repeat: Infinity,
-              ease: "linear",
-            }}
-          />
+	          <motion.div
+	            className="absolute -top-40 left-[-18%] w-[78%] h-[42%] rounded-[140px] blur-2xl opacity-80 pointer-events-none"
+	            style={{ background: HOME_OIL_THEME.brush, transform: 'rotate(-10deg)' }}
+	            animate={motionEnabled ? { x: [0, 12, 0], y: [0, -10, 0] } : { x: 0, y: 0 }}
+	            transition={motionEnabled ? { duration: 22, repeat: Infinity, ease: 'easeInOut' } : { duration: 0 }}
+	          />
+	          <motion.div
+	            className="absolute -bottom-40 right-[-18%] w-[76%] h-[40%] rounded-[140px] blur-2xl opacity-70 pointer-events-none"
+	            style={{ background: HOME_OIL_THEME.brush, transform: 'rotate(12deg)' }}
+	            animate={motionEnabled ? { x: [0, -12, 0], y: [0, 10, 0] } : { x: 0, y: 0 }}
+	            transition={motionEnabled ? { duration: 26, repeat: Infinity, ease: 'easeInOut', delay: 0.6 } : { duration: 0 }}
+	          />
 
-          {/* Floating Particles */}
-          {[...Array(20)].map((_, i) => (
-            <motion.div
-              key={i}
-              className="absolute w-1 h-1 bg-white/30 rounded-full"
-              initial={{
-                x: Math.random() * window.innerWidth,
-                y: Math.random() * window.innerHeight,
-                opacity: 0,
-              }}
-              animate={{
-                y: [null, -100],
-                opacity: [0, 1, 0],
-              }}
-              transition={{
-                duration: Math.random() * 3 + 2,
-                repeat: Infinity,
-                delay: Math.random() * 2,
-                ease: "linear",
-              }}
-            />
-          ))}
+	          <div className="absolute inset-0 pointer-events-none opacity-[0.06]" style={{ backgroundImage: OIL_NOISE_BG, mixBlendMode: 'overlay' }} />
+	          <div
+	            className="absolute inset-0 pointer-events-none"
+	            style={{ background: 'radial-gradient(circle at 50% 42%, transparent 0%, rgba(2,6,23,0.32) 62%, rgba(2,6,23,0.82) 100%)' }}
+	          />
+
+	          {/* Animated Grid Background */}
+	          <div 
+	            className="absolute inset-0 opacity-[0.035] pointer-events-none"
+	            style={{
+	              backgroundImage: `
+	                linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px),
+	                linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)
+	              `,
+	              backgroundSize: '60px 60px',
+	              transform: `translate(${(mousePosition?.x ?? 0) * 0.5}px, ${(mousePosition?.y ?? 0) * 0.5}px)`,
+	              mixBlendMode: 'soft-light',
+	            }}
+	          />
+
+	          {/* Dynamic Gradient Orbs with Mouse Parallax */}
+	          <motion.div
+	            className="absolute top-1/4 left-1/4 w-[640px] h-[640px] rounded-full blur-[120px] pointer-events-none"
+	            style={{
+	              background: HOME_OIL_THEME.orbA,
+	              x: useSpring(mouseX, { damping: 50, stiffness: 100 }),
+	              y: useSpring(mouseY, { damping: 50, stiffness: 100 }),
+	            }}
+	            animate={motionEnabled ? { scale: [1, 1.18, 1], opacity: [0.15, 0.32, 0.15] } : { opacity: 0.18 }}
+	            transition={motionEnabled ? { duration: 18, repeat: Infinity, ease: "easeInOut" } : { duration: 0 }}
+	          />
+	          <motion.div
+	            className="absolute bottom-1/4 right-1/4 w-[560px] h-[560px] rounded-full blur-[120px] pointer-events-none"
+	            style={{
+	              background: HOME_OIL_THEME.orbB,
+	              x: useSpring(mouseX, { damping: 50, stiffness: 100 }),
+	              y: useSpring(mouseY, { damping: 50, stiffness: 100 }),
+	            }}
+	            animate={motionEnabled ? { scale: [1, 1.22, 1], opacity: [0.14, 0.30, 0.14] } : { opacity: 0.16 }}
+	            transition={motionEnabled ? { duration: 22, repeat: Infinity, ease: "easeInOut", delay: 1.4 } : { duration: 0 }}
+	          />
+	          <motion.div
+	            className="absolute top-1/2 left-1/2 w-[420px] h-[420px] rounded-full blur-[110px] -translate-x-1/2 -translate-y-1/2 pointer-events-none"
+	            style={{ background: HOME_OIL_THEME.conic, opacity: 0.2 }}
+	            animate={motionEnabled ? { rotate: [0, 180, 360] } : { rotate: 0 }}
+	            transition={motionEnabled ? { duration: 38, repeat: Infinity, ease: "linear" } : { duration: 0 }}
+	          />
+
+	          {/* Floating Particles */}
+	          {motionEnabled && [...Array(18)].map((_, i) => (
+	            <motion.div
+	              key={i}
+	              className="absolute w-1 h-1 bg-white/30 rounded-full"
+	              initial={{
+	                x: Math.random() * window.innerWidth,
+	                y: Math.random() * window.innerHeight,
+	                opacity: 0,
+	              }}
+	              animate={{
+	                y: [null, -100],
+	                opacity: [0, 1, 0],
+	              }}
+	              transition={{
+	                duration: Math.random() * 3 + 2,
+	                repeat: Infinity,
+	                delay: Math.random() * 2,
+	                ease: "linear",
+	              }}
+	            />
+	          ))}
 
           {/* Content */}
           <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
@@ -712,10 +731,26 @@ export default function Home() {
                 whileInView={{ opacity: 1, y: 0, scale: 1 }}
                 viewport={{ once: true, margin: "-100px" }}
                 transition={{ duration: 0.8, type: "spring" }}
-                className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-red-500/30 via-orange-500/30 to-red-500/30 backdrop-blur-2xl border-2 border-red-500/40 p-10 shadow-2xl"
+                className="relative overflow-hidden rounded-3xl border border-white/10 p-10 shadow-2xl"
+                style={{ background: featuredLiveOil.base, boxShadow: featuredLiveShadows.base, isolation: 'isolate' }}
               >
+                {/* Oil-canvas layers */}
+                <div className="absolute inset-0 pointer-events-none" style={{ background: featuredLiveOil.hazeA, mixBlendMode: 'screen' }} />
+                <div className="absolute inset-0 pointer-events-none" style={{ background: featuredLiveOil.hazeB, mixBlendMode: 'screen' }} />
+                <div className="absolute inset-0 pointer-events-none opacity-[0.12]" style={{ background: featuredLiveOil.conic, mixBlendMode: 'screen' }} />
+                <div className="absolute inset-0 pointer-events-none opacity-[0.06]" style={{ backgroundImage: OIL_NOISE_BG, mixBlendMode: 'overlay' }} />
+                <div
+                  className="absolute inset-0 pointer-events-none"
+                  style={{ background: 'linear-gradient(180deg, rgba(2,6,23,0.08) 0%, rgba(2,6,23,0.72) 100%)' }}
+                />
+                <div className="absolute top-0 left-0 right-0 h-[2px] pointer-events-none opacity-80" style={{ background: featuredLiveOil.accentLine }} />
+
                 <motion.div
-                  className="absolute top-0 right-0 w-96 h-96 bg-red-500/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"
+                  className="absolute top-0 right-0 w-96 h-96 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"
+                  style={{
+                    background:
+                      'radial-gradient(circle at 30% 30%, rgba(248,113,113,0.32) 0%, rgba(239,68,68,0.10) 45%, transparent 72%)',
+                  }}
                   animate={{
                     scale: [1, 1.2, 1],
                     opacity: [0.2, 0.4, 0.2],
@@ -1513,77 +1548,101 @@ export default function Home() {
             {iplLoading || wplLoading ? (
               <MatchesSkeleton />
             ) : (
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {[...iplMatches.slice(0, 3), ...wplMatches.slice(0, 3)]
-                  .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
-                  .slice(0, 6)
-                  .map((match, idx) => (
-                    <motion.div
-                      key={match.id}
-                      initial={{ opacity: 0, y: 50, scale: 0.9 }}
-                      whileInView={{ opacity: 1, y: 0, scale: 1 }}
-                      viewport={{ once: true, margin: "-50px" }}
-                      transition={{ duration: 0.6, delay: idx * 0.1, type: "spring" }}
-                      whileHover={{ scale: 1.05, y: -8 }}
-                      className="group relative overflow-hidden rounded-3xl bg-white/5 backdrop-blur-xl border border-white/10 p-8 hover:bg-white/10 hover:border-white/20 transition-all duration-300 cursor-pointer shadow-xl hover:shadow-2xl"
-                      onClick={() => router.push(match.league === 'wpl' ? '/wpl/matches' : '/matches')}
-                    >
-                      <motion.div
-                        className={`absolute top-0 left-0 w-full h-1 ${
-                          match.league === 'ipl' 
-                            ? 'bg-gradient-to-r from-blue-500 to-cyan-500'
-                            : 'bg-gradient-to-r from-purple-500 to-pink-500'
-                        }`}
-                        initial={{ scaleX: 0 }}
-                        whileHover={{ scaleX: 1 }}
-                        transition={{ duration: 0.3 }}
-                      />
-                      <div className="flex items-center justify-between mb-6">
-                        <span className={`text-xs font-bold px-4 py-2 rounded-full ${
-                          match.league === 'ipl' 
-                            ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
-                            : 'bg-purple-500/20 text-purple-400 border border-purple-500/30'
-                        }`}>
-                          {match.league.toUpperCase()}
-                        </span>
-                        {match.status === 'live' && (
-                            <motion.div
-                            className="flex items-center gap-2 px-4 py-2 rounded-full bg-red-500/20 border border-red-500/30"
-                            animate={{ scale: [1, 1.1, 1] }}
-                            transition={{ duration: 2, repeat: Infinity }}
-                          >
-                            <motion.div
-                              className="w-2.5 h-2.5 bg-red-500 rounded-full"
-                              animate={{ scale: [1, 1.5, 1], opacity: [1, 0.5, 1] }}
-                              transition={{ duration: 1.5, repeat: Infinity }}
-                            />
-                            <span className="text-xs font-bold text-red-400">LIVE</span>
-                          </motion.div>
-                        )}
-                      </div>
-                      <div className="flex items-center justify-between mb-6">
-                        <div className="text-3xl font-black text-white">{match.team1.shortName}</div>
-                        <div className="text-gray-400 text-lg font-bold">VS</div>
-                        <div className="text-3xl font-black text-white">{match.team2.shortName}</div>
-                      </div>
-                      <div className="flex items-center justify-between text-sm text-gray-400">
-                        <div className="flex items-center gap-2">
-                          <Clock className="w-4 h-4" />
-                          {match.time && match.date ? formatMatchTime(match.time, match.date) : 'TBD'}
-                        </div>
-                        <motion.div
-                          animate={{ x: [0, 5, 0] }}
-                          transition={{ duration: 2, repeat: Infinity }}
-                        >
-                          <ChevronRight className="w-6 h-6 text-gray-500 group-hover:text-white group-hover:translate-x-2 transition-all" />
-                        </motion.div>
-                      </div>
-                    </motion.div>
-                  ))}
-              </div>
-            )}
-          </div>
-        </section>
+	              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+	                {[...iplMatches.slice(0, 3), ...wplMatches.slice(0, 3)]
+	                  .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+	                  .slice(0, 6)
+	                  .map((match, idx) => {
+	                    const matchOil = match.league === 'wpl' ? wplOil : iplOil;
+	                    const matchShadows = match.league === 'wpl' ? wplCardShadows : iplCardShadows;
+	                    const leagueLabel = match.league === 'wpl' ? 'WPL' : 'IPL';
+
+	                    return (
+	                      <motion.div
+	                        key={match.id}
+	                        initial={{ opacity: 0, y: 50, scale: 0.9 }}
+	                        whileInView={{ opacity: 1, y: 0, scale: 1 }}
+	                        viewport={{ once: true, margin: "-50px" }}
+	                        transition={{ duration: 0.6, delay: idx * 0.1, type: "spring" }}
+	                        whileHover={motionEnabled ? { y: -10, scale: 1.03, boxShadow: matchShadows.hover } : { y: -6 }}
+	                        className="group relative overflow-hidden rounded-3xl border border-white/10 p-8 cursor-pointer shadow-xl transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/20"
+	                        onClick={() => router.push(match.league === 'wpl' ? '/wpl/matches' : '/matches')}
+	                        role="link"
+	                        tabIndex={0}
+	                        aria-label={`Open ${leagueLabel} matches`}
+	                        style={{ background: matchOil.base, boxShadow: matchShadows.base, isolation: 'isolate' }}
+	                      >
+	                        {/* Oil layers */}
+	                        <div className="absolute inset-0 pointer-events-none" style={{ background: matchOil.hazeA, mixBlendMode: 'screen' }} />
+	                        <div className="absolute inset-0 pointer-events-none" style={{ background: matchOil.hazeB, mixBlendMode: 'screen' }} />
+	                        <div className="absolute inset-0 pointer-events-none opacity-[0.12]" style={{ background: matchOil.conic, mixBlendMode: 'screen' }} />
+	                        <div className="absolute inset-0 pointer-events-none opacity-[0.05]" style={{ backgroundImage: OIL_NOISE_BG, mixBlendMode: 'overlay' }} />
+	                        <div
+	                          className="absolute inset-0 pointer-events-none"
+	                          style={{
+	                            background:
+	                              'radial-gradient(circle at 50% 42%, transparent 0%, rgba(2,6,23,0.22) 62%, rgba(2,6,23,0.68) 100%)',
+	                          }}
+	                        />
+	                        <div
+	                          className="absolute top-0 left-0 right-0 h-[2px] origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-300 pointer-events-none opacity-90"
+	                          style={{ background: matchOil.accentLine }}
+	                        />
+	                        <div
+	                          className="absolute inset-0 pointer-events-none rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+	                          style={{
+	                            background:
+	                              'linear-gradient(135deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.01) 50%, rgba(255,255,255,0.05) 100%)',
+	                          }}
+	                        />
+
+	                        <div className="relative z-10">
+	                          <div className="flex items-center justify-between mb-6">
+	                            <span className="text-[11px] font-black px-4 py-2 rounded-full bg-black/25 text-white/90 border border-white/12 tracking-[0.18em] uppercase">
+	                              {leagueLabel}
+	                            </span>
+	                            {match.status === 'live' && (
+	                              <motion.div
+	                                className="flex items-center gap-2 px-4 py-2 rounded-full bg-red-500/20 border border-red-500/30"
+	                                animate={motionEnabled ? { scale: [1, 1.08, 1] } : { scale: 1 }}
+	                                transition={motionEnabled ? { duration: 2, repeat: Infinity } : { duration: 0 }}
+	                              >
+	                                <motion.div
+	                                  className="w-2.5 h-2.5 bg-red-500 rounded-full"
+	                                  animate={motionEnabled ? { scale: [1, 1.5, 1], opacity: [1, 0.5, 1] } : { scale: 1, opacity: 1 }}
+	                                  transition={motionEnabled ? { duration: 1.5, repeat: Infinity } : { duration: 0 }}
+	                                />
+	                                <span className="text-[11px] font-black tracking-widest text-red-200">LIVE</span>
+	                              </motion.div>
+	                            )}
+	                          </div>
+
+	                          <div className="flex items-center justify-between mb-6">
+	                            <div className="text-3xl font-black text-white">{match.team1.shortName}</div>
+	                            <div className="text-white/50 text-lg font-black tracking-widest">VS</div>
+	                            <div className="text-3xl font-black text-white">{match.team2.shortName}</div>
+	                          </div>
+
+	                          <div className="flex items-center justify-between text-sm text-white/65">
+	                            <div className="flex items-center gap-2">
+	                              <Clock className="w-4 h-4" />
+	                              {match.time && match.date ? formatMatchTime(match.time, match.date) : 'TBD'}
+	                            </div>
+	                            <motion.div
+	                              animate={motionEnabled ? { x: [0, 5, 0] } : { x: 0 }}
+	                              transition={motionEnabled ? { duration: 2, repeat: Infinity } : { duration: 0 }}
+	                            >
+	                              <ChevronRight className="w-6 h-6 text-white/45 group-hover:text-white group-hover:translate-x-2 transition-all" />
+	                            </motion.div>
+	                          </div>
+	                        </div>
+	                      </motion.div>
+	                    );
+	                  })}
+	              </div>
+	            )}
+	          </div>
+	        </section>
 
         {/* Teams Showcase Section - Enhanced */}
         <section className="relative py-24 overflow-hidden">

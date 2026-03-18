@@ -177,6 +177,42 @@ const mockTeams = [
 
 const IPL_TEAM_IDS = new Set(['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '16', '17', '18', '19', '20']);
 const WPL_TEAM_IDS = new Set(['11', '12', '13', '14', '15']);
+const ACTIVE_IPL_2026_TEAM_IDS = new Set(['1', '2', '3', '4', '5', '6', '7', '8', '9', '10']);
+const ACTIVE_WPL_2026_TEAM_IDS = new Set(['11', '12', '13', '14', '15']);
+const DEFAULT_SEASON_YEAR = 2026;
+
+function getYearFromDateLike(value) {
+  if (!value) return null;
+  const str = String(value).trim();
+  if (!str) return null;
+  const prefix = str.slice(0, 4);
+  if (/^\d{4}$/.test(prefix)) {
+    const parsed = Number(prefix);
+    return Number.isFinite(parsed) ? parsed : null;
+  }
+  const ms = Date.parse(str);
+  if (Number.isNaN(ms)) return null;
+  return new Date(ms).getUTCFullYear();
+}
+
+function normalizeTeamId(value) {
+  const raw = String(value ?? '').trim();
+  if (!raw) return '';
+  if (raw.startsWith('tbd-')) return raw;
+  return raw.replace(/^team/i, '');
+}
+
+function isActiveSeasonMatch(match, seasonYear) {
+  const matchLeague = inferMatchLeague(match) || match.league || 'ipl';
+  const activeIds = matchLeague === 'wpl' ? ACTIVE_WPL_2026_TEAM_IDS : ACTIVE_IPL_2026_TEAM_IDS;
+
+  const year = getYearFromDateLike(match?.date);
+  if (year !== seasonYear) return false;
+
+  const team1Id = normalizeTeamId(match?.team1Id ?? match?.team1?.id);
+  const team2Id = normalizeTeamId(match?.team2Id ?? match?.team2?.id);
+  return activeIds.has(team1Id) && activeIds.has(team2Id);
+}
 
 function normalizeLeague(value) {
   return value === 'ipl' || value === 'wpl' ? value : null;
@@ -309,6 +345,10 @@ async function handleGetRequest(context) {
     const url = new URL(request.url);
     const league = url.searchParams.get('league');
     const matchId = url.searchParams.get('id');
+    const includeAll = url.searchParams.get('includeAll') === 'true';
+    const seasonParam = url.searchParams.get('season') || url.searchParams.get('year');
+    const seasonYear = Number.parseInt(seasonParam || '', 10);
+    const resolvedSeasonYear = Number.isFinite(seasonYear) ? seasonYear : DEFAULT_SEASON_YEAR;
     
     // Try to get matches from KV storage
     const kvMatches = await env.IPL_CACHE.get('matches', 'json');
@@ -354,6 +394,11 @@ async function handleGetRequest(context) {
         const matchLeague = inferMatchLeague(match) || match.league || 'ipl';
         return matchLeague === league;
       });
+    }
+
+    // Default: only return the active 2026 season data (unless explicitly requested otherwise).
+    if (!includeAll) {
+      matches = matches.filter((match) => isActiveSeasonMatch(match, resolvedSeasonYear));
     }
     
     // Fetch teams from KV storage to properly resolve team objects
