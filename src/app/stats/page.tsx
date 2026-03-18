@@ -737,12 +737,13 @@ export default function StatsPage() {
                         players={topRunScorers}
                         teams={teams}
                         type="batting"
+                        metric="runs"
                         qualificationText={getQualificationDescription('orangeCap', currentLeague)}
                         color="from-orange-500/20 to-yellow-500/20"
                         expandedPlayerId={expandedPlayerId}
                         onPlayerExpand={setExpandedPlayerId}
                         leadersLimit={leadersLimit}
-                        visualizationVariant="axis"
+                        visualizationVariant="lollipop"
                       />
                     )}
 
@@ -753,6 +754,7 @@ export default function StatsPage() {
                         players={topWicketTakers}
                         teams={teams}
                         type="bowling"
+                        metric="wickets"
                         qualificationText={getQualificationDescription('purpleCap', currentLeague)}
                         color="from-purple-500/20 to-pink-500/20"
                         expandedPlayerId={expandedPlayerId}
@@ -782,12 +784,13 @@ export default function StatsPage() {
                       players={topRunScorers}
                       teams={teams}
                       type="batting"
+                      metric="runs"
                       qualificationText={getQualificationDescription('orangeCap', currentLeague)}
                       color="from-orange-500/20 to-yellow-500/20"
                       expandedPlayerId={expandedPlayerId}
                       onPlayerExpand={setExpandedPlayerId}
                       leadersLimit={leadersLimit}
-                      visualizationVariant="axis"
+                      visualizationVariant="lollipop"
                     />
                   )}
 
@@ -799,11 +802,13 @@ export default function StatsPage() {
                       players={bestStrikeRates}
                       teams={teams}
                       type="batting"
+                      metric="strikeRate"
                       qualificationText={getQualificationDescription('bestStrikeRate', currentLeague)}
                       color="from-blue-500/20 to-cyan-500/20"
                       expandedPlayerId={expandedPlayerId}
                       onPlayerExpand={setExpandedPlayerId}
                       leadersLimit={leadersLimit}
+                      visualizationVariant="column"
                     />
                   )}
                 </motion.div>
@@ -826,6 +831,7 @@ export default function StatsPage() {
                       players={topWicketTakers}
                       teams={teams}
                       type="bowling"
+                      metric="wickets"
                       qualificationText={getQualificationDescription('purpleCap', currentLeague)}
                       color="from-purple-500/20 to-pink-500/20"
                       expandedPlayerId={expandedPlayerId}
@@ -843,11 +849,13 @@ export default function StatsPage() {
                       players={bestEconomyRates}
                       teams={teams}
                       type="bowling"
+                      metric="economy"
                       qualificationText={getQualificationDescription('bestEconomy', currentLeague)}
                       color="from-emerald-500/20 to-teal-500/20"
                       expandedPlayerId={expandedPlayerId}
                       onPlayerExpand={setExpandedPlayerId}
                       leadersLimit={leadersLimit}
+                      visualizationVariant="lollipop"
                     />
                   )}
                 </motion.div>

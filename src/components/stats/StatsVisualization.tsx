@@ -4,33 +4,81 @@ import { useMemo } from 'react';
 import { motion } from 'framer-motion';
 import type { Player } from '@/types';
 
+type MetricKey = 'runs' | 'wickets' | 'strikeRate' | 'economy';
+
 interface StatsVisualizationProps {
   players: Player[];
   type: 'batting' | 'bowling';
+  metric?: MetricKey;
   maxItems?: number;
-  variant?: 'bar' | 'column' | 'donut' | 'axis';
+  variant?: 'bar' | 'column' | 'donut' | 'axis' | 'lollipop';
 }
 
-export default function StatsVisualization({ players, type, maxItems = 10, variant = 'bar' }: StatsVisualizationProps) {
+function getMetricValue(player: Player, metric: MetricKey): number {
+  switch (metric) {
+    case 'wickets':
+      return Number(player.stats.wickets || 0);
+    case 'strikeRate':
+      return Number(player.stats.strikeRate || 0);
+    case 'economy':
+      return Number(player.stats.economy || 0);
+    case 'runs':
+    default:
+      return Number(player.stats.runs || 0);
+  }
+}
+
+function formatMetricValue(metric: MetricKey, value: number): string {
+  if (metric === 'strikeRate') return value.toFixed(1);
+  if (metric === 'economy') return value.toFixed(2);
+  return Math.round(value).toLocaleString();
+}
+
+function normalizeScore(value: number, maxValue: number, minValue: number, metric: MetricKey): number {
+  if (metric === 'economy') {
+    if (maxValue <= minValue) return 100;
+    return ((maxValue - value) / (maxValue - minValue)) * 100;
+  }
+
+  if (maxValue <= 0) return 0;
+  return (value / maxValue) * 100;
+}
+
+export default function StatsVisualization({
+  players,
+  type,
+  metric,
+  maxItems = 10,
+  variant = 'bar',
+}: StatsVisualizationProps) {
+  const metricKey: MetricKey = metric || (type === 'batting' ? 'runs' : 'wickets');
+
   const sortedPlayers = useMemo(() => {
     const sorted = [...players].sort((a, b) => {
-      if (type === 'batting') {
-        return b.stats.runs - a.stats.runs;
-      } else {
-        return b.stats.wickets - a.stats.wickets;
-      }
-    });
-    return sorted.slice(0, maxItems);
-  }, [players, type, maxItems]);
+      const valueA = getMetricValue(a, metricKey);
+      const valueB = getMetricValue(b, metricKey);
 
-  const maxValue = useMemo(() => {
-    if (sortedPlayers.length === 0) return 1;
-    if (type === 'batting') {
-      return Math.max(...sortedPlayers.map(p => p.stats.runs));
-    } else {
-      return Math.max(...sortedPlayers.map(p => p.stats.wickets));
+      if (metricKey === 'economy') {
+        return valueA - valueB;
+      }
+
+      return valueB - valueA;
+    });
+
+    return sorted.slice(0, maxItems);
+  }, [players, metricKey, maxItems]);
+
+  const { maxValue, minValue } = useMemo(() => {
+    if (sortedPlayers.length === 0) {
+      return { maxValue: 1, minValue: 0 };
     }
-  }, [sortedPlayers, type]);
+
+    const values = sortedPlayers.map((player) => getMetricValue(player, metricKey));
+    return {
+      maxValue: Math.max(...values),
+      minValue: Math.min(...values),
+    };
+  }, [sortedPlayers, metricKey]);
 
   const getBarColor = (index: number) => {
     if (index === 0) return 'from-orange-500 to-amber-500';
@@ -46,82 +94,82 @@ export default function StatsVisualization({ players, type, maxItems = 10, varia
     return 'from-gray-600 to-gray-700';
   };
 
-  // Axis / track variant (used for Orange Cap to feel very different from Purple Cap)
-  if (variant === 'axis') {
-    return (
-      <div className="space-y-4">
-        <div className="relative h-28">
-          {/* Axis line */}
-          <div className="absolute left-0 right-0 top-1/2 h-px bg-gradient-to-r from-gray-700 via-gray-500 to-gray-700" />
-          {/* Min / max markers */}
-          <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-4 bg-gray-400 rounded-full" />
-          <div className="absolute right-0 top-1/2 -translate-y-1/2 w-1 h-4 bg-gray-400 rounded-full" />
+  const valueLabel =
+    metricKey === 'runs'
+      ? 'Runs'
+      : metricKey === 'wickets'
+      ? 'Wickets'
+      : metricKey === 'strikeRate'
+      ? 'Strike Rate'
+      : 'Economy';
 
-          {sortedPlayers.map((player, index) => {
-            const value = type === 'batting' ? player.stats.runs : player.stats.wickets;
-            const percentage = (value / maxValue) * 100;
+  const resolvedVariant = variant === 'axis' ? 'lollipop' : variant;
+
+  // Lollipop chart variant inspired by common ranked comparison patterns.
+  if (resolvedVariant === 'lollipop') {
+    return (
+      <div className="space-y-3">
+        {sortedPlayers.map((player, index) => {
+            const value = getMetricValue(player, metricKey);
+            const percentage = normalizeScore(value, maxValue, minValue, metricKey);
             const barColor = type === 'batting' ? getBarColor(index) : getBarColorBowling(index);
 
             return (
               <motion.div
                 key={player.id}
-                className="absolute"
-                style={{
-                  left: `calc(${percentage}% - 14px)`,
-                  top: '50%',
-                }}
-                initial={{ opacity: 0, y: 12 }}
+                className="grid grid-cols-[30px_minmax(0,1fr)] gap-3"
+                initial={{ opacity: 0, y: 14 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3, delay: index * 0.06 }}
+                transition={{ duration: 0.35, delay: index * 0.05 }}
               >
-                {/* Point + glow */}
-                <motion.div
-                  className={`w-7 h-7 rounded-full border-2 border-white/60 shadow-lg flex items-center justify-center bg-gradient-to-br ${barColor}`}
-                  whileHover={{ scale: 1.2, y: -4 }}
-                >
-                  <span className="text-[10px] font-bold text-white">#{index + 1}</span>
-                </motion.div>
+                <div className="text-xs font-bold text-gray-400 pt-1">#{index + 1}</div>
+
+                <div className="min-w-0">
+                  <div className="flex items-center justify-between gap-3 mb-1">
+                    <span className="text-sm font-semibold text-white truncate">{player.name}</span>
+                    <span className={`text-sm font-bold whitespace-nowrap ${type === 'batting' ? 'text-amber-300' : 'text-purple-300'}`}>
+                      {formatMetricValue(metricKey, value)}
+                    </span>
+                  </div>
+
+                  <div className="relative h-7">
+                    <div className="absolute left-0 right-0 top-1/2 -translate-y-1/2 h-[2px] rounded-full bg-gray-700/70" />
+
+                    <motion.div
+                      className={`absolute left-0 top-1/2 -translate-y-1/2 h-[2px] rounded-full bg-gradient-to-r ${barColor}`}
+                      initial={{ width: 0 }}
+                      animate={{ width: `${Math.max(6, percentage)}%` }}
+                      transition={{ duration: 0.7, delay: index * 0.06, ease: 'easeOut' }}
+                    />
+
+                    <motion.div
+                      className={`absolute top-1/2 -translate-y-1/2 -ml-2 w-4 h-4 rounded-full border border-white/60 shadow-lg bg-gradient-to-br ${barColor}`}
+                      style={{ left: `${Math.max(6, percentage)}%` }}
+                      initial={{ scale: 0.6, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      transition={{ duration: 0.3, delay: 0.2 + index * 0.06 }}
+                    />
+                  </div>
+                </div>
               </motion.div>
             );
           })}
-        </div>
 
-        {/* Legend with names and values */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          {sortedPlayers.map((player, index) => {
-            const value = type === 'batting' ? player.stats.runs : player.stats.wickets;
-            const barColor = type === 'batting' ? getBarColor(index) : getBarColorBowling(index);
-            const colorClass =
-              type === 'batting'
-                ? index === 0
-                  ? 'text-amber-300'
-                  : 'text-amber-200'
-                : index === 0
-                ? 'text-purple-300'
-                : 'text-purple-200';
-
-            return (
-              <div key={player.id} className="flex items-center gap-3 text-xs">
-                <div
-                  className={`w-2.5 h-2.5 rounded-full bg-gradient-to-r ${barColor} shadow-md`}
-                />
-                <span className="text-gray-200 truncate flex-1">{player.name}</span>
-                <span className={`font-semibold ${colorClass}`}>{value}</span>
-              </div>
-            );
-          })}
+        <div className="pt-1 text-[11px] text-gray-500">
+          Ranked by {valueLabel.toLowerCase()}
+          {metricKey === 'economy' ? ' (lower is better)' : ''}
         </div>
       </div>
     );
   }
 
   // Donut chart variant (e.g. Purple Cap special view)
-  if (variant === 'donut') {
+  if (resolvedVariant === 'donut') {
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {sortedPlayers.map((player, index) => {
-          const value = type === 'batting' ? player.stats.runs : player.stats.wickets;
-          const percentage = (value / maxValue) * 100;
+          const value = getMetricValue(player, metricKey);
+          const percentage = normalizeScore(value, maxValue, minValue, metricKey);
           const barColor = type === 'batting' ? getBarColor(index) : getBarColorBowling(index);
           const gradient = barColor.includes('purple')
             ? 'rgba(168,85,247,1), rgba(244,114,182,1)'
@@ -156,11 +204,11 @@ export default function StatsVisualization({ players, type, maxItems = 10, varia
                     {player.name}
                   </p>
                   <span className={`text-sm font-bold ${type === 'bowling' ? 'text-purple-300' : 'text-amber-300'}`}>
-                    {value}
+                    {formatMetricValue(metricKey, value)}
                   </span>
                 </div>
                 <p className="text-xs text-gray-400 mt-1">
-                  Share of leader: {Math.round(percentage)}%
+                  Relative score: {Math.round(percentage)}%
                 </p>
               </div>
             </motion.div>
@@ -171,13 +219,13 @@ export default function StatsVisualization({ players, type, maxItems = 10, varia
   }
 
   // Column chart variant
-  if (variant === 'column') {
+  if (resolvedVariant === 'column') {
     return (
       <div className="flex flex-col gap-4">
         <div className="flex items-end gap-3 h-48">
           {sortedPlayers.map((player, index) => {
-            const value = type === 'batting' ? player.stats.runs : player.stats.wickets;
-            const percentage = (value / maxValue) * 100;
+            const value = getMetricValue(player, metricKey);
+            const percentage = normalizeScore(value, maxValue, minValue, metricKey);
             const barColor = type === 'batting' ? getBarColor(index) : getBarColorBowling(index);
 
             return (
@@ -188,7 +236,7 @@ export default function StatsVisualization({ players, type, maxItems = 10, varia
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3, delay: index * 0.06 }}
               >
-                <span className="text-xs font-semibold text-gray-300">{value}</span>
+                <span className="text-xs font-semibold text-gray-300">{formatMetricValue(metricKey, value)}</span>
                 <div className="relative w-full h-full bg-gray-900/60 rounded-full overflow-hidden flex items-end">
                   <motion.div
                     className={`w-full bg-gradient-to-t ${barColor} rounded-full`}
@@ -215,8 +263,8 @@ export default function StatsVisualization({ players, type, maxItems = 10, varia
   return (
     <div className="space-y-3">
       {sortedPlayers.map((player, index) => {
-        const value = type === 'batting' ? player.stats.runs : player.stats.wickets;
-        const percentage = (value / maxValue) * 100;
+        const value = getMetricValue(player, metricKey);
+        const percentage = normalizeScore(value, maxValue, minValue, metricKey);
         const barColor = type === 'batting' ? getBarColor(index) : getBarColorBowling(index);
 
         return (
@@ -233,14 +281,14 @@ export default function StatsVisualization({ players, type, maxItems = 10, varia
                 <span className="text-white font-semibold truncate">{player.name}</span>
               </div>
               <span className={`font-bold ${type === 'bowling' && index === 0 ? 'text-purple-400' : index === 0 ? 'text-orange-400' : 'text-gray-300'}`}>
-                {value}
+                {formatMetricValue(metricKey, value)}
               </span>
             </div>
             <div className="relative h-3 bg-gray-800 rounded-full overflow-hidden">
               <motion.div
                 className={`h-full bg-gradient-to-r ${barColor} rounded-full`}
                 initial={{ width: 0 }}
-                animate={{ width: `${percentage}%` }}
+                animate={{ width: `${Math.max(3, percentage)}%` }}
                 transition={{ duration: 0.8, delay: index * 0.1, ease: 'easeOut' }}
               />
               <motion.div

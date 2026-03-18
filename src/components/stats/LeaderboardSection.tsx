@@ -12,12 +12,13 @@ interface LeaderboardSectionProps {
   players: Player[];
   teams: Team[];
   type: 'batting' | 'bowling';
+  metric?: 'runs' | 'wickets' | 'strikeRate' | 'economy';
   qualificationText?: string;
   color: string;
   expandedPlayerId: string | null;
   onPlayerExpand: (playerId: string | null) => void;
   leadersLimit: 10 | 50;
-  visualizationVariant?: 'bar' | 'column' | 'donut' | 'axis';
+  visualizationVariant?: 'bar' | 'column' | 'donut' | 'axis' | 'lollipop';
 }
 
 export default function LeaderboardSection({
@@ -26,6 +27,7 @@ export default function LeaderboardSection({
   players,
   teams,
   type,
+  metric,
   qualificationText,
   color,
   expandedPlayerId,
@@ -33,6 +35,7 @@ export default function LeaderboardSection({
   leadersLimit,
   visualizationVariant = 'bar',
 }: LeaderboardSectionProps) {
+  const resolvedMetric = metric || (type === 'batting' ? 'runs' : 'wickets');
   const displayPlayers = players.slice(0, leadersLimit);
 
   return (
@@ -103,6 +106,7 @@ export default function LeaderboardSection({
             <StatsVisualization 
               players={displayPlayers} 
               type={type}
+              metric={resolvedMetric}
               maxItems={leadersLimit}
               variant={visualizationVariant}
             />
