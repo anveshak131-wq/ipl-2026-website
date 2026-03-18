@@ -14,6 +14,19 @@ interface ModernStatsCardProps {
   isExpanded?: boolean;
 }
 
+function toFiniteNumber(value: unknown, fallback: number = 0): number {
+  const parsed = typeof value === 'number' ? value : Number(value);
+  return Number.isFinite(parsed) ? parsed : fallback;
+}
+
+function toOptionalNumber(value: unknown): number | null {
+  if (value === null || value === undefined || value === '' || value === '-') {
+    return null;
+  }
+  const parsed = typeof value === 'number' ? value : Number(value);
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
 export default function ModernStatsCard({
   player,
   rank,
@@ -23,11 +36,22 @@ export default function ModernStatsCard({
   onExpand,
   isExpanded = false,
 }: ModernStatsCardProps) {
+  const stats = player.stats as any;
   const isBatting = type === 'batting';
   const primaryColor = isBatting ? 'from-orange-500/20 via-amber-500/20' : 'from-purple-500/20 via-violet-500/20';
   const accentColor = isBatting ? 'text-orange-400' : 'text-purple-400';
   const borderColor = isBatting ? 'border-orange-500/40' : 'border-purple-500/40';
   const glowColor = isBatting ? 'shadow-orange-500/20' : 'shadow-purple-500/20';
+
+  const battingStrikeRate = toFiniteNumber(stats?.strikeRate);
+  const battingAverage = toFiniteNumber(stats?.average);
+  const bowlingEconomy = toFiniteNumber(stats?.economy);
+  const bowlingAverage = toOptionalNumber(stats?.bowlingAverage);
+  const bowlingStrikeRateNumber = toOptionalNumber(stats?.bowlingStrikeRate);
+  const bowlingStrikeRateDisplay =
+    bowlingStrikeRateNumber !== null
+      ? bowlingStrikeRateNumber.toFixed(1)
+      : (typeof stats?.bowlingStrikeRate === 'string' && stats.bowlingStrikeRate.trim()) || '-';
 
   const getTrendIcon = (rank: number) => {
     if (rank <= 3) return <TrendingUp className="w-3 h-3 text-emerald-400" />;
@@ -116,7 +140,7 @@ export default function ModernStatsCard({
                   runs
                 </div>
                 <div className="text-xs text-gray-500 mt-1">
-                  SR {player.stats.strikeRate.toFixed(1)} • Avg {player.stats.average.toFixed(1)}
+                  SR {battingStrikeRate.toFixed(1)} • Avg {battingAverage.toFixed(1)}
                 </div>
               </>
             ) : (
@@ -128,7 +152,7 @@ export default function ModernStatsCard({
                   wickets
                 </div>
                 <div className="text-xs text-gray-500 mt-1">
-                  Eco {player.stats.economy.toFixed(2)} • Avg {player.stats.bowlingAverage?.toFixed(1) || '-'}
+                  Eco {bowlingEconomy.toFixed(2)} • Avg {bowlingAverage !== null ? bowlingAverage.toFixed(1) : '-'}
                 </div>
               </>
             )}
@@ -171,16 +195,12 @@ export default function ModernStatsCard({
                   </div>
                   <div>
                     <div className="text-gray-400 mb-1">Economy</div>
-                    <div className="text-white font-semibold">{player.stats.economy.toFixed(2)}</div>
+                    <div className="text-white font-semibold">{bowlingEconomy.toFixed(2)}</div>
                   </div>
                   <div>
                     <div className="text-gray-400 mb-1">Strike Rate</div>
                     <div className="text-white font-semibold">
-                      {player.stats.bowlingStrikeRate ? 
-                        (typeof player.stats.bowlingStrikeRate === 'number' 
-                          ? player.stats.bowlingStrikeRate.toFixed(1) 
-                          : player.stats.bowlingStrikeRate) 
-                        : '-'}
+                      {bowlingStrikeRateDisplay}
                     </div>
                   </div>
                   <div>
