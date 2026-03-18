@@ -5,6 +5,33 @@ import { Team, Player, Match, News, Highlight, Content } from '@/types';
 import { sortPlayersByRoleAndAge } from '@/lib/playerSort';
 import { filterMatchesForSeason, filterNewsForSeason, filterTeamsForSeason, SEASON_YEAR } from '@/lib/season';
 
+const MATCH_CACHE_KEYS = ['matches_cache_all', 'matches_cache_ipl', 'matches_cache_wpl'] as const;
+
+function clearMatchesClientCache(): void {
+  if (typeof window === 'undefined') return;
+
+  for (const key of MATCH_CACHE_KEYS) {
+    try {
+      sessionStorage.removeItem(key);
+      localStorage.removeItem(key);
+    } catch (error) {
+      console.warn('API: Failed to clear matches cache key', key, error);
+    }
+  }
+}
+
+function getAdminAuthToken(): string | null {
+  if (typeof window === 'undefined') return null;
+
+  return (
+    localStorage.getItem('adminToken') ||
+    localStorage.getItem('admin_token') ||
+    sessionStorage.getItem('admin_token') ||
+    localStorage.getItem('auth_token') ||
+    sessionStorage.getItem('auth_token')
+  );
+}
+
 export const mockTeams: Team[] = [
   {
     id: '1',
@@ -516,7 +543,11 @@ export const api = {
   
   clearAllMatches: async (): Promise<{ success: boolean; message: string }> => {
     try {
-      const token = localStorage.getItem('admin_token') || sessionStorage.getItem('admin_token');
+      const token = getAdminAuthToken();
+      if (!token) {
+        throw new Error('Authentication token not found. Please log in.');
+      }
+
       const response = await fetch('/api/matches?clearAll=true', {
         method: 'DELETE',
         headers: {
@@ -528,6 +559,7 @@ export const api = {
         const body = await response.text();
         throw new Error(`Failed to clear matches (${response.status}): ${body}`);
       }
+      clearMatchesClientCache();
       return await response.json();
     } catch (error) {
       console.error('Error clearing matches:', error);
@@ -546,7 +578,7 @@ export const api = {
             const cached = JSON.parse(cachedRaw) as { ts: number; data: Match[] };
             const maxAgeMs = 2 * 60 * 1000; // 2 minutes is enough for schedule data
             if (Date.now() - cached.ts < maxAgeMs && Array.isArray(cached.data)) {
-              return cached.data;
+              return filterMatchesForSeason(cached.data, SEASON_YEAR);
             }
           } catch (err) {
             console.warn('API: Failed to parse cached matches, ignoring cache', err);
@@ -607,7 +639,11 @@ export const api = {
     status: 'upcoming' | 'live' | 'completed' | 'cancelled'
   ): Promise<{ updated: number; status: string }> => {
     try {
-      const token = localStorage.getItem('admin_token') || sessionStorage.getItem('admin_token') || localStorage.getItem('adminToken');
+      const token = getAdminAuthToken();
+      if (!token) {
+        throw new Error('Authentication token not found. Please log in.');
+      }
+
       const response = await fetch('/api/matches?bulkStatus=true', {
         method: 'PUT',
         headers: {
@@ -620,6 +656,7 @@ export const api = {
         const body = await response.text();
         throw new Error(`Bulk status update failed (${response.status}): ${body}`);
       }
+      clearMatchesClientCache();
       return await response.json();
     } catch (error) {
       console.error('Error bulk updating match status:', error);
@@ -631,7 +668,11 @@ export const api = {
     matches: Array<Omit<Match, 'id' | 'team1' | 'team2'> & { team1Id: string; team2Id: string }>
   ): Promise<{ created: Match[]; count: number }> => {
     try {
-      const token = localStorage.getItem('admin_token') || sessionStorage.getItem('admin_token') || localStorage.getItem('adminToken');
+      const token = getAdminAuthToken();
+      if (!token) {
+        throw new Error('Authentication token not found. Please log in.');
+      }
+
       const response = await fetch('/api/matches?bulk=true', {
         method: 'POST',
         headers: {
@@ -644,6 +685,7 @@ export const api = {
         const body = await response.text();
         throw new Error(`Bulk create failed (${response.status}): ${body}`);
       }
+      clearMatchesClientCache();
       return await response.json();
     } catch (error) {
       console.error('Error bulk creating matches:', error);
@@ -653,7 +695,11 @@ export const api = {
 
   createMatch: async (match: Omit<Match, 'id' | 'team1' | 'team2'> & { team1Id: string; team2Id: string }): Promise<Match> => {
     try {
-      const token = localStorage.getItem('adminToken');
+      const token = getAdminAuthToken();
+      if (!token) {
+        throw new Error('Authentication token not found. Please log in.');
+      }
+
       const response = await fetch('/api/matches', {
         method: 'POST',
         headers: {
@@ -665,6 +711,7 @@ export const api = {
       if (!response.ok) {
         throw new Error('Failed to create match');
       }
+      clearMatchesClientCache();
       return await response.json();
     } catch (error) {
       console.error('Error creating match:', error);
@@ -674,7 +721,11 @@ export const api = {
   
   updateMatch: async (id: string, match: Partial<Omit<Match, 'id' | 'team1' | 'team2'> & { team1Id?: string; team2Id?: string }>): Promise<Match> => {
     try {
-      const token = localStorage.getItem('adminToken');
+      const token = getAdminAuthToken();
+      if (!token) {
+        throw new Error('Authentication token not found. Please log in.');
+      }
+
       const response = await fetch('/api/matches', {
         method: 'PUT',
         headers: {
@@ -686,6 +737,7 @@ export const api = {
       if (!response.ok) {
         throw new Error('Failed to update match');
       }
+      clearMatchesClientCache();
       return await response.json();
     } catch (error) {
       console.error('Error updating match:', error);
@@ -695,7 +747,11 @@ export const api = {
   
   deleteMatch: async (id: string): Promise<void> => {
     try {
-      const token = localStorage.getItem('adminToken');
+      if (!id) {
+        throw new Error('Match ID is required for deletion.');
+      }
+
+      const token = getAdminAuthToken();
       if (!token) {
         throw new Error('Authentication token not found. Please log in.');
       }
@@ -731,6 +787,8 @@ export const api = {
         // We'll verify by checking if the match still exists after refresh
         console.log('Delete response was empty or not JSON, assuming success');
       }
+
+      clearMatchesClientCache();
     } catch (error: any) {
       console.error('API: Error deleting match:', error);
       throw error;

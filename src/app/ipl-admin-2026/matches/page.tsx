@@ -305,12 +305,7 @@ export default function AdminMatches() {
                     console.error('Failed to update match statuses:', error);
                 }
             }
-        
-        return undefined;
-        return undefined;
-        return undefined;
-        return undefined;
-        return undefined;};
+        };
 
         // Run immediately
         updateMatchStatuses();
@@ -1917,6 +1912,7 @@ export default function AdminMatches() {
             const updatedMatches = matches.filter(m => m.id !== matchId);
             const matchesWithNumbers = recalculateMatchNumbers(updatedMatches);
             setMatches(matchesWithNumbers);
+            matchesRef.current = matchesWithNumbers;
             showSuccess('Sample match removed');
             return;
         }
@@ -1927,20 +1923,19 @@ export default function AdminMatches() {
             setIsSubmitting(true);
             setError(null);
             await api.deleteMatch(matchId);
-            
-            // Remove from local state
-            const updatedMatches = matches.filter(m => m.id !== matchId);
-            setMatches(updatedMatches);
+
+            // Always refresh from backend after delete to avoid stale client cache/state.
+            const refreshedMatches = await api.getMatches(currentLeague);
+            const matchesWithNumbers = recalculateMatchNumbers(refreshedMatches);
+            setMatches(matchesWithNumbers);
+            matchesRef.current = matchesWithNumbers;
+
             setSelectedMatches(prev => {
                 const next = new Set(prev);
                 next.delete(matchId);
                 return next;
             });
-            
-            // Recalculate match numbers after deletion
-            const matchesWithNumbers = recalculateMatchNumbers(updatedMatches);
-            setMatches(matchesWithNumbers);
-            
+
             showSuccess('Match deleted successfully');
         } catch (error: any) {
             console.error('Failed to delete match:', error);
