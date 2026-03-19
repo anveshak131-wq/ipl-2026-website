@@ -30,5 +30,5 @@ export async function generateStaticParams() {
 export default function TeamDetailPage({ params }: { params: { teamId: string } }) {
   // All data fetching happens client-side in TeamDetailClient
   // This provides static pre-rendered pages for all teams
-  return <TeamDetailClient teamId={params.teamId} />;
+  return <TeamDetailClient teamId={params.teamId} league="ipl" />;
 }

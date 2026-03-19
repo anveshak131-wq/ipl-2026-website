@@ -915,7 +915,7 @@ export const api = {
   // Teams API
   createTeam: async (team: Omit<Team, 'id' | 'players'>): Promise<Team> => {
     try {
-      const token = localStorage.getItem('adminToken');
+      const token = getAdminAuthToken();
       if (!token) {
         throw new Error('Authentication token not found');
       }
@@ -949,7 +949,10 @@ export const api = {
 
   updateTeam: async (id: string, team: Partial<Omit<Team, 'id' | 'players'>>): Promise<Team> => {
     try {
-      const token = localStorage.getItem('adminToken');
+      const token = getAdminAuthToken();
+      if (!token) {
+        throw new Error('Authentication token not found');
+      }
       const response = await fetch('/api/teams', {
         method: 'PUT',
         headers: {
@@ -970,7 +973,10 @@ export const api = {
 
   deleteTeam: async (id: string): Promise<void> => {
     try {
-      const token = localStorage.getItem('adminToken');
+      const token = getAdminAuthToken();
+      if (!token) {
+        throw new Error('Authentication token not found');
+      }
       const response = await fetch(`/api/teams?id=${id}`, {
         method: 'DELETE',
         headers: {
