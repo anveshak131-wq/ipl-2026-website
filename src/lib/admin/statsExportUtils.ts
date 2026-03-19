@@ -392,16 +392,32 @@ const buildPdf = (rows: ExportRow[], options: ExportOptions) => {
   const usableWidth = pageWidth - marginX * 2;
   const keyColumnWidths = { id: 56, name: 170, team: 130 };
   const keyWidthTotal = keyColumnWidths.id + keyColumnWidths.name + keyColumnWidths.team;
-  const extraMinWidth = 76;
+  const extraMinWidth = 88;
   const extrasPerPart = Math.max(1, Math.floor((usableWidth - keyWidthTotal) / extraMinWidth));
 
   const parts: Column[][] = [];
-  for (let i = 0; i < extraColumns.length; i += extrasPerPart) {
-    parts.push(extraColumns.slice(i, i + extrasPerPart));
-  }
+  for (let i = 0; i < extraColumns.length; i += extrasPerPart) parts.push(extraColumns.slice(i, i + extrasPerPart));
   if (parts.length === 0) parts.push([]);
 
-  const drawHeader = (partIndex: number, partsTotal: number, includeSummary: boolean) => {
+  const teamBuckets = new Map<string, ExportRow[]>();
+  rows.forEach((row) => {
+    const teamName = String(row.teamName || 'Unknown');
+    const bucket = teamBuckets.get(teamName) || [];
+    bucket.push(row);
+    teamBuckets.set(teamName, bucket);
+  });
+  const teamNames = Array.from(teamBuckets.keys()).sort((a, b) => a.localeCompare(b));
+  const rowsPerPage = 10;
+
+  const drawHeader = (
+    teamName: string,
+    batchIndex: number,
+    batchTotal: number,
+    partIndex: number,
+    partsTotal: number,
+    batchRangeLabel: string,
+    includeSummary: boolean
+  ) => {
     setFill(palette.bg);
     doc.rect(0, 0, pageWidth, pageHeight, 'F');
 
@@ -428,6 +444,16 @@ const buildPdf = (rows: ExportRow[], options: ExportOptions) => {
     doc.text(generatedAt, pageWidth - marginX, 64, { align: 'right' });
     doc.text(`Part ${partIndex + 1}/${partsTotal}`, pageWidth - marginX, 84, { align: 'right' });
 
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(11);
+    setText(palette.text);
+    doc.text(`Team: ${teamName}`, 108, 104, { maxWidth: pageWidth - 310 });
+
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(10);
+    setText(palette.muted);
+    doc.text(`Batch ${batchIndex + 1}/${batchTotal}  |  Players ${batchRangeLabel}`, pageWidth - marginX, 104, { align: 'right' });
+
     if (!includeSummary) return;
 
     cards.forEach((card, index) => {
@@ -448,55 +474,92 @@ const buildPdf = (rows: ExportRow[], options: ExportOptions) => {
     });
   };
 
-  parts.forEach((partExtraColumns, partIndex) => {
-    if (partIndex > 0) doc.addPage();
+  let hasDrawnFirstSummary = false;
 
-    const partColumns: Column[] = [...keyColumns, ...partExtraColumns];
-    const partStartPage = (doc as any).internal.getCurrentPageInfo().pageNumber as number;
-    const partStartY = partIndex === 0 ? firstPageTableTop : tableTop;
+  teamNames.forEach((teamName) => {
+    const teamRows = teamBuckets.get(teamName) || [];
+    const batchTotal = Math.max(1, Math.ceil(teamRows.length / rowsPerPage));
 
-    autoTable(doc, {
-      startY: partStartY,
-      margin: { left: marginX, right: marginX, top: tableTop, bottom: footerHeight },
-      head: [partColumns.map(([label]) => label)],
-      body: rows.map((row) => partColumns.map(([, key]) => String(row[key] ?? ''))),
-      theme: 'grid',
-      styles: {
-        fontSize: 8,
-        cellPadding: { top: 6, right: 5, bottom: 6, left: 5 },
-        textColor: [palette.text[0], palette.text[1], palette.text[2]],
-        fillColor: [palette.bg[0], palette.bg[1], palette.bg[2]],
-        lineColor: [palette.grid[0], palette.grid[1], palette.grid[2]],
-        lineWidth: 0.5,
-        overflow: 'linebreak'
-      },
-      headStyles: {
-        fillColor: [palette.accent[0], palette.accent[1], palette.accent[2]],
-        textColor: [palette.text[0], palette.text[1], palette.text[2]],
-        fontStyle: 'bold',
-        fontSize: 9
-      },
-      alternateRowStyles: {
-        fillColor: [palette.panel[0], palette.panel[1], palette.panel[2]]
-      },
-      columnStyles: {
-        0: { cellWidth: keyColumnWidths.id },
-        1: { cellWidth: keyColumnWidths.name },
-        2: { cellWidth: keyColumnWidths.team }
-      },
-      willDrawPage: (data) => {
-        const includeSummary = partIndex === 0 && data.pageNumber === partStartPage;
-        drawHeader(partIndex, parts.length, includeSummary);
-      },
-      didDrawPage: (data) => {
-        setText(palette.muted);
-        doc.setFont('helvetica', 'normal');
-        doc.setFontSize(8);
-        doc.text(`${isBatting ? 'Batting' : 'Bowling'} Stats`, marginX, pageHeight - 12);
-        doc.text(`Part ${partIndex + 1}/${parts.length}`, marginX + 82, pageHeight - 12);
-        doc.text(`Page ${data.pageNumber}`, pageWidth - marginX, pageHeight - 12, { align: 'right' });
-      }
-    });
+    for (let batchIndex = 0; batchIndex < teamRows.length; batchIndex += rowsPerPage) {
+      const batchStart = batchIndex;
+      const batchEnd = Math.min(batchIndex + rowsPerPage, teamRows.length);
+      const batchRows = teamRows.slice(batchStart, batchEnd);
+      const batchNumber = Math.floor(batchStart / rowsPerPage);
+      const batchRangeLabel = `${batchStart + 1}-${batchEnd} of ${teamRows.length}`;
+
+      parts.forEach((partExtraColumns, partIndex) => {
+        if (hasDrawnFirstSummary || batchStart !== 0 || partIndex !== 0 || teamName !== teamNames[0]) {
+          doc.addPage();
+        }
+
+        const includeSummary = !hasDrawnFirstSummary && teamName === teamNames[0] && batchStart === 0 && partIndex === 0;
+        const partColumns: Column[] = [...keyColumns, ...partExtraColumns];
+        const startY = includeSummary ? firstPageTableTop : tableTop;
+
+        const extraCount = partExtraColumns.length;
+        const extraWidth = extraCount ? Math.floor((usableWidth - keyWidthTotal) / extraCount) : 0;
+        const extraColumnStyles = partExtraColumns.reduce((styles, _, idx) => {
+          styles[idx + keyColumns.length] = { cellWidth: extraWidth };
+          return styles;
+        }, {} as Record<number, any>);
+
+        const partStartPage = (doc as any).internal.getCurrentPageInfo().pageNumber as number;
+
+        autoTable(doc, {
+          startY,
+          margin: { left: marginX, right: marginX, top: tableTop, bottom: footerHeight },
+          head: [partColumns.map(([label]) => label)],
+          body: batchRows.map((row) => partColumns.map(([, key]) => String(row[key] ?? ''))),
+          theme: 'grid',
+          styles: {
+            fontSize: 8,
+            cellPadding: { top: 6, right: 5, bottom: 6, left: 5 },
+            textColor: [palette.text[0], palette.text[1], palette.text[2]],
+            fillColor: [palette.bg[0], palette.bg[1], palette.bg[2]],
+            lineColor: [palette.grid[0], palette.grid[1], palette.grid[2]],
+            lineWidth: 0.5,
+            overflow: 'ellipsize'
+          },
+          headStyles: {
+            fillColor: [palette.accent[0], palette.accent[1], palette.accent[2]],
+            textColor: [palette.text[0], palette.text[1], palette.text[2]],
+            fontStyle: 'bold',
+            fontSize: 9
+          },
+          alternateRowStyles: {
+            fillColor: [palette.panel[0], palette.panel[1], palette.panel[2]]
+          },
+          columnStyles: {
+            0: { cellWidth: keyColumnWidths.id },
+            1: { cellWidth: keyColumnWidths.name },
+            2: { cellWidth: keyColumnWidths.team },
+            ...extraColumnStyles
+          },
+          pageBreak: 'avoid',
+          willDrawPage: (data) => {
+            drawHeader(
+              teamName,
+              batchNumber,
+              batchTotal,
+              partIndex,
+              parts.length,
+              batchRangeLabel,
+              includeSummary && data.pageNumber === partStartPage
+            );
+          },
+          didDrawPage: (data) => {
+            setText(palette.muted);
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(8);
+            doc.text(`${isBatting ? 'Batting' : 'Bowling'} Stats`, marginX, pageHeight - 12);
+            doc.text(`Team: ${teamName}`, marginX + 86, pageHeight - 12, { maxWidth: pageWidth - 260 });
+            doc.text(`Page ${data.pageNumber}`, pageWidth - marginX, pageHeight - 12, { align: 'right' });
+          }
+        });
+
+        if (includeSummary) hasDrawnFirstSummary = true;
+      });
+    }
   });
 
   return doc.output('arraybuffer');
