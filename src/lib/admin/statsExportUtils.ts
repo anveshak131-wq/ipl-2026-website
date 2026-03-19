@@ -318,24 +318,23 @@ const buildFilename = (kind: ExportKind, format: 'pdf' | 'csv' | 'sql', options:
 };
 
 const buildPdf = (rows: ExportRow[], options: ExportOptions) => {
-  try {
-    console.log('Building PDF with rows:', rows.length, 'options:', options);
-    
-    // Handle empty data case
-    if (!rows || rows.length === 0) {
-      console.log('No rows to export, creating empty PDF');
-      const doc = new jsPDF({ orientation: 'landscape', unit: 'pt', format: 'a4' });
-      doc.setFontSize(16);
-      doc.text('No data available for export', doc.internal.pageSize.getWidth() / 2, doc.internal.pageSize.getHeight() / 2, { align: 'center' });
-      return doc.output('arraybuffer');
-    }
-    
+  if (!rows || rows.length === 0) {
     const doc = new jsPDF({ orientation: 'landscape', unit: 'pt', format: 'a4' });
-    const isBatting = options.kind === 'batting';
-    const pageWidth = doc.internal.pageSize.getWidth();
-    const pageHeight = doc.internal.pageSize.getHeight();
-    
-    console.log('PDF document created, dimensions:', { pageWidth, pageHeight });
+    doc.setFontSize(16);
+    doc.text(
+      'No data available for export',
+      doc.internal.pageSize.getWidth() / 2,
+      doc.internal.pageSize.getHeight() / 2,
+      { align: 'center' }
+    );
+    return doc.output('arraybuffer');
+  }
+
+  const doc = new jsPDF({ orientation: 'landscape', unit: 'pt', format: 'a4' });
+  const isBatting = options.kind === 'batting';
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const pageHeight = doc.internal.pageSize.getHeight();
+
   const palette = isBatting
     ? {
         bg: [13, 20, 27] as RGB,
@@ -360,6 +359,10 @@ const buildPdf = (rows: ExportRow[], options: ExportOptions) => {
   const setText = (color: RGB) => doc.setTextColor(color[0], color[1], color[2]);
   const setDraw = (color: RGB) => doc.setDrawColor(color[0], color[1], color[2]);
 
+  const title = isBatting ? 'Batting Canvas Export' : 'Bowling Canvas Export';
+  const filterLine = `League ${options.league.toUpperCase()}  |  Team ${options.teamLabel}  |  Search ${options.searchQuery || 'None'}`;
+  const generatedAt = new Date().toLocaleString();
+
   const totalPrimary = rows.reduce((sum, row) => sum + (isBatting ? Number(row.runs) : Number(row.wickets)), 0);
   const leaders = [...rows]
     .sort((a, b) => (isBatting ? Number(b.runs) - Number(a.runs) : Number(b.wickets) - Number(a.wickets)))
@@ -367,127 +370,106 @@ const buildPdf = (rows: ExportRow[], options: ExportOptions) => {
     .map((row) => `${row.name} (${isBatting ? row.runs : row.wickets})`)
     .join(' • ') || 'No data';
 
-  setFill(palette.bg);
-  doc.rect(0, 0, pageWidth, pageHeight, 'F');
-  setFill(palette.panel);
-  doc.roundedRect(24, 24, pageWidth - 48, 98, 18, 18, 'F');
-  setFill(palette.accent);
-  doc.circle(70, 70, 22, 'F');
-  setFill(palette.accentSoft);
-  doc.circle(pageWidth - 78, 58, 14, 'F');
-  doc.circle(pageWidth - 110, 88, 28, 'F');
-
-  setText(palette.text);
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(26);
-  doc.text(isBatting ? 'Batting Canvas Export' : 'Bowling Canvas Export', 108, 66);
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(11);
-  setText(palette.muted);
-  doc.text(`League ${options.league.toUpperCase()}  |  Team ${options.teamLabel}  |  Search ${options.searchQuery || 'None'}`, 108, 88);
-  doc.text(`Generated ${new Date().toLocaleString()}`, 108, 106);
-
   const cards = [
     { label: 'Players', value: String(rows.length) },
     { label: isBatting ? 'Runs' : 'Wickets', value: String(totalPrimary) },
     { label: 'Leaders', value: leaders }
   ];
 
-  cards.forEach((card, index) => {
-    const x = 24 + index * ((pageWidth - 48 - 24) / 3);
-    const width = (pageWidth - 48 - 24) / 3 - 8;
-    setFill(palette.panel);
-    doc.roundedRect(x, 138, width, 56, 14, 14, 'F');
-    setDraw(palette.grid);
-    doc.roundedRect(x, 138, width, 56, 14, 14, 'S');
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(index === 2 ? 10 : 20);
-    setText(palette.text);
-    doc.text(card.value, x + 14, 162, { maxWidth: width - 28 });
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(9);
-    setText(palette.muted);
-    doc.text(card.label, x + 14, 183, { maxWidth: width - 28 });
-  });
+  const marginX = 24;
+  const footerHeight = 26;
+  const tableTop = 140;
+  const firstPageTableTop = 214;
 
-  const columns = getColumns(options.kind);
-  console.log('Columns retrieved:', columns.length, 'columns');
-  
-  // Split columns into groups to fit on one page
-  const maxColumnsPerPage = 8; // Limit columns to fit comfortably
-  const columnGroups: typeof columns[] = [];
-  
-  // Always include ID, Name, Team in every group
-  const essentialColumns = columns.filter(([label]) => 
-    label === 'ID' || label === 'Name' || label === 'Team Name' || label === 'Team ID'
-  );
-  
-  console.log('Essential columns:', essentialColumns.length);
-  
-  const otherColumns = columns.filter(([label]) => 
-    label !== 'ID' && label !== 'Name' && label !== 'Team Name' && label !== 'Team ID'
-  );
-  
-  console.log('Other columns:', otherColumns.length);
-  
-  // Create column groups
-  for (let i = 0; i < otherColumns.length; i += maxColumnsPerPage - essentialColumns.length) {
-    const group = [...essentialColumns, ...otherColumns.slice(i, i + maxColumnsPerPage - essentialColumns.length)];
-    columnGroups.push(group);
+  const keyColumns: readonly Column[] = [
+    ['ID', 'id'],
+    ['Player', 'name'],
+    ['Team', 'teamName']
+  ];
+  const keyKeys = new Set<keyof ExportRow>(['id', 'name', 'teamName']);
+  const extraColumns = getColumns(options.kind).filter(([, key]) => !keyKeys.has(key));
+
+  const usableWidth = pageWidth - marginX * 2;
+  const keyColumnWidths = { id: 56, name: 170, team: 130 };
+  const keyWidthTotal = keyColumnWidths.id + keyColumnWidths.name + keyColumnWidths.team;
+  const extraMinWidth = 76;
+  const extrasPerPart = Math.max(1, Math.floor((usableWidth - keyWidthTotal) / extraMinWidth));
+
+  const parts: Column[][] = [];
+  for (let i = 0; i < extraColumns.length; i += extrasPerPart) {
+    parts.push(extraColumns.slice(i, i + extrasPerPart));
   }
-  
-  console.log('Column groups created:', columnGroups.length, 'groups');
-  
-  // Fallback: if no groups created, create one with all columns
-  if (columnGroups.length === 0) {
-    console.log('No column groups created, using all columns');
-    columnGroups.push(columns);
-  }
-  
-  // Generate table for each column group
-  let currentY = 214;
-  
-  columnGroups.forEach((columnGroup, groupIndex) => {
-    console.log(`Processing group ${groupIndex + 1} with ${columnGroup.length} columns`);
-    
-    // Add page break if not first group
-    if (groupIndex > 0) {
-      doc.addPage();
-      currentY = 60; // Reset Y position for new page
-    }
-    
-    // Add page header with column group info
-    setText(palette.muted);
+  if (parts.length === 0) parts.push([]);
+
+  const drawHeader = (partIndex: number, partsTotal: number, includeSummary: boolean) => {
+    setFill(palette.bg);
+    doc.rect(0, 0, pageWidth, pageHeight, 'F');
+
+    setFill(palette.panel);
+    doc.roundedRect(marginX, 24, pageWidth - marginX * 2, 94, 18, 18, 'F');
+
+    setFill(palette.accent);
+    doc.circle(70, 68, 22, 'F');
+    setFill(palette.accentSoft);
+    doc.circle(pageWidth - 78, 54, 14, 'F');
+    doc.circle(pageWidth - 110, 82, 28, 'F');
+
+    setText(palette.text);
     doc.setFont('helvetica', 'bold');
-    doc.setFontSize(12);
-    doc.text(`Player Statistics - Part ${groupIndex + 1}`, 24, currentY - 20);
+    doc.setFontSize(24);
+    doc.text(title, 108, 64);
+
     doc.setFont('helvetica', 'normal');
+    doc.setFontSize(11);
+    setText(palette.muted);
+    doc.text(filterLine, 108, 84, { maxWidth: pageWidth - 310 });
+
     doc.setFontSize(10);
-    doc.text(`Columns: ${columnGroup.map(([label]) => label).join(', ')}`, 24, currentY - 10);
-    
-    // Create table for this column group
-    try {
-      console.log('Creating autoTable with', columnGroup.length, 'columns and', rows.length, 'rows');
-      
-      const tableData = rows.map((row) => 
-        columnGroup.map(([, key]) => String(row[key as keyof ExportRow] ?? ''))
-      );
-      
-      console.log('Table data prepared, first row sample:', tableData[0]?.slice(0, 3));
-      
-      autoTable(doc, {
-        startY: currentY,
-        head: [columnGroup.map(([label]) => label)],
-        body: tableData,
-        theme: 'grid',
-        styles: {
-          fontSize: 8,
-          cellPadding: 4,
-          textColor: palette.text,
-          fillColor: palette.bg,
-          lineColor: palette.grid,
-          lineWidth: 0.5
-        },
+    doc.text(generatedAt, pageWidth - marginX, 64, { align: 'right' });
+    doc.text(`Part ${partIndex + 1}/${partsTotal}`, pageWidth - marginX, 84, { align: 'right' });
+
+    if (!includeSummary) return;
+
+    cards.forEach((card, index) => {
+      const x = marginX + index * ((pageWidth - marginX * 2 - 24) / 3);
+      const width = (pageWidth - marginX * 2 - 24) / 3 - 8;
+      setFill(palette.panel);
+      doc.roundedRect(x, 138, width, 56, 14, 14, 'F');
+      setDraw(palette.grid);
+      doc.roundedRect(x, 138, width, 56, 14, 14, 'S');
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(index === 2 ? 10 : 20);
+      setText(palette.text);
+      doc.text(card.value, x + 14, 162, { maxWidth: width - 28 });
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(9);
+      setText(palette.muted);
+      doc.text(card.label, x + 14, 183, { maxWidth: width - 28 });
+    });
+  };
+
+  parts.forEach((partExtraColumns, partIndex) => {
+    if (partIndex > 0) doc.addPage();
+
+    const partColumns: Column[] = [...keyColumns, ...partExtraColumns];
+    const partStartPage = (doc as any).internal.getCurrentPageInfo().pageNumber as number;
+    const partStartY = partIndex === 0 ? firstPageTableTop : tableTop;
+
+    autoTable(doc, {
+      startY: partStartY,
+      margin: { left: marginX, right: marginX, top: tableTop, bottom: footerHeight },
+      head: [partColumns.map(([label]) => label)],
+      body: rows.map((row) => partColumns.map(([, key]) => String(row[key] ?? ''))),
+      theme: 'grid',
+      styles: {
+        fontSize: 8,
+        cellPadding: { top: 6, right: 5, bottom: 6, left: 5 },
+        textColor: [palette.text[0], palette.text[1], palette.text[2]],
+        fillColor: [palette.bg[0], palette.bg[1], palette.bg[2]],
+        lineColor: [palette.grid[0], palette.grid[1], palette.grid[2]],
+        lineWidth: 0.5,
+        overflow: 'linebreak'
+      },
       headStyles: {
         fillColor: [palette.accent[0], palette.accent[1], palette.accent[2]],
         textColor: [palette.text[0], palette.text[1], palette.text[2]],
@@ -497,44 +479,27 @@ const buildPdf = (rows: ExportRow[], options: ExportOptions) => {
       alternateRowStyles: {
         fillColor: [palette.panel[0], palette.panel[1], palette.panel[2]]
       },
-      margin: { left: 24, right: 24, top: 24, bottom: 40 },
-      columnStyles: columnGroup.reduce((styles, [label], index) => {
-        // Make ID and Name columns wider
-        if (label === 'ID' || label === 'Name') {
-          styles[index] = { cellWidth: 60 };
-        } else if (label === 'Team Name') {
-          styles[index] = { cellWidth: 80 };
-        }
-        return styles;
-      }, {} as Record<number, any>),
+      columnStyles: {
+        0: { cellWidth: keyColumnWidths.id },
+        1: { cellWidth: keyColumnWidths.name },
+        2: { cellWidth: keyColumnWidths.team }
+      },
+      willDrawPage: (data) => {
+        const includeSummary = partIndex === 0 && data.pageNumber === partStartPage;
+        drawHeader(partIndex, parts.length, includeSummary);
+      },
       didDrawPage: (data) => {
         setText(palette.muted);
+        doc.setFont('helvetica', 'normal');
         doc.setFontSize(8);
-        doc.text(`${isBatting ? 'Batting' : 'Bowling'} Stats - Part ${groupIndex + 1}`, 24, pageHeight - 12);
-        doc.text(`Page ${data.pageNumber}`, pageWidth - 24, pageHeight - 12, { align: 'right' });
-        
-        // Add player info footer on each page
-        if (data.pageNumber === Math.ceil(data.table.rowCount / data.table.rows.length)) {
-          doc.setFontSize(9);
-          doc.text(`Total Players: ${rows.length}`, 24, pageHeight - 24);
-        }
+        doc.text(`${isBatting ? 'Batting' : 'Bowling'} Stats`, marginX, pageHeight - 12);
+        doc.text(`Part ${partIndex + 1}/${parts.length}`, marginX + 82, pageHeight - 12);
+        doc.text(`Page ${data.pageNumber}`, pageWidth - marginX, pageHeight - 12, { align: 'right' });
       }
     });
-    
-    console.log(`AutoTable created successfully for group ${groupIndex + 1}`);
-    currentY = (doc as any).lastAutoTable.finalY + 30;
-    } catch (tableError) {
-      console.error('AutoTable creation failed:', tableError);
-      throw new Error(`Table creation failed for group ${groupIndex + 1}: ${tableError instanceof Error ? tableError.message : String(tableError)}`);
-    }
   });
 
-  console.log('PDF generation completed successfully');
   return doc.output('arraybuffer');
-  } catch (error) {
-    console.error('PDF generation failed:', error);
-    throw new Error(`PDF generation failed: ${error instanceof Error ? error.message : String(error)}`);
-  }
 };
 
 export const exportStatsData = (
@@ -543,33 +508,18 @@ export const exportStatsData = (
   teams: ExportTeam[],
   options: ExportOptions
 ) => {
-  try {
-    console.log('Export started:', { format, playersCount: players.length, teamsCount: teams.length, options });
-    
-    const rows = buildExportRows(players, teams);
-    const filename = buildFilename(options.kind, format, options);
-    
-    console.log('Export rows built:', { rowsCount: rows.length, filename });
+  const rows = buildExportRows(players, teams);
+  const filename = buildFilename(options.kind, format, options);
 
-    if (format === 'csv') {
-      console.log('Building CSV export...');
-      downloadBlob(buildCsv(rows, options.kind), 'text/csv;charset=utf-8', filename);
-      return;
-    }
-
-    if (format === 'sql') {
-      console.log('Building SQL export...');
-      downloadBlob(buildSql(rows, options.kind), 'application/sql;charset=utf-8', filename);
-      return;
-    }
-
-    console.log('Building PDF export...');
-    const pdfBuffer = buildPdf(rows, options);
-    console.log('PDF built successfully, buffer size:', pdfBuffer.byteLength);
-    downloadBlob(pdfBuffer, 'application/pdf', filename);
-    console.log('PDF download completed');
-  } catch (error) {
-    console.error('Export failed:', error);
-    throw error; // Re-throw to let the calling component handle it
+  if (format === 'csv') {
+    downloadBlob(buildCsv(rows, options.kind), 'text/csv;charset=utf-8', filename);
+    return;
   }
+
+  if (format === 'sql') {
+    downloadBlob(buildSql(rows, options.kind), 'application/sql;charset=utf-8', filename);
+    return;
+  }
+
+  downloadBlob(buildPdf(rows, options), 'application/pdf', filename);
 };
