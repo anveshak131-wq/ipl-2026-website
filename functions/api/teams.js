@@ -7,6 +7,12 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'Content-Type, Authorization',
 };
 
+const noCacheHeaders = {
+  'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0',
+  Pragma: 'no-cache',
+  Expires: '0',
+};
+
 const HISTORICAL_IPL_TEAM_IDS = new Set(['16', '17', '18', '19', '20']);
 const WPL_TEAM_IDS = new Set(['11', '12', '13', '14', '15']);
 
@@ -39,6 +45,7 @@ function json(data, status = 200, extraHeaders = {}) {
     headers: {
       'Content-Type': 'application/json',
       ...corsHeaders,
+      ...noCacheHeaders,
       ...extraHeaders,
     },
   });
@@ -430,6 +437,15 @@ export async function onRequest(context) {
   if (!token) {
     return json({ error: 'Unauthorized' }, 401);
   }
+  if (!env || !env.IPL_CACHE) {
+    return json(
+      {
+        error:
+          'KV binding IPL_CACHE is missing. Configure KV namespace binding "IPL_CACHE" in Cloudflare Pages > Settings > Functions.',
+      },
+      500,
+    );
+  }
 
   if (method === 'POST') {
     let body;
@@ -458,7 +474,10 @@ export async function onRequest(context) {
     };
 
     teams.push(createdTeam);
-    await writeTeamsToKV(env, teams);
+    const persisted = await writeTeamsToKV(env, teams);
+    if (!persisted) {
+      return json({ error: 'Failed to persist team changes' }, 500);
+    }
     return json(createdTeam, 201);
   }
 
@@ -496,7 +515,10 @@ export async function onRequest(context) {
         updatedAt: nowIso,
       };
       teams.push(created);
-      await writeTeamsToKV(env, teams);
+      const persisted = await writeTeamsToKV(env, teams);
+      if (!persisted) {
+        return json({ error: 'Failed to persist team changes' }, 500);
+      }
       return json(created, 200);
     }
 
@@ -517,7 +539,10 @@ export async function onRequest(context) {
     }
 
     teams[index] = updatedTeam;
-    await writeTeamsToKV(env, teams);
+    const persisted = await writeTeamsToKV(env, teams);
+    if (!persisted) {
+      return json({ error: 'Failed to persist team changes' }, 500);
+    }
     return json(updatedTeam, 200);
   }
 
@@ -534,7 +559,10 @@ export async function onRequest(context) {
       return json({ error: 'Team not found' }, 404);
     }
 
-    await writeTeamsToKV(env, remaining);
+    const persisted = await writeTeamsToKV(env, remaining);
+    if (!persisted) {
+      return json({ error: 'Failed to persist team changes' }, 500);
+    }
     return json({ success: true, id: normalizedId }, 200);
   }
 
@@ -542,4 +570,3 @@ export async function onRequest(context) {
     Allow: 'GET, POST, PUT, DELETE, OPTIONS',
   });
 }
-

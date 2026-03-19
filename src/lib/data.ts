@@ -445,9 +445,10 @@ export const mockHighlights: Highlight[] = [
 export const api = {
   getTeams: async (league?: 'ipl' | 'wpl'): Promise<Team[]> => {
     try {
-      const url = league ? `/api/teams?league=${league}` : '/api/teams';
+      const baseUrl = league ? `/api/teams?league=${league}` : '/api/teams';
+      const url = `${baseUrl}${baseUrl.includes('?') ? '&' : '?'}_=${Date.now()}`;
       console.log('API: Fetching teams from:', url);
-      const response = await fetch(url);
+      const response = await fetch(url, { cache: 'no-store' });
       console.log('API: Response status:', response.status, response.ok);
       if (!response.ok) {
         throw new Error(`Failed to fetch teams: ${response.status} ${response.statusText}`);

@@ -292,10 +292,11 @@ export default function TeamDetailClient({ teamId, league }: TeamDetailClientPro
         const shortNameLower = teamId.toLowerCase();
         
         // Fetch teams with league filter if provided
-        const teamsUrl = league ? `/api/teams?league=${league}` : '/api/teams';
+        const baseTeamsUrl = league ? `/api/teams?league=${league}` : '/api/teams';
+        const teamsUrl = `${baseTeamsUrl}${baseTeamsUrl.includes('?') ? '&' : '?'}_=${Date.now()}`;
         console.log('TeamDetailClient: Fetching from URL:', teamsUrl);
         
-        const teamsResponse = await fetch(teamsUrl);
+        const teamsResponse = await fetch(teamsUrl, { cache: 'no-store' });
         if (!teamsResponse.ok) {
           console.error('TeamDetailClient: Teams API response not OK:', teamsResponse.status, teamsResponse.statusText);
           setTeamData(null);
