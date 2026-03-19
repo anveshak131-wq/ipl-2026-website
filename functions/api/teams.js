@@ -376,13 +376,32 @@ function buildSeedTeams() {
 }
 
 async function readTeamsFromKV(env) {
+  if (!env || !env.IPL_CACHE) {
+    return { teams: null, error: 'KV binding IPL_CACHE is missing' };
+  }
+
+  const kv = env.IPL_CACHE;
+
   try {
-    if (!env || !env.IPL_CACHE) return null;
-    const teams = await env.IPL_CACHE.get('teams', { type: 'json', cacheTtl: 0 });
-    return Array.isArray(teams) ? teams : null;
-  } catch (error) {
-    console.error('Teams API: Failed to read teams from KV:', error);
-    return null;
+    const teams = await kv.get('teams', { type: 'json', cacheTtl: 0 });
+    return { teams: Array.isArray(teams) ? teams : null, error: null };
+  } catch (errorWithCacheTtl) {
+    try {
+      const teams = await kv.get('teams', { type: 'json' });
+      return { teams: Array.isArray(teams) ? teams : null, error: null };
+    } catch (errorWithOptionsObject) {
+      try {
+        const teams = await kv.get('teams', 'json');
+        return { teams: Array.isArray(teams) ? teams : null, error: null };
+      } catch (errorWithTypeString) {
+        console.error('Teams API: Failed to read teams from KV:', {
+          errorWithCacheTtl,
+          errorWithOptionsObject,
+          errorWithTypeString,
+        });
+        return { teams: null, error: 'Failed to read teams from KV' };
+      }
+    }
   }
 }
 
@@ -395,6 +414,71 @@ async function writeTeamsToKV(env, teams) {
     console.error('Teams API: Failed to write teams to KV:', error);
     return false;
   }
+}
+
+function teamCompletenessScore(team) {
+  if (!team) return 0;
+  let score = 0;
+  if (team.name) score += 2;
+  if (team.shortName) score += 2;
+  if (team.logo) score += 1;
+  if (team.description) score += 1;
+  if (Array.isArray(team.trophies)) score += Math.min(team.trophies.length, 10);
+  if (Array.isArray(team.homeGrounds)) score += Math.min(team.homeGrounds.length, 5);
+  return score;
+}
+
+function dedupeTeamsByKey(teams) {
+  if (!Array.isArray(teams)) return { teams: [], changed: false };
+
+  const byKey = new Map();
+  let changed = false;
+
+  for (const rawTeam of teams) {
+    if (!rawTeam || rawTeam.id === undefined || rawTeam.id === null) {
+      changed = true;
+      continue;
+    }
+
+    const id = normalizeTeamId(rawTeam.id);
+    if (!id) {
+      changed = true;
+      continue;
+    }
+
+    const league = normalizeLeague(rawTeam.league, id);
+    const normalizedTeam =
+      rawTeam.id === id && rawTeam.league === league ? rawTeam : { ...rawTeam, id, league };
+    const key = `${league}:${id}`;
+
+    const existing = byKey.get(key);
+    if (!existing) {
+      byKey.set(key, normalizedTeam);
+      continue;
+    }
+
+    const existingUpdated = Math.max(toTimestamp(existing.updatedAt), toTimestamp(existing.createdAt));
+    const candidateUpdated = Math.max(
+      toTimestamp(normalizedTeam.updatedAt),
+      toTimestamp(normalizedTeam.createdAt),
+    );
+
+    if (candidateUpdated > existingUpdated) {
+      byKey.set(key, normalizedTeam);
+    } else if (candidateUpdated === existingUpdated) {
+      const existingScore = teamCompletenessScore(existing);
+      const candidateScore = teamCompletenessScore(normalizedTeam);
+      if (candidateScore > existingScore) {
+        byKey.set(key, normalizedTeam);
+      }
+    }
+
+    changed = true;
+  }
+
+  if (byKey.size !== teams.length) changed = true;
+
+  return { teams: Array.from(byKey.values()), changed };
 }
 
 function mergeSeedIntoStored(seedTeams, storedTeams) {
@@ -438,18 +522,28 @@ function mergeSeedIntoStored(seedTeams, storedTeams) {
 
 async function loadTeams(env) {
   const seedTeams = buildSeedTeams();
-  const storedTeams = await readTeamsFromKV(env);
+  const storedResult = await readTeamsFromKV(env);
+  const storedTeams = storedResult.teams;
+
+  if (storedResult.error) {
+    // If we cannot read from KV (binding missing or runtime error), do NOT overwrite KV with seed data.
+    // Returning seed-only keeps the site functional without destroying existing KV state.
+    return { teams: seedTeams, source: 'seed-only' };
+  }
 
   if (!storedTeams || storedTeams.length === 0) {
     const persisted = await writeTeamsToKV(env, seedTeams);
     return { teams: seedTeams, source: persisted ? 'seeded' : 'seed-only' };
   }
 
-  const { teams: merged, changed } = mergeSeedIntoStored(seedTeams, storedTeams);
-  if (changed) {
-    await writeTeamsToKV(env, merged);
+  const storedDeduped = dedupeTeamsByKey(storedTeams);
+  const { teams: merged, changed: mergedChanged } = mergeSeedIntoStored(seedTeams, storedDeduped.teams);
+  const mergedDeduped = dedupeTeamsByKey(merged);
+
+  if (storedDeduped.changed || mergedChanged || mergedDeduped.changed) {
+    await writeTeamsToKV(env, mergedDeduped.teams);
   }
-  return { teams: merged, source: 'kv' };
+  return { teams: mergedDeduped.teams, source: 'kv' };
 }
 
 function filterTeamsForQuery(teams, league, includeHistorical) {
@@ -574,13 +668,23 @@ export async function onRequest(context) {
 
     const loaded = await loadTeams(env);
     const teams = loaded.teams;
-    const index = teams.findIndex((team) => normalizeTeamId(team?.id) === normalizedId);
+    const desiredLeague =
+      body?.league !== undefined && body?.league !== null
+        ? normalizeLeague(body.league, normalizedId)
+        : null;
+    const matchingIndexes = [];
+    for (let i = 0; i < teams.length; i += 1) {
+      const team = teams[i];
+      if (normalizeTeamId(team?.id) !== normalizedId) continue;
+      if (desiredLeague && normalizeLeague(team?.league, team?.id) !== desiredLeague) continue;
+      matchingIndexes.push(i);
+    }
 
     const nowIso = new Date().toISOString();
-    if (index === -1) {
+    if (matchingIndexes.length === 0) {
       const created = {
         id: normalizedId,
-        league: normalizeLeague(body?.league, normalizedId),
+        league: desiredLeague || normalizeLeague(body?.league, normalizedId),
         name: body?.name || `Team ${normalizedId}`,
         shortName: body?.shortName || `T${normalizedId}`,
         aliases: Array.isArray(body?.aliases) ? body.aliases : undefined,
@@ -600,28 +704,33 @@ export async function onRequest(context) {
       return json(created, 200);
     }
 
-    const current = teams[index] || {};
-    const updatedTeam = {
-      ...current,
-      ...body,
-      id: normalizedId,
-      league: normalizeLeague(body?.league ?? current.league, normalizedId),
-      updatedAt: nowIso,
-    };
+    let firstUpdated = null;
+    for (const index of matchingIndexes) {
+      const current = teams[index] || {};
+      const updatedTeam = {
+        ...current,
+        ...body,
+        id: normalizedId,
+        league: normalizeLeague(body?.league ?? current.league, normalizedId),
+        updatedAt: nowIso,
+      };
 
-    if (body?.trophies !== undefined) {
-      updatedTeam.trophies = Array.isArray(body.trophies) ? body.trophies : [];
-    }
-    if (body?.homeGrounds !== undefined) {
-      updatedTeam.homeGrounds = Array.isArray(body.homeGrounds) ? body.homeGrounds : [];
+      if (body?.trophies !== undefined) {
+        updatedTeam.trophies = Array.isArray(body.trophies) ? body.trophies : [];
+      }
+      if (body?.homeGrounds !== undefined) {
+        updatedTeam.homeGrounds = Array.isArray(body.homeGrounds) ? body.homeGrounds : [];
+      }
+
+      teams[index] = updatedTeam;
+      if (!firstUpdated) firstUpdated = updatedTeam;
     }
 
-    teams[index] = updatedTeam;
     const persisted = await writeTeamsToKV(env, teams);
     if (!persisted) {
       return json({ error: 'Failed to persist team changes' }, 500);
     }
-    return json(updatedTeam, 200);
+    return json(firstUpdated || teams[matchingIndexes[0]] || null, 200);
   }
 
   if (method === 'DELETE') {
