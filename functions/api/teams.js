@@ -378,7 +378,7 @@ function buildSeedTeams() {
 async function readTeamsFromKV(env) {
   try {
     if (!env || !env.IPL_CACHE) return null;
-    const teams = await env.IPL_CACHE.get('teams', 'json');
+    const teams = await env.IPL_CACHE.get('teams', { type: 'json', cacheTtl: 0 });
     return Array.isArray(teams) ? teams : null;
   } catch (error) {
     console.error('Teams API: Failed to read teams from KV:', error);
