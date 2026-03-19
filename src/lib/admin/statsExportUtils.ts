@@ -318,10 +318,15 @@ const buildFilename = (kind: ExportKind, format: 'pdf' | 'csv' | 'sql', options:
 };
 
 const buildPdf = (rows: ExportRow[], options: ExportOptions) => {
-  const doc = new jsPDF({ orientation: 'landscape', unit: 'pt', format: 'a4' });
-  const isBatting = options.kind === 'batting';
-  const pageWidth = doc.internal.pageSize.getWidth();
-  const pageHeight = doc.internal.pageSize.getHeight();
+  try {
+    console.log('Building PDF with rows:', rows.length, 'options:', options);
+    
+    const doc = new jsPDF({ orientation: 'landscape', unit: 'pt', format: 'a4' });
+    const isBatting = options.kind === 'batting';
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    
+    console.log('PDF document created, dimensions:', { pageWidth, pageHeight });
   const palette = isBatting
     ? {
         bg: [13, 20, 27] as RGB,
@@ -488,7 +493,12 @@ const buildPdf = (rows: ExportRow[], options: ExportOptions) => {
     currentY = (doc as any).lastAutoTable.finalY + 30;
   });
 
+  console.log('PDF generation completed successfully');
   return doc.output('arraybuffer');
+  } catch (error) {
+    console.error('PDF generation failed:', error);
+    throw new Error(`PDF generation failed: ${error instanceof Error ? error.message : String(error)}`);
+  }
 };
 
 export const exportStatsData = (
@@ -497,18 +507,33 @@ export const exportStatsData = (
   teams: ExportTeam[],
   options: ExportOptions
 ) => {
-  const rows = buildExportRows(players, teams);
-  const filename = buildFilename(options.kind, format, options);
+  try {
+    console.log('Export started:', { format, playersCount: players.length, teamsCount: teams.length, options });
+    
+    const rows = buildExportRows(players, teams);
+    const filename = buildFilename(options.kind, format, options);
+    
+    console.log('Export rows built:', { rowsCount: rows.length, filename });
 
-  if (format === 'csv') {
-    downloadBlob(buildCsv(rows, options.kind), 'text/csv;charset=utf-8', filename);
-    return;
+    if (format === 'csv') {
+      console.log('Building CSV export...');
+      downloadBlob(buildCsv(rows, options.kind), 'text/csv;charset=utf-8', filename);
+      return;
+    }
+
+    if (format === 'sql') {
+      console.log('Building SQL export...');
+      downloadBlob(buildSql(rows, options.kind), 'application/sql;charset=utf-8', filename);
+      return;
+    }
+
+    console.log('Building PDF export...');
+    const pdfBuffer = buildPdf(rows, options);
+    console.log('PDF built successfully, buffer size:', pdfBuffer.byteLength);
+    downloadBlob(pdfBuffer, 'application/pdf', filename);
+    console.log('PDF download completed');
+  } catch (error) {
+    console.error('Export failed:', error);
+    throw error; // Re-throw to let the calling component handle it
   }
-
-  if (format === 'sql') {
-    downloadBlob(buildSql(rows, options.kind), 'application/sql;charset=utf-8', filename);
-    return;
-  }
-
-  downloadBlob(buildPdf(rows, options), 'application/pdf', filename);
 };
