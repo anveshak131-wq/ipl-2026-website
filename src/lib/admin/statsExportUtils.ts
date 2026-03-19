@@ -321,6 +321,15 @@ const buildPdf = (rows: ExportRow[], options: ExportOptions) => {
   try {
     console.log('Building PDF with rows:', rows.length, 'options:', options);
     
+    // Handle empty data case
+    if (!rows || rows.length === 0) {
+      console.log('No rows to export, creating empty PDF');
+      const doc = new jsPDF({ orientation: 'landscape', unit: 'pt', format: 'a4' });
+      doc.setFontSize(16);
+      doc.text('No data available for export', doc.internal.pageSize.getWidth() / 2, doc.internal.pageSize.getHeight() / 2, { align: 'center' });
+      return doc.output('arraybuffer');
+    }
+    
     const doc = new jsPDF({ orientation: 'landscape', unit: 'pt', format: 'a4' });
     const isBatting = options.kind === 'batting';
     const pageWidth = doc.internal.pageSize.getWidth();
@@ -402,6 +411,7 @@ const buildPdf = (rows: ExportRow[], options: ExportOptions) => {
   });
 
   const columns = getColumns(options.kind);
+  console.log('Columns retrieved:', columns.length, 'columns');
   
   // Split columns into groups to fit on one page
   const maxColumnsPerPage = 8; // Limit columns to fit comfortably
@@ -412,9 +422,13 @@ const buildPdf = (rows: ExportRow[], options: ExportOptions) => {
     label === 'ID' || label === 'Name' || label === 'Team Name' || label === 'Team ID'
   );
   
+  console.log('Essential columns:', essentialColumns.length);
+  
   const otherColumns = columns.filter(([label]) => 
     label !== 'ID' && label !== 'Name' && label !== 'Team Name' && label !== 'Team ID'
   );
+  
+  console.log('Other columns:', otherColumns.length);
   
   // Create column groups
   for (let i = 0; i < otherColumns.length; i += maxColumnsPerPage - essentialColumns.length) {
@@ -422,10 +436,20 @@ const buildPdf = (rows: ExportRow[], options: ExportOptions) => {
     columnGroups.push(group);
   }
   
+  console.log('Column groups created:', columnGroups.length, 'groups');
+  
+  // Fallback: if no groups created, create one with all columns
+  if (columnGroups.length === 0) {
+    console.log('No column groups created, using all columns');
+    columnGroups.push(columns);
+  }
+  
   // Generate table for each column group
   let currentY = 214;
   
   columnGroups.forEach((columnGroup, groupIndex) => {
+    console.log(`Processing group ${groupIndex + 1} with ${columnGroup.length} columns`);
+    
     // Add page break if not first group
     if (groupIndex > 0) {
       doc.addPage();
@@ -442,21 +466,28 @@ const buildPdf = (rows: ExportRow[], options: ExportOptions) => {
     doc.text(`Columns: ${columnGroup.map(([label]) => label).join(', ')}`, 24, currentY - 10);
     
     // Create table for this column group
-    autoTable(doc, {
-      startY: currentY,
-      head: [columnGroup.map(([label]) => label)],
-      body: rows.map((row) => 
+    try {
+      console.log('Creating autoTable with', columnGroup.length, 'columns and', rows.length, 'rows');
+      
+      const tableData = rows.map((row) => 
         columnGroup.map(([, key]) => String(row[key as keyof ExportRow] ?? ''))
-      ),
-      theme: 'grid',
-      styles: {
-        fontSize: 8,
-        cellPadding: 4,
-        textColor: palette.text,
-        fillColor: palette.bg,
-        lineColor: palette.grid,
-        lineWidth: 0.5
-      },
+      );
+      
+      console.log('Table data prepared, first row sample:', tableData[0]?.slice(0, 3));
+      
+      autoTable(doc, {
+        startY: currentY,
+        head: [columnGroup.map(([label]) => label)],
+        body: tableData,
+        theme: 'grid',
+        styles: {
+          fontSize: 8,
+          cellPadding: 4,
+          textColor: palette.text,
+          fillColor: palette.bg,
+          lineColor: palette.grid,
+          lineWidth: 0.5
+        },
       headStyles: {
         fillColor: [palette.accent[0], palette.accent[1], palette.accent[2]],
         textColor: [palette.text[0], palette.text[1], palette.text[2]],
@@ -490,7 +521,12 @@ const buildPdf = (rows: ExportRow[], options: ExportOptions) => {
       }
     });
     
+    console.log(`AutoTable created successfully for group ${groupIndex + 1}`);
     currentY = (doc as any).lastAutoTable.finalY + 30;
+    } catch (tableError) {
+      console.error('AutoTable creation failed:', tableError);
+      throw new Error(`Table creation failed for group ${groupIndex + 1}: ${tableError instanceof Error ? tableError.message : String(tableError)}`);
+    }
   });
 
   console.log('PDF generation completed successfully');
