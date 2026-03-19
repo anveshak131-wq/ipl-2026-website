@@ -643,6 +643,9 @@ export default function TeamDetailClient({ teamId, league }: TeamDetailClientPro
   const numericId = teamId.replace('team', '');
   const teamLogoPath = getAnimatedLogoPath(teamData.id, teamData.shortName, teamData.league);
   const fallbackLogoPath = getLogoPath(teamData.id);
+  const trophies = Array.isArray(teamData.trophies) ? teamData.trophies : [];
+  const trophyCount = trophies.length;
+  const trophyYears = trophies.map(trophy => trophy.year).filter(Boolean).sort((a, b) => a - b);
 
   // Apply squad filters
   const filteredPlayers = (teamData.players || []).filter((p) => {
@@ -763,10 +766,10 @@ export default function TeamDetailClient({ teamId, league }: TeamDetailClientPro
                 )}
 
                 {/* Trophy Showcase */}
-                {teamData.trophies && teamData.trophies > 0 && (
+                {trophyCount > 0 && (
                   <TrophyCounter
-                    trophyCount={teamData.trophies}
-                    trophyYears={teamData.trophyYears}
+                    trophyCount={trophyCount}
+                    trophyYears={trophyYears}
                     primaryColor={primaryColor.solid}
                     teamName={teamData.shortName}
                   />
@@ -2562,6 +2565,9 @@ function StatsTab({ teamData, primaryColor, secondaryColor, batsmen, bowlers, al
 // About Tab
 function AboutTab({ teamData, primaryColor, secondaryColor, coachingStaff }: AboutTabProps) {
   if (!teamData) return null;
+  const trophies = Array.isArray(teamData.trophies) ? teamData.trophies : [];
+  const trophyCount = trophies.length;
+  const homeGrounds = Array.isArray(teamData.homeGrounds) ? teamData.homeGrounds : [];
   const hasCoachingStaff = coachingStaff && (
     coachingStaff.headCoach ||
     coachingStaff.mentor ||
@@ -2625,6 +2631,14 @@ function AboutTab({ teamData, primaryColor, secondaryColor, coachingStaff }: Abo
               <li className="flex items-center gap-3">
                 <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: primaryColor.solid }} />
                 Foreign Players: <span className="font-bold">{teamData.players?.filter((p: Player) => p.nationality !== 'India').length || 0}</span>
+              </li>
+              <li className="flex items-center gap-3">
+                <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: primaryColor.solid }} />
+                Home Ground: <span className="font-bold">{homeGrounds.length > 0 ? homeGrounds.join(', ') : 'TBA'}</span>
+              </li>
+              <li className="flex items-center gap-3">
+                <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: primaryColor.solid }} />
+                Trophies: <span className="font-bold">{trophyCount}</span>
               </li>
             </ul>
           </div>

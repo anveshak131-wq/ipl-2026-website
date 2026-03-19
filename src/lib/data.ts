@@ -43,7 +43,7 @@ export const mockTeams: Team[] = [
     colors: { primary: '#EC1C24', secondary: '#000000' },
     players: [],
     trophies: [],
-    homeGrounds: ['M. Chinnaswamy Stadium']
+    homeGrounds: ['M. Chinnaswamy Stadium, Bengaluru']
   },
   {
     id: '2',
@@ -59,9 +59,9 @@ export const mockTeams: Team[] = [
       { year: 2015, name: 'IPL Champions' },
       { year: 2017, name: 'IPL Champions' },
       { year: 2019, name: 'IPL Champions' },
-      { year: 2023, name: 'IPL Champions' }
+      { year: 2020, name: 'IPL Champions' }
     ],
-    homeGrounds: ['Wankhede Stadium']
+    homeGrounds: ['Wankhede Stadium, Mumbai']
   },
   {
     id: '3',
@@ -75,7 +75,7 @@ export const mockTeams: Team[] = [
     trophies: [
       { year: 2016, name: 'IPL Champions' }
     ],
-    homeGrounds: ['Arun Jaitley Stadium', 'Rajiv Gandhi International Stadium']
+    homeGrounds: ['Rajiv Gandhi International Stadium, Hyderabad']
   },
   {
     id: '4',
@@ -89,7 +89,7 @@ export const mockTeams: Team[] = [
     trophies: [
       { year: 2022, name: 'IPL Champions' }
     ],
-    homeGrounds: ['Arun Jaitley Stadium', 'Narendra Modi Stadium']
+    homeGrounds: ['Narendra Modi Stadium, Ahmedabad']
   },
   {
     id: '5',
@@ -102,7 +102,7 @@ export const mockTeams: Team[] = [
     colors: { primary: '#ED1D24', secondary: '#FBDD0B' },
     players: [],
     trophies: [],
-    homeGrounds: ['PCA Stadium', 'Arun Jaitley Stadium']
+    homeGrounds: ['Punjab Cricket Association Stadium, Mohali']
   },
   {
     id: '6',
@@ -115,7 +115,7 @@ export const mockTeams: Team[] = [
     colors: { primary: '#0078BC', secondary: '#EF1B26' },
     players: [],
     trophies: [],
-    homeGrounds: ['Arun Jaitley Stadium']
+    homeGrounds: ['Arun Jaitley Stadium, Delhi']
   },
   {
     id: '7',
@@ -127,7 +127,7 @@ export const mockTeams: Team[] = [
     colors: { primary: '#9C2A2C', secondary: '#F7E17D' },
     players: [],
     trophies: [],
-    homeGrounds: ['ARUN JAITLEY STADIUM', 'Bharat Ratna Shri Atal Bihari Vajpayee Ekana Cricket Stadium']
+    homeGrounds: ['Bharat Ratna Shri Atal Bihari Vajpayee Ekana Cricket Stadium, Lucknow']
   },
   {
     id: '8',
@@ -141,7 +141,7 @@ export const mockTeams: Team[] = [
     trophies: [
       { year: 2008, name: 'IPL Champions' }
     ],
-    homeGrounds: ['Arun Jaitley Stadium', 'Sawai Mansingh Stadium']
+    homeGrounds: ['Sawai Mansingh Stadium, Jaipur']
   },
   {
     id: '9',
@@ -154,9 +154,10 @@ export const mockTeams: Team[] = [
     players: [],
     trophies: [
       { year: 2012, name: 'IPL Champions' },
-      { year: 2014, name: 'IPL Champions' }
+      { year: 2014, name: 'IPL Champions' },
+      { year: 2024, name: 'IPL Champions' }
     ],
-    homeGrounds: ['Eden Gardens']
+    homeGrounds: ['Eden Gardens, Kolkata']
   },
   {
     id: '10',
@@ -171,9 +172,10 @@ export const mockTeams: Team[] = [
       { year: 2010, name: 'IPL Champions' },
       { year: 2011, name: 'IPL Champions' },
       { year: 2018, name: 'IPL Champions' },
-      { year: 2021, name: 'IPL Champions' }
+      { year: 2021, name: 'IPL Champions' },
+      { year: 2023, name: 'IPL Champions' }
     ],
-    homeGrounds: ['M. A. Chidambaram Stadium']
+    homeGrounds: ['M. A. Chidambaram Stadium, Chennai']
   },
   {
     id: '16',
@@ -185,7 +187,7 @@ export const mockTeams: Team[] = [
     colors: { primary: '#F28C28', secondary: '#1B365D' },
     players: [],
     trophies: [],
-    homeGrounds: ['Saurashtra Cricket Association Stadium']
+    homeGrounds: ['Saurashtra Cricket Association Stadium, Rajkot']
   },
   {
     id: '17',
@@ -198,7 +200,7 @@ export const mockTeams: Team[] = [
     colors: { primary: '#6A1B9A', secondary: '#F06292' },
     players: [],
     trophies: [],
-    homeGrounds: ['Maharashtra Cricket Association Stadium']
+    homeGrounds: ['Maharashtra Cricket Association Stadium, Pune']
   },
   {
     id: '18',
@@ -212,7 +214,7 @@ export const mockTeams: Team[] = [
     trophies: [
       { year: 2009, name: 'IPL Champions' }
     ],
-    homeGrounds: ['Rajiv Gandhi International Stadium']
+    homeGrounds: ['Rajiv Gandhi International Stadium, Hyderabad']
   },
   {
     id: '19',
@@ -236,7 +238,7 @@ export const mockTeams: Team[] = [
     colors: { primary: '#2563EB', secondary: '#FACC15' },
     players: [],
     trophies: [],
-    homeGrounds: ['Maharashtra Cricket Association Stadium']
+    homeGrounds: ['Maharashtra Cricket Association Stadium, Pune']
   },
   // WPL Teams
   {
@@ -248,7 +250,12 @@ export const mockTeams: Team[] = [
     description: 'The women\'s franchise of Mumbai Indians bringing championship pedigree',
     colors: { primary: '#004BA0', secondary: '#FFD700' },
     players: [],
-    trophies: [],
+    trophies: [
+      {
+        year: 2023,
+        name: 'WPL Champions'
+      }
+    ],
     homeGrounds: ['Wankhede Stadium, Mumbai']
   },
   {
