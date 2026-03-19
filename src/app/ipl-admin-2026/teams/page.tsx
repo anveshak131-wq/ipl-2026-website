@@ -250,13 +250,14 @@ export default function AdminTeams() {
         setIsSubmitting(true);
         setError(null);
 
-        try {
-            if (editingTeam) {
-                // When editing, preserve the team's existing league unless explicitly changed
-                const updatedTeam = await api.updateTeam(editingTeam.id, formData);
-                setTeams(teams.map(t => t.id === editingTeam.id ? updatedTeam : t));
-                setSuccess('Team updated successfully');
-            } else {
+	        try {
+	            if (editingTeam) {
+	                // When editing, preserve the team's existing league unless explicitly changed
+	                await api.updateTeam(editingTeam.id, formData);
+	                const refreshedTeams = await api.getTeams(currentLeague);
+	                setTeams(refreshedTeams);
+	                setSuccess('Team updated successfully');
+	            } else {
                 // When creating, always use currentLeague from context to ensure correct league assignment
                 const teamData = {
                     ...formData,
@@ -276,9 +277,9 @@ export default function AdminTeams() {
 
             setShowSlideOver(false);
             setTimeout(() => setSuccess(null), 3000);
-        } catch (err: any) {
-            const errorMessage = err?.message || (editingTeam ? 'Failed to update team' : 'Failed to create team');
-            setError(errorMessage);
+	        } catch (err: any) {
+	            const errorMessage = err?.message || (editingTeam ? 'Failed to update team' : 'Failed to create team');
+	            setError(errorMessage);
             console.error('Team submission error:', err);
             
             // Log additional details for debugging
@@ -294,7 +295,7 @@ export default function AdminTeams() {
         }
     };
 
-    const handleDeleteTeam = async (teamId: string) => {
+	    const handleDeleteTeam = async (teamId: string) => {
         if (!confirm('Are you sure you want to delete this team?')) return;
 
         setIsSubmitting(true);
@@ -310,15 +311,15 @@ export default function AdminTeams() {
             });
             setSuccess('Team deleted successfully');
             setTimeout(() => setSuccess(null), 3000);
-        } catch (err) {
-            setError('Failed to delete team');
-            console.error('Team deletion error:', err);
-        } finally {
+	        } catch (err) {
+	            setError((err as any)?.message || 'Failed to delete team');
+	            console.error('Team deletion error:', err);
+	        } finally {
             setIsSubmitting(false);
         }
     };
 
-    const handleBulkDelete = async () => {
+	    const handleBulkDelete = async () => {
         if (selectedTeams.size === 0) return;
         if (!confirm(`Are you sure you want to delete ${selectedTeams.size} team(s)?`)) return;
 
@@ -331,10 +332,10 @@ export default function AdminTeams() {
             setSelectedTeams(new Set());
             setSuccess(`${selectedTeams.size} team(s) deleted successfully`);
             setTimeout(() => setSuccess(null), 3000);
-        } catch (err) {
-            setError('Failed to delete teams');
-            console.error('Bulk deletion error:', err);
-        } finally {
+	        } catch (err) {
+	            setError((err as any)?.message || 'Failed to delete teams');
+	            console.error('Bulk deletion error:', err);
+	        } finally {
             setIsSubmitting(false);
         }
     };
@@ -932,14 +933,15 @@ export default function AdminTeams() {
                                                 </div>
                                                 <div className="flex-1 min-w-0">
                                                     <h3 className="font-semibold text-white text-lg mb-1">{team.name}</h3>
-                                                    <div className="flex items-center gap-2 mb-2">
-                                                        <span className="inline-flex items-center px-3 py-1 rounded-lg text-sm font-semibold bg-gradient-to-r from-purple-500/10 to-violet-500/10 text-purple-300 border border-purple-500/20">
-                                                            {team.shortName}
-                                                        </span>
-                                                        <span className="text-xs text-gray-400">{currentLeague.toUpperCase()}</span>
-                                                    </div>
-                                                </div>
-                                            </div>
+	                                                    <div className="flex items-center gap-2 mb-2">
+	                                                        <span className="inline-flex items-center px-3 py-1 rounded-lg text-sm font-semibold bg-gradient-to-r from-purple-500/10 to-violet-500/10 text-purple-300 border border-purple-500/20">
+	                                                            {team.shortName}
+	                                                        </span>
+	                                                        <span className="text-xs text-gray-400">{currentLeague.toUpperCase()}</span>
+	                                                        <span className="text-xs text-gray-500">ID: {team.id}</span>
+	                                                    </div>
+	                                                </div>
+	                                            </div>
                                             <p className="text-sm text-gray-300 mb-4 line-clamp-2 leading-relaxed">
                                                 {team.description || <span className="text-gray-500 italic">No description</span>}
                                             </p>

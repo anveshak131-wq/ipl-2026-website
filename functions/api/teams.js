@@ -28,6 +28,74 @@ function normalizeLeague(value, id) {
   return WPL_TEAM_IDS.has(normalizedId) ? 'wpl' : 'ipl';
 }
 
+function toTimestamp(value) {
+  if (!value) return 0;
+  const parsed = Date.parse(String(value));
+  return Number.isNaN(parsed) ? 0 : parsed;
+}
+
+function selectBestTeamMatch(teams, query) {
+  const rawQuery = String(query ?? '').trim();
+  if (!rawQuery) return null;
+
+  const normalizedIdQuery = normalizeTeamId(rawQuery);
+  const isNumericQuery = /^\d+$/.test(normalizedIdQuery);
+  const slugLower = rawQuery.toLowerCase();
+
+  let best = null;
+  let bestScore = -1;
+  let bestUpdatedAt = 0;
+
+  for (const team of teams || []) {
+    if (!team) continue;
+
+    const teamId = normalizeTeamId(team.id);
+    const shortNameLower = String(team.shortName || '').toLowerCase();
+    const nameLower = String(team.name || '').toLowerCase();
+    const aliasesLower = Array.isArray(team.aliases)
+      ? team.aliases.map((a) => String(a || '').toLowerCase())
+      : [];
+
+    let score = 0;
+
+    if (isNumericQuery) {
+      if (teamId === normalizedIdQuery) score = 100;
+    } else if (shortNameLower) {
+      if (shortNameLower === slugLower) score = 100;
+      else if (shortNameLower.replace('-w', '') === slugLower) score = 90;
+      else if (
+        shortNameLower.includes(slugLower) ||
+        slugLower.includes(shortNameLower.replace('-w', ''))
+      )
+        score = 70;
+    }
+
+    if (score === 0 && nameLower) {
+      if (nameLower === slugLower) score = 60;
+      else if (nameLower.includes(slugLower)) score = 40;
+    }
+
+    if (score === 0 && aliasesLower.length > 0) {
+      if (aliasesLower.includes(slugLower)) score = 50;
+    }
+
+    if (score === 0) continue;
+
+    const updatedAt = Math.max(toTimestamp(team.updatedAt), toTimestamp(team.createdAt));
+    if (
+      score > bestScore ||
+      (score === bestScore && updatedAt > bestUpdatedAt) ||
+      (score === bestScore && updatedAt === bestUpdatedAt && teamId && best && teamId < normalizeTeamId(best.id))
+    ) {
+      best = team;
+      bestScore = score;
+      bestUpdatedAt = updatedAt;
+    }
+  }
+
+  return best;
+}
+
 function getBearerToken(request) {
   const authHeader =
     request.headers.get('Authorization') || request.headers.get('authorization') || '';
@@ -373,15 +441,15 @@ async function loadTeams(env) {
   const storedTeams = await readTeamsFromKV(env);
 
   if (!storedTeams || storedTeams.length === 0) {
-    await writeTeamsToKV(env, seedTeams);
-    return seedTeams;
+    const persisted = await writeTeamsToKV(env, seedTeams);
+    return { teams: seedTeams, source: persisted ? 'seeded' : 'seed-only' };
   }
 
   const { teams: merged, changed } = mergeSeedIntoStored(seedTeams, storedTeams);
   if (changed) {
     await writeTeamsToKV(env, merged);
   }
-  return merged;
+  return { teams: merged, source: 'kv' };
 }
 
 function filterTeamsForQuery(teams, league, includeHistorical) {
@@ -426,10 +494,18 @@ export async function onRequest(context) {
   if (method === 'GET') {
     const league = url.searchParams.get('league');
     const includeHistorical = url.searchParams.get('includeHistorical') === 'true';
+    const teamQuery = url.searchParams.get('teamId');
 
-    const allTeams = await loadTeams(env);
+    const loaded = await loadTeams(env);
+    const allTeams = loaded.teams;
+    const source = loaded.source;
+
     const responseTeams = filterTeamsForQuery(allTeams, league, includeHistorical);
-    return json(responseTeams);
+    if (teamQuery) {
+      const best = selectBestTeamMatch(responseTeams, teamQuery);
+      return json(best ? [best] : [], 200, { 'X-Teams-Source': source });
+    }
+    return json(responseTeams, 200, { 'X-Teams-Source': source });
   }
 
   // Admin-only mutations (basic bearer presence check).
@@ -455,7 +531,8 @@ export async function onRequest(context) {
       return json({ error: 'Invalid JSON body' }, 400);
     }
 
-    const teams = await loadTeams(env);
+    const loaded = await loadTeams(env);
+    const teams = loaded.teams;
     const nextId = getNextNumericId(teams);
     const league = normalizeLeague(body?.league, nextId);
     const createdTeam = {
@@ -495,7 +572,8 @@ export async function onRequest(context) {
       return json({ error: 'id is required' }, 400);
     }
 
-    const teams = await loadTeams(env);
+    const loaded = await loadTeams(env);
+    const teams = loaded.teams;
     const index = teams.findIndex((team) => normalizeTeamId(team?.id) === normalizedId);
 
     const nowIso = new Date().toISOString();
@@ -553,7 +631,8 @@ export async function onRequest(context) {
       return json({ error: 'id query param is required' }, 400);
     }
 
-    const teams = await loadTeams(env);
+    const loaded = await loadTeams(env);
+    const teams = loaded.teams;
     const remaining = teams.filter((team) => normalizeTeamId(team?.id) !== normalizedId);
     if (remaining.length === teams.length) {
       return json({ error: 'Team not found' }, 404);

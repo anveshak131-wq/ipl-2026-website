@@ -963,7 +963,11 @@ export const api = {
         body: JSON.stringify({ id, ...team })
       });
       if (!response.ok) {
-        throw new Error('Failed to update team');
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+        const message =
+          (errorData && (errorData.error || errorData.message)) ||
+          `Failed to update team: ${response.status} ${response.statusText}`;
+        throw new Error(message);
       }
       return await response.json();
     } catch (error) {
@@ -985,7 +989,11 @@ export const api = {
         }
       });
       if (!response.ok) {
-        throw new Error('Failed to delete team');
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+        const message =
+          (errorData && (errorData.error || errorData.message)) ||
+          `Failed to delete team: ${response.status} ${response.statusText}`;
+        throw new Error(message);
       }
     } catch (error) {
       console.error('Error deleting team:', error);

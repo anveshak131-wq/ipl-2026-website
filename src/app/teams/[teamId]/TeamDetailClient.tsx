@@ -291,8 +291,10 @@ export default function TeamDetailClient({ teamId, league }: TeamDetailClientPro
         const shortNameUpper = teamId.toUpperCase();
         const shortNameLower = teamId.toLowerCase();
         
-        // Fetch teams with league filter if provided
-        const baseTeamsUrl = league ? `/api/teams?league=${league}` : '/api/teams';
+        // Fetch teams with league filter if provided (and ask API to resolve this teamId)
+        const baseTeamsUrl = league
+          ? `/api/teams?league=${league}&teamId=${encodeURIComponent(teamId)}`
+          : `/api/teams?teamId=${encodeURIComponent(teamId)}`;
         const teamsUrl = `${baseTeamsUrl}${baseTeamsUrl.includes('?') ? '&' : '?'}_=${Date.now()}`;
         console.log('TeamDetailClient: Fetching from URL:', teamsUrl);
         
