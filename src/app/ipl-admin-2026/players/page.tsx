@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, ReactNode } from 'react';
+import { useState, useEffect, useMemo, ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import { useLeague } from '@/contexts/LeagueContext';
 import ModernDialog from '@/components/admin/ModernDialog';
@@ -9,6 +9,7 @@ import WPLTeamsManager from '@/components/admin/WPLTeamsManager';
 import { Player, Team } from '@/types';
 import { api } from '@/lib/data';
 import { sortPlayersByRoleAndAge } from '@/lib/playerSort';
+import { computeRoleRawScore, applyReliability, gradeFromPercentile } from '@/lib/playerRanking';
 import { parseDateDDMMYYYY, calculateAge, isValidDate, formatDateMonthDDYYYY, parseDateMonthDDYYYY, isValidDateForLeague } from '@/lib/dateUtils';
 import { CustomEmoji } from '@/components/emoji/Emoji';
 import FlagImage from '@/components/ui/FlagImage';
@@ -253,90 +254,113 @@ export default function AdminPlayers() {
   }, []);
 
   // Performance helper functions
-  const getPerformanceColor = (player: Player): string => {
-    const runs = player.stats?.runs || 0;
-    const wickets = player.stats?.wickets || 0;
-    const average = parseFloat(player.stats?.average) || 0;
-    
-    if (player.role === 'Batsman' || player.role === 'Wicket-keeper') {
-      if (runs > 500) return '#10B981'; // Green - Excellent
-      if (runs > 300) return '#3B82F6'; // Blue - Good
-      if (runs > 100) return '#F59E0B'; // Yellow - Average
-      return '#EF4444'; // Red - Poor
-    } else if (player.role === 'Bowler') {
-      if (wickets > 20) return '#10B981';
-      if (wickets > 10) return '#3B82F6';
-      if (wickets > 5) return '#F59E0B';
-      return '#EF4444';
-    } else { // All-rounder
-      const performance = (runs / 10) + (wickets * 5);
-      if (performance > 100) return '#10B981';
-      if (performance > 50) return '#3B82F6';
-      if (performance > 25) return '#F59E0B';
-      return '#EF4444';
+  const performanceMetaByPlayerId = useMemo(() => {
+    const map = new Map<string, {
+      score: number;
+      grade: string;
+      label: string;
+      color: string;
+      textColor: string;
+    }>();
+
+    for (const player of players) {
+      const raw = computeRoleRawScore(player);
+      const matches = Number(player.stats?.matches || 0);
+      const score = Math.round(applyReliability(raw, matches));
+      const league = player.league || currentLeague || 'ipl';
+      const grade = gradeFromPercentile(score, player.role, league, players);
+
+      const label = grade === 'A'
+        ? 'Excellent'
+        : grade === 'B'
+          ? 'Good'
+          : grade === 'C'
+            ? 'Average'
+            : 'Poor';
+
+      const color = grade === 'A'
+        ? '#10B981'
+        : grade === 'B'
+          ? '#3B82F6'
+          : grade === 'C'
+            ? '#F59E0B'
+            : '#EF4444';
+
+      const textColor = grade === 'A'
+        ? 'text-green-400'
+        : grade === 'B'
+          ? 'text-blue-400'
+          : grade === 'C'
+            ? 'text-yellow-400'
+            : 'text-red-400';
+
+      map.set(String(player.id), {
+        score,
+        grade,
+        label,
+        color,
+        textColor
+      });
     }
+
+    return map;
+  }, [players, currentLeague]);
+
+  const getPerformanceMeta = (player: Player) => {
+    const cached = performanceMetaByPlayerId.get(String(player.id));
+    if (cached) return cached;
+
+    const raw = computeRoleRawScore(player);
+    const matches = Number(player.stats?.matches || 0);
+    const score = Math.round(applyReliability(raw, matches));
+    const league = player.league || currentLeague || 'ipl';
+    const grade = gradeFromPercentile(score, player.role, league, players.length > 0 ? players : [player]);
+
+    const label = grade === 'A'
+      ? 'Excellent'
+      : grade === 'B'
+        ? 'Good'
+        : grade === 'C'
+          ? 'Average'
+          : 'Poor';
+
+    const color = grade === 'A'
+      ? '#10B981'
+      : grade === 'B'
+        ? '#3B82F6'
+        : grade === 'C'
+          ? '#F59E0B'
+          : '#EF4444';
+
+    const textColor = grade === 'A'
+      ? 'text-green-400'
+      : grade === 'B'
+        ? 'text-blue-400'
+        : grade === 'C'
+          ? 'text-yellow-400'
+          : 'text-red-400';
+
+    return { score, grade, label, color, textColor };
+  };
+
+  const getPerformanceColor = (player: Player): string => {
+    return getPerformanceMeta(player).color;
   };
 
   const getPerformanceIndicator = (player: Player): string => {
-    const runs = player.stats?.runs || 0;
-    const wickets = player.stats?.wickets || 0;
-    
-    if (player.role === 'Batsman' || player.role === 'Wicket-keeper') {
-      if (runs > 500) return 'A';
-      if (runs > 300) return 'B';
-      if (runs > 100) return 'C';
-      return 'D';
-    } else if (player.role === 'Bowler') {
-      if (wickets > 20) return 'A';
-      if (wickets > 10) return 'B';
-      if (wickets > 5) return 'C';
-      return 'D';
-    } else { // All-rounder
-      const performance = (runs / 10) + (wickets * 5);
-      if (performance > 100) return 'A';
-      if (performance > 50) return 'B';
-      if (performance > 25) return 'C';
-      return 'D';
-    }
+    return getPerformanceMeta(player).grade;
   };
 
   const getPerformanceLabel = (player: Player): string => {
-    const indicator = getPerformanceIndicator(player);
-    switch (indicator) {
-      case 'A': return 'Excellent';
-      case 'B': return 'Good';
-      case 'C': return 'Average';
-      case 'D': return 'Poor';
-      default: return 'Unknown';
-    }
+    return getPerformanceMeta(player).label;
   };
 
   const getPerformanceTextColor = (player: Player): string => {
-    const indicator = getPerformanceIndicator(player);
-    switch (indicator) {
-      case 'A': return 'text-green-400';
-      case 'B': return 'text-blue-400';
-      case 'C': return 'text-yellow-400';
-      case 'D': return 'text-red-400';
-      default: return 'text-gray-400';
-    }
+    return getPerformanceMeta(player).textColor;
   };
 
   const getRecentFormScore = (player: Player): number => {
-    const runs = player.stats?.runs || 0;
-    const wickets = player.stats?.wickets || 0;
-
-    if (player.role === 'Batsman' || player.role === 'Wicket-keeper') {
-      return Math.max(0, Math.min(100, Math.round((runs / 600) * 100)));
-    }
-
-    if (player.role === 'Bowler') {
-      return Math.max(0, Math.min(100, Math.round((wickets / 25) * 100)));
-    }
-
-    const battingComponent = Math.min(60, (runs / 500) * 60);
-    const bowlingComponent = Math.min(40, (wickets / 20) * 40);
-    return Math.max(0, Math.min(100, Math.round(battingComponent + bowlingComponent)));
+    return getPerformanceMeta(player).score;
   };
 
   const renderRecentFormBand = (player: Player, size: 'sm' | 'md' = 'sm'): ReactNode => {
