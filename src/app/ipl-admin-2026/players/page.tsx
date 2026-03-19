@@ -2313,97 +2313,88 @@ export default function AdminPlayers() {
       return String(value);
     };
 
-    const playerIdentityColumns = ['id', 'name', 'role', 'teamShortName'];
+    // Identity columns that repeat on each column-part page
+    const identityColumns = ['id', 'name', 'role', 'teamShortName'];
 
-    const pdfColumnGroups = [
-      [
-        'id',
-        'name',
-        'role',
-        'allrounderType',
-        'teamId',
-        'teamName',
-        'teamShortName',
-        'age',
-        'dateOfBirth',
-        'nationality',
-        'jerseyNumber',
-        'isCaptain'
-      ],
-      [
-        ...playerIdentityColumns,
-        'battingStyle',
-        'bowlingStyle',
-        'league',
-        'photoUrl',
-        'matches',
-        'runs',
-        'wickets',
-        'average',
-        'bowlingAverage',
-        'strikeRate',
-        'economy'
-      ],
-      [
-        ...playerIdentityColumns,
-        'highest',
-        'fours',
-        'sixes',
-        'fifties',
-        'hundreds',
-        'bestBowling',
-        'maidens',
-        'fiveWickets',
-        'lastAuctionYear',
-        'acquiredVia',
-        'transferable',
-        'transferFee',
-        'transferNotes',
-        'performanceGrade',
-        'performanceLabel',
-        'performanceColor'
-      ]
-    ].map(group =>
-      group
-        .map(key => exportColumns.find(column => column.key === key))
-        .filter(Boolean) as Array<(typeof exportColumns)[number]>
-    );
+    // All non-identity columns for the remaining data parts
+    const dataColumns = exportColumns.filter(col => !identityColumns.includes(col.key));
 
-    const rowsPerChunk = 18;
-    const rowChunks: typeof rows[] = rows.reduce((chunks: typeof rows[], row, index) => {
-      const chunkIndex = Math.floor(index / rowsPerChunk);
-      if (!chunks[chunkIndex]) chunks[chunkIndex] = [];
-      chunks[chunkIndex].push(row);
-      return chunks;
-    }, []);
+    // Estimate columns per page (landscape a4, accounting for width constraints)
+    // Typically ~8-10 columns fit comfortably
+    const columnsPerPage = 9;
 
-    rowChunks.forEach((rowChunk, chunkIndex) => {
-      pdfColumnGroups.forEach((pdfColumns, groupIndex) => {
+    // Split data columns into parts
+    const columnParts: Array<Array<(typeof exportColumns)[number]>> = [];
+    for (let i = 0; i < dataColumns.length; i += columnsPerPage) {
+      const part = dataColumns.slice(i, i + columnsPerPage);
+      columnParts.push(part);
+    }
+
+    // Group players by team, then by batches of 10 per team
+    const playersByTeam = rows.reduce((acc, row) => {
+      const team = row.teamName as string || 'Unknown';
+      if (!acc[team]) acc[team] = [];
+      acc[team].push(row);
+      return acc;
+    }, {} as Record<string, typeof rows>);
+
+    const teamsInOrder = Object.keys(playersByTeam).sort();
+    const teamBatches: Array<{ team: string; batch: typeof rows[]; batchIndex: number; totalBatches: number }> = [];
+
+    teamsInOrder.forEach(team => {
+      const teamPlayers = playersByTeam[team];
+      const playersPerBatch = 10;
+      const totalBatches = Math.ceil(teamPlayers.length / playersPerBatch);
+
+      for (let batchIndex = 0; batchIndex < totalBatches; batchIndex += 1) {
+        const start = batchIndex * playersPerBatch;
+        const end = Math.min(start + playersPerBatch, teamPlayers.length);
+        const batch = teamPlayers.slice(start, end);
+        teamBatches.push({
+          team,
+          batch,
+          batchIndex,
+          totalBatches
+        });
+      }
+    });
+
+    // Render each team batch with all columns split across multiple pages
+    teamBatches.forEach(({ team, batch, batchIndex, totalBatches }) => {
+      columnParts.forEach((columnPart, partIndex) => {
         doc.addPage();
         const tableStartY = 120;
-        const startPlayerNumber = chunkIndex * rowsPerChunk + 1;
-        const endPlayerNumber = startPlayerNumber + rowChunk.length - 1;
-        const firstPlayerName = formatPdfCell('name', rowChunk[0]?.name) || `Player ${startPlayerNumber}`;
-        const lastPlayerName = formatPdfCell('name', rowChunk[rowChunk.length - 1]?.name) || `Player ${endPlayerNumber}`;
-        const groupTitle = `Players ${startPlayerNumber}-${endPlayerNumber} • Data ${groupIndex + 1} of ${pdfColumnGroups.length}`;
-        const playerMeta = `${firstPlayerName} to ${lastPlayerName} • ${rowChunk.length} players`;
-        const groupSubtitle = pdfColumns.map(column => column.label).join(' • ');
+
+        // Combine identity columns with current data part
+        const displayColumns = [
+          ...identityColumns.map(key => exportColumns.find(col => col.key === key)).filter(Boolean) as Array<(typeof exportColumns)[number]>,
+          ...columnPart
+        ];
+
+        const firstPlayerName = formatPdfCell('name', batch[0]?.name) || 'Player';
+        const lastPlayerName = formatPdfCell('name', batch[batch.length - 1]?.name) || 'Player';
+        const batchTitle = `${team} • Batch ${batchIndex + 1} of ${totalBatches} • ${batch.length} players`;
+        const playerMeta = `${firstPlayerName} to ${lastPlayerName}`;
+        const partLabel = `Data Part ${partIndex + 1} of ${columnParts.length}`;
+        const columnLabels = displayColumns.map(column => column.label).join(' • ');
 
         doc.setFont('helvetica', 'bold');
         doc.setFontSize(13);
         doc.setTextColor(60, 36, 16);
-        doc.text(groupTitle, 40, 92);
+        doc.text(batchTitle, 40, 92);
+
         doc.setFont('helvetica', 'normal');
         doc.setFontSize(8);
         doc.setTextColor(...theme.mutedText);
         doc.text(playerMeta, 40, 104, { maxWidth: pageWidth - 80 });
-        doc.text(groupSubtitle, 40, 116, { maxWidth: pageWidth - 80 });
+        doc.text(partLabel, 40, 110);
+        doc.text(columnLabels, 40, 116, { maxWidth: pageWidth - 80 });
 
-        const pdfRows = rowChunk.map(row =>
-          pdfColumns.map(column => formatPdfCell(column.key, (row as any)[column.key]))
+        const pdfRows = batch.map(row =>
+          displayColumns.map(column => formatPdfCell(column.key, (row as any)[column.key]))
         );
 
-        const columnStyles = pdfColumns.reduce((acc, column, index) => {
+        const columnStyles = displayColumns.reduce((acc, column, index) => {
           if (numericFields.has(column.key) || decimalFields.has(column.key)) {
             acc[index] = { halign: 'right' };
           } else if (column.key === 'isCaptain' || column.key === 'transferable') {
@@ -2413,7 +2404,7 @@ export default function AdminPlayers() {
         }, {} as Record<number, { halign: 'right' | 'center' }>);
 
         autoTable(doc, {
-          head: [pdfColumns.map(column => column.label)],
+          head: [displayColumns.map(column => column.label)],
           body: pdfRows,
           startY: tableStartY,
           margin: { top: 90, left: 40, right: 40, bottom: 50 },
