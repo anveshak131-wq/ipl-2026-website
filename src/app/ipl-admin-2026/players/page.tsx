@@ -322,15 +322,56 @@ export default function AdminPlayers() {
     }
   };
 
-  const generatePerformanceBars = (player: Player): number[] => {
-    // Generate 5 bars representing recent performance (simulated data)
-    const basePerformance = getPerformanceIndicator(player);
-    const baseValue = basePerformance === 'A' ? 80 : basePerformance === 'B' ? 60 : basePerformance === 'C' ? 40 : 20;
-    
-    return Array.from({ length: 5 }, (_, i) => {
-      const variation = Math.random() * 40 - 20; // -20 to +20 variation
-      return Math.max(10, Math.min(100, baseValue + variation));
-    });
+  const getRecentFormScore = (player: Player): number => {
+    const runs = player.stats?.runs || 0;
+    const wickets = player.stats?.wickets || 0;
+
+    if (player.role === 'Batsman' || player.role === 'Wicket-keeper') {
+      return Math.max(0, Math.min(100, Math.round((runs / 600) * 100)));
+    }
+
+    if (player.role === 'Bowler') {
+      return Math.max(0, Math.min(100, Math.round((wickets / 25) * 100)));
+    }
+
+    const battingComponent = Math.min(60, (runs / 500) * 60);
+    const bowlingComponent = Math.min(40, (wickets / 20) * 40);
+    return Math.max(0, Math.min(100, Math.round(battingComponent + bowlingComponent)));
+  };
+
+  const renderRecentFormBand = (player: Player, size: 'sm' | 'md' = 'sm'): ReactNode => {
+    const score = getRecentFormScore(player);
+    const markerSizeClass = size === 'md' ? 'w-3.5 h-3.5' : 'w-3 h-3';
+    const trackHeightClass = size === 'md' ? 'h-3.5' : 'h-3';
+    const textSizeClass = size === 'md' ? 'text-xs' : 'text-[11px]';
+
+    return (
+      <div>
+        <div className={`relative ${trackHeightClass} rounded-full overflow-hidden border border-white/15 bg-white/5`}>
+          <div className="absolute inset-y-0 left-0 w-1/4 bg-red-500/60" />
+          <div className="absolute inset-y-0 left-1/4 w-1/4 bg-amber-500/60" />
+          <div className="absolute inset-y-0 left-2/4 w-1/4 bg-sky-500/60" />
+          <div className="absolute inset-y-0 left-3/4 w-1/4 bg-emerald-500/60" />
+          <div
+            className={`absolute top-1/2 ${markerSizeClass} rounded-full border-2 border-white shadow-lg`}
+            style={{
+              left: `${score}%`,
+              transform: 'translate(-50%, -50%)',
+              backgroundColor: getPerformanceColor(player)
+            }}
+          />
+        </div>
+        <div className="mt-1.5 flex justify-between text-[10px] text-gray-400 font-medium">
+          <span>Poor</span>
+          <span>Average</span>
+          <span>Good</span>
+          <span>Excellent</span>
+        </div>
+        <div className={`mt-1 ${textSizeClass} text-gray-300`}>
+          Form score: <span className="font-semibold text-white">{score}/100</span>
+        </div>
+      </div>
+    );
   };
 
   // Virtualized Player Card Component - simplified for stability
@@ -4501,19 +4542,10 @@ export default function AdminPlayers() {
                               {getPerformanceLabel(player)}
                             </span>
                           </div>
-                          <div className="flex gap-1 h-8">
-                            {generatePerformanceBars(player).map((height, index) => (
-                              <div
-                                key={index}
-                                className="flex-1 rounded-t transition-all duration-300 hover:opacity-80"
-                                style={{
-                                  height: `${height}%`,
-                                  background: `linear-gradient(to top, ${team?.colors?.primary || '#3B82F6'}, ${team?.colors?.secondary || '#8B5CF6'})`,
-                                  opacity: height > 0 ? 1 : 0.3
-                                }}
-                              />
-                            ))}
-                          </div>
+                          {renderRecentFormBand(player, 'sm')}
+                          <p className="mt-2 text-[10px] text-gray-500">
+                            Based on season aggregate stats, not match-by-match trend.
+                          </p>
                         </div>
 
                         {/* Stats Preview */}
@@ -6444,24 +6476,15 @@ export default function AdminPlayers() {
             <div className="p-4 bg-gray-800/50 rounded-xl border border-white/10">
               <h4 className="text-lg font-semibold text-white mb-3">Recent Form</h4>
               <div className="flex items-center justify-between mb-2">
-                <span className="text-sm text-gray-400">Performance Trend</span>
+                <span className="text-sm text-gray-400">Season Form Snapshot</span>
                 <span className={`text-sm font-bold ${getPerformanceTextColor(selectedPlayerForDetails)}`}>
                   {getPerformanceLabel(selectedPlayerForDetails)}
                 </span>
               </div>
-              <div className="flex gap-1 h-12">
-                {generatePerformanceBars(selectedPlayerForDetails).map((height, index) => (
-                  <div
-                    key={index}
-                    className="flex-1 rounded-t transition-all duration-300 hover:opacity-80"
-                    style={{
-                      height: `${height}%`,
-                      background: `linear-gradient(to top, ${teams.find(t => String(t.id) === String(selectedPlayerForDetails.teamId))?.colors?.primary || '#3B82F6'}, ${teams.find(t => String(t.id) === String(selectedPlayerForDetails.teamId))?.colors?.secondary || '#8B5CF6'})`,
-                      opacity: height > 0 ? 1 : 0.3
-                    }}
-                  />
-                ))}
-              </div>
+              {renderRecentFormBand(selectedPlayerForDetails, 'md')}
+              <p className="mt-3 text-xs text-gray-500">
+                Based on season aggregate stats, not match-by-match trend.
+              </p>
           </div>
         </div>
         )}
