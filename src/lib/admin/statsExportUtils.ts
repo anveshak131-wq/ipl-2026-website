@@ -384,13 +384,14 @@ const buildPdf = (rows: ExportRow[], options: ExportOptions) => {
   const keyColumns: readonly Column[] = [
     ['ID', 'id'],
     ['Player', 'name'],
-    ['Team', 'teamName']
+    ['Team', 'teamShortName']
   ];
-  const keyKeys = new Set<keyof ExportRow>(['id', 'name', 'teamName']);
+  // Keep the PDF compact: repeat ID/Player/Team short code, and omit long team name from the table.
+  const keyKeys = new Set<keyof ExportRow>(['id', 'name', 'teamShortName', 'teamName']);
   const extraColumns = getColumns(options.kind).filter(([, key]) => !keyKeys.has(key));
 
   const usableWidth = pageWidth - marginX * 2;
-  const keyColumnWidths = { id: 56, name: 170, team: 130 };
+  const keyColumnWidths = { id: 56, name: 182, team: 72 };
   const keyWidthTotal = keyColumnWidths.id + keyColumnWidths.name + keyColumnWidths.team;
   const extraMinWidth = 88;
   const extrasPerPart = Math.max(1, Math.floor((usableWidth - keyWidthTotal) / extraMinWidth));
@@ -498,9 +499,7 @@ const buildPdf = (rows: ExportRow[], options: ExportOptions) => {
     const bucket = teamBuckets.get(teamKey);
     if (!bucket) return;
 
-    const teamName = bucket.shortName && bucket.displayName && bucket.displayName.toUpperCase() !== bucket.shortName
-      ? `${bucket.shortName} • ${bucket.displayName}`
-      : bucket.displayName || bucket.shortName || teamKey;
+    const teamName = bucket.shortName || bucket.displayName || teamKey;
     const teamRows = bucket.rows;
     const batchTotal = Math.max(1, Math.ceil(teamRows.length / rowsPerPage));
 
