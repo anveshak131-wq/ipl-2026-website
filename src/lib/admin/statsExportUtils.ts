@@ -397,34 +397,95 @@ const buildPdf = (rows: ExportRow[], options: ExportOptions) => {
   });
 
   const columns = getColumns(options.kind);
-  autoTable(doc, {
-    startY: 214,
-    head: [columns.map(([label]) => label)],
-    body: rows.map((row) => columns.map(([, key]) => String(row[key as keyof ExportRow] ?? ''))),
-    theme: 'grid',
-    styles: {
-      fontSize: 7,
-      cellPadding: 5,
-      textColor: palette.text,
-      fillColor: palette.bg,
-      lineColor: palette.grid,
-      lineWidth: 0.5
-    },
-    headStyles: {
-      fillColor: [palette.accent[0], palette.accent[1], palette.accent[2]],
-      textColor: [palette.text[0], palette.text[1], palette.text[2]],
-      fontStyle: 'bold'
-    },
-    alternateRowStyles: {
-      fillColor: [palette.panel[0], palette.panel[1], palette.panel[2]]
-    },
-    margin: { left: 24, right: 24, top: 24, bottom: 24 },
-    didDrawPage: (data) => {
-      setText(palette.muted);
-      doc.setFontSize(8);
-      doc.text(`${isBatting ? 'Batting' : 'Bowling'} export`, 24, pageHeight - 12);
-      doc.text(`Page ${data.pageNumber}`, pageWidth - 24, pageHeight - 12, { align: 'right' });
+  
+  // Split columns into groups to fit on one page
+  const maxColumnsPerPage = 8; // Limit columns to fit comfortably
+  const columnGroups: typeof columns[] = [];
+  
+  // Always include ID, Name, Team in every group
+  const essentialColumns = columns.filter(([label]) => 
+    label === 'ID' || label === 'Name' || label === 'Team Name' || label === 'Team ID'
+  );
+  
+  const otherColumns = columns.filter(([label]) => 
+    label !== 'ID' && label !== 'Name' && label !== 'Team Name' && label !== 'Team ID'
+  );
+  
+  // Create column groups
+  for (let i = 0; i < otherColumns.length; i += maxColumnsPerPage - essentialColumns.length) {
+    const group = [...essentialColumns, ...otherColumns.slice(i, i + maxColumnsPerPage - essentialColumns.length)];
+    columnGroups.push(group);
+  }
+  
+  // Generate table for each column group
+  let currentY = 214;
+  
+  columnGroups.forEach((columnGroup, groupIndex) => {
+    // Add page break if not first group
+    if (groupIndex > 0) {
+      doc.addPage();
+      currentY = 60; // Reset Y position for new page
     }
+    
+    // Add page header with column group info
+    setText(palette.muted);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(12);
+    doc.text(`Player Statistics - Part ${groupIndex + 1}`, 24, currentY - 20);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(10);
+    doc.text(`Columns: ${columnGroup.map(([label]) => label).join(', ')}`, 24, currentY - 10);
+    
+    // Create table for this column group
+    autoTable(doc, {
+      startY: currentY,
+      head: [columnGroup.map(([label]) => label)],
+      body: rows.map((row) => 
+        columnGroup.map(([, key]) => String(row[key as keyof ExportRow] ?? ''))
+      ),
+      theme: 'grid',
+      styles: {
+        fontSize: 8,
+        cellPadding: 4,
+        textColor: palette.text,
+        fillColor: palette.bg,
+        lineColor: palette.grid,
+        lineWidth: 0.5
+      },
+      headStyles: {
+        fillColor: [palette.accent[0], palette.accent[1], palette.accent[2]],
+        textColor: [palette.text[0], palette.text[1], palette.text[2]],
+        fontStyle: 'bold',
+        fontSize: 9
+      },
+      alternateRowStyles: {
+        fillColor: [palette.panel[0], palette.panel[1], palette.panel[2]]
+      },
+      margin: { left: 24, right: 24, top: 24, bottom: 40 },
+      columnStyles: columnGroup.reduce((styles, [label], index) => {
+        // Make ID and Name columns wider
+        if (label === 'ID' || label === 'Name') {
+          styles[index] = { cellWidth: 60 };
+        } else if (label === 'Team Name') {
+          styles[index] = { cellWidth: 80 };
+        }
+        return styles;
+      }, {} as Record<number, any>),
+      didDrawPage: (data) => {
+        setText(palette.muted);
+        doc.setFontSize(8);
+        doc.text(`${isBatting ? 'Batting' : 'Bowling'} Stats - Part ${groupIndex + 1}`, 24, pageHeight - 12);
+        doc.text(`Page ${data.pageNumber}`, pageWidth - 24, pageHeight - 12, { align: 'right' });
+        
+        // Add player info footer on each page
+        if (data.pageNumber === Math.ceil(data.table.rowCount / data.table.rows.length)) {
+          doc.setFontSize(9);
+          doc.text(`Total Players: ${rows.length}`, 24, pageHeight - 24);
+        }
+      }
+    });
+    
+    currentY = (doc as any).lastAutoTable.finalY + 30;
   });
 
   return doc.output('arraybuffer');
