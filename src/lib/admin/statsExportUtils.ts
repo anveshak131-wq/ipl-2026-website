@@ -399,14 +399,32 @@ const buildPdf = (rows: ExportRow[], options: ExportOptions) => {
   for (let i = 0; i < extraColumns.length; i += extrasPerPart) parts.push(extraColumns.slice(i, i + extrasPerPart));
   if (parts.length === 0) parts.push([]);
 
-  const teamBuckets = new Map<string, ExportRow[]>();
+  type TeamBucket = { shortName: string; displayName: string; rows: ExportRow[] };
+  const teamBuckets = new Map<string, TeamBucket>();
   rows.forEach((row) => {
-    const teamName = String(row.teamName || 'Unknown');
-    const bucket = teamBuckets.get(teamName) || [];
-    bucket.push(row);
-    teamBuckets.set(teamName, bucket);
+    const shortName = String(row.teamShortName || '').trim().toUpperCase();
+    const displayName = String(row.teamName || shortName || 'Unknown').trim();
+    const key = shortName || displayName.toUpperCase() || 'UNKNOWN';
+    const existing = teamBuckets.get(key);
+    if (existing) {
+      existing.rows.push(row);
+      if (!existing.displayName && displayName) existing.displayName = displayName;
+      return;
+    }
+    teamBuckets.set(key, { shortName: shortName || key, displayName, rows: [row] });
   });
-  const teamNames = Array.from(teamBuckets.keys()).sort((a, b) => a.localeCompare(b));
+
+  const preferredTeamOrder = ['RCB', 'MI', 'SRH', 'GT', 'PBKS', 'DC', 'LSG', 'RR', 'KKR', 'CSK'] as const;
+  const teamOrderIndex = new Map<string, number>(preferredTeamOrder.map((code, idx) => [code, idx]));
+
+  const teamKeys = Array.from(teamBuckets.keys()).sort((a, b) => {
+    const ia = teamOrderIndex.get(a) ?? Number.POSITIVE_INFINITY;
+    const ib = teamOrderIndex.get(b) ?? Number.POSITIVE_INFINITY;
+    if (ia !== ib) return ia - ib;
+    const da = teamBuckets.get(a)?.displayName || a;
+    const db = teamBuckets.get(b)?.displayName || b;
+    return da.localeCompare(db);
+  });
   const rowsPerPage = 10;
 
   const drawHeader = (
@@ -476,8 +494,14 @@ const buildPdf = (rows: ExportRow[], options: ExportOptions) => {
 
   let hasDrawnFirstSummary = false;
 
-  teamNames.forEach((teamName) => {
-    const teamRows = teamBuckets.get(teamName) || [];
+  teamKeys.forEach((teamKey) => {
+    const bucket = teamBuckets.get(teamKey);
+    if (!bucket) return;
+
+    const teamName = bucket.shortName && bucket.displayName && bucket.displayName.toUpperCase() !== bucket.shortName
+      ? `${bucket.shortName} • ${bucket.displayName}`
+      : bucket.displayName || bucket.shortName || teamKey;
+    const teamRows = bucket.rows;
     const batchTotal = Math.max(1, Math.ceil(teamRows.length / rowsPerPage));
 
     for (let batchIndex = 0; batchIndex < teamRows.length; batchIndex += rowsPerPage) {
@@ -488,11 +512,11 @@ const buildPdf = (rows: ExportRow[], options: ExportOptions) => {
       const batchRangeLabel = `${batchStart + 1}-${batchEnd} of ${teamRows.length}`;
 
       parts.forEach((partExtraColumns, partIndex) => {
-        if (hasDrawnFirstSummary || batchStart !== 0 || partIndex !== 0 || teamName !== teamNames[0]) {
+        if (hasDrawnFirstSummary || batchStart !== 0 || partIndex !== 0 || teamKey !== teamKeys[0]) {
           doc.addPage();
         }
 
-        const includeSummary = !hasDrawnFirstSummary && teamName === teamNames[0] && batchStart === 0 && partIndex === 0;
+        const includeSummary = !hasDrawnFirstSummary && teamKey === teamKeys[0] && batchStart === 0 && partIndex === 0;
         const partColumns: Column[] = [...keyColumns, ...partExtraColumns];
         const startY = includeSummary ? firstPageTableTop : tableTop;
 
