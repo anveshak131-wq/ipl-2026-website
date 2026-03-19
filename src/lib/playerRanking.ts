@@ -122,6 +122,11 @@ export function computeRoleRawScore(player: Player): number {
 export function applyReliability(raw: number, matches: number): number {
   const safeRaw = clamp(Number(raw) || 0);
   const safeMatches = Math.max(0, Number(matches) || 0);
+
+  if (safeMatches <= 0) {
+    return 0;
+  }
+
   const reliability = safeMatches / (safeMatches + DEFAULT_RELIABILITY_K);
 
   return clamp(reliability * safeRaw + (1 - reliability) * RELIABILITY_BASELINE);
@@ -138,6 +143,12 @@ export function gradeFromPercentile(
   allPlayers: Player[]
 ): PlayerGrade {
   const safeScore = clamp(Number(score) || 0);
+
+  // Explicit no-data fallback: score 0 should always map to D.
+  if (safeScore <= 0) {
+    return 'D';
+  }
+
   const peers = allPlayers.filter(
     (p) => p?.role === role && p?.league === league && p?.stats
   );
