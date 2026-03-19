@@ -426,7 +426,7 @@ const buildPdf = (rows: ExportRow[], options: ExportOptions) => {
     const db = teamBuckets.get(b)?.displayName || b;
     return da.localeCompare(db);
   });
-  const rowsPerPage = 10;
+  const rowsPerPage = 15;
 
   const drawHeader = (
     teamName: string,
