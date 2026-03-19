@@ -278,10 +278,11 @@ export default function TeamDetailClient({ teamId, league }: TeamDetailClientPro
   }, []);
 
   useEffect(() => {
+    let cancelled = false;
+
     const fetchTeamData = async () => {
-      // Prevent infinite loops
-      if (isLoading) return;
-      
+      setIsLoading(true);
+
       try {
         console.log('TeamDetailClient: Starting fetch for teamId:', teamId, 'league:', league);
         
@@ -465,11 +466,17 @@ export default function TeamDetailClient({ teamId, league }: TeamDetailClientPro
         console.error('Error fetching team data:', error);
         setTeamData(null);
       } finally {
-        setIsLoading(false);
+        if (!cancelled) {
+          setIsLoading(false);
+        }
       }
     };
 
     fetchTeamData();
+
+    return () => {
+      cancelled = true;
+    };
   }, [teamId, league]);
 
   // Real-time player updates - refresh team data when players are updated
