@@ -70,7 +70,7 @@ export const AdminDataProvider = ({ children }: AdminDataProviderProps) => {
       setLoading(true);
       setError('');
       
-      const playersData = await api.getPlayers(undefined, currentLeague);
+      const playersData = await api.getPlayers(undefined, currentLeague, { includeInactive: true });
       const teamsData = await api.getTeams(currentLeague);
       
       setPlayers(playersData);

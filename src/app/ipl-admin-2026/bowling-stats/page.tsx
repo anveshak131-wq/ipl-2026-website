@@ -6,7 +6,13 @@ import { useAdminData } from '@/contexts/AdminDataContext';
 import { useLeague } from '@/contexts/LeagueContext';
 import ModernDialog from '@/components/admin/ModernDialog';
 import { exportStatsData } from '@/lib/admin/statsExportUtils';
-import { Search, Filter, Edit2, X, TrendingDown, Award, Target, Zap, ChevronDown, ChevronUp, SortAsc, SortDesc, User, Shirt, Calendar, BarChart3, Target as TargetIcon, Award as AwardIcon, Zap as ZapIcon, Hash, Activity, Gauge, LayoutGrid, Table2, Download, FileDown, FileText, Database } from 'lucide-react';
+import { Search, Filter, Edit2, X, TrendingDown, Award, Target, Zap, ChevronDown, ChevronUp, SortAsc, SortDesc, User, Shirt, Calendar, BarChart3, Target as TargetIcon, Award as AwardIcon, Zap as ZapIcon, Hash, Activity, Gauge, LayoutGrid, Table2, Download, FileDown, FileText, Database, DatabaseBackup } from 'lucide-react';
+
+const NOT_SELECTED_SEASON_FILTER = '__not_selected_season__';
+
+const isInNotSelectedSeasonPool = (player: any) => {
+  return player.isActiveInSquad === false || player.squadStatus === 'inactive';
+};
 
 const BowlingStatsPage = () => {
   const router = useRouter();
@@ -354,6 +360,12 @@ const BowlingStatsPage = () => {
       const isIPL = (player.league || 'ipl') === 'ipl';
       const matchesSearch = player.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
                            player.teamId?.toLowerCase().includes(searchQuery.toLowerCase());
+      
+      // Handle the special "Not Selected This Season" filter
+      if (selectedTeam === NOT_SELECTED_SEASON_FILTER) {
+        return isIPL && matchesSearch && isInNotSelectedSeasonPool(player);
+      }
+      
       const matchesTeam = selectedTeam === 'all' || player.teamId === selectedTeam;
       // Show all players, not just those with existing stats
       return isIPL && matchesSearch && matchesTeam;
@@ -509,8 +521,13 @@ const BowlingStatsPage = () => {
 
   const getSelectedTeamLabel = useCallback(() => {
     if (selectedTeam === 'all') return 'All Teams';
+    if (selectedTeam === NOT_SELECTED_SEASON_FILTER) return 'Not Selected This Season';
     return teams.find((team) => team.id === selectedTeam)?.name || 'Selected Team';
   }, [selectedTeam, teams]);
+
+  const getInactivePlayerCount = useCallback(() => {
+    return players.filter(p => isInNotSelectedSeasonPool(p)).length;
+  }, [players]);
 
   const handleExport = useCallback(async (format: 'pdf' | 'csv' | 'sql') => {
     if (filteredAndSortedPlayers.length === 0) {
@@ -676,6 +693,9 @@ const BowlingStatsPage = () => {
                   className="pl-10 pr-8 py-2.5 bg-gray-900/60 border border-gray-700 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all appearance-none cursor-pointer hover:bg-gray-900/80"
                 >
                   <option value="all">All Teams</option>
+                  <option value={NOT_SELECTED_SEASON_FILTER} className="bg-amber-950">
+                    Not Selected This Season ({getInactivePlayerCount()})
+                  </option>
                   {teams.map(team => (
                     <option key={team.id} value={team.id}>{team.name}</option>
                   ))}
