@@ -198,6 +198,7 @@ export default function PlayerModal({ player, isOpen, onClose, teamColors, teamD
       description="Complete player information and statistics"
       variant="info"
       size="lg"
+      backdropClassName="bg-black"
       icon={
         <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center shadow-lg">
           <Eye className="w-6 h-6 text-white" />

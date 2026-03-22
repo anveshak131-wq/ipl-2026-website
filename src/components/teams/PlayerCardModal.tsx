@@ -209,7 +209,7 @@ export default function PlayerCardModal({
           exit={{ opacity: 0 }}
         >
           <motion.div
-            className="fixed inset-0 bg-black/60 backdrop-blur-xl"
+            className="fixed inset-0 bg-black"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -358,7 +358,6 @@ export default function PlayerCardModal({
                         <MetricCard label="Batting Style" value={displayValue(player.battingStyle)} />
                         <MetricCard label="Bowling Style" value={displayValue(player.bowlingStyle)} />
                         {player.allrounderType ? <MetricCard label="All-rounder" value={displayValue(player.allrounderType)} /> : null}
-                        <MetricCard label="Player ID" value={displayValue(player.id)} />
                       </div>
                     </Section>
 

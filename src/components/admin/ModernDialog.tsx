@@ -16,6 +16,7 @@ interface ModernDialogProps {
   icon?: ReactNode;
   className?: string;
   contentClassName?: string;
+  backdropClassName?: string;
 }
 
 export default function ModernDialog({
@@ -31,6 +32,7 @@ export default function ModernDialog({
   icon,
   className = '',
   contentClassName = '',
+  backdropClassName = 'bg-black/50 backdrop-blur-md',
 }: ModernDialogProps) {
   // Add ESC key handler
   useEffect(() => {
@@ -103,7 +105,7 @@ export default function ModernDialog({
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
             onClick={onClose}
-            className="fixed inset-0 z-40 bg-black/50 backdrop-blur-md"
+            className={`fixed inset-0 z-40 ${backdropClassName}`}
           />
 
           {/* Dialog */}
