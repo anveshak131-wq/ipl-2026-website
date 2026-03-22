@@ -1241,6 +1241,7 @@ export default function TeamDetailClient({ teamId, league }: TeamDetailClientPro
                     teamId={teamData.id} 
                     teamName={teamData.name}
                     initialPlayers={teamData.players}
+                    league={teamLeague}
                   />
                 </div>
               </motion.div>
