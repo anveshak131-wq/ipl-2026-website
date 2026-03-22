@@ -1,12 +1,16 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import { motion } from 'framer-motion';
 
 interface ParticleBackgroundProps {
   primaryColor: string;
   secondaryColor: string;
   particleCount?: number;
+}
+
+function getPrefersReducedMotion(): boolean {
+  if (typeof window === 'undefined') return false;
+  return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 }
 
 export default function ParticleBackground({
@@ -23,24 +27,42 @@ export default function ParticleBackground({
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
+    const reducedMotion = getPrefersReducedMotion();
+
     // Set canvas size
+    let width = 0;
+    let height = 0;
+    let dpr = 1;
     const updateSize = () => {
-      canvas.width = canvas.offsetWidth;
-      canvas.height = canvas.offsetHeight;
+      const rect = canvas.getBoundingClientRect();
+      width = rect.width;
+      height = rect.height;
+      dpr = Math.min(2, window.devicePixelRatio || 1);
+
+      canvas.width = Math.max(1, Math.floor(width * dpr));
+      canvas.height = Math.max(1, Math.floor(height * dpr));
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     };
     updateSize();
     window.addEventListener('resize', updateSize);
 
     // Parse hex colors to RGB
     const hexToRgb = (hex: string) => {
-      const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-      return result
-        ? {
-            r: parseInt(result[1], 16),
-            g: parseInt(result[2], 16),
-            b: parseInt(result[3], 16),
-          }
-        : { r: 255, g: 255, b: 255 };
+      const cleaned = String(hex || '').trim().replace('#', '');
+      if (cleaned.length === 3) {
+        const r = parseInt(cleaned[0] + cleaned[0], 16);
+        const g = parseInt(cleaned[1] + cleaned[1], 16);
+        const b = parseInt(cleaned[2] + cleaned[2], 16);
+        if ([r, g, b].some((v) => Number.isNaN(v))) return { r: 255, g: 255, b: 255 };
+        return { r, g, b };
+      }
+      const result = /^([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(cleaned);
+      if (!result) return { r: 255, g: 255, b: 255 };
+      return {
+        r: parseInt(result[1], 16),
+        g: parseInt(result[2], 16),
+        b: parseInt(result[3], 16),
+      };
     };
 
     const color1 = hexToRgb(primaryColor);
@@ -57,11 +79,11 @@ export default function ParticleBackground({
       opacity: number;
 
       constructor() {
-        this.x = Math.random() * canvas.width;
-        this.y = Math.random() * canvas.height;
+        this.x = Math.random() * width;
+        this.y = Math.random() * height;
         this.size = Math.random() * 3 + 1;
-        this.speedX = Math.random() * 0.5 - 0.25;
-        this.speedY = Math.random() * 0.5 - 0.25;
+        this.speedX = reducedMotion ? 0 : Math.random() * 0.45 - 0.225;
+        this.speedY = reducedMotion ? 0 : Math.random() * 0.45 - 0.225;
         // Mix colors
         const mixRatio = Math.random();
         this.color = {
@@ -77,10 +99,10 @@ export default function ParticleBackground({
         this.y += this.speedY;
 
         // Wrap around edges
-        if (this.x > canvas.width) this.x = 0;
-        if (this.x < 0) this.x = canvas.width;
-        if (this.y > canvas.height) this.y = 0;
-        if (this.y < 0) this.y = canvas.height;
+        if (this.x > width) this.x = 0;
+        if (this.x < 0) this.x = width;
+        if (this.y > height) this.y = 0;
+        if (this.y < 0) this.y = height;
       }
 
       draw() {
@@ -93,29 +115,31 @@ export default function ParticleBackground({
 
     // Create particles
     const particles: Particle[] = [];
-    for (let i = 0; i < particleCount; i++) {
+    const effectiveCount = reducedMotion ? Math.min(14, particleCount) : particleCount;
+    for (let i = 0; i < effectiveCount; i++) {
       particles.push(new Particle());
     }
 
-    // Animation loop
-    let animationFrame: number;
-    const animate = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    const maxDistance = 110;
+    const maxDistanceSq = maxDistance * maxDistance;
+
+    const drawFrame = () => {
+      ctx.clearRect(0, 0, width, height);
 
       particles.forEach((particle) => {
         particle.update();
         particle.draw();
       });
 
-      // Draw connections between nearby particles
+      // Draw connections between nearby particles (kept subtle for performance)
       for (let i = 0; i < particles.length; i++) {
         for (let j = i + 1; j < particles.length; j++) {
           const dx = particles[i].x - particles[j].x;
           const dy = particles[i].y - particles[j].y;
-          const distance = Math.sqrt(dx * dx + dy * dy);
+          const distanceSq = dx * dx + dy * dy;
 
-          if (distance < 100) {
-            const opacity = (1 - distance / 100) * 0.2;
+          if (distanceSq < maxDistanceSq) {
+            const opacity = (1 - Math.sqrt(distanceSq) / maxDistance) * 0.16;
             ctx.strokeStyle = `rgba(${color1.r}, ${color1.g}, ${color1.b}, ${opacity})`;
             ctx.lineWidth = 0.5;
             ctx.beginPath();
@@ -125,14 +149,46 @@ export default function ParticleBackground({
           }
         }
       }
-
-      animationFrame = requestAnimationFrame(animate);
     };
 
-    animate();
+    if (reducedMotion) {
+      drawFrame();
+      return () => {
+        window.removeEventListener('resize', updateSize);
+      };
+    }
+
+    // Animation loop (throttled)
+    let animationFrame: number;
+    let running = true;
+    let lastTime = 0;
+    const frameInterval = 1000 / 30;
+
+    const tick = (time: number) => {
+      if (!running) return;
+      if (time - lastTime >= frameInterval) {
+        lastTime = time;
+        drawFrame();
+      }
+      animationFrame = requestAnimationFrame(tick);
+    };
+
+    const handleVisibility = () => {
+      running = !document.hidden;
+      if (running) {
+        lastTime = 0;
+        animationFrame = requestAnimationFrame(tick);
+      } else {
+        cancelAnimationFrame(animationFrame);
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibility);
+    animationFrame = requestAnimationFrame(tick);
 
     return () => {
       window.removeEventListener('resize', updateSize);
+      document.removeEventListener('visibilitychange', handleVisibility);
       cancelAnimationFrame(animationFrame);
     };
   }, [primaryColor, secondaryColor, particleCount]);
