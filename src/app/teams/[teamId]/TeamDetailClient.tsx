@@ -1,9 +1,10 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, MotionConfig, useReducedMotion } from 'framer-motion';
 import SmartDescription from '@/components/teams/SmartDescription';
 import { useRouter } from 'next/navigation';
+import dynamic from 'next/dynamic';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import PlayerModal from '@/components/teams/PlayerModal';
@@ -11,21 +12,16 @@ import WPLPlayerCard from '@/components/teams/WPLPlayerCard';
 import WPLPlayerModal from '@/components/teams/WPLPlayerModal';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import AuroraBackground from '@/components/ui/AuroraBackground';
+import TeamAuroraBackground from '@/components/ui/TeamAuroraBackground';
 import IPLLogo from '@/components/ui/IPLLogo';
 import AnimatedSection from '@/components/ui/AnimatedSection';
-import GlassCard from '@/components/ui/GlassCard';
-import GradientText from '@/components/ui/GradientText';
 import CustomEmoji from '@/components/emoji/CustomEmoji';
 import UpcomingFixturesWidget from '@/components/teams/UpcomingFixturesWidget';
-import PlayerPerformanceChart from '@/components/teams/PlayerPerformanceChart';
 import TeamNewsFeed from '@/components/teams/TeamNewsFeed';
 import SocialMediaLinks from '@/components/teams/SocialMediaLinks';
 import TeamHistoryTimeline from '@/components/teams/TeamHistoryTimeline';
 import RecentResultsTimeline from '@/components/teams/RecentResultsTimeline';
 import TrophyShowcaseGallery from '@/components/teams/TrophyShowcaseGallery';
-import InteractiveStadiumTour from '@/components/teams/InteractiveStadiumTour';
-import PlayerComparisonTool from '@/components/teams/PlayerComparisonTool';
-import TeamFormationVisualizer from '@/components/teams/TeamFormationVisualizer';
 import { Calendar, Filter } from 'lucide-react';
 import { api } from '@/lib/data';
 import { 
@@ -39,15 +35,12 @@ import {
   CricketBatIcon,
   TrophyIcon
 } from '@/components/ui/CustomIcons';
-import TeamPlayersTab from '@/components/teams/TeamPlayersTab';
-import Image from 'next/image';
 import { Team, Player, CoachingStaff, KeyPlayers, Match, Trophy } from '@/types';
 import { PlayerCardProps, KeyPlayersSectionProps, StatsTabProps, AboutTabProps } from '@/types/components';
 import { sortPlayersByRoleAndAge } from '@/lib/playerSort';
 import { getAnimatedLogoPath, getLogoPath } from '@/lib/logoUtils';
 import RCBLottie from '@/components/ui/RCBLottie';
 import RCBLionLogo from '@/components/RCBLion/RCBLionLogo';
-import { getOptimalTextColor } from '@/lib/colorUtils';
 import FlagImage from '@/components/ui/FlagImage';
 import { usePlayerUpdates } from '@/hooks/usePlayerUpdates';
 import ParticleBackground from '@/components/ui/ParticleBackground';
@@ -62,11 +55,50 @@ interface TeamDetailClientProps {
   league?: 'ipl' | 'wpl';
 }
 
+const TeamFormationVisualizer = dynamic(() => import('@/components/teams/TeamFormationVisualizer'), {
+  ssr: false,
+  loading: () => <div className="py-16 text-center text-sm text-white/60">Loading formation…</div>,
+}) as any;
+
+const TeamPlayersTab = dynamic(() => import('@/components/teams/TeamPlayersTab'), {
+  ssr: false,
+  loading: () => <div className="py-16 text-center text-sm text-white/60">Loading players…</div>,
+}) as any;
+
+const PlayerComparisonTool = dynamic(() => import('@/components/teams/PlayerComparisonTool'), { ssr: false }) as any;
+
+const InteractiveStadiumTour = dynamic(() => import('@/components/teams/InteractiveStadiumTour'), {
+  ssr: false,
+  loading: () => <div className="py-16 text-center text-sm text-white/60">Loading stadium tour…</div>,
+}) as any;
+
+const PlayerPerformanceChart = dynamic(() => import('@/components/teams/PlayerPerformanceChart'), {
+  ssr: false,
+  loading: () => <div className="py-16 text-center text-sm text-white/60">Loading chart…</div>,
+}) as any;
+
+function normalizeHexColor(raw: string | undefined, fallback: string): string {
+  const value = String(raw || '').trim();
+  if (!value) return fallback;
+
+  const withHash = value.startsWith('#') ? value : `#${value}`;
+  const shortMatch = withHash.match(/^#([0-9a-fA-F]{3})$/);
+  if (shortMatch) {
+    const [r, g, b] = shortMatch[1].split('');
+    return `#${r}${r}${g}${g}${b}${b}`.toUpperCase();
+  }
+
+  const longMatch = withHash.match(/^#([0-9a-fA-F]{6})$/);
+  if (longMatch) return withHash.toUpperCase();
+
+  return fallback;
+}
 
 function createColorVariations(hex: string) {
-  const r = parseInt(hex.slice(1, 3), 16);
-  const g = parseInt(hex.slice(3, 5), 16);
-  const b = parseInt(hex.slice(5, 7), 16);
+  const safeHex = normalizeHexColor(hex, '#1D3D8D');
+  const r = parseInt(safeHex.slice(1, 3), 16);
+  const g = parseInt(safeHex.slice(3, 5), 16);
+  const b = parseInt(safeHex.slice(5, 7), 16);
   
   const light = `rgba(${r}, ${g}, ${b}, 0.15)`;
   const medium = `rgba(${r}, ${g}, ${b}, 0.3)`;
@@ -74,7 +106,7 @@ function createColorVariations(hex: string) {
   return {
     light,
     medium,
-    solid: hex,
+    solid: safeHex,
     glow: `rgba(${r}, ${g}, ${b}, 0.5)`,
     text: '#FFFFFF',
     textOnLight: '#FFFFFF',
@@ -136,14 +168,18 @@ function AnimatedCounter({ value, duration = 2 }: { value: number; duration?: nu
 
 export default function TeamDetailClient({ teamId, league }: TeamDetailClientProps) {
   const router = useRouter();
+  const prefersReducedMotion = useReducedMotion();
   const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [teamData, setTeamData] = useState<Team | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'squad' | 'players' | 'stats' | 'about'>('squad');
-  const [scrollY, setScrollY] = useState(0);
+  const [activeTab, setActiveTab] = useState<'overview' | 'squad' | 'players' | 'stats' | 'about'>('overview');
   const [nationalityFilter, setNationalityFilter] = useState<'all' | 'indian' | 'overseas'>('all');
   const [battingStyleFilter, setBattingStyleFilter] = useState<'any' | 'right' | 'left'>('any');
+  const [pendingScrollTarget, setPendingScrollTarget] = useState<null | {
+    tab: 'overview' | 'squad' | 'players' | 'stats' | 'about';
+    section: string;
+  }>(null);
   const [seasonStats, setSeasonStats] = useState<{
     matchesPlayed: number;
     wins: number;
@@ -162,6 +198,21 @@ export default function TeamDetailClient({ teamId, league }: TeamDetailClientPro
   const [scorecard, setScorecard] = useState<any>(null);
   const [loadingScorecard, setLoadingScorecard] = useState(false);
   const [showPlayerCards, setShowPlayerCards] = useState(false);
+
+  useEffect(() => {
+    if (!pendingScrollTarget) return;
+    if (activeTab !== pendingScrollTarget.tab) return;
+
+    const run = () => {
+      const el = document.querySelector(`[data-section="${pendingScrollTarget.section}"]`);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+      setPendingScrollTarget(null);
+    };
+
+    requestAnimationFrame(() => requestAnimationFrame(run));
+  }, [activeTab, pendingScrollTarget]);
 
   const fetchPlayerStats = async () => {
     if (!teamData || !league) return;
@@ -270,12 +321,6 @@ export default function TeamDetailClient({ teamId, league }: TeamDetailClientPro
       setLoadingScorecard(false);
     }
   };
-
-  useEffect(() => {
-    const handleScroll = () => setScrollY(window.scrollY);
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -676,31 +721,40 @@ export default function TeamDetailClient({ teamId, league }: TeamDetailClientPro
   
 
   return (
-    <div className="min-h-screen bg-gray-950">
-      <Navbar />
-      
-      <main className="relative">
+    <MotionConfig reducedMotion="user">
+      <div className="min-h-screen relative overflow-x-hidden">
+        <TeamAuroraBackground primaryColor={primaryColor.solid} secondaryColor={secondaryColor.solid} />
+        <Navbar />
+        
+        <main className="relative">
         {/* Enhanced Hero Section */}
-        <section className="relative py-20 border-b border-gray-800 overflow-hidden">
+        <section className="relative py-16 md:py-20 border-b border-white/10 overflow-hidden">
           {/* Animated Background Layers */}
-          <div className="absolute inset-0 bg-gradient-to-b from-gray-950 via-gray-900 to-gray-950" />
-          <motion.div 
+          <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/40 to-black/70" />
+          <motion.div
             className="absolute inset-0"
             style={{
-              background: `linear-gradient(135deg, ${primaryColor.solid}15, ${secondaryColor.solid}15)`,
+              background: `linear-gradient(135deg, ${primaryColor.solid}26, ${secondaryColor.solid}20)`,
+              backgroundSize: '200% 200%',
             }}
-            animate={{
-              backgroundPosition: ['0% 0%', '100% 100%', '0% 0%'],
-            }}
-            transition={{ duration: 20, repeat: Infinity, ease: 'linear' }}
+            animate={
+              prefersReducedMotion
+                ? { backgroundPosition: '0% 0%' }
+                : { backgroundPosition: ['0% 0%', '100% 100%', '0% 0%'] }
+            }
+            transition={
+              prefersReducedMotion ? { duration: 0 } : { duration: 18, repeat: Infinity, ease: 'linear' }
+            }
           />
           
           {/* Particle System */}
-          <ParticleBackground 
-            primaryColor={primaryColor.solid}
-            secondaryColor={secondaryColor.solid}
-            particleCount={40}
-          />
+          {!prefersReducedMotion && (
+            <ParticleBackground
+              primaryColor={primaryColor.solid}
+              secondaryColor={secondaryColor.solid}
+              particleCount={32}
+            />
+          )}
 
           <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             {/* Back Button */}
@@ -781,14 +835,21 @@ export default function TeamDetailClient({ teamId, league }: TeamDetailClientPro
                 {/* Quick Actions Bar */}
                 <QuickActionsBar
                   primaryColor={primaryColor.solid}
-                  onSquadClick={() => setShowPlayerCards(!showPlayerCards)}
+                  onSquadClick={() => {
+                    const shouldOpen = activeTab !== 'squad' || !showPlayerCards;
+                    setActiveTab('squad');
+                    setShowPlayerCards(activeTab === 'squad' ? !showPlayerCards : true);
+                    if (shouldOpen) {
+                      setPendingScrollTarget({ tab: 'squad', section: 'squad' });
+                    }
+                  }}
                   onFixturesClick={() => {
-                    const fixturesSection = document.querySelector('[data-section="fixtures"]');
-                    fixturesSection?.scrollIntoView({ behavior: 'smooth' });
+                    setActiveTab('overview');
+                    setPendingScrollTarget({ tab: 'overview', section: 'fixtures' });
                   }}
                   onNewsClick={() => router.push(isWPL ? '/wpl/news' : '/news')}
                   league={teamLeague}
-                  showPlayerCards={showPlayerCards}
+                  showPlayerCards={activeTab === 'squad' && showPlayerCards}
                 />
               </div>
 
@@ -801,7 +862,7 @@ export default function TeamDetailClient({ teamId, league }: TeamDetailClientPro
               >
                 <motion.div 
                   className="relative w-80 h-80 md:w-96 md:h-96 flex items-center justify-center"
-                  whileHover={{ scale: 1.05, rotate: 5 }}
+                  whileHover={prefersReducedMotion ? undefined : { scale: 1.05, rotate: 5 }}
                   transition={{ type: 'spring', stiffness: 300 }}
                 >
                   {/* Glow effect behind logo */}
@@ -810,11 +871,12 @@ export default function TeamDetailClient({ teamId, league }: TeamDetailClientPro
                     style={{
                       background: `radial-gradient(circle, ${primaryColor.solid}40, transparent)`,
                     }}
-                    animate={{
-                      scale: [1, 1.2, 1],
-                      opacity: [0.3, 0.6, 0.3],
-                    }}
-                    transition={{ duration: 3, repeat: Infinity }}
+                    animate={
+                      prefersReducedMotion
+                        ? { opacity: 0.35, scale: 1 }
+                        : { scale: [1, 1.2, 1], opacity: [0.3, 0.6, 0.3] }
+                    }
+                    transition={prefersReducedMotion ? { duration: 0 } : { duration: 3, repeat: Infinity }}
                   />
                   
                   {teamLogoPath.endsWith('.json') ? (
@@ -841,153 +903,12 @@ export default function TeamDetailClient({ teamId, league }: TeamDetailClientPro
           </div>
         </section>
 
-        {/* Stats Section */}
-        <section className="py-12 border-b border-gray-800">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <h2 className="text-2xl font-semibold text-white mb-8">Team Overview</h2>
-            
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {[
-                { label: 'Squad Size', value: teamData.players?.length || 0, Icon: UsersIcon },
-                { label: 'Captains', value: teamData.players?.filter(p => p.isCaptain).length || 0, Icon: StarIcon },
-                { label: 'Foreign', value: teamData.players?.filter(p => p.nationality !== 'India').length || 0, Icon: GlobeIcon },
-                { label: 'All-rounders', value: teamData.players?.filter(p => p.role === 'All-rounder').length || 0, Icon: AllRounderIcon }
-              ].map((stat, index) => (
-                <div
-                  key={index}
-                  className="rounded-lg border border-gray-800 bg-gray-900/50 p-6 hover:bg-gray-900 transition-colors"
-                >
-                  <stat.Icon className="w-6 h-6 mb-3" style={{ color: primaryColor.solid }} />
-                  <p className="text-3xl font-bold text-white mb-1">{stat.value}</p>
-                  <p className="text-sm text-gray-400">{stat.label}</p>
-                    </div>
-              ))}
-            </div>
-
-            {/* Upcoming Fixtures Widget */}
-            {teamData && (
-              <div className="rounded-3xl backdrop-blur-xl p-8 border shadow-xl animate-fade-in mb-6" data-section="fixtures"
-                   style={{
-                     background: `linear-gradient(135deg, ${primaryColor.light}, ${secondaryColor.light})`,
-                     borderColor: primaryColor.medium,
-                     boxShadow: `0 10px 30px ${primaryColor.glow}15`,
-                   }}>
-                <h3 className="text-2xl font-black mb-6 flex items-center gap-3" style={{ color: primaryColor.textOnLight }}>
-                  <CricketBatIcon className="w-8 h-8" color={primaryColor.solid} />
-                  Fixtures
-                </h3>
-                <UpcomingFixturesWidget team={teamData} matches={allMatches} onViewScorecard={fetchScorecard} />
-              </div>
-            )}
-
-            {/* Match & Season Snapshot */}
-            {seasonStats && (
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-fade-in">
-                {/* Season summary */}
-                <div
-                  className="rounded-3xl backdrop-blur-xl p-6 border shadow-xl flex flex-col justify-between"
-                  style={{
-                    background: `linear-gradient(135deg, ${primaryColor.light}, ${secondaryColor.light})`,
-                    borderColor: primaryColor.medium,
-                    boxShadow: `0 10px 30px ${primaryColor.glow}15`,
-                  }}
-                >
-                  <div className="flex items-center justify-between mb-4">
-                    <div>
-                      <p className="text-xs font-semibold uppercase tracking-wide" style={{ color: primaryColor.textOnLight }}>
-                        Season snapshot
-                      </p>
-                      <h3 className="text-2xl font-black" style={{ color: primaryColor.text }}>
-                        {teamData.shortName} 2026
-                      </h3>
-                    </div>
-                    <div className="w-8 h-8 opacity-20">
-                      <TrophyIcon className="w-full h-full" color={primaryColor.solid} />
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4 mb-4 text-sm">
-                    <div>
-                      <p className="text-gray-400">Matches</p>
-                      <p className="text-xl font-bold text-white">{seasonStats.matchesPlayed}</p>
-                    </div>
-                    <div>
-                      <p className="text-gray-400">Win %</p>
-                      <p className="text-xl font-bold text-ipl-gold">{seasonStats.winPercentage}%</p>
-                    </div>
-                    <div>
-                      <p className="text-gray-400">Wins</p>
-                      <p className="text-lg font-semibold text-green-400">{seasonStats.wins}</p>
-                    </div>
-                    <div>
-                      <p className="text-gray-400">Losses</p>
-                      <p className="text-lg font-semibold text-red-400">{seasonStats.losses}</p>
-                    </div>
-                  </div>
-
-                  <div className="mt-2">
-                    <div className="flex items-center justify-between mb-1 text-xs text-gray-400">
-                      <span>Season progress</span>
-                      <span>
-                        {seasonStats.matchesPlayed} matches · {seasonStats.noResult} NR
-                      </span>
-                    </div>
-                    <div className="w-full h-2 rounded-full bg-black/30 overflow-hidden">
-                      <div
-                        className="h-full rounded-full bg-gradient-to-r from-green-500 via-ipl-gold to-red-500"
-                        style={{ width: `${Math.max(seasonStats.winPercentage, 4)}%` }}
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Last match */}
-                <div
-                  className="rounded-3xl backdrop-blur-xl p-6 border shadow-xl flex flex-col"
-                  style={{
-                    background: 'linear-gradient(135deg, rgba(15,23,42,0.85), rgba(15,23,42,0.95))',
-                    borderColor: 'rgba(148,163,184,0.6)',
-                  }}
-                >
-                  <p className="text-xs font-semibold uppercase tracking-wide text-gray-400 mb-2">Last match</p>
-                  {lastMatch ? (
-                    <>
-                      <p className="text-sm text-gray-400 mb-1">
-                        {new Date(lastMatch.date).toLocaleDateString('en-IN', {
-                          day: 'numeric',
-                          month: 'short',
-                        })}{' '}
-                        · {lastMatch.venue}
-                      </p>
-                      <p className="text-lg font-semibold text-white mb-1">
-                        {lastMatch.team1.shortName} vs {lastMatch.team2.shortName}
-                      </p>
-                      <p className="text-sm text-gray-300 mb-3 max-w-full overflow-hidden truncate whitespace-nowrap">{lastMatch.result || 'Result not available'}</p>
-                      <p className="text-xs text-gray-500 mb-3">Status: {lastMatch.status}</p>
-                      {lastMatch.status === 'completed' && (
-                        <button
-                          onClick={() => fetchScorecard(lastMatch.id)}
-                          disabled={loadingScorecard}
-                          className="mt-auto px-4 py-2 rounded-lg bg-gradient-to-r from-green-600 to-emerald-600 text-white font-semibold hover:from-green-700 hover:to-emerald-700 transition-all disabled:opacity-50 text-sm"
-                        >
-                          {loadingScorecard ? 'Loading...' : '📊 View Scorecard'}
-                        </button>
-                      )}
-                    </>
-                  ) : (
-                    <p className="text-sm text-gray-400">No completed matches yet this season.</p>
-                  )}
-                </div>
-              </div>
-            )}
-          </div>
-        </section>
-
         {/* Tab Navigation */}
-        <section className="border-b border-gray-800 bg-gray-900/30">
+        <section className="sticky top-16 md:top-20 z-40 border-b border-white/10 bg-black/30 backdrop-blur-2xl">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex gap-1">
+            <div className="flex gap-2 overflow-x-auto py-3" role="tablist" aria-label="Team sections">
               {[
+                { id: 'overview', label: 'Overview' },
                 { id: 'squad', label: 'Squad' },
                 { id: 'players', label: 'Players' },
                 { id: 'stats', label: 'Stats' },
@@ -996,12 +917,28 @@ export default function TeamDetailClient({ teamId, league }: TeamDetailClientPro
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id as any)}
-                  className={`px-6 py-4 text-sm font-medium transition-colors border-b-2 ${
-                    activeTab === tab.id
-                      ? 'text-white border-white'
-                      : 'text-gray-400 border-transparent hover:text-gray-300'
+                  role="tab"
+                  aria-selected={activeTab === (tab.id as any)}
+                  className={`relative shrink-0 px-4 sm:px-5 py-2.5 rounded-xl text-sm font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-white/20 ${
+                    activeTab === (tab.id as any) ? 'text-white' : 'text-white/70 hover:text-white'
                   }`}
                 >
+                  {activeTab === (tab.id as any) && (
+                    <motion.div
+                      layoutId="team-tab-indicator"
+                      className="absolute inset-0 rounded-xl border"
+                      style={{
+                        background: `linear-gradient(135deg, ${primaryColor.light}, ${secondaryColor.light})`,
+                        borderColor: primaryColor.medium,
+                        boxShadow: `0 10px 30px ${primaryColor.glow}10`,
+                      }}
+                      transition={
+                        prefersReducedMotion
+                          ? { duration: 0 }
+                          : { type: 'spring', stiffness: 360, damping: 30 }
+                      }
+                    />
+                  )}
                   {tab.label}
                 </button>
               ))}
@@ -1010,8 +947,212 @@ export default function TeamDetailClient({ teamId, league }: TeamDetailClientPro
         </section>
 
         {/* Content Sections */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20 pt-10">
           <AnimatePresence mode="wait">
+            {activeTab === 'overview' && (
+              <motion.div
+                key="overview"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.3 }}
+                className="space-y-10"
+              >
+                <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
+                  <div>
+                    <p className="text-xs uppercase tracking-[0.2em] text-white/60">Overview</p>
+                    <h2 className="text-2xl md:text-3xl font-black text-white">Team snapshot</h2>
+                  </div>
+                  <div className="text-sm text-white/60">
+                    Powered by Workers KV
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  {[
+                    { label: 'Squad Size', value: teamData.players?.length || 0, Icon: UsersIcon },
+                    { label: 'Captains', value: teamData.players?.filter(p => p.isCaptain).length || 0, Icon: StarIcon },
+                    { label: 'Overseas', value: teamData.players?.filter(p => p.nationality !== 'India').length || 0, Icon: GlobeIcon },
+                    { label: 'All-rounders', value: teamData.players?.filter(p => p.role === 'All-rounder').length || 0, Icon: AllRounderIcon }
+                  ].map((stat, index) => (
+                    <motion.div
+                      key={stat.label}
+                      className="group relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl p-5 shadow-xl shadow-black/20"
+                      whileHover={prefersReducedMotion ? undefined : { y: -4, scale: 1.02 }}
+                      transition={{ type: 'spring', stiffness: 260, damping: 22 }}
+                    >
+                      <div
+                        className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                        style={{
+                          background: `radial-gradient(600px 160px at 20% 0%, ${primaryColor.light}, transparent 70%),
+                                       radial-gradient(600px 160px at 80% 100%, ${secondaryColor.light}, transparent 70%)`,
+                        }}
+                      />
+                      <div className="relative">
+                        <stat.Icon className="w-6 h-6 mb-3" style={{ color: primaryColor.solid }} />
+                        <p className="text-3xl font-black text-white mb-1">{stat.value}</p>
+                        <p className="text-xs font-semibold uppercase tracking-wide text-white/60">{stat.label}</p>
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+
+                {/* Upcoming Fixtures Widget */}
+                <div
+                  className="rounded-3xl backdrop-blur-xl p-8 border shadow-xl animate-fade-in scroll-mt-32"
+                  data-section="fixtures"
+                  style={{
+                    background: `linear-gradient(135deg, ${primaryColor.light}, ${secondaryColor.light})`,
+                    borderColor: primaryColor.medium,
+                    boxShadow: `0 10px 30px ${primaryColor.glow}15`,
+                  }}
+                >
+                  <h3 className="text-2xl font-black mb-6 flex items-center gap-3" style={{ color: primaryColor.textOnLight }}>
+                    <CricketBatIcon className="w-8 h-8" color={primaryColor.solid} />
+                    Fixtures
+                  </h3>
+                  <UpcomingFixturesWidget team={teamData} matches={allMatches} onViewScorecard={fetchScorecard} />
+                </div>
+
+                {/* Match & Season Snapshot */}
+                {seasonStats && (
+                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-fade-in">
+                    {/* Season summary */}
+                    <div
+                      className="rounded-3xl backdrop-blur-xl p-6 border shadow-xl flex flex-col justify-between"
+                      style={{
+                        background: `linear-gradient(135deg, ${primaryColor.light}, ${secondaryColor.light})`,
+                        borderColor: primaryColor.medium,
+                        boxShadow: `0 10px 30px ${primaryColor.glow}15`,
+                      }}
+                    >
+                      <div className="flex items-center justify-between mb-4">
+                        <div>
+                          <p className="text-xs font-semibold uppercase tracking-wide" style={{ color: primaryColor.textOnLight }}>
+                            Season snapshot
+                          </p>
+                          <h3 className="text-2xl font-black" style={{ color: primaryColor.text }}>
+                            {teamData.shortName} 2026
+                          </h3>
+                        </div>
+                        <div className="w-8 h-8 opacity-20">
+                          <TrophyIcon className="w-full h-full" color={primaryColor.solid} />
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-4 mb-4 text-sm">
+                        <div>
+                          <p className="text-gray-400">Matches</p>
+                          <p className="text-xl font-bold text-white">{seasonStats.matchesPlayed}</p>
+                        </div>
+                        <div>
+                          <p className="text-gray-400">Win %</p>
+                          <p className="text-xl font-bold text-ipl-gold">{seasonStats.winPercentage}%</p>
+                        </div>
+                        <div>
+                          <p className="text-gray-400">Wins</p>
+                          <p className="text-lg font-semibold text-green-400">{seasonStats.wins}</p>
+                        </div>
+                        <div>
+                          <p className="text-gray-400">Losses</p>
+                          <p className="text-lg font-semibold text-red-400">{seasonStats.losses}</p>
+                        </div>
+                      </div>
+
+                      <div className="mt-2">
+                        <div className="flex items-center justify-between mb-1 text-xs text-gray-400">
+                          <span>Season progress</span>
+                          <span>
+                            {seasonStats.matchesPlayed} matches · {seasonStats.noResult} NR
+                          </span>
+                        </div>
+                        <div className="w-full h-2 rounded-full bg-black/30 overflow-hidden">
+                          <div
+                            className="h-full rounded-full bg-gradient-to-r from-green-500 via-ipl-gold to-red-500"
+                            style={{ width: `${Math.max(seasonStats.winPercentage, 4)}%` }}
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Last match */}
+                    <div
+                      className="rounded-3xl backdrop-blur-xl p-6 border shadow-xl flex flex-col"
+                      style={{
+                        background: 'linear-gradient(135deg, rgba(15,23,42,0.75), rgba(15,23,42,0.92))',
+                        borderColor: 'rgba(148,163,184,0.35)',
+                      }}
+                    >
+                      <p className="text-xs font-semibold uppercase tracking-wide text-gray-300/80 mb-2">Last match</p>
+                      {lastMatch ? (
+                        <>
+                          <p className="text-sm text-gray-300/80 mb-1">
+                            {new Date(lastMatch.date).toLocaleDateString('en-IN', {
+                              day: 'numeric',
+                              month: 'short',
+                            })}{' '}
+                            · {lastMatch.venue}
+                          </p>
+                          <p className="text-lg font-semibold text-white mb-1">
+                            {lastMatch.team1.shortName} vs {lastMatch.team2.shortName}
+                          </p>
+                          <p className="text-sm text-gray-200/80 mb-3 max-w-full overflow-hidden truncate whitespace-nowrap">{lastMatch.result || 'Result not available'}</p>
+                          <p className="text-xs text-gray-400 mb-3">Status: {lastMatch.status}</p>
+                          {lastMatch.status === 'completed' && (
+                            <button
+                              onClick={() => fetchScorecard(lastMatch.id)}
+                              disabled={loadingScorecard}
+                              className="mt-auto px-4 py-2 rounded-lg bg-gradient-to-r from-green-600 to-emerald-600 text-white font-semibold hover:from-green-700 hover:to-emerald-700 transition-all disabled:opacity-50 text-sm"
+                            >
+                              {loadingScorecard ? 'Loading...' : 'View scorecard'}
+                            </button>
+                          )}
+                        </>
+                      ) : (
+                        <p className="text-sm text-gray-300/80">No completed matches yet this season.</p>
+                      )}
+                    </div>
+
+                    {/* Next match */}
+                    <div
+                      className="rounded-3xl backdrop-blur-xl p-6 border shadow-xl flex flex-col"
+                      style={{
+                        background: `linear-gradient(135deg, ${primaryColor.light}70, rgba(15,23,42,0.92))`,
+                        borderColor: primaryColor.medium,
+                        boxShadow: `0 10px 30px ${primaryColor.glow}10`,
+                      }}
+                    >
+                      <p className="text-xs font-semibold uppercase tracking-wide text-gray-300/80 mb-2">Next match</p>
+                      {nextMatch ? (
+                        <>
+                          <p className="text-sm text-gray-300/80 mb-1">
+                            {new Date(nextMatch.date).toLocaleDateString('en-IN', {
+                              day: 'numeric',
+                              month: 'short',
+                            })}{' '}
+                            · {nextMatch.venue}
+                          </p>
+                          <p className="text-lg font-semibold text-white mb-1">
+                            {nextMatch.team1.shortName} vs {nextMatch.team2.shortName}
+                          </p>
+                          <p className="text-xs text-gray-400 mb-3">Status: {nextMatch.status}</p>
+                          <button
+                            onClick={() => {
+                              setPendingScrollTarget({ tab: 'overview', section: 'fixtures' });
+                            }}
+                            className="mt-auto px-4 py-2 rounded-lg bg-white/10 hover:bg-white/15 border border-white/10 text-white font-semibold transition-colors text-sm"
+                          >
+                            See fixtures
+                          </button>
+                        </>
+                      ) : (
+                        <p className="text-sm text-gray-300/80">No upcoming matches scheduled yet.</p>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </motion.div>
+            )}
             {activeTab === 'squad' && (
               <motion.div 
                 key="squad"
@@ -1019,7 +1160,8 @@ export default function TeamDetailClient({ teamId, league }: TeamDetailClientPro
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
                 transition={{ duration: 0.3 }}
-                className="space-y-16"
+                className="space-y-16 scroll-mt-32"
+                data-section="squad"
               >
               {/* Team Formation Visualizer */}
               {teamData && teamData.players && teamData.players.length > 0 && (
@@ -1438,9 +1580,9 @@ export default function TeamDetailClient({ teamId, league }: TeamDetailClientPro
             )}
           </AnimatePresence>
         </div>
-      </main>
+        </main>
 
-      <Footer />
+        <Footer />
 
       {isWPL ? (
         <WPLPlayerModal
@@ -1699,7 +1841,8 @@ export default function TeamDetailClient({ teamId, league }: TeamDetailClientPro
           </div>
         </div>
       )}
-    </div>
+      </div>
+    </MotionConfig>
   );
 }
 
