@@ -386,51 +386,7 @@ export default function PlayerCardModal({
                     </div>
                   </div>
 
-                  {(transferInfo ||
-                    player.isActiveInSquad === false ||
-                    player.squadStatus ||
-                    player.squadExitReason ||
-                    player.squadExitDate) && (
-                    <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
-                      <Section title="Squad Status" icon={<Trophy className="h-4 w-4" />}>
-                        <div className="grid grid-cols-2 gap-3">
-                          <MetricCard label="Active" value={player.isActiveInSquad === false ? 'No' : 'Yes'} />
-                          <MetricCard label="Status" value={displayValue(player.squadStatus)} />
-                          <MetricCard label="Exit Reason" value={displayValue(player.squadExitReason)} />
-                          <MetricCard label="Exit Date" value={displayValue(player.squadExitDate)} />
-                        </div>
-                      </Section>
 
-                      {transferInfo ? (
-                        <Section title="Auction / Transfer" icon={<Zap className="h-4 w-4" />}>
-                          <div className="grid grid-cols-2 gap-3">
-                            {'acquiredVia' in transferInfo ? (
-                              <MetricCard label="Acquired Via" value={displayValue(transferInfo.acquiredVia)} />
-                            ) : null}
-                            {'lastAuctionYear' in transferInfo ? (
-                              <MetricCard label="Auction Year" value={displayValue(transferInfo.lastAuctionYear)} />
-                            ) : null}
-                            {'transferFee' in transferInfo ? (
-                              <MetricCard label="Fee" value={displayValue(transferInfo.transferFee)} />
-                            ) : null}
-                            {'transferable' in transferInfo ? (
-                              <MetricCard label="Transferable" value={transferInfo.transferable ? 'Yes' : 'No'} />
-                            ) : null}
-                            {'notes' in transferInfo ? (
-                              <div className="col-span-2 rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3">
-                                <div className="text-[11px] font-semibold uppercase tracking-wide text-white/55">Notes</div>
-                                <div className="mt-1 text-sm text-white/80 whitespace-pre-wrap">
-                                  {displayValue(transferInfo.notes)}
-                                </div>
-                              </div>
-                            ) : null}
-                          </div>
-                        </Section>
-                      ) : (
-                        <div />
-                      )}
-                    </div>
-                  )}
 
                   <div className="mt-6 flex items-center justify-between gap-3">
                     <button
