@@ -7,6 +7,7 @@ import {
   Activity,
   ArrowLeft,
   ArrowRight,
+  Award,
   BarChart3,
   Calendar,
   Hash,
@@ -16,7 +17,6 @@ import {
   X,
   Zap,
 } from 'lucide-react';
-import { Award } from 'lucide-react';
 import Image from 'next/image';
 import FlagImage from '@/components/ui/FlagImage';
 import { calculateAge, formatDateMonthDDYYYY } from '@/lib/dateUtils';
@@ -33,20 +33,20 @@ interface PlayerCardModalProps {
     league?: string;
     age?: number;
     dateOfBirth?: string;
-import {
-  Activity,
-  ArrowLeft,
-  ArrowRight,
-  Award,
-  BarChart3,
-  Calendar,
-  Hash,
-  Star,
-  Trophy,
-  User,
-  X,
-  Zap,
-} from 'lucide-react';
+    nationality?: string;
+    jerseyNumber?: number;
+    isCaptain?: boolean;
+    battingStyle?: string;
+    bowlingStyle?: string;
+    allrounderType?: string;
+    transferInfo?: unknown;
+    isActiveInSquad?: boolean;
+    squadStatus?: string;
+    squadExitReason?: string;
+    squadExitDate?: string;
+    matches: number;
+    runs: number;
+    wickets: number;
     highestScore: string;
     battingAverage: number;
     bowlingAverage: number;
@@ -412,51 +412,6 @@ export default function PlayerCardModal({
                     </div>
                   </div>
 
-                  {(player.isActiveInSquad !== undefined || 
-                    player.squadStatus || 
-                    player.squadExitReason || 
-                    player.squadExitDate ||
-                    player.transferInfo) && (
-                    <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
-                      <Section title="Squad Status" icon={<Trophy className="h-4 w-4" />}>
-                        <div className="grid grid-cols-2 gap-3">
-                          <MetricCard label="Active" value={player.isActiveInSquad === false ? 'No' : 'Yes'} />
-                          <MetricCard label="Status" value={displayValue(player.squadStatus)} />
-                          <MetricCard label="Exit Reason" value={displayValue(player.squadExitReason)} />
-                          <MetricCard label="Exit Date" value={displayValue(player.squadExitDate)} />
-                        </div>
-                      </Section>
-
-                      {player.transferInfo ? (
-                        <Section title="Auction / Transfer" icon={<Zap className="h-4 w-4" />}>
-                          <div className="grid grid-cols-2 gap-3">
-                            {'acquiredVia' in player.transferInfo ? (
-                              <MetricCard label="Acquired Via" value={displayValue((player.transferInfo as any).acquiredVia)} />
-                            ) : null}
-                            {'lastAuctionYear' in player.transferInfo ? (
-                              <MetricCard label="Auction Year" value={displayValue((player.transferInfo as any).lastAuctionYear)} />
-                            ) : null}
-                            {'transferFee' in player.transferInfo ? (
-                              <MetricCard label="Fee" value={displayValue((player.transferInfo as any).transferFee)} />
-                            ) : null}
-                            {'transferable' in player.transferInfo ? (
-                              <MetricCard label="Transferable" value={(player.transferInfo as any).transferable ? 'Yes' : 'No'} />
-                            ) : null}
-                            {'notes' in player.transferInfo ? (
-                              <div className="col-span-2 rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3">
-                                <div className="text-[11px] font-semibold uppercase tracking-wide text-white/55">Notes</div>
-                                <div className="mt-1 text-sm text-white/80 whitespace-pre-wrap">
-                                  {displayValue((player.transferInfo as any).notes)}
-                                </div>
-                              </div>
-                            ) : null}
-                          </div>
-                        </Section>
-                      ) : (
-                        <div />
-                      )}
-                    </div>
-                  )}
                     {(player.isActiveInSquad !== undefined || 
                       player.squadStatus || 
                       player.squadExitReason || 
