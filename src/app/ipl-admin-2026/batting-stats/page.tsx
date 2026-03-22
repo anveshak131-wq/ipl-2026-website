@@ -376,14 +376,14 @@ const BattingStatsPage = () => {
       // Only show IPL players
       const isIPL = (player.league || 'ipl') === 'ipl';
       const matchesSearch = player.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                           player.teamId?.toLowerCase().includes(searchQuery.toLowerCase());
+                           String(player.teamId || '').toLowerCase().includes(searchQuery.toLowerCase());
       
       // Handle the special "Not Selected This Season" filter
       if (selectedTeam === NOT_SELECTED_SEASON_FILTER) {
         return isIPL && matchesSearch && isInNotSelectedSeasonPool(player);
       }
       
-      const matchesTeam = selectedTeam === 'all' || player.teamId === selectedTeam;
+      const matchesTeam = selectedTeam === 'all' || String(player.teamId || '') === String(selectedTeam);
       // Show all players, not just those with existing stats
       return isIPL && matchesSearch && matchesTeam;
     });
@@ -484,8 +484,11 @@ const BattingStatsPage = () => {
       // Only show IPL players
       const isIPL = (player.league || 'ipl') === 'ipl';
       const matchesSearch = player.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                           player.teamId?.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesTeam = selectedTeam === 'all' || player.teamId === selectedTeam;
+                           String(player.teamId || '').toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesTeam =
+        selectedTeam === NOT_SELECTED_SEASON_FILTER
+          ? isInNotSelectedSeasonPool(player)
+          : selectedTeam === 'all' || String(player.teamId || '') === String(selectedTeam);
       return isIPL && matchesSearch && matchesTeam;
     });
     
@@ -526,7 +529,7 @@ const BattingStatsPage = () => {
   const getSelectedTeamLabel = useCallback(() => {
     if (selectedTeam === 'all') return 'All Teams';
     if (selectedTeam === NOT_SELECTED_SEASON_FILTER) return 'Not Selected This Season';
-    return teams.find((team) => team.id === selectedTeam)?.name || 'Selected Team';
+    return teams.find((team) => String(team.id) === String(selectedTeam))?.name || 'Selected Team';
   }, [selectedTeam, teams]);
 
   const getInactivePlayerCount = useCallback(() => {
@@ -707,7 +710,7 @@ const BattingStatsPage = () => {
                     Not Selected This Season ({getInactivePlayerCount()})
                   </option>
                   {teams.map(team => (
-                    <option key={team.id} value={team.id}>{team.name}</option>
+                    <option key={team.id} value={String(team.id)}>{team.name}</option>
                   ))}
                 </select>
               </div>
@@ -831,7 +834,7 @@ const BattingStatsPage = () => {
                   </thead>
                   <tbody className="divide-y divide-gray-700/50">
                     {filteredAndSortedPlayers.map((player, index) => {
-                      const team = teams.find(t => t.id === player.teamId);
+                      const team = teams.find(t => String(t.id) === String(player.teamId));
                       const runs = player.stats?.runs || 0;
                       const maxRuns = Math.max(...filteredAndSortedPlayers.map(p => p.stats?.runs || 0), 1);
                       const runsPercentage = (runs / maxRuns) * 100;
@@ -942,11 +945,11 @@ const BattingStatsPage = () => {
             <div className="space-y-6">
               {teams
                 .filter(team => {
-                  const teamPlayers = filteredAndSortedPlayers.filter(p => p.teamId === team.id);
+                  const teamPlayers = filteredAndSortedPlayers.filter(p => String(p.teamId) === String(team.id));
                   return teamPlayers.length > 0;
                 })
                 .map((team, teamIndex) => {
-                  const teamPlayers = filteredAndSortedPlayers.filter(p => p.teamId === team.id);
+                  const teamPlayers = filteredAndSortedPlayers.filter(p => String(p.teamId) === String(team.id));
                   const teamRuns = teamPlayers.reduce((sum, p) => sum + (p.stats?.runs || 0), 0);
                   const teamHundreds = teamPlayers.reduce((sum, p) => sum + (p.stats?.hundreds || 0), 0);
                   const teamFifties = teamPlayers.reduce((sum, p) => sum + (p.stats?.fifties || 0), 0);

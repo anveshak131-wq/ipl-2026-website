@@ -359,14 +359,14 @@ const BowlingStatsPage = () => {
       // Only show IPL players
       const isIPL = (player.league || 'ipl') === 'ipl';
       const matchesSearch = player.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                           player.teamId?.toLowerCase().includes(searchQuery.toLowerCase());
+                           String(player.teamId || '').toLowerCase().includes(searchQuery.toLowerCase());
       
       // Handle the special "Not Selected This Season" filter
       if (selectedTeam === NOT_SELECTED_SEASON_FILTER) {
         return isIPL && matchesSearch && isInNotSelectedSeasonPool(player);
       }
       
-      const matchesTeam = selectedTeam === 'all' || player.teamId === selectedTeam;
+      const matchesTeam = selectedTeam === 'all' || String(player.teamId || '') === String(selectedTeam);
       // Show all players, not just those with existing stats
       return isIPL && matchesSearch && matchesTeam;
     });
@@ -463,8 +463,11 @@ const BowlingStatsPage = () => {
       // Only show IPL players
       const isIPL = (player.league || 'ipl') === 'ipl';
       const matchesSearch = player.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                           player.teamId?.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesTeam = selectedTeam === 'all' || player.teamId === selectedTeam;
+                           String(player.teamId || '').toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesTeam =
+        selectedTeam === NOT_SELECTED_SEASON_FILTER
+          ? isInNotSelectedSeasonPool(player)
+          : selectedTeam === 'all' || String(player.teamId || '') === String(selectedTeam);
       return isIPL && matchesSearch && matchesTeam;
     });
     
@@ -522,7 +525,7 @@ const BowlingStatsPage = () => {
   const getSelectedTeamLabel = useCallback(() => {
     if (selectedTeam === 'all') return 'All Teams';
     if (selectedTeam === NOT_SELECTED_SEASON_FILTER) return 'Not Selected This Season';
-    return teams.find((team) => team.id === selectedTeam)?.name || 'Selected Team';
+    return teams.find((team) => String(team.id) === String(selectedTeam))?.name || 'Selected Team';
   }, [selectedTeam, teams]);
 
   const getInactivePlayerCount = useCallback(() => {
@@ -697,7 +700,7 @@ const BowlingStatsPage = () => {
                     Not Selected This Season ({getInactivePlayerCount()})
                   </option>
                   {teams.map(team => (
-                    <option key={team.id} value={team.id}>{team.name}</option>
+                    <option key={team.id} value={String(team.id)}>{team.name}</option>
                   ))}
                 </select>
               </div>
@@ -814,7 +817,7 @@ const BowlingStatsPage = () => {
                   </thead>
                   <tbody className="divide-y divide-gray-700/50">
                     {filteredAndSortedPlayers.map((player) => {
-                      const team = teams.find(t => t.id === player.teamId);
+                      const team = teams.find(t => String(t.id) === String(player.teamId));
                       const wickets = player.stats?.wickets || 0;
                       const maxWickets = Math.max(...filteredAndSortedPlayers.map(p => p.stats?.wickets || 0), 1);
                       const wicketsPercentage = (wickets / maxWickets) * 100;
@@ -941,11 +944,11 @@ const BowlingStatsPage = () => {
             <div className="space-y-6">
               {teams
                 .filter(team => {
-                  const teamPlayers = filteredAndSortedPlayers.filter(p => p.teamId === team.id);
+                  const teamPlayers = filteredAndSortedPlayers.filter(p => String(p.teamId) === String(team.id));
                   return teamPlayers.length > 0;
                 })
                 .map(team => {
-                  const teamPlayers = filteredAndSortedPlayers.filter(p => p.teamId === team.id);
+                  const teamPlayers = filteredAndSortedPlayers.filter(p => String(p.teamId) === String(team.id));
                   const teamWickets = teamPlayers.reduce((sum, p) => sum + (p.stats?.wickets || 0), 0);
                   const teamFiveWickets = teamPlayers.reduce((sum, p) => sum + (p.stats?.fiveWickets || 0), 0);
                   const teamMaidens = teamPlayers.reduce((sum, p) => sum + (p.stats?.maidens || 0), 0);
