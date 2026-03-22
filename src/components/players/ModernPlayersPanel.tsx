@@ -1,13 +1,11 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Filter, ChevronDown, BarChart2, Trophy, Zap, Flame, ArrowRight, X, BarChart3, Users, ScatterChart, Table2, SlidersHorizontal, Download, FileText, FileDown, FileJson } from 'lucide-react';
+import { Search, ChevronDown, Users, Sword, Shield, Hand, ArrowRight } from 'lucide-react';
 import Image from 'next/image';
-import { teamColors, roleColors, fadeIn, staggerContainer, cardStyle, buttonStyle, inputStyle } from '@/styles/theme';
+import { teamColors, fadeIn, staggerContainer, inputStyle } from '@/styles/theme';
 import PlayerCardModal from '../teams/PlayerCardModal';
-import { useInView } from 'react-intersection-observer';
-import { exportToCSV, exportToPDF, exportToJSON } from '@/utils/exportUtils';
 
 interface Player {
   id: string;
@@ -36,11 +34,23 @@ interface Team {
   name: string;
   shortName: string;
   logo?: string;
+  colors?: {
+    primary: string;
+    secondary: string;
+  };
 }
 
 interface ModernPlayersPanelProps {
   initialPlayers?: any[];
   teams: Team[];
+  showHeader?: boolean;
+  showTeamFilter?: boolean;
+  title?: string;
+  subtitle?: string;
+  searchPlaceholder?: string;
+  defaultTeamId?: string;
+  accentColor?: string;
+  accentColorSecondary?: string;
 }
 
 function toNumber(value: any): number {
@@ -81,6 +91,43 @@ function resolveTeamName(teamId: string, teams: Team[], fallback?: string): stri
   return match?.name || fallback || (teamId ? `Team ${teamId}` : 'Team');
 }
 
+function normalizeHexColor(raw: string | undefined, fallback: string): string {
+  const value = String(raw || '').trim();
+  if (!value) return fallback;
+
+  const withHash = value.startsWith('#') ? value : `#${value}`;
+  const shortMatch = withHash.match(/^#([0-9a-fA-F]{3})$/);
+  if (shortMatch) {
+    const [r, g, b] = shortMatch[1].split('');
+    return `#${r}${r}${g}${g}${b}${b}`.toUpperCase();
+  }
+
+  const longMatch = withHash.match(/^#([0-9a-fA-F]{6})$/);
+  if (longMatch) return withHash.toUpperCase();
+
+  return fallback;
+}
+
+function hexToRgba(raw: string, alpha: number): string {
+  const hex = normalizeHexColor(raw, '#7C3AED');
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
+function normalizeRole(role: string): string {
+  const raw = String(role || '').trim();
+  if (!raw) return 'Player';
+  const lower = raw.toLowerCase().replace(/\s+/g, '-');
+  if (lower.includes('wicket')) return 'Wicket-keeper';
+  if (lower.includes('keeper')) return 'Wicket-keeper';
+  if (lower.includes('all')) return 'All-rounder';
+  if (lower.includes('bowl')) return 'Bowler';
+  if (lower.includes('bat')) return 'Batsman';
+  return raw;
+}
+
 function normalizePlayer(raw: any, teams: Team[]): Player {
   const rawStats = raw?.stats || {};
   const normalizedTeamId = resolveTeamId(raw?.teamId ?? raw?.team?.id ?? raw?.team, teams);
@@ -92,7 +139,7 @@ function normalizePlayer(raw: any, teams: Team[]): Player {
     name: String(raw?.name ?? 'Unknown'),
     teamId: normalizedTeamId,
     teamName: resolveTeamName(normalizedTeamId, teams, raw?.teamName),
-    role: String(raw?.role ?? 'Player'),
+    role: normalizeRole(String(raw?.role ?? 'Player')),
     matches: toNumber(raw?.matches ?? rawStats.matches),
     runs: toNumber(raw?.runs ?? rawStats.runs),
     wickets: toNumber(raw?.wickets ?? rawStats.wickets),
@@ -115,63 +162,26 @@ function normalizePlayers(rawPlayers: any, teams: Team[]): Player[] {
   return rawPlayers.map((p) => normalizePlayer(p, teams));
 }
 
-// Define view types
-type ViewType = 'grid' | 'table' | 'stats';
-
-// Define comparison type
-interface ComparisonPlayer extends Player {
-  isSelected: boolean;
-}
-
-export default function ModernPlayersPanel({ initialPlayers = [], teams }: ModernPlayersPanelProps) {
+export default function ModernPlayersPanel({
+  initialPlayers = [],
+  teams,
+  showHeader = true,
+  showTeamFilter = true,
+  title = 'IPL 2026 Players',
+  subtitle = 'Browse, filter, and explore player stats.',
+  searchPlaceholder = 'Search players by name, team, or role…',
+  defaultTeamId,
+  accentColor,
+  accentColorSecondary,
+}: ModernPlayersPanelProps) {
   // State for players and filtering
   const [players, setPlayers] = useState<Player[]>(() => normalizePlayers(initialPlayers, teams));
-  const [filteredPlayers, setFilteredPlayers] = useState<Player[]>([]);
-  const [displayedPlayers, setDisplayedPlayers] = useState<Player[]>([]);
+  const [selectedTeam, setSelectedTeam] = useState(defaultTeamId || 'all');
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedTeam, setSelectedTeam] = useState('all');
   const [selectedRole, setSelectedRole] = useState('all');
-  const [sortBy, setSortBy] = useState<'name' | 'runs' | 'wickets' | 'matches' | 'battingAverage' | 'bowlingAverage' | 'strikeRate' | 'economy'>('name');
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [isLoading, setIsLoading] = useState(!initialPlayers.length);
   const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
   const [selectedPlayerIndex, setSelectedPlayerIndex] = useState<number>(-1);
-  const [viewType, setViewType] = useState<ViewType>('grid');
-  const [showComparison, setShowComparison] = useState(false);
-  const [comparisonPlayers, setComparisonPlayers] = useState<ComparisonPlayer[]>([]);
-  const [page, setPage] = useState(1);
-  const [hasMore, setHasMore] = useState(true);
-  const [statsView, setStatsView] = useState<'batting' | 'bowling' | 'fielding'>('batting');
-  const [showFilters, setShowFilters] = useState(false);
-  const [showExportDropdown, setShowExportDropdown] = useState(false);
-  
-  // Infinite scroll ref
-  const { ref: loadMoreRef, inView } = useInView({
-    threshold: 0.1,
-    triggerOnce: false,
-  });
-  
-  // Load more players when scrolled to bottom
-  useEffect(() => {
-    if (inView && hasMore && !isLoading) {
-      loadMorePlayers();
-    }
-  }, [inView, hasMore]);
-  
-  const loadMorePlayers = () => {
-    const nextPage = page + 1;
-    const startIndex = (nextPage - 1) * 20;
-    const endIndex = startIndex + 20;
-    
-    if (startIndex >= filteredPlayers.length) {
-      setHasMore(false);
-      return;
-    }
-    
-    const newPlayers = filteredPlayers.slice(0, endIndex);
-    setDisplayedPlayers(newPlayers);
-    setPage(nextPage);
-  };
 
   // Fetch players if not provided
   useEffect(() => {
@@ -182,7 +192,6 @@ export default function ModernPlayersPanel({ initialPlayers = [], teams }: Moder
           const data = response.ok ? await response.json() : [];
           const normalized = normalizePlayers(data, teams);
           setPlayers(normalized);
-          setFilteredPlayers(normalized);
         } catch (error) {
           console.error('Error fetching players:', error);
         } finally {
@@ -199,7 +208,6 @@ export default function ModernPlayersPanel({ initialPlayers = [], teams }: Moder
     if (initialPlayers.length > 0) {
       const normalized = normalizePlayers(initialPlayers, teams);
       setPlayers(normalized);
-      setFilteredPlayers(normalized);
       setIsLoading(false);
     }
   }, [initialPlayers, teams]);
@@ -215,56 +223,11 @@ export default function ModernPlayersPanel({ initialPlayers = [], teams }: Moder
     );
   }, [teams]);
 
-  // Apply filters and sorting
+  // If the caller passes a defaultTeamId after mount, keep the filter in sync.
   useEffect(() => {
-    let result = [...players];
-
-    // Apply team filter
-    if (selectedTeam !== 'all') {
-      result = result.filter(player => player.teamId === selectedTeam);
-    }
-
-    // Apply role filter
-    if (selectedRole !== 'all') {
-      result = result.filter(player => player.role?.toLowerCase() === selectedRole.toLowerCase());
-    }
-
-    // Apply search
-    if (searchTerm) {
-      const term = searchTerm.toLowerCase();
-      result = result.filter(player => 
-        player.name.toLowerCase().includes(term) ||
-        player.teamName?.toLowerCase().includes(term) ||
-        player.role?.toLowerCase().includes(term)
-      );
-    }
-
-    // Apply sorting
-    result.sort((a, b) => {
-      let comparison = 0;
-      
-      if (sortBy === 'name') {
-        comparison = a.name.localeCompare(b.name);
-      } else {
-        const aValue = a[sortBy] || 0;
-        const bValue = b[sortBy] || 0;
-        comparison = (aValue as number) - (bValue as number);
-      }
-      
-      return sortOrder === 'asc' ? comparison : -comparison;
-    });
-
-    setFilteredPlayers(result);
-  }, [players, searchTerm, selectedTeam, selectedRole, sortBy, sortOrder]);
-
-  const toggleSort = (key: typeof sortBy) => {
-    if (sortBy === key) {
-      setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc');
-    } else {
-      setSortBy(key);
-      setSortOrder('asc');
-    }
-  };
+    if (!defaultTeamId) return;
+    setSelectedTeam(defaultTeamId);
+  }, [defaultTeamId]);
 
   const openPlayerModal = (player: Player, index: number) => {
     setSelectedPlayer(player);
@@ -289,10 +252,48 @@ export default function ModernPlayersPanel({ initialPlayers = [], teams }: Moder
     setSelectedPlayerIndex(newIndex);
   };
 
-  const getRoleGradient = (role?: string) => {
-    if (!role) return roleColors.default;
-    return roleColors[role as keyof typeof roleColors] || roleColors.default;
-  };
+  const filteredPlayers = useMemo(() => {
+    let result = [...players];
+
+    if (selectedTeam !== 'all') {
+      result = result.filter((player) => String(player.teamId) === String(selectedTeam));
+    }
+
+    if (selectedRole !== 'all') {
+      const desired = selectedRole.toLowerCase();
+      result = result.filter((player) => player.role?.toLowerCase() === desired);
+    }
+
+    if (searchTerm.trim()) {
+      const term = searchTerm.toLowerCase();
+      result = result.filter(
+        (player) =>
+          player.name.toLowerCase().includes(term) ||
+          player.teamName?.toLowerCase().includes(term) ||
+          player.role?.toLowerCase().includes(term),
+      );
+    }
+
+    // Stable sort: name asc by default for consistent UX.
+    result.sort((a, b) => a.name.localeCompare(b.name));
+    return result;
+  }, [players, searchTerm, selectedTeam, selectedRole]);
+
+  const stats = useMemo(() => {
+    const counts = { total: 0, batsmen: 0, bowlers: 0, allRounders: 0, keepers: 0 };
+    counts.total = filteredPlayers.length;
+    for (const player of filteredPlayers) {
+      const role = String(player.role || '').toLowerCase();
+      if (role.includes('wicket') || role.includes('keeper')) counts.keepers += 1;
+      else if (role.includes('all')) counts.allRounders += 1;
+      else if (role.includes('bowl')) counts.bowlers += 1;
+      else if (role.includes('bat')) counts.batsmen += 1;
+    }
+    return counts;
+  }, [filteredPlayers]);
+
+  const accentPrimary = normalizeHexColor(accentColor, '#7C3AED');
+  const accentSecondary = normalizeHexColor(accentColorSecondary || accentColor, accentPrimary);
 
   if (isLoading) {
     return (
@@ -306,56 +307,75 @@ export default function ModernPlayersPanel({ initialPlayers = [], teams }: Moder
     <div className="space-y-6">
       {/* Header with Search and Filters */}
       <motion.div 
-        className="bg-slate-800/50 backdrop-blur-sm rounded-2xl p-6 border border-slate-700/50"
+        className="relative overflow-hidden rounded-3xl border border-white/10 bg-slate-950/40 backdrop-blur-xl p-5 md:p-6 shadow-[0_10px_50px_rgba(0,0,0,0.25)]"
         initial="hidden"
         animate="visible"
         variants={fadeIn}
       >
-        <h1 className="text-3xl font-bold mb-6 bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
-          IPL 2026 Players
-        </h1>
+        <div
+          className="pointer-events-none absolute inset-0 opacity-70"
+          style={{
+            background: `radial-gradient(800px circle at 20% 0%, ${hexToRgba(accentPrimary, 0.22)}, transparent 55%), radial-gradient(700px circle at 85% 45%, ${hexToRgba(accentSecondary, 0.16)}, transparent 50%)`,
+          }}
+        />
+
+        {showHeader && (
+          <div className="relative mb-5 flex flex-col gap-1">
+            <h2 className="text-2xl md:text-3xl font-black tracking-tight text-white">
+              {title}
+            </h2>
+            {subtitle && (
+              <p className="text-sm md:text-base text-white/60">
+                {subtitle}
+              </p>
+            )}
+          </div>
+        )}
         
-        <div className="flex flex-col md:flex-row gap-4">
+        <div className="relative flex flex-col gap-3 md:flex-row md:items-center">
           <div className="relative flex-grow">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <Search className="h-5 w-5 text-slate-400" />
             </div>
             <input
               type="text"
-              placeholder="Search players by name, team, or role..."
+              placeholder={searchPlaceholder}
               className={inputStyle + " pl-10"}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
           
-          <div className="flex gap-2">
-            <div className="relative">
-              <select
-                value={selectedTeam}
-                onChange={(e) => setSelectedTeam(e.target.value)}
-                className="appearance-none bg-slate-800/50 border border-slate-700 text-white pl-3 pr-8 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/50"
-              >
-                <option value="all">All Teams</option>
-                {teams.map((team) => (
-                  <option key={team.id} value={team.id}>
-                    {team.shortName}
-                  </option>
-                ))}
-              </select>
-              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-slate-400">
-                <ChevronDown className="h-4 w-4" />
+          <div className="flex flex-col gap-2 sm:flex-row">
+            {showTeamFilter && (
+              <div className="relative">
+                <select
+                  value={selectedTeam}
+                  onChange={(e) => setSelectedTeam(e.target.value)}
+                  className="appearance-none bg-slate-950/40 border border-white/10 text-white pl-3 pr-9 py-2.5 rounded-xl focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-900"
+                  style={{ outlineColor: accentPrimary }}
+                >
+                  <option value="all">All Teams</option>
+                  {teams.map((team) => (
+                    <option key={team.id} value={team.id}>
+                      {team.shortName}
+                    </option>
+                  ))}
+                </select>
+                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-400">
+                  <ChevronDown className="h-4 w-4" />
+                </div>
               </div>
-            </div>
+            )}
 
             <div className="relative">
               <select
                 value={selectedRole}
                 onChange={(e) => setSelectedRole(e.target.value)}
-                className="appearance-none bg-slate-800/50 border border-slate-700 text-white pl-3 pr-8 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                className="appearance-none bg-slate-950/40 border border-white/10 text-white pl-3 pr-9 py-2.5 rounded-xl focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-900"
               >
                 <option value="all">All Roles</option>
-                {['Batsman', 'Bowler', 'All-Rounder', 'Wicket-Keeper'].map((role) => (
+                {['Batsman', 'Bowler', 'All-rounder', 'Wicket-keeper'].map((role) => (
                   <option key={role} value={role.toLowerCase()}>
                     {role}
                   </option>
@@ -369,36 +389,25 @@ export default function ModernPlayersPanel({ initialPlayers = [], teams }: Moder
         </div>
 
         {/* Stats Overview */}
-        <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="relative mt-5 grid grid-cols-2 sm:grid-cols-5 gap-3">
           {[
-            { label: 'Total Players', value: filteredPlayers.length, icon: <Users className="w-5 h-5" /> },
-            { 
-              label: 'Top Run Scorer', 
-              value: [...filteredPlayers].sort((a, b) => (b.runs || 0) - (a.runs || 0))[0]?.name || '-',
-              icon: <Zap className="w-5 h-5" /> 
-            },
-            { 
-              label: 'Top Wicket Taker', 
-              value: [...filteredPlayers].sort((a, b) => (b.wickets || 0) - (a.wickets || 0))[0]?.name || '-',
-              icon: <Trophy className="w-5 h-5" /> 
-            },
-            { 
-              label: 'Best Average', 
-              value: [...filteredPlayers].sort((a, b) => (b.battingAverage || 0) - (a.battingAverage || 0))[0]?.name || '-',
-              icon: <BarChart2 className="w-5 h-5" /> 
-            },
+            { label: 'Total', value: stats.total, icon: <Users className="w-4 h-4" /> },
+            { label: 'Batsmen', value: stats.batsmen, icon: <Sword className="w-4 h-4" /> },
+            { label: 'Bowlers', value: stats.bowlers, icon: <Shield className="w-4 h-4" /> },
+            { label: 'All-rounders', value: stats.allRounders, icon: <Hand className="w-4 h-4" /> },
+            { label: 'Keepers', value: stats.keepers, icon: <Users className="w-4 h-4" /> },
           ].map((stat, index) => (
             <motion.div 
               key={index}
-              className="bg-slate-800/30 p-4 rounded-xl border border-slate-700/50"
+              className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3"
               variants={fadeIn}
               transition={{ delay: index * 0.1 }}
             >
-              <div className="flex items-center gap-2 text-slate-400 text-sm">
+              <div className="flex items-center gap-2 text-white/60 text-xs">
                 {stat.icon}
                 {stat.label}
               </div>
-              <div className="text-lg font-semibold mt-1 truncate" title={String(stat.value)}>
+              <div className="text-lg font-bold mt-1 truncate text-white" title={String(stat.value)}>
                 {stat.value}
               </div>
             </motion.div>
@@ -408,113 +417,104 @@ export default function ModernPlayersPanel({ initialPlayers = [], teams }: Moder
 
       {/* Players Grid */}
       <motion.div 
-        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
         variants={staggerContainer}
         initial="hidden"
         animate="visible"
       >
         {filteredPlayers.map((player, index) => {
-          const team = teams.find(t => t.id === player.teamId);
-          const teamColor = team ? teamColors[team.shortName] || '#7C3AED' : '#7C3AED';
+          const team = teams.find((t) => String(t.id) === String(player.teamId));
+          const teamPrimary = normalizeHexColor(
+            team?.colors?.primary,
+            team ? (teamColors[team.shortName] || '#7C3AED') : '#7C3AED',
+          );
+          const teamSecondary = normalizeHexColor(team?.colors?.secondary, teamPrimary);
           
           return (
-            <motion.div
+            <motion.button
+              type="button"
               key={player.id}
               variants={fadeIn}
-              className={cardStyle + " hover:shadow-xl hover:-translate-y-1 cursor-pointer"}
+              whileHover={{ y: -4 }}
+              className="group relative w-full overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur-xl p-5 text-left shadow-[0_10px_40px_rgba(0,0,0,0.20)] transition-colors hover:bg-white/[0.055]"
               onClick={() => openPlayerModal(player, index)}
             >
-              <div className="p-5">
-                <div className="flex items-start gap-4">
-                  {/* Player Avatar */}
-                  <div className="relative">
-                    <div 
-                      className="w-20 h-20 rounded-full bg-gradient-to-br from-slate-700 to-slate-900 flex items-center justify-center overflow-hidden border-2"
-                      style={{ borderColor: teamColor }}
-                    >
-                      {player.image ? (
-                        <Image
-                          src={player.image}
-                          alt={player.name}
-                          width={80}
-                          height={80}
-                          className="object-cover w-full h-full"
-                        />
-                      ) : (
-                        <span className="text-2xl font-bold text-white">
-                          {player.name.charAt(0)}
-                        </span>
-                      )}
-                    </div>
-                    <div 
-                      className={`absolute -bottom-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold text-white ${
-                        getRoleGradient(player.role).split(' ')[0]
-                      }`}
-                    >
-                      {player.role?.charAt(0) || 'P'}
-                    </div>
+              <div
+                className="pointer-events-none absolute inset-0 opacity-70"
+                style={{
+                  background: `radial-gradient(500px circle at 20% 10%, ${hexToRgba(teamPrimary, 0.18)}, transparent 55%), radial-gradient(450px circle at 90% 40%, ${hexToRgba(teamSecondary, 0.12)}, transparent 55%)`,
+                }}
+              />
+
+              <div className="relative flex items-start gap-4">
+                <div className="relative shrink-0">
+                  <div
+                    className="h-16 w-16 rounded-2xl overflow-hidden border border-white/15 bg-slate-900/60 shadow-[0_10px_30px_rgba(0,0,0,0.25)]"
+                    style={{ boxShadow: `0 18px 40px ${hexToRgba(teamPrimary, 0.15)}` }}
+                  >
+                    {player.image ? (
+                      <Image
+                        src={player.image}
+                        alt={player.name}
+                        width={64}
+                        height={64}
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
+                      <div className="h-full w-full flex items-center justify-center text-xl font-black text-white">
+                        {player.name.charAt(0)}
+                      </div>
+                    )}
                   </div>
-
-                  {/* Player Info */}
-                  <div className="flex-grow">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <h3 className="font-bold text-lg text-white">{player.name}</h3>
-                        <div className="flex items-center gap-2 mt-1">
-                          <div 
-                            className="w-3 h-3 rounded-full"
-                            style={{ backgroundColor: teamColor }}
-                          />
-                          <span className="text-sm text-slate-300">
-                            {team?.shortName || 'N/A'}
-                          </span>
-                        </div>
-                      </div>
-                      <div 
-                        className={`px-2 py-1 rounded-md text-xs font-medium ${
-                          player.role === 'Batsman' ? 'bg-orange-900/30 text-orange-400' :
-                          player.role === 'Bowler' ? 'bg-blue-900/30 text-blue-400' :
-                          player.role === 'All-Rounder' ? 'bg-purple-900/30 text-purple-400' :
-                          player.role === 'Wicket-Keeper' ? 'bg-green-900/30 text-green-400' :
-                          'bg-slate-700/50 text-slate-300'
-                        }`}
-                      >
-                        {player.role || 'Player'}
-                      </div>
-                    </div>
-
-                    {/* Stats */}
-                    <div className="grid grid-cols-3 gap-2 mt-3 text-center">
-                      <div>
-                        <p className="text-xs text-slate-400">Matches</p>
-                        <p className="text-sm font-semibold">{player.matches || 0}</p>
-                      </div>
-                      <div>
-                        <p className="text-xs text-slate-400">Runs</p>
-                        <p className="text-sm font-semibold">{player.runs || 0}</p>
-                      </div>
-                      <div>
-                        <p className="text-xs text-slate-400">Wickets</p>
-                        <p className="text-sm font-semibold">{player.wickets || 0}</p>
-                      </div>
-                    </div>
+                  <div
+                    className="absolute -bottom-2 -right-2 rounded-xl px-2 py-0.5 text-[11px] font-semibold border border-white/10 bg-slate-950/60 text-white/80"
+                    style={{ boxShadow: `0 10px 25px ${hexToRgba(teamPrimary, 0.12)}` }}
+                  >
+                    {team?.shortName || 'IPL'}
                   </div>
                 </div>
 
-                {/* View Button */}
-                <div className="mt-4 flex justify-end">
-                  <button 
-                    className="text-sm flex items-center gap-1 text-blue-400 hover:text-blue-300 transition-colors"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      openPlayerModal(player, index);
-                    }}
-                  >
-                    View Details <ArrowRight className="w-3.5 h-3.5" />
-                  </button>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <div className="truncate text-lg font-bold text-white">
+                        {player.name}
+                      </div>
+                      <div className="mt-1 flex flex-wrap items-center gap-2">
+                        <span
+                          className="inline-flex items-center rounded-full border border-white/10 px-2.5 py-1 text-[11px] font-semibold text-white/80 bg-white/[0.03]"
+                        >
+                          {player.role || 'Player'}
+                        </span>
+                        <span className="text-xs text-white/60 truncate">
+                          {player.teamName}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="shrink-0 rounded-full border border-white/10 bg-white/[0.03] p-2 text-white/70 transition-transform group-hover:translate-x-0.5">
+                      <ArrowRight className="h-4 w-4" />
+                    </div>
+                  </div>
+
+                  <div className="mt-4 grid grid-cols-3 gap-3">
+                    {[
+                      { label: 'Matches', value: player.matches || 0 },
+                      { label: 'Runs', value: player.runs || 0 },
+                      { label: 'Wkts', value: player.wickets || 0 },
+                    ].map((stat) => (
+                      <div
+                        key={stat.label}
+                        className="rounded-2xl border border-white/10 bg-white/[0.03] px-3 py-2"
+                      >
+                        <div className="text-[11px] text-white/55">{stat.label}</div>
+                        <div className="text-base font-bold text-white">{stat.value}</div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
-            </motion.div>
+            </motion.button>
           );
         })}
       </motion.div>
@@ -534,19 +534,30 @@ export default function ModernPlayersPanel({ initialPlayers = [], teams }: Moder
 
       {/* Player Modal */}
       <AnimatePresence>
-        {selectedPlayer && (
-          <PlayerCardModal
-            isOpen={!!selectedPlayer}
-            onClose={closePlayerModal}
-            player={selectedPlayer}
-            teamColor={teams.find(t => t.id === selectedPlayer.teamId) ? 
-              teamColors[teams.find(t => t.id === selectedPlayer.teamId)?.shortName || ''] : '#7C3AED'}
-            onNext={() => navigatePlayer('next')}
-            onPrev={() => navigatePlayer('prev')}
-            hasNext={selectedPlayerIndex < filteredPlayers.length - 1}
-            hasPrev={selectedPlayerIndex > 0}
-          />
-        )}
+        {selectedPlayer && (() => {
+          const team = teams.find((t) => String(t.id) === String(selectedPlayer.teamId));
+          const primary = normalizeHexColor(
+            team?.colors?.primary,
+            team ? (teamColors[team.shortName] || '#7C3AED') : '#7C3AED',
+          );
+          const secondary = normalizeHexColor(team?.colors?.secondary, primary);
+
+          return (
+            <PlayerCardModal
+              isOpen={!!selectedPlayer}
+              onClose={closePlayerModal}
+              player={selectedPlayer}
+              teamPrimary={primary}
+              teamSecondary={secondary}
+              teamShortName={team?.shortName}
+              teamLogo={team?.logo}
+              onNext={() => navigatePlayer('next')}
+              onPrev={() => navigatePlayer('prev')}
+              hasNext={selectedPlayerIndex < filteredPlayers.length - 1}
+              hasPrev={selectedPlayerIndex > 0}
+            />
+          );
+        })()}
       </AnimatePresence>
     </div>
   );

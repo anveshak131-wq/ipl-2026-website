@@ -46,7 +46,7 @@ export default function TeamPlayersPage() {
           </p>
         </div>
 
-        <ModernPlayersPanel initialPlayers={players} teams={teams} />
+        <ModernPlayersPanel initialPlayers={players} teams={teams} showHeader={false} />
       </main>
 
       <Footer />

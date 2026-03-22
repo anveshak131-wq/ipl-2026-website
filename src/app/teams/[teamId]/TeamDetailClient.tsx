@@ -9,7 +9,6 @@ import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import PlayerModal from '@/components/teams/PlayerModal';
 import WPLPlayerCard from '@/components/teams/WPLPlayerCard';
-import WPLPlayerModal from '@/components/teams/WPLPlayerModal';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import AuroraBackground from '@/components/ui/AuroraBackground';
 import TeamAuroraBackground from '@/components/ui/TeamAuroraBackground';
@@ -1585,28 +1584,16 @@ export default function TeamDetailClient({ teamId, league }: TeamDetailClientPro
 
         <Footer />
 
-      {isWPL ? (
-        <WPLPlayerModal
-          player={selectedPlayer}
-          team={teamData}
-          isOpen={isModalOpen}
-          onClose={() => {
-            setIsModalOpen(false);
-            setSelectedPlayer(null);
-          }}
-        />
-      ) : (
-        <PlayerModal
-          player={selectedPlayer}
-          isOpen={isModalOpen}
-          onClose={() => {
-            setIsModalOpen(false);
-            setSelectedPlayer(null);
-          }}
-          teamColors={teamData?.colors}
-          teamData={teamData || undefined}
-        />
-      )}
+      <PlayerModal
+        player={selectedPlayer}
+        isOpen={isModalOpen}
+        onClose={() => {
+          setIsModalOpen(false);
+          setSelectedPlayer(null);
+        }}
+        teamColors={teamData?.colors}
+        teamData={teamData || undefined}
+      />
 
       {showPlayerComparison && teamData && teamData.players && (
         <PlayerComparisonTool

@@ -1,14 +1,13 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Player, Team } from '@/types';
 import { api } from '@/lib/data';
-import { getOptimalTextColor } from '@/lib/colorUtils';
-import { formatDateMonthDDYYYY, calculateAge } from '@/lib/dateUtils';
 import FlagImage from '@/components/ui/FlagImage';
-import { X, Star, Globe, Calendar, TrendingUp, Award, Target, Activity, Zap, BarChart3 } from 'lucide-react';
-import { calculateOverallPerformance, OverallPerformance } from '@/lib/playerPerformance';
+import { X, Calendar, Hash, Star, BarChart3, Trophy, Activity } from 'lucide-react';
+import { formatDateMonthDDYYYY, calculateAge } from '@/lib/dateUtils';
+import { calculateOverallPerformance } from '@/lib/playerPerformance';
 import { usePlayerUpdates } from '@/hooks/usePlayerUpdates';
 
 interface PlayerModalProps {
@@ -22,59 +21,76 @@ interface PlayerModalProps {
   teamData?: Team;
 }
 
-// Helper function to create color variations
-function createColorVariations(hex: string) {
+function normalizeHexColor(raw: string | undefined, fallback: string): string {
+  const value = String(raw || '').trim();
+  if (!value) return fallback;
+
+  const withHash = value.startsWith('#') ? value : `#${value}`;
+  const shortMatch = withHash.match(/^#([0-9a-fA-F]{3})$/);
+  if (shortMatch) {
+    const [r, g, b] = shortMatch[1].split('');
+    return `#${r}${r}${g}${g}${b}${b}`.toUpperCase();
+  }
+
+  const longMatch = withHash.match(/^#([0-9a-fA-F]{6})$/);
+  if (longMatch) return withHash.toUpperCase();
+
+  return fallback;
+}
+
+function hexToRgba(raw: string, alpha: number): string {
+  const hex = normalizeHexColor(raw, '#7C3AED');
   const r = parseInt(hex.slice(1, 3), 16);
   const g = parseInt(hex.slice(3, 5), 16);
   const b = parseInt(hex.slice(5, 7), 16);
-  
-  const light = `rgba(${r}, ${g}, ${b}, 0.12)`;
-  const medium = `rgba(${r}, ${g}, ${b}, 0.25)`;
-  const dark = `rgba(${r}, ${g}, ${b}, 0.4)`;
-  
-  return {
-    light,
-    medium,
-    dark,
-    solid: hex,
-    glow: `rgba(${r}, ${g}, ${b}, 0.5)`,
-    text: getOptimalTextColor(hex),
-    textOnLight: '#E5E7EB',
-  };
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
 
-// Helper function to adjust opacity of rgba color
-function adjustOpacity(rgbaColor: string, opacity: number): string {
-  const match = rgbaColor.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*[\d.]+)?\)/);
-  if (match) {
-    return `rgba(${match[1]}, ${match[2]}, ${match[3]}, ${opacity})`;
-  }
-  return rgbaColor;
+function MetricCard({ label, value, hint }: { label: string; value: string; hint?: string }) {
+  return (
+    <div className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3">
+      <div className="text-[11px] font-semibold uppercase tracking-wide text-white/55">{label}</div>
+      <div className="mt-1 text-lg font-black text-white">{value}</div>
+      {hint ? <div className="mt-1 text-xs text-white/45">{hint}</div> : null}
+    </div>
+  );
+}
+
+function displayValue(value: unknown): string {
+  if (value === null || value === undefined) return '—';
+  if (typeof value === 'number') return Number.isFinite(value) ? String(value) : '—';
+  const raw = String(value).trim();
+  return raw ? raw : '—';
+}
+
+function getInitials(name: string): string {
+  return name
+    .split(' ')
+    .filter(Boolean)
+    .map((n) => n[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2);
 }
 
 export default function PlayerModal({ player, isOpen, onClose, teamColors, teamData }: PlayerModalProps) {
   const [teamColorsState, setTeamColorsState] = useState<{ primary: string; secondary: string } | null>(teamColors || null);
   const [currentPlayer, setCurrentPlayer] = useState<Player | null>(player);
+  const closeButtonRef = useRef<HTMLButtonElement | null>(null);
 
-  // Update current player when prop changes
   useEffect(() => {
     setCurrentPlayer(player);
   }, [player]);
 
-  // Real-time player updates - refresh player data when updated
+  // Real-time player updates (admin edits)
   usePlayerUpdates(async (playerId: string) => {
     if (!currentPlayer) return;
-    
-    // If specific player ID provided, only update if it matches
     if (playerId && currentPlayer.id !== playerId) return;
-    
+
     try {
-      const allPlayers = await api.getPlayers();
-      const updatedPlayer = allPlayers.find(p => p.id === currentPlayer.id);
-      if (updatedPlayer) {
-        setCurrentPlayer(updatedPlayer);
-        console.log('Player modal: Updated player data for', updatedPlayer.name);
-      }
+      const allPlayers = await api.getPlayers(undefined, currentPlayer.league);
+      const updated = allPlayers.find((p) => p.id === currentPlayer.id);
+      if (updated) setCurrentPlayer(updated);
     } catch (error) {
       console.error('Error refreshing player data in modal:', error);
     }
@@ -85,734 +101,250 @@ export default function PlayerModal({ player, isOpen, onClose, teamColors, teamD
       setTeamColorsState(teamColors);
       return;
     }
-    
-    if (!teamColors && currentPlayer?.teamId) {
-      api.getTeams().then((teams) => {
-        const team = teams.find(t => t.id === currentPlayer.teamId);
-        if (team) {
-          setTeamColorsState(team.colors);
-        }
-      }).catch((error) => {
-        console.error('Error fetching team colors:', error);
-      });
-    }
-  }, [currentPlayer?.teamId, teamColors]);
 
-  // Close modal on Escape key
+    if (teamData?.colors) {
+      setTeamColorsState(teamData.colors);
+      return;
+    }
+
+    if (!currentPlayer?.teamId) return;
+
+    api
+      .getTeams(currentPlayer.league)
+      .then((teams) => {
+        const team = teams.find((t) => String(t.id) === String(currentPlayer.teamId));
+        if (team?.colors) setTeamColorsState(team.colors);
+      })
+      .catch((error) => console.error('Error fetching team colors:', error));
+  }, [currentPlayer?.teamId, currentPlayer?.league, teamColors, teamData]);
+
+  // Close modal on Escape + lock body scroll
   useEffect(() => {
+    if (!isOpen) return;
+
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' || e.key === 'Esc' || e.keyCode === 27) {
-        onClose();
-      }
+      if (e.key === 'Escape') onClose();
     };
 
-    if (isOpen) {
-      window.addEventListener('keydown', handleKeyDown);
-      // Prevent body scroll when modal is open
-      document.body.style.overflow = 'hidden';
-    }
+    window.addEventListener('keydown', handleKeyDown);
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    closeButtonRef.current?.focus();
 
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
-      document.body.style.overflow = 'unset';
+      document.body.style.overflow = previousOverflow;
     };
   }, [isOpen, onClose]);
 
   if (!isOpen || !currentPlayer) return null;
 
-  // Default colors if team colors are not available
-  const defaultColors = {
-    primary: '#7C3AED',
-    secondary: '#FFD700'
-  };
-
+  const defaultColors = { primary: '#7C3AED', secondary: '#22C55E' };
   const colors = teamColorsState || defaultColors;
-  const primaryColor = createColorVariations(colors.primary);
-  const secondaryColor = createColorVariations(colors.secondary);
+  const primary = normalizeHexColor(colors.primary, defaultColors.primary);
+  const secondary = normalizeHexColor(colors.secondary, defaultColors.secondary);
 
-  // Check if player is from WPL
   const isWPLPlayer = currentPlayer.league === 'wpl' || teamData?.league === 'wpl';
-
-  const handleBackdropClick = (e: React.MouseEvent) => {
-    if (e.target === e.currentTarget) {
-      onClose();
-    }
-  };
-  
-  // Get player initials for avatar
-  const getInitials = (name: string) => {
-    return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
-  };
-
-  // Calculate derived stats
-  const boundariesPerMatch = currentPlayer.stats?.matches > 0 
-    ? Math.round(((currentPlayer.stats?.fours || 0) + (currentPlayer.stats?.sixes || 0)) / currentPlayer.stats.matches * 10) / 10 
-    : 0;
-  const runsPerMatch = currentPlayer.stats?.matches > 0 
-    ? Math.round((currentPlayer.stats?.runs || 0) / currentPlayer.stats.matches * 10) / 10 
-    : 0;
-
-  // Calculate overall performance using the comprehensive calculation system
+  const age = currentPlayer.dateOfBirth ? calculateAge(currentPlayer.dateOfBirth) : currentPlayer.age;
   const overallPerformance = calculateOverallPerformance(currentPlayer);
 
-  // Get role border color
-  const getRoleBorderColor = () => {
-    if (currentPlayer.role === 'Batsman') return '#F59E0B'; // Amber
-    if (currentPlayer.role === 'Bowler') return '#10B981'; // Emerald
-    if (currentPlayer.role === 'Wicket-keeper') return '#F97316'; // Orange
-    if (currentPlayer.role === 'All-rounder') {
-      if (currentPlayer.allrounderType === 'Batting All-rounder') return '#10B981'; // Emerald
-      if (currentPlayer.allrounderType === 'Bowling All-rounder') return '#3B82F6'; // Blue
-      return '#10B981'; // Default Emerald
-    }
-    return primaryColor.solid;
-  };
-
-  const roleBorderColor = getRoleBorderColor();
+  const headerStats = isWPLPlayer
+    ? [
+        { label: 'Role', value: currentPlayer.role, icon: <Trophy className="w-4 h-4" /> },
+        { label: 'Age', value: `${age}`, icon: <Calendar className="w-4 h-4" /> },
+        { label: 'Bat', value: currentPlayer.battingStyle || '—', icon: <BarChart3 className="w-4 h-4" /> },
+        { label: 'Bowl', value: currentPlayer.bowlingStyle || '—', icon: <Activity className="w-4 h-4" /> },
+      ]
+    : [
+        { label: 'Matches', value: displayValue(currentPlayer.stats?.matches), icon: <Calendar className="w-4 h-4" /> },
+        { label: 'Runs', value: displayValue(currentPlayer.stats?.runs), icon: <BarChart3 className="w-4 h-4" /> },
+        { label: 'Wickets', value: displayValue(currentPlayer.stats?.wickets), icon: <Trophy className="w-4 h-4" /> },
+        { label: 'SR', value: displayValue(currentPlayer.stats?.strikeRate), icon: <Activity className="w-4 h-4" /> },
+      ];
 
   return (
     <AnimatePresence>
-      {isOpen && player && (
-        <motion.div 
-          key="player-modal"
-          className="fixed inset-0 z-50 flex items-center justify-center p-4"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.2 }}
+      <motion.div
+        className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        onClick={(e) => {
+          if (e.target === e.currentTarget) onClose();
+        }}
+        style={{ backgroundColor: 'rgba(0, 0, 0, 0.72)', backdropFilter: 'blur(12px)' }}
+      >
+        <motion.div
+          className="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-3xl border border-white/10 bg-slate-950/60 backdrop-blur-xl shadow-[0_25px_90px_rgba(0,0,0,0.65)]"
+          initial={{ opacity: 0, y: 16, scale: 0.985 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          exit={{ opacity: 0, y: 10, scale: 0.985 }}
+          transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+          onClick={(e) => e.stopPropagation()}
+          role="dialog"
+          aria-modal="true"
+          aria-label={`${currentPlayer.name} profile`}
           style={{
-            backgroundColor: 'rgba(0, 0, 0, 0.75)',
-            backdropFilter: 'blur(8px)',
+            boxShadow: `0 25px 90px rgba(0,0,0,0.65), 0 0 0 1px ${hexToRgba(primary, 0.18)}`,
           }}
-          onClick={handleBackdropClick}
         >
-          {/* Subtle animated background gradient */}
-          <motion.div 
-            className="absolute inset-0 opacity-30"
+          <div
+            className="pointer-events-none absolute inset-0 opacity-85"
             style={{
-              background: `radial-gradient(circle at 30% 30%, ${primaryColor.medium}, transparent 50%),
-                           radial-gradient(circle at 70% 70%, ${secondaryColor.medium}, transparent 50%)`,
-            }}
-            animate={{
-              scale: [1, 1.05, 1],
-            }}
-            transition={{
-              duration: 8,
-              repeat: Infinity,
-              ease: "easeInOut"
+              background: `radial-gradient(900px circle at 18% 0%, ${hexToRgba(primary, 0.22)}, transparent 55%), radial-gradient(700px circle at 85% 45%, ${hexToRgba(secondary, 0.16)}, transparent 50%)`,
             }}
           />
 
-          {/* Modal Container */}
-          <motion.div 
-            className="relative rounded-2xl max-w-4xl w-full max-h-[90vh] flex flex-col overflow-hidden shadow-2xl"
-            initial={{ opacity: 0, scale: 0.95, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-            style={{
-              background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.98), rgba(30, 41, 59, 0.98))',
-              border: `1px solid ${roleBorderColor}40`,
-              boxShadow: `0 20px 60px rgba(0, 0, 0, 0.5), 0 0 0 1px ${roleBorderColor}20`
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Close Button */}
-            <motion.button
-              onClick={onClose}
-              className="absolute top-4 right-4 z-50 w-10 h-10 rounded-xl flex items-center justify-center bg-gray-800/80 hover:bg-gray-700/80 border border-gray-700/50 transition-all"
-              whileHover={{ scale: 1.1, rotate: 90 }}
-              whileTap={{ scale: 0.9 }}
-              transition={{ duration: 0.2 }}
-            >
-              <X className="w-5 h-5 text-gray-300" strokeWidth={2.5} />
-            </motion.button>
-
-            {/* Scrollable Content Container */}
-            <div className="overflow-y-auto overflow-x-hidden flex-1 custom-scrollbar">
-              {/* Header Section */}
-              <div className="relative p-6 border-b border-gray-800/50" style={{ borderColor: `${roleBorderColor}30` }}>
-                {/* Subtle background pattern */}
-                <div 
-                  className="absolute inset-0 opacity-5"
-                  style={{
-                    backgroundImage: `radial-gradient(circle at 2px 2px, ${primaryColor.solid} 1px, transparent 0)`,
-                    backgroundSize: '24px 24px'
-                  }}
-                />
-
-                <div className="relative flex flex-col md:flex-row items-center gap-6">
-                  {/* Player Avatar */}
-                  <motion.div 
-                    className="relative"
-                    initial={{ scale: 0, rotate: -180 }}
-                    animate={{ scale: 1, rotate: 0 }}
-                    transition={{ duration: 0.5, type: "spring", stiffness: 200 }}
-                  >
-                    <div 
-                      className="relative w-24 h-24 md:w-28 md:h-28 rounded-2xl flex items-center justify-center shadow-lg border-2"
-                      style={{
-                        background: `linear-gradient(135deg, ${primaryColor.solid}, ${secondaryColor.solid})`,
-                        borderColor: `${roleBorderColor}60`,
-                        boxShadow: `0 8px 24px ${primaryColor.glow}30`
-                      }}
-                    >
-                <span 
-                        className="relative font-bold text-3xl md:text-4xl text-white"
-                  style={{
-                          textShadow: '0 2px 8px rgba(0,0,0,0.5)'
-                  }}
-                >
-                  {getInitials(currentPlayer.name)}
-                </span>
-
-                {/* Captain badge */}
-                {currentPlayer.isCaptain && (
-                        <motion.div 
-                          className="absolute -top-2 -right-2 w-8 h-8 rounded-lg flex items-center justify-center bg-gradient-to-br from-yellow-400 to-yellow-600 shadow-lg border-2 border-yellow-500/50 z-10"
-                          animate={{
-                            scale: [1, 1.1, 1],
-                          }}
-                          transition={{
-                            duration: 2,
-                            repeat: Infinity,
-                            ease: "easeInOut"
-                          }}
-                        >
-                          <Star className="w-4 h-4 text-yellow-900 fill-yellow-900" />
-                        </motion.div>
-                )}
-
-                {/* Special Achievement Badge - Highest Run Scorer */}
-                {currentPlayer.name.toLowerCase().includes('virat kohli') && (
-                  <motion.div 
-                    className="absolute -bottom-2 left-1/2 -translate-x-1/2 px-3 py-1 rounded-lg bg-gradient-to-r from-amber-500 to-orange-500 shadow-lg border-2 border-amber-400/50 z-10"
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5, delay: 0.3 }}
-                    whileHover={{ scale: 1.1 }}
-                  >
-                    <span className="text-[10px] font-bold text-white whitespace-nowrap">
-                      🏆 Highest Run Scorer
-                    </span>
-                  </motion.div>
-                )}
-              </div>
-                  </motion.div>
-              
-              {/* Player Info */}
-              <div className="flex-1 text-center md:text-left">
-                    <motion.h2
-                      className="text-2xl md:text-3xl font-bold mb-3 text-gray-100"
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.4, delay: 0.1 }}
-                >
-                  {currentPlayer.name}
-                    </motion.h2>
-                    
-                    <motion.div 
-                      className="flex flex-wrap items-center justify-center md:justify-start gap-3"
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.4, delay: 0.2 }}
-                    >
-                      <motion.span 
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border"
-                    style={{
-                          background: `${roleBorderColor}20`,
-                          color: roleBorderColor,
-                          borderColor: `${roleBorderColor}40`,
-                    }}
-                        whileHover={{ scale: 1.05 }}
-                        transition={{ duration: 0.2 }}
-                  >
-                        <Target className="w-3.5 h-3.5" />
-                    {currentPlayer.role}
-                        {currentPlayer.allrounderType && (
-                          <span className="ml-1 text-[10px] opacity-80">({currentPlayer.allrounderType})</span>
-                        )}
-                      </motion.span>
-                      
-                      <motion.span 
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-gray-800/50 border border-gray-700/50 text-gray-300"
-                        whileHover={{ scale: 1.05 }}
-                        transition={{ duration: 0.2 }}
-                      >
-                        <Calendar className="w-3.5 h-3.5" />
-                    {(currentPlayer.dateOfBirth ? calculateAge(currentPlayer.dateOfBirth) : currentPlayer.age) > 0 
-                          ? `${currentPlayer.dateOfBirth ? calculateAge(currentPlayer.dateOfBirth) : currentPlayer.age} yrs`
-                          : 'Age N/A'}
-                      </motion.span>
-                      
-                      {currentPlayer.nationality && currentPlayer.nationality !== 'Pakistan' && (
-                        <motion.span 
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-gray-800/50 border border-gray-700/50 text-gray-300"
-                          whileHover={{ scale: 1.05 }}
-                          transition={{ duration: 0.2 }}
-                        >
-                          <Globe className="w-3.5 h-3.5" />
-                        <FlagImage nationality={currentPlayer.nationality} size="sm" />
-                          {currentPlayer.nationality}
-                        </motion.span>
-                      )}
-
-              {/* Jersey Number Badge */}
-                      <motion.div 
-                        className="inline-flex items-center justify-center w-10 h-10 rounded-lg font-bold text-sm border-2"
-                style={{
-                  background: `linear-gradient(135deg, ${primaryColor.solid}, ${secondaryColor.solid})`,
-                          borderColor: `${roleBorderColor}60`,
-                  color: '#FFFFFF',
-                }}
-                        initial={{ scale: 0 }}
-                        animate={{ scale: 1 }}
-                        transition={{ duration: 0.3, delay: 0.3 }}
-                        whileHover={{ scale: 1.1 }}
+          <div className="relative">
+            <div className="absolute right-4 top-4 z-20">
+              <button
+                ref={closeButtonRef}
+                type="button"
+                onClick={onClose}
+                className="h-10 w-10 rounded-xl border border-white/10 bg-white/[0.04] text-white/80 transition-colors hover:bg-white/[0.08]"
+                aria-label="Close"
               >
-                {currentPlayer.jerseyNumber > 0 ? currentPlayer.jerseyNumber : 'N/A'}
-                      </motion.div>
-                    </motion.div>
+                <X className="mx-auto h-4 w-4" />
+              </button>
+            </div>
 
-                    {/* Special Achievement Badges for Virat Kohli */}
-                    {currentPlayer.name.toLowerCase().includes('virat kohli') && (
-                      <div className="mt-3 w-full flex flex-wrap items-center justify-center gap-2">
-                        <motion.div 
-                          className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-amber-500/20 to-orange-500/20 border-2 border-amber-400/50"
-                          initial={{ opacity: 0, scale: 0.9 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          transition={{ duration: 0.4, delay: 0.4 }}
-                          whileHover={{ scale: 1.05 }}
-                        >
-                          <Award className="w-4 h-4 text-amber-400" />
-                          <span className="text-xs font-bold text-amber-300 whitespace-nowrap">
-                            🏆 Highest Run Scorer
-                          </span>
-                        </motion.div>
-                        <motion.div 
-                          className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-purple-500/20 to-pink-500/20 border-2 border-purple-400/50"
-                          initial={{ opacity: 0, scale: 0.9 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          transition={{ duration: 0.4, delay: 0.5 }}
-                          whileHover={{ scale: 1.05 }}
-                        >
-                          <Award className="w-4 h-4 text-purple-400" />
-                          <span className="text-xs font-bold text-purple-300 whitespace-nowrap">
-                            🎯 Most 50s in IPL History
-                          </span>
-                        </motion.div>
-                        <motion.div 
-                          className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-blue-500/20 to-cyan-500/20 border-2 border-blue-400/50"
-                          initial={{ opacity: 0, scale: 0.9 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          transition={{ duration: 0.4, delay: 0.6 }}
-                          whileHover={{ scale: 1.05 }}
-                        >
-                          <Award className="w-4 h-4 text-blue-400" />
-                          <span className="text-xs font-bold text-blue-300 whitespace-nowrap">
-                            💯 Most 100s in IPL History
-                          </span>
-                        </motion.div>
+            {/* Header */}
+            <div className="relative border-b border-white/10 px-6 pb-6 pt-6 sm:px-8 sm:pb-8">
+              <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
+                <div className="flex items-center gap-4">
+                  <div
+                    className="h-20 w-20 shrink-0 rounded-2xl border border-white/15 bg-slate-900/60 flex items-center justify-center text-2xl font-black text-white shadow-[0_18px_50px_rgba(0,0,0,0.35)]"
+                    style={{ boxShadow: `0 22px 55px ${hexToRgba(primary, 0.18)}` }}
+                  >
+                    {getInitials(currentPlayer.name)}
+                  </div>
+
+                  <div className="min-w-0">
+                    <div className="text-2xl sm:text-3xl font-black tracking-tight text-white">{currentPlayer.name}</div>
+                    <div className="mt-2 flex flex-wrap items-center gap-2">
+                      <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs font-semibold text-white/75">
+                        <span className="h-2 w-2 rounded-full" style={{ background: primary }} />
+                        {teamData?.shortName || currentPlayer.teamId}
+                      </span>
+                      <span className="inline-flex items-center rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs font-semibold text-white/75">
+                        {currentPlayer.role}
+                      </span>
+                      {currentPlayer.isCaptain ? (
+                        <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-300/30 bg-amber-400/10 px-3 py-1 text-xs font-semibold text-amber-200">
+                          <Star className="h-3.5 w-3.5" />
+                          Captain
+                        </span>
+                      ) : null}
+                      {currentPlayer.jerseyNumber > 0 ? (
+                        <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs font-semibold text-white/75">
+                          <Hash className="h-3.5 w-3.5" />
+                          {currentPlayer.jerseyNumber}
+                        </span>
+                      ) : null}
+                      {currentPlayer.nationality ? (
+                        <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs font-semibold text-white/75">
+                          <FlagImage nationality={currentPlayer.nationality} size="sm" />
+                          {currentPlayer.nationality}
+                        </span>
+                      ) : null}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                  {headerStats.map((item) => (
+                    <div key={item.label} className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3">
+                      <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wide text-white/55">
+                        {item.icon}
+                        {item.label}
                       </div>
-                    )}
+                      <div className="mt-1 text-lg font-black text-white truncate" title={item.value}>
+                        {item.value}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Content */}
+            <div className="relative space-y-6 px-6 py-6 sm:px-8 sm:py-8">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <MetricCard
+                  label="Age"
+                  value={`${age}`}
+                  hint={currentPlayer.dateOfBirth ? formatDateMonthDDYYYY(currentPlayer.dateOfBirth) : undefined}
+                />
+                <MetricCard label="Nationality" value={displayValue(currentPlayer.nationality)} />
+              </div>
+
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <MetricCard label="Batting Style" value={displayValue(currentPlayer.battingStyle)} />
+                <MetricCard label="Bowling Style" value={displayValue(currentPlayer.bowlingStyle)} />
+              </div>
+
+              {!isWPLPlayer ? (
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <div className="rounded-3xl border border-white/10 bg-white/[0.02] p-4">
+                    <div className="flex items-center gap-2 text-sm font-bold text-white">
+                      <BarChart3 className="h-4 w-4 text-white/70" />
+                      Batting
+                    </div>
+                    <div className="mt-3 grid grid-cols-2 gap-3">
+                      <MetricCard label="Runs" value={displayValue(currentPlayer.stats?.runs)} />
+                      <MetricCard label="Avg" value={displayValue(currentPlayer.stats?.average)} />
+                      <MetricCard label="SR" value={displayValue(currentPlayer.stats?.strikeRate)} />
+                      <MetricCard label="HS" value={displayValue(currentPlayer.stats?.highest)} />
+                      <MetricCard label="4s / 6s" value={`${displayValue(currentPlayer.stats?.fours)} / ${displayValue(currentPlayer.stats?.sixes)}`} />
+                      <MetricCard label="50s / 100s" value={`${displayValue(currentPlayer.stats?.fifties)} / ${displayValue(currentPlayer.stats?.hundreds)}`} />
+                    </div>
+                  </div>
+
+                  <div className="rounded-3xl border border-white/10 bg-white/[0.02] p-4">
+                    <div className="flex items-center gap-2 text-sm font-bold text-white">
+                      <Trophy className="h-4 w-4 text-white/70" />
+                      Bowling
+                    </div>
+                    <div className="mt-3 grid grid-cols-2 gap-3">
+                      <MetricCard label="Wickets" value={displayValue(currentPlayer.stats?.wickets)} />
+                      <MetricCard label="Econ" value={displayValue(currentPlayer.stats?.economy)} />
+                      <MetricCard label="Best" value={displayValue(currentPlayer.stats?.bestBowling)} hint="Wickets/Runs" />
+                      <MetricCard label="Bowling Avg" value={displayValue(currentPlayer.stats?.bowlingAverage)} />
+                    </div>
+                  </div>
+                </div>
+              ) : null}
+
+              <div className="rounded-3xl border border-white/10 bg-white/[0.02] p-4">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="text-sm font-bold text-white">Overall Performance</div>
+                  <div className="text-sm font-black text-white">{overallPerformance.rating.toFixed(1)}/100</div>
+                </div>
+                <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-white/10">
+                  <div
+                    className="h-full rounded-full"
+                    style={{
+                      width: `${Math.max(0, Math.min(100, overallPerformance.rating))}%`,
+                      background: `linear-gradient(90deg, ${primary}, ${secondary})`,
+                    }}
+                  />
+                </div>
+                <div className="mt-2 text-xs text-white/55">{overallPerformance.summary}</div>
+              </div>
+
+              <div className="flex justify-end">
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="inline-flex items-center justify-center rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-2.5 text-sm font-semibold text-white/80 transition-colors hover:bg-white/[0.08]"
+                >
+                  Close
+                </button>
               </div>
             </div>
           </div>
-
-          {/* Playing Style Section */}
-              <motion.div 
-                className="p-6 border-b border-gray-800/50"
-                style={{ borderColor: `${roleBorderColor}30` }}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, delay: 0.2 }}
-              >
-                <motion.h3 
-                  className="text-lg font-bold mb-4 flex items-center gap-2 text-gray-200"
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.4, delay: 0.3 }}
-                >
-                  <div 
-                    className="w-1 h-6 rounded-full"
-                    style={{ 
-                      background: `linear-gradient(to bottom, ${primaryColor.solid}, ${secondaryColor.solid})`,
-                    }}
-              />
-              Playing Style
-                </motion.h3>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {(() => {
-                const isBowler = currentPlayer.role === 'Bowler';
-                const isAllRounder = currentPlayer.role === 'All-rounder';
-                    const highlightBatting = isAllRounder || currentPlayer.role === 'Batsman' || currentPlayer.role === 'Wicket-keeper';
-                const highlightBowling = isBowler || isAllRounder;
-                
-                return (
-                  <>
-                        <motion.div 
-                          className="p-5 rounded-xl border relative overflow-hidden group"
-                          initial={{ opacity: 0, x: -20 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ duration: 0.4, delay: 0.4 }}
-                          whileHover={{ scale: 1.02, y: -2 }}
-                      style={{
-                        background: highlightBatting 
-                              ? `linear-gradient(135deg, ${primaryColor.light}, ${adjustOpacity(primaryColor.medium, 0.3)})`
-                              : 'rgba(30, 41, 59, 0.5)',
-                            borderColor: highlightBatting ? `${primaryColor.solid}40` : 'rgba(71, 85, 105, 0.3)',
-                      }}
-                    >
-                      <p 
-                            className="text-xl font-bold mb-1 text-gray-100"
-                      >
-                        {currentPlayer.battingStyle && currentPlayer.battingStyle.trim() !== '' ? currentPlayer.battingStyle : 'N/A'}
-                      </p>
-                      <p 
-                            className="text-xs font-semibold uppercase tracking-wider text-gray-400"
-                      >
-                        Batting Style
-                      </p>
-                        </motion.div>
-                        
-                        <motion.div
-                          className="p-5 rounded-xl border relative overflow-hidden group"
-                          initial={{ opacity: 0, x: 20 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ duration: 0.4, delay: 0.5 }}
-                          whileHover={{ scale: 1.02, y: -2 }}
-                      style={{
-                        background: highlightBowling 
-                              ? `linear-gradient(135deg, ${secondaryColor.light}, ${adjustOpacity(secondaryColor.medium || primaryColor.medium, 0.3)})`
-                              : 'rgba(30, 41, 59, 0.5)',
-                            borderColor: highlightBowling ? `${(secondaryColor.solid || primaryColor.solid)}40` : 'rgba(71, 85, 105, 0.3)',
-                      }}
-                    >
-                      <p 
-                            className="text-xl font-bold mb-1 text-gray-100"
-                      >
-                        {currentPlayer.bowlingStyle && currentPlayer.bowlingStyle.trim() !== '' ? currentPlayer.bowlingStyle : 'N/A'}
-                      </p>
-                      <p 
-                            className="text-xs font-semibold uppercase tracking-wider text-gray-400"
-                      >
-                        Bowling Style
-                      </p>
-                        </motion.div>
-                  </>
-                );
-              })()}
-            </div>
-              </motion.div>
-
-          {/* Career Statistics Section - Hide for WPL players */}
-          {!isWPLPlayer && (
-                <motion.div 
-                  className="p-6"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.4, delay: 0.3 }}
-                >
-                  <motion.div 
-                    className="flex justify-between items-center mb-6"
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.4, delay: 0.4 }}
-                  >
-                    <motion.h3 
-                      className="text-lg font-bold flex items-center gap-2 text-gray-200"
-                    >
-                      <div 
-                        className="w-1 h-6 rounded-full"
-                        style={{ 
-                          background: `linear-gradient(to bottom, ${primaryColor.solid}, ${secondaryColor.solid})`,
-                        }}
-                      />
-                      <Award className="w-5 h-5" style={{ color: primaryColor.solid }} />
-                      Career Statistics
-                    </motion.h3>
-                  </motion.div>
-                
-                  {/* Batting Performance */}
-                  <motion.div 
-                    className="mb-6"
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.4, delay: 0.5 }}
-                  >
-                    <motion.h4 
-                      className="text-base font-semibold mb-4 flex items-center gap-2 text-gray-300"
-              >
-                <div 
-                        className="w-8 h-0.5 rounded-full"
-                        style={{ 
-                          background: `linear-gradient(to right, ${primaryColor.solid}, ${secondaryColor.solid})`,
-                        }}
-                      />
-                      <TrendingUp className="w-4 h-4" style={{ color: primaryColor.solid }} />
-                Batting Performance
-                    </motion.h4>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                      {[
-                        { label: 'Matches', value: currentPlayer.stats?.matches || 0, isNumeric: true },
-                        { label: 'Innings', value: (currentPlayer.stats as any)?.battingInnings || 0, isNumeric: true },
-                        { label: 'Not Outs', value: (currentPlayer.stats as any)?.notOuts || 0, isNumeric: true },
-                  { label: 'Total Runs', value: currentPlayer.stats?.runs || 0, isNumeric: true },
-                        { label: 'Balls Faced', value: (currentPlayer.stats as any)?.ballsFaced || 0, isNumeric: true },
-                        { label: 'Highest', value: currentPlayer.stats?.highest || 0, isNumeric: true },
-                  { label: 'Batting Avg', value: currentPlayer.stats?.average || 0, isNumeric: true, format: (v: number) => v.toFixed(2) },
-                  { label: 'Strike Rate', value: currentPlayer.stats?.strikeRate || 0, isNumeric: true, format: (v: number) => v.toFixed(1) },
-                        { label: 'Fours', value: currentPlayer.stats?.fours || 0, isNumeric: true },
-                        { label: 'Sixes', value: currentPlayer.stats?.sixes || 0, isNumeric: true },
-                        { label: 'Fifties', value: currentPlayer.stats?.fifties || 0, isNumeric: true },
-                        { label: 'Hundreds', value: currentPlayer.stats?.hundreds || 0, isNumeric: true },
-                ].map((stat, index) => {
-                  const displayValue = stat.isNumeric 
-                    ? (stat.value > 0 ? (stat.format ? stat.format(stat.value) : stat.value.toString()) : '-')
-                    : stat.value;
-                  return (
-                          <motion.div
-                      key={index}
-                            className="p-4 rounded-lg border text-center relative overflow-hidden group"
-                            initial={{ opacity: 0, scale: 0.95 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            transition={{ duration: 0.3, delay: 0.6 + index * 0.03 }}
-                            whileHover={{ scale: 1.05, y: -2 }}
-                      style={{
-                        background: `linear-gradient(135deg, ${primaryColor.light}, ${secondaryColor.light})`,
-                              borderColor: `${primaryColor.medium}40`,
-                      }}
-                    >
-                      <p 
-                              className="text-xl font-bold mb-1 text-gray-100"
-                      >
-                        {displayValue}
-                      </p>
-                            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">
-                              {stat.label}
-                            </p>
-                          </motion.div>
-                  );
-                })}
-              </div>
-                  </motion.div>
-
-                  {/* Bowling Performance */}
-                  <motion.div 
-                    className="mb-6"
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.4, delay: 0.7 }}
-                  >
-                    <motion.h4 
-                      className="text-base font-semibold mb-4 flex items-center gap-2 text-gray-300"
-              >
-                <div 
-                        className="w-8 h-0.5 rounded-full"
-                        style={{ 
-                          background: `linear-gradient(to right, ${secondaryColor.solid || primaryColor.solid}, ${primaryColor.solid})`,
-                        }}
-                      />
-                      <TrendingUp className="w-4 h-4" style={{ color: secondaryColor.solid || primaryColor.solid }} />
-                Bowling Performance
-                    </motion.h4>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                {[
-                  { label: 'Matches', value: currentPlayer.stats?.matches || 0, isNumeric: true },
-                  { label: 'Bowling Innings', value: (currentPlayer.stats as any)?.bowlingInnings || 0, isNumeric: true },
-                  { label: 'Balls', value: (currentPlayer.stats as any)?.balls || 0, isNumeric: true },
-                  { label: 'Overs', value: (currentPlayer.stats as any)?.balls ? ((currentPlayer.stats as any).balls / 6).toFixed(1) : '0', isNumeric: false },
-                  { label: 'Maidens', value: (currentPlayer.stats as any)?.maidens || 0, isNumeric: true },
-                  { label: 'Runs Conceded', value: (currentPlayer.stats as any)?.runsConceded || 0, isNumeric: true },
-                  { label: 'Wickets', value: currentPlayer.stats?.wickets || 0, isNumeric: true },
-                  { 
-                    label: 'Bowling Avg', 
-                    value: (() => {
-                      const bowlingAvg = currentPlayer.stats?.bowlingAverage ?? 
-                        ((currentPlayer.stats?.wickets || 0) > 0 
-                          ? calculateBowlingAverage(currentPlayer.stats?.economy || 0, currentPlayer.stats?.wickets || 0, currentPlayer.stats?.matches || 0)
-                          : 0);
-                      return bowlingAvg;
-                    })(),
-                    isNumeric: true,
-                    format: (v: number) => v.toFixed(2)
-                  },
-                  { label: 'Economy', value: currentPlayer.stats?.economy || 0, isNumeric: true, format: (v: number) => v.toFixed(2) },
-                  { 
-                    label: 'Bowling SR', 
-                    value: (() => {
-                      const balls = (currentPlayer.stats as any)?.balls || 0;
-                      const wickets = currentPlayer.stats?.wickets || 0;
-                      if (wickets > 0 && balls > 0) {
-                        return (balls / wickets).toFixed(1);
-                      }
-                      return '0';
-                    })(),
-                    isNumeric: false
-                  },
-                  { label: 'Best Bowling', value: currentPlayer.stats?.bestBowling || '-', isNumeric: false },
-                  { label: '5 Wickets', value: (currentPlayer.stats as any)?.fiveWickets || 0, isNumeric: true },
-                ].map((stat, index) => {
-                  let displayValue: string;
-                  if (stat.isNumeric) {
-                    displayValue = stat.value > 0 
-                      ? (stat.format ? stat.format(stat.value) : stat.value.toString())
-                      : '-';
-                  } else {
-                    displayValue = stat.value && stat.value !== '-' ? stat.value : '-';
-                  }
-                  return (
-                          <motion.div
-                      key={index}
-                            className="p-4 rounded-lg border text-center relative overflow-hidden group"
-                            initial={{ opacity: 0, scale: 0.95 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            transition={{ duration: 0.3, delay: 0.8 + index * 0.03 }}
-                            whileHover={{ scale: 1.05, y: -2 }}
-                      style={{
-                        background: `linear-gradient(135deg, ${secondaryColor.light}, ${primaryColor.light})`,
-                              borderColor: `${(secondaryColor.medium || primaryColor.medium)}40`,
-                      }}
-                    >
-                      <p 
-                              className="text-xl font-bold mb-1 text-gray-100"
-                      >
-                        {displayValue}
-                      </p>
-                            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">
-                              {stat.label}
-                            </p>
-                          </motion.div>
-                  );
-                })}
-              </div>
-                  </motion.div>
-
-                  {/* Overall Performance */}
-                  <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.4, delay: 0.9 }}
-                  >
-                    <motion.h4 
-                      className="text-base font-semibold mb-4 flex items-center gap-2 text-gray-300"
-              >
-                <div 
-                        className="w-8 h-0.5 rounded-full"
-                        style={{ 
-                          background: `linear-gradient(to right, ${primaryColor.solid}, ${secondaryColor.solid})`,
-                        }}
-                      />
-                      <BarChart3 className="w-4 h-4" style={{ color: primaryColor.solid }} />
-                      Overall Performance Rating
-                    </motion.h4>
-
-                    {/* Overall Rating Card */}
-                    <motion.div
-                      className="mb-6 p-6 rounded-xl border relative overflow-hidden"
-                      initial={{ opacity: 0, scale: 0.95 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ duration: 0.4, delay: 1.0 }}
-                      whileHover={{ scale: 1.02, y: -2 }}
-                      style={{
-                        background: `linear-gradient(135deg, ${primaryColor.light}, ${secondaryColor.light})`,
-                        borderColor: `${primaryColor.medium}50`,
-                      }}
-                    >
-                      <div className="flex items-center justify-between mb-3">
-                        <div>
-                          <p className="text-sm font-semibold text-gray-400 uppercase tracking-wide mb-1">
-                            Performance Rating
-                          </p>
-                          <p className="text-xs text-gray-500">
-                            {overallPerformance.summary}
-                          </p>
-                        </div>
-                        <div className="text-right">
-                          <motion.div
-                            className="text-4xl font-bold mb-1"
-                            style={{ color: primaryColor.solid }}
-                            initial={{ scale: 0 }}
-                            animate={{ scale: 1 }}
-                            transition={{ duration: 0.5, delay: 1.1, type: "spring" }}
-                          >
-                            {overallPerformance.rating.toFixed(1)}
-                          </motion.div>
-                          <p className="text-xs text-gray-400">out of 100</p>
-                    </div>
-                </div>
-                      
-                      {/* Rating Bar */}
-                      <div className="w-full h-2 bg-gray-800/50 rounded-full overflow-hidden">
-                        <motion.div
-                          className="h-full rounded-full"
-                      style={{
-                            background: `linear-gradient(to right, ${primaryColor.solid}, ${secondaryColor.solid})`,
-                          }}
-                          initial={{ width: 0 }}
-                          animate={{ width: `${overallPerformance.rating}%` }}
-                          transition={{ duration: 1, delay: 1.2, ease: "easeOut" }}
-                        />
-                    </div>
-                    </motion.div>
-
-                    {/* Performance Breakdown */}
-                    {overallPerformance.breakdown.length > 0 && (
-                      <div>
-                        <p className="text-sm font-semibold text-gray-400 uppercase tracking-wide mb-3">
-                          Performance Breakdown
-                        </p>
-                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                          {overallPerformance.breakdown
-                            .filter(item => item.weight > 0) // Only show metrics with weight
-                            .map((item, index) => (
-                            <motion.div
-                      key={index}
-                              className="p-4 rounded-lg border text-center relative overflow-hidden group"
-                              initial={{ opacity: 0, scale: 0.95 }}
-                              animate={{ opacity: 1, scale: 1 }}
-                              transition={{ duration: 0.3, delay: 1.2 + index * 0.05 }}
-                              whileHover={{ scale: 1.05, y: -2 }}
-                      style={{
-                        background: `linear-gradient(135deg, ${primaryColor.light}, ${secondaryColor.light})`,
-                                borderColor: `${primaryColor.medium}40`,
-                      }}
-                    >
-                      <p 
-                                className="text-xl font-bold mb-1 text-gray-100"
-                              >
-                                {item.value}
-                              </p>
-                              <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1">
-                                {item.label}
-                              </p>
-                              <div className="w-full h-1 bg-gray-800/50 rounded-full overflow-hidden mt-2">
-                                <motion.div
-                                  className="h-full rounded-full"
-                                  style={{
-                                    background: primaryColor.solid,
-                                  }}
-                                  initial={{ width: 0 }}
-                                  animate={{ width: `${(item.weight / 30) * 100}%` }}
-                                  transition={{ duration: 0.6, delay: 1.3 + index * 0.05 }}
-                                />
-                    </div>
-                              <p className="text-[10px] text-gray-500 mt-1">
-                                {item.weight.toFixed(1)} pts
-                              </p>
-                            </motion.div>
-                  ))}
-                </div>
-                      </div>
-                    )}
-                  </motion.div>
-                </motion.div>
-              )}
-            </div>
-          </motion.div>
         </motion.div>
-          )}
+      </motion.div>
     </AnimatePresence>
   );
 }

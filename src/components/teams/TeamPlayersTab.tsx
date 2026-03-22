@@ -38,6 +38,8 @@ export default function TeamPlayersTab({ teamId, teamName, initialPlayers = [], 
   const [players, setPlayers] = useState<Player[]>(initialPlayers);
   const [isLoading, setIsLoading] = useState(!initialPlayers.length);
   const [teams, setTeams] = useState<Team[]>([]);
+  const [canonicalTeamId, setCanonicalTeamId] = useState<string>(() => String(teamId ?? ''));
+  const [accentColors, setAccentColors] = useState<{ primary: string; secondary: string } | null>(null);
 
   useEffect(() => {
     setPlayers(initialPlayers);
@@ -65,6 +67,11 @@ export default function TeamPlayersTab({ teamId, teamName, initialPlayers = [], 
         setTeams(teamsData);
 
         const canonicalTeamId = resolveCanonicalTeamId(teamId, teamsData);
+        setCanonicalTeamId(canonicalTeamId);
+
+        const matchedTeam = teamsData.find((t) => String(t.id) === String(canonicalTeamId));
+        setAccentColors(matchedTeam?.colors ? matchedTeam.colors : null);
+
         const teamPlayers = (playersData || []).filter((p) => {
           const playerTeamId = resolveCanonicalTeamId(p.teamId, teamsData);
           return playerTeamId === canonicalTeamId;
@@ -101,17 +108,30 @@ export default function TeamPlayersTab({ teamId, teamName, initialPlayers = [], 
   return (
     <div className="mt-6">
       <div className="mb-8 text-center">
-        <h2 className="text-2xl md:text-3xl font-bold mb-2">
-          {teamName} Squad {new Date().getFullYear()}
+        <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs font-semibold text-white/70">
+          <span
+            className="h-2 w-2 rounded-full"
+            style={{ background: accentColors?.primary || '#7C3AED' }}
+          />
+          Players • {new Date().getFullYear()}
+        </div>
+        <h2 className="mt-3 text-2xl md:text-3xl font-black tracking-tight text-white">
+          {teamName} Squad
         </h2>
-        <p className="text-slate-400">
-          Meet the players representing {teamName} in the current season
+        <p className="mt-2 text-sm md:text-base text-white/60">
+          Search by name or role and tap a player for the quick profile view.
         </p>
       </div>
       
       <ModernPlayersPanel 
         initialPlayers={players} 
         teams={teams}
+        showHeader={false}
+        showTeamFilter={false}
+        defaultTeamId={canonicalTeamId}
+        accentColor={accentColors?.primary}
+        accentColorSecondary={accentColors?.secondary}
+        searchPlaceholder={`Search ${teamName} players…`}
       />
     </div>
   );
