@@ -138,6 +138,11 @@ const BATTING_STYLES = [
 
 // Current season for which transfer rules apply (used to enforce auction locks)
 const CURRENT_SEASON = 2027;
+const NOT_SELECTED_SEASON_FILTER = '__not_selected_season__';
+
+const isInNotSelectedSeasonPool = (player: Player) => {
+  return player.isActiveInSquad === false || player.squadStatus === 'inactive';
+};
 
 // Levenshtein distance for fuzzy matching
 function levenshteinDistance(str1: string, str2: string): number {
@@ -843,12 +848,14 @@ export default function AdminPlayers() {
 
   const getSelectedTeamLabel = () => {
     if (selectedTeam === 'all') return 'All Teams';
+    if (selectedTeam === NOT_SELECTED_SEASON_FILTER) return 'Not Selected This Season';
     const team = teams.find(t => String(t.id) === String(selectedTeam));
     return team?.name || `Team ${selectedTeam}`;
   };
 
   const getSelectedTeamSlug = () => {
     if (selectedTeam === 'all') return 'all-teams';
+    if (selectedTeam === NOT_SELECTED_SEASON_FILTER) return 'not-selected-this-season';
     const team = teams.find(t => String(t.id) === String(selectedTeam));
     return normalizeSlug(team?.shortName || team?.name || String(selectedTeam));
   };
@@ -2661,6 +2668,9 @@ export default function AdminPlayers() {
   // Reset team filter if selected team is not in current league
   useEffect(() => {
     if (selectedTeam !== 'all' && teams.length > 0) {
+      if (selectedTeam === NOT_SELECTED_SEASON_FILTER) {
+        return;
+      }
       const selectedTeamObj = teams.find(t => String(t.id) === String(selectedTeam));
       if (!selectedTeamObj || selectedTeamObj.league !== currentLeague) {
         setSelectedTeam('all');
@@ -2695,7 +2705,7 @@ export default function AdminPlayers() {
       name: '',
       role: 'Batsman',
       allrounderType: '',
-      teamId: selectedTeam === 'all' ? '' : selectedTeam, // Auto-select filtered team
+      teamId: (selectedTeam === 'all' || selectedTeam === NOT_SELECTED_SEASON_FILTER) ? '' : selectedTeam, // Auto-select filtered team
       league: currentLeague, // Use current league from context
       age: '',
       dateOfBirth: '',
@@ -3400,9 +3410,17 @@ export default function AdminPlayers() {
   // Then filter by team if a specific team is selected
   if (selectedTeam !== 'all') {
     filteredPlayers = filteredPlayers.filter(player => {
+        if (selectedTeam === NOT_SELECTED_SEASON_FILTER) {
+          return isInNotSelectedSeasonPool(player);
+        }
+
         // Only show players with a valid teamId when a specific team is selected
         if (!player.teamId) {
           return false; // Exclude players without a teamId
+        }
+
+        if (isInNotSelectedSeasonPool(player)) {
+          return false;
         }
         
         // Ensure both values are strings for comparison
@@ -3516,7 +3534,11 @@ export default function AdminPlayers() {
   // Safety check: Double-filter by team to ensure no players slip through
   if (selectedTeam !== 'all') {
     searchFilteredPlayers = searchFilteredPlayers.filter(player => {
+      if (selectedTeam === NOT_SELECTED_SEASON_FILTER) {
+        return isInNotSelectedSeasonPool(player);
+      }
       if (!player.teamId) return false;
+      if (isInNotSelectedSeasonPool(player)) return false;
       return String(player.teamId).trim() === String(selectedTeam).trim();
     });
   }
@@ -3978,6 +4000,8 @@ export default function AdminPlayers() {
                   <span className="flex-1 text-left truncate flex items-center gap-2">
                     {selectedTeam === 'all' 
                         ? <>All Teams</>
+                        : selectedTeam === NOT_SELECTED_SEASON_FILTER
+                          ? <>Not Selected This Season</>
                         : <>{teams.find(t => t.id === selectedTeam)?.shortName || 'Select Team'}</>
                     }
                   </span>
@@ -4019,13 +4043,48 @@ export default function AdminPlayers() {
                     {/* Divider */}
                     {teams.length > 0 && <div className="border-t border-white/10 my-2" />}
 
+                      {/* Admin-only not-selected-season pool */}
+                      <button
+                        onClick={() => {
+                          setSelectedTeam(NOT_SELECTED_SEASON_FILTER);
+                          setIsDropdownOpen(false);
+                        }}
+                        className={`w-full px-6 py-3.5 text-left hover:bg-amber-500/20 transition-all duration-200 flex items-center space-x-3 group ${
+                          selectedTeam === NOT_SELECTED_SEASON_FILTER ? 'bg-amber-500/30 text-amber-200' : 'text-white'
+                        }`}
+                      >
+                        <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 shadow-lg">
+                          <DatabaseBackup className="w-5 h-5 text-white" />
+                        </div>
+                        <div className="flex-1">
+                          <div className="font-semibold">Not Selected This Season</div>
+                          <div className="text-xs text-gray-400">
+                            {
+                              players.filter(
+                                p => (p.league || 'ipl') === currentLeague && isInNotSelectedSeasonPool(p)
+                              ).length
+                            } player(s), admin-only
+                          </div>
+                        </div>
+                        {selectedTeam === NOT_SELECTED_SEASON_FILTER && (
+                          <div className="w-5 h-5 rounded-full bg-amber-500 flex items-center justify-center">
+                            <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                            </svg>
+                          </div>
+                        )}
+                      </button>
+
+                      {teams.length > 0 && <div className="border-t border-white/10 my-2" />}
+
                       {/* Team Options - Only show teams from current league */}
                       {teams
                         .filter(team => team.league === currentLeague)
                         .map((team) => {
                           const teamPlayersCount = players.filter(p => 
                             String(p.teamId) === String(team.id) && 
-                            (p.league || 'ipl') === currentLeague
+                            (p.league || 'ipl') === currentLeague &&
+                            !isInNotSelectedSeasonPool(p)
                           ).length;
                       return (
                         <button
@@ -4076,7 +4135,7 @@ export default function AdminPlayers() {
                 {selectedTeam !== 'all' && (
                     <div className="flex items-center gap-2 px-3 py-1.5 bg-blue-500/20 border border-blue-500/30 rounded-lg">
                       <Users className="w-3.5 h-3.5 text-blue-400" />
-                      <span className="text-xs text-blue-300 font-medium">{teams.find(t => t.id === selectedTeam)?.name}</span>
+                      <span className="text-xs text-blue-300 font-medium">{selectedTeam === NOT_SELECTED_SEASON_FILTER ? 'Not Selected This Season' : teams.find(t => t.id === selectedTeam)?.name}</span>
                     </div>
                   )}
                   {selectedRole !== 'all' && (
@@ -4804,7 +4863,11 @@ export default function AdminPlayers() {
                     searchFilteredPlayers
                     .filter(player => {
                       // Final safety check: If a team is selected, ensure player matches
+                      if (selectedTeam === NOT_SELECTED_SEASON_FILTER) {
+                        return isInNotSelectedSeasonPool(player);
+                      }
                       if (selectedTeam !== 'all' && player.teamId) {
+                        if (isInNotSelectedSeasonPool(player)) return false;
                         return String(player.teamId).trim() === String(selectedTeam).trim();
                       }
                       return true;
@@ -5238,14 +5301,39 @@ export default function AdminPlayers() {
                             <span className="text-red-400">*</span>
                         </label>
                           <CustomSelect
-                          value={formData.teamId}
-                            onChange={(value) => setFormData({...formData, teamId: value})}
-                            options={teams
-                              .filter(team => team.league === formData.league)
-                              .map(team => ({
-                                value: team.id,
-                                label: team.name,
-                              }))}
+                          value={formData.isActiveInSquad ? formData.teamId : NOT_SELECTED_SEASON_FILTER}
+                            onChange={(value) => {
+                              if (value === NOT_SELECTED_SEASON_FILTER) {
+                                setFormData({
+                                  ...formData,
+                                  teamId: '',
+                                  isActiveInSquad: false,
+                                  squadExitReason: formData.squadExitReason || 'released',
+                                  squadExitDate: formData.squadExitDate || new Date().toISOString().slice(0, 10),
+                                });
+                                return;
+                              }
+
+                              setFormData({
+                                ...formData,
+                                teamId: value,
+                                isActiveInSquad: true,
+                                squadExitReason: '',
+                                squadExitDate: '',
+                              });
+                            }}
+                            options={[
+                              {
+                                value: NOT_SELECTED_SEASON_FILTER,
+                                label: 'Not Selected This Season (Admin only)',
+                              },
+                              ...teams
+                                .filter(team => team.league === formData.league)
+                                .map(team => ({
+                                  value: team.id,
+                                  label: team.name,
+                                }))
+                            ]}
                             placeholder="Select a team"
                             icon={<Users className="w-5 h-5" />}
                             iconColor="text-cyan-400"
