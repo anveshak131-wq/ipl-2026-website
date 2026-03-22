@@ -2352,7 +2352,49 @@ export default function AdminPlayers() {
       return acc;
     }, {} as Record<string, typeof rows>);
 
-    const teamsInOrder = Object.keys(playersByTeam).sort();
+    const preferredIplShortOrder = ['RCB', 'MI', 'SRH', 'GT', 'PBKS'];
+    const filterOrder = new Map<string, number>();
+
+    teams
+      .filter(team => team.league === currentLeague)
+      .forEach((team, index) => {
+        filterOrder.set(String(team.name || ''), index);
+        filterOrder.set(String(team.shortName || '').toUpperCase(), index);
+      });
+
+    const getTeamSortMeta = (teamName: string) => {
+      const teamRows = playersByTeam[teamName] || [];
+      const teamShort = String(teamRows[0]?.teamShortName || '').toUpperCase();
+
+      const preferredIndex = preferredIplShortOrder.indexOf(teamShort);
+      if (preferredIndex >= 0) {
+        return { bucket: 0, index: preferredIndex, teamShort };
+      }
+
+      const filterIndexByName = filterOrder.get(String(teamName));
+      const filterIndexByShort = filterOrder.get(teamShort);
+      const filterIndex = filterIndexByName ?? filterIndexByShort;
+      if (typeof filterIndex === 'number') {
+        return { bucket: 1, index: filterIndex, teamShort };
+      }
+
+      return { bucket: 2, index: Number.MAX_SAFE_INTEGER, teamShort };
+    };
+
+    const teamsInOrder = Object.keys(playersByTeam).sort((a, b) => {
+      const aMeta = getTeamSortMeta(a);
+      const bMeta = getTeamSortMeta(b);
+
+      if (aMeta.bucket !== bMeta.bucket) {
+        return aMeta.bucket - bMeta.bucket;
+      }
+
+      if (aMeta.index !== bMeta.index) {
+        return aMeta.index - bMeta.index;
+      }
+
+      return String(a).localeCompare(String(b));
+    });
     const teamBatches: Array<{ team: string; batch: typeof rows[]; batchIndex: number; totalBatches: number }> = [];
 
     teamsInOrder.forEach(team => {
