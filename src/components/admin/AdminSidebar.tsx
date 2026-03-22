@@ -10,6 +10,7 @@ import { Search, X, Clock, Command, ChevronDown, ChevronRight, Bell } from 'luci
 
 interface AdminSidebarProps {
   currentPage?: string;
+  onLogout?: () => void;
 }
 
 interface MenuItem {
@@ -28,7 +29,7 @@ interface RecentPage {
   timestamp: number;
 }
 
-export default function AdminSidebar({ currentPage = '' }: AdminSidebarProps) {
+export default function AdminSidebar({ currentPage = '', onLogout }: AdminSidebarProps) {
   const router = useRouter();
   const pathname = usePathname();
   const { currentLeague } = useLeague();
@@ -773,8 +774,18 @@ export default function AdminSidebar({ currentPage = '' }: AdminSidebarProps) {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('adminToken');
-    localStorage.removeItem('auth_token');
+    if (onLogout) {
+      onLogout();
+      return;
+    }
+
+    try {
+      localStorage.removeItem('adminToken');
+      localStorage.removeItem('auth_token');
+      localStorage.removeItem('authToken');
+    } catch {
+      // localStorage not available
+    }
     router.push('/ipl-admin-2026');
   };
 

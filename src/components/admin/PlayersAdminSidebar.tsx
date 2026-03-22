@@ -7,9 +7,10 @@ import { Search, X, Users, TrendingUp, Zap } from 'lucide-react';
 
 interface PlayersAdminSidebarProps {
   currentPage?: string;
+  onLogout?: () => void;
 }
 
-export default function PlayersAdminSidebar({ currentPage = '' }: PlayersAdminSidebarProps) {
+export default function PlayersAdminSidebar({ currentPage = '', onLogout }: PlayersAdminSidebarProps) {
   const router = useRouter();
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
@@ -81,8 +82,18 @@ export default function PlayersAdminSidebar({ currentPage = '' }: PlayersAdminSi
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('adminToken');
-    localStorage.removeItem('auth_token');
+    if (onLogout) {
+      onLogout();
+      return;
+    }
+
+    try {
+      localStorage.removeItem('adminToken');
+      localStorage.removeItem('auth_token');
+      localStorage.removeItem('authToken');
+    } catch {
+      // localStorage not available
+    }
     router.push('/ipl-admin-2026');
   };
 

@@ -23,6 +23,49 @@ export default function AdminLayout({
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const hasCheckedAuth = useRef(false);
 
+  const handleLogout = async () => {
+    // Immediately update UI state
+    setIsSearchOpen(false);
+    setUserRole(null);
+    setIsAuthenticated(false);
+
+    let token: string | null = null;
+    try {
+      token =
+        localStorage.getItem('adminToken') ||
+        localStorage.getItem('auth_token') ||
+        localStorage.getItem('authToken');
+    } catch {
+      // localStorage not available
+    }
+
+    // Best-effort server logout (clears HttpOnly cookie + revokes token in KV when possible)
+    try {
+      await fetch('/api/auth?action=signout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token }),
+      });
+    } catch {
+      try {
+        await fetch('/api/auth?action=logout', { method: 'POST' });
+      } catch {
+        // ignore
+      }
+    }
+
+    // Best-effort local cleanup
+    try {
+      localStorage.removeItem('adminToken');
+      localStorage.removeItem('auth_token');
+      localStorage.removeItem('authToken');
+    } catch {
+      // localStorage not available
+    }
+
+    router.replace('/ipl-admin-2026');
+  };
+
   useEffect(() => {
     if (hasCheckedAuth.current) return;
     hasCheckedAuth.current = true;
@@ -113,9 +156,9 @@ export default function AdminLayout({
         <div className="flex min-h-screen bg-ipl-dark">
           {/* Single sidebar - show PlayersAdminSidebar for players_admin on players pages, else AdminSidebar */}
           {userRole === 'players_admin' && ['/ipl-admin-2026/players', '/ipl-admin-2026/batting-stats', '/ipl-admin-2026/bowling-stats', '/ipl-admin-2026/players/upload'].includes(pathname) ? (
-            <PlayersAdminSidebar currentPage={pathname} />
+            <PlayersAdminSidebar currentPage={pathname} onLogout={handleLogout} />
           ) : (
-            <AdminSidebar currentPage={pathname} />
+            <AdminSidebar currentPage={pathname} onLogout={handleLogout} />
           )}
           
           <div className="flex-1 flex flex-col">
