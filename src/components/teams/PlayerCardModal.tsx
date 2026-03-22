@@ -7,7 +7,6 @@ import {
   Activity,
   ArrowLeft,
   ArrowRight,
-  Award,
   BarChart3,
   Calendar,
   Hash,
@@ -79,6 +78,7 @@ interface PlayerCardModalProps {
       wickets?: number;
       runsConceded?: number;
       bowlingAverage?: number | string;
+      bowlingStrikeRate?: number | string;
       economy?: number | string;
       bestBowling?: string;
       fiveWickets?: number;
@@ -214,11 +214,6 @@ export default function PlayerCardModal({
     const formatted = formatDateMonthDDYYYY(player.dateOfBirth);
     return formatted || player.dateOfBirth;
   }, [player.dateOfBirth]);
-
-  const transferInfo = useMemo(() => {
-    if (!player.transferInfo || typeof player.transferInfo !== 'object') return null;
-    return player.transferInfo as any;
-  }, [player.transferInfo]);
 
   if (typeof document === 'undefined') return null;
 
@@ -402,115 +397,30 @@ export default function PlayerCardModal({
                       </Section>
 
                       <Section title="Bowling Stats" icon={<Trophy className="h-4 w-4" />}>
-                        <div className="grid grid-cols-2 gap-3">
-                          <MetricCard label="Wickets" value={displayValue(player.wickets)} />
-                          <MetricCard label="Avg" value={displayValue(player.bowlingAverage)} />
-                          <MetricCard label="Econ" value={displayValue(player.economy)} />
-                          <MetricCard label="Best" value={displayValue(player.bestBowling)} hint="Wickets/Runs" />
+                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                          <MetricCard label="Matches" value={displayValue(player.stats?.matches ?? player.matches)} />
+                          <MetricCard label="Bowling Inns" value={displayValue(player.stats?.bowlingInnings)} />
+                          <MetricCard label="Balls" value={displayValue(player.stats?.balls)} />
+                          <MetricCard label="Wickets" value={displayValue(player.stats?.wickets ?? player.wickets)} />
+                          <MetricCard label="Maidens" value={displayValue(player.stats?.maidens)} />
+                          <MetricCard label="Runs Conceded" value={displayValue(player.stats?.runsConceded)} />
+                          <MetricCard label="Econ" value={displayValue(player.stats?.economy ?? player.economy)} />
+                          <MetricCard label="Bowling Avg" value={displayValue(player.stats?.bowlingAverage ?? player.bowlingAverage)} />
+                          <MetricCard
+                            label="Bowling S/R"
+                            value={displayValue(
+                              player.stats?.bowlingStrikeRate ??
+                                ((player.stats?.wickets ?? player.wickets) && player.stats?.balls
+                                  ? Number(player.stats.balls) / Number(player.stats.wickets ?? player.wickets)
+                                  : undefined),
+                            )}
+                          />
+                          <MetricCard label="Best Bowling" value={displayValue(player.stats?.bestBowling ?? player.bestBowling)} hint="Wickets/Runs" />
+                          <MetricCard label="5-Wicket Hauls" value={displayValue(player.stats?.fiveWickets)} />
                         </div>
                       </Section>
                     </div>
                   </div>
-
-                    {(player.isActiveInSquad !== undefined || 
-                      player.squadStatus || 
-                      player.squadExitReason || 
-                      player.squadExitDate ||
-                      player.transferInfo ||
-                      player.stats) && (
-                      <div className="mt-6 space-y-4">
-                        {/* Match Statistics Section */}
-                        {(player.matches || player.stats?.matches || player.stats?.battingInnings || player.stats?.bowlingInnings) && (
-                          <Section title="Match Statistics" icon={<Calendar className="h-4 w-4" />}>
-                            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                              {(player.matches || player.stats?.matches) && <MetricCard label="Matches" value={displayValue(player.stats?.matches || player.matches)} />}
-                              {player.stats?.battingInnings && <MetricCard label="Batting Innings" value={displayValue(player.stats.battingInnings)} />}
-                              {player.stats?.notOuts && <MetricCard label="Not Outs" value={displayValue(player.stats.notOuts)} />}
-                              {player.stats?.bowlingInnings && <MetricCard label="Bowling Innings" value={displayValue(player.stats.bowlingInnings)} />}
-                              {player.stats?.balls && <MetricCard label="Balls" value={displayValue(player.stats.balls)} />}
-                              {player.stats?.ballsFaced && <MetricCard label="Balls Faced" value={displayValue(player.stats.ballsFaced)} />}
-                            </div>
-                          </Section>
-                        )}
-
-                        {/* Batting Performance Section */}
-                        {(player.stats?.runs || player.stats?.highest || player.stats?.fours || player.stats?.sixes) && (
-                          <Section title="Batting Performance" icon={<BarChart3 className="h-4 w-4" />}>
-                            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                              {player.stats?.runs && <MetricCard label="Runs" value={displayValue(player.stats.runs)} />}
-                              {player.stats?.highest && <MetricCard label="Highest Score" value={displayValue(player.stats.highest)} />}
-                              {player.stats?.fours && <MetricCard label="Fours" value={displayValue(player.stats.fours)} />}
-                              {player.stats?.sixes && <MetricCard label="Sixes" value={displayValue(player.stats.sixes)} />}
-                            </div>
-                          </Section>
-                        )}
-
-                        {/* Bowling Performance Section */}
-                        {(player.stats?.wickets || player.stats?.maidens || player.stats?.runsConceded) && (
-                          <Section title="Bowling Performance" icon={<Zap className="h-4 w-4" />}>
-                            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                              {player.stats?.wickets && <MetricCard label="Wickets" value={displayValue(player.stats.wickets)} />}
-                              {player.stats?.maidens && <MetricCard label="Maidens" value={displayValue(player.stats.maidens)} />}
-                              {player.stats?.runsConceded && <MetricCard label="Runs Conceded" value={displayValue(player.stats.runsConceded)} />}
-                            </div>
-                          </Section>
-                        )}
-
-                        {/* Milestones & Averages Section */}
-                        {(player.stats?.fifties || player.stats?.hundreds || player.stats?.battingAverage || player.stats?.economy || player.stats?.bowlingAverage || player.stats?.fiveWickets) && (
-                          <Section title="Milestones & Averages" icon={<Award className="h-4 w-4" />}>
-                            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                              {player.stats?.fifties && <MetricCard label="Fifties" value={displayValue(player.stats.fifties)} />}
-                              {player.stats?.hundreds && <MetricCard label="Hundreds" value={displayValue(player.stats.hundreds)} />}
-                              {player.stats?.battingAverage && <MetricCard label="Batting Avg" value={displayValue(player.stats.battingAverage)} />}
-                              {player.stats?.economy && <MetricCard label="Economy" value={displayValue(player.stats.economy)} />}
-                              {player.stats?.bowlingAverage && <MetricCard label="Bowling Avg" value={displayValue(player.stats.bowlingAverage)} />}
-                              {player.stats?.fiveWickets && <MetricCard label="5-Wicket Hauls" value={displayValue(player.stats.fiveWickets)} />}
-                            </div>
-                          </Section>
-                        )}
-
-                        {/* Squad Status Fields */}
-                        {(player.isActiveInSquad !== undefined || player.squadStatus || player.squadExitReason || player.squadExitDate) && (
-                          <Section title="Squad Status" icon={<Trophy className="h-4 w-4" />}>
-                            <div className="grid grid-cols-2 gap-3">
-                              <MetricCard label="Active" value={player.isActiveInSquad === false ? 'No' : 'Yes'} />
-                              {player.squadStatus && <MetricCard label="Status" value={displayValue(player.squadStatus)} />}
-                              {player.squadExitReason && <MetricCard label="Exit Reason" value={displayValue(player.squadExitReason)} />}
-                              {player.squadExitDate && <MetricCard label="Exit Date" value={displayValue(player.squadExitDate)} />}
-                            </div>
-                          </Section>
-                        )}
-
-                        {/* Auction / Transfer Section */}
-                        {player.transferInfo && (
-                          <Section title="Auction / Transfer" icon={<Zap className="h-4 w-4" />}>
-                            <div className="grid grid-cols-2 gap-3">
-                              {'acquiredVia' in player.transferInfo ? (
-                                <MetricCard label="Acquired Via" value={displayValue((player.transferInfo as any).acquiredVia)} />
-                              ) : null}
-                              {'lastAuctionYear' in player.transferInfo ? (
-                                <MetricCard label="Auction Year" value={displayValue((player.transferInfo as any).lastAuctionYear)} />
-                              ) : null}
-                              {'transferFee' in player.transferInfo ? (
-                                <MetricCard label="Fee" value={displayValue((player.transferInfo as any).transferFee)} />
-                              ) : null}
-                              {'transferable' in player.transferInfo ? (
-                                <MetricCard label="Transferable" value={(player.transferInfo as any).transferable ? 'Yes' : 'No'} />
-                              ) : null}
-                              {'notes' in player.transferInfo ? (
-                                <div className="col-span-2 rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3">
-                                  <div className="text-[11px] font-semibold uppercase tracking-wide text-white/55">Notes</div>
-                                  <div className="mt-1 text-sm text-white/80 whitespace-pre-wrap">
-                                    {displayValue((player.transferInfo as any).notes)}
-                                  </div>
-                                </div>
-                              ) : null}
-                            </div>
-                          </Section>
-                        )}
-                      </div>
-                    )}
 
                   <div className="mt-6 flex items-center justify-between gap-3">
                     <button
