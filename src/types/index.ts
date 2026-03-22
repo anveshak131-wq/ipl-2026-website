@@ -40,19 +40,33 @@ export interface Player {
   battingStyle: string;
   photoUrl?: string; // Optional player photo URL
   stats: {
+    // Batting stats
     matches: number;
+    battingInnings?: number;
+    notOuts?: number;
     runs: number;
-    wickets: number;
+    ballsFaced?: number;
     average: number; // Batting average
-    bowlingAverage?: number; // Bowling average (runs conceded per wicket)
+    battingAverage?: number | string; // Alternative batting average format
     strikeRate: number;
-    economy: number;
+    battingStrikeRate?: number | string; // Alternative batting strike rate format
     highest: number;
     fours: number;
     sixes: number;
     fifties: number;
     hundreds: number;
+    
+    // Bowling stats
+    bowlingInnings?: number;
+    balls?: number;
+    maidens?: number;
+    wickets: number;
+    runsConceded?: number;
+    bowlingAverage?: number | string; // Bowling average (runs conceded per wicket)
+    bowlingStrikeRate?: number | string; // Bowling strike rate (balls per wicket)
+    economy: number;
     bestBowling: string; // Format: "wickets/runs" e.g., "4/21", "3/45"
+    fiveWickets?: number; // Number of 5-wicket hauls
   };
   // Transfer and auction metadata (optional)
   transferInfo?: {
