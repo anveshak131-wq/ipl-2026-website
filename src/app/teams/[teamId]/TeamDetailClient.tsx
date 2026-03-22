@@ -401,18 +401,18 @@ export default function TeamDetailClient({ teamId, league }: TeamDetailClientPro
           console.log('TeamDetailClient: Fetched players:', allPlayers.length);
           
           if (allPlayers.length > 0) {
-            console.log('TeamDetailClient: Sample player teamIds:', allPlayers.slice(0, 5).map(p => ({ 
-              name: p.name, 
-              teamId: p.teamId, 
-              normalizedTeamId: normalizeId(p.teamId)
-            })));
-            
             const normalizeId = (id: any) => {
               if (!id) return '';
               const idStr = String(id);
               // Remove 'team' prefix if present
               return idStr.replace(/^team/i, '');
             };
+
+            console.log('TeamDetailClient: Sample player teamIds:', allPlayers.slice(0, 5).map(p => ({ 
+              name: p.name, 
+              teamId: p.teamId, 
+              normalizedTeamId: normalizeId(p.teamId)
+            })));
             
             const normalizedTeamId = normalizeId(team.id);
             console.log('TeamDetailClient: Normalized team ID:', normalizedTeamId, 'from:', team.id);
@@ -1383,6 +1383,7 @@ export default function TeamDetailClient({ teamId, league }: TeamDetailClientPro
                     teamId={teamData.id} 
                     teamName={teamData.name}
                     initialPlayers={teamData.players}
+                    league={teamLeague}
                   />
                 </div>
               </motion.div>

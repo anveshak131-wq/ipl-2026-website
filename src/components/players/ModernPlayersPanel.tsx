@@ -39,8 +39,76 @@ interface Team {
 }
 
 interface ModernPlayersPanelProps {
-  initialPlayers?: Player[];
+  initialPlayers?: any[];
   teams: Team[];
+}
+
+function toNumber(value: any): number {
+  if (typeof value === 'number') return Number.isFinite(value) ? value : 0;
+  if (typeof value === 'string') {
+    const trimmed = value.trim();
+    if (!trimmed) return 0;
+    const parsed = Number(trimmed);
+    return Number.isFinite(parsed) ? parsed : 0;
+  }
+  return 0;
+}
+
+function resolveTeamId(teamRef: any, teams: Team[]): string {
+  const raw = String(teamRef ?? '').trim();
+  if (!raw) return '';
+
+  const withoutPrefix = raw.replace(/^team/i, '');
+  if (/^\d+$/.test(withoutPrefix)) return withoutPrefix;
+
+  const lower = raw.toLowerCase();
+  const match = teams.find((t) => {
+    const short = String(t.shortName || '').toLowerCase();
+    const name = String(t.name || '').toLowerCase();
+    return short === lower || short.replace('-w', '') === lower || name === lower;
+  });
+
+  if (match) return String(match.id);
+  return withoutPrefix.toLowerCase();
+}
+
+function resolveTeamName(teamId: string, teams: Team[], fallback?: string): string {
+  const match = teams.find((t) => String(t.id) === String(teamId));
+  return match?.name || fallback || (teamId ? `Team ${teamId}` : 'Team');
+}
+
+function normalizePlayer(raw: any, teams: Team[]): Player {
+  const rawStats = raw?.stats || {};
+  const normalizedTeamId = resolveTeamId(raw?.teamId ?? raw?.team?.id ?? raw?.team, teams);
+
+  const highestValue = raw?.highestScore ?? rawStats.highestScore ?? rawStats.highest;
+
+  return {
+    id: String(raw?.id ?? ''),
+    name: String(raw?.name ?? 'Unknown'),
+    teamId: normalizedTeamId,
+    teamName: resolveTeamName(normalizedTeamId, teams, raw?.teamName),
+    role: String(raw?.role ?? 'Player'),
+    matches: toNumber(raw?.matches ?? rawStats.matches),
+    runs: toNumber(raw?.runs ?? rawStats.runs),
+    wickets: toNumber(raw?.wickets ?? rawStats.wickets),
+    battingAverage: toNumber(raw?.battingAverage ?? rawStats.average ?? rawStats.battingAverage),
+    bowlingAverage: toNumber(raw?.bowlingAverage ?? rawStats.bowlingAverage),
+    strikeRate: toNumber(raw?.strikeRate ?? rawStats.strikeRate ?? rawStats.battingStrikeRate),
+    economy: toNumber(raw?.economy ?? rawStats.economy),
+    bestBowling: String(raw?.bestBowling ?? rawStats.bestBowling ?? '-'),
+    highestScore: typeof highestValue === 'string' ? highestValue : String(toNumber(highestValue)),
+    image: raw?.image || raw?.photoUrl || raw?.photo || undefined,
+    fifties: toNumber(raw?.fifties ?? rawStats.fifties),
+    hundreds: toNumber(raw?.hundreds ?? rawStats.hundreds),
+    fours: toNumber(raw?.fours ?? rawStats.fours),
+    sixes: toNumber(raw?.sixes ?? rawStats.sixes),
+  };
+}
+
+function normalizePlayers(rawPlayers: any, teams: Team[]): Player[] {
+  if (!Array.isArray(rawPlayers)) return [];
+  return rawPlayers.map((p) => normalizePlayer(p, teams));
 }
 
 // Define view types
@@ -53,7 +121,7 @@ interface ComparisonPlayer extends Player {
 
 export default function ModernPlayersPanel({ initialPlayers = [], teams }: ModernPlayersPanelProps) {
   // State for players and filtering
-  const [players, setPlayers] = useState<Player[]>(initialPlayers);
+  const [players, setPlayers] = useState<Player[]>(() => normalizePlayers(initialPlayers, teams));
   const [filteredPlayers, setFilteredPlayers] = useState<Player[]>([]);
   const [displayedPlayers, setDisplayedPlayers] = useState<Player[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -106,9 +174,11 @@ export default function ModernPlayersPanel({ initialPlayers = [], teams }: Moder
     const fetchPlayers = async () => {
       if (!initialPlayers.length) {
         try {
-          const data = await fetch('/api/players').then(res => res.json());
-          setPlayers(data);
-          setFilteredPlayers(data);
+          const response = await fetch(`/api/players?_${Date.now()}`, { cache: 'no-store' });
+          const data = response.ok ? await response.json() : [];
+          const normalized = normalizePlayers(data, teams);
+          setPlayers(normalized);
+          setFilteredPlayers(normalized);
         } catch (error) {
           console.error('Error fetching players:', error);
         } finally {
@@ -118,7 +188,28 @@ export default function ModernPlayersPanel({ initialPlayers = [], teams }: Moder
     };
 
     fetchPlayers();
-  }, [initialPlayers]);
+  }, [initialPlayers.length]);
+
+  // Keep players in sync when parent provides players/teams (KV shape -> panel shape)
+  useEffect(() => {
+    if (initialPlayers.length > 0) {
+      const normalized = normalizePlayers(initialPlayers, teams);
+      setPlayers(normalized);
+      setFilteredPlayers(normalized);
+      setIsLoading(false);
+    }
+  }, [initialPlayers, teams]);
+
+  // If teams arrive later, enrich player.teamName
+  useEffect(() => {
+    if (!teams.length) return;
+    setPlayers((prev) =>
+      prev.map((p) => ({
+        ...p,
+        teamName: resolveTeamName(p.teamId, teams, p.teamName),
+      })),
+    );
+  }, [teams]);
 
   // Apply filters and sorting
   useEffect(() => {
