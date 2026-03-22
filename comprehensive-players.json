@@ -14,27 +14,28 @@
     "stats": {
       "matches": 65,
       "runs": 978,
-      "wickets": 19,
+      "wickets": 100,
       "average": 45.19,
       "strikeRate": 166.58,
-      "economy": 6.73,
+      "economy": 7.58,
       "highest": 31,
       "fours": 65,
       "sixes": 39,
       "fifties": 8,
       "hundreds": 0,
-      "bestBowling": "1/8",
+      "bestBowling": "5/20",
       "battingInnings": 0,
       "notOuts": 0,
       "ballsFaced": 0,
       "battingAverage": 45.19,
       "battingStrikeRate": 166.58,
-      "bowlingInnings": 0,
-      "balls": 0,
-      "maidens": 0,
-      "runsConceded": 0,
-      "bowlingStrikeRate": 5.052631578947368,
-      "fiveWickets": 0
+      "bowlingInnings": 83,
+      "balls": 1888,
+      "maidens": 1,
+      "runsConceded": 2385,
+      "bowlingStrikeRate": 18.88,
+      "fiveWickets": 1,
+      "bowlingAverage": 23.85
     }
   },
   {
@@ -52,27 +53,28 @@
     "stats": {
       "matches": 50,
       "runs": 80,
-      "wickets": 78,
+      "wickets": 192,
       "average": 20.59,
       "strikeRate": 137.48,
-      "economy": 8.33,
+      "economy": 6.8,
       "highest": 27,
       "fours": 5,
       "sixes": 3,
       "fifties": 6,
       "hundreds": 0,
-      "bestBowling": "3/16",
+      "bestBowling": "5/19",
       "battingInnings": 0,
       "notOuts": 0,
       "ballsFaced": 0,
       "battingAverage": 20.59,
       "battingStrikeRate": 137.48,
-      "bowlingInnings": 0,
-      "balls": 0,
-      "maidens": 0,
-      "runsConceded": 0,
-      "bowlingStrikeRate": 1.2307692307692308,
-      "fiveWickets": 0
+      "bowlingInnings": 187,
+      "balls": 4345,
+      "maidens": 4,
+      "runsConceded": 4922,
+      "bowlingStrikeRate": 22.63,
+      "fiveWickets": 1,
+      "bowlingAverage": 25.64
     }
   },
   {
@@ -90,27 +92,28 @@
     "stats": {
       "matches": 9,
       "runs": 869,
-      "wickets": 7,
+      "wickets": 123,
       "average": 20.53,
       "strikeRate": 128.8,
-      "economy": 7.48,
+      "economy": 9.51,
       "highest": 64,
       "fours": 57,
       "sixes": 34,
       "fifties": 1,
       "hundreds": 0,
-      "bestBowling": "2/0",
+      "bestBowling": "5/15",
       "battingInnings": 0,
       "notOuts": 0,
       "ballsFaced": 0,
       "battingAverage": 20.53,
       "battingStrikeRate": 128.8,
-      "bowlingInnings": 0,
-      "balls": 0,
+      "bowlingInnings": 121,
+      "balls": 1806,
       "maidens": 0,
-      "runsConceded": 0,
-      "bowlingStrikeRate": 13.714285714285714,
-      "fiveWickets": 0
+      "runsConceded": 2863,
+      "bowlingStrikeRate": 14.68,
+      "fiveWickets": 1,
+      "bowlingAverage": 23.28
     }
   },
   {
@@ -128,27 +131,28 @@
     "stats": {
       "matches": 10,
       "runs": 2462,
-      "wickets": 0,
+      "wickets": 40,
       "average": 38.97,
       "strikeRate": 152.21,
-      "economy": 0,
+      "economy": 9.51,
       "highest": 66,
       "fours": 164,
       "sixes": 98,
       "fifties": 1,
       "hundreds": 0,
-      "bestBowling": "-",
+      "bestBowling": "3/24",
       "battingInnings": 0,
       "notOuts": 0,
       "ballsFaced": 0,
       "battingAverage": 38.97,
       "battingStrikeRate": 152.21,
-      "bowlingInnings": 0,
-      "balls": 0,
-      "maidens": 0,
-      "runsConceded": 0,
-      "bowlingStrikeRate": 0,
-      "fiveWickets": 0
+      "bowlingInnings": 32,
+      "balls": 649,
+      "maidens": 1,
+      "runsConceded": 1029,
+      "bowlingStrikeRate": 16.23,
+      "fiveWickets": 0,
+      "bowlingAverage": 25.73
     }
   },
   {
@@ -166,27 +170,28 @@
     "stats": {
       "matches": 47,
       "runs": 778,
-      "wickets": 34,
+      "wickets": 6,
       "average": 30.98,
       "strikeRate": 124.08,
-      "economy": 8.87,
+      "economy": 9.45,
       "highest": 41,
       "fours": 51,
       "sixes": 31,
       "fifties": 5,
       "hundreds": 0,
-      "bestBowling": "2/18",
+      "bestBowling": "3/20",
       "battingInnings": 0,
       "notOuts": 0,
       "ballsFaced": 0,
       "battingAverage": 30.98,
       "battingStrikeRate": 124.08,
-      "bowlingInnings": 0,
-      "balls": 0,
+      "bowlingInnings": 4,
+      "balls": 40,
       "maidens": 0,
-      "runsConceded": 0,
-      "bowlingStrikeRate": 2.823529411764706,
-      "fiveWickets": 0
+      "runsConceded": 63,
+      "bowlingStrikeRate": 6.67,
+      "fiveWickets": 0,
+      "bowlingAverage": 10.5
     }
   },
   {
@@ -207,7 +212,7 @@
       "wickets": 83,
       "average": 48.08,
       "strikeRate": 141.68,
-      "economy": 6.51,
+      "economy": 0,
       "highest": 51,
       "fours": 1,
       "sixes": 1,
@@ -223,8 +228,9 @@
       "balls": 0,
       "maidens": 0,
       "runsConceded": 0,
-      "bowlingStrikeRate": 1.1566265060240963,
-      "fiveWickets": 0
+      "bowlingStrikeRate": 0,
+      "fiveWickets": 0,
+      "bowlingAverage": 0
     }
   },
   {
@@ -245,24 +251,25 @@
       "wickets": 0,
       "average": 40.23,
       "strikeRate": 161.06,
-      "economy": 0,
+      "economy": 36,
       "highest": 75,
       "fours": 158,
       "sixes": 95,
       "fifties": 5,
       "hundreds": 0,
-      "bestBowling": "-",
+      "bestBowling": "0/6",
       "battingInnings": 0,
       "notOuts": 0,
       "ballsFaced": 0,
       "battingAverage": 40.23,
       "battingStrikeRate": 161.06,
-      "bowlingInnings": 0,
-      "balls": 0,
+      "bowlingInnings": 1,
+      "balls": 1,
       "maidens": 0,
-      "runsConceded": 0,
+      "runsConceded": 6,
       "bowlingStrikeRate": 0,
-      "fiveWickets": 0
+      "fiveWickets": 0,
+      "bowlingAverage": 0
     }
   },
   {
@@ -280,27 +287,28 @@
     "stats": {
       "matches": 11,
       "runs": 1148,
-      "wickets": 19,
+      "wickets": 7,
       "average": 31.52,
       "strikeRate": 162.38,
-      "economy": 8.39,
+      "economy": 9.7,
       "highest": 49,
       "fours": 76,
       "sixes": 45,
       "fifties": 1,
       "hundreds": 0,
-      "bestBowling": "1/14",
+      "bestBowling": "1/7",
       "battingInnings": 0,
       "notOuts": 0,
       "ballsFaced": 0,
       "battingAverage": 31.52,
       "battingStrikeRate": 162.38,
-      "bowlingInnings": 0,
-      "balls": 0,
+      "bowlingInnings": 30,
+      "balls": 295,
       "maidens": 0,
-      "runsConceded": 0,
-      "bowlingStrikeRate": 5.052631578947368,
-      "fiveWickets": 0
+      "runsConceded": 477,
+      "bowlingStrikeRate": 42.14,
+      "fiveWickets": 0,
+      "bowlingAverage": 68.14
     }
   },
   {
@@ -321,7 +329,7 @@
       "wickets": 35,
       "average": 38.19,
       "strikeRate": 120.28,
-      "economy": 8.73,
+      "economy": 0,
       "highest": 82,
       "fours": 0,
       "sixes": 0,
@@ -337,8 +345,9 @@
       "balls": 0,
       "maidens": 0,
       "runsConceded": 0,
-      "bowlingStrikeRate": 2.742857142857143,
-      "fiveWickets": 0
+      "bowlingStrikeRate": 0,
+      "fiveWickets": 0,
+      "bowlingAverage": 0
     }
   },
   {
@@ -359,7 +368,7 @@
       "wickets": 9,
       "average": 25.61,
       "strikeRate": 146.19,
-      "economy": 8.95,
+      "economy": 0,
       "highest": 80,
       "fours": 27,
       "sixes": 16,
@@ -375,8 +384,9 @@
       "balls": 0,
       "maidens": 0,
       "runsConceded": 0,
-      "bowlingStrikeRate": 10.666666666666666,
-      "fiveWickets": 0
+      "bowlingStrikeRate": 0,
+      "fiveWickets": 0,
+      "bowlingAverage": 0
     }
   },
   {
@@ -394,27 +404,28 @@
     "stats": {
       "matches": 20,
       "runs": 1061,
-      "wickets": 6,
+      "wickets": 158,
       "average": 38.64,
       "strikeRate": 150.1,
-      "economy": 6.35,
+      "economy": 7.09,
       "highest": 84,
       "fours": 70,
       "sixes": 42,
       "fifties": 2,
       "hundreds": 0,
-      "bestBowling": "1/19",
+      "bestBowling": "4/24",
       "battingInnings": 0,
       "notOuts": 0,
       "ballsFaced": 0,
       "battingAverage": 38.64,
       "battingStrikeRate": 150.1,
-      "bowlingInnings": 0,
-      "balls": 0,
-      "maidens": 0,
-      "runsConceded": 0,
-      "bowlingStrikeRate": 16,
-      "fiveWickets": 0
+      "bowlingInnings": 136,
+      "balls": 3189,
+      "maidens": 4,
+      "runsConceded": 3766,
+      "bowlingStrikeRate": 20.18,
+      "fiveWickets": 0,
+      "bowlingAverage": 23.84
     }
   },
   {
@@ -435,7 +446,7 @@
       "wickets": 48,
       "average": 26.69,
       "strikeRate": 149.18,
-      "economy": 6.92,
+      "economy": 0,
       "highest": 60,
       "fours": 4,
       "sixes": 2,
@@ -451,8 +462,9 @@
       "balls": 0,
       "maidens": 0,
       "runsConceded": 0,
-      "bowlingStrikeRate": 2,
-      "fiveWickets": 0
+      "bowlingStrikeRate": 0,
+      "fiveWickets": 0,
+      "bowlingAverage": 0
     }
   },
   {
@@ -473,7 +485,7 @@
       "wickets": 88,
       "average": 39.1,
       "strikeRate": 153.7,
-      "economy": 7.3,
+      "economy": 0,
       "highest": 44,
       "fours": 2,
       "sixes": 1,
@@ -489,8 +501,9 @@
       "balls": 0,
       "maidens": 0,
       "runsConceded": 0,
-      "bowlingStrikeRate": 1.0909090909090908,
-      "fiveWickets": 0
+      "bowlingStrikeRate": 0,
+      "fiveWickets": 0,
+      "bowlingAverage": 0
     }
   },
   {
@@ -508,27 +521,28 @@
     "stats": {
       "matches": 24,
       "runs": 2080,
-      "wickets": 0,
+      "wickets": 32,
       "average": 32.59,
       "strikeRate": 148.81,
-      "economy": 0,
+      "economy": 7.91,
       "highest": 68,
       "fours": 138,
       "sixes": 83,
       "fifties": 3,
       "hundreds": 0,
-      "bestBowling": "-",
+      "bestBowling": "3/18",
       "battingInnings": 0,
       "notOuts": 0,
       "ballsFaced": 0,
       "battingAverage": 32.59,
       "battingStrikeRate": 148.81,
-      "bowlingInnings": 0,
-      "balls": 0,
+      "bowlingInnings": 52,
+      "balls": 843,
       "maidens": 0,
-      "runsConceded": 0,
-      "bowlingStrikeRate": 0,
-      "fiveWickets": 0
+      "runsConceded": 1111,
+      "bowlingStrikeRate": 26.34,
+      "fiveWickets": 0,
+      "bowlingAverage": 34.72
     }
   },
   {
@@ -546,27 +560,28 @@
     "stats": {
       "matches": 12,
       "runs": 85,
-      "wickets": 89,
+      "wickets": 1,
       "average": 41.12,
       "strikeRate": 123.09,
-      "economy": 7.71,
+      "economy": 9.33,
       "highest": 41,
       "fours": 5,
       "sixes": 3,
       "fifties": 1,
       "hundreds": 0,
-      "bestBowling": "2/4",
+      "bestBowling": "1/13",
       "battingInnings": 0,
       "notOuts": 0,
       "ballsFaced": 0,
       "battingAverage": 41.12,
       "battingStrikeRate": 123.09,
-      "bowlingInnings": 0,
-      "balls": 0,
+      "bowlingInnings": 3,
+      "balls": 18,
       "maidens": 0,
-      "runsConceded": 0,
-      "bowlingStrikeRate": 1.0786516853932584,
-      "fiveWickets": 0
+      "runsConceded": 28,
+      "bowlingStrikeRate": 18,
+      "fiveWickets": 0,
+      "bowlingAverage": 28
     }
   },
   {
@@ -587,7 +602,7 @@
       "wickets": 24,
       "average": 25.62,
       "strikeRate": 134.4,
-      "economy": 6.79,
+      "economy": 0,
       "highest": 91,
       "fours": 62,
       "sixes": 37,
@@ -603,8 +618,9 @@
       "balls": 0,
       "maidens": 0,
       "runsConceded": 0,
-      "bowlingStrikeRate": 4,
-      "fiveWickets": 0
+      "bowlingStrikeRate": 0,
+      "fiveWickets": 0,
+      "bowlingAverage": 0
     }
   },
   {
@@ -622,27 +638,28 @@
     "stats": {
       "matches": 11,
       "runs": 60,
-      "wickets": 56,
+      "wickets": 9,
       "average": 48.43,
       "strikeRate": 123.54,
-      "economy": 6.89,
+      "economy": 9.17,
       "highest": 37,
       "fours": 4,
       "sixes": 2,
       "fifties": 1,
       "hundreds": 0,
-      "bestBowling": "3/0",
+      "bestBowling": "3/14",
       "battingInnings": 0,
       "notOuts": 0,
       "ballsFaced": 0,
       "battingAverage": 48.43,
       "battingStrikeRate": 123.54,
-      "bowlingInnings": 0,
-      "balls": 0,
+      "bowlingInnings": 6,
+      "balls": 121,
       "maidens": 0,
-      "runsConceded": 0,
-      "bowlingStrikeRate": 1.7142857142857142,
-      "fiveWickets": 0
+      "runsConceded": 185,
+      "bowlingStrikeRate": 13.44,
+      "fiveWickets": 0,
+      "bowlingAverage": 20.56
     }
   },
   {
@@ -660,27 +677,28 @@
     "stats": {
       "matches": 62,
       "runs": 53,
-      "wickets": 56,
+      "wickets": 27,
       "average": 42.09,
       "strikeRate": 140.47,
-      "economy": 8.44,
+      "economy": 8.51,
       "highest": 55,
       "fours": 3,
       "sixes": 2,
       "fifties": 7,
       "hundreds": 0,
-      "bestBowling": "3/4",
+      "bestBowling": "4/16",
       "battingInnings": 0,
       "notOuts": 0,
       "ballsFaced": 0,
       "battingAverage": 42.09,
       "battingStrikeRate": 140.47,
-      "bowlingInnings": 0,
-      "balls": 0,
-      "maidens": 0,
-      "runsConceded": 0,
-      "bowlingStrikeRate": 1.7142857142857142,
-      "fiveWickets": 0
+      "bowlingInnings": 23,
+      "balls": 486,
+      "maidens": 2,
+      "runsConceded": 689,
+      "bowlingStrikeRate": 18,
+      "fiveWickets": 0,
+      "bowlingAverage": 25.52
     }
   },
   {
@@ -698,27 +716,28 @@
     "stats": {
       "matches": 5,
       "runs": 827,
-      "wickets": 0,
+      "wickets": 4,
       "average": 35.78,
       "strikeRate": 145.37,
-      "economy": 0,
+      "economy": 8.4,
       "highest": 75,
       "fours": 55,
       "sixes": 33,
       "fifties": 0,
       "hundreds": 1,
-      "bestBowling": "-",
+      "bestBowling": "2/4",
       "battingInnings": 0,
       "notOuts": 0,
       "ballsFaced": 0,
       "battingAverage": 35.78,
       "battingStrikeRate": 145.37,
-      "bowlingInnings": 0,
-      "balls": 0,
+      "bowlingInnings": 7,
+      "balls": 35,
       "maidens": 0,
-      "runsConceded": 0,
-      "bowlingStrikeRate": 0,
-      "fiveWickets": 0
+      "runsConceded": 49,
+      "bowlingStrikeRate": 8.75,
+      "fiveWickets": 0,
+      "bowlingAverage": 12.25
     }
   },
   {
@@ -736,27 +755,28 @@
     "stats": {
       "matches": 57,
       "runs": 858,
-      "wickets": 19,
+      "wickets": 1,
       "average": 15.65,
       "strikeRate": 138.9,
-      "economy": 6.17,
+      "economy": 10.4,
       "highest": 42,
       "fours": 57,
       "sixes": 34,
       "fifties": 7,
       "hundreds": 0,
-      "bestBowling": "3/15",
+      "bestBowling": "1/5",
       "battingInnings": 0,
       "notOuts": 0,
       "ballsFaced": 0,
       "battingAverage": 15.65,
       "battingStrikeRate": 138.9,
-      "bowlingInnings": 0,
-      "balls": 0,
+      "bowlingInnings": 4,
+      "balls": 30,
       "maidens": 0,
-      "runsConceded": 0,
-      "bowlingStrikeRate": 5.052631578947368,
-      "fiveWickets": 0
+      "runsConceded": 52,
+      "bowlingStrikeRate": 30,
+      "fiveWickets": 0,
+      "bowlingAverage": 52
     }
   },
   {
@@ -794,7 +814,8 @@
       "maidens": 0,
       "runsConceded": 0,
       "bowlingStrikeRate": 0,
-      "fiveWickets": 0
+      "fiveWickets": 0,
+      "bowlingAverage": 0
     }
   },
   {
@@ -815,7 +836,7 @@
       "wickets": 16,
       "average": 47.32,
       "strikeRate": 164.08,
-      "economy": 7.01,
+      "economy": 0,
       "highest": 40,
       "fours": 78,
       "sixes": 47,
@@ -831,8 +852,9 @@
       "balls": 0,
       "maidens": 0,
       "runsConceded": 0,
-      "bowlingStrikeRate": 6,
-      "fiveWickets": 0
+      "bowlingStrikeRate": 0,
+      "fiveWickets": 0,
+      "bowlingAverage": 0
     }
   },
   {
@@ -853,24 +875,25 @@
       "wickets": 78,
       "average": 39.93,
       "strikeRate": 132.91,
-      "economy": 7.15,
+      "economy": 7,
       "highest": 75,
       "fours": 6,
       "sixes": 3,
       "fifties": 7,
       "hundreds": 0,
-      "bestBowling": "1/9",
+      "bestBowling": "0/7",
       "battingInnings": 0,
       "notOuts": 0,
       "ballsFaced": 0,
       "battingAverage": 39.93,
       "battingStrikeRate": 132.91,
-      "bowlingInnings": 0,
-      "balls": 0,
+      "bowlingInnings": 1,
+      "balls": 6,
       "maidens": 0,
-      "runsConceded": 0,
-      "bowlingStrikeRate": 1.2307692307692308,
-      "fiveWickets": 0
+      "runsConceded": 7,
+      "bowlingStrikeRate": 0,
+      "fiveWickets": 0,
+      "bowlingAverage": 0
     }
   },
   {
@@ -891,7 +914,7 @@
       "wickets": 68,
       "average": 39.05,
       "strikeRate": 126.39,
-      "economy": 6.01,
+      "economy": 0,
       "highest": 71,
       "fours": 0,
       "sixes": 0,
@@ -907,8 +930,9 @@
       "balls": 0,
       "maidens": 0,
       "runsConceded": 0,
-      "bowlingStrikeRate": 1.411764705882353,
-      "fiveWickets": 0
+      "bowlingStrikeRate": 0,
+      "fiveWickets": 0,
+      "bowlingAverage": 0
     }
   },
   {
@@ -926,27 +950,28 @@
     "stats": {
       "matches": 69,
       "runs": 41,
-      "wickets": 53,
+      "wickets": 119,
       "average": 49.2,
       "strikeRate": 126.19,
-      "economy": 7.56,
+      "economy": 8.62,
       "highest": 96,
       "fours": 2,
       "sixes": 1,
       "fifties": 8,
       "hundreds": 0,
-      "bestBowling": "2/6",
+      "bestBowling": "4/21",
       "battingInnings": 0,
       "notOuts": 0,
       "ballsFaced": 0,
       "battingAverage": 49.2,
       "battingStrikeRate": 126.19,
-      "bowlingInnings": 0,
-      "balls": 0,
-      "maidens": 0,
-      "runsConceded": 0,
-      "bowlingStrikeRate": 1.8113207547169812,
-      "fiveWickets": 0
+      "bowlingInnings": 84,
+      "balls": 1902,
+      "maidens": 2,
+      "runsConceded": 2732,
+      "bowlingStrikeRate": 15.98,
+      "fiveWickets": 0,
+      "bowlingAverage": 22.96
     }
   },
   {
@@ -964,27 +989,28 @@
     "stats": {
       "matches": 45,
       "runs": 881,
-      "wickets": 0,
+      "wickets": 97,
       "average": 28.26,
       "strikeRate": 132.99,
-      "economy": 0,
+      "economy": 9,
       "highest": 37,
       "fours": 58,
       "sixes": 35,
       "fifties": 5,
       "hundreds": 0,
-      "bestBowling": "-",
+      "bestBowling": "5/32",
       "battingInnings": 0,
       "notOuts": 0,
       "ballsFaced": 0,
       "battingAverage": 28.26,
       "battingStrikeRate": 132.99,
-      "bowlingInnings": 0,
-      "balls": 0,
-      "maidens": 0,
-      "runsConceded": 0,
-      "bowlingStrikeRate": 0,
-      "fiveWickets": 0
+      "bowlingInnings": 82,
+      "balls": 1714,
+      "maidens": 2,
+      "runsConceded": 2570,
+      "bowlingStrikeRate": 17.67,
+      "fiveWickets": 1,
+      "bowlingAverage": 26.49
     }
   },
   {
@@ -1002,27 +1028,28 @@
     "stats": {
       "matches": 63,
       "runs": 48,
-      "wickets": 49,
+      "wickets": 65,
       "average": 21.82,
       "strikeRate": 166.61,
-      "economy": 6.76,
+      "economy": 8.61,
       "highest": 33,
       "fours": 3,
       "sixes": 1,
       "fifties": 7,
       "hundreds": 0,
-      "bestBowling": "3/17",
+      "bestBowling": "5/35",
       "battingInnings": 0,
       "notOuts": 0,
       "ballsFaced": 0,
       "battingAverage": 21.82,
       "battingStrikeRate": 166.61,
-      "bowlingInnings": 0,
-      "balls": 0,
-      "maidens": 0,
-      "runsConceded": 0,
-      "bowlingStrikeRate": 1.9591836734693877,
-      "fiveWickets": 0
+      "bowlingInnings": 49,
+      "balls": 1047,
+      "maidens": 1,
+      "runsConceded": 1503,
+      "bowlingStrikeRate": 16.11,
+      "fiveWickets": 1,
+      "bowlingAverage": 23.12
     }
   },
   {
@@ -1040,27 +1067,28 @@
     "stats": {
       "matches": 53,
       "runs": 13,
-      "wickets": 31,
+      "wickets": 221,
       "average": 49.68,
       "strikeRate": 146.78,
-      "economy": 6.29,
+      "economy": 7.96,
       "highest": 62,
       "fours": 0,
       "sixes": 0,
       "fifties": 6,
       "hundreds": 0,
-      "bestBowling": "3/16",
+      "bestBowling": "5/40",
       "battingInnings": 0,
       "notOuts": 0,
       "ballsFaced": 0,
       "battingAverage": 49.68,
       "battingStrikeRate": 146.78,
-      "bowlingInnings": 0,
-      "balls": 0,
-      "maidens": 0,
-      "runsConceded": 0,
-      "bowlingStrikeRate": 3.096774193548387,
-      "fiveWickets": 0
+      "bowlingInnings": 172,
+      "balls": 3791,
+      "maidens": 4,
+      "runsConceded": 5032,
+      "bowlingStrikeRate": 17.15,
+      "fiveWickets": 1,
+      "bowlingAverage": 22.77
     }
   },
   {
@@ -1098,7 +1126,8 @@
       "maidens": 0,
       "runsConceded": 0,
       "bowlingStrikeRate": 0,
-      "fiveWickets": 0
+      "fiveWickets": 0,
+      "bowlingAverage": 0
     }
   },
   {
@@ -1119,7 +1148,7 @@
       "wickets": 61,
       "average": 49.72,
       "strikeRate": 153.13,
-      "economy": 8.62,
+      "economy": 0,
       "highest": 31,
       "fours": 0,
       "sixes": 0,
@@ -1135,8 +1164,9 @@
       "balls": 0,
       "maidens": 0,
       "runsConceded": 0,
-      "bowlingStrikeRate": 1.5737704918032787,
-      "fiveWickets": 0
+      "bowlingStrikeRate": 0,
+      "fiveWickets": 0,
+      "bowlingAverage": 0
     }
   },
   {
@@ -1154,27 +1184,28 @@
     "stats": {
       "matches": 12,
       "runs": 859,
-      "wickets": 0,
+      "wickets": 109,
       "average": 24.08,
       "strikeRate": 127.96,
-      "economy": 0,
+      "economy": 8.74,
       "highest": 71,
       "fours": 57,
       "sixes": 34,
       "fifties": 1,
       "hundreds": 0,
-      "bestBowling": "-",
+      "bestBowling": "4/17",
       "battingInnings": 0,
       "notOuts": 0,
       "ballsFaced": 0,
       "battingAverage": 24.08,
       "battingStrikeRate": 127.96,
-      "bowlingInnings": 0,
-      "balls": 0,
-      "maidens": 0,
-      "runsConceded": 0,
-      "bowlingStrikeRate": 0,
-      "fiveWickets": 0
+      "bowlingInnings": 108,
+      "balls": 2300,
+      "maidens": 4,
+      "runsConceded": 3349,
+      "bowlingStrikeRate": 21.1,
+      "fiveWickets": 0,
+      "bowlingAverage": 30.72
     }
   },
   {
@@ -1195,24 +1226,25 @@
       "wickets": 6,
       "average": 15.72,
       "strikeRate": 124.94,
-      "economy": 6.64,
+      "economy": 6.25,
       "highest": 34,
       "fours": 14,
       "sixes": 8,
       "fifties": 6,
       "hundreds": 0,
-      "bestBowling": "3/12",
+      "bestBowling": "0/7",
       "battingInnings": 0,
       "notOuts": 0,
       "ballsFaced": 0,
       "battingAverage": 15.72,
       "battingStrikeRate": 124.94,
-      "bowlingInnings": 0,
-      "balls": 0,
+      "bowlingInnings": 3,
+      "balls": 24,
       "maidens": 0,
-      "runsConceded": 0,
-      "bowlingStrikeRate": 16,
-      "fiveWickets": 0
+      "runsConceded": 25,
+      "bowlingStrikeRate": 0,
+      "fiveWickets": 0,
+      "bowlingAverage": 0
     }
   },
   {
@@ -1250,7 +1282,8 @@
       "maidens": 0,
       "runsConceded": 0,
       "bowlingStrikeRate": 0,
-      "fiveWickets": 0
+      "fiveWickets": 0,
+      "bowlingAverage": 0
     }
   },
   {
@@ -1306,27 +1339,28 @@
     "stats": {
       "matches": 46,
       "runs": 29,
-      "wickets": 83,
+      "wickets": 6,
       "average": 27.52,
       "strikeRate": 168.92,
-      "economy": 7.94,
+      "economy": 8.79,
       "highest": 70,
       "fours": 1,
       "sixes": 1,
       "fifties": 5,
       "hundreds": 0,
-      "bestBowling": "1/17",
+      "bestBowling": "2/30",
       "battingInnings": 0,
       "notOuts": 0,
       "ballsFaced": 0,
       "battingAverage": 27.52,
       "battingStrikeRate": 168.92,
-      "bowlingInnings": 0,
-      "balls": 0,
+      "bowlingInnings": 19,
+      "balls": 187,
       "maidens": 0,
-      "runsConceded": 0,
-      "bowlingStrikeRate": 1.1566265060240963,
-      "fiveWickets": 0
+      "runsConceded": 274,
+      "bowlingStrikeRate": 31.17,
+      "fiveWickets": 0,
+      "bowlingAverage": 45.67
     }
   },
   {
@@ -1364,7 +1398,8 @@
       "maidens": 0,
       "runsConceded": 0,
       "bowlingStrikeRate": 0,
-      "fiveWickets": 0
+      "fiveWickets": 0,
+      "bowlingAverage": 0
     }
   },
   {
@@ -1385,7 +1420,7 @@
       "wickets": 83,
       "average": 40.17,
       "strikeRate": 158.09,
-      "economy": 8.85,
+      "economy": 0,
       "highest": 32,
       "fours": 3,
       "sixes": 2,
@@ -1401,8 +1436,9 @@
       "balls": 0,
       "maidens": 0,
       "runsConceded": 0,
-      "bowlingStrikeRate": 1.1566265060240963,
-      "fiveWickets": 0
+      "bowlingStrikeRate": 0,
+      "fiveWickets": 0,
+      "bowlingAverage": 0
     }
   },
   {
@@ -1420,27 +1456,28 @@
     "stats": {
       "matches": 10,
       "runs": 52,
-      "wickets": 20,
+      "wickets": 37,
       "average": 26.05,
       "strikeRate": 136.3,
-      "economy": 7.37,
+      "economy": 8.52,
       "highest": 37,
       "fours": 3,
       "sixes": 2,
       "fifties": 1,
       "hundreds": 0,
-      "bestBowling": "3/1",
+      "bestBowling": "4/25",
       "battingInnings": 0,
       "notOuts": 0,
       "ballsFaced": 0,
       "battingAverage": 26.05,
       "battingStrikeRate": 136.3,
-      "bowlingInnings": 0,
-      "balls": 0,
-      "maidens": 0,
-      "runsConceded": 0,
-      "bowlingStrikeRate": 4.8,
-      "fiveWickets": 0
+      "bowlingInnings": 34,
+      "balls": 560,
+      "maidens": 1,
+      "runsConceded": 795,
+      "bowlingStrikeRate": 15.14,
+      "fiveWickets": 0,
+      "bowlingAverage": 21.49
     }
   },
   {
@@ -1461,7 +1498,7 @@
       "wickets": 59,
       "average": 40.57,
       "strikeRate": 152.73,
-      "economy": 8.2,
+      "economy": 0,
       "highest": 90,
       "fours": 5,
       "sixes": 3,
@@ -1477,8 +1514,9 @@
       "balls": 0,
       "maidens": 0,
       "runsConceded": 0,
-      "bowlingStrikeRate": 1.6271186440677967,
-      "fiveWickets": 0
+      "bowlingStrikeRate": 0,
+      "fiveWickets": 0,
+      "bowlingAverage": 0
     }
   },
   {
@@ -1496,27 +1534,28 @@
     "stats": {
       "matches": 5,
       "runs": 48,
-      "wickets": 62,
+      "wickets": 151,
       "average": 37.2,
       "strikeRate": 162.06,
-      "economy": 6.67,
+      "economy": 8.86,
       "highest": 94,
       "fours": 3,
       "sixes": 1,
       "fifties": 0,
       "hundreds": 0,
-      "bestBowling": "1/18",
+      "bestBowling": "5/27",
       "battingInnings": 0,
       "notOuts": 0,
       "ballsFaced": 0,
       "battingAverage": 37.2,
       "battingStrikeRate": 162.06,
-      "bowlingInnings": 0,
-      "balls": 0,
-      "maidens": 0,
-      "runsConceded": 0,
-      "bowlingStrikeRate": 1.5483870967741935,
-      "fiveWickets": 0
+      "bowlingInnings": 116,
+      "balls": 2424,
+      "maidens": 2,
+      "runsConceded": 3579,
+      "bowlingStrikeRate": 16.05,
+      "fiveWickets": 1,
+      "bowlingAverage": 23.7
     }
   },
   {
@@ -1534,27 +1573,28 @@
     "stats": {
       "matches": 23,
       "runs": 1148,
-      "wickets": 0,
+      "wickets": 44,
       "average": 19.08,
       "strikeRate": 152.51,
-      "economy": 0,
+      "economy": 9.79,
       "highest": 58,
       "fours": 76,
       "sixes": 45,
       "fifties": 2,
       "hundreds": 0,
-      "bestBowling": "-",
+      "bestBowling": "4/15",
       "battingInnings": 0,
       "notOuts": 0,
       "ballsFaced": 0,
       "battingAverage": 19.08,
       "battingStrikeRate": 152.51,
-      "bowlingInnings": 0,
-      "balls": 0,
+      "bowlingInnings": 71,
+      "balls": 888,
       "maidens": 0,
-      "runsConceded": 0,
-      "bowlingStrikeRate": 0,
-      "fiveWickets": 0
+      "runsConceded": 1449,
+      "bowlingStrikeRate": 20.18,
+      "fiveWickets": 0,
+      "bowlingAverage": 32.93
     }
   },
   {
@@ -1592,7 +1632,8 @@
       "maidens": 0,
       "runsConceded": 0,
       "bowlingStrikeRate": 0,
-      "fiveWickets": 0
+      "fiveWickets": 0,
+      "bowlingAverage": 0
     }
   },
   {
@@ -1613,24 +1654,25 @@
       "wickets": 0,
       "average": 20.73,
       "strikeRate": 157.27,
-      "economy": 0,
+      "economy": 24,
       "highest": 59,
       "fours": 68,
       "sixes": 41,
       "fifties": 4,
       "hundreds": 2,
-      "bestBowling": "-",
+      "bestBowling": "0/4",
       "battingInnings": 0,
       "notOuts": 0,
       "ballsFaced": 0,
       "battingAverage": 20.73,
       "battingStrikeRate": 157.27,
-      "bowlingInnings": 0,
-      "balls": 0,
+      "bowlingInnings": 1,
+      "balls": 1,
       "maidens": 0,
-      "runsConceded": 0,
+      "runsConceded": 4,
       "bowlingStrikeRate": 0,
-      "fiveWickets": 0
+      "fiveWickets": 0,
+      "bowlingAverage": 0
     }
   },
   {
@@ -1651,7 +1693,7 @@
       "wickets": 27,
       "average": 39.12,
       "strikeRate": 137.73,
-      "economy": 6.32,
+      "economy": 0,
       "highest": 22,
       "fours": 73,
       "sixes": 43,
@@ -1667,8 +1709,9 @@
       "balls": 0,
       "maidens": 0,
       "runsConceded": 0,
-      "bowlingStrikeRate": 3.5555555555555554,
-      "fiveWickets": 0
+      "bowlingStrikeRate": 0,
+      "fiveWickets": 0,
+      "bowlingAverage": 0
     }
   },
   {
@@ -1689,7 +1732,7 @@
       "wickets": 52,
       "average": 20.88,
       "strikeRate": 136.4,
-      "economy": 6.48,
+      "economy": 0,
       "highest": 95,
       "fours": 5,
       "sixes": 3,
@@ -1705,8 +1748,9 @@
       "balls": 0,
       "maidens": 0,
       "runsConceded": 0,
-      "bowlingStrikeRate": 1.8461538461538463,
-      "fiveWickets": 0
+      "bowlingStrikeRate": 0,
+      "fiveWickets": 0,
+      "bowlingAverage": 0
     }
   },
   {
@@ -1724,27 +1768,28 @@
     "stats": {
       "matches": 60,
       "runs": 54,
-      "wickets": 67,
+      "wickets": 89,
       "average": 35.25,
       "strikeRate": 143.72,
-      "economy": 7.98,
+      "economy": 8.98,
       "highest": 94,
       "fours": 3,
       "sixes": 2,
       "fifties": 7,
       "hundreds": 0,
-      "bestBowling": "3/11",
+      "bestBowling": "3/21",
       "battingInnings": 0,
       "notOuts": 0,
       "ballsFaced": 0,
       "battingAverage": 35.25,
       "battingStrikeRate": 143.72,
-      "bowlingInnings": 0,
-      "balls": 0,
-      "maidens": 0,
-      "runsConceded": 0,
-      "bowlingStrikeRate": 1.4328358208955223,
-      "fiveWickets": 0
+      "bowlingInnings": 71,
+      "balls": 1556,
+      "maidens": 4,
+      "runsConceded": 2328,
+      "bowlingStrikeRate": 17.48,
+      "fiveWickets": 0,
+      "bowlingAverage": 26.16
     }
   },
   {
@@ -1762,7 +1807,7 @@
     "stats": {
       "matches": 41,
       "runs": 33,
-      "wickets": 33,
+      "wickets": 143,
       "average": 31.42,
       "strikeRate": 124.74,
       "economy": 8.38,
@@ -1771,18 +1816,19 @@
       "sixes": 1,
       "fifties": 5,
       "hundreds": 0,
-      "bestBowling": "2/12",
+      "bestBowling": "4/18",
       "battingInnings": 0,
       "notOuts": 0,
       "ballsFaced": 0,
       "battingAverage": 31.42,
       "battingStrikeRate": 124.74,
-      "bowlingInnings": 0,
-      "balls": 0,
-      "maidens": 0,
-      "runsConceded": 0,
-      "bowlingStrikeRate": 2.909090909090909,
-      "fiveWickets": 0
+      "bowlingInnings": 119,
+      "balls": 2683,
+      "maidens": 11,
+      "runsConceded": 3747,
+      "bowlingStrikeRate": 18.76,
+      "fiveWickets": 0,
+      "bowlingAverage": 26.2
     }
   },
   {
@@ -1800,27 +1846,28 @@
     "stats": {
       "matches": 42,
       "runs": 4,
-      "wickets": 22,
+      "wickets": 57,
       "average": 20.05,
       "strikeRate": 158.47,
-      "economy": 7.09,
+      "economy": 8.28,
       "highest": 50,
       "fours": 0,
       "sixes": 0,
       "fifties": 5,
       "hundreds": 0,
-      "bestBowling": "3/13",
+      "bestBowling": "4/25",
       "battingInnings": 0,
       "notOuts": 0,
       "ballsFaced": 0,
       "battingAverage": 20.05,
       "battingStrikeRate": 158.47,
-      "bowlingInnings": 0,
-      "balls": 0,
-      "maidens": 0,
-      "runsConceded": 0,
-      "bowlingStrikeRate": 4.363636363636363,
-      "fiveWickets": 0
+      "bowlingInnings": 39,
+      "balls": 867,
+      "maidens": 1,
+      "runsConceded": 1196,
+      "bowlingStrikeRate": 15.21,
+      "fiveWickets": 0,
+      "bowlingAverage": 20.98
     }
   },
   {
@@ -1838,27 +1885,28 @@
     "stats": {
       "matches": 22,
       "runs": 472,
-      "wickets": 12,
+      "wickets": 87,
       "average": 29.82,
       "strikeRate": 159.12,
-      "economy": 7.2,
+      "economy": 9.12,
       "highest": 53,
       "fours": 31,
       "sixes": 18,
       "fifties": 2,
       "hundreds": 0,
-      "bestBowling": "2/1",
+      "bestBowling": "4/24",
       "battingInnings": 0,
       "notOuts": 0,
       "ballsFaced": 0,
       "battingAverage": 29.82,
       "battingStrikeRate": 159.12,
-      "bowlingInnings": 0,
-      "balls": 0,
-      "maidens": 0,
-      "runsConceded": 0,
-      "bowlingStrikeRate": 8,
-      "fiveWickets": 0
+      "bowlingInnings": 75,
+      "balls": 1619,
+      "maidens": 1,
+      "runsConceded": 2461,
+      "bowlingStrikeRate": 18.61,
+      "fiveWickets": 0,
+      "bowlingAverage": 28.29
     }
   },
   {
@@ -1876,27 +1924,28 @@
     "stats": {
       "matches": 5,
       "runs": 583,
-      "wickets": 13,
+      "wickets": 74,
       "average": 36.93,
       "strikeRate": 146.62,
-      "economy": 6.51,
+      "economy": 8.77,
       "highest": 83,
       "fours": 38,
       "sixes": 23,
       "fifties": 0,
       "hundreds": 0,
-      "bestBowling": "3/9",
+      "bestBowling": "4/30",
       "battingInnings": 0,
       "notOuts": 0,
       "ballsFaced": 0,
       "battingAverage": 36.93,
       "battingStrikeRate": 146.62,
-      "bowlingInnings": 0,
-      "balls": 0,
-      "maidens": 0,
-      "runsConceded": 0,
-      "bowlingStrikeRate": 7.384615384615385,
-      "fiveWickets": 0
+      "bowlingInnings": 66,
+      "balls": 1499,
+      "maidens": 3,
+      "runsConceded": 2191,
+      "bowlingStrikeRate": 20.26,
+      "fiveWickets": 0,
+      "bowlingAverage": 29.61
     }
   },
   {
@@ -1914,27 +1963,28 @@
     "stats": {
       "matches": 7,
       "runs": 2499,
-      "wickets": 0,
+      "wickets": 67,
       "average": 29.06,
       "strikeRate": 123.34,
-      "economy": 0,
+      "economy": 8.94,
       "highest": 77,
       "fours": 166,
       "sixes": 99,
       "fifties": 0,
       "hundreds": 1,
-      "bestBowling": "-",
+      "bestBowling": "4/19",
       "battingInnings": 0,
       "notOuts": 0,
       "ballsFaced": 0,
       "battingAverage": 29.06,
       "battingStrikeRate": 123.34,
-      "bowlingInnings": 0,
-      "balls": 0,
-      "maidens": 0,
-      "runsConceded": 0,
-      "bowlingStrikeRate": 0,
-      "fiveWickets": 0
+      "bowlingInnings": 62,
+      "balls": 1355,
+      "maidens": 2,
+      "runsConceded": 2018,
+      "bowlingStrikeRate": 20.22,
+      "fiveWickets": 0,
+      "bowlingAverage": 30.12
     }
   },
   {
@@ -1952,27 +2002,28 @@
     "stats": {
       "matches": 12,
       "runs": 619,
-      "wickets": 32,
+      "wickets": 48,
       "average": 28.32,
       "strikeRate": 137.59,
-      "economy": 6.88,
+      "economy": 8.08,
       "highest": 90,
       "fours": 41,
       "sixes": 24,
       "fifties": 1,
       "hundreds": 0,
-      "bestBowling": "1/13",
+      "bestBowling": "4/18",
       "battingInnings": 0,
       "notOuts": 0,
       "ballsFaced": 0,
       "battingAverage": 28.32,
       "battingStrikeRate": 137.59,
-      "bowlingInnings": 0,
-      "balls": 0,
+      "bowlingInnings": 37,
+      "balls": 792,
       "maidens": 0,
-      "runsConceded": 0,
-      "bowlingStrikeRate": 3,
-      "fiveWickets": 0
+      "runsConceded": 1067,
+      "bowlingStrikeRate": 16.5,
+      "fiveWickets": 0,
+      "bowlingAverage": 22.23
     }
   },
   {
@@ -1993,7 +2044,7 @@
       "wickets": 38,
       "average": 48.99,
       "strikeRate": 139.4,
-      "economy": 6.02,
+      "economy": 0,
       "highest": 84,
       "fours": 2,
       "sixes": 1,
@@ -2009,8 +2060,9 @@
       "balls": 0,
       "maidens": 0,
       "runsConceded": 0,
-      "bowlingStrikeRate": 2.526315789473684,
-      "fiveWickets": 0
+      "bowlingStrikeRate": 0,
+      "fiveWickets": 0,
+      "bowlingAverage": 0
     }
   },
   {
@@ -2031,7 +2083,7 @@
       "wickets": 26,
       "average": 41.61,
       "strikeRate": 145.24,
-      "economy": 6.99,
+      "economy": 0,
       "highest": 94,
       "fours": 44,
       "sixes": 26,
@@ -2047,8 +2099,9 @@
       "balls": 0,
       "maidens": 0,
       "runsConceded": 0,
-      "bowlingStrikeRate": 3.6923076923076925,
-      "fiveWickets": 0
+      "bowlingStrikeRate": 0,
+      "fiveWickets": 0,
+      "bowlingAverage": 0
     }
   },
   {
@@ -2069,7 +2122,7 @@
       "wickets": 11,
       "average": 27.62,
       "strikeRate": 153.49,
-      "economy": 6.07,
+      "economy": 0,
       "highest": 49,
       "fours": 34,
       "sixes": 20,
@@ -2085,8 +2138,9 @@
       "balls": 0,
       "maidens": 0,
       "runsConceded": 0,
-      "bowlingStrikeRate": 8.727272727272727,
-      "fiveWickets": 0
+      "bowlingStrikeRate": 0,
+      "fiveWickets": 0,
+      "bowlingAverage": 0
     }
   },
   {
@@ -2124,7 +2178,8 @@
       "maidens": 0,
       "runsConceded": 0,
       "bowlingStrikeRate": 0,
-      "fiveWickets": 0
+      "fiveWickets": 0,
+      "bowlingAverage": 0
     }
   },
   {
@@ -2145,7 +2200,7 @@
       "wickets": 89,
       "average": 21.12,
       "strikeRate": 164.82,
-      "economy": 6.08,
+      "economy": 0,
       "highest": 79,
       "fours": 4,
       "sixes": 2,
@@ -2161,8 +2216,9 @@
       "balls": 0,
       "maidens": 0,
       "runsConceded": 0,
-      "bowlingStrikeRate": 1.0786516853932584,
-      "fiveWickets": 0
+      "bowlingStrikeRate": 0,
+      "fiveWickets": 0,
+      "bowlingAverage": 0
     }
   },
   {
@@ -2183,7 +2239,7 @@
       "wickets": 25,
       "average": 41.76,
       "strikeRate": 151.49,
-      "economy": 6.93,
+      "economy": 0,
       "highest": 58,
       "fours": 3,
       "sixes": 2,
@@ -2199,8 +2255,9 @@
       "balls": 0,
       "maidens": 0,
       "runsConceded": 0,
-      "bowlingStrikeRate": 3.84,
-      "fiveWickets": 0
+      "bowlingStrikeRate": 0,
+      "fiveWickets": 0,
+      "bowlingAverage": 0
     }
   },
   {
@@ -2221,24 +2278,25 @@
       "wickets": 90,
       "average": 41.94,
       "strikeRate": 158.33,
-      "economy": 7.12,
+      "economy": 7.76,
       "highest": 57,
       "fours": 5,
       "sixes": 3,
       "fifties": 1,
       "hundreds": 0,
-      "bestBowling": "2/0",
+      "bestBowling": "0/9",
       "battingInnings": 0,
       "notOuts": 0,
       "ballsFaced": 0,
       "battingAverage": 41.94,
       "battingStrikeRate": 158.33,
-      "bowlingInnings": 0,
-      "balls": 0,
+      "bowlingInnings": 2,
+      "balls": 17,
       "maidens": 0,
-      "runsConceded": 0,
-      "bowlingStrikeRate": 1.0666666666666667,
-      "fiveWickets": 0
+      "runsConceded": 22,
+      "bowlingStrikeRate": 0,
+      "fiveWickets": 0,
+      "bowlingAverage": 0
     }
   },
   {
@@ -2256,27 +2314,28 @@
     "stats": {
       "matches": 13,
       "runs": 2336,
-      "wickets": 0,
+      "wickets": 35,
       "average": 33.13,
       "strikeRate": 155.6,
-      "economy": 0,
+      "economy": 8.03,
       "highest": 43,
       "fours": 155,
       "sixes": 93,
       "fifties": 1,
       "hundreds": 0,
-      "bestBowling": "-",
+      "bestBowling": "4/30",
       "battingInnings": 0,
       "notOuts": 0,
       "ballsFaced": 0,
       "battingAverage": 33.13,
       "battingStrikeRate": 155.6,
-      "bowlingInnings": 0,
-      "balls": 0,
-      "maidens": 0,
-      "runsConceded": 0,
-      "bowlingStrikeRate": 0,
-      "fiveWickets": 0
+      "bowlingInnings": 46,
+      "balls": 811,
+      "maidens": 1,
+      "runsConceded": 1085,
+      "bowlingStrikeRate": 23.17,
+      "fiveWickets": 0,
+      "bowlingAverage": 31
     }
   },
   {
@@ -2297,24 +2356,25 @@
       "wickets": 92,
       "average": 49.54,
       "strikeRate": 143.8,
-      "economy": 6.27,
+      "economy": 8.77,
       "highest": 26,
       "fours": 5,
       "sixes": 3,
       "fifties": 1,
       "hundreds": 0,
-      "bestBowling": "2/16",
+      "bestBowling": "0/9",
       "battingInnings": 0,
       "notOuts": 0,
       "ballsFaced": 0,
       "battingAverage": 49.54,
       "battingStrikeRate": 143.8,
-      "bowlingInnings": 0,
-      "balls": 0,
+      "bowlingInnings": 5,
+      "balls": 52,
       "maidens": 0,
-      "runsConceded": 0,
-      "bowlingStrikeRate": 1.0434782608695652,
-      "fiveWickets": 0
+      "runsConceded": 76,
+      "bowlingStrikeRate": 0,
+      "fiveWickets": 0,
+      "bowlingAverage": 0
     }
   },
   {
@@ -2332,27 +2392,28 @@
     "stats": {
       "matches": 14,
       "runs": 54,
-      "wickets": 37,
+      "wickets": 2,
       "average": 29.24,
       "strikeRate": 165.94,
-      "economy": 8.21,
+      "economy": 6.33,
       "highest": 49,
       "fours": 3,
       "sixes": 2,
       "fifties": 1,
       "hundreds": 0,
-      "bestBowling": "1/10",
+      "bestBowling": "2/20",
       "battingInnings": 0,
       "notOuts": 0,
       "ballsFaced": 0,
       "battingAverage": 29.24,
       "battingStrikeRate": 165.94,
-      "bowlingInnings": 0,
-      "balls": 0,
+      "bowlingInnings": 2,
+      "balls": 36,
       "maidens": 0,
-      "runsConceded": 0,
-      "bowlingStrikeRate": 2.5945945945945947,
-      "fiveWickets": 0
+      "runsConceded": 38,
+      "bowlingStrikeRate": 18,
+      "fiveWickets": 0,
+      "bowlingAverage": 19
     }
   },
   {
@@ -2390,7 +2451,8 @@
       "maidens": 0,
       "runsConceded": 0,
       "bowlingStrikeRate": 0,
-      "fiveWickets": 0
+      "fiveWickets": 0,
+      "bowlingAverage": 0
     }
   },
   {
@@ -2408,27 +2470,28 @@
     "stats": {
       "matches": 51,
       "runs": 87,
-      "wickets": 27,
+      "wickets": 2,
       "average": 43.69,
       "strikeRate": 127.14,
-      "economy": 8.06,
+      "economy": 12.75,
       "highest": 72,
       "fours": 5,
       "sixes": 3,
       "fifties": 6,
       "hundreds": 0,
-      "bestBowling": "3/8",
+      "bestBowling": "1/9",
       "battingInnings": 0,
       "notOuts": 0,
       "ballsFaced": 0,
       "battingAverage": 43.69,
       "battingStrikeRate": 127.14,
-      "bowlingInnings": 0,
-      "balls": 0,
+      "bowlingInnings": 6,
+      "balls": 56,
       "maidens": 0,
-      "runsConceded": 0,
-      "bowlingStrikeRate": 3.5555555555555554,
-      "fiveWickets": 0
+      "runsConceded": 119,
+      "bowlingStrikeRate": 28,
+      "fiveWickets": 0,
+      "bowlingAverage": 59.5
     }
   },
   {
@@ -2466,7 +2529,8 @@
       "maidens": 0,
       "runsConceded": 0,
       "bowlingStrikeRate": 0,
-      "fiveWickets": 0
+      "fiveWickets": 0,
+      "bowlingAverage": 0
     }
   },
   {
@@ -2504,7 +2568,8 @@
       "maidens": 0,
       "runsConceded": 0,
       "bowlingStrikeRate": 0,
-      "fiveWickets": 0
+      "fiveWickets": 0,
+      "bowlingAverage": 0
     }
   },
   {
@@ -2525,7 +2590,7 @@
       "wickets": 56,
       "average": 36.72,
       "strikeRate": 142.32,
-      "economy": 6.89,
+      "economy": 0,
       "highest": 94,
       "fours": 3,
       "sixes": 2,
@@ -2541,8 +2606,9 @@
       "balls": 0,
       "maidens": 0,
       "runsConceded": 0,
-      "bowlingStrikeRate": 1.7142857142857142,
-      "fiveWickets": 0
+      "bowlingStrikeRate": 0,
+      "fiveWickets": 0,
+      "bowlingAverage": 0
     }
   },
   {
@@ -2563,7 +2629,7 @@
       "wickets": 31,
       "average": 28.52,
       "strikeRate": 168.93,
-      "economy": 7.18,
+      "economy": 0,
       "highest": 89,
       "fours": 59,
       "sixes": 35,
@@ -2579,8 +2645,9 @@
       "balls": 0,
       "maidens": 0,
       "runsConceded": 0,
-      "bowlingStrikeRate": 3.096774193548387,
-      "fiveWickets": 0
+      "bowlingStrikeRate": 0,
+      "fiveWickets": 0,
+      "bowlingAverage": 0
     }
   },
   {
@@ -2601,7 +2668,7 @@
       "wickets": 25,
       "average": 30.6,
       "strikeRate": 131.62,
-      "economy": 7.15,
+      "economy": 0,
       "highest": 96,
       "fours": 6,
       "sixes": 3,
@@ -2617,8 +2684,9 @@
       "balls": 0,
       "maidens": 0,
       "runsConceded": 0,
-      "bowlingStrikeRate": 3.84,
-      "fiveWickets": 0
+      "bowlingStrikeRate": 0,
+      "fiveWickets": 0,
+      "bowlingAverage": 0
     }
   },
   {
@@ -2639,7 +2707,7 @@
       "wickets": 28,
       "average": 20.52,
       "strikeRate": 166.79,
-      "economy": 8.95,
+      "economy": 0,
       "highest": 57,
       "fours": 74,
       "sixes": 44,
@@ -2655,8 +2723,9 @@
       "balls": 0,
       "maidens": 0,
       "runsConceded": 0,
-      "bowlingStrikeRate": 3.4285714285714284,
-      "fiveWickets": 0
+      "bowlingStrikeRate": 0,
+      "fiveWickets": 0,
+      "bowlingAverage": 0
     }
   },
   {
@@ -2694,7 +2763,8 @@
       "maidens": 0,
       "runsConceded": 0,
       "bowlingStrikeRate": 0,
-      "fiveWickets": 0
+      "fiveWickets": 0,
+      "bowlingAverage": 0
     }
   },
   {
@@ -2715,7 +2785,7 @@
       "wickets": 6,
       "average": 16.15,
       "strikeRate": 153.89,
-      "economy": 7.9,
+      "economy": 0,
       "highest": 25,
       "fours": 31,
       "sixes": 18,
@@ -2731,8 +2801,9 @@
       "balls": 0,
       "maidens": 0,
       "runsConceded": 0,
-      "bowlingStrikeRate": 16,
-      "fiveWickets": 0
+      "bowlingStrikeRate": 0,
+      "fiveWickets": 0,
+      "bowlingAverage": 0
     }
   },
   {
@@ -2770,7 +2841,8 @@
       "maidens": 0,
       "runsConceded": 0,
       "bowlingStrikeRate": 0,
-      "fiveWickets": 0
+      "fiveWickets": 0,
+      "bowlingAverage": 0
     }
   },
   {
@@ -2788,27 +2860,28 @@
     "stats": {
       "matches": 5,
       "runs": 79,
-      "wickets": 45,
+      "wickets": 36,
       "average": 20.38,
       "strikeRate": 146.92,
-      "economy": 6.19,
+      "economy": 9.55,
       "highest": 95,
       "fours": 5,
       "sixes": 3,
       "fifties": 0,
       "hundreds": 0,
-      "bestBowling": "1/1",
+      "bestBowling": "3/27",
       "battingInnings": 0,
       "notOuts": 0,
       "ballsFaced": 0,
       "battingAverage": 20.38,
       "battingStrikeRate": 146.92,
-      "bowlingInnings": 0,
-      "balls": 0,
-      "maidens": 0,
-      "runsConceded": 0,
-      "bowlingStrikeRate": 2.1333333333333333,
-      "fiveWickets": 0
+      "bowlingInnings": 32,
+      "balls": 638,
+      "maidens": 1,
+      "runsConceded": 1016,
+      "bowlingStrikeRate": 17.72,
+      "fiveWickets": 0,
+      "bowlingAverage": 28.22
     }
   },
   {
@@ -2826,27 +2899,28 @@
     "stats": {
       "matches": 11,
       "runs": 1134,
-      "wickets": 32,
+      "wickets": 10,
       "average": 40.23,
       "strikeRate": 123.98,
-      "economy": 7.54,
+      "economy": 10.62,
       "highest": 24,
       "fours": 75,
       "sixes": 45,
       "fifties": 1,
       "hundreds": 0,
-      "bestBowling": "1/10",
+      "bestBowling": "3/34",
       "battingInnings": 0,
       "notOuts": 0,
       "ballsFaced": 0,
       "battingAverage": 40.23,
       "battingStrikeRate": 123.98,
-      "bowlingInnings": 0,
-      "balls": 0,
+      "bowlingInnings": 13,
+      "balls": 231,
       "maidens": 0,
-      "runsConceded": 0,
-      "bowlingStrikeRate": 3,
-      "fiveWickets": 0
+      "runsConceded": 409,
+      "bowlingStrikeRate": 23.1,
+      "fiveWickets": 0,
+      "bowlingAverage": 40.9
     }
   },
   {
@@ -2905,7 +2979,7 @@
       "wickets": 18,
       "average": 18.69,
       "strikeRate": 151.81,
-      "economy": 8.53,
+      "economy": 0,
       "highest": 65,
       "fours": 49,
       "sixes": 29,
@@ -2921,8 +2995,9 @@
       "balls": 0,
       "maidens": 0,
       "runsConceded": 0,
-      "bowlingStrikeRate": 5.333333333333333,
-      "fiveWickets": 0
+      "bowlingStrikeRate": 0,
+      "fiveWickets": 0,
+      "bowlingAverage": 0
     }
   },
   {
@@ -2940,27 +3015,28 @@
     "stats": {
       "matches": 48,
       "runs": 2032,
-      "wickets": 0,
+      "wickets": 51,
       "average": 29.13,
       "strikeRate": 174.59,
-      "economy": 0,
+      "economy": 8.97,
       "highest": 95,
       "fours": 169,
       "sixes": 101,
       "fifties": 4,
       "hundreds": 0,
-      "bestBowling": "-",
+      "bestBowling": "4/28",
       "battingInnings": 0,
       "notOuts": 0,
       "ballsFaced": 0,
       "battingAverage": 29.13,
       "battingStrikeRate": 174.59,
-      "bowlingInnings": 0,
-      "balls": 0,
-      "maidens": 0,
-      "runsConceded": 0,
-      "bowlingStrikeRate": 0,
-      "fiveWickets": 0
+      "bowlingInnings": 49,
+      "balls": 1023,
+      "maidens": 1,
+      "runsConceded": 1530,
+      "bowlingStrikeRate": 20.06,
+      "fiveWickets": 0,
+      "bowlingAverage": 30
     }
   },
   {
@@ -2978,27 +3054,28 @@
     "stats": {
       "matches": 17,
       "runs": 1337,
-      "wickets": 44,
+      "wickets": 198,
       "average": 48.99,
       "strikeRate": 169.09,
-      "economy": 7.54,
+      "economy": 7.69,
       "highest": 25,
       "fours": 111,
       "sixes": 66,
       "fifties": 1,
       "hundreds": 0,
-      "bestBowling": "1/2",
+      "bestBowling": "5/19",
       "battingInnings": 0,
       "notOuts": 0,
       "ballsFaced": 0,
       "battingAverage": 48.99,
       "battingStrikeRate": 169.09,
-      "bowlingInnings": 0,
-      "balls": 0,
-      "maidens": 0,
-      "runsConceded": 0,
-      "bowlingStrikeRate": 2.1818181818181817,
-      "fiveWickets": 0
+      "bowlingInnings": 190,
+      "balls": 4222,
+      "maidens": 14,
+      "runsConceded": 5412,
+      "bowlingStrikeRate": 21.32,
+      "fiveWickets": 2,
+      "bowlingAverage": 27.33
     }
   },
   {
@@ -3016,27 +3093,28 @@
     "stats": {
       "matches": 55,
       "runs": 101,
-      "wickets": 121,
+      "wickets": 36,
       "average": 22.49,
       "strikeRate": 152.49,
-      "economy": 7.91,
+      "economy": 10.4,
       "highest": 78,
       "fours": 8,
       "sixes": 5,
       "fifties": 5,
       "hundreds": 0,
-      "bestBowling": "3/9",
+      "bestBowling": "4/33",
       "battingInnings": 0,
       "notOuts": 0,
       "ballsFaced": 0,
       "battingAverage": 22.49,
       "battingStrikeRate": 152.49,
-      "bowlingInnings": 0,
-      "balls": 0,
-      "maidens": 0,
-      "runsConceded": 0,
-      "bowlingStrikeRate": 0.7933884297520661,
-      "fiveWickets": 0
+      "bowlingInnings": 32,
+      "balls": 636,
+      "maidens": 1,
+      "runsConceded": 1102,
+      "bowlingStrikeRate": 17.67,
+      "fiveWickets": 0,
+      "bowlingAverage": 30.61
     }
   },
   {
@@ -3074,7 +3152,8 @@
       "maidens": 0,
       "runsConceded": 0,
       "bowlingStrikeRate": 0,
-      "fiveWickets": 0
+      "fiveWickets": 0,
+      "bowlingAverage": 0
     }
   },
   {
@@ -3150,7 +3229,8 @@
       "maidens": 0,
       "runsConceded": 0,
       "bowlingStrikeRate": 0,
-      "fiveWickets": 0
+      "fiveWickets": 0,
+      "bowlingAverage": 0
     }
   },
   {
@@ -3209,7 +3289,7 @@
       "wickets": 105,
       "average": 18.45,
       "strikeRate": 176.85,
-      "economy": 9.96,
+      "economy": 0,
       "highest": 115,
       "fours": 0,
       "sixes": 0,
@@ -3225,8 +3305,9 @@
       "balls": 0,
       "maidens": 0,
       "runsConceded": 0,
-      "bowlingStrikeRate": 0.9142857142857143,
-      "fiveWickets": 0
+      "bowlingStrikeRate": 0,
+      "fiveWickets": 0,
+      "bowlingAverage": 0
     }
   },
   {
@@ -3244,10 +3325,10 @@
     "stats": {
       "matches": 9,
       "runs": 114,
-      "wickets": 110,
+      "wickets": 10,
       "average": 39.67,
       "strikeRate": 131.75,
-      "economy": 6.21,
+      "economy": 9.08,
       "highest": 115,
       "fours": 9,
       "sixes": 5,
@@ -3259,12 +3340,13 @@
       "ballsFaced": 0,
       "battingAverage": 39.67,
       "battingStrikeRate": 131.75,
-      "bowlingInnings": 0,
-      "balls": 0,
+      "bowlingInnings": 11,
+      "balls": 189,
       "maidens": 0,
-      "runsConceded": 0,
-      "bowlingStrikeRate": 0.8727272727272727,
-      "fiveWickets": 0
+      "runsConceded": 286,
+      "bowlingStrikeRate": 18.9,
+      "fiveWickets": 0,
+      "bowlingAverage": 28.6
     }
   },
   {
@@ -3282,27 +3364,28 @@
     "stats": {
       "matches": 97,
       "runs": 1096,
-      "wickets": 0,
+      "wickets": 12,
       "average": 52.9,
       "strikeRate": 136.4,
-      "economy": 0,
+      "economy": 11.49,
       "highest": 22,
       "fours": 91,
       "sixes": 54,
       "fifties": 9,
       "hundreds": 0,
-      "bestBowling": "-",
+      "bestBowling": "3/39",
       "battingInnings": 0,
       "notOuts": 0,
       "ballsFaced": 0,
       "battingAverage": 52.9,
       "battingStrikeRate": 136.4,
-      "bowlingInnings": 0,
-      "balls": 0,
+      "bowlingInnings": 19,
+      "balls": 272,
       "maidens": 0,
-      "runsConceded": 0,
-      "bowlingStrikeRate": 0,
-      "fiveWickets": 0
+      "runsConceded": 521,
+      "bowlingStrikeRate": 22.67,
+      "fiveWickets": 0,
+      "bowlingAverage": 43.42
     }
   },
   {
@@ -3358,27 +3441,28 @@
     "stats": {
       "matches": 6,
       "runs": 127,
-      "wickets": 113,
+      "wickets": 6,
       "average": 33.27,
       "strikeRate": 129.49,
-      "economy": 8.51,
+      "economy": 8.18,
       "highest": 79,
       "fours": 10,
       "sixes": 6,
       "fifties": 0,
       "hundreds": 0,
-      "bestBowling": "2/17",
+      "bestBowling": "2/19",
       "battingInnings": 0,
       "notOuts": 0,
       "ballsFaced": 0,
       "battingAverage": 33.27,
       "battingStrikeRate": 129.49,
-      "bowlingInnings": 0,
-      "balls": 0,
+      "bowlingInnings": 10,
+      "balls": 160,
       "maidens": 0,
-      "runsConceded": 0,
-      "bowlingStrikeRate": 0.8495575221238938,
-      "fiveWickets": 0
+      "runsConceded": 218,
+      "bowlingStrikeRate": 26.67,
+      "fiveWickets": 0,
+      "bowlingAverage": 36.33
     }
   },
   {
@@ -3396,27 +3480,28 @@
     "stats": {
       "matches": 5,
       "runs": 3201,
-      "wickets": 0,
+      "wickets": 7,
       "average": 47.64,
       "strikeRate": 141.07,
-      "economy": 0,
+      "economy": 8.93,
       "highest": 107,
       "fours": 266,
       "sixes": 160,
       "fifties": 0,
       "hundreds": 4,
-      "bestBowling": "-",
+      "bestBowling": "2/28",
       "battingInnings": 0,
       "notOuts": 0,
       "ballsFaced": 0,
       "battingAverage": 47.64,
       "battingStrikeRate": 141.07,
-      "bowlingInnings": 0,
-      "balls": 0,
+      "bowlingInnings": 14,
+      "balls": 162,
       "maidens": 0,
-      "runsConceded": 0,
-      "bowlingStrikeRate": 0,
-      "fiveWickets": 0
+      "runsConceded": 241,
+      "bowlingStrikeRate": 23.14,
+      "fiveWickets": 0,
+      "bowlingAverage": 34.43
     }
   },
   {
@@ -3513,24 +3598,25 @@
       "wickets": 0,
       "average": 35.67,
       "strikeRate": 130.09,
-      "economy": 0,
+      "economy": 14,
       "highest": 26,
       "fours": 45,
       "sixes": 27,
       "fifties": 0,
       "hundreds": 4,
-      "bestBowling": "-",
+      "bestBowling": "0/42",
       "battingInnings": 0,
       "notOuts": 0,
       "ballsFaced": 0,
       "battingAverage": 35.67,
       "battingStrikeRate": 130.09,
-      "bowlingInnings": 0,
-      "balls": 0,
+      "bowlingInnings": 1,
+      "balls": 18,
       "maidens": 0,
-      "runsConceded": 0,
+      "runsConceded": 42,
       "bowlingStrikeRate": 0,
-      "fiveWickets": 0
+      "fiveWickets": 0,
+      "bowlingAverage": 0
     }
   },
   {
@@ -3548,27 +3634,28 @@
     "stats": {
       "matches": 12,
       "runs": 107,
-      "wickets": 117,
+      "wickets": 17,
       "average": 21.59,
       "strikeRate": 170.7,
-      "economy": 6.36,
+      "economy": 9.94,
       "highest": 69,
       "fours": 8,
       "sixes": 5,
       "fifties": 1,
       "hundreds": 0,
-      "bestBowling": "1/15",
+      "bestBowling": "4/46",
       "battingInnings": 0,
       "notOuts": 0,
       "ballsFaced": 0,
       "battingAverage": 21.59,
       "battingStrikeRate": 170.7,
-      "bowlingInnings": 0,
-      "balls": 0,
+      "bowlingInnings": 16,
+      "balls": 315,
       "maidens": 0,
-      "runsConceded": 0,
-      "bowlingStrikeRate": 0.8205128205128205,
-      "fiveWickets": 0
+      "runsConceded": 522,
+      "bowlingStrikeRate": 18.53,
+      "fiveWickets": 0,
+      "bowlingAverage": 30.71
     }
   },
   {
@@ -3586,27 +3673,28 @@
     "stats": {
       "matches": 10,
       "runs": 83,
-      "wickets": 91,
+      "wickets": 3,
       "average": 42.38,
       "strikeRate": 151.73,
-      "economy": 6.25,
+      "economy": 9.37,
       "highest": 31,
       "fours": 6,
       "sixes": 4,
       "fifties": 1,
       "hundreds": 0,
-      "bestBowling": "2/4",
+      "bestBowling": "1/9",
       "battingInnings": 0,
       "notOuts": 0,
       "ballsFaced": 0,
       "battingAverage": 42.38,
       "battingStrikeRate": 151.73,
-      "bowlingInnings": 0,
-      "balls": 0,
+      "bowlingInnings": 5,
+      "balls": 73,
       "maidens": 0,
-      "runsConceded": 0,
-      "bowlingStrikeRate": 1.054945054945055,
-      "fiveWickets": 0
+      "runsConceded": 114,
+      "bowlingStrikeRate": 24.33,
+      "fiveWickets": 0,
+      "bowlingAverage": 38
     }
   },
   {
@@ -3662,27 +3750,28 @@
     "stats": {
       "matches": 77,
       "runs": 745,
-      "wickets": 0,
+      "wickets": 3,
       "average": 27.45,
       "strikeRate": 165.97,
-      "economy": 0,
+      "economy": 8.63,
       "highest": 93,
       "fours": 62,
       "sixes": 37,
       "fifties": 7,
       "hundreds": 0,
-      "bestBowling": "-",
+      "bestBowling": "2/39",
       "battingInnings": 0,
       "notOuts": 0,
       "ballsFaced": 0,
       "battingAverage": 27.45,
       "battingStrikeRate": 165.97,
-      "bowlingInnings": 0,
-      "balls": 0,
+      "bowlingInnings": 5,
+      "balls": 96,
       "maidens": 0,
-      "runsConceded": 0,
-      "bowlingStrikeRate": 0,
-      "fiveWickets": 0
+      "runsConceded": 138,
+      "bowlingStrikeRate": 32,
+      "fiveWickets": 0,
+      "bowlingAverage": 46
     }
   },
   {
@@ -3700,27 +3789,28 @@
     "stats": {
       "matches": 19,
       "runs": 1340,
-      "wickets": 0,
+      "wickets": 14,
       "average": 18.69,
       "strikeRate": 159.92,
-      "economy": 0,
+      "economy": 8.25,
       "highest": 93,
       "fours": 111,
       "sixes": 67,
       "fifties": 1,
       "hundreds": 0,
-      "bestBowling": "-",
+      "bestBowling": "2/30",
       "battingInnings": 0,
       "notOuts": 0,
       "ballsFaced": 0,
       "battingAverage": 18.69,
       "battingStrikeRate": 159.92,
-      "bowlingInnings": 0,
-      "balls": 0,
+      "bowlingInnings": 13,
+      "balls": 312,
       "maidens": 0,
-      "runsConceded": 0,
-      "bowlingStrikeRate": 0,
-      "fiveWickets": 0
+      "runsConceded": 429,
+      "bowlingStrikeRate": 22.29,
+      "fiveWickets": 0,
+      "bowlingAverage": 30.64
     }
   },
   {
@@ -3741,7 +3831,7 @@
       "wickets": 27,
       "average": 33.4,
       "strikeRate": 134.27,
-      "economy": 6.12,
+      "economy": 0,
       "highest": 44,
       "fours": 73,
       "sixes": 44,
@@ -3757,8 +3847,9 @@
       "balls": 0,
       "maidens": 0,
       "runsConceded": 0,
-      "bowlingStrikeRate": 3.5555555555555554,
-      "fiveWickets": 0
+      "bowlingStrikeRate": 0,
+      "fiveWickets": 0,
+      "bowlingAverage": 0
     }
   },
   {
@@ -3776,27 +3867,28 @@
     "stats": {
       "matches": 8,
       "runs": 2914,
-      "wickets": 0,
+      "wickets": 1,
       "average": 24.32,
       "strikeRate": 124.88,
-      "economy": 0,
+      "economy": 8.63,
       "highest": 76,
       "fours": 242,
       "sixes": 145,
       "fifties": 0,
       "hundreds": 0,
-      "bestBowling": "-",
+      "bestBowling": "1/6",
       "battingInnings": 0,
       "notOuts": 0,
       "ballsFaced": 0,
       "battingAverage": 24.32,
       "battingStrikeRate": 124.88,
-      "bowlingInnings": 0,
-      "balls": 0,
+      "bowlingInnings": 6,
+      "balls": 41,
       "maidens": 0,
-      "runsConceded": 0,
-      "bowlingStrikeRate": 0,
-      "fiveWickets": 0
+      "runsConceded": 59,
+      "bowlingStrikeRate": 41,
+      "fiveWickets": 0,
+      "bowlingAverage": 59
     }
   },
   {
@@ -3814,27 +3906,28 @@
     "stats": {
       "matches": 12,
       "runs": 3305,
-      "wickets": 0,
+      "wickets": 22,
       "average": 44.83,
       "strikeRate": 161.27,
-      "economy": 0,
+      "economy": 9.58,
       "highest": 61,
       "fours": 275,
       "sixes": 165,
       "fifties": 1,
       "hundreds": 1,
-      "bestBowling": "-",
+      "bestBowling": "3/7",
       "battingInnings": 0,
       "notOuts": 0,
       "ballsFaced": 0,
       "battingAverage": 44.83,
       "battingStrikeRate": 161.27,
-      "bowlingInnings": 0,
-      "balls": 0,
+      "bowlingInnings": 45,
+      "balls": 588,
       "maidens": 0,
-      "runsConceded": 0,
-      "bowlingStrikeRate": 0,
-      "fiveWickets": 0
+      "runsConceded": 939,
+      "bowlingStrikeRate": 26.73,
+      "fiveWickets": 0,
+      "bowlingAverage": 42.68
     }
   },
   {
@@ -3855,7 +3948,7 @@
       "wickets": 66,
       "average": 40.47,
       "strikeRate": 176.49,
-      "economy": 9.19,
+      "economy": 0,
       "highest": 50,
       "fours": 8,
       "sixes": 5,
@@ -3871,8 +3964,9 @@
       "balls": 0,
       "maidens": 0,
       "runsConceded": 0,
-      "bowlingStrikeRate": 1.4545454545454546,
-      "fiveWickets": 0
+      "bowlingStrikeRate": 0,
+      "fiveWickets": 0,
+      "bowlingAverage": 0
     }
   },
   {
@@ -3910,7 +4004,8 @@
       "maidens": 0,
       "runsConceded": 0,
       "bowlingStrikeRate": 0,
-      "fiveWickets": 0
+      "fiveWickets": 0,
+      "bowlingAverage": 0
     }
   },
   {
@@ -3966,27 +4061,28 @@
     "stats": {
       "matches": 36,
       "runs": 1007,
-      "wickets": 0,
+      "wickets": 2,
       "average": 27.8,
       "strikeRate": 169.37,
-      "economy": 0,
+      "economy": 9.57,
       "highest": 65,
       "fours": 83,
       "sixes": 50,
       "fifties": 3,
       "hundreds": 0,
-      "bestBowling": "-",
+      "bestBowling": "2/14",
       "battingInnings": 0,
       "notOuts": 0,
       "ballsFaced": 0,
       "battingAverage": 27.8,
       "battingStrikeRate": 169.37,
-      "bowlingInnings": 0,
-      "balls": 0,
+      "bowlingInnings": 13,
+      "balls": 138,
       "maidens": 0,
-      "runsConceded": 0,
-      "bowlingStrikeRate": 0,
-      "fiveWickets": 0
+      "runsConceded": 220,
+      "bowlingStrikeRate": 17.25,
+      "fiveWickets": 0,
+      "bowlingAverage": 27.5
     }
   },
   {
@@ -4004,27 +4100,28 @@
     "stats": {
       "matches": 13,
       "runs": 1917,
-      "wickets": 0,
+      "wickets": 12,
       "average": 35.39,
       "strikeRate": 172.62,
-      "economy": 0,
+      "economy": 9.69,
       "highest": 69,
       "fours": 159,
       "sixes": 95,
       "fifties": 1,
       "hundreds": 0,
-      "bestBowling": "-",
+      "bestBowling": "2/27",
       "battingInnings": 0,
       "notOuts": 0,
       "ballsFaced": 0,
       "battingAverage": 35.39,
       "battingStrikeRate": 172.62,
-      "bowlingInnings": 0,
-      "balls": 0,
+      "bowlingInnings": 15,
+      "balls": 288,
       "maidens": 0,
-      "runsConceded": 0,
-      "bowlingStrikeRate": 0,
-      "fiveWickets": 0
+      "runsConceded": 465,
+      "bowlingStrikeRate": 24,
+      "fiveWickets": 0,
+      "bowlingAverage": 38.75
     }
   },
   {
@@ -4042,27 +4139,28 @@
     "stats": {
       "matches": 99,
       "runs": 58,
-      "wickets": 59,
+      "wickets": 32,
       "average": 16.91,
       "strikeRate": 149.84,
-      "economy": 6.11,
+      "economy": 8.86,
       "highest": 117,
       "fours": 4,
       "sixes": 2,
       "fifties": 9,
       "hundreds": 0,
-      "bestBowling": "2/23",
+      "bestBowling": "4/33",
       "battingInnings": 0,
       "notOuts": 0,
       "ballsFaced": 0,
       "battingAverage": 16.91,
       "battingStrikeRate": 149.84,
-      "bowlingInnings": 0,
-      "balls": 0,
+      "bowlingInnings": 25,
+      "balls": 441,
       "maidens": 0,
-      "runsConceded": 0,
-      "bowlingStrikeRate": 1.6271186440677967,
-      "fiveWickets": 0
+      "runsConceded": 651,
+      "bowlingStrikeRate": 13.78,
+      "fiveWickets": 0,
+      "bowlingAverage": 20.34
     }
   },
   {
@@ -4080,27 +4178,28 @@
     "stats": {
       "matches": 8,
       "runs": 772,
-      "wickets": 0,
+      "wickets": 10,
       "average": 29.27,
       "strikeRate": 131.33,
-      "economy": 0,
+      "economy": 11.66,
       "highest": 26,
       "fours": 64,
       "sixes": 38,
       "fifties": 0,
       "hundreds": 0,
-      "bestBowling": "-",
+      "bestBowling": "2/14",
       "battingInnings": 0,
       "notOuts": 0,
       "ballsFaced": 0,
       "battingAverage": 29.27,
       "battingStrikeRate": 131.33,
-      "bowlingInnings": 0,
-      "balls": 0,
+      "bowlingInnings": 15,
+      "balls": 210,
       "maidens": 0,
-      "runsConceded": 0,
-      "bowlingStrikeRate": 0,
-      "fiveWickets": 0
+      "runsConceded": 408,
+      "bowlingStrikeRate": 21,
+      "fiveWickets": 0,
+      "bowlingAverage": 40.8
     }
   },
   {
@@ -4118,27 +4217,28 @@
     "stats": {
       "matches": 41,
       "runs": 42,
-      "wickets": 113,
+      "wickets": 5,
       "average": 33.19,
       "strikeRate": 168.31,
-      "economy": 7.67,
+      "economy": 10.39,
       "highest": 77,
       "fours": 3,
       "sixes": 2,
       "fifties": 4,
       "hundreds": 0,
-      "bestBowling": "1/1",
+      "bestBowling": "2/25",
       "battingInnings": 0,
       "notOuts": 0,
       "ballsFaced": 0,
       "battingAverage": 33.19,
       "battingStrikeRate": 168.31,
-      "bowlingInnings": 0,
-      "balls": 0,
+      "bowlingInnings": 9,
+      "balls": 164,
       "maidens": 0,
-      "runsConceded": 0,
-      "bowlingStrikeRate": 0.8495575221238938,
-      "fiveWickets": 0
+      "runsConceded": 284,
+      "bowlingStrikeRate": 32.8,
+      "fiveWickets": 0,
+      "bowlingAverage": 56.8
     }
   },
   {
@@ -4156,27 +4256,28 @@
     "stats": {
       "matches": 27,
       "runs": 886,
-      "wickets": 0,
+      "wickets": 29,
       "average": 30.34,
       "strikeRate": 160.26,
-      "economy": 0,
+      "economy": 9.4,
       "highest": 111,
       "fours": 73,
       "sixes": 44,
       "fifties": 2,
       "hundreds": 3,
-      "bestBowling": "-",
+      "bestBowling": "5/25",
       "battingInnings": 0,
       "notOuts": 0,
       "ballsFaced": 0,
       "battingAverage": 30.34,
       "battingStrikeRate": 160.26,
-      "bowlingInnings": 0,
-      "balls": 0,
-      "maidens": 0,
-      "runsConceded": 0,
-      "bowlingStrikeRate": 0,
-      "fiveWickets": 0
+      "bowlingInnings": 26,
+      "balls": 493,
+      "maidens": 1,
+      "runsConceded": 772,
+      "bowlingStrikeRate": 17,
+      "fiveWickets": 1,
+      "bowlingAverage": 26.62
     }
   },
   {
@@ -4194,27 +4295,28 @@
     "stats": {
       "matches": 7,
       "runs": 1046,
-      "wickets": 0,
+      "wickets": 96,
       "average": 22.3,
       "strikeRate": 144.35,
-      "economy": 0,
+      "economy": 8.38,
       "highest": 99,
       "fours": 87,
       "sixes": 52,
       "fifties": 0,
       "hundreds": 0,
-      "bestBowling": "-",
+      "bestBowling": "5/12",
       "battingInnings": 0,
       "notOuts": 0,
       "ballsFaced": 0,
       "battingAverage": 22.3,
       "battingStrikeRate": 144.35,
-      "bowlingInnings": 0,
-      "balls": 0,
-      "maidens": 0,
-      "runsConceded": 0,
-      "bowlingStrikeRate": 0,
-      "fiveWickets": 0
+      "bowlingInnings": 117,
+      "balls": 2419,
+      "maidens": 6,
+      "runsConceded": 3377,
+      "bowlingStrikeRate": 25.2,
+      "fiveWickets": 1,
+      "bowlingAverage": 35.18
     }
   },
   {
@@ -4232,27 +4334,28 @@
     "stats": {
       "matches": 86,
       "runs": 692,
-      "wickets": 0,
+      "wickets": 9,
       "average": 22.68,
       "strikeRate": 151.21,
-      "economy": 0,
+      "economy": 9.43,
       "highest": 86,
       "fours": 57,
       "sixes": 34,
       "fifties": 8,
       "hundreds": 4,
-      "bestBowling": "-",
+      "bestBowling": "3/28",
       "battingInnings": 0,
       "notOuts": 0,
       "ballsFaced": 0,
       "battingAverage": 22.68,
       "battingStrikeRate": 151.21,
-      "bowlingInnings": 0,
-      "balls": 0,
+      "bowlingInnings": 8,
+      "balls": 180,
       "maidens": 0,
-      "runsConceded": 0,
-      "bowlingStrikeRate": 0,
-      "fiveWickets": 0
+      "runsConceded": 283,
+      "bowlingStrikeRate": 20,
+      "fiveWickets": 0,
+      "bowlingAverage": 31.44
     }
   },
   {
@@ -4349,7 +4452,7 @@
       "wickets": 77,
       "average": 24.9,
       "strikeRate": 130.2,
-      "economy": 7.15,
+      "economy": 0,
       "highest": 51,
       "fours": 0,
       "sixes": 0,
@@ -4365,8 +4468,9 @@
       "balls": 0,
       "maidens": 0,
       "runsConceded": 0,
-      "bowlingStrikeRate": 1.2467532467532467,
-      "fiveWickets": 0
+      "bowlingStrikeRate": 0,
+      "fiveWickets": 0,
+      "bowlingAverage": 0
     }
   },
   {
@@ -4384,27 +4488,28 @@
     "stats": {
       "matches": 85,
       "runs": 3128,
-      "wickets": 0,
+      "wickets": 10,
       "average": 24.13,
       "strikeRate": 130.25,
-      "economy": 0,
+      "economy": 11.83,
       "highest": 37,
       "fours": 260,
       "sixes": 156,
       "fifties": 8,
       "hundreds": 1,
-      "bestBowling": "-",
+      "bestBowling": "3/45",
       "battingInnings": 0,
       "notOuts": 0,
       "ballsFaced": 0,
       "battingAverage": 24.13,
       "battingStrikeRate": 130.25,
-      "bowlingInnings": 0,
-      "balls": 0,
-      "maidens": 0,
-      "runsConceded": 0,
-      "bowlingStrikeRate": 0,
-      "fiveWickets": 0
+      "bowlingInnings": 14,
+      "balls": 278,
+      "maidens": 1,
+      "runsConceded": 548,
+      "bowlingStrikeRate": 27.8,
+      "fiveWickets": 0,
+      "bowlingAverage": 54.8
     }
   },
   {
@@ -4422,27 +4527,28 @@
     "stats": {
       "matches": 99,
       "runs": 1479,
-      "wickets": 40,
+      "wickets": 8,
       "average": 45.07,
       "strikeRate": 143.94,
-      "economy": 8.05,
+      "economy": 11,
       "highest": 79,
       "fours": 123,
       "sixes": 73,
       "fifties": 9,
       "hundreds": 0,
-      "bestBowling": "1/18",
+      "bestBowling": "3/47",
       "battingInnings": 0,
       "notOuts": 0,
       "ballsFaced": 0,
       "battingAverage": 45.07,
       "battingStrikeRate": 143.94,
-      "bowlingInnings": 0,
-      "balls": 0,
+      "bowlingInnings": 9,
+      "balls": 138,
       "maidens": 0,
-      "runsConceded": 0,
-      "bowlingStrikeRate": 2.4,
-      "fiveWickets": 0
+      "runsConceded": 253,
+      "bowlingStrikeRate": 17.25,
+      "fiveWickets": 0,
+      "bowlingAverage": 31.63
     }
   },
   {
@@ -4501,7 +4607,7 @@
       "wickets": 60,
       "average": 53.18,
       "strikeRate": 168.19,
-      "economy": 7.89,
+      "economy": 0,
       "highest": 99,
       "fours": 1,
       "sixes": 1,
@@ -4517,8 +4623,9 @@
       "balls": 0,
       "maidens": 0,
       "runsConceded": 0,
-      "bowlingStrikeRate": 1.6,
-      "fiveWickets": 0
+      "bowlingStrikeRate": 0,
+      "fiveWickets": 0,
+      "bowlingAverage": 0
     }
   },
   {
@@ -4536,27 +4643,28 @@
     "stats": {
       "matches": 25,
       "runs": 1086,
-      "wickets": 41,
+      "wickets": 11,
       "average": 31.65,
       "strikeRate": 127,
-      "economy": 9.75,
+      "economy": 11.32,
       "highest": 101,
       "fours": 90,
       "sixes": 54,
       "fifties": 2,
       "hundreds": 0,
-      "bestBowling": "2/7",
+      "bestBowling": "4/24",
       "battingInnings": 0,
       "notOuts": 0,
       "ballsFaced": 0,
       "battingAverage": 31.65,
       "battingStrikeRate": 127,
-      "bowlingInnings": 0,
-      "balls": 0,
+      "bowlingInnings": 7,
+      "balls": 123,
       "maidens": 0,
-      "runsConceded": 0,
-      "bowlingStrikeRate": 2.341463414634146,
-      "fiveWickets": 0
+      "runsConceded": 232,
+      "bowlingStrikeRate": 11.18,
+      "fiveWickets": 0,
+      "bowlingAverage": 21.09
     }
   },
   {
@@ -4574,27 +4682,28 @@
     "stats": {
       "matches": 8,
       "runs": 1506,
-      "wickets": 0,
+      "wickets": 9,
       "average": 43.66,
       "strikeRate": 179.37,
-      "economy": 0,
+      "economy": 9.54,
       "highest": 106,
       "fours": 125,
       "sixes": 75,
       "fifties": 0,
       "hundreds": 3,
-      "bestBowling": "-",
+      "bestBowling": "2/30",
       "battingInnings": 0,
       "notOuts": 0,
       "ballsFaced": 0,
       "battingAverage": 43.66,
       "battingStrikeRate": 179.37,
-      "bowlingInnings": 0,
-      "balls": 0,
+      "bowlingInnings": 10,
+      "balls": 205,
       "maidens": 0,
-      "runsConceded": 0,
-      "bowlingStrikeRate": 0,
-      "fiveWickets": 0
+      "runsConceded": 326,
+      "bowlingStrikeRate": 22.78,
+      "fiveWickets": 0,
+      "bowlingAverage": 36.22
     }
   },
   {
@@ -4632,7 +4741,8 @@
       "maidens": 0,
       "runsConceded": 0,
       "bowlingStrikeRate": 0,
-      "fiveWickets": 0
+      "fiveWickets": 0,
+      "bowlingAverage": 0
     }
   },
   {
@@ -4653,7 +4763,7 @@
       "wickets": 36,
       "average": 48.42,
       "strikeRate": 121.38,
-      "economy": 7.55,
+      "economy": 0,
       "highest": 106,
       "fours": 36,
       "sixes": 21,
@@ -4669,8 +4779,9 @@
       "balls": 0,
       "maidens": 0,
       "runsConceded": 0,
-      "bowlingStrikeRate": 2.6666666666666665,
-      "fiveWickets": 0
+      "bowlingStrikeRate": 0,
+      "fiveWickets": 0,
+      "bowlingAverage": 0
     }
   },
   {
@@ -4708,7 +4819,8 @@
       "maidens": 0,
       "runsConceded": 0,
       "bowlingStrikeRate": 0,
-      "fiveWickets": 0
+      "fiveWickets": 0,
+      "bowlingAverage": 0
     }
   },
   {
@@ -4726,27 +4838,28 @@
     "stats": {
       "matches": 67,
       "runs": 2530,
-      "wickets": 0,
+      "wickets": 8,
       "average": 40.62,
       "strikeRate": 120.87,
-      "economy": 0,
+      "economy": 6.85,
       "highest": 93,
       "fours": 210,
       "sixes": 126,
       "fifties": 6,
       "hundreds": 0,
-      "bestBowling": "-",
+      "bestBowling": "1/8",
       "battingInnings": 0,
       "notOuts": 0,
       "ballsFaced": 0,
       "battingAverage": 40.62,
       "battingStrikeRate": 120.87,
-      "bowlingInnings": 0,
-      "balls": 0,
+      "bowlingInnings": 20,
+      "balls": 390,
       "maidens": 0,
-      "runsConceded": 0,
-      "bowlingStrikeRate": 0,
-      "fiveWickets": 0
+      "runsConceded": 445,
+      "bowlingStrikeRate": 48.75,
+      "fiveWickets": 0,
+      "bowlingAverage": 55.63
     }
   },
   {
@@ -4802,27 +4915,28 @@
     "stats": {
       "matches": 58,
       "runs": 1366,
-      "wickets": 42,
+      "wickets": 2,
       "average": 47.81,
       "strikeRate": 129.98,
-      "economy": 6.37,
+      "economy": 13,
       "highest": 96,
       "fours": 113,
       "sixes": 68,
       "fifties": 5,
       "hundreds": 0,
-      "bestBowling": "1/10",
+      "bestBowling": "1/23",
       "battingInnings": 0,
       "notOuts": 0,
       "ballsFaced": 0,
       "battingAverage": 47.81,
       "battingStrikeRate": 129.98,
-      "bowlingInnings": 0,
-      "balls": 0,
+      "bowlingInnings": 4,
+      "balls": 66,
       "maidens": 0,
-      "runsConceded": 0,
-      "bowlingStrikeRate": 2.2857142857142856,
-      "fiveWickets": 0
+      "runsConceded": 143,
+      "bowlingStrikeRate": 33,
+      "fiveWickets": 0,
+      "bowlingAverage": 71.5
     }
   },
   {
@@ -4840,27 +4954,28 @@
     "stats": {
       "matches": 13,
       "runs": 53,
-      "wickets": 112,
+      "wickets": 14,
       "average": 19.86,
       "strikeRate": 142.89,
-      "economy": 9.43,
+      "economy": 9.63,
       "highest": 108,
       "fours": 4,
       "sixes": 2,
       "fifties": 1,
       "hundreds": 0,
-      "bestBowling": "3/23",
+      "bestBowling": "4/20",
       "battingInnings": 0,
       "notOuts": 0,
       "ballsFaced": 0,
       "battingAverage": 19.86,
       "battingStrikeRate": 142.89,
-      "bowlingInnings": 0,
-      "balls": 0,
+      "bowlingInnings": 12,
+      "balls": 241,
       "maidens": 0,
-      "runsConceded": 0,
-      "bowlingStrikeRate": 0.8571428571428571,
-      "fiveWickets": 0
+      "runsConceded": 387,
+      "bowlingStrikeRate": 17.21,
+      "fiveWickets": 0,
+      "bowlingAverage": 27.64
     }
   },
   {
@@ -4974,7 +5089,8 @@
       "maidens": 0,
       "runsConceded": 0,
       "bowlingStrikeRate": 0,
-      "fiveWickets": 0
+      "fiveWickets": 0,
+      "bowlingAverage": 0
     }
   },
   {
@@ -5030,27 +5146,28 @@
     "stats": {
       "matches": 53,
       "runs": 3,
-      "wickets": 91,
+      "wickets": 2,
       "average": 34.07,
       "strikeRate": 129.29,
-      "economy": 9.78,
+      "economy": 8.54,
       "highest": 91,
       "fours": 0,
       "sixes": 0,
       "fifties": 5,
       "hundreds": 0,
-      "bestBowling": "2/8",
+      "bestBowling": "1/19",
       "battingInnings": 0,
       "notOuts": 0,
       "ballsFaced": 0,
       "battingAverage": 34.07,
       "battingStrikeRate": 129.29,
-      "bowlingInnings": 0,
-      "balls": 0,
+      "bowlingInnings": 5,
+      "balls": 78,
       "maidens": 0,
-      "runsConceded": 0,
-      "bowlingStrikeRate": 1.054945054945055,
-      "fiveWickets": 0
+      "runsConceded": 111,
+      "bowlingStrikeRate": 39,
+      "fiveWickets": 0,
+      "bowlingAverage": 55.5
     }
   },
   {
@@ -5088,7 +5205,8 @@
       "maidens": 0,
       "runsConceded": 0,
       "bowlingStrikeRate": 0,
-      "fiveWickets": 0
+      "fiveWickets": 0,
+      "bowlingAverage": 0
     }
   },
   {
@@ -5106,27 +5224,28 @@
     "stats": {
       "matches": 10,
       "runs": 954,
-      "wickets": 0,
+      "wickets": 11,
       "average": 39.79,
       "strikeRate": 128.75,
-      "economy": 0,
+      "economy": 9.13,
       "highest": 110,
       "fours": 79,
       "sixes": 47,
       "fifties": 1,
       "hundreds": 4,
-      "bestBowling": "-",
+      "bestBowling": "2/18",
       "battingInnings": 0,
       "notOuts": 0,
       "ballsFaced": 0,
       "battingAverage": 39.79,
       "battingStrikeRate": 128.75,
-      "bowlingInnings": 0,
-      "balls": 0,
+      "bowlingInnings": 13,
+      "balls": 234,
       "maidens": 0,
-      "runsConceded": 0,
-      "bowlingStrikeRate": 0,
-      "fiveWickets": 0
+      "runsConceded": 356,
+      "bowlingStrikeRate": 21.27,
+      "fiveWickets": 0,
+      "bowlingAverage": 32.36
     }
   },
   {
@@ -5223,7 +5342,7 @@
       "wickets": 69,
       "average": 27.98,
       "strikeRate": 140.93,
-      "economy": 8.57,
+      "economy": 0,
       "highest": 119,
       "fours": 4,
       "sixes": 2,
@@ -5239,8 +5358,9 @@
       "balls": 0,
       "maidens": 0,
       "runsConceded": 0,
-      "bowlingStrikeRate": 1.391304347826087,
-      "fiveWickets": 0
+      "bowlingStrikeRate": 0,
+      "fiveWickets": 0,
+      "bowlingAverage": 0
     }
   },
   {
@@ -5278,7 +5398,8 @@
       "maidens": 0,
       "runsConceded": 0,
       "bowlingStrikeRate": 0,
-      "fiveWickets": 0
+      "fiveWickets": 0,
+      "bowlingAverage": 0
     }
   },
   {
@@ -5334,27 +5455,28 @@
     "stats": {
       "matches": 54,
       "runs": 1740,
-      "wickets": 0,
+      "wickets": 2,
       "average": 42.79,
       "strikeRate": 139.1,
-      "economy": 0,
+      "economy": 8.57,
       "highest": 118,
       "fours": 145,
       "sixes": 87,
       "fifties": 5,
       "hundreds": 0,
-      "bestBowling": "-",
+      "bestBowling": "1/4",
       "battingInnings": 0,
       "notOuts": 0,
       "ballsFaced": 0,
       "battingAverage": 42.79,
       "battingStrikeRate": 139.1,
-      "bowlingInnings": 0,
-      "balls": 0,
+      "bowlingInnings": 4,
+      "balls": 42,
       "maidens": 0,
-      "runsConceded": 0,
-      "bowlingStrikeRate": 0,
-      "fiveWickets": 0
+      "runsConceded": 60,
+      "bowlingStrikeRate": 21,
+      "fiveWickets": 0,
+      "bowlingAverage": 30
     }
   },
   {
@@ -5372,27 +5494,28 @@
     "stats": {
       "matches": 24,
       "runs": 748,
-      "wickets": 29,
+      "wickets": 13,
       "average": 50.24,
       "strikeRate": 136.48,
-      "economy": 8.2,
+      "economy": 9.73,
       "highest": 84,
       "fours": 62,
       "sixes": 37,
       "fifties": 2,
       "hundreds": 0,
-      "bestBowling": "3/23",
+      "bestBowling": "2/17",
       "battingInnings": 0,
       "notOuts": 0,
       "ballsFaced": 0,
       "battingAverage": 50.24,
       "battingStrikeRate": 136.48,
-      "bowlingInnings": 0,
-      "balls": 0,
+      "bowlingInnings": 18,
+      "balls": 372,
       "maidens": 0,
-      "runsConceded": 0,
-      "bowlingStrikeRate": 3.310344827586207,
-      "fiveWickets": 0
+      "runsConceded": 603,
+      "bowlingStrikeRate": 28.62,
+      "fiveWickets": 0,
+      "bowlingAverage": 46.38
     }
   },
   {
@@ -5410,27 +5533,28 @@
     "stats": {
       "matches": 53,
       "runs": 517,
-      "wickets": 24,
+      "wickets": 19,
       "average": 33.24,
       "strikeRate": 159.53,
-      "economy": 7.79,
+      "economy": 8.67,
       "highest": 44,
       "fours": 43,
       "sixes": 25,
       "fifties": 5,
       "hundreds": 0,
-      "bestBowling": "2/23",
+      "bestBowling": "4/30",
       "battingInnings": 0,
       "notOuts": 0,
       "ballsFaced": 0,
       "battingAverage": 33.24,
       "battingStrikeRate": 159.53,
-      "bowlingInnings": 0,
-      "balls": 0,
+      "bowlingInnings": 17,
+      "balls": 378,
       "maidens": 0,
-      "runsConceded": 0,
-      "bowlingStrikeRate": 4,
-      "fiveWickets": 0
+      "runsConceded": 546,
+      "bowlingStrikeRate": 19.89,
+      "fiveWickets": 0,
+      "bowlingAverage": 28.74
     }
   },
   {
@@ -5489,7 +5613,7 @@
       "wickets": 45,
       "average": 35.81,
       "strikeRate": 145.71,
-      "economy": 7.87,
+      "economy": 0,
       "highest": 76,
       "fours": 1,
       "sixes": 0,
@@ -5505,8 +5629,9 @@
       "balls": 0,
       "maidens": 0,
       "runsConceded": 0,
-      "bowlingStrikeRate": 2.1333333333333333,
-      "fiveWickets": 0
+      "bowlingStrikeRate": 0,
+      "fiveWickets": 0,
+      "bowlingAverage": 0
     }
   },
   {
@@ -5544,7 +5669,8 @@
       "maidens": 0,
       "runsConceded": 0,
       "bowlingStrikeRate": 0,
-      "fiveWickets": 0
+      "fiveWickets": 0,
+      "bowlingAverage": 0
     }
   },
   {
@@ -5562,27 +5688,28 @@
     "stats": {
       "matches": 72,
       "runs": 633,
-      "wickets": 0,
+      "wickets": 1,
       "average": 33.42,
       "strikeRate": 137.37,
-      "economy": 0,
+      "economy": 13.5,
       "highest": 117,
       "fours": 52,
       "sixes": 31,
       "fifties": 7,
       "hundreds": 0,
-      "bestBowling": "-",
+      "bestBowling": "1/27",
       "battingInnings": 0,
       "notOuts": 0,
       "ballsFaced": 0,
       "battingAverage": 33.42,
       "battingStrikeRate": 137.37,
-      "bowlingInnings": 0,
-      "balls": 0,
+      "bowlingInnings": 1,
+      "balls": 12,
       "maidens": 0,
-      "runsConceded": 0,
-      "bowlingStrikeRate": 0,
-      "fiveWickets": 0
+      "runsConceded": 27,
+      "bowlingStrikeRate": 12,
+      "fiveWickets": 0,
+      "bowlingAverage": 27
     }
   },
   {
@@ -5641,24 +5768,25 @@
       "wickets": 0,
       "average": 21.81,
       "strikeRate": 143.34,
-      "economy": 0,
+      "economy": 13.33,
       "highest": 25,
       "fours": 219,
       "sixes": 131,
       "fifties": 1,
       "hundreds": 2,
-      "bestBowling": "-",
+      "bestBowling": "0/40",
       "battingInnings": 0,
       "notOuts": 0,
       "ballsFaced": 0,
       "battingAverage": 21.81,
       "battingStrikeRate": 143.34,
-      "bowlingInnings": 0,
-      "balls": 0,
+      "bowlingInnings": 1,
+      "balls": 18,
       "maidens": 0,
-      "runsConceded": 0,
+      "runsConceded": 40,
       "bowlingStrikeRate": 0,
-      "fiveWickets": 0
+      "fiveWickets": 0,
+      "bowlingAverage": 0
     }
   },
   {
@@ -5714,27 +5842,28 @@
     "stats": {
       "matches": 8,
       "runs": 1825,
-      "wickets": 0,
+      "wickets": 3,
       "average": 36.07,
       "strikeRate": 123.42,
-      "economy": 0,
+      "economy": 9.85,
       "highest": 101,
       "fours": 152,
       "sixes": 91,
       "fifties": 0,
       "hundreds": 4,
-      "bestBowling": "-",
+      "bestBowling": "1/29",
       "battingInnings": 0,
       "notOuts": 0,
       "ballsFaced": 0,
       "battingAverage": 36.07,
       "battingStrikeRate": 123.42,
-      "bowlingInnings": 0,
-      "balls": 0,
+      "bowlingInnings": 6,
+      "balls": 137,
       "maidens": 0,
-      "runsConceded": 0,
-      "bowlingStrikeRate": 0,
-      "fiveWickets": 0
+      "runsConceded": 225,
+      "bowlingStrikeRate": 45.67,
+      "fiveWickets": 0,
+      "bowlingAverage": 75
     }
   },
   {
@@ -5755,24 +5884,25 @@
       "wickets": 112,
       "average": 44.97,
       "strikeRate": 130.93,
-      "economy": 7.47,
+      "economy": 13.83,
       "highest": 55,
       "fours": 12,
       "sixes": 7,
       "fifties": 7,
       "hundreds": 0,
-      "bestBowling": "2/12",
+      "bestBowling": "0/24",
       "battingInnings": 0,
       "notOuts": 0,
       "ballsFaced": 0,
       "battingAverage": 44.97,
       "battingStrikeRate": 130.93,
-      "bowlingInnings": 0,
-      "balls": 0,
+      "bowlingInnings": 3,
+      "balls": 36,
       "maidens": 0,
-      "runsConceded": 0,
-      "bowlingStrikeRate": 0.8571428571428571,
-      "fiveWickets": 0
+      "runsConceded": 83,
+      "bowlingStrikeRate": 0,
+      "fiveWickets": 0,
+      "bowlingAverage": 0
     }
   },
   {
@@ -5790,27 +5920,28 @@
     "stats": {
       "matches": 13,
       "runs": 1611,
-      "wickets": 0,
+      "wickets": 2,
       "average": 48.66,
       "strikeRate": 155.02,
-      "economy": 0,
+      "economy": 9.6,
       "highest": 55,
       "fours": 134,
       "sixes": 80,
       "fifties": 1,
       "hundreds": 3,
-      "bestBowling": "-",
+      "bestBowling": "1/26",
       "battingInnings": 0,
       "notOuts": 0,
       "ballsFaced": 0,
       "battingAverage": 48.66,
       "battingStrikeRate": 155.02,
-      "bowlingInnings": 0,
-      "balls": 0,
+      "bowlingInnings": 4,
+      "balls": 60,
       "maidens": 0,
-      "runsConceded": 0,
-      "bowlingStrikeRate": 0,
-      "fiveWickets": 0
+      "runsConceded": 96,
+      "bowlingStrikeRate": 30,
+      "fiveWickets": 0,
+      "bowlingAverage": 48
     }
   },
   {
@@ -5869,7 +6000,7 @@
       "wickets": 86,
       "average": 15.42,
       "strikeRate": 155.24,
-      "economy": 8.46,
+      "economy": 0,
       "highest": 48,
       "fours": 9,
       "sixes": 5,
@@ -5885,8 +6016,9 @@
       "balls": 0,
       "maidens": 0,
       "runsConceded": 0,
-      "bowlingStrikeRate": 1.1162790697674418,
-      "fiveWickets": 0
+      "bowlingStrikeRate": 0,
+      "fiveWickets": 0,
+      "bowlingAverage": 0
     }
   },
   {
@@ -5962,7 +6094,8 @@
       "maidens": 0,
       "runsConceded": 0,
       "bowlingStrikeRate": 0,
-      "fiveWickets": 0
+      "fiveWickets": 0,
+      "bowlingAverage": 0
     }
   },
   {
@@ -6000,7 +6133,8 @@
       "maidens": 0,
       "runsConceded": 0,
       "bowlingStrikeRate": 0,
-      "fiveWickets": 0
+      "fiveWickets": 0,
+      "bowlingAverage": 0
     }
   },
   {
@@ -6114,7 +6248,8 @@
       "maidens": 0,
       "runsConceded": 0,
       "bowlingStrikeRate": 0,
-      "fiveWickets": 0
+      "fiveWickets": 0,
+      "bowlingAverage": 0
     }
   },
   {
@@ -6132,27 +6267,28 @@
     "stats": {
       "matches": 29,
       "runs": 2663,
-      "wickets": 0,
+      "wickets": 13,
       "average": 48.26,
       "strikeRate": 139.04,
-      "economy": 0,
+      "economy": 8.93,
       "highest": 74,
       "fours": 221,
       "sixes": 133,
       "fifties": 2,
       "hundreds": 0,
-      "bestBowling": "-",
+      "bestBowling": "3/31",
       "battingInnings": 0,
       "notOuts": 0,
       "ballsFaced": 0,
       "battingAverage": 48.26,
       "battingStrikeRate": 139.04,
-      "bowlingInnings": 0,
-      "balls": 0,
+      "bowlingInnings": 7,
+      "balls": 160,
       "maidens": 0,
-      "runsConceded": 0,
-      "bowlingStrikeRate": 0,
-      "fiveWickets": 0
+      "runsConceded": 238,
+      "bowlingStrikeRate": 12.31,
+      "fiveWickets": 0,
+      "bowlingAverage": 18.31
     }
   },
   {
@@ -6173,7 +6309,7 @@
       "wickets": 9,
       "average": 25.09,
       "strikeRate": 132.35,
-      "economy": 7.32,
+      "economy": 0,
       "highest": 52,
       "fours": 57,
       "sixes": 34,
@@ -6189,8 +6325,9 @@
       "balls": 0,
       "maidens": 0,
       "runsConceded": 0,
-      "bowlingStrikeRate": 10.666666666666666,
-      "fiveWickets": 0
+      "bowlingStrikeRate": 0,
+      "fiveWickets": 0,
+      "bowlingAverage": 0
     }
   },
   {
@@ -6211,7 +6348,7 @@
       "wickets": 38,
       "average": 29.74,
       "strikeRate": 126.85,
-      "economy": 9.74,
+      "economy": 0,
       "highest": 23,
       "fours": 97,
       "sixes": 58,
@@ -6227,8 +6364,9 @@
       "balls": 0,
       "maidens": 0,
       "runsConceded": 0,
-      "bowlingStrikeRate": 2.526315789473684,
-      "fiveWickets": 0
+      "bowlingStrikeRate": 0,
+      "fiveWickets": 0,
+      "bowlingAverage": 0
     }
   },
   {
@@ -6246,27 +6384,28 @@
     "stats": {
       "matches": 64,
       "runs": 2014,
-      "wickets": 0,
+      "wickets": 59,
       "average": 18.57,
       "strikeRate": 175.91,
-      "economy": 0,
+      "economy": 7.89,
       "highest": 61,
       "fours": 167,
       "sixes": 100,
       "fifties": 6,
       "hundreds": 0,
-      "bestBowling": "-",
+      "bestBowling": "3/15",
       "battingInnings": 0,
       "notOuts": 0,
       "ballsFaced": 0,
       "battingAverage": 18.57,
       "battingStrikeRate": 175.91,
-      "bowlingInnings": 0,
-      "balls": 0,
-      "maidens": 0,
-      "runsConceded": 0,
-      "bowlingStrikeRate": 0,
-      "fiveWickets": 0
+      "bowlingInnings": 52,
+      "balls": 1218,
+      "maidens": 3,
+      "runsConceded": 1602,
+      "bowlingStrikeRate": 20.64,
+      "fiveWickets": 0,
+      "bowlingAverage": 27.15
     }
   },
   {
@@ -6284,27 +6423,28 @@
     "stats": {
       "matches": 69,
       "runs": 1480,
-      "wickets": 0,
+      "wickets": 133,
       "average": 18.15,
       "strikeRate": 158.58,
-      "economy": 0,
+      "economy": 8.63,
       "highest": 42,
       "fours": 123,
       "sixes": 74,
       "fifties": 6,
       "hundreds": 0,
-      "bestBowling": "-",
+      "bestBowling": "4/11",
       "battingInnings": 0,
       "notOuts": 0,
       "ballsFaced": 0,
       "battingAverage": 18.15,
       "battingStrikeRate": 158.58,
-      "bowlingInnings": 0,
-      "balls": 0,
-      "maidens": 0,
-      "runsConceded": 0,
-      "bowlingStrikeRate": 0,
-      "fiveWickets": 0
+      "bowlingInnings": 119,
+      "balls": 2606,
+      "maidens": 3,
+      "runsConceded": 3748,
+      "bowlingStrikeRate": 19.59,
+      "fiveWickets": 0,
+      "bowlingAverage": 28.18
     }
   },
   {
@@ -6322,27 +6462,28 @@
     "stats": {
       "matches": 58,
       "runs": 1802,
-      "wickets": 0,
+      "wickets": 7,
       "average": 19.41,
       "strikeRate": 178.51,
-      "economy": 0,
+      "economy": 8.53,
       "highest": 81,
       "fours": 150,
       "sixes": 90,
       "fifties": 5,
       "hundreds": 2,
-      "bestBowling": "-",
+      "bestBowling": "2/29",
       "battingInnings": 0,
       "notOuts": 0,
       "ballsFaced": 0,
       "battingAverage": 19.41,
       "battingStrikeRate": 178.51,
-      "bowlingInnings": 0,
-      "balls": 0,
+      "bowlingInnings": 5,
+      "balls": 102,
       "maidens": 0,
-      "runsConceded": 0,
-      "bowlingStrikeRate": 0,
-      "fiveWickets": 0
+      "runsConceded": 145,
+      "bowlingStrikeRate": 14.57,
+      "fiveWickets": 0,
+      "bowlingAverage": 20.71
     }
   },
   {
@@ -6380,7 +6521,8 @@
       "maidens": 0,
       "runsConceded": 0,
       "bowlingStrikeRate": 0,
-      "fiveWickets": 0
+      "fiveWickets": 0,
+      "bowlingAverage": 0
     }
   },
   {
@@ -6398,27 +6540,28 @@
     "stats": {
       "matches": 10,
       "runs": 652,
-      "wickets": 8,
+      "wickets": 107,
       "average": 39.76,
       "strikeRate": 169.55,
-      "economy": 9,
+      "economy": 9.4,
       "highest": 53,
       "fours": 54,
       "sixes": 32,
       "fifties": 1,
       "hundreds": 0,
-      "bestBowling": "1/11",
+      "bestBowling": "4/34",
       "battingInnings": 0,
       "notOuts": 0,
       "ballsFaced": 0,
       "battingAverage": 39.76,
       "battingStrikeRate": 169.55,
-      "bowlingInnings": 0,
-      "balls": 0,
-      "maidens": 0,
-      "runsConceded": 0,
-      "bowlingStrikeRate": 12,
-      "fiveWickets": 0
+      "bowlingInnings": 102,
+      "balls": 2070,
+      "maidens": 3,
+      "runsConceded": 3244,
+      "bowlingStrikeRate": 19.35,
+      "fiveWickets": 0,
+      "bowlingAverage": 30.32
     }
   },
   {
@@ -6436,27 +6579,28 @@
     "stats": {
       "matches": 99,
       "runs": 46,
-      "wickets": 68,
+      "wickets": 1,
       "average": 32.29,
       "strikeRate": 123.88,
-      "economy": 8.47,
+      "economy": 7.86,
       "highest": 38,
       "fours": 3,
       "sixes": 2,
       "fifties": 9,
       "hundreds": 0,
-      "bestBowling": "2/16",
+      "bestBowling": "1/26",
       "battingInnings": 0,
       "notOuts": 0,
       "ballsFaced": 0,
       "battingAverage": 32.29,
       "battingStrikeRate": 123.88,
-      "bowlingInnings": 0,
-      "balls": 0,
+      "bowlingInnings": 2,
+      "balls": 39,
       "maidens": 0,
-      "runsConceded": 0,
-      "bowlingStrikeRate": 1.411764705882353,
-      "fiveWickets": 0
+      "runsConceded": 55,
+      "bowlingStrikeRate": 42,
+      "fiveWickets": 0,
+      "bowlingAverage": 55
     }
   },
   {
@@ -6494,7 +6638,8 @@
       "maidens": 0,
       "runsConceded": 0,
       "bowlingStrikeRate": 0,
-      "fiveWickets": 0
+      "fiveWickets": 0,
+      "bowlingAverage": 0
     }
   },
   {
@@ -6512,27 +6657,28 @@
     "stats": {
       "matches": 52,
       "runs": 2346,
-      "wickets": 0,
+      "wickets": 1,
       "average": 28.72,
       "strikeRate": 124.99,
-      "economy": 0,
+      "economy": 16,
       "highest": 72,
       "fours": 195,
       "sixes": 117,
       "fifties": 5,
       "hundreds": 0,
-      "bestBowling": "-",
+      "bestBowling": "1/8",
       "battingInnings": 0,
       "notOuts": 0,
       "ballsFaced": 0,
       "battingAverage": 28.72,
       "battingStrikeRate": 124.99,
-      "bowlingInnings": 0,
-      "balls": 0,
+      "bowlingInnings": 1,
+      "balls": 3,
       "maidens": 0,
-      "runsConceded": 0,
-      "bowlingStrikeRate": 0,
-      "fiveWickets": 0
+      "runsConceded": 8,
+      "bowlingStrikeRate": 3,
+      "fiveWickets": 0,
+      "bowlingAverage": 8
     }
   },
   {
@@ -6570,7 +6716,8 @@
       "maidens": 0,
       "runsConceded": 0,
       "bowlingStrikeRate": 0,
-      "fiveWickets": 0
+      "fiveWickets": 0,
+      "bowlingAverage": 0
     }
   },
   {
@@ -6591,7 +6738,7 @@
       "wickets": 81,
       "average": 54.82,
       "strikeRate": 135.62,
-      "economy": 7.63,
+      "economy": 0,
       "highest": 46,
       "fours": 1,
       "sixes": 1,
@@ -6607,8 +6754,9 @@
       "balls": 0,
       "maidens": 0,
       "runsConceded": 0,
-      "bowlingStrikeRate": 1.1851851851851851,
-      "fiveWickets": 0
+      "bowlingStrikeRate": 0,
+      "fiveWickets": 0,
+      "bowlingAverage": 0
     }
   },
   {
@@ -6646,7 +6794,8 @@
       "maidens": 0,
       "runsConceded": 0,
       "bowlingStrikeRate": 0,
-      "fiveWickets": 0
+      "fiveWickets": 0,
+      "bowlingAverage": 0
     }
   },
   {
@@ -6667,7 +6816,7 @@
       "wickets": 109,
       "average": 22.49,
       "strikeRate": 151.89,
-      "economy": 6.72,
+      "economy": 0,
       "highest": 86,
       "fours": 7,
       "sixes": 4,
@@ -6683,8 +6832,9 @@
       "balls": 0,
       "maidens": 0,
       "runsConceded": 0,
-      "bowlingStrikeRate": 0.8807339449541285,
-      "fiveWickets": 0
+      "bowlingStrikeRate": 0,
+      "fiveWickets": 0,
+      "bowlingAverage": 0
     }
   },
   {
@@ -6702,27 +6852,28 @@
     "stats": {
       "matches": 66,
       "runs": 3410,
-      "wickets": 0,
+      "wickets": 13,
       "average": 28.13,
       "strikeRate": 143.15,
-      "economy": 0,
+      "economy": 9.02,
       "highest": 80,
       "fours": 284,
       "sixes": 170,
       "fifties": 6,
       "hundreds": 0,
-      "bestBowling": "-",
+      "bestBowling": "3/27",
       "battingInnings": 0,
       "notOuts": 0,
       "ballsFaced": 0,
       "battingAverage": 28.13,
       "battingStrikeRate": 143.15,
-      "bowlingInnings": 0,
-      "balls": 0,
+      "bowlingInnings": 27,
+      "balls": 312,
       "maidens": 0,
-      "runsConceded": 0,
-      "bowlingStrikeRate": 0,
-      "fiveWickets": 0
+      "runsConceded": 469,
+      "bowlingStrikeRate": 24,
+      "fiveWickets": 0,
+      "bowlingAverage": 36.08
     }
   },
   {
@@ -6743,7 +6894,7 @@
       "wickets": 34,
       "average": 50.36,
       "strikeRate": 176.68,
-      "economy": 7.95,
+      "economy": 0,
       "highest": 21,
       "fours": 100,
       "sixes": 60,
@@ -6759,8 +6910,9 @@
       "balls": 0,
       "maidens": 0,
       "runsConceded": 0,
-      "bowlingStrikeRate": 2.823529411764706,
-      "fiveWickets": 0
+      "bowlingStrikeRate": 0,
+      "fiveWickets": 0,
+      "bowlingAverage": 0
     }
   },
   {
@@ -6798,7 +6950,8 @@
       "maidens": 0,
       "runsConceded": 0,
       "bowlingStrikeRate": 0,
-      "fiveWickets": 0
+      "fiveWickets": 0,
+      "bowlingAverage": 0
     }
   },
   {
@@ -6816,27 +6969,28 @@
     "stats": {
       "matches": 16,
       "runs": 1422,
-      "wickets": 0,
+      "wickets": 5,
       "average": 23.6,
       "strikeRate": 177.78,
-      "economy": 0,
+      "economy": 9.8,
       "highest": 58,
       "fours": 118,
       "sixes": 71,
       "fifties": 1,
       "hundreds": 0,
-      "bestBowling": "-",
+      "bestBowling": "3/34",
       "battingInnings": 0,
       "notOuts": 0,
       "ballsFaced": 0,
       "battingAverage": 23.6,
       "battingStrikeRate": 177.78,
-      "bowlingInnings": 0,
-      "balls": 0,
+      "bowlingInnings": 3,
+      "balls": 60,
       "maidens": 0,
-      "runsConceded": 0,
-      "bowlingStrikeRate": 0,
-      "fiveWickets": 0
+      "runsConceded": 98,
+      "bowlingStrikeRate": 12,
+      "fiveWickets": 0,
+      "bowlingAverage": 19.6
     }
   },
   {
@@ -6854,27 +7008,28 @@
     "stats": {
       "matches": 41,
       "runs": 1848,
-      "wickets": 0,
+      "wickets": 110,
       "average": 31.13,
       "strikeRate": 130.48,
-      "economy": 0,
+      "economy": 8.88,
       "highest": 39,
       "fours": 154,
       "sixes": 92,
       "fifties": 4,
       "hundreds": 0,
-      "bestBowling": "-",
+      "bestBowling": "5/25",
       "battingInnings": 0,
       "notOuts": 0,
       "ballsFaced": 0,
       "battingAverage": 31.13,
       "battingStrikeRate": 130.48,
-      "bowlingInnings": 0,
-      "balls": 0,
-      "maidens": 0,
-      "runsConceded": 0,
-      "bowlingStrikeRate": 0,
-      "fiveWickets": 0
+      "bowlingInnings": 111,
+      "balls": 2274,
+      "maidens": 3,
+      "runsConceded": 3364,
+      "bowlingStrikeRate": 20.67,
+      "fiveWickets": 2,
+      "bowlingAverage": 30.58
     }
   },
   {
@@ -6895,7 +7050,7 @@
       "wickets": 10,
       "average": 54.15,
       "strikeRate": 131.45,
-      "economy": 7.78,
+      "economy": 0,
       "highest": 66,
       "fours": 72,
       "sixes": 43,
@@ -6911,8 +7066,9 @@
       "balls": 0,
       "maidens": 0,
       "runsConceded": 0,
-      "bowlingStrikeRate": 9.6,
-      "fiveWickets": 0
+      "bowlingStrikeRate": 0,
+      "fiveWickets": 0,
+      "bowlingAverage": 0
     }
   },
   {
@@ -6930,27 +7086,28 @@
     "stats": {
       "matches": 39,
       "runs": 1301,
-      "wickets": 0,
+      "wickets": 6,
       "average": 32.3,
       "strikeRate": 130.28,
-      "economy": 0,
+      "economy": 9.84,
       "highest": 99,
       "fours": 108,
       "sixes": 65,
       "fifties": 3,
       "hundreds": 0,
-      "bestBowling": "-",
+      "bestBowling": "3/42",
       "battingInnings": 0,
       "notOuts": 0,
       "ballsFaced": 0,
       "battingAverage": 32.3,
       "battingStrikeRate": 130.28,
-      "bowlingInnings": 0,
-      "balls": 0,
+      "bowlingInnings": 10,
+      "balls": 203,
       "maidens": 0,
-      "runsConceded": 0,
-      "bowlingStrikeRate": 0,
-      "fiveWickets": 0
+      "runsConceded": 333,
+      "bowlingStrikeRate": 33.83,
+      "fiveWickets": 0,
+      "bowlingAverage": 55.5
     }
   },
   {
@@ -6968,27 +7125,28 @@
     "stats": {
       "matches": 14,
       "runs": 28,
-      "wickets": 31,
+      "wickets": 79,
       "average": 36.32,
       "strikeRate": 162.33,
-      "economy": 9.38,
+      "economy": 8.81,
       "highest": 76,
       "fours": 2,
       "sixes": 1,
       "fifties": 1,
       "hundreds": 0,
-      "bestBowling": "3/1",
+      "bestBowling": "4/34",
       "battingInnings": 0,
       "notOuts": 0,
       "ballsFaced": 0,
       "battingAverage": 36.32,
       "battingStrikeRate": 162.33,
-      "bowlingInnings": 0,
-      "balls": 0,
-      "maidens": 0,
-      "runsConceded": 0,
-      "bowlingStrikeRate": 3.096774193548387,
-      "fiveWickets": 0
+      "bowlingInnings": 72,
+      "balls": 1617,
+      "maidens": 2,
+      "runsConceded": 2373,
+      "bowlingStrikeRate": 20.47,
+      "fiveWickets": 0,
+      "bowlingAverage": 30.04
     }
   },
   {
@@ -7009,7 +7167,7 @@
       "wickets": 45,
       "average": 32.91,
       "strikeRate": 168.84,
-      "economy": 7.46,
+      "economy": 0,
       "highest": 103,
       "fours": 2,
       "sixes": 1,
@@ -7025,8 +7183,9 @@
       "balls": 0,
       "maidens": 0,
       "runsConceded": 0,
-      "bowlingStrikeRate": 2.1333333333333333,
-      "fiveWickets": 0
+      "bowlingStrikeRate": 0,
+      "fiveWickets": 0,
+      "bowlingAverage": 0
     }
   },
   {
@@ -7047,7 +7206,7 @@
       "wickets": 34,
       "average": 46.88,
       "strikeRate": 167.32,
-      "economy": 7.75,
+      "economy": 0,
       "highest": 47,
       "fours": 9,
       "sixes": 5,
@@ -7063,8 +7222,9 @@
       "balls": 0,
       "maidens": 0,
       "runsConceded": 0,
-      "bowlingStrikeRate": 2.823529411764706,
-      "fiveWickets": 0
+      "bowlingStrikeRate": 0,
+      "fiveWickets": 0,
+      "bowlingAverage": 0
     }
   },
   {
@@ -7085,7 +7245,7 @@
       "wickets": 13,
       "average": 40.31,
       "strikeRate": 122.93,
-      "economy": 8.66,
+      "economy": 0,
       "highest": 31,
       "fours": 77,
       "sixes": 46,
@@ -7101,8 +7261,9 @@
       "balls": 0,
       "maidens": 0,
       "runsConceded": 0,
-      "bowlingStrikeRate": 7.384615384615385,
-      "fiveWickets": 0
+      "bowlingStrikeRate": 0,
+      "fiveWickets": 0,
+      "bowlingAverage": 0
     }
   },
   {
@@ -7123,7 +7284,7 @@
       "wickets": 55,
       "average": 26.64,
       "strikeRate": 148.63,
-      "economy": 8.32,
+      "economy": 0,
       "highest": 93,
       "fours": 5,
       "sixes": 3,
@@ -7139,8 +7300,9 @@
       "balls": 0,
       "maidens": 0,
       "runsConceded": 0,
-      "bowlingStrikeRate": 1.7454545454545454,
-      "fiveWickets": 0
+      "bowlingStrikeRate": 0,
+      "fiveWickets": 0,
+      "bowlingAverage": 0
     }
   },
   {
@@ -7178,7 +7340,8 @@
       "maidens": 0,
       "runsConceded": 0,
       "bowlingStrikeRate": 0,
-      "fiveWickets": 0
+      "fiveWickets": 0,
+      "bowlingAverage": 0
     }
   },
   {
@@ -7199,7 +7362,7 @@
       "wickets": 51,
       "average": 35.96,
       "strikeRate": 175.87,
-      "economy": 8.09,
+      "economy": 0,
       "highest": 87,
       "fours": 12,
       "sixes": 7,
@@ -7215,8 +7378,9 @@
       "balls": 0,
       "maidens": 0,
       "runsConceded": 0,
-      "bowlingStrikeRate": 1.8823529411764706,
-      "fiveWickets": 0
+      "bowlingStrikeRate": 0,
+      "fiveWickets": 0,
+      "bowlingAverage": 0
     }
   },
   {
@@ -7237,7 +7401,7 @@
       "wickets": 10,
       "average": 35.99,
       "strikeRate": 150.87,
-      "economy": 6.71,
+      "economy": 0,
       "highest": 99,
       "fours": 122,
       "sixes": 73,
@@ -7253,8 +7417,9 @@
       "balls": 0,
       "maidens": 0,
       "runsConceded": 0,
-      "bowlingStrikeRate": 9.6,
-      "fiveWickets": 0
+      "bowlingStrikeRate": 0,
+      "fiveWickets": 0,
+      "bowlingAverage": 0
     }
   },
   {
@@ -7275,24 +7440,25 @@
       "wickets": 99,
       "average": 16.24,
       "strikeRate": 123.9,
-      "economy": 7.96,
+      "economy": 6.25,
       "highest": 39,
       "fours": 2,
       "sixes": 1,
       "fifties": 8,
       "hundreds": 0,
-      "bestBowling": "3/5",
+      "bestBowling": "0/7",
       "battingInnings": 0,
       "notOuts": 0,
       "ballsFaced": 0,
       "battingAverage": 16.24,
       "battingStrikeRate": 123.9,
-      "bowlingInnings": 0,
-      "balls": 0,
+      "bowlingInnings": 3,
+      "balls": 24,
       "maidens": 0,
-      "runsConceded": 0,
-      "bowlingStrikeRate": 0.9696969696969697,
-      "fiveWickets": 0
+      "runsConceded": 25,
+      "bowlingStrikeRate": 0,
+      "fiveWickets": 0,
+      "bowlingAverage": 0
     }
   },
   {
@@ -7313,7 +7479,7 @@
       "wickets": 14,
       "average": 44.68,
       "strikeRate": 131.63,
-      "economy": 9.95,
+      "economy": 0,
       "highest": 40,
       "fours": 60,
       "sixes": 36,
@@ -7329,8 +7495,9 @@
       "balls": 0,
       "maidens": 0,
       "runsConceded": 0,
-      "bowlingStrikeRate": 6.857142857142857,
-      "fiveWickets": 0
+      "bowlingStrikeRate": 0,
+      "fiveWickets": 0,
+      "bowlingAverage": 0
     }
   },
   {
@@ -7368,7 +7535,8 @@
       "maidens": 0,
       "runsConceded": 0,
       "bowlingStrikeRate": 0,
-      "fiveWickets": 0
+      "fiveWickets": 0,
+      "bowlingAverage": 0
     }
   },
   {
