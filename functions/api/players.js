@@ -34,6 +34,30 @@ async function getTeamNameById(players, teamId, league, env) {
 // Default sample players (both IPL and WPL)
 const defaultPlayers = [];
 
+function isPlayerActiveInSquad(player) {
+  if (!player) return true;
+  if (player.isActiveInSquad === false) return false;
+  if (player.squadStatus === 'inactive') return false;
+  return true;
+}
+
+function hasAtLeastOneAppearance(player) {
+  const matches = Number(player?.stats?.matches || 0);
+  return Number.isFinite(matches) && matches > 0;
+}
+
+function buildSeasonHistoryEntry(player, seasonYear, teamId, exitReason) {
+  return {
+    season: Number(seasonYear),
+    teamId: String(teamId),
+    matches: Number(player?.stats?.matches || 0),
+    runs: Number(player?.stats?.runs || 0),
+    wickets: Number(player?.stats?.wickets || 0),
+    exitReason: exitReason || undefined,
+    recordedAt: new Date().toISOString(),
+  };
+}
+
 export const onRequest = async (context) => {
   const { request, env } = context;
 
@@ -46,6 +70,7 @@ export const onRequest = async (context) => {
     if (request.method === 'GET') {
       const url = new URL(request.url);
       const league = url.searchParams.get('league');
+      const includeInactive = url.searchParams.get('includeInactive') === 'true';
       const forceRefresh = url.searchParams.get('forceRefresh') === 'true';
       const fixEllyse = url.searchParams.get('fixEllyse') === 'true';
       const diagnostic = url.searchParams.get('diagnostic') === 'true';
@@ -359,6 +384,14 @@ export const onRequest = async (context) => {
         });
         console.log(`Filtered to league '${league}': ${players.length} players`);
       }
+
+      // Default API behavior excludes inactive/replaced players from team selections.
+      // Admin players page can pass includeInactive=true to manage all records.
+      if (!includeInactive) {
+        const before = players.length;
+        players = players.filter((player) => isPlayerActiveInSquad(player));
+        console.log(`Filtered inactive players: ${before} -> ${players.length}`);
+      }
       
       return new Response(JSON.stringify(players), {
         status: 200,
@@ -407,8 +440,17 @@ export const onRequest = async (context) => {
 
       const newPlayer = body; // Use the already parsed body
 
-      if (!newPlayer.name || !newPlayer.role || !newPlayer.teamId) {
-        return new Response(JSON.stringify({ error: 'Missing required fields: name, role, teamId' }), {
+      const newPlayerIsActive = !(newPlayer.isActiveInSquad === false || newPlayer.squadStatus === 'inactive');
+
+      if (!newPlayer.name || !newPlayer.role) {
+        return new Response(JSON.stringify({ error: 'Missing required fields: name, role' }), {
+          status: 400,
+          headers: { 'Content-Type': 'application/json', ...corsHeaders },
+        });
+      }
+
+      if (newPlayerIsActive && !newPlayer.teamId) {
+        return new Response(JSON.stringify({ error: 'Active squad players require a teamId' }), {
           status: 400,
           headers: { 'Content-Type': 'application/json', ...corsHeaders },
         });
@@ -436,10 +478,10 @@ export const onRequest = async (context) => {
       }
 
       // Check team size limits
-      if (playerLeague === 'ipl') {
+      if (newPlayerIsActive && playerLeague === 'ipl') {
         // IPL teams: maximum 25 players
         const existingTeamPlayers = players.filter(p => 
-          (p.league || 'ipl') === 'ipl' && p.teamId === newPlayer.teamId
+          (p.league || 'ipl') === 'ipl' && p.teamId === newPlayer.teamId && isPlayerActiveInSquad(p)
         );
         
         if (existingTeamPlayers.length >= 25) {
@@ -450,10 +492,10 @@ export const onRequest = async (context) => {
             headers: { 'Content-Type': 'application/json', ...corsHeaders },
           });
         }
-      } else if (playerLeague === 'wpl') {
+      } else if (newPlayerIsActive && playerLeague === 'wpl') {
         // WPL teams: maximum 19 players
         const existingTeamPlayers = players.filter(p => 
-          (p.league || 'ipl') === 'wpl' && p.teamId === newPlayer.teamId
+          (p.league || 'ipl') === 'wpl' && p.teamId === newPlayer.teamId && isPlayerActiveInSquad(p)
         );
         
         if (existingTeamPlayers.length >= 19) {
@@ -482,7 +524,7 @@ export const onRequest = async (context) => {
         ...(newPlayer.role === 'All-rounder' && newPlayer.allrounderType 
           ? { allrounderType: newPlayer.allrounderType }
           : {}),
-        teamId: newPlayer.teamId,
+        teamId: newPlayerIsActive ? String(newPlayer.teamId || '') : '',
         age: parseInt(newPlayer.age) || 0,
         dateOfBirth: newPlayer.dateOfBirth || undefined,
         nationality: newPlayer.nationality || '',
@@ -490,6 +532,18 @@ export const onRequest = async (context) => {
         isCaptain: newPlayer.isCaptain || false,
         bowlingStyle: newPlayer.bowlingStyle || 'N/A (Batsman)',
         battingStyle: newPlayer.battingStyle || 'Right-handed bat',
+        isActiveInSquad: newPlayerIsActive,
+        squadStatus: newPlayerIsActive ? 'active' : 'inactive',
+        squadExitReason: !newPlayerIsActive ? (newPlayer.squadExitReason || 'other') : undefined,
+        squadExitDate: !newPlayerIsActive ? (newPlayer.squadExitDate || new Date().toISOString().slice(0, 10)) : undefined,
+        seasonTeamHistory: Array.isArray(newPlayer.seasonTeamHistory) ? newPlayer.seasonTeamHistory : [],
+        transferInfo: newPlayer.transferInfo ? {
+          lastAuctionYear: newPlayer.transferInfo.lastAuctionYear,
+          acquiredVia: newPlayer.transferInfo.acquiredVia,
+          transferable: typeof newPlayer.transferInfo.transferable === 'boolean' ? newPlayer.transferInfo.transferable : undefined,
+          transferFee: newPlayer.transferInfo.transferFee,
+          notes: newPlayer.transferInfo.notes,
+        } : undefined,
         stats: {
           matches: parseInt(newPlayer.stats?.matches) || 0,
           runs: parseInt(newPlayer.stats?.runs) || 0,
@@ -577,6 +631,48 @@ export const onRequest = async (context) => {
         });
       }
 
+      const previousPlayer = players[index];
+      const wasActive = isPlayerActiveInSquad(previousPlayer);
+      const nextIsActive = !(updatedPlayer.isActiveInSquad === false || updatedPlayer.squadStatus === 'inactive');
+      const previousTeamId = String(previousPlayer.teamId || '');
+      const requestedTeamId = String(updatedPlayer.teamId || '').trim();
+      const nextTeamId = nextIsActive ? requestedTeamId : '';
+
+      if (nextIsActive && !nextTeamId) {
+        return new Response(JSON.stringify({ error: 'Active squad players require a teamId' }), {
+          status: 400,
+          headers: { 'Content-Type': 'application/json', ...corsHeaders },
+        });
+      }
+
+      const seasonYear = Number(updatedPlayer.currentSeasonYear) || new Date().getUTCFullYear();
+      let seasonTeamHistory = Array.isArray(previousPlayer.seasonTeamHistory)
+        ? [...previousPlayer.seasonTeamHistory]
+        : [];
+
+      // Business rule: store team-season record only if player has >=1 match in the season.
+      if (wasActive && !nextIsActive && previousTeamId && hasAtLeastOneAppearance(previousPlayer)) {
+        const existingHistoryIndex = seasonTeamHistory.findIndex((entry) =>
+          Number(entry?.season) === seasonYear && String(entry?.teamId || '') === previousTeamId
+        );
+
+        const historyEntry = buildSeasonHistoryEntry(
+          previousPlayer,
+          seasonYear,
+          previousTeamId,
+          updatedPlayer.squadExitReason
+        );
+
+        if (existingHistoryIndex >= 0) {
+          seasonTeamHistory[existingHistoryIndex] = {
+            ...seasonTeamHistory[existingHistoryIndex],
+            ...historyEntry,
+          };
+        } else {
+          seasonTeamHistory.push(historyEntry);
+        }
+      }
+
       // Extract base stats for calculation - use updated values if provided, otherwise existing
       const runs = updatedPlayer.stats?.runs !== undefined ? (parseInt(updatedPlayer.stats.runs) || 0) : (players[index].stats?.runs || 0);
       const battingInnings = updatedPlayer.stats?.battingInnings !== undefined ? (parseInt(updatedPlayer.stats.battingInnings) || 0) : (players[index].stats?.battingInnings || 0);
@@ -636,7 +732,7 @@ export const onRequest = async (context) => {
       });
 
       players[index] = {
-        ...players[index], // Preserve existing properties
+        ...previousPlayer, // Preserve existing properties
         id: updatedPlayer.id,
         ...(updatedPlayer.league && { league: updatedPlayer.league }), // Update league if provided
         name: updatedPlayer.name,
@@ -647,7 +743,7 @@ export const onRequest = async (context) => {
           : updatedPlayer.role !== 'All-rounder' 
             ? { allrounderType: undefined }
             : {}),
-        teamId: updatedPlayer.teamId,
+        teamId: nextTeamId,
         age: parseInt(updatedPlayer.age) || 0,
         dateOfBirth: updatedPlayer.dateOfBirth || undefined,
         nationality: updatedPlayer.nationality || '',
@@ -655,34 +751,48 @@ export const onRequest = async (context) => {
         isCaptain: updatedPlayer.isCaptain || false,
         bowlingStyle: updatedPlayer.bowlingStyle || 'N/A (Batsman)',
         battingStyle: updatedPlayer.battingStyle || 'Right-handed bat',
+        isActiveInSquad: nextIsActive,
+        squadStatus: nextIsActive ? 'active' : 'inactive',
+        squadExitReason: nextIsActive ? undefined : (updatedPlayer.squadExitReason || 'other'),
+        squadExitDate: nextIsActive ? undefined : (updatedPlayer.squadExitDate || new Date().toISOString().slice(0, 10)),
+        seasonTeamHistory,
+        transferInfo: updatedPlayer.transferInfo
+          ? {
+              lastAuctionYear: updatedPlayer.transferInfo.lastAuctionYear,
+              acquiredVia: updatedPlayer.transferInfo.acquiredVia,
+              transferable: typeof updatedPlayer.transferInfo.transferable === 'boolean' ? updatedPlayer.transferInfo.transferable : undefined,
+              transferFee: updatedPlayer.transferInfo.transferFee,
+              notes: updatedPlayer.transferInfo.notes,
+            }
+          : previousPlayer.transferInfo,
         stats: {
           // Preserve existing stats first
-          ...players[index].stats,
+          ...previousPlayer.stats,
           // Standard stats - update if provided
-          matches: updatedPlayer.stats?.matches !== undefined ? (parseInt(updatedPlayer.stats.matches) || 0) : (players[index].stats?.matches || 0),
+          matches: updatedPlayer.stats?.matches !== undefined ? (parseInt(updatedPlayer.stats.matches) || 0) : (previousPlayer.stats?.matches || 0),
           runs: runs,
-          wickets: updatedPlayer.stats?.wickets !== undefined ? (parseInt(updatedPlayer.stats.wickets) || 0) : (players[index].stats?.wickets || 0),
+          wickets: updatedPlayer.stats?.wickets !== undefined ? (parseInt(updatedPlayer.stats.wickets) || 0) : (previousPlayer.stats?.wickets || 0),
           // CRITICAL: Always set average and strikeRate explicitly
           average: finalAverage,
           strikeRate: finalStrikeRate,
-          economy: updatedPlayer.stats?.economy !== undefined ? (typeof updatedPlayer.stats.economy === 'string' ? (updatedPlayer.stats.economy || '') : (parseFloat(updatedPlayer.stats.economy) || 0)) : (players[index].stats?.economy || 0),
-          highest: updatedPlayer.stats?.highest !== undefined ? (parseInt(updatedPlayer.stats.highest) || 0) : (players[index].stats?.highest || 0),
-          fours: updatedPlayer.stats?.fours !== undefined ? (parseInt(updatedPlayer.stats.fours) || 0) : (players[index].stats?.fours || 0),
-          sixes: updatedPlayer.stats?.sixes !== undefined ? (parseInt(updatedPlayer.stats.sixes) || 0) : (players[index].stats?.sixes || 0),
-          fifties: updatedPlayer.stats?.fifties !== undefined ? (parseInt(updatedPlayer.stats.fifties) || 0) : (players[index].stats?.fifties || 0),
-          hundreds: updatedPlayer.stats?.hundreds !== undefined ? (parseInt(updatedPlayer.stats.hundreds) || 0) : (players[index].stats?.hundreds || 0),
-          bestBowling: updatedPlayer.stats?.bestBowling !== undefined ? (updatedPlayer.stats.bestBowling || '-') : (players[index].stats?.bestBowling || '-'),
+          economy: updatedPlayer.stats?.economy !== undefined ? (typeof updatedPlayer.stats.economy === 'string' ? (updatedPlayer.stats.economy || '') : (parseFloat(updatedPlayer.stats.economy) || 0)) : (previousPlayer.stats?.economy || 0),
+          highest: updatedPlayer.stats?.highest !== undefined ? (parseInt(updatedPlayer.stats.highest) || 0) : (previousPlayer.stats?.highest || 0),
+          fours: updatedPlayer.stats?.fours !== undefined ? (parseInt(updatedPlayer.stats.fours) || 0) : (previousPlayer.stats?.fours || 0),
+          sixes: updatedPlayer.stats?.sixes !== undefined ? (parseInt(updatedPlayer.stats.sixes) || 0) : (previousPlayer.stats?.sixes || 0),
+          fifties: updatedPlayer.stats?.fifties !== undefined ? (parseInt(updatedPlayer.stats.fifties) || 0) : (previousPlayer.stats?.fifties || 0),
+          hundreds: updatedPlayer.stats?.hundreds !== undefined ? (parseInt(updatedPlayer.stats.hundreds) || 0) : (previousPlayer.stats?.hundreds || 0),
+          bestBowling: updatedPlayer.stats?.bestBowling !== undefined ? (updatedPlayer.stats.bestBowling || '-') : (previousPlayer.stats?.bestBowling || '-'),
           // Batting-specific stats - update if provided
-          battingInnings: updatedPlayer.stats?.battingInnings !== undefined ? (parseInt(updatedPlayer.stats.battingInnings) || 0) : (players[index].stats?.battingInnings || 0),
-          notOuts: updatedPlayer.stats?.notOuts !== undefined ? (parseInt(updatedPlayer.stats.notOuts) || 0) : (players[index].stats?.notOuts || 0),
-          ballsFaced: updatedPlayer.stats?.ballsFaced !== undefined ? (parseInt(updatedPlayer.stats.ballsFaced) || 0) : (players[index].stats?.ballsFaced || 0),
-          battingAverage: updatedPlayer.stats?.battingAverage !== undefined ? (updatedPlayer.stats.battingAverage || '') : (players[index].stats?.battingAverage || ''),
-          battingStrikeRate: updatedPlayer.stats?.battingStrikeRate !== undefined ? (updatedPlayer.stats.battingStrikeRate || '') : (players[index].stats?.battingStrikeRate || ''),
+          battingInnings: updatedPlayer.stats?.battingInnings !== undefined ? (parseInt(updatedPlayer.stats.battingInnings) || 0) : (previousPlayer.stats?.battingInnings || 0),
+          notOuts: updatedPlayer.stats?.notOuts !== undefined ? (parseInt(updatedPlayer.stats.notOuts) || 0) : (previousPlayer.stats?.notOuts || 0),
+          ballsFaced: updatedPlayer.stats?.ballsFaced !== undefined ? (parseInt(updatedPlayer.stats.ballsFaced) || 0) : (previousPlayer.stats?.ballsFaced || 0),
+          battingAverage: updatedPlayer.stats?.battingAverage !== undefined ? (updatedPlayer.stats.battingAverage || '') : (previousPlayer.stats?.battingAverage || ''),
+          battingStrikeRate: updatedPlayer.stats?.battingStrikeRate !== undefined ? (updatedPlayer.stats.battingStrikeRate || '') : (previousPlayer.stats?.battingStrikeRate || ''),
           // Bowling-specific stats - update if provided
-          bowlingInnings: updatedPlayer.stats?.bowlingInnings !== undefined ? (parseInt(updatedPlayer.stats.bowlingInnings) || 0) : (players[index].stats?.bowlingInnings || 0),
-          balls: updatedPlayer.stats?.balls !== undefined ? (parseInt(updatedPlayer.stats.balls) || 0) : (players[index].stats?.balls || 0),
-          maidens: updatedPlayer.stats?.maidens !== undefined ? (parseInt(updatedPlayer.stats.maidens) || 0) : (players[index].stats?.maidens || 0),
-          runsConceded: updatedPlayer.stats?.runsConceded !== undefined ? (parseInt(updatedPlayer.stats.runsConceded) || 0) : (players[index].stats?.runsConceded || 0),
+          bowlingInnings: updatedPlayer.stats?.bowlingInnings !== undefined ? (parseInt(updatedPlayer.stats.bowlingInnings) || 0) : (previousPlayer.stats?.bowlingInnings || 0),
+          balls: updatedPlayer.stats?.balls !== undefined ? (parseInt(updatedPlayer.stats.balls) || 0) : (previousPlayer.stats?.balls || 0),
+          maidens: updatedPlayer.stats?.maidens !== undefined ? (parseInt(updatedPlayer.stats.maidens) || 0) : (previousPlayer.stats?.maidens || 0),
+          runsConceded: updatedPlayer.stats?.runsConceded !== undefined ? (parseInt(updatedPlayer.stats.runsConceded) || 0) : (previousPlayer.stats?.runsConceded || 0),
           // Calculate bowling average - use provided value, or calculate from base stats, or use existing
           bowlingAverage: (() => {
             // If explicitly provided, use it
@@ -693,16 +803,16 @@ export const onRequest = async (context) => {
               }
             }
             // Otherwise, calculate from base stats
-            const wickets = updatedPlayer.stats?.wickets !== undefined ? (parseInt(updatedPlayer.stats.wickets) || 0) : (players[index].stats?.wickets || 0);
-            const runsConceded = updatedPlayer.stats?.runsConceded !== undefined ? (parseInt(updatedPlayer.stats.runsConceded) || 0) : (players[index].stats?.runsConceded || 0);
+            const wickets = updatedPlayer.stats?.wickets !== undefined ? (parseInt(updatedPlayer.stats.wickets) || 0) : (previousPlayer.stats?.wickets || 0);
+            const runsConceded = updatedPlayer.stats?.runsConceded !== undefined ? (parseInt(updatedPlayer.stats.runsConceded) || 0) : (previousPlayer.stats?.runsConceded || 0);
             if (wickets > 0 && runsConceded >= 0) {
               return runsConceded / wickets;
             }
             // Fallback to existing value
-            return players[index].stats?.bowlingAverage || 0;
+            return previousPlayer.stats?.bowlingAverage || 0;
           })(),
-          bowlingStrikeRate: updatedPlayer.stats?.bowlingStrikeRate !== undefined ? (updatedPlayer.stats.bowlingStrikeRate || '') : (players[index].stats?.bowlingStrikeRate || ''),
-          fiveWickets: updatedPlayer.stats?.fiveWickets !== undefined ? (parseInt(updatedPlayer.stats.fiveWickets) || 0) : (players[index].stats?.fiveWickets || 0),
+          bowlingStrikeRate: updatedPlayer.stats?.bowlingStrikeRate !== undefined ? (updatedPlayer.stats.bowlingStrikeRate || '') : (previousPlayer.stats?.bowlingStrikeRate || ''),
+          fiveWickets: updatedPlayer.stats?.fiveWickets !== undefined ? (parseInt(updatedPlayer.stats.fiveWickets) || 0) : (previousPlayer.stats?.fiveWickets || 0),
         },
       };
       

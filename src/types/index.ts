@@ -67,6 +67,22 @@ export interface Player {
     // Free-form notes (e.g., "Confirmed trade to CSK on 2025-12-10")
     notes?: string;
   };
+  // Squad availability state for the active season. Inactive players are excluded
+  // from team selections but still retained for profile/history use.
+  isActiveInSquad?: boolean;
+  squadStatus?: 'active' | 'inactive';
+  squadExitReason?: 'contract_terminated' | 'injury_replacement' | 'released' | 'unavailable' | 'other';
+  squadExitDate?: string; // ISO date (YYYY-MM-DD)
+  // Team-season history entry is recorded only if player has >= 1 appearance.
+  seasonTeamHistory?: Array<{
+    season: number;
+    teamId: string;
+    matches: number;
+    runs?: number;
+    wickets?: number;
+    exitReason?: string;
+    recordedAt: string;
+  }>;
 }
 
 export type PlayoffType = 'qualifier1' | 'eliminator' | 'qualifier2' | 'final' | null;

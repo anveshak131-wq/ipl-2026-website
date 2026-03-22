@@ -54,7 +54,8 @@ const findDataInconsistencies = (players: Player[]): Array<{player: Player; issu
       });
     }
     
-    if (!player.teamId) {
+    const isActiveInSquad = player.isActiveInSquad !== false && player.squadStatus !== 'inactive';
+    if (isActiveInSquad && !player.teamId) {
       inconsistencies.push({
         player,
         issue: 'Missing team assignment',
@@ -525,6 +526,9 @@ export default function AdminPlayers() {
     transferable: boolean;
     transferFee?: string;
     transferNotes?: string;
+    isActiveInSquad: boolean;
+    squadExitReason: 'contract_terminated' | 'injury_replacement' | 'released' | 'unavailable' | 'other' | '';
+    squadExitDate: string;
 
     stats: {
       matches: string;
@@ -571,6 +575,9 @@ export default function AdminPlayers() {
     transferable: false,
     transferFee: '',
     transferNotes: '',
+    isActiveInSquad: true,
+    squadExitReason: '',
+    squadExitDate: '',
     stats: {
       matches: '',
       runs: '',
@@ -2599,7 +2606,7 @@ export default function AdminPlayers() {
   const fetchData = async () => {
     try {
       setIsLoading(true);
-      const playersData = await api.getPlayers(undefined, currentLeague);
+      const playersData = await api.getPlayers(undefined, currentLeague, { includeInactive: true });
       const teamsData = await api.getTeams(currentLeague);
       setPlayers(playersData);
       setTeams(teamsData);
@@ -2704,6 +2711,9 @@ export default function AdminPlayers() {
       transferable: false,
       transferFee: '',
       transferNotes: '',
+      isActiveInSquad: true,
+      squadExitReason: '',
+      squadExitDate: '',
       stats: {
         matches: '',
         runs: '',
@@ -2799,6 +2809,9 @@ export default function AdminPlayers() {
       transferable: typeof player.transferInfo?.transferable === 'boolean' ? player.transferInfo!.transferable : false,
       transferFee: player.transferInfo?.transferFee ? String(player.transferInfo.transferFee) : '',
       transferNotes: player.transferInfo?.notes || '',
+      isActiveInSquad: player.isActiveInSquad !== false && player.squadStatus !== 'inactive',
+      squadExitReason: player.squadExitReason || '',
+      squadExitDate: player.squadExitDate || '',
       stats: {
         matches: player.stats.matches > 0 ? player.stats.matches.toString() : '',
         runs: player.stats.runs > 0 ? player.stats.runs.toString() : '',
@@ -2843,6 +2856,11 @@ export default function AdminPlayers() {
       if (!token) {
         alert('Admin session expired. Please log in again.');
         router.push('/ipl-admin-2026');
+        return;
+      }
+
+      if (formData.isActiveInSquad && !formData.teamId) {
+        alert('Active squad players must have a team selected.');
         return;
       }
 
@@ -2987,7 +3005,7 @@ export default function AdminPlayers() {
         name: formData.name,
         role: formData.role,
         allrounderType: allrounderTypeValue,
-        teamId: formData.teamId,
+        teamId: formData.isActiveInSquad ? formData.teamId : '',
         league: formData.league,
         dateOfBirth: dateOfBirthISO || undefined,
         age: calculatedAge,
@@ -2996,6 +3014,11 @@ export default function AdminPlayers() {
         isCaptain: formData.isCaptain,
         bowlingStyle: finalBowlingStyle,
         battingStyle: formData.battingStyle,
+        isActiveInSquad: formData.isActiveInSquad,
+        squadStatus: formData.isActiveInSquad ? 'active' : 'inactive',
+        squadExitReason: formData.isActiveInSquad ? undefined : (formData.squadExitReason || 'other'),
+        squadExitDate: formData.isActiveInSquad ? undefined : (formData.squadExitDate || new Date().toISOString().slice(0, 10)),
+        currentSeasonYear: new Date().getFullYear(),
         stats: statsForPlayer,
         transferInfo: {
           lastAuctionYear: formData.lastAuctionYear ? Number(formData.lastAuctionYear) : undefined,
@@ -4360,6 +4383,7 @@ export default function AdminPlayers() {
               {searchFilteredPlayers.length > 0 ? (
                 searchFilteredPlayers.map((player, idx) => {
                   const team = teams.find(t => String(t.id) === String(player.teamId));
+                  const isInactive = player.isActiveInSquad === false || player.squadStatus === 'inactive';
                   
                   // Determine role colors with special handling for All-rounder types
                   let roleColors: string;
@@ -4431,7 +4455,7 @@ export default function AdminPlayers() {
                   return (
                     <div
                       key={`${player.id}-${player.teamId}-${selectedTeam}-${idx}`}
-                      className={`group relative bg-gradient-to-br ${roleColors} rounded-2xl p-6 border backdrop-blur-xl shadow-xl hover:shadow-2xl transition-all duration-500 hover:scale-[1.03] cursor-pointer overflow-hidden`}
+                      className={`group relative bg-gradient-to-br ${roleColors} rounded-2xl p-6 border backdrop-blur-xl shadow-xl hover:shadow-2xl transition-all duration-500 hover:scale-[1.03] cursor-pointer overflow-hidden ${isInactive ? 'opacity-70' : ''}`}
                       style={{ animationDelay: `${idx * 50}ms` }}
                       onClick={() => handleEditPlayer(player)}
                       onContextMenu={(e) => handleContextMenu(e, player)}
@@ -4516,6 +4540,11 @@ export default function AdminPlayers() {
                                   {player.isCaptain && (
                                     <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold bg-yellow-500/20 text-yellow-400 border border-yellow-500/30">
                                       <CustomEmoji type="star" size={12} /> C
+                                    </span>
+                                  )}
+                                  {isInactive && (
+                                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold bg-red-500/20 text-red-300 border border-red-500/30">
+                                      Inactive
                                     </span>
                                   )}
                                 </div>
@@ -5220,7 +5249,8 @@ export default function AdminPlayers() {
                             placeholder="Select a team"
                             icon={<Users className="w-5 h-5" />}
                             iconColor="text-cyan-400"
-                          required
+                          required={formData.isActiveInSquad}
+                            disabled={!formData.isActiveInSquad}
                             searchable
                           />
                         </div>
@@ -5627,6 +5657,72 @@ export default function AdminPlayers() {
                                     <span className="text-sm font-semibold text-gray-200">Allow Transfer</span>
                                 </div>
                                 </div>
+                                <div className="group md:col-span-3">
+                                  <label className="block text-sm font-semibold text-gray-200 mb-2.5 flex items-center gap-2">
+                                    <Users className="w-4 h-4 text-cyan-400" />
+                                    Active In Team Squad
+                                  </label>
+                                  <div className="flex items-center gap-4 p-4 bg-gradient-to-r from-cyan-500/10 to-blue-500/10 rounded-xl border-2 border-cyan-500/20 hover:border-cyan-500/30 transition-all">
+                                    <input
+                                      type="checkbox"
+                                      checked={!!formData.isActiveInSquad}
+                                      onChange={(e) => {
+                                        const isActive = e.target.checked;
+                                        setFormData({
+                                          ...formData,
+                                          isActiveInSquad: isActive,
+                                          teamId: isActive ? formData.teamId : '',
+                                          squadExitReason: isActive ? '' : (formData.squadExitReason || 'other'),
+                                          squadExitDate: isActive ? '' : (formData.squadExitDate || new Date().toISOString().slice(0, 10)),
+                                        });
+                                      }}
+                                      className="w-5 h-5 rounded bg-gray-800/60 border-2 border-white/20 text-cyan-500 focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50 cursor-pointer transition-all"
+                                    />
+                                    <span className="text-sm font-semibold text-gray-200">Include in active squad selections</span>
+                                  </div>
+                                  {!formData.isActiveInSquad && (
+                                    <p className="text-xs text-yellow-300 mt-2">Inactive players are removed from team selections, scorecards, and public squad lists without deleting profile data.</p>
+                                  )}
+                                </div>
+                                {!formData.isActiveInSquad && (
+                                  <>
+                                    <div className="group">
+                                      <label className="block text-sm font-semibold text-gray-200 mb-2.5 flex items-center gap-2">
+                                        <BarChart3 className="w-4 h-4 text-red-400" />
+                                        Squad Exit Reason
+                                      </label>
+                                      <CustomSelect
+                                        value={formData.squadExitReason || 'other'}
+                                        onChange={(value) => setFormData({ ...formData, squadExitReason: value as any })}
+                                        options={[
+                                          { value: 'contract_terminated', label: 'Contract Terminated' },
+                                          { value: 'injury_replacement', label: 'Injury Replacement' },
+                                          { value: 'released', label: 'Released' },
+                                          { value: 'unavailable', label: 'Unavailable' },
+                                          { value: 'other', label: 'Other' },
+                                        ]}
+                                        placeholder="Select reason"
+                                        icon={<BarChart3 className="w-5 h-5" />}
+                                        iconColor="text-red-400"
+                                      />
+                                    </div>
+                                    <div className="group">
+                                      <label className="block text-sm font-semibold text-gray-200 mb-2.5 flex items-center gap-2">
+                                        <Calendar className="w-4 h-4 text-red-400" />
+                                        Exit Date
+                                      </label>
+                                      <div className="relative">
+                                        <input
+                                          type="date"
+                                          value={formData.squadExitDate || ''}
+                                          onChange={(e) => setFormData({ ...formData, squadExitDate: e.target.value })}
+                                          className="w-full pl-12 pr-4 py-3.5 bg-gray-800/60 border-2 border-white/10 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500/50 focus:border-red-500/50 transition-all hover:border-white/20 group-hover:bg-gray-800/70"
+                                        />
+                                        <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+                                      </div>
+                                    </div>
+                                  </>
+                                )}
                                 <div className="group md:col-span-2">
                                   <label className="block text-sm font-semibold text-gray-200 mb-2.5 flex items-center gap-2">
                                     <TrendingUp className="w-4 h-4 text-amber-400" />

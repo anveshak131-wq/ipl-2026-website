@@ -468,9 +468,17 @@ export const api = {
     }
   },
   
-  getPlayers: async (teamId?: string, league?: 'ipl' | 'wpl'): Promise<Player[]> => {
+  getPlayers: async (
+    teamId?: string,
+    league?: 'ipl' | 'wpl',
+    options?: { includeInactive?: boolean }
+  ): Promise<Player[]> => {
     try {
-      const url = league ? `/api/players?league=${league}` : '/api/players';
+      const includeInactive = options?.includeInactive === true;
+      const params = new URLSearchParams();
+      if (league) params.set('league', league);
+      if (includeInactive) params.set('includeInactive', 'true');
+      const url = params.toString() ? `/api/players?${params.toString()}` : '/api/players';
       console.log('API: Fetching players from:', url);
       const response = await fetch(url);
       console.log('API: Players response status:', response.status, response.ok);
@@ -530,6 +538,12 @@ export const api = {
           const uniqueLeagues = Array.from(new Set(originalPlayers.map((p: Player) => p.league || 'ipl')));
           console.warn(`⚠️ No players match league '${league}'. Available leagues:`, uniqueLeagues);
         }
+      }
+
+      // Default behavior: hide inactive/replaced players from all public/admin selectors.
+      // Admin players page can opt-in with includeInactive=true.
+      if (!includeInactive) {
+        players = players.filter((p: Player) => p.isActiveInSquad !== false && p.squadStatus !== 'inactive');
       }
       
       // Filter by team if specified
