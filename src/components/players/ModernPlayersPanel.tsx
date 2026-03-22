@@ -13,6 +13,20 @@ interface Player {
   teamId: string;
   teamName: string;
   role: string;
+  league?: string;
+  age?: number;
+  dateOfBirth?: string;
+  nationality?: string;
+  jerseyNumber?: number;
+  isCaptain?: boolean;
+  battingStyle?: string;
+  bowlingStyle?: string;
+  allrounderType?: string;
+  transferInfo?: unknown;
+  isActiveInSquad?: boolean;
+  squadStatus?: string;
+  squadExitReason?: string;
+  squadExitDate?: string;
   matches: number;
   runs: number;
   wickets: number;
@@ -140,6 +154,20 @@ function normalizePlayer(raw: any, teams: Team[]): Player {
     teamId: normalizedTeamId,
     teamName: resolveTeamName(normalizedTeamId, teams, raw?.teamName),
     role: normalizeRole(String(raw?.role ?? 'Player')),
+    league: raw?.league ? String(raw.league) : undefined,
+    age: toNumber(raw?.age),
+    dateOfBirth: raw?.dateOfBirth ? String(raw.dateOfBirth) : undefined,
+    nationality: raw?.nationality ? String(raw.nationality) : undefined,
+    jerseyNumber: toNumber(raw?.jerseyNumber),
+    isCaptain: Boolean(raw?.isCaptain),
+    battingStyle: raw?.battingStyle ? String(raw.battingStyle) : undefined,
+    bowlingStyle: raw?.bowlingStyle ? String(raw.bowlingStyle) : undefined,
+    allrounderType: raw?.allrounderType ? String(raw.allrounderType) : undefined,
+    transferInfo: raw?.transferInfo,
+    isActiveInSquad: typeof raw?.isActiveInSquad === 'boolean' ? raw.isActiveInSquad : undefined,
+    squadStatus: raw?.squadStatus ? String(raw.squadStatus) : undefined,
+    squadExitReason: raw?.squadExitReason ? String(raw.squadExitReason) : undefined,
+    squadExitDate: raw?.squadExitDate ? String(raw.squadExitDate) : undefined,
     matches: toNumber(raw?.matches ?? rawStats.matches),
     runs: toNumber(raw?.runs ?? rawStats.runs),
     wickets: toNumber(raw?.wickets ?? rawStats.wickets),
