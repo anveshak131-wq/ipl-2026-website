@@ -31,6 +31,17 @@ export default function Playing11Page() {
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
+  const substitutionTimingOptions = useMemo(
+    () => [
+      'Before Start of Innings',
+      'Innings Break',
+      'End of Over',
+      'Fall of Wicket',
+      'Batter Retired',
+      'Injury Replacement (Mid-Over)',
+    ],
+    []
+  );
 
   // Check authentication
   useEffect(() => {
@@ -1013,25 +1024,16 @@ export default function Playing11Page() {
                   {team1ImpactPlayer && (
                     <div>
                       <h4 className="text-sm font-semibold mb-2 text-white">Substitution Timing:</h4>
-                      <div className="grid grid-cols-3 gap-2">
-                        <button
-                          onClick={() => handleSubstitution('team1', 'Before Innings')}
-                          className="px-3 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm"
-                        >
-                          Before Innings
-                        </button>
-                        <button
-                          onClick={() => handleSubstitution('team1', 'After Wicket')}
-                          className="px-3 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm"
-                        >
-                          After Wicket
-                        </button>
-                        <button
-                          onClick={() => handleSubstitution('team1', 'End of Over')}
-                          className="px-3 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm"
-                        >
-                          End of Over
-                        </button>
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                        {substitutionTimingOptions.map((opt) => (
+                          <button
+                            key={opt}
+                            onClick={() => handleSubstitution('team1', opt)}
+                            className="px-3 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm"
+                          >
+                            {opt}
+                          </button>
+                        ))}
                       </div>
                       
                       {team1SubstitutionTime && (
@@ -1255,25 +1257,16 @@ export default function Playing11Page() {
                   {team2ImpactPlayer && (
                     <div>
                       <h4 className="text-sm font-semibold mb-2 text-white">Substitution Timing:</h4>
-                      <div className="grid grid-cols-3 gap-2">
-                        <button
-                          onClick={() => handleSubstitution('team2', 'Before Innings')}
-                          className="px-3 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm"
-                        >
-                          Before Innings
-                        </button>
-                        <button
-                          onClick={() => handleSubstitution('team2', 'After Wicket')}
-                          className="px-3 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm"
-                        >
-                          After Wicket
-                        </button>
-                        <button
-                          onClick={() => handleSubstitution('team2', 'End of Over')}
-                          className="px-3 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm"
-                        >
-                          End of Over
-                        </button>
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                        {substitutionTimingOptions.map((opt) => (
+                          <button
+                            key={opt}
+                            onClick={() => handleSubstitution('team2', opt)}
+                            className="px-3 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm"
+                          >
+                            {opt}
+                          </button>
+                        ))}
                       </div>
                       
                       {team2SubstitutionTime && (
