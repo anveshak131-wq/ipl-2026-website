@@ -127,11 +127,16 @@ export interface Match {
       original: string;
       impact: string;
       substitutedAt: number;
+      substitutionTime?: string;
+      // Backward-compat (older admin UIs stored only a playerId)
+      playerId?: string;
     };
     team2?: {
       original: string;
       impact: string;
       substitutedAt: number;
+      substitutionTime?: string;
+      playerId?: string;
     };
   };
   matchNumber?: string; // Auto-generated based on date and time ordering (e.g., "IPL-001", "WPL-001")

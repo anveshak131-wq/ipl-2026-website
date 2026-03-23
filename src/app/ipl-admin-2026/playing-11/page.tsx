@@ -24,6 +24,8 @@ export default function Playing11Page() {
   const [team2Playing11, setTeam2Playing11] = useState<string[]>([]);
   const [team1ImpactPlayer, setTeam1ImpactPlayer] = useState<string>('');
   const [team2ImpactPlayer, setTeam2ImpactPlayer] = useState<string>('');
+  const [team1ImpactOriginalPlayer, setTeam1ImpactOriginalPlayer] = useState<string>('');
+  const [team2ImpactOriginalPlayer, setTeam2ImpactOriginalPlayer] = useState<string>('');
   const [team1SubstitutionTime, setTeam1SubstitutionTime] = useState<string>('');
   const [team2SubstitutionTime, setTeam2SubstitutionTime] = useState<string>('');
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
@@ -155,13 +157,14 @@ export default function Playing11Page() {
       setTeam2Playing11(existingTeam2);
 
       const normalizeImpact = (impact: any) => {
-        if (!impact) return { playerId: '', substitutionTime: '' };
+        if (!impact) return { playerId: '', substitutionTime: '', original: '' };
         const playerId = impact.playerId || impact.impact || '';
+        const original = impact.original || '';
         let substitutionTime = impact.substitutionTime || '';
         if (!substitutionTime && typeof impact.substitutedAt === 'number') {
           substitutionTime = new Date(impact.substitutedAt).toLocaleString();
         }
-        return { playerId, substitutionTime };
+        return { playerId, substitutionTime, original };
       };
 
       const impact = (selectedMatch as any).impactPlayer;
@@ -169,6 +172,8 @@ export default function Playing11Page() {
       const team2Impact = normalizeImpact(impact?.team2);
       setTeam1ImpactPlayer(team1Impact.playerId);
       setTeam2ImpactPlayer(team2Impact.playerId);
+      setTeam1ImpactOriginalPlayer(team1Impact.original);
+      setTeam2ImpactOriginalPlayer(team2Impact.original);
       setTeam1SubstitutionTime(team1Impact.substitutionTime);
       setTeam2SubstitutionTime(team2Impact.substitutionTime);
     } else {
@@ -176,6 +181,8 @@ export default function Playing11Page() {
       setTeam2Playing11([]);
       setTeam1ImpactPlayer('');
       setTeam2ImpactPlayer('');
+      setTeam1ImpactOriginalPlayer('');
+      setTeam2ImpactOriginalPlayer('');
       setTeam1SubstitutionTime('');
       setTeam2SubstitutionTime('');
     }
@@ -352,32 +359,51 @@ export default function Playing11Page() {
   const handleImpactPlayerSelection = (team: 'team1' | 'team2', playerId: string) => {
     if (team === 'team1') {
       setTeam1ImpactPlayer(playerId);
+      setTeam1SubstitutionTime('');
+      // Keep original selection only if still valid (in playing 11 and not same as impact)
+      setTeam1ImpactOriginalPlayer((prev) =>
+        prev && team1Playing11.includes(prev) && prev !== playerId ? prev : ''
+      );
     } else {
       setTeam2ImpactPlayer(playerId);
+      setTeam2SubstitutionTime('');
+      setTeam2ImpactOriginalPlayer((prev) =>
+        prev && team2Playing11.includes(prev) && prev !== playerId ? prev : ''
+      );
     }
   };
 
   const handleSubstitution = (team: 'team1' | 'team2', substitutionTime: string) => {
     const impactPlayerId = team === 'team1' ? team1ImpactPlayer : team2ImpactPlayer;
     const playing11 = team === 'team1' ? team1Playing11 : team2Playing11;
+    const originalPlayerId = team === 'team1' ? team1ImpactOriginalPlayer : team2ImpactOriginalPlayer;
     
     if (!impactPlayerId) return;
+    if (!originalPlayerId) {
+      alert('Please select the original player to be substituted.');
+      return;
+    }
+    if (!playing11.includes(originalPlayerId)) {
+      alert('Selected original player is not in the current Playing 11.');
+      return;
+    }
+    if (originalPlayerId === impactPlayerId) {
+      alert('Impact Player cannot be the same as the original player.');
+      return;
+    }
     
-    // Remove one player from playing 11 and add impact player
-    const updatedPlaying11 = [...playing11];
-    const playerToRemoveIndex = updatedPlaying11.findIndex(id => id !== impactPlayerId);
-    
-    if (playerToRemoveIndex >= 0) {
-      updatedPlaying11.splice(playerToRemoveIndex, 1);
-      updatedPlaying11.push(impactPlayerId);
-      
-      if (team === 'team1') {
-        setTeam1Playing11(updatedPlaying11);
-        setTeam1SubstitutionTime(substitutionTime);
-      } else {
-        setTeam2Playing11(updatedPlaying11);
-        setTeam2SubstitutionTime(substitutionTime);
-      }
+    // Replace the selected original player with the impact player (keep XI size at 11)
+    const updatedPlaying11 = playing11.map((id) => (id === originalPlayerId ? impactPlayerId : id));
+    // Ensure uniqueness (in case impact player was already accidentally in XI)
+    const deduped = Array.from(new Set(updatedPlaying11));
+    const finalXI = deduped.length === 11 ? deduped : updatedPlaying11;
+
+    if (team === 'team1') {
+      setTeam1Playing11(finalXI);
+      setTeam1SubstitutionTime(substitutionTime);
+    } else {
+      setTeam2Playing11(finalXI);
+      setTeam2SubstitutionTime(substitutionTime);
     }
   };
 
@@ -419,12 +445,16 @@ export default function Playing11Page() {
           },
           impactPlayer: {
             team1: team1ImpactPlayer ? {
-              playerId: team1ImpactPlayer,
-              substitutionTime: team1SubstitutionTime
+              original: team1ImpactOriginalPlayer || '',
+              impact: team1ImpactPlayer,
+              substitutionTime: team1SubstitutionTime || '',
+              ...(team1SubstitutionTime ? { substitutedAt: Date.now() } : {}),
             } : null,
             team2: team2ImpactPlayer ? {
-              playerId: team2ImpactPlayer,
-              substitutionTime: team2SubstitutionTime
+              original: team2ImpactOriginalPlayer || '',
+              impact: team2ImpactPlayer,
+              substitutionTime: team2SubstitutionTime || '',
+              ...(team2SubstitutionTime ? { substitutedAt: Date.now() } : {}),
             } : null
           }
         }),
@@ -461,10 +491,14 @@ export default function Playing11Page() {
       impact: {
         team1: team1ImpactPlayer || team1SubstitutionTime ? {
           playerId: team1ImpactPlayer,
+          original: team1ImpactOriginalPlayer,
+          impact: team1ImpactPlayer,
           substitutionTime: team1SubstitutionTime
         } : null,
         team2: team2ImpactPlayer || team2SubstitutionTime ? {
           playerId: team2ImpactPlayer,
+          original: team2ImpactOriginalPlayer,
+          impact: team2ImpactPlayer,
           substitutionTime: team2SubstitutionTime
         } : null
       }
@@ -476,6 +510,8 @@ export default function Playing11Page() {
     team2Playing11,
     team1ImpactPlayer,
     team2ImpactPlayer,
+    team1ImpactOriginalPlayer,
+    team2ImpactOriginalPlayer,
     team1SubstitutionTime,
     team2SubstitutionTime
   ]);
@@ -895,6 +931,38 @@ export default function Playing11Page() {
                         ))}
                     </select>
                   </div>
+
+                  {/* Original Player Selection */}
+                  {team1ImpactPlayer && (
+                    <div>
+                      <h4 className="text-sm font-semibold mb-2 text-white">Select Original Player to Substitute:</h4>
+                      <select
+                        value={team1ImpactOriginalPlayer}
+                        onChange={(e) => setTeam1ImpactOriginalPlayer(e.target.value)}
+                        disabled={team1Playing11.length !== 11}
+                        className="w-full px-4 py-3 rounded-lg text-white disabled:opacity-60"
+                        style={isWPL ? {
+                          background: WPLColors.purpleRGBA[20],
+                          border: `1px solid ${WPLColors.purpleRGBA[30]}`,
+                        } : {
+                          background: '#0F172A',
+                          border: '1px solid rgba(255, 255, 255, 0.1)',
+                        }}
+                      >
+                        <option value="">{team1Playing11.length === 11 ? 'Select Original Player...' : 'Select Playing 11 first'}</option>
+                        {team1Playing11
+                          .filter((id) => id !== team1ImpactPlayer)
+                          .map((id) => {
+                            const player = team1Players.find((p) => p.id === id);
+                            return (
+                              <option key={id} value={id}>
+                                {player ? `${player.name} (${player.role})` : id}
+                              </option>
+                            );
+                          })}
+                      </select>
+                    </div>
+                  )}
                   
                   {/* Substitution Timing */}
                   {team1ImpactPlayer && (
@@ -1094,6 +1162,38 @@ export default function Playing11Page() {
                         ))}
                     </select>
                   </div>
+
+                  {/* Original Player Selection */}
+                  {team2ImpactPlayer && (
+                    <div>
+                      <h4 className="text-sm font-semibold mb-2 text-white">Select Original Player to Substitute:</h4>
+                      <select
+                        value={team2ImpactOriginalPlayer}
+                        onChange={(e) => setTeam2ImpactOriginalPlayer(e.target.value)}
+                        disabled={team2Playing11.length !== 11}
+                        className="w-full px-4 py-3 rounded-lg text-white disabled:opacity-60"
+                        style={isWPL ? {
+                          background: WPLColors.purpleRGBA[20],
+                          border: `1px solid ${WPLColors.purpleRGBA[30]}`,
+                        } : {
+                          background: '#0F172A',
+                          border: '1px solid rgba(255, 255, 255, 0.1)',
+                        }}
+                      >
+                        <option value="">{team2Playing11.length === 11 ? 'Select Original Player...' : 'Select Playing 11 first'}</option>
+                        {team2Playing11
+                          .filter((id) => id !== team2ImpactPlayer)
+                          .map((id) => {
+                            const player = team2Players.find((p) => p.id === id);
+                            return (
+                              <option key={id} value={id}>
+                                {player ? `${player.name} (${player.role})` : id}
+                              </option>
+                            );
+                          })}
+                      </select>
+                    </div>
+                  )}
                   
                   {/* Substitution Timing */}
                   {team2ImpactPlayer && (
