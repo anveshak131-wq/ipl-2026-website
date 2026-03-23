@@ -402,18 +402,16 @@ export default function Playing11Page() {
       alert('Impact Player cannot be the same as the original player.');
       return;
     }
-    
-    // Replace the selected original player with the impact player (keep XI size at 11)
-    const updatedPlaying11 = playing11.map((id) => (id === originalPlayerId ? impactPlayerId : id));
-    // Ensure uniqueness (in case impact player was already accidentally in XI)
-    const deduped = Array.from(new Set(updatedPlaying11));
-    const finalXI = deduped.length === 11 ? deduped : updatedPlaying11;
+
+    // IMPORTANT: keep Playing 11 unchanged; Impact Player is stored separately.
+    if (playing11.includes(impactPlayerId)) {
+      alert('Impact Player is currently selected in Playing 11. Remove them from Playing 11 to record as Impact Player.');
+      return;
+    }
 
     if (team === 'team1') {
-      setTeam1Playing11(finalXI);
       setTeam1SubstitutionTime(substitutionTime);
     } else {
-      setTeam2Playing11(finalXI);
       setTeam2SubstitutionTime(substitutionTime);
     }
   };
