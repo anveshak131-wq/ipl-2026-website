@@ -123,7 +123,11 @@ function displayValue(value: unknown): string {
   if (value === null || value === undefined) return '—';
   if (typeof value === 'number') return Number.isFinite(value) ? String(value) : '—';
   const raw = String(value).trim();
-  return raw ? raw : '—';
+  if (!raw) return '—';
+  const normalized = raw.toLowerCase();
+  const placeholders = new Set(['-', '—', '--', 'n/a', 'na', 'null', 'undefined']);
+  if (placeholders.has(normalized)) return '—';
+  return raw;
 }
 
 function MetricCard({ label, value, hint }: { label: string; value: string; hint?: string }) {

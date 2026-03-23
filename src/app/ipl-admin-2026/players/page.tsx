@@ -14,7 +14,7 @@ import { parseDateDDMMYYYY, calculateAge, isValidDate, formatDateMonthDDYYYY, pa
 import { CustomEmoji } from '@/components/emoji/Emoji';
 import FlagImage from '@/components/ui/FlagImage';
 import CustomSelect from '@/components/ui/CustomSelect';
-import { jsPDF } from 'jspdf';
+import { jsPDF, GState } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import * as ExcelJS from 'exceljs';
 import { Search, Filter, Edit2, X, Users, TrendingUp, Award, Target, Zap, ChevronDown, ChevronUp, SortAsc, SortDesc, User, Shirt, Calendar, BarChart3, Plus, Trash2, Download, Upload, Shield, Activity, Hash, Grid3x3, List, Eye, Star, Copy, History, FileSpreadsheet, FileText, FileDown, Database, DatabaseBackup } from 'lucide-react';
@@ -1618,14 +1618,28 @@ export default function AdminPlayers() {
     const pageHeight = doc.internal.pageSize.getHeight();
 
     const theme = {
-      pageBackground: [255, 246, 233],
-      headerBackground: [74, 29, 10],
-      headerAccent: [204, 96, 22],
-      headerText: [255, 250, 242],
-      mutedText: [120, 96, 70],
-      tableHeader: [143, 58, 16],
-      tableAltRow: [254, 242, 227],
-      cardBorder: [229, 205, 178]
+      // Dark "oil paint" palette: deep canvas + rich pigments.
+      pageBackground: [9, 12, 18],
+      headerBackground: [12, 17, 28],
+      headerAccent: [217, 107, 59],
+      headerText: [242, 246, 255],
+      text: [231, 238, 255],
+      mutedText: [166, 179, 201],
+      inkText: [12, 17, 28],
+
+      cardBackground: [14, 21, 34],
+      cardBorder: [42, 58, 90],
+
+      tableHeader: [18, 26, 42],
+      tableRow: [14, 21, 34],
+      tableAltRow: [18, 27, 44],
+      gridLine: [56, 74, 108],
+
+      oilEmber: [217, 107, 59],
+      oilGold: [240, 199, 74],
+      oilTeal: [47, 183, 166],
+      oilCobalt: [58, 111, 240],
+      oilPlum: [182, 90, 214]
     } as const;
 
     const headerTitle = `${currentLeague.toUpperCase()} Players Export`;
@@ -1637,20 +1651,83 @@ export default function AdminPlayers() {
     const generatedAt = new Date().toLocaleString();
 
     const summaryCards = [
-      { label: 'Total Players', value: playersToExport.length, color: [204, 96, 22] as const },
-      { label: 'Batsmen', value: playersToExport.filter(p => p.role === 'Batsman').length, color: [90, 132, 52] as const },
-      { label: 'Bowlers', value: playersToExport.filter(p => p.role === 'Bowler').length, color: [196, 74, 28] as const },
-      { label: 'All-rounders', value: playersToExport.filter(p => p.role === 'All-rounder').length, color: [168, 78, 96] as const },
-      { label: 'Wicket-keepers', value: playersToExport.filter(p => p.role === 'Wicket-keeper').length, color: [130, 94, 40] as const }
+      { label: 'Total Players', value: playersToExport.length, color: theme.oilGold },
+      { label: 'Batsmen', value: playersToExport.filter(p => p.role === 'Batsman').length, color: theme.oilCobalt },
+      { label: 'Bowlers', value: playersToExport.filter(p => p.role === 'Bowler').length, color: theme.oilEmber },
+      { label: 'All-rounders', value: playersToExport.filter(p => p.role === 'All-rounder').length, color: theme.oilPlum },
+      { label: 'Wicket-keepers', value: playersToExport.filter(p => p.role === 'Wicket-keeper').length, color: theme.oilTeal }
     ];
+
+    const withOpacity = (opacity: number, draw: () => void) => {
+      if (
+        typeof doc.saveGraphicsState === 'function' &&
+        typeof doc.restoreGraphicsState === 'function' &&
+        typeof doc.setGState === 'function'
+      ) {
+        doc.saveGraphicsState();
+        doc.setGState(new GState({ opacity }));
+        draw();
+        doc.restoreGraphicsState();
+        return;
+      }
+      draw();
+    };
+
+    const mixColor = (a: readonly [number, number, number], b: readonly [number, number, number], t: number) => {
+      const tt = Math.min(Math.max(t, 0), 1);
+      return [
+        Math.round(a[0] + (b[0] - a[0]) * tt),
+        Math.round(a[1] + (b[1] - a[1]) * tt),
+        Math.round(a[2] + (b[2] - a[2]) * tt)
+      ] as const;
+    };
+
+    const luminance = (color: readonly [number, number, number]) =>
+      0.2126 * color[0] + 0.7152 * color[1] + 0.0722 * color[2];
+
+    const textColorForFill = (fill: readonly [number, number, number]) =>
+      luminance(fill) > 165 ? theme.inkText : theme.text;
+
+    const drawOilBlobs = () => {
+      // Subtle, low-opacity pigment blobs (kept mostly to page corners).
+      withOpacity(0.08, () => {
+        doc.setFillColor(...theme.oilTeal);
+        doc.ellipse(-40, pageHeight + 20, 260, 160, 'F');
+        doc.setFillColor(...theme.oilPlum);
+        doc.ellipse(pageWidth + 70, pageHeight + 10, 300, 190, 'F');
+      });
+    };
+
+    const drawHeaderBlobs = () => {
+      withOpacity(0.18, () => {
+        doc.setFillColor(...theme.oilCobalt);
+        doc.ellipse(pageWidth - 120, 16, 240, 56, 'F');
+        doc.setFillColor(...theme.oilEmber);
+        doc.ellipse(pageWidth - 40, 44, 210, 54, 'F');
+        doc.setFillColor(...theme.oilGold);
+        doc.ellipse(pageWidth - 250, 38, 170, 46, 'F');
+      });
+    };
+
+    const drawHeaderStroke = (y: number) => {
+      const h = 3;
+      const seg = pageWidth / 3;
+      doc.setFillColor(...theme.oilTeal);
+      doc.rect(0, y, seg, h, 'F');
+      doc.setFillColor(...theme.oilEmber);
+      doc.rect(seg, y, seg, h, 'F');
+      doc.setFillColor(...theme.oilGold);
+      doc.rect(seg * 2, y, pageWidth - seg * 2, h, 'F');
+    };
 
     const drawPageFrame = (pageNumber: number) => {
       doc.setFillColor(...theme.pageBackground);
       doc.rect(0, 0, pageWidth, pageHeight, 'F');
+      drawOilBlobs();
       doc.setFillColor(...theme.headerBackground);
       doc.rect(0, 0, pageWidth, 64, 'F');
-      doc.setFillColor(...theme.headerAccent);
-      doc.rect(0, 64, pageWidth, 2, 'F');
+      drawHeaderBlobs();
+      drawHeaderStroke(64);
 
       doc.setTextColor(...theme.headerText);
       doc.setFont('helvetica', 'bold');
@@ -1659,6 +1736,7 @@ export default function AdminPlayers() {
 
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(9);
+      doc.setTextColor(...theme.mutedText);
       doc.text(filterLine, 40, 55, { maxWidth: pageWidth - 260 });
       doc.text(generatedAt, pageWidth - 40, 38, { align: 'right' });
 
@@ -1675,9 +1753,18 @@ export default function AdminPlayers() {
 
       summaryCards.forEach((card, index) => {
         const x = 40 + index * (cardWidth + gap);
-        doc.setFillColor(255, 255, 255);
+        doc.setFillColor(...theme.cardBackground);
         doc.setDrawColor(...theme.cardBorder);
-        doc.roundedRect(x, cardY, cardWidth, cardHeight, 6, 6, 'FD');
+        doc.roundedRect(x, cardY, cardWidth, cardHeight, 8, 8, 'FD');
+        withOpacity(0.24, () => {
+          doc.setFillColor(...card.color);
+          doc.ellipse(x + cardWidth - 22, cardY + 12, 26, 10, 'F');
+          doc.ellipse(x + cardWidth - 10, cardY + 24, 20, 14, 'F');
+        });
+        withOpacity(0.85, () => {
+          doc.setFillColor(...card.color);
+          doc.rect(x, cardY, cardWidth, 2, 'F');
+        });
         doc.setFont('helvetica', 'bold');
         doc.setFontSize(12);
         doc.setTextColor(...card.color);
@@ -1702,21 +1789,31 @@ export default function AdminPlayers() {
       return name.split(' ')[0];
     };
 
-    const roleColors = new Map<string, [number, number, number]>([
-      ['Batsman', [90, 132, 52]],
-      ['Bowler', [196, 74, 28]],
-      ['All-rounder', [168, 78, 96]],
-      ['Wicket-keeper', [130, 94, 40]]
+    const roleColors = new Map<string, readonly [number, number, number]>([
+      ['Batsman', theme.oilCobalt],
+      ['Bowler', theme.oilEmber],
+      ['All-rounder', theme.oilPlum],
+      ['Wicket-keeper', theme.oilTeal]
     ]);
 
     const drawCard = (title: string, x: number, y: number, w: number, h: number, draw: (plotX: number, plotY: number, plotW: number, plotH: number) => void) => {
-      doc.setFillColor(255, 255, 255);
+      doc.setFillColor(...theme.cardBackground);
       doc.setDrawColor(...theme.cardBorder);
-      doc.roundedRect(x, y, w, h, 8, 8, 'FD');
+      doc.roundedRect(x, y, w, h, 10, 10, 'FD');
+      withOpacity(0.14, () => {
+        doc.setFillColor(...theme.oilCobalt);
+        doc.ellipse(x + w - 18, y + 10, 70, 22, 'F');
+        doc.setFillColor(...theme.oilPlum);
+        doc.ellipse(x + w - 40, y + 22, 76, 26, 'F');
+      });
+      withOpacity(0.85, () => {
+        doc.setFillColor(...theme.oilGold);
+        doc.rect(x, y, w, 2, 'F');
+      });
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(10);
-      doc.setTextColor(60, 36, 16);
-      doc.text(title, x + 12, y + 16);
+      doc.setTextColor(...theme.text);
+      doc.text(title, x + 12, y + 16, { maxWidth: w - 24 });
       const plotX = x + 12;
       const plotY = y + 24;
       const plotW = w - 24;
@@ -1725,10 +1822,12 @@ export default function AdminPlayers() {
     };
 
     const drawAxes = (x: number, y: number, w: number, h: number) => {
-      doc.setDrawColor(232, 217, 196);
-      doc.setLineWidth(0.5);
-      doc.line(x, y, x, y + h);
-      doc.line(x, y + h, x + w, y + h);
+      withOpacity(0.6, () => {
+        doc.setDrawColor(...theme.gridLine);
+        doc.setLineWidth(0.6);
+        doc.line(x, y, x, y + h);
+        doc.line(x, y + h, x + w, y + h);
+      });
     };
 
     const drawBarChart = (x: number, y: number, w: number, h: number) => {
@@ -1831,7 +1930,7 @@ export default function AdminPlayers() {
       drawAxes(x, y, w, h);
       counts.forEach((count, idx) => {
         const barHeight = (count / maxCount) * (h - 10);
-        doc.setFillColor(214, 128, 34);
+        doc.setFillColor(...theme.oilGold);
         doc.rect(x + idx * barWidth, y + h - barHeight, barWidth - 2, barHeight, 'F');
       });
     };
@@ -1863,6 +1962,8 @@ export default function AdminPlayers() {
       drawAxes(x, y, w, h);
       const boxWidth = w / roles.length - 10;
       statsByRole.forEach((stat, idx) => {
+        const roleColor = roleColors.get(stat.role) || theme.headerAccent;
+        const boxFill = mixColor(theme.tableRow, roleColor, 0.35);
         const centerX = x + idx * (boxWidth + 10) + boxWidth / 2;
         const scale = (val: number) => y + h - (val / maxVal) * (h - 10);
         const minY = scale(stat.min);
@@ -1870,11 +1971,11 @@ export default function AdminPlayers() {
         const q1Y = scale(stat.q1);
         const q3Y = scale(stat.q3);
         const medY = scale(stat.median);
-        doc.setDrawColor(164, 142, 118);
+        doc.setDrawColor(...theme.gridLine);
         doc.line(centerX, minY, centerX, maxY);
-        doc.setFillColor(252, 238, 218);
+        doc.setFillColor(...boxFill);
         doc.rect(centerX - boxWidth / 2, q3Y, boxWidth, q1Y - q3Y, 'F');
-        doc.setDrawColor(...theme.headerAccent);
+        doc.setDrawColor(...roleColor);
         doc.line(centerX - boxWidth / 2, medY, centerX + boxWidth / 2, medY);
         doc.setFontSize(7);
         doc.setTextColor(...theme.mutedText);
@@ -1942,16 +2043,18 @@ export default function AdminPlayers() {
       const rowH = h / teamStats.length;
       teamStats.forEach((team, idx) => {
         const barY = y + idx * rowH + 6;
-        doc.setFillColor(238, 225, 208);
+        doc.setFillColor(...theme.tableAltRow);
         doc.rect(x + 80, barY, w - 90, 8, 'F');
         doc.setFillColor(...theme.headerAccent);
         doc.rect(x + 80, barY, ((team.avgRuns / maxVal) * (w - 90)), 8, 'F');
         const targetX = x + 80 + (target / maxVal) * (w - 90);
-        doc.setDrawColor(60, 36, 16);
+        doc.setDrawColor(...theme.oilGold);
+        doc.setLineWidth(1);
         doc.line(targetX, barY - 2, targetX, barY + 10);
         doc.setFontSize(7);
         doc.setTextColor(...theme.mutedText);
         doc.text(team.team, x + 4, barY + 7);
+        doc.setTextColor(...theme.text);
         doc.text(team.avgRuns.toFixed(0), x + w - 6, barY + 7, { align: 'right' });
       });
     };
@@ -1975,15 +2078,17 @@ export default function AdminPlayers() {
         teams.forEach((team, tIdx) => {
           const count = matrix[rIdx][tIdx];
           const intensity = count / maxCount;
-          const color = [
-            Math.round(252 + (176 - 252) * intensity),
-            Math.round(240 + (74 - 240) * intensity),
-            Math.round(224 + (20 - 224) * intensity)
-          ];
-          doc.setFillColor(color[0], color[1], color[2]);
+          const roleColor = roleColors.get(role) || theme.headerAccent;
+          const fill = mixColor(theme.tableRow, roleColor, 0.75 * intensity);
+          doc.setFillColor(...fill);
           doc.rect(x + tIdx * cellW, y + rIdx * cellH, cellW, cellH, 'F');
+          withOpacity(0.35, () => {
+            doc.setDrawColor(...theme.cardBorder);
+            doc.setLineWidth(0.6);
+            doc.rect(x + tIdx * cellW, y + rIdx * cellH, cellW, cellH, 'S');
+          });
           doc.setFontSize(7);
-          doc.setTextColor(60, 36, 16);
+          doc.setTextColor(...textColorForFill(fill));
           doc.text(String(count), x + tIdx * cellW + cellW / 2, y + rIdx * cellH + cellH / 2 + 2, { align: 'center' });
         });
         doc.setFontSize(7);
@@ -2032,21 +2137,17 @@ export default function AdminPlayers() {
         metrics.forEach((metricB, j) => {
           const corr = pearson(values[i], values[j]);
           const t = clamp(Math.abs(corr), 0, 1);
-          const color = corr >= 0
-            ? [
-                Math.round(255 + (176 - 255) * t),
-                Math.round(244 + (74 - 244) * t),
-                Math.round(230 + (20 - 230) * t)
-              ]
-            : [
-                Math.round(252 + (176 - 252) * t),
-                Math.round(226 + (40 - 226) * t),
-                Math.round(220 + (24 - 220) * t)
-              ];
-          doc.setFillColor(color[0], color[1], color[2]);
+          const signColor = corr >= 0 ? theme.oilTeal : theme.oilPlum;
+          const fill = mixColor(theme.tableRow, signColor, 0.8 * t);
+          doc.setFillColor(...fill);
           doc.rect(x + j * cellW, y + i * cellH, cellW, cellH, 'F');
+          withOpacity(0.35, () => {
+            doc.setDrawColor(...theme.cardBorder);
+            doc.setLineWidth(0.6);
+            doc.rect(x + j * cellW, y + i * cellH, cellW, cellH, 'S');
+          });
           doc.setFontSize(7);
-          doc.setTextColor(60, 36, 16);
+          doc.setTextColor(...textColorForFill(fill));
           doc.text(corr.toFixed(1), x + j * cellW + cellW / 2, y + i * cellH + cellH / 2 + 2, { align: 'center' });
         });
         doc.setFontSize(7);
@@ -2097,8 +2198,12 @@ export default function AdminPlayers() {
 
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(14);
-      doc.setTextColor(60, 36, 16);
+      doc.setTextColor(...theme.text);
       doc.text('Chart Explanations', 40, 92);
+      withOpacity(0.85, () => {
+        doc.setFillColor(...theme.oilGold);
+        doc.rect(40, 98, 138, 2, 'F');
+      });
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(9);
       doc.setTextColor(...theme.mutedText);
@@ -2281,12 +2386,22 @@ export default function AdminPlayers() {
         const col = index % cols;
         const x = 40 + col * (cardWidth + gap);
         const y = top + row * (cardHeight + gap);
-        doc.setFillColor(255, 255, 255);
+        doc.setFillColor(...theme.cardBackground);
         doc.setDrawColor(...theme.cardBorder);
-        doc.roundedRect(x, y, cardWidth, cardHeight, 8, 8, 'FD');
+        doc.roundedRect(x, y, cardWidth, cardHeight, 10, 10, 'FD');
+        withOpacity(0.14, () => {
+          doc.setFillColor(...theme.oilTeal);
+          doc.ellipse(x + cardWidth - 14, y + 12, 60, 18, 'F');
+          doc.setFillColor(...theme.oilEmber);
+          doc.ellipse(x + cardWidth - 40, y + 22, 74, 24, 'F');
+        });
+        withOpacity(0.85, () => {
+          doc.setFillColor(...theme.oilGold);
+          doc.rect(x, y, cardWidth, 2, 'F');
+        });
         doc.setFont('helvetica', 'bold');
         doc.setFontSize(10);
-        doc.setTextColor(60, 36, 16);
+        doc.setTextColor(...theme.text);
         doc.text(item.title, x + 12, y + 16, { maxWidth: cardWidth - 24 });
         doc.setFont('helvetica', 'normal');
         doc.setFontSize(8);
@@ -2436,7 +2551,7 @@ export default function AdminPlayers() {
 
         doc.setFont('helvetica', 'bold');
         doc.setFontSize(13);
-        doc.setTextColor(60, 36, 16);
+        doc.setTextColor(...theme.text);
         doc.text(batchTitle, 40, 92);
 
         doc.setFont('helvetica', 'normal');
@@ -2469,15 +2584,20 @@ export default function AdminPlayers() {
             fontSize: 7.5,
             cellPadding: 3,
             overflow: 'linebreak',
-            textColor: [60, 36, 16],
+            textColor: theme.text,
+            fillColor: theme.tableRow,
             lineColor: theme.cardBorder,
-            lineWidth: 0.1
+            lineWidth: 0.2
           },
           headStyles: {
             fillColor: theme.tableHeader,
-            textColor: 255,
+            textColor: theme.headerText,
             fontStyle: 'bold',
             halign: 'center'
+          },
+          bodyStyles: {
+            fillColor: theme.tableRow,
+            textColor: theme.text
           },
           alternateRowStyles: {
             fillColor: theme.tableAltRow
