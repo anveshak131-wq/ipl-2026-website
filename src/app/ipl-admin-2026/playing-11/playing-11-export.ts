@@ -409,139 +409,161 @@ export async function exportPlaying11ToPDF(payload: Playing11ExportPayload): Pro
   ).length;
 
   const theme = {
-    // Dark, modern "oil paint" palette (deep base + rich accents)
-    pageBackground: [7, 10, 18] as const,
-    surface: [13, 18, 30] as const,
-    surface2: [17, 24, 39] as const,
-    border: [36, 48, 74] as const,
-    headerDark: [10, 14, 24] as const,
-    headerLine: [36, 48, 74] as const,
-    headerText: [241, 245, 249] as const,
-    headerMuted: [148, 163, 184] as const,
-    cardBackground: [13, 18, 30] as const,
-    cardBorder: [36, 48, 74] as const,
-    cardTitle: [241, 245, 249] as const,
-    cardText: [203, 213, 225] as const,
+    // Dark premium palette (clean + modern UI/UX)
+    bg0: [6, 8, 14] as const,
+    bg1: [11, 15, 26] as const,
+    bg2: [16, 22, 38] as const,
+    plate: [14, 19, 32] as const,
+    plate2: [18, 25, 43] as const,
+    border: [38, 52, 86] as const,
+    text: [241, 245, 249] as const,
+    muted: [148, 163, 184] as const,
+    subtle: [203, 213, 225] as const,
+    // Accents (rich "oil" tones without messy blobs)
+    cyan: [34, 211, 238] as const,
+    blue: [96, 165, 250] as const,
+    violet: [167, 139, 250] as const,
+    fuchsia: [244, 114, 182] as const,
+    amber: [251, 191, 36] as const,
+    emerald: [52, 211, 153] as const,
     tableText: [226, 232, 240] as const,
-    tableLine: [36, 48, 74] as const,
-    // Oil accents
-    oilTeal: [20, 184, 166] as const,
-    oilBlue: [59, 130, 246] as const,
-    oilIndigo: [99, 102, 241] as const,
-    oilPurple: [168, 85, 247] as const,
-    oilMagenta: [236, 72, 153] as const,
-    oilAmber: [245, 158, 11] as const,
-    team1Header: [59, 130, 246] as const,
-    team2Header: [34, 197, 94] as const,
-    impactHeader: [245, 158, 11] as const,
-    team1Alt: [11, 18, 34] as const,
-    team2Alt: [10, 26, 18] as const,
-    impactAlt: [30, 20, 10] as const
+    tableLine: [38, 52, 86] as const,
+    rowA: [14, 19, 32] as const,
+    rowB: [12, 17, 28] as const,
+    team1Header: [96, 165, 250] as const,
+    team2Header: [52, 211, 153] as const,
+    impactHeader: [251, 191, 36] as const
   };
 
-  const drawOilBackdrop = () => {
-    doc.setFillColor(...theme.pageBackground);
+  const drawBackdrop = () => {
+    doc.setFillColor(...theme.bg0);
     doc.rect(0, 0, pageWidth, pageHeight, 'F');
 
-    // "Oil blobs" — layered circles/rounded shapes to create depth
-    const blobs = [
-      { x: pageWidth * 0.18, y: headerHeight + 90, r: 130, c: theme.oilIndigo },
-      { x: pageWidth * 0.34, y: headerHeight + 40, r: 110, c: theme.oilTeal },
-      { x: pageWidth * 0.82, y: headerHeight + 70, r: 150, c: theme.oilPurple },
-      { x: pageWidth * 0.74, y: pageHeight * 0.72, r: 170, c: theme.oilMagenta },
-      { x: pageWidth * 0.24, y: pageHeight * 0.78, r: 150, c: theme.oilAmber },
-    ];
+    // Faux gradient bands
+    doc.setFillColor(...theme.bg1);
+    doc.rect(0, 0, pageWidth, pageHeight * 0.55, 'F');
+    doc.setFillColor(...theme.bg2);
+    doc.rect(0, pageHeight * 0.55, pageWidth, pageHeight * 0.45, 'F');
 
-    blobs.forEach((b) => {
-      doc.setFillColor(...b.c);
-      doc.circle(b.x, b.y, b.r, 'F');
-    });
+    // Corner accent shapes
+    doc.setFillColor(...theme.violet);
+    doc.roundedRect(-140, -90, 360, 230, 90, 90, 'F');
+    doc.setFillColor(...theme.cyan);
+    doc.roundedRect(pageWidth - 240, -70, 340, 210, 90, 90, 'F');
+    doc.setFillColor(...theme.fuchsia);
+    doc.roundedRect(pageWidth - 290, pageHeight - 170, 460, 290, 110, 110, 'F');
 
-    // Dark overlay panels to keep readability (still looks "oily" beneath)
-    doc.setFillColor(...theme.surface);
-    doc.roundedRect(marginX - 10, headerHeight + 8, pageWidth - (marginX - 10) * 2, pageHeight - headerHeight - 40, 16, 16, 'F');
+    // Content plate
+    doc.setFillColor(...theme.plate);
+    doc.setDrawColor(...theme.border);
+    doc.setLineWidth(1);
+    doc.roundedRect(
+      marginX - 12,
+      headerHeight + 10,
+      pageWidth - (marginX - 12) * 2,
+      pageHeight - headerHeight - 46,
+      18,
+      18,
+      'FD'
+    );
   };
 
   const drawPageShell = () => {
-    drawOilBackdrop();
+    drawBackdrop();
 
-    doc.setFillColor(...theme.headerDark);
-    doc.rect(0, 0, pageWidth, headerHeight, 'F');
+    // Header plate (premium, minimal)
+    doc.setFillColor(...theme.plate2);
+    doc.setDrawColor(...theme.border);
+    doc.setLineWidth(1);
+    doc.roundedRect(marginX - 12, 18, pageWidth - (marginX - 12) * 2, headerHeight - 18, 18, 18, 'FD');
 
-    // Accent ribbon (oil gradient feel via blocks)
-    doc.setFillColor(...theme.oilIndigo);
-    doc.roundedRect(0, 0, pageWidth * 0.55, headerHeight, 0, 0, 'F');
-    doc.setFillColor(...theme.oilTeal);
-    doc.roundedRect(0, headerHeight - 18, pageWidth * 0.38, 18, 0, 0, 'F');
-    doc.setFillColor(...theme.oilMagenta);
-    doc.roundedRect(pageWidth * 0.55, 0, pageWidth * 0.12, headerHeight, 0, 0, 'F');
-
-    doc.setDrawColor(...theme.headerLine);
-    doc.setLineWidth(0.8);
-    doc.line(0, headerHeight, pageWidth, headerHeight);
+    // Accent bar
+    doc.setFillColor(...theme.cyan);
+    doc.roundedRect(marginX - 12, headerHeight - 6, pageWidth - (marginX - 12) * 2, 6, 3, 3, 'F');
 
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(12);
-    doc.setTextColor(...theme.headerText);
-    doc.text('SportsUp18 Admin', marginX, 26);
+    doc.setTextColor(...theme.text);
+    doc.text('SportsUp18 • Admin Export', marginX, 44);
 
-    doc.setFontSize(20);
-    doc.text('Playing 11 & Impact Players', pageWidth / 2, 40, { align: 'center' });
+    doc.setFontSize(22);
+    doc.text('Playing 11 & Impact Player', marginX, 72);
 
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(10);
-    doc.setTextColor(...theme.headerMuted);
-    doc.text(`Generated: ${generatedAt}`, pageWidth - marginX, 26, { align: 'right' });
+    // Right aligned match title
+    doc.setFontSize(12);
+    doc.setTextColor(...theme.subtle);
+    doc.text(matchTitle, pageWidth - marginX, 44, { align: 'right' });
 
-    doc.setFontSize(11);
-    doc.text(matchTitle, pageWidth / 2, 58, { align: 'center' });
-    doc.setFontSize(9);
-    doc.text(matchMeta, pageWidth / 2, 72, { align: 'center' });
+    // Meta chips
+    const chipY = 90;
+    const chipPadX = 10;
+    const chipH = 18;
+    const chipGap = 8;
+    const chips = [matchMeta, `Generated ${generatedAt}`];
+    let chipX = marginX;
+    chips.forEach((label, idx) => {
+      const maxW = pageWidth - marginX * 2;
+      const textW = Math.min(doc.getTextWidth(label), maxW - 20);
+      const chipW = textW + chipPadX * 2;
+      doc.setFillColor(...(idx === 0 ? theme.bg2 : theme.bg1));
+      doc.setDrawColor(...theme.border);
+      doc.setLineWidth(0.8);
+      doc.roundedRect(chipX, chipY - chipH + 4, chipW, chipH, 9, 9, 'FD');
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(9);
+      doc.setTextColor(...theme.muted);
+      doc.text(label, chipX + chipPadX, chipY);
+      chipX += chipW + chipGap;
+    });
   };
 
   const drawInfoCard = (x: number, y: number, w: number, h: number, title: string, lines: string[], accent: [number, number, number]) => {
-    doc.setFillColor(...theme.cardBackground);
-    doc.setDrawColor(...theme.cardBorder);
-    doc.setLineWidth(0.8);
-    doc.roundedRect(x, y, w, h, 10, 10, 'FD');
+    // Shadow layer
+    doc.setFillColor(0, 0, 0);
+    doc.roundedRect(x + 2, y + 3, w, h, 14, 14, 'F');
+    doc.setFillColor(...theme.plate2);
+    doc.setDrawColor(...theme.border);
+    doc.setLineWidth(0.9);
+    doc.roundedRect(x, y, w, h, 14, 14, 'FD');
+    // Accent rail
     doc.setFillColor(...accent);
-    doc.roundedRect(x, y, w, 6, 10, 10, 'F');
+    doc.roundedRect(x, y, 8, h, 14, 14, 'F');
 
     doc.setFont('helvetica', 'bold');
-    doc.setFontSize(10);
-    doc.setTextColor(...theme.cardTitle);
-    doc.text(title, x + 12, y + 20);
+    doc.setFontSize(11);
+    doc.setTextColor(...theme.text);
+    doc.text(title, x + 18, y + 22);
 
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(9);
-    doc.setTextColor(...theme.cardText);
-    let cursor = y + 34;
+    doc.setTextColor(...theme.subtle);
+    let cursor = y + 38;
     lines.forEach((line) => {
-      const wrapped = doc.splitTextToSize(line, w - 24);
+      const wrapped = doc.splitTextToSize(line, w - 28);
       wrapped.forEach((textLine: string) => {
-        doc.text(textLine, x + 12, cursor);
+        doc.text(textLine, x + 18, cursor);
         cursor += 12;
       });
     });
   };
 
   const drawSectionHeader = (label: string, color: [number, number, number], y: number) => {
-    doc.setFillColor(...theme.surface2);
+    doc.setFillColor(...theme.plate2);
     doc.setDrawColor(...theme.border);
-    doc.setLineWidth(0.8);
-    doc.roundedRect(marginX, y, 260, 28, 12, 12, 'FD');
+    doc.setLineWidth(0.9);
+    doc.roundedRect(marginX, y, 300, 30, 14, 14, 'FD');
     doc.setFillColor(...color);
-    doc.roundedRect(marginX + 8, y + 7, 14, 14, 7, 7, 'F');
+    doc.roundedRect(marginX + 10, y + 8, 14, 14, 7, 7, 'F');
     doc.setFont('helvetica', 'bold');
-    doc.setFontSize(11);
-    doc.setTextColor(...theme.headerText);
-    doc.text(label, marginX + 28, y + 19);
+    doc.setFontSize(12);
+    doc.setTextColor(...theme.text);
+    doc.text(label, marginX + 32, y + 20);
   };
 
   const drawFooter = (pageNumber: number, totalPages: number) => {
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(9);
-    doc.setTextColor(...theme.headerMuted);
+    doc.setTextColor(...theme.muted);
     doc.text(matchTitle, marginX, pageHeight - 16);
     doc.text(`Page ${pageNumber} of ${totalPages}`, pageWidth - marginX, pageHeight - 16, { align: 'right' });
   };
@@ -565,7 +587,7 @@ export async function exportPlaying11ToPDF(payload: Playing11ExportPayload): Pro
       payload.match.venue,
       `Match ID: ${payload.match.id}${payload.match.matchNumber ? ` • ${payload.match.matchNumber}` : ''}`
     ],
-    theme.oilBlue
+    theme.blue
   );
 
   drawInfoCard(
@@ -579,7 +601,7 @@ export async function exportPlaying11ToPDF(payload: Playing11ExportPayload): Pro
       `Impact Players: ${impactCount}`,
       `League: ${payload.match.league.toUpperCase()}`
     ],
-    theme.oilTeal
+    theme.cyan
   );
 
   const tableHeaders = ['#', 'Player', 'Role', 'Jersey', 'Nationality', 'Captain', 'Batting', 'Bowling', 'Impact'];
@@ -633,10 +655,10 @@ export async function exportPlaying11ToPDF(payload: Playing11ExportPayload): Pro
       textColor: theme.tableText,
       lineColor: theme.tableLine,
       lineWidth: 0.2,
-      fillColor: theme.surface2,
+      fillColor: theme.rowA,
     },
     headStyles: { fillColor: theme.team1Header, textColor: 255, fontStyle: 'bold', lineColor: theme.team1Header },
-    alternateRowStyles: { fillColor: theme.team1Alt },
+    alternateRowStyles: { fillColor: theme.rowB },
     margin: tableMargin,
     ...tableHooks
   });
@@ -656,10 +678,10 @@ export async function exportPlaying11ToPDF(payload: Playing11ExportPayload): Pro
       textColor: theme.tableText,
       lineColor: theme.tableLine,
       lineWidth: 0.2,
-      fillColor: theme.surface2,
+      fillColor: theme.rowA,
     },
     headStyles: { fillColor: theme.team2Header, textColor: 255, fontStyle: 'bold', lineColor: theme.team2Header },
-    alternateRowStyles: { fillColor: theme.team2Alt },
+    alternateRowStyles: { fillColor: theme.rowB },
     margin: tableMargin,
     ...tableHooks
   });
@@ -685,10 +707,10 @@ export async function exportPlaying11ToPDF(payload: Playing11ExportPayload): Pro
       textColor: theme.tableText,
       lineColor: theme.tableLine,
       lineWidth: 0.2,
-      fillColor: theme.surface2,
+      fillColor: theme.rowA,
     },
     headStyles: { fillColor: theme.impactHeader, textColor: 255, fontStyle: 'bold', lineColor: theme.impactHeader },
-    alternateRowStyles: { fillColor: theme.impactAlt },
+    alternateRowStyles: { fillColor: theme.rowB },
     margin: tableMargin,
     ...tableHooks
   });
@@ -721,11 +743,11 @@ export async function exportPlaying11ToPDF(payload: Playing11ExportPayload): Pro
     return `${teamLabel}: Substituted ${originalLabel} → ${impactLabel}${timeLabel}`;
   };
 
-  drawSectionHeader('Substitution Summary', theme.oilPurple, cursorY);
+  drawSectionHeader('Substitution Summary', theme.violet, cursorY);
   cursorY += 34;
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(10);
-  doc.setTextColor(...theme.cardText);
+  doc.setTextColor(...theme.subtle);
   const summaryLines = [buildSubstitutionLine('team1'), buildSubstitutionLine('team2')];
   summaryLines.forEach((line) => {
     const wrapped = doc.splitTextToSize(line, pageWidth - marginX * 2);
