@@ -2549,18 +2549,6 @@ export default function AdminPlayers() {
         const partLabel = `Data Part ${partIndex + 1} of ${columnParts.length}`;
         const columnLabels = displayColumns.map(column => column.label).join(' • ');
 
-        doc.setFont('helvetica', 'bold');
-        doc.setFontSize(13);
-        doc.setTextColor(...theme.text);
-        doc.text(batchTitle, 40, 92);
-
-        doc.setFont('helvetica', 'normal');
-        doc.setFontSize(8);
-        doc.setTextColor(...theme.mutedText);
-        doc.text(playerMeta, 40, 104, { maxWidth: pageWidth - 80 });
-        doc.text(partLabel, 40, 110);
-        doc.text(columnLabels, 40, 116, { maxWidth: pageWidth - 80 });
-
         const pdfRows = batch.map(row =>
           displayColumns.map(column => formatPdfCell(column.key, (row as any)[column.key]))
         );
@@ -2606,6 +2594,18 @@ export default function AdminPlayers() {
           willDrawPage: () => {
             const pageNumber = doc.internal.getCurrentPageInfo().pageNumber;
             drawPageFrame(pageNumber);
+
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(13);
+            doc.setTextColor(...theme.text);
+            doc.text(batchTitle, 40, 92);
+
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(8);
+            doc.setTextColor(...theme.mutedText);
+            doc.text(playerMeta, 40, 104, { maxWidth: pageWidth - 80 });
+            doc.text(partLabel, 40, 110);
+            doc.text(columnLabels, 40, 116, { maxWidth: pageWidth - 80 });
           }
         });
       });
