@@ -409,35 +409,73 @@ export async function exportPlaying11ToPDF(payload: Playing11ExportPayload): Pro
   ).length;
 
   const theme = {
-    pageBackground: [248, 250, 252] as const,
-    headerDark: [15, 23, 42] as const,
-    headerAccent: [37, 99, 235] as const,
-    headerLine: [203, 213, 225] as const,
-    headerText: [248, 250, 252] as const,
-    headerMuted: [226, 232, 240] as const,
-    cardBackground: [255, 255, 255] as const,
-    cardBorder: [226, 232, 240] as const,
-    cardTitle: [30, 41, 59] as const,
-    cardText: [71, 85, 105] as const,
-    cardAccent: [59, 130, 246] as const,
-    cardAccentSecondary: [14, 116, 144] as const,
-    tableText: [15, 23, 42] as const,
-    tableLine: [226, 232, 240] as const,
-    team1Header: [37, 99, 235] as const,
+    // Dark, modern "oil paint" palette (deep base + rich accents)
+    pageBackground: [7, 10, 18] as const,
+    surface: [13, 18, 30] as const,
+    surface2: [17, 24, 39] as const,
+    border: [36, 48, 74] as const,
+    headerDark: [10, 14, 24] as const,
+    headerLine: [36, 48, 74] as const,
+    headerText: [241, 245, 249] as const,
+    headerMuted: [148, 163, 184] as const,
+    cardBackground: [13, 18, 30] as const,
+    cardBorder: [36, 48, 74] as const,
+    cardTitle: [241, 245, 249] as const,
+    cardText: [203, 213, 225] as const,
+    tableText: [226, 232, 240] as const,
+    tableLine: [36, 48, 74] as const,
+    // Oil accents
+    oilTeal: [20, 184, 166] as const,
+    oilBlue: [59, 130, 246] as const,
+    oilIndigo: [99, 102, 241] as const,
+    oilPurple: [168, 85, 247] as const,
+    oilMagenta: [236, 72, 153] as const,
+    oilAmber: [245, 158, 11] as const,
+    team1Header: [59, 130, 246] as const,
     team2Header: [34, 197, 94] as const,
-    impactHeader: [249, 115, 22] as const,
-    team1Alt: [239, 246, 255] as const,
-    team2Alt: [236, 253, 245] as const,
-    impactAlt: [255, 247, 237] as const
+    impactHeader: [245, 158, 11] as const,
+    team1Alt: [11, 18, 34] as const,
+    team2Alt: [10, 26, 18] as const,
+    impactAlt: [30, 20, 10] as const
+  };
+
+  const drawOilBackdrop = () => {
+    doc.setFillColor(...theme.pageBackground);
+    doc.rect(0, 0, pageWidth, pageHeight, 'F');
+
+    // "Oil blobs" — layered circles/rounded shapes to create depth
+    const blobs = [
+      { x: pageWidth * 0.18, y: headerHeight + 90, r: 130, c: theme.oilIndigo },
+      { x: pageWidth * 0.34, y: headerHeight + 40, r: 110, c: theme.oilTeal },
+      { x: pageWidth * 0.82, y: headerHeight + 70, r: 150, c: theme.oilPurple },
+      { x: pageWidth * 0.74, y: pageHeight * 0.72, r: 170, c: theme.oilMagenta },
+      { x: pageWidth * 0.24, y: pageHeight * 0.78, r: 150, c: theme.oilAmber },
+    ];
+
+    blobs.forEach((b) => {
+      doc.setFillColor(...b.c);
+      doc.circle(b.x, b.y, b.r, 'F');
+    });
+
+    // Dark overlay panels to keep readability (still looks "oily" beneath)
+    doc.setFillColor(...theme.surface);
+    doc.roundedRect(marginX - 10, headerHeight + 8, pageWidth - (marginX - 10) * 2, pageHeight - headerHeight - 40, 16, 16, 'F');
   };
 
   const drawPageShell = () => {
-    doc.setFillColor(...theme.pageBackground);
-    doc.rect(0, 0, pageWidth, pageHeight, 'F');
+    drawOilBackdrop();
+
     doc.setFillColor(...theme.headerDark);
     doc.rect(0, 0, pageWidth, headerHeight, 'F');
-    doc.setFillColor(...theme.headerAccent);
-    doc.rect(0, 0, pageWidth * 0.62, headerHeight, 'F');
+
+    // Accent ribbon (oil gradient feel via blocks)
+    doc.setFillColor(...theme.oilIndigo);
+    doc.roundedRect(0, 0, pageWidth * 0.55, headerHeight, 0, 0, 'F');
+    doc.setFillColor(...theme.oilTeal);
+    doc.roundedRect(0, headerHeight - 18, pageWidth * 0.38, 18, 0, 0, 'F');
+    doc.setFillColor(...theme.oilMagenta);
+    doc.roundedRect(pageWidth * 0.55, 0, pageWidth * 0.12, headerHeight, 0, 0, 'F');
+
     doc.setDrawColor(...theme.headerLine);
     doc.setLineWidth(0.8);
     doc.line(0, headerHeight, pageWidth, headerHeight);
@@ -467,7 +505,7 @@ export async function exportPlaying11ToPDF(payload: Playing11ExportPayload): Pro
     doc.setLineWidth(0.8);
     doc.roundedRect(x, y, w, h, 10, 10, 'FD');
     doc.setFillColor(...accent);
-    doc.rect(x, y, w, 5, 'F');
+    doc.roundedRect(x, y, w, 6, 10, 10, 'F');
 
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(10);
@@ -488,18 +526,22 @@ export async function exportPlaying11ToPDF(payload: Playing11ExportPayload): Pro
   };
 
   const drawSectionHeader = (label: string, color: [number, number, number], y: number) => {
+    doc.setFillColor(...theme.surface2);
+    doc.setDrawColor(...theme.border);
+    doc.setLineWidth(0.8);
+    doc.roundedRect(marginX, y, 260, 28, 12, 12, 'FD');
     doc.setFillColor(...color);
-    doc.roundedRect(marginX, y, 220, 24, 8, 8, 'F');
+    doc.roundedRect(marginX + 8, y + 7, 14, 14, 7, 7, 'F');
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(11);
-    doc.setTextColor(255, 255, 255);
-    doc.text(label, marginX + 12, y + 16);
+    doc.setTextColor(...theme.headerText);
+    doc.text(label, marginX + 28, y + 19);
   };
 
   const drawFooter = (pageNumber: number, totalPages: number) => {
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(9);
-    doc.setTextColor(148, 163, 184);
+    doc.setTextColor(...theme.headerMuted);
     doc.text(matchTitle, marginX, pageHeight - 16);
     doc.text(`Page ${pageNumber} of ${totalPages}`, pageWidth - marginX, pageHeight - 16, { align: 'right' });
   };
@@ -523,7 +565,7 @@ export async function exportPlaying11ToPDF(payload: Playing11ExportPayload): Pro
       payload.match.venue,
       `Match ID: ${payload.match.id}${payload.match.matchNumber ? ` • ${payload.match.matchNumber}` : ''}`
     ],
-    theme.cardAccent
+    theme.oilBlue
   );
 
   drawInfoCard(
@@ -537,7 +579,7 @@ export async function exportPlaying11ToPDF(payload: Playing11ExportPayload): Pro
       `Impact Players: ${impactCount}`,
       `League: ${payload.match.league.toUpperCase()}`
     ],
-    theme.cardAccentSecondary
+    theme.oilTeal
   );
 
   const tableHeaders = ['#', 'Player', 'Role', 'Jersey', 'Nationality', 'Captain', 'Batting', 'Bowling', 'Impact'];
@@ -585,8 +627,15 @@ export async function exportPlaying11ToPDF(payload: Playing11ExportPayload): Pro
     head: [tableHeaders],
     body: buildTeamRows('team1'),
     startY: cursorY,
-    styles: { fontSize: 8, cellPadding: 3, textColor: theme.tableText, lineColor: theme.tableLine, lineWidth: 0.2 },
-    headStyles: { fillColor: theme.team1Header, textColor: 255, fontStyle: 'bold' },
+    styles: {
+      fontSize: 8,
+      cellPadding: 3,
+      textColor: theme.tableText,
+      lineColor: theme.tableLine,
+      lineWidth: 0.2,
+      fillColor: theme.surface2,
+    },
+    headStyles: { fillColor: theme.team1Header, textColor: 255, fontStyle: 'bold', lineColor: theme.team1Header },
     alternateRowStyles: { fillColor: theme.team1Alt },
     margin: tableMargin,
     ...tableHooks
@@ -601,8 +650,15 @@ export async function exportPlaying11ToPDF(payload: Playing11ExportPayload): Pro
     head: [tableHeaders],
     body: buildTeamRows('team2'),
     startY: cursorY,
-    styles: { fontSize: 8, cellPadding: 3, textColor: theme.tableText, lineColor: theme.tableLine, lineWidth: 0.2 },
-    headStyles: { fillColor: theme.team2Header, textColor: 255, fontStyle: 'bold' },
+    styles: {
+      fontSize: 8,
+      cellPadding: 3,
+      textColor: theme.tableText,
+      lineColor: theme.tableLine,
+      lineWidth: 0.2,
+      fillColor: theme.surface2,
+    },
+    headStyles: { fillColor: theme.team2Header, textColor: 255, fontStyle: 'bold', lineColor: theme.team2Header },
     alternateRowStyles: { fillColor: theme.team2Alt },
     margin: tableMargin,
     ...tableHooks
@@ -623,8 +679,15 @@ export async function exportPlaying11ToPDF(payload: Playing11ExportPayload): Pro
     head: [['Team', 'Impact Player', 'Role', 'Substitution Time', 'Original Player', 'Substituted At']],
     body: impactRows.length > 0 ? impactRows : [['-', 'None selected', '', '', '', '']],
     startY: cursorY,
-    styles: { fontSize: 8, cellPadding: 3, textColor: theme.tableText, lineColor: theme.tableLine, lineWidth: 0.2 },
-    headStyles: { fillColor: theme.impactHeader, textColor: 255, fontStyle: 'bold' },
+    styles: {
+      fontSize: 8,
+      cellPadding: 3,
+      textColor: theme.tableText,
+      lineColor: theme.tableLine,
+      lineWidth: 0.2,
+      fillColor: theme.surface2,
+    },
+    headStyles: { fillColor: theme.impactHeader, textColor: 255, fontStyle: 'bold', lineColor: theme.impactHeader },
     alternateRowStyles: { fillColor: theme.impactAlt },
     margin: tableMargin,
     ...tableHooks
