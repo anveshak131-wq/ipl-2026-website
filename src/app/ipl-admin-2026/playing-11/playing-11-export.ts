@@ -693,6 +693,49 @@ export async function exportPlaying11ToPDF(payload: Playing11ExportPayload): Pro
     ...tableHooks
   });
 
+  const afterImpact = (doc as any).lastAutoTable;
+  cursorY = afterImpact?.finalY ? afterImpact.finalY + 18 : cursorY + 140;
+
+  const buildSubstitutionLine = (teamSide: 'team1' | 'team2') => {
+    const teamLabel =
+      teamSide === 'team1'
+        ? payload.match.team1.shortName || payload.match.team1.name || 'Team 1'
+        : payload.match.team2.shortName || payload.match.team2.name || 'Team 2';
+
+    const impactInfo = normalizeImpact(payload.impact[teamSide] || undefined);
+    if (!impactInfo.playerId) return `${teamLabel}: No Impact Player used`;
+
+    const impactPlayer = payload.players.find((p) => p.id === impactInfo.playerId);
+    const originalPlayer = impactInfo.original
+      ? payload.players.find((p) => p.id === impactInfo.original)
+      : undefined;
+
+    const originalLabel = originalPlayer
+      ? `${originalPlayer.name}${originalPlayer.role ? ` (${originalPlayer.role})` : ''}`
+      : impactInfo.original || 'Unknown';
+    const impactLabel = impactPlayer
+      ? `${impactPlayer.name}${impactPlayer.role ? ` (${impactPlayer.role})` : ''}`
+      : impactInfo.playerId;
+
+    const timeLabel = impactInfo.substitutionTime ? ` • ${impactInfo.substitutionTime}` : '';
+    return `${teamLabel}: Substituted ${originalLabel} → ${impactLabel}${timeLabel}`;
+  };
+
+  drawSectionHeader('Substitution Summary', theme.oilPurple, cursorY);
+  cursorY += 34;
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(10);
+  doc.setTextColor(...theme.cardText);
+  const summaryLines = [buildSubstitutionLine('team1'), buildSubstitutionLine('team2')];
+  summaryLines.forEach((line) => {
+    const wrapped = doc.splitTextToSize(line, pageWidth - marginX * 2);
+    wrapped.forEach((textLine: string) => {
+      doc.text(textLine, marginX, cursorY);
+      cursorY += 14;
+    });
+    cursorY += 4;
+  });
+
   const filename = buildFilename(payload.match, 'playing11-impact', 'pdf');
   const pdfBlob = doc.output('blob');
   downloadBlob(pdfBlob, filename);
