@@ -6,6 +6,8 @@ import { Search, ChevronDown, Users, Sword, Shield, Hand, ArrowRight } from 'luc
 import Image from 'next/image';
 import { teamColors, fadeIn, staggerContainer, inputStyle } from '@/styles/theme';
 import PlayerCardModal from '../teams/PlayerCardModal';
+import { applyReliability, computeRoleRawScore } from '@/lib/playerRanking';
+import { calculateAge } from '@/lib/dateUtils';
 
 interface Player {
   id: string;
@@ -167,6 +169,58 @@ function normalizeRole(role: string): string {
   if (lower.includes('bowl')) return 'Bowler';
   if (lower.includes('bat')) return 'Batsman';
   return raw;
+}
+
+function roleSortRank(role: string): number {
+  const normalized = normalizeRole(role);
+  switch (normalized) {
+    case 'Batsman':
+      return 0;
+    case 'Wicket-keeper':
+      return 1;
+    case 'All-rounder':
+      return 2;
+    case 'Bowler':
+      return 3;
+    default:
+      return 9;
+  }
+}
+
+function toFiniteNumber(value: any): number | undefined {
+  if (value === null || value === undefined) return undefined;
+  const num = typeof value === 'number' ? value : Number(String(value).trim());
+  return Number.isFinite(num) ? num : undefined;
+}
+
+function getComparableAge(player: Player): number {
+  const ageFromField = toFiniteNumber(player.age);
+  if (ageFromField && ageFromField > 0) return ageFromField;
+  if (player.dateOfBirth) {
+    const derived = calculateAge(player.dateOfBirth);
+    if (derived && derived > 0) return derived;
+  }
+  return 999;
+}
+
+function getPerformanceScore(player: Player): number {
+  const matches = toFiniteNumber(player.stats?.matches ?? player.matches) ?? 0;
+
+  const role = normalizeRole(player.role) as any;
+  const stats: any = {
+    matches,
+    runs: toFiniteNumber(player.stats?.runs ?? player.runs) ?? 0,
+    wickets: toFiniteNumber(player.stats?.wickets ?? player.wickets) ?? 0,
+    strikeRate: toFiniteNumber(player.stats?.strikeRate ?? player.strikeRate) ?? 0,
+    average: toFiniteNumber(player.stats?.average ?? player.battingAverage) ?? 0,
+    fifties: toFiniteNumber(player.stats?.fifties ?? player.fifties) ?? 0,
+    hundreds: toFiniteNumber(player.stats?.hundreds ?? player.hundreds) ?? 0,
+    economy: toFiniteNumber(player.stats?.economy ?? player.economy) ?? 0,
+    bowlingAverage: toFiniteNumber(player.stats?.bowlingAverage ?? player.bowlingAverage) ?? 0,
+  };
+
+  const raw = computeRoleRawScore({ role, stats } as any);
+  return applyReliability(raw, matches);
 }
 
 function normalizePlayer(raw: any, teams: Team[]): Player {
@@ -359,8 +413,21 @@ export default function ModernPlayersPanel({
       );
     }
 
-    // Stable sort: name asc by default for consistent UX.
-    result.sort((a, b) => a.name.localeCompare(b.name));
+    // End-user sorting:
+    // 1) Role group order: Batsman, Wicket-keeper, All-rounder, Bowler
+    // 2) Within role: performance DESC, age ASC, name ASC
+    result.sort((a, b) => {
+      const roleDelta = roleSortRank(a.role) - roleSortRank(b.role);
+      if (roleDelta !== 0) return roleDelta;
+
+      const perfDelta = getPerformanceScore(b) - getPerformanceScore(a);
+      if (perfDelta !== 0) return perfDelta;
+
+      const ageDelta = getComparableAge(a) - getComparableAge(b);
+      if (ageDelta !== 0) return ageDelta;
+
+      return a.name.localeCompare(b.name);
+    });
     return result;
   }, [players, searchTerm, selectedTeam, selectedRole]);
 
