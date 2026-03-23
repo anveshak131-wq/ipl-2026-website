@@ -25,14 +25,26 @@ interface StadiumInfo {
 // Mock stadium data - in production, this would come from team data
 const getStadiumInfo = (teamId: string, homeGrounds?: string[]): StadiumInfo[] => {
   const stadiums: { [key: string]: StadiumInfo[] } = {
-    '1': [{
-      name: 'M. Chinnaswamy Stadium',
-      city: 'Bangalore',
-      capacity: '40,000',
-      established: '1969',
-      description: 'One of the most iconic cricket stadiums in India, known for its electric atmosphere and passionate RCB fans.',
-      features: ['Floodlights', 'Dugouts', 'VIP Boxes', 'Media Center', 'Fan Zone'],
-    }],
+    '1': [
+      {
+        name: 'M. Chinnaswamy Stadium',
+        city: 'Bangalore',
+        capacity: '40,000',
+        established: '1969',
+        description:
+          'One of the most iconic cricket stadiums in India, known for its electric atmosphere and passionate RCB fans.',
+        features: ['Floodlights', 'Dugouts', 'VIP Boxes', 'Media Center', 'Fan Zone'],
+      },
+      {
+        name: 'Shaheed Veer Narayan Singh International Cricket Stadium',
+        city: 'New Raipur',
+        capacity: 'N/A',
+        established: 'N/A',
+        description:
+          'A modern international cricket venue used for hosting major fixtures and tournaments.',
+        features: ['Modern Facilities', 'Practice Nets', 'VIP Boxes', 'Media Center'],
+      },
+    ],
     '2': [{
       name: 'Wankhede Stadium',
       city: 'Mumbai',
@@ -44,14 +56,24 @@ const getStadiumInfo = (teamId: string, homeGrounds?: string[]): StadiumInfo[] =
     // Add more stadiums as needed
   };
 
-  return stadiums[teamId] || (homeGrounds?.map(ground => ({
-    name: ground,
-    city: 'Unknown',
-    capacity: 'N/A',
-    established: 'N/A',
-    description: `Home ground of ${homeGrounds[0]}`,
-    features: ['Standard Facilities'],
-  })) || []);
+  return (
+    stadiums[teamId] ||
+    (homeGrounds?.map((ground) => {
+      const raw = String(ground || '').trim();
+      const parts = raw.split(',').map((p) => p.trim()).filter(Boolean);
+      const name = parts[0] || raw || 'Stadium';
+      const city = parts.slice(1).join(', ') || 'Unknown';
+
+      return {
+        name,
+        city,
+        capacity: 'N/A',
+        established: 'N/A',
+        description: 'Official home stadium.',
+        features: ['Standard Facilities'],
+      };
+    }) || [])
+  );
 };
 
 export default function InteractiveStadiumTour({ team, primaryColor, secondaryColor }: InteractiveStadiumTourProps) {
@@ -216,4 +238,3 @@ export default function InteractiveStadiumTour({ team, primaryColor, secondaryCo
     </div>
   );
 }
-

@@ -758,30 +758,7 @@ export default function TeamDetailRedesigned({ teamId }: TeamDetailRedesignedPro
                 </div>
               )}
 
-              {/* Home Grounds - from Admin Data */}
-              {teamData.homeGrounds && teamData.homeGrounds.length > 0 && (
-                <div className="rounded-3xl backdrop-blur-xl p-12 border border-white/10"
-                     style={{ background: 'linear-gradient(135deg, rgba(236,28,36,0.1), rgba(218,165,32,0.1))' }}>
-                  <h3 className="text-4xl font-black mb-8 flex items-center gap-3 text-white">
-                    <CustomEmoji type="stadium" size={40} />
-                    Home Grounds
-                  </h3>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {teamData.homeGrounds.map((ground: string, i: number) => (
-                      <div key={i} className="group p-6 rounded-2xl bg-white/5 hover:bg-white/10 transition-all border border-white/5 hover:border-white/20 hover:scale-105 transform">
-                        <div className="flex items-start gap-4">
-                          <CustomEmoji type="venue" size={48} animate={true} />
-                          <div className="flex-1">
-                            <p className="text-xl font-bold text-white">{ground}</p>
-                            <p className="text-xs mt-2 text-gray-400">Official Home Ground</p>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
+              {/* Home Stadiums are shown in the Overview tab via the Interactive Stadium Tour. */}
 
               {/* Static Achievements Section */}
               <div className="rounded-3xl backdrop-blur-xl p-12 border border-white/10"

@@ -2866,28 +2866,7 @@ function AboutTab({ teamData, primaryColor, secondaryColor, coachingStaff }: Abo
         </div>
       )}
 
-      {/* Home Grounds Information */}
-      {teamData.homeGrounds && teamData.homeGrounds.length > 0 && (
-        <div className="rounded-3xl backdrop-blur-xl p-8 border shadow-xl animate-fade-in"
-             style={{
-               background: `linear-gradient(135deg, ${primaryColor.light}, ${secondaryColor.light})`,
-               borderColor: primaryColor.medium,
-               boxShadow: `0 10px 30px ${primaryColor.glow}15`
-             }}>
-          <div className="flex items-center gap-3 mb-8">
-            <CustomEmoji type="venue" size={48} animate={true} />
-            <h4 className="text-2xl font-black" style={{ color: primaryColor.textOnLight }}>Home Grounds</h4>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {teamData.homeGrounds.map((ground: string, idx: number) => (
-              <div key={idx} className="group p-6 rounded-2xl bg-white/5 hover:bg-white/10 transition-all border border-white/5 hover:border-white/20 hover:scale-105 transform">
-                <p className="font-bold text-lg" style={{ color: primaryColor.textOnLight }}>{ground}</p>
-                <p className="text-xs mt-2" style={{ color: primaryColor.textOnLight }}>Official Home Ground</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
+      {/* Home Stadiums are shown via the Interactive Stadium Tour above. */}
     </div>
   );
 }
