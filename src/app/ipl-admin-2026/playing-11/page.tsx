@@ -939,7 +939,7 @@ export default function Playing11Page() {
                       <select
                         value={team1ImpactOriginalPlayer}
                         onChange={(e) => setTeam1ImpactOriginalPlayer(e.target.value)}
-                        disabled={team1Playing11.length !== 11}
+                        disabled={team1Playing11.length === 0}
                         className="w-full px-4 py-3 rounded-lg text-white disabled:opacity-60"
                         style={isWPL ? {
                           background: WPLColors.purpleRGBA[20],
@@ -949,7 +949,7 @@ export default function Playing11Page() {
                           border: '1px solid rgba(255, 255, 255, 0.1)',
                         }}
                       >
-                        <option value="">{team1Playing11.length === 11 ? 'Select Original Player...' : 'Select Playing 11 first'}</option>
+                        <option value="">{team1Playing11.length ? 'Select Original Player...' : 'Select Playing 11 first'}</option>
                         {team1Playing11
                           .filter((id) => id !== team1ImpactPlayer)
                           .map((id) => {
@@ -1170,7 +1170,7 @@ export default function Playing11Page() {
                       <select
                         value={team2ImpactOriginalPlayer}
                         onChange={(e) => setTeam2ImpactOriginalPlayer(e.target.value)}
-                        disabled={team2Playing11.length !== 11}
+                        disabled={team2Playing11.length === 0}
                         className="w-full px-4 py-3 rounded-lg text-white disabled:opacity-60"
                         style={isWPL ? {
                           background: WPLColors.purpleRGBA[20],
@@ -1180,7 +1180,7 @@ export default function Playing11Page() {
                           border: '1px solid rgba(255, 255, 255, 0.1)',
                         }}
                       >
-                        <option value="">{team2Playing11.length === 11 ? 'Select Original Player...' : 'Select Playing 11 first'}</option>
+                        <option value="">{team2Playing11.length ? 'Select Original Player...' : 'Select Playing 11 first'}</option>
                         {team2Playing11
                           .filter((id) => id !== team2ImpactPlayer)
                           .map((id) => {
