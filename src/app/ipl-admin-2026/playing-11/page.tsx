@@ -429,6 +429,31 @@ export default function Playing11Page() {
       const token = localStorage.getItem('adminToken');
       
       const existingSetAt = (selectedMatch as any).playing11?.setAt;
+      const sanitizePlaying11 = (playing11: string[], impactId: string, originalId: string) => {
+        let xi = playing11.map(String).filter(Boolean);
+        if (impactId && originalId) {
+          // Keep the ORIGINAL XI (pre-substitution): ensure original is in XI and impact is not.
+          xi = xi.map((id) => (id === impactId ? originalId : id));
+          xi = xi.filter((id) => id !== impactId);
+          if (!xi.includes(originalId)) {
+            if (xi.length < 11) xi.push(originalId);
+          }
+        }
+        xi = Array.from(new Set(xi));
+        if (xi.length > 11) xi = xi.slice(0, 11);
+        return xi;
+      };
+
+      const sanitizedTeam1Playing11 = sanitizePlaying11(
+        team1Playing11,
+        team1ImpactPlayer,
+        team1ImpactOriginalPlayer
+      );
+      const sanitizedTeam2Playing11 = sanitizePlaying11(
+        team2Playing11,
+        team2ImpactPlayer,
+        team2ImpactOriginalPlayer
+      );
 
       // Update match with playing 11
       // Use the match update API format
@@ -448,8 +473,8 @@ export default function Playing11Page() {
           status: selectedMatch.status,
           league: selectedMatch.league,
           playing11: {
-            team1: team1Playing11,
-            team2: team2Playing11,
+            team1: sanitizedTeam1Playing11,
+            team2: sanitizedTeam2Playing11,
             ...(publish ? { setAt: new Date().toISOString() } : (existingSetAt ? { setAt: existingSetAt } : {})),
           },
           impactPlayer: {
