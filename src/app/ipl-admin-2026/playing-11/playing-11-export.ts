@@ -410,15 +410,15 @@ export async function exportPlaying11ToPDF(payload: Playing11ExportPayload): Pro
 
   const theme = {
     // Dark premium palette (clean + modern UI/UX)
-    bg0: [6, 8, 14] as const,
-    bg1: [11, 15, 26] as const,
-    bg2: [16, 22, 38] as const,
-    plate: [14, 19, 32] as const,
-    plate2: [18, 25, 43] as const,
-    border: [38, 52, 86] as const,
-    text: [241, 245, 249] as const,
-    muted: [148, 163, 184] as const,
-    subtle: [203, 213, 225] as const,
+    bg0: [8, 10, 18] as const,
+    bg1: [10, 14, 24] as const,
+    bg2: [13, 18, 30] as const,
+    plate: [13, 18, 30] as const,
+    plate2: [17, 24, 39] as const,
+    border: [34, 44, 68] as const,
+    text: [236, 242, 255] as const,
+    muted: [155, 170, 199] as const,
+    subtle: [206, 216, 238] as const,
     // Accents (rich "oil" tones without messy blobs)
     cyan: [34, 211, 238] as const,
     blue: [96, 165, 250] as const,
@@ -426,6 +426,7 @@ export async function exportPlaying11ToPDF(payload: Playing11ExportPayload): Pro
     fuchsia: [244, 114, 182] as const,
     amber: [251, 191, 36] as const,
     emerald: [52, 211, 153] as const,
+    slate: [100, 116, 139] as const,
     tableText: [226, 232, 240] as const,
     tableLine: [38, 52, 86] as const,
     rowA: [14, 19, 32] as const,
@@ -436,36 +437,29 @@ export async function exportPlaying11ToPDF(payload: Playing11ExportPayload): Pro
   };
 
   const drawBackdrop = () => {
+    // Minimal dark background (no big shapes)
     doc.setFillColor(...theme.bg0);
     doc.rect(0, 0, pageWidth, pageHeight, 'F');
 
-    // Faux gradient bands
+    // Subtle top glow band
     doc.setFillColor(...theme.bg1);
-    doc.rect(0, 0, pageWidth, pageHeight * 0.55, 'F');
-    doc.setFillColor(...theme.bg2);
-    doc.rect(0, pageHeight * 0.55, pageWidth, pageHeight * 0.45, 'F');
+    doc.rect(0, 0, pageWidth, 160, 'F');
 
-    // Corner accent shapes
-    doc.setFillColor(...theme.violet);
-    doc.roundedRect(-140, -90, 360, 230, 90, 90, 'F');
-    doc.setFillColor(...theme.cyan);
-    doc.roundedRect(pageWidth - 240, -70, 340, 210, 90, 90, 'F');
-    doc.setFillColor(...theme.fuchsia);
-    doc.roundedRect(pageWidth - 290, pageHeight - 170, 460, 290, 110, 110, 'F');
+    // Very subtle grid dots for texture
+    doc.setFillColor(...theme.bg2);
+    for (let x = 18; x < pageWidth; x += 22) {
+      for (let y = 140; y < pageHeight; y += 22) {
+        if ((x + y) % 44 === 0) {
+          doc.circle(x, y, 0.8, 'F');
+        }
+      }
+    }
 
     // Content plate
     doc.setFillColor(...theme.plate);
     doc.setDrawColor(...theme.border);
     doc.setLineWidth(1);
-    doc.roundedRect(
-      marginX - 12,
-      headerHeight + 10,
-      pageWidth - (marginX - 12) * 2,
-      pageHeight - headerHeight - 46,
-      18,
-      18,
-      'FD'
-    );
+    doc.roundedRect(marginX - 12, headerHeight + 10, pageWidth - (marginX - 12) * 2, pageHeight - headerHeight - 46, 16, 16, 'FD');
   };
 
   const drawPageShell = () => {
@@ -477,9 +471,16 @@ export async function exportPlaying11ToPDF(payload: Playing11ExportPayload): Pro
     doc.setLineWidth(1);
     doc.roundedRect(marginX - 12, 18, pageWidth - (marginX - 12) * 2, headerHeight - 18, 18, 18, 'FD');
 
-    // Accent bar
+    // Accent bar (multi-tone segments)
+    const accentY = headerHeight - 6;
+    const accentX = marginX - 12;
+    const accentW = pageWidth - (marginX - 12) * 2;
+    doc.setFillColor(...theme.blue);
+    doc.roundedRect(accentX, accentY, accentW * 0.5, 6, 3, 3, 'F');
+    doc.setFillColor(...theme.violet);
+    doc.roundedRect(accentX + accentW * 0.5, accentY, accentW * 0.25, 6, 3, 3, 'F');
     doc.setFillColor(...theme.cyan);
-    doc.roundedRect(marginX - 12, headerHeight - 6, pageWidth - (marginX - 12) * 2, 6, 3, 3, 'F');
+    doc.roundedRect(accentX + accentW * 0.75, accentY, accentW * 0.25, 6, 3, 3, 'F');
 
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(12);
@@ -510,10 +511,10 @@ export async function exportPlaying11ToPDF(payload: Playing11ExportPayload): Pro
       doc.setLineWidth(0.8);
       doc.roundedRect(chipX, chipY - chipH + 4, chipW, chipH, 9, 9, 'FD');
       doc.setFont('helvetica', 'normal');
-      doc.setFontSize(9);
-      doc.setTextColor(...theme.muted);
-      doc.text(label, chipX + chipPadX, chipY);
-      chipX += chipW + chipGap;
+    doc.setFontSize(9);
+    doc.setTextColor(...theme.muted);
+    doc.text(label, chipX + chipPadX, chipY);
+    chipX += chipW + chipGap;
     });
   };
 
@@ -551,7 +552,7 @@ export async function exportPlaying11ToPDF(payload: Playing11ExportPayload): Pro
     doc.setFillColor(...theme.plate2);
     doc.setDrawColor(...theme.border);
     doc.setLineWidth(0.9);
-    doc.roundedRect(marginX, y, 300, 30, 14, 14, 'FD');
+    doc.roundedRect(marginX, y, 320, 30, 14, 14, 'FD');
     doc.setFillColor(...color);
     doc.roundedRect(marginX + 10, y + 8, 14, 14, 7, 7, 'F');
     doc.setFont('helvetica', 'bold');
