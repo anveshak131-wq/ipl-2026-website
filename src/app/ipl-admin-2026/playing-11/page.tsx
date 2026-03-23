@@ -10,6 +10,7 @@ import { CheckCircle2, AlertCircle, Users, Save, RefreshCw, FileDown, FileText, 
 import { useLeague } from '@/contexts/LeagueContext';
 import { WPLColors } from '@/lib/wplColors';
 import { exportPlaying11ToCSV, exportPlaying11ToExcel, exportPlaying11ToPDF, exportPlaying11ToDatabase } from './playing-11-export';
+import { exportPlaying11ToPDFModern2025 } from './pdf-export-modern-2025';
 
 export default function Playing11Page() {
   const router = useRouter();
@@ -575,7 +576,7 @@ export default function Playing11Page() {
           await exportPlaying11ToExcel(payload);
           break;
         case 'pdf':
-          await exportPlaying11ToPDF(payload);
+          await exportPlaying11ToPDFModern2025(payload);
           break;
         case 'database':
           exportPlaying11ToDatabase(payload);
