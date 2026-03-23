@@ -355,6 +355,7 @@ export async function exportPlaying11ToPDFModern2025(payload: Playing11ExportPay
     currentY = lastTeam1Table?.finalY ? lastTeam1Table.finalY + spacing.xl : currentY + 120;
 
     // Team 2 Playing 11 Table
+    const team2Headers = ['#', 'Player Name', 'Role', 'Jersey', 'Captain', 'Batting Style', 'Bowling Style', 'Impact Player'];
     const team2Data = playing11.team2.map((playerId, index) => {
       const player = players.find(p => p.id === playerId);
       const isImpact = team2Impact.playerId === playerId;
