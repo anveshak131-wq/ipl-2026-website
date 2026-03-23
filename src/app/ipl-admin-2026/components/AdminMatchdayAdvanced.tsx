@@ -843,6 +843,26 @@ export default function AdminMatchdayAdvanced() {
             upcomingMatch: '2025-04-08',
             status: 'active',
             lastUpdated: new Date().toISOString()
+          },
+          {
+            id: 'new-raipur',
+            name: 'Shaheed Veer Narayan Singh International Cricket Stadium',
+            city: 'New Raipur',
+            capacity: 65000,
+            coordinates: { lat: 21.1614, lng: 81.7873 },
+            timezone: 'Asia/Kolkata',
+            established: 2008,
+            pitchType: 'Clay and Red Soil',
+            floodlights: true,
+            drainageSystem: 'Modern',
+            avgFirstInnings: 155,
+            avgSecondInnings: 145,
+            highestTotal: 220,
+            lowestTotal: 90,
+            lastMatch: '2024-06-12',
+            upcomingMatch: '2025-04-09',
+            status: 'active',
+            lastUpdated: new Date().toISOString()
           }
         ];
       }
