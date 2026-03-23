@@ -70,7 +70,39 @@ function Section({
 }
 
 // Mock stadium data - in production, this would come from team data
-const getStadiumInfo = (teamId: string, homeGrounds?: string[]): StadiumInfo[] => {
+type VenueApiItem = {
+  id?: string;
+  name?: string;
+  city?: string;
+  capacity?: number | string;
+  established?: number | string;
+  pitchType?: string;
+  floodlights?: boolean;
+  dimensions?: string;
+};
+
+function normalizeIdentity(value: unknown): string {
+  return String(value || '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, '');
+}
+
+function findVenueMatch(venues: VenueApiItem[], name: string, city: string): VenueApiItem | undefined {
+  if (!venues.length) return undefined;
+  const nameKey = normalizeIdentity(name);
+  const cityKey = normalizeIdentity(city);
+
+  return venues.find((v) => {
+    const vNameKey = normalizeIdentity(v?.name);
+    const vCityKey = normalizeIdentity(v?.city);
+    if (!vNameKey) return false;
+    const nameMatches = vNameKey === nameKey || vNameKey.includes(nameKey) || nameKey.includes(vNameKey);
+    const cityMatches = !cityKey || !vCityKey || vCityKey === cityKey || vCityKey.includes(cityKey) || cityKey.includes(vCityKey);
+    return nameMatches && cityMatches;
+  });
+}
+
+const getStadiumInfo = (teamId: string, homeGrounds: string[] | undefined, venues: VenueApiItem[]): StadiumInfo[] => {
   const stadiums: { [key: string]: StadiumInfo[] } = {
     '1': [
       {
@@ -85,8 +117,8 @@ const getStadiumInfo = (teamId: string, homeGrounds?: string[]): StadiumInfo[] =
       {
         name: 'Shaheed Veer Narayan Singh International Cricket Stadium',
         city: 'New Raipur',
-        capacity: 'N/A',
-        established: 'N/A',
+        capacity: '65,000',
+        established: '2008',
         description:
           'A modern international cricket venue used for hosting major fixtures and tournaments.',
         features: ['Modern Facilities', 'Practice Nets', 'VIP Boxes', 'Media Center'],
@@ -110,14 +142,29 @@ const getStadiumInfo = (teamId: string, homeGrounds?: string[]): StadiumInfo[] =
       const parts = raw.split(',').map((p) => p.trim()).filter(Boolean);
       const name = parts[0] || raw || 'Stadium';
       const city = parts.slice(1).join(', ') || 'Unknown';
+      const matched = findVenueMatch(venues, name, city);
+
+      const capacityValue = matched?.capacity ?? 'N/A';
+      const establishedValue = matched?.established ?? 'N/A';
+      const capacity =
+        typeof capacityValue === 'number'
+          ? capacityValue.toLocaleString()
+          : String(capacityValue || 'N/A');
+      const established = String(establishedValue || 'N/A');
+
+      const features = [
+        matched?.floodlights ? 'Floodlights' : null,
+        matched?.pitchType ? String(matched.pitchType) : null,
+        matched?.dimensions ? String(matched.dimensions) : null,
+      ].filter(Boolean) as string[];
 
       return {
-        name,
-        city,
-        capacity: 'N/A',
-        established: 'N/A',
+        name: matched?.name ? String(matched.name) : name,
+        city: matched?.city ? String(matched.city) : city,
+        capacity: capacity || 'N/A',
+        established: established || 'N/A',
         description: 'Official home stadium.',
-        features: ['Standard Facilities'],
+        features: features.length ? features : ['Standard Facilities'],
       };
     }) || [])
   );
@@ -126,7 +173,33 @@ const getStadiumInfo = (teamId: string, homeGrounds?: string[]): StadiumInfo[] =
 export default function InteractiveStadiumTour({ team, primaryColor, secondaryColor }: InteractiveStadiumTourProps) {
   const [selectedStadium, setSelectedStadium] = useState<StadiumInfo | null>(null);
   const closeButtonRef = useRef<HTMLButtonElement | null>(null);
-  const stadiums = getStadiumInfo(team.id.replace('team', ''), team.homeGrounds);
+  const [venues, setVenues] = useState<VenueApiItem[]>([]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const load = async () => {
+      try {
+        const response = await fetch('/api/venues', { cache: 'no-store' });
+        const data = response.ok ? await response.json() : null;
+        const list = Array.isArray(data?.venues) ? data.venues : Array.isArray(data?.venues?.venues) ? data.venues.venues : [];
+        if (!cancelled) setVenues(list);
+      } catch (error) {
+        // Keep fallback stadium info if venues API isn't available.
+        if (!cancelled) setVenues([]);
+      }
+    };
+
+    load();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const stadiums = useMemo(
+    () => getStadiumInfo(team.id.replace('team', ''), team.homeGrounds, venues),
+    [team.id, team.homeGrounds, venues],
+  );
 
   useEffect(() => {
     if (!selectedStadium) return;

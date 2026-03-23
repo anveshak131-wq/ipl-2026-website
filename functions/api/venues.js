@@ -187,6 +187,18 @@ function getDefaultVenues() {
       established: 1969
     },
     {
+      id: '4',
+      name: 'Shaheed Veer Narayan Singh International Cricket Stadium',
+      city: 'New Raipur',
+      lat: 21.1614,
+      lng: 81.7873,
+      capacity: 65000,
+      pitchType: 'Clay and Red Soil',
+      floodlights: true,
+      dimensions: 'N/A',
+      established: 2008
+    },
+    {
       id: '2',
       name: 'M. A. Chidambaram Stadium',
       city: 'Chennai',
