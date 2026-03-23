@@ -150,9 +150,20 @@ export default function Playing11Page() {
   // Load existing playing 11 when match is selected
   useEffect(() => {
     if (selectedMatch) {
+      const normalizeIdArray = (value: unknown): string[] => {
+        if (Array.isArray(value)) return value.map(String).filter(Boolean);
+        if (typeof value === 'string') {
+          return value
+            .split(',')
+            .map((s) => s.trim())
+            .filter(Boolean);
+        }
+        return [];
+      };
+
       // Load from match data if available
-      const existingTeam1 = (selectedMatch as any).playing11?.team1 || [];
-      const existingTeam2 = (selectedMatch as any).playing11?.team2 || [];
+      const existingTeam1 = normalizeIdArray((selectedMatch as any).playing11?.team1);
+      const existingTeam2 = normalizeIdArray((selectedMatch as any).playing11?.team2);
       setTeam1Playing11(existingTeam1);
       setTeam2Playing11(existingTeam2);
 
@@ -949,7 +960,11 @@ export default function Playing11Page() {
                           border: '1px solid rgba(255, 255, 255, 0.1)',
                         }}
                       >
-                        <option value="">{team1Playing11.length ? 'Select Original Player...' : 'Select Playing 11 first'}</option>
+                        <option value="">
+                          {team1Playing11.length
+                            ? `Select Original Player... (${team1Playing11.length}/11 selected)`
+                            : 'Select Playing 11 first'}
+                        </option>
                         {team1Playing11
                           .filter((id) => id !== team1ImpactPlayer)
                           .map((id) => {
@@ -961,6 +976,13 @@ export default function Playing11Page() {
                             );
                           })}
                       </select>
+                      {team1Playing11.length > 0 && team1Playing11.length < 11 && (
+                        <div className="mt-2 p-3 rounded-lg bg-yellow-600/20 border border-yellow-600/30">
+                          <p className="text-sm text-yellow-300">
+                            Select all 11 players to see the full Playing 11 list here.
+                          </p>
+                        </div>
+                      )}
                     </div>
                   )}
                   
@@ -1180,7 +1202,11 @@ export default function Playing11Page() {
                           border: '1px solid rgba(255, 255, 255, 0.1)',
                         }}
                       >
-                        <option value="">{team2Playing11.length ? 'Select Original Player...' : 'Select Playing 11 first'}</option>
+                        <option value="">
+                          {team2Playing11.length
+                            ? `Select Original Player... (${team2Playing11.length}/11 selected)`
+                            : 'Select Playing 11 first'}
+                        </option>
                         {team2Playing11
                           .filter((id) => id !== team2ImpactPlayer)
                           .map((id) => {
@@ -1192,6 +1218,13 @@ export default function Playing11Page() {
                             );
                           })}
                       </select>
+                      {team2Playing11.length > 0 && team2Playing11.length < 11 && (
+                        <div className="mt-2 p-3 rounded-lg bg-yellow-600/20 border border-yellow-600/30">
+                          <p className="text-sm text-yellow-300">
+                            Select all 11 players to see the full Playing 11 list here.
+                          </p>
+                        </div>
+                      )}
                     </div>
                   )}
                   
