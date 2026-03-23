@@ -102,72 +102,44 @@ function findVenueMatch(venues: VenueApiItem[], name: string, city: string): Ven
   });
 }
 
-const getStadiumInfo = (teamId: string, homeGrounds: string[] | undefined, venues: VenueApiItem[]): StadiumInfo[] => {
-  const stadiums: { [key: string]: StadiumInfo[] } = {
-    '1': [
-      {
-        name: 'M. Chinnaswamy Stadium',
-        city: 'Bangalore',
-        capacity: '40,000',
-        established: '1969',
-        description:
-          'One of the most iconic cricket stadiums in India, known for its electric atmosphere and passionate RCB fans.',
-        features: ['Floodlights', 'Dugouts', 'VIP Boxes', 'Media Center', 'Fan Zone'],
-      },
-      {
-        name: 'Shaheed Veer Narayan Singh International Cricket Stadium',
-        city: 'New Raipur',
-        capacity: '65,000',
-        established: '2008',
-        description:
-          'A modern international cricket venue used for hosting major fixtures and tournaments.',
-        features: ['Modern Facilities', 'Practice Nets', 'VIP Boxes', 'Media Center'],
-      },
-    ],
-    '2': [{
-      name: 'Wankhede Stadium',
-      city: 'Mumbai',
-      capacity: '33,000',
-      established: '1974',
-      description: 'The fortress of Mumbai Indians, where they have won multiple championships. Known for its sea-facing location.',
-      features: ['Sea View', 'Modern Facilities', 'VIP Lounges', 'Fan Park', 'Museum'],
-    }],
-    // Add more stadiums as needed
-  };
+const getStadiumInfo = (homeGrounds: string[] | undefined, venues: VenueApiItem[]): StadiumInfo[] => {
+  if (!homeGrounds?.length) return [];
 
-  return (
-    stadiums[teamId] ||
-    (homeGrounds?.map((ground) => {
-      const raw = String(ground || '').trim();
-      const parts = raw.split(',').map((p) => p.trim()).filter(Boolean);
-      const name = parts[0] || raw || 'Stadium';
-      const city = parts.slice(1).join(', ') || 'Unknown';
-      const matched = findVenueMatch(venues, name, city);
+  return homeGrounds.map((ground) => {
+    const raw = String(ground || '').trim();
+    const parts = raw.split(',').map((p) => p.trim()).filter(Boolean);
+    const name = parts[0] || raw || 'Stadium';
+    const city = parts.slice(1).join(', ') || 'Unknown';
+    const matched = findVenueMatch(venues, name, city);
 
-      const capacityValue = matched?.capacity ?? 'N/A';
-      const establishedValue = matched?.established ?? 'N/A';
-      const capacity =
-        typeof capacityValue === 'number'
-          ? capacityValue.toLocaleString()
-          : String(capacityValue || 'N/A');
-      const established = String(establishedValue || 'N/A');
+    const capacityValue = matched?.capacity ?? 'N/A';
+    const establishedValue = matched?.established ?? 'N/A';
+    const capacity =
+      typeof capacityValue === 'number'
+        ? capacityValue.toLocaleString()
+        : String(capacityValue || 'N/A');
+    const established = String(establishedValue || 'N/A');
 
-      const features = [
-        matched?.floodlights ? 'Floodlights' : null,
-        matched?.pitchType ? String(matched.pitchType) : null,
-        matched?.dimensions ? String(matched.dimensions) : null,
-      ].filter(Boolean) as string[];
+    const features = [
+      matched?.floodlights ? 'Floodlights' : null,
+      matched?.pitchType ? String(matched.pitchType) : null,
+      matched?.dimensions ? String(matched.dimensions) : null,
+    ].filter(Boolean) as string[];
 
-      return {
-        name: matched?.name ? String(matched.name) : name,
-        city: matched?.city ? String(matched.city) : city,
-        capacity: capacity || 'N/A',
-        established: established || 'N/A',
-        description: 'Official home stadium.',
-        features: features.length ? features : ['Standard Facilities'],
-      };
-    }) || [])
-  );
+    const descriptionParts = [
+      matched?.pitchType ? `Pitch: ${matched.pitchType}` : null,
+      matched?.dimensions ? `Dimensions: ${matched.dimensions}` : null,
+    ].filter(Boolean) as string[];
+
+    return {
+      name: matched?.name ? String(matched.name) : name,
+      city: matched?.city ? String(matched.city) : city,
+      capacity: capacity || 'N/A',
+      established: established || 'N/A',
+      description: descriptionParts.length ? descriptionParts.join(' • ') : 'Official home stadium.',
+      features: features.length ? features : ['Standard Facilities'],
+    };
+  });
 };
 
 export default function InteractiveStadiumTour({ team, primaryColor, secondaryColor }: InteractiveStadiumTourProps) {
@@ -196,10 +168,7 @@ export default function InteractiveStadiumTour({ team, primaryColor, secondaryCo
     };
   }, []);
 
-  const stadiums = useMemo(
-    () => getStadiumInfo(team.id.replace('team', ''), team.homeGrounds, venues),
-    [team.id, team.homeGrounds, venues],
-  );
+  const stadiums = useMemo(() => getStadiumInfo(team.homeGrounds, venues), [team.homeGrounds, venues]);
 
   useEffect(() => {
     if (!selectedStadium) return;
