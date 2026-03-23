@@ -16,6 +16,29 @@ import RCBLionLogo from '@/components/RCBLion/RCBLionLogo';
 type SortField = 'name' | 'shortName';
 type SortDirection = 'asc' | 'desc';
 
+const HOME_GROUND_OPTIONS: string[] = [
+    'M. Chinnaswamy Stadium, Bengaluru',
+    'Shaheed Veer Narayan Singh International Cricket Stadium, New Raipur',
+    'Wankhede Stadium, Mumbai',
+    'M. A. Chidambaram Stadium, Chennai',
+    'Eden Gardens, Kolkata',
+    'Narendra Modi Stadium, Ahmedabad',
+    'Arun Jaitley Stadium, Delhi',
+    'Sawai Mansingh Stadium, Jaipur',
+    'Rajiv Gandhi International Stadium, Hyderabad',
+    'Punjab Cricket Association Stadium, Mohali',
+    'Himachal Pradesh Cricket Association Stadium, Dharamsala',
+    'Dr. Y.S. Rajasekhara Reddy ACA-VDCA Cricket Stadium, Visakhapatnam',
+    'Bharat Ratna Shri Atal Bihari Vajpayee Ekana Cricket Stadium, Lucknow',
+    'Maharashtra Cricket Association Stadium, Pune',
+    'Maharaja Yadavindra Singh International Cricket Stadium, Mullanpur',
+    'Holkar Cricket Stadium, Indore',
+    'JSCA International Stadium Complex, Ranchi',
+    'Green Park, Kanpur',
+    'Barabati Stadium, Cuttack',
+    'Barsapara Cricket Stadium, Guwahati',
+];
+
 const formatSeasonRanges = (seasons: number[] = []) => {
     if (seasons.length === 0) return 'No seasons recorded';
 
@@ -1293,8 +1316,7 @@ export default function AdminTeams() {
                                             <div className="space-y-3 mb-4">
                                                 {formData.homeGrounds.map((ground, index) => (
                                                     <div key={index} className="flex items-center gap-2 bg-white/5 rounded-lg p-3 border border-white/10">
-                                                        <input
-                                                            type="text"
+                                                        <select
                                                             value={ground}
                                                             onChange={(e) => {
                                                                 const newGrounds = [...formData.homeGrounds];
@@ -1302,8 +1324,17 @@ export default function AdminTeams() {
                                                                 setFormData({ ...formData, homeGrounds: newGrounds });
                                                             }}
                                                             className="flex-1 bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-purple-500/50"
-                                                            placeholder="Home ground name"
-                                                        />
+                                                        >
+                                                            <option value="">Select venue…</option>
+                                                            {ground && !HOME_GROUND_OPTIONS.includes(ground) ? (
+                                                                <option value={ground}>{ground} (custom)</option>
+                                                            ) : null}
+                                                            {HOME_GROUND_OPTIONS.map((venue) => (
+                                                                <option key={venue} value={venue}>
+                                                                    {venue}
+                                                                </option>
+                                                            ))}
+                                                        </select>
                                                         <button
                                                             type="button"
                                                             onClick={() => {
