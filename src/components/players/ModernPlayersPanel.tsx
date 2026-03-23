@@ -447,6 +447,30 @@ export default function ModernPlayersPanel({
   const accentPrimary = normalizeHexColor(accentColor, '#7C3AED');
   const accentSecondary = normalizeHexColor(accentColorSecondary || accentColor, accentPrimary);
 
+  const roleSections = useMemo(
+    () =>
+      ([
+        { key: 'batsman', label: 'Batsman', match: (p: Player) => normalizeRole(p.role) === 'Batsman' },
+        { key: 'keeper', label: 'Wicket-keeper', match: (p: Player) => normalizeRole(p.role) === 'Wicket-keeper' },
+        { key: 'allrounder', label: 'All-rounder', match: (p: Player) => normalizeRole(p.role) === 'All-rounder' },
+        { key: 'bowler', label: 'Bowler', match: (p: Player) => normalizeRole(p.role) === 'Bowler' },
+      ] as const),
+    [],
+  );
+
+  const filteredIndexById = useMemo(() => {
+    const map = new Map<string, number>();
+    filteredPlayers.forEach((p, idx) => map.set(String(p.id), idx));
+    return map;
+  }, [filteredPlayers]);
+
+  const groupedPlayers = useMemo(() => {
+    return roleSections.map((section) => ({
+      ...section,
+      players: filteredPlayers.filter(section.match),
+    }));
+  }, [filteredPlayers, roleSections]);
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -574,99 +598,120 @@ export default function ModernPlayersPanel({
         initial="hidden"
         animate="visible"
       >
-        {filteredPlayers.map((player, index) => {
-          const team = teams.find((t) => String(t.id) === String(player.teamId));
-          const teamPrimary = normalizeHexColor(
-            team?.colors?.primary,
-            team ? (teamColors[team.shortName] || '#7C3AED') : '#7C3AED',
-          );
-          const teamSecondary = normalizeHexColor(team?.colors?.secondary, teamPrimary);
-          
+        {groupedPlayers.map((section) => {
+          if (section.players.length === 0) return null;
+
           return (
-            <motion.button
-              type="button"
-              key={player.id}
-              variants={fadeIn}
-              whileHover={{ y: -4 }}
-              className="group relative w-full overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur-xl p-5 text-left shadow-[0_10px_40px_rgba(0,0,0,0.20)] transition-colors hover:bg-white/[0.055]"
-              onClick={() => openPlayerModal(player, index)}
-            >
-              <div
-                className="pointer-events-none absolute inset-0 opacity-70"
-                style={{
-                  background: `radial-gradient(500px circle at 20% 10%, ${hexToRgba(teamPrimary, 0.18)}, transparent 55%), radial-gradient(450px circle at 90% 40%, ${hexToRgba(teamSecondary, 0.12)}, transparent 55%)`,
-                }}
-              />
-
-              <div className="relative flex items-start gap-4">
-                <div className="relative shrink-0">
-                  <div
-                    className="h-16 w-16 rounded-2xl overflow-hidden border border-white/15 bg-slate-900/60 shadow-[0_10px_30px_rgba(0,0,0,0.25)]"
-                    style={{ boxShadow: `0 18px 40px ${hexToRgba(teamPrimary, 0.15)}` }}
-                  >
-                    {player.image ? (
-                      <Image
-                        src={player.image}
-                        alt={player.name}
-                        width={64}
-                        height={64}
-                        className="h-full w-full object-cover"
-                      />
-                    ) : (
-                      <div className="h-full w-full flex items-center justify-center text-xl font-black text-white">
-                        {player.name.charAt(0)}
-                      </div>
-                    )}
-                  </div>
-                  <div
-                    className="absolute -bottom-2 -right-2 rounded-xl px-2 py-0.5 text-[11px] font-semibold border border-white/10 bg-slate-950/60 text-white/80"
-                    style={{ boxShadow: `0 10px 25px ${hexToRgba(teamPrimary, 0.12)}` }}
-                  >
-                    {team?.shortName || 'IPL'}
-                  </div>
+            <div key={section.key} className="contents">
+              <div className="col-span-full mt-2">
+                <div className="flex items-center justify-between gap-3">
+                  <h3 className="text-base md:text-lg font-black tracking-tight text-white">
+                    {section.label}
+                  </h3>
+                  <span className="text-xs font-semibold text-white/55">
+                    {section.players.length}
+                  </span>
                 </div>
-
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <div className="truncate text-lg font-bold text-white">
-                        {player.name}
-                      </div>
-                      <div className="mt-1 flex flex-wrap items-center gap-2">
-                        <span
-                          className="inline-flex items-center rounded-full border border-white/10 px-2.5 py-1 text-[11px] font-semibold text-white/80 bg-white/[0.03]"
-                        >
-                          {player.role || 'Player'}
-                        </span>
-                        <span className="text-xs text-white/60 truncate">
-                          {player.teamName}
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="shrink-0 rounded-full border border-white/10 bg-white/[0.03] p-2 text-white/70 transition-transform group-hover:translate-x-0.5">
-                      <ArrowRight className="h-4 w-4" />
-                    </div>
-                  </div>
-
-                  <div className="mt-4 grid grid-cols-3 gap-3">
-                    {[
-                      { label: 'Matches', value: player.matches || 0 },
-                      { label: 'Runs', value: player.runs || 0 },
-                      { label: 'Wkts', value: player.wickets || 0 },
-                    ].map((stat) => (
-                      <div
-                        key={stat.label}
-                        className="rounded-2xl border border-white/10 bg-white/[0.03] px-3 py-2"
-                      >
-                        <div className="text-[11px] text-white/55">{stat.label}</div>
-                        <div className="text-base font-bold text-white">{stat.value}</div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
+                <div className="mt-2 h-px w-full bg-white/10" />
               </div>
-            </motion.button>
+
+              {section.players.map((player) => {
+                const index = filteredIndexById.get(String(player.id)) ?? 0;
+                const team = teams.find((t) => String(t.id) === String(player.teamId));
+                const teamPrimary = normalizeHexColor(
+                  team?.colors?.primary,
+                  team ? (teamColors[team.shortName] || '#7C3AED') : '#7C3AED',
+                );
+                const teamSecondary = normalizeHexColor(team?.colors?.secondary, teamPrimary);
+
+                return (
+                  <motion.button
+                    type="button"
+                    key={player.id}
+                    variants={fadeIn}
+                    whileHover={{ y: -4 }}
+                    className="group relative w-full overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur-xl p-5 text-left shadow-[0_10px_40px_rgba(0,0,0,0.20)] transition-colors hover:bg-white/[0.055]"
+                    onClick={() => openPlayerModal(player, index)}
+                  >
+                    <div
+                      className="pointer-events-none absolute inset-0 opacity-70"
+                      style={{
+                        background: `radial-gradient(500px circle at 20% 10%, ${hexToRgba(teamPrimary, 0.18)}, transparent 55%), radial-gradient(450px circle at 90% 40%, ${hexToRgba(teamSecondary, 0.12)}, transparent 55%)`,
+                      }}
+                    />
+
+                    <div className="relative flex items-start gap-4">
+                      <div className="relative shrink-0">
+                        <div
+                          className="h-16 w-16 rounded-2xl overflow-hidden border border-white/15 bg-slate-900/60 shadow-[0_10px_30px_rgba(0,0,0,0.25)]"
+                          style={{ boxShadow: `0 18px 40px ${hexToRgba(teamPrimary, 0.15)}` }}
+                        >
+                          {player.image ? (
+                            <Image
+                              src={player.image}
+                              alt={player.name}
+                              width={64}
+                              height={64}
+                              className="h-full w-full object-cover"
+                            />
+                          ) : (
+                            <div className="h-full w-full flex items-center justify-center text-xl font-black text-white">
+                              {player.name.charAt(0)}
+                            </div>
+                          )}
+                        </div>
+                        <div
+                          className="absolute -bottom-2 -right-2 rounded-xl px-2 py-0.5 text-[11px] font-semibold border border-white/10 bg-slate-950/60 text-white/80"
+                          style={{ boxShadow: `0 10px 25px ${hexToRgba(teamPrimary, 0.12)}` }}
+                        >
+                          {team?.shortName || 'IPL'}
+                        </div>
+                      </div>
+
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="min-w-0">
+                            <div className="truncate text-lg font-bold text-white">
+                              {player.name}
+                            </div>
+                            <div className="mt-1 flex flex-wrap items-center gap-2">
+                              <span
+                                className="inline-flex items-center rounded-full border border-white/10 px-2.5 py-1 text-[11px] font-semibold text-white/80 bg-white/[0.03]"
+                              >
+                                {player.role || 'Player'}
+                              </span>
+                              <span className="text-xs text-white/60 truncate">
+                                {player.teamName}
+                              </span>
+                            </div>
+                          </div>
+
+                          <div className="shrink-0 rounded-full border border-white/10 bg-white/[0.03] p-2 text-white/70 transition-transform group-hover:translate-x-0.5">
+                            <ArrowRight className="h-4 w-4" />
+                          </div>
+                        </div>
+
+                        <div className="mt-4 grid grid-cols-3 gap-3">
+                          {[
+                            { label: 'Matches', value: player.matches || 0 },
+                            { label: 'Runs', value: player.runs || 0 },
+                            { label: 'Wkts', value: player.wickets || 0 },
+                          ].map((stat) => (
+                            <div
+                              key={stat.label}
+                              className="rounded-2xl border border-white/10 bg-white/[0.03] px-3 py-2"
+                            >
+                              <div className="text-[11px] text-white/55">{stat.label}</div>
+                              <div className="text-base font-bold text-white">{stat.value}</div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </motion.button>
+                );
+              })}
+            </div>
           );
         })}
       </motion.div>
