@@ -223,11 +223,11 @@ export default function InteractiveStadiumTour({ team, primaryColor, secondaryCo
       </div>
 
       {/* Stadium Detail Modal */}
-      <AnimatePresence>
-        {selectedStadium && (
-          typeof document === 'undefined'
-            ? null
-            : createPortal(
+      {selectedStadium &&
+        (typeof document === 'undefined'
+          ? null
+          : createPortal(
+              <AnimatePresence>
                 <>
                   <motion.div
                     initial={{ opacity: 0 }}
@@ -329,11 +329,10 @@ export default function InteractiveStadiumTour({ team, primaryColor, secondaryCo
                       </div>
                     </div>
                   </motion.div>
-                </>,
+                </>
+              </AnimatePresence>,
                 document.body,
-              )
-        )}
-      </AnimatePresence>
+            ))}
     </div>
   );
 }
