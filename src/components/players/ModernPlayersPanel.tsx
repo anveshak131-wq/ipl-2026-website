@@ -41,6 +41,33 @@ interface Player {
   hundreds?: number;
   fours?: number;
   sixes?: number;
+  // Keep the full KV stats object for end-user popups (extended bowling/batting stats).
+  stats?: {
+    matches?: number;
+    battingInnings?: number;
+    notOuts?: number;
+    runs?: number;
+    ballsFaced?: number;
+    highest?: number | string;
+    fours?: number;
+    sixes?: number;
+    fifties?: number;
+    hundreds?: number;
+    average?: number | string;
+    battingAverage?: number | string;
+    strikeRate?: number | string;
+    battingStrikeRate?: number | string;
+    bowlingInnings?: number;
+    balls?: number;
+    maidens?: number;
+    wickets?: number;
+    runsConceded?: number;
+    bowlingAverage?: number | string;
+    bowlingStrikeRate?: number | string;
+    economy?: number | string;
+    bestBowling?: string;
+    fiveWickets?: number;
+  };
 }
 
 interface Team {
@@ -147,6 +174,35 @@ function normalizePlayer(raw: any, teams: Team[]): Player {
   const normalizedTeamId = resolveTeamId(raw?.teamId ?? raw?.team?.id ?? raw?.team, teams);
 
   const highestValue = raw?.highestScore ?? rawStats.highestScore ?? rawStats.highest;
+  const normalizedStats: Player['stats'] | undefined =
+    rawStats && typeof rawStats === 'object'
+      ? {
+          matches: toNumber(rawStats.matches),
+          battingInnings: toNumber(rawStats.battingInnings),
+          notOuts: toNumber(rawStats.notOuts),
+          runs: toNumber(rawStats.runs),
+          ballsFaced: toNumber(rawStats.ballsFaced),
+          highest: rawStats.highest ?? rawStats.highestScore,
+          fours: toNumber(rawStats.fours),
+          sixes: toNumber(rawStats.sixes),
+          fifties: toNumber(rawStats.fifties),
+          hundreds: toNumber(rawStats.hundreds),
+          average: rawStats.average ?? rawStats.battingAverage,
+          battingAverage: rawStats.battingAverage,
+          strikeRate: rawStats.strikeRate ?? rawStats.battingStrikeRate,
+          battingStrikeRate: rawStats.battingStrikeRate,
+          bowlingInnings: toNumber(rawStats.bowlingInnings),
+          balls: toNumber(rawStats.balls),
+          maidens: toNumber(rawStats.maidens),
+          wickets: toNumber(rawStats.wickets),
+          runsConceded: toNumber(rawStats.runsConceded),
+          bowlingAverage: rawStats.bowlingAverage,
+          bowlingStrikeRate: rawStats.bowlingStrikeRate,
+          economy: rawStats.economy,
+          bestBowling: rawStats.bestBowling ? String(rawStats.bestBowling) : undefined,
+          fiveWickets: toNumber(rawStats.fiveWickets),
+        }
+      : undefined;
 
   return {
     id: String(raw?.id ?? ''),
@@ -182,6 +238,7 @@ function normalizePlayer(raw: any, teams: Team[]): Player {
     hundreds: toNumber(raw?.hundreds ?? rawStats.hundreds),
     fours: toNumber(raw?.fours ?? rawStats.fours),
     sixes: toNumber(raw?.sixes ?? rawStats.sixes),
+    stats: normalizedStats,
   };
 }
 
