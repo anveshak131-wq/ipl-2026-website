@@ -1,24 +1,25 @@
 'use client';
 
 import { useState } from 'react';
-import { Users, SwapHorizontal, CheckCircle } from 'lucide-react';
+import { SwapHorizontal, CheckCircle } from 'lucide-react';
 import { Player } from '@/types';
 
 interface ImpactPlayerSelectorProps {
-  team: 'team1' | 'team2';
+  teamId: string;
   teamName: string;
   players: Player[];
   playing11: string[]; // Player IDs in playing 11
-  onSubstitute: (originalPlayerId: string, impactPlayerId: string) => void;
+  onSubstitute: (originalPlayerId: string, impactPlayerId: string, substitutionTime: string) => void;
   currentSubstitution?: {
     original: string;
     impact: string;
     substitutedAt: number;
+    substitutionTime?: string;
   };
 }
 
 export default function ImpactPlayerSelector({
-  team,
+  teamId,
   teamName,
   players,
   playing11,
@@ -28,12 +29,10 @@ export default function ImpactPlayerSelector({
   const [showSelector, setShowSelector] = useState(false);
   const [selectedOriginal, setSelectedOriginal] = useState<string | null>(null);
   const [selectedImpact, setSelectedImpact] = useState<string | null>(null);
+  const [substitutionTime, setSubstitutionTime] = useState<string>('End of Over');
 
   // Filter players for this team
-  const teamPlayers = players.filter(p => {
-    const playerTeam = typeof p.teamId === 'string' ? p.teamId : String(p.teamId);
-    return playerTeam === team;
-  });
+  const teamPlayers = players.filter((p) => String(p.teamId) === String(teamId));
 
   // Players in playing 11
   const playing11Players = teamPlayers.filter(p => playing11.includes(p.id));
@@ -41,11 +40,11 @@ export default function ImpactPlayerSelector({
   // Players not in playing 11 (available as Impact Player)
   const impactPlayerOptions = teamPlayers.filter(p => !playing11.includes(p.id));
 
-  const canSubstitute = selectedOriginal && selectedImpact && !currentSubstitution;
+  const canSubstitute = selectedOriginal && selectedImpact && substitutionTime && !currentSubstitution;
 
   const handleSubstitute = () => {
     if (selectedOriginal && selectedImpact) {
-      onSubstitute(selectedOriginal, selectedImpact);
+      onSubstitute(selectedOriginal, selectedImpact, substitutionTime);
       setShowSelector(false);
       setSelectedOriginal(null);
       setSelectedImpact(null);
@@ -93,6 +92,11 @@ export default function ImpactPlayerSelector({
             <div className="text-xs text-gray-400 mt-2">
               Substituted at: {new Date(currentSubstitution.substitutedAt).toLocaleTimeString()}
             </div>
+            {currentSubstitution.substitutionTime && (
+              <div className="text-xs text-gray-400">
+                When: {currentSubstitution.substitutionTime}
+              </div>
+            )}
           </div>
         </div>
       ) : showSelector ? (
@@ -128,6 +132,22 @@ export default function ImpactPlayerSelector({
                   {player.name} ({player.role})
                 </option>
               ))}
+              </select>
+          </div>
+
+          {/* Substitution Timing */}
+          <div>
+            <label className="text-sm text-gray-300 mb-2 block">Substitution Timing</label>
+            <select
+              value={substitutionTime}
+              onChange={(e) => setSubstitutionTime(e.target.value)}
+              className="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white text-sm"
+            >
+              <option value="Before Innings">Before Innings</option>
+              <option value="End of Over">End of Over</option>
+              <option value="After Wicket">After Wicket</option>
+              <option value="Batter Retired">Batter Retired</option>
+              <option value="Other">Other</option>
             </select>
           </div>
 
@@ -158,4 +178,3 @@ export default function ImpactPlayerSelector({
     </div>
   );
 }
-

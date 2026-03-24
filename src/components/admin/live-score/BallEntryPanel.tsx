@@ -154,8 +154,8 @@ export default function BallEntryPanel({
 
   // Impact Player state
   const [impactPlayerState, setImpactPlayerState] = useState<{
-    team1?: { original: string; impact: string; substitutedAt: number };
-    team2?: { original: string; impact: string; substitutedAt: number };
+    team1?: { original: string; impact: string; substitutedAt: number; substitutionTime?: string };
+    team2?: { original: string; impact: string; substitutedAt: number; substitutionTime?: string };
   }>({});
 
   // Two-Ball Rule state
@@ -175,6 +175,53 @@ export default function BallEntryPanel({
       setIsEveningMatch(hours >= 17); // 5 PM or later
     }
   }, [propIsEveningMatch, time]);
+
+  // Restore extended state (timeouts, DRS, impact player, etc.) from persisted initial state
+  useEffect(() => {
+    const extended = initialState as any;
+
+    setTimeoutState(
+      extended?.strategicTimeout || {
+        team1: { used: 0, remaining: 2 },
+        team2: { used: 0, remaining: 2 },
+        currentTimeout: null,
+      }
+    );
+
+    setDrsState(
+      extended?.drsReviews || {
+        team1: { used: 0, remaining: 2, successful: 0 },
+        team2: { used: 0, remaining: 2, successful: 0 },
+      }
+    );
+
+    const normalizeImpact = (sub: any) => {
+      if (!sub || typeof sub !== 'object') return undefined;
+      const impact = String(sub.impact || sub.playerId || '').trim();
+      if (!impact) return undefined;
+      return {
+        original: String(sub.original || '').trim(),
+        impact,
+        substitutedAt: typeof sub.substitutedAt === 'number' ? sub.substitutedAt : Date.now(),
+        substitutionTime: typeof sub.substitutionTime === 'string' ? sub.substitutionTime : undefined,
+      };
+    };
+
+    if (extended?.impactPlayer) {
+      setImpactPlayerState({
+        team1: normalizeImpact(extended.impactPlayer.team1),
+        team2: normalizeImpact(extended.impactPlayer.team2),
+      });
+    } else {
+      setImpactPlayerState({});
+    }
+
+    setSuperOverState(extended?.superOver || null);
+    setBallChanged(typeof extended?.ballChanged === 'boolean' ? extended.ballChanged : false);
+    if (typeof extended?.isEveningMatch === 'boolean') {
+      setIsEveningMatch(extended.isEveningMatch);
+    }
+  }, [matchId, initialState]);
 
   const {
     state,
@@ -268,7 +315,8 @@ export default function BallEntryPanel({
     // Save if there's ball history OR if any match state has been set (toss, innings transitions, etc.)
     const hasToss = matchState?.toss?.winner && matchState?.toss?.decision;
     const hasMatchStateProgress = matchState?.currentState && matchState.currentState !== 'pre-match';
-    if (state.ballHistory.length === 0 && !hasToss && !hasMatchStateProgress) return;
+    const hasImpactPlayer = Boolean(impactPlayerState?.team1?.impact || impactPlayerState?.team2?.impact);
+    if (state.ballHistory.length === 0 && !hasToss && !hasMatchStateProgress && !hasImpactPlayer) return;
     
     const localKey = `liveScore_${league}_${matchId}`;
     
@@ -317,6 +365,18 @@ export default function BallEntryPanel({
     state.battingTeam,
     state.currentBatter?.runs,
     state.currentBowler?.wickets,
+    impactPlayerState?.team1?.impact,
+    impactPlayerState?.team1?.original,
+    impactPlayerState?.team1?.substitutionTime,
+    impactPlayerState?.team2?.impact,
+    impactPlayerState?.team2?.original,
+    impactPlayerState?.team2?.substitutionTime,
+    timeoutState.team1.used,
+    timeoutState.team2.used,
+    drsState.team1.used,
+    drsState.team2.used,
+    ballChanged,
+    isEveningMatch,
     matchId, 
     league, 
     matchState?.toss?.winner, 
@@ -614,11 +674,46 @@ export default function BallEntryPanel({
 
   // Filter players based on match teams and playing 11
   // If playing11 is defined, only show those players; otherwise show all team players
-  const battingTeamPlaying11 = playing11 
-    ? (state.battingTeam === 'team1' ? playing11.team1 : playing11.team2)
+  const effectivePlaying11 = playing11 ? {
+    team1: [...(playing11.team1 || [])],
+    team2: [...(playing11.team2 || [])],
+  } : null;
+
+  // Apply Impact Player substitutions to playing XI for selection lists (IPL only)
+  if (effectivePlaying11 && league === 'ipl') {
+    const applySubstitution = (
+      xi: string[],
+      substitution?: { original: string; impact: string }
+    ): string[] => {
+      if (!substitution?.impact) return xi;
+      const impactId = String(substitution.impact).trim();
+      const originalId = String(substitution.original || '').trim();
+      if (!impactId) return xi;
+
+      // Replace original with impact when possible; otherwise just include impact
+      const next = xi.map(String).filter(Boolean);
+      if (originalId) {
+        const idx = next.indexOf(originalId);
+        if (idx >= 0) {
+          next[idx] = impactId;
+        } else {
+          next.push(impactId);
+        }
+        // Ensure original is not selectable after substitution
+        return Array.from(new Set(next.filter((id) => id !== originalId)));
+      }
+      return Array.from(new Set([...next, impactId]));
+    };
+
+    effectivePlaying11.team1 = applySubstitution(effectivePlaying11.team1, impactPlayerState.team1);
+    effectivePlaying11.team2 = applySubstitution(effectivePlaying11.team2, impactPlayerState.team2);
+  }
+
+  const battingTeamPlaying11 = effectivePlaying11 
+    ? (state.battingTeam === 'team1' ? effectivePlaying11.team1 : effectivePlaying11.team2)
     : null;
-  const bowlingTeamPlaying11 = playing11
-    ? (state.battingTeam === 'team1' ? playing11.team2 : playing11.team1)
+  const bowlingTeamPlaying11 = effectivePlaying11
+    ? (state.battingTeam === 'team1' ? effectivePlaying11.team2 : effectivePlaying11.team1)
     : null;
 
   const battingTeamPlayers = battingTeamPlaying11
@@ -682,6 +777,56 @@ export default function BallEntryPanel({
         team2Overs={state.team2.balls / 6}
         maxOvers={20}
       />
+
+      {/* Impact Player (IPL only) */}
+      {league === 'ipl' ? (
+        playing11 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <ImpactPlayerSelector
+              teamId={team1Id}
+              teamName={team1Name}
+              players={players}
+              playing11={playing11.team1 || []}
+              currentSubstitution={impactPlayerState.team1}
+              onSubstitute={(originalPlayerId, impactPlayerId, substitutionTime) => {
+                setImpactPlayerState((prev) => ({
+                  ...prev,
+                  team1: {
+                    original: originalPlayerId,
+                    impact: impactPlayerId,
+                    substitutedAt: Date.now(),
+                    substitutionTime,
+                  },
+                }));
+              }}
+            />
+            <ImpactPlayerSelector
+              teamId={team2Id}
+              teamName={team2Name}
+              players={players}
+              playing11={playing11.team2 || []}
+              currentSubstitution={impactPlayerState.team2}
+              onSubstitute={(originalPlayerId, impactPlayerId, substitutionTime) => {
+                setImpactPlayerState((prev) => ({
+                  ...prev,
+                  team2: {
+                    original: originalPlayerId,
+                    impact: impactPlayerId,
+                    substitutedAt: Date.now(),
+                    substitutionTime,
+                  },
+                }));
+              }}
+            />
+          </div>
+        ) : (
+          <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-xl p-4">
+            <div className="text-yellow-200 text-sm">
+              ⚠️ Set Playing 11 to enable Impact Player substitutions.
+            </div>
+          </div>
+        )
+      ) : null}
 
       {/* Match Info */}
       <div className="space-y-4">

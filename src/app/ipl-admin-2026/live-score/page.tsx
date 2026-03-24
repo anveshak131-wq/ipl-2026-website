@@ -8,35 +8,31 @@ import { Match, Player } from '@/types';
 import { LiveScoreState, BallEvent } from '@/hooks/useLiveScore';
 import { api } from '@/lib/data';
 import { LoadingSpinner } from '@/components/admin/animations';
-import { useLeague } from '@/contexts/LeagueContext';
-import { WPLColors } from '@/lib/wplColors';
-import MatchStatusBadge from '@/components/admin/live-score/MatchStatusBadge';
-import AutoSaveIndicator from '@/components/admin/live-score/AutoSaveIndicator';
+import { Activity } from 'lucide-react';
 
-export default function AdminLiveScorePage() {
+const LEAGUE = 'ipl' as const;
+
+export default function IPLAdminLiveScorePage() {
   const router = useRouter();
-  const { currentLeague } = useLeague();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [matches, setMatches] = useState<Match[]>([]);
   const [players, setPlayers] = useState<Player[]>([]);
   const [selectedMatchId, setSelectedMatchId] = useState<string>('');
-  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
-  const [liveScoreState, setLiveScoreState] = useState<LiveScoreState | undefined>(undefined);
-  const [isScoreLoading, setIsScoreLoading] = useState(false);
 
-  // Check authentication
+  const [initialLiveState, setInitialLiveState] = useState<LiveScoreState | undefined>(undefined);
+
+  const getLocalStorageKeyForMatch = (matchId: string) => `liveScore_${LEAGUE}_${matchId}`;
+
   useEffect(() => {
-    const checkAuth = () => {
-      const token = localStorage.getItem('adminToken');
-      if (!token) {
-        router.push('/ipl-admin-2026');
-        return;
-      }
-      setIsAuthenticated(true);
-      setIsLoading(false);
-    };
-    checkAuth();
+    if (typeof window === 'undefined') return;
+    const token = localStorage.getItem('adminToken');
+    if (!token) {
+      router.push('/ipl-admin-2026');
+      return;
+    }
+    setIsAuthenticated(true);
   }, [router]);
 
   // Load matches and players
@@ -46,107 +42,115 @@ export default function AdminLiveScorePage() {
     const loadData = async () => {
       try {
         const [matchesData, playersData] = await Promise.all([
-          api.getMatches(currentLeague),
-          api.getPlayers(undefined, currentLeague),
+          api.getMatches(LEAGUE),
+          api.getPlayers(undefined, LEAGUE),
         ]);
-        setMatches(matchesData);
-        setPlayers(playersData);
 
-        // Auto-select first live or upcoming match
-        if (!selectedMatchId && matchesData && Array.isArray(matchesData) && matchesData.length > 0) {
-          const preferred =
+        setMatches(matchesData || []);
+        setPlayers(playersData || []);
+
+        const savedMatchId = localStorage.getItem('ipl-live-score-matchId');
+        const defaultMatch = (matchesData && matchesData.length > 0)
+          ? matchesData.find((m) => m.id === savedMatchId) ||
             matchesData.find((m) => m.status === 'live') ||
             matchesData.find((m) => m.status === 'upcoming') ||
-            matchesData[0];
-          if (preferred) {
-            setSelectedMatchId(preferred.id);
-          }
+            matchesData[0]
+          : null;
+
+        if (defaultMatch) {
+          setSelectedMatchId(defaultMatch.id);
         }
-      } catch (error) {
-        console.error('Error loading data:', error);
+      } catch (err) {
+        console.error('[IPLLiveScore] Error loading data:', err);
+        setError(err instanceof Error ? err.message : 'Failed to load data');
+      } finally {
+        setIsLoading(false);
       }
     };
 
     loadData();
-  }, [isAuthenticated, currentLeague]);
+  }, [isAuthenticated]);
 
   const selectedMatch = useMemo(
-    () => {
-      if (!matches || !Array.isArray(matches)) return null;
-      return matches.find((m) => m.id === selectedMatchId) || null;
-    },
+    () => matches.find((m) => m.id === selectedMatchId) || null,
     [matches, selectedMatchId]
   );
 
-  // Helper to get localStorage key for a match
-  const getLocalStorageKey = (matchId: string) => `liveScore_${currentLeague}_${matchId}`;
-
-  // Fetch live score when match is selected - prioritize localStorage
+  // Load initial state from localStorage when match is selected (and merge match toss/impact info if missing)
   useEffect(() => {
-    if (!selectedMatchId) {
-      setLiveScoreState(undefined);
+    if (!selectedMatchId || !selectedMatch) {
+      setInitialLiveState(undefined);
       return;
     }
 
-    const fetchLiveScore = async () => {
-      setIsScoreLoading(true);
+    const localKey = getLocalStorageKeyForMatch(selectedMatchId);
+    const localData = localStorage.getItem(localKey);
+
+    let parsedLocal: any | undefined = undefined;
+    if (localData) {
       try {
-        // First, try to load from localStorage (has full state including ballHistory)
-        const localKey = getLocalStorageKey(selectedMatchId);
-        const localData = localStorage.getItem(localKey);
-        
-        if (localData) {
-          try {
-            const parsedLocal = JSON.parse(localData);
-            console.log('[LiveScore] Loaded from localStorage:', parsedLocal);
-            setLiveScoreState(parsedLocal);
-            setIsScoreLoading(false);
-            
-            // Also fetch from API to check if there's newer data
-            const response = await fetch(`/api/live-score?matchId=${selectedMatchId}`);
-            if (response.ok) {
-              const apiData = await response.json();
-              // Only use API data if localStorage is empty/incomplete
-              if (!parsedLocal.ballHistory || parsedLocal.ballHistory.length === 0) {
-                setLiveScoreState(apiData);
-              }
-            }
-            return;
-          } catch (e) {
-            console.error('Error parsing localStorage data:', e);
-          }
-        }
-        
-        // Fallback: fetch from API
-        const response = await fetch(`/api/live-score?matchId=${selectedMatchId}`);
-        if (response.ok) {
-          const data = await response.json();
-          setLiveScoreState(data);
-        }
-      } catch (error) {
-        console.error('Error fetching live score:', error);
-      } finally {
-        setIsScoreLoading(false);
+        parsedLocal = JSON.parse(localData);
+        console.log('[IPLLiveScore] Loaded from localStorage:', parsedLocal);
+      } catch (e) {
+        console.error('[IPLLiveScore] Error parsing localStorage data:', e);
+      }
+    }
+
+    const matchToss = selectedMatch.matchState?.toss
+      ? { winner: selectedMatch.matchState.toss.winner, decision: selectedMatch.matchState.toss.decision }
+      : undefined;
+
+    const matchImpactPlayer = (selectedMatch as any).impactPlayer;
+
+    const merged: any = {
+      ...(parsedLocal || {}),
+      ...(parsedLocal?.toss ? {} : matchToss ? { toss: matchToss } : {}),
+      ...(parsedLocal?.matchState ? {} : selectedMatch.matchState ? { matchState: selectedMatch.matchState } : {}),
+      ...(parsedLocal?.impactPlayer ? {} : matchImpactPlayer ? { impactPlayer: matchImpactPlayer } : {}),
+    };
+
+    // Avoid passing an empty object as "initialState"
+    const hasAnyInitial =
+      Boolean(parsedLocal) ||
+      Boolean(matchToss) ||
+      Boolean(selectedMatch.matchState) ||
+      Boolean(matchImpactPlayer);
+
+    setInitialLiveState(hasAnyInitial ? (merged as LiveScoreState) : undefined);
+  }, [selectedMatchId, selectedMatch]);
+
+  // Refresh match data when selected match changes (to get latest toss/playing11 info from scorecard)
+  // Also refresh periodically every 10 seconds to catch updates
+  useEffect(() => {
+    if (!selectedMatchId || !isAuthenticated) return;
+
+    const refreshMatchData = async () => {
+      try {
+        const updatedMatches = await api.getMatches(LEAGUE);
+        setMatches(updatedMatches || []);
+      } catch (err) {
+        console.error('[IPLLiveScore] Error refreshing match data:', err);
       }
     };
 
-    fetchLiveScore();
-  }, [selectedMatchId, currentLeague]);
+    refreshMatchData();
+    const interval = setInterval(refreshMatchData, 10000);
+    return () => clearInterval(interval);
+  }, [selectedMatchId, isAuthenticated]);
 
-  const handleSave = async (state: LiveScoreState) => {
+  const handleSaveLiveScore = async (state: LiveScoreState) => {
     if (!selectedMatch) return;
 
-    setSaveStatus('saving');
     try {
       // First, save the full state to localStorage for persistence across refreshes
-      const localKey = getLocalStorageKey(selectedMatch.id);
+      const localKey = getLocalStorageKeyForMatch(selectedMatch.id);
       const fullStateToSave = {
         ...state,
         lastUpdated: new Date().toISOString(),
         matchId: selectedMatch.id,
       };
       localStorage.setItem(localKey, JSON.stringify(fullStateToSave));
-      console.log('[LiveScore] Saved full state to localStorage');
+      console.log('[IPLLiveScore] Saved full state to localStorage');
 
       const token = localStorage.getItem('adminToken');
 
@@ -219,14 +223,8 @@ export default function AdminLiveScorePage() {
       if (!response.ok) {
         throw new Error('Failed to save score');
       }
-
-      setSaveStatus('saved');
-      setTimeout(() => setSaveStatus('idle'), 2000);
     } catch (error) {
-      console.error('Error saving score:', error);
-      setSaveStatus('error');
-      setTimeout(() => setSaveStatus('idle'), 3000);
-      throw error;
+      console.error('[IPLLiveScore] Error saving score:', error);
     }
   };
 
@@ -257,16 +255,9 @@ export default function AdminLiveScorePage() {
     }
   }
 
-  const isWPL = currentLeague === 'wpl';
-  const bgStyle = isWPL
-    ? {
-        background: `linear-gradient(to bottom, ${WPLColors.base}, ${WPLColors.gradientStart}66, ${WPLColors.gradientMid}33, ${WPLColors.base})`,
-      }
-    : { background: '#0B0F13' };
-  const spinnerColor = isWPL ? WPLColors.pink : '#FFD700';
-  const headerGradient = isWPL
-    ? `linear-gradient(to right, ${WPLColors.textPrimary}, ${WPLColors.purple}, ${WPLColors.pink})`
-    : 'linear-gradient(to right, white, #93C5FD, #67E8F9)';
+  const bgStyle = { background: '#0B0F13' };
+  const spinnerColor = '#FFD700';
+  const headerGradient = 'linear-gradient(to right, white, #93C5FD, #67E8F9)';
 
   if (isLoading) {
     return (
@@ -283,158 +274,260 @@ export default function AdminLiveScorePage() {
     return null;
   }
 
+  if (error) {
+    return (
+      <div className="flex min-h-screen" style={bgStyle}>
+        <AuroraBackground />
+        <main className="flex-1 relative z-20 p-8 flex items-center justify-center">
+          <div className="text-center">
+            <h2 className="text-2xl font-bold mb-2 text-white">Error</h2>
+            <p className="text-gray-400">{error}</p>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
+  // No matches - render an empty state with counts and actions
+  if (matches.length === 0) {
+    return (
+      <div className="flex min-h-screen" style={bgStyle}>
+        <AuroraBackground />
+
+        <main className="flex-1 relative z-20 p-4 md:p-8 overflow-y-auto">
+          <div className="max-w-7xl mx-auto">
+            {/* Header */}
+            <div className="mb-6">
+              <div className="flex items-center gap-3 mb-2">
+                <Activity className="w-8 h-8 text-cyan-300" />
+                <h1
+                  className="text-4xl font-bold"
+                  style={{
+                    background: headerGradient,
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    backgroundClip: 'text',
+                  }}
+                >
+                  Live Score
+                </h1>
+              </div>
+              <p className="text-gray-400">Create and manage IPL match scorecards</p>
+            </div>
+
+            {/* Counts + actions */}
+            <div className="rounded-2xl p-6 md:p-8 backdrop-blur-xl border flex flex-col items-center gap-4"
+              style={{ background: 'rgba(30, 41, 59, 0.6)', borderColor: 'rgba(255, 255, 255, 0.1)' }}>
+              <div className="text-lg font-medium text-white">
+                {matches.length} IPL matches available • {players.length} IPL players loaded
+              </div>
+
+              <div className="flex gap-3">
+                <button
+                  onClick={() => router.push('/ipl-admin-2026/matchday')}
+                  className="px-4 py-2 rounded-lg font-semibold text-white bg-cyan-600 hover:bg-cyan-700 transition-colors"
+                >
+                  Create Match
+                </button>
+
+                <button
+                  onClick={() => router.push('/ipl-admin-2026/players')}
+                  className="px-4 py-2 rounded-lg font-semibold text-white bg-blue-600 hover:bg-blue-700 transition-colors"
+                >
+                  Import Players
+                </button>
+              </div>
+
+              <p className="text-sm mt-2 text-gray-400">
+                You can create a match or import players to get started with live scoring.
+              </p>
+            </div>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
+  const matchToss = selectedMatch?.matchState?.toss;
+  const hasPlaying11 =
+    Boolean(selectedMatch?.playing11?.team1?.length) &&
+    Boolean(selectedMatch?.playing11?.team2?.length);
+
   return (
     <>
       <AuroraBackground />
 
-      <main className="flex-1 relative z-10 p-4 md:p-8 overflow-y-auto">
-        <div className="max-w-6xl mx-auto">
+      <main className="flex-1 relative z-20 p-4 md:p-8 overflow-y-auto" style={{ position: 'relative', zIndex: 20 }}>
+        <div className="max-w-7xl mx-auto">
           {/* Header */}
           <div className="mb-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex-1">
-                <div className="flex items-center gap-4 mb-2">
-                  <h1
-                    className="text-4xl font-bold"
-                    style={{
-                      background: headerGradient,
-                      WebkitBackgroundClip: 'text',
-                      WebkitTextFillColor: 'transparent',
-                      backgroundClip: 'text',
-                    }}
-                  >
-                    Live Score Management
-                  </h1>
-                  {selectedMatch && <MatchStatusBadge status={selectedMatch.status} league={currentLeague} />}
+            <div className="flex items-center gap-3 mb-2">
+              <Activity className="w-8 h-8 text-cyan-300" />
+              <h1
+                className="text-4xl font-bold"
+                style={{
+                  background: headerGradient,
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  backgroundClip: 'text',
+                }}
+              >
+                Live Score
+              </h1>
+            </div>
+            <p className="text-gray-400">Record ball-by-ball live cricket scores (IPL)</p>
+          </div>
+
+          {/* Match Selector */}
+          <div className="mb-6">
+            <label className="block text-sm font-medium mb-2 text-white">
+              Select Match
+            </label>
+            <select
+              value={selectedMatchId}
+              onChange={(e) => {
+                setSelectedMatchId(e.target.value);
+                localStorage.setItem('ipl-live-score-matchId', e.target.value);
+              }}
+              className="w-full md:w-96 px-4 py-3 rounded-lg text-white text-sm focus:outline-none transition-colors"
+              style={{
+                background: '#0F172A',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+              }}
+            >
+              {matches.map((match) => (
+                <option key={match.id} value={match.id}>
+                  {match.team1?.shortName || match.team1?.name || 'Team 1'} vs {match.team2?.shortName || match.team2?.name || 'Team 2'}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Toss Info from Scorecard - Display Only */}
+          {selectedMatch && matchToss && (
+            <div
+              className="rounded-2xl p-4 md:p-6 backdrop-blur-xl border mb-6"
+              style={{
+                background: 'rgba(30, 41, 59, 0.6)',
+                borderColor: 'rgba(255, 255, 255, 0.1)',
+              }}
+            >
+              <div className="flex items-center gap-3">
+                <div className="text-sm text-gray-400">
+                  🪙 Toss (from Scorecard):
                 </div>
-                <div className="flex items-center gap-4">
-                  <p style={{ color: isWPL ? WPLColors.textSecondary : '#9CA3AF' }}>
-                    Record ball-by-ball updates. All changes save automatically.
-                  </p>
-                  <AutoSaveIndicator status={saveStatus} league={currentLeague} />
+                <div className="font-semibold text-white">
+                  {matchToss.winner === 'team1' ? selectedMatch.team1?.name : selectedMatch.team2?.name} won and elected to {matchToss.decision}
+                </div>
+                <div className="ml-auto">
+                  <a
+                    href="/ipl-admin-2026/scorecard"
+                    className="text-xs px-3 py-1.5 rounded-lg transition-colors hover:opacity-80 bg-cyan-600 text-white"
+                  >
+                    Edit in Scorecard
+                  </a>
                 </div>
               </div>
             </div>
+          )}
 
-            {/* Match Selector */}
+          {/* Toss Not Set Warning */}
+          {selectedMatch && !matchToss && (
             <div
-              className="rounded-2xl p-4 backdrop-blur-xl border"
-              style={
-                isWPL
-                  ? {
-                      background: WPLColors.purpleRGBA[10],
-                      borderColor: WPLColors.purpleRGBA[30],
-                    }
-                  : {
-                      background: 'rgba(30, 41, 59, 0.6)',
-                      borderColor: 'rgba(255, 255, 255, 0.1)',
-                    }
-              }
+              className="rounded-2xl p-4 md:p-6 backdrop-blur-xl border mb-6"
+              style={{
+                background: 'rgba(234, 179, 8, 0.1)',
+                borderColor: 'rgba(234, 179, 8, 0.3)',
+              }}
             >
-              <label
-                htmlFor="match-selector"
-                className="block text-sm font-semibold mb-2"
-                style={{ color: isWPL ? WPLColors.textMuted : '#9CA3AF' }}
-              >
-                Select Match
-              </label>
-              <select
-                id="match-selector"
-                name="match-selector"
-                value={selectedMatchId}
-                onChange={(e) => setSelectedMatchId(e.target.value)}
-                className="w-full md:w-96 px-4 py-3 rounded-lg text-white text-sm focus:outline-none transition-colors"
-                style={
-                  isWPL
-                    ? {
-                        background: WPLColors.purpleRGBA[20],
-                        border: `1px solid ${WPLColors.purpleRGBA[30]}`,
-                      }
-                    : {
-                        background: '#0F172A',
-                        border: '1px solid rgba(255, 255, 255, 0.1)',
-                      }
-                }
-                onFocus={(e) => {
-                  e.currentTarget.style.borderColor = isWPL ? WPLColors.purpleRGBA[50] : '#3B82F6';
-                }}
-                onBlur={(e) => {
-                  e.currentTarget.style.borderColor = isWPL ? WPLColors.purpleRGBA[30] : 'rgba(255, 255, 255, 0.1)';
-                }}
-              >
-                <option value="">Select a match...</option>
-                {matches && Array.isArray(matches) ? (
-                  matches
-                    .filter((m) => m.status === 'live' || m.status === 'upcoming')
-                    .map((match) => (
-                      <option key={match.id} value={match.id}>
-                        {match.team1.shortName} vs {match.team2.shortName} · {new Date(match.date).toLocaleDateString()}{' '}
-                        {match.time}
-                      </option>
-                    ))
-                ) : (
-                  <option disabled>No matches available</option>
-                )}
-              </select>
+              <div className="flex items-center gap-3">
+                <div className="text-sm text-yellow-300">
+                  ⚠️ Toss not set yet - Set it in Scorecard first
+                </div>
+                <div className="ml-auto">
+                  <a
+                    href="/ipl-admin-2026/scorecard"
+                    className="text-xs px-3 py-1.5 rounded-lg transition-colors hover:opacity-80 bg-yellow-500 text-black font-semibold"
+                  >
+                    Set in Scorecard
+                  </a>
+                </div>
+              </div>
             </div>
-          </div>
+          )}
 
-          {/* Content Area */}
-          {selectedMatch ? (
+          {/* Playing 11 Warning */}
+          {selectedMatch && !hasPlaying11 && (
+            <div
+              className="rounded-2xl p-4 md:p-6 backdrop-blur-xl border mb-6"
+              style={{
+                background: 'rgba(59, 130, 246, 0.08)',
+                borderColor: 'rgba(59, 130, 246, 0.25)',
+              }}
+            >
+              <div className="flex items-center gap-3">
+                <div className="text-sm text-blue-200">
+                  ⚠️ Playing 11 not set yet - IPL live scoring works best with Playing 11 + Impact Player configured
+                </div>
+                <div className="ml-auto">
+                  <a
+                    href="/ipl-admin-2026/playing-11"
+                    className="text-xs px-3 py-1.5 rounded-lg transition-colors hover:opacity-80 bg-blue-600 text-white"
+                  >
+                    Set Playing 11
+                  </a>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Live Score Panel */}
+          {selectedMatch && (
             <div
               className="rounded-2xl p-6 md:p-8 backdrop-blur-xl border"
-              style={
-                isWPL
-                  ? {
-                      background: WPLColors.purpleRGBA[10],
-                      borderColor: WPLColors.purpleRGBA[30],
-                    }
-                  : {
-                      background: 'rgba(30, 41, 59, 0.4)',
-                      borderColor: 'rgba(255, 255, 255, 0.1)',
-                    }
-              }
+              style={{
+                background: 'rgba(30, 41, 59, 0.4)',
+                borderColor: 'rgba(255, 255, 255, 0.1)',
+              }}
             >
-              {isScoreLoading ? (
-                <div className="flex justify-center py-12">
-                  <LoadingSpinner size="lg" color={spinnerColor} />
-                </div>
-              ) : (
-                <BallEntryPanel
-                  key={selectedMatch.id}
-                  matchId={selectedMatch.id}
-                  team1Name={selectedMatch.team1.shortName || selectedMatch.team1.name}
-                  team2Name={selectedMatch.team2.shortName || selectedMatch.team2.name}
-                  team1Id={selectedMatch.team1.id}
-                  team2Id={selectedMatch.team2.id}
-                  onSave={handleSave}
-                  players={players.filter(
-                    (p) => p.teamId === selectedMatch.team1.id || p.teamId === selectedMatch.team2.id
-                  )}
-                  league={currentLeague}
-                  playing11={selectedMatch.playing11}
-                  initialState={liveScoreState}
-                />
-              )}
-            </div>
-          ) : (
-            <div
-              className="rounded-2xl p-12 text-center backdrop-blur-xl border"
-              style={
-                isWPL
-                  ? {
-                      background: WPLColors.purpleRGBA[10],
-                      borderColor: WPLColors.purpleRGBA[30],
-                    }
-                  : {
-                      background: 'rgba(30, 41, 59, 0.4)',
-                      borderColor: 'rgba(255, 255, 255, 0.1)',
-                    }
-              }
-            >
-              <p className="text-lg" style={{ color: isWPL ? WPLColors.textSecondary : '#9CA3AF' }}>
-                Please select a match to start scoring
-              </p>
+              <BallEntryPanel
+                matchId={selectedMatch.id || ''}
+                team1Name={selectedMatch.team1?.shortName || selectedMatch.team1?.name || 'Team 1'}
+                team2Name={selectedMatch.team2?.shortName || selectedMatch.team2?.name || 'Team 2'}
+                team1Id={selectedMatch.team1?.id || ''}
+                team2Id={selectedMatch.team2?.id || ''}
+                onSave={handleSaveLiveScore}
+                players={players.filter(
+                  (p) => p.teamId === selectedMatch.team1?.id || p.teamId === selectedMatch.team2?.id
+                )}
+                league={LEAGUE}
+                initialBatter={
+                  selectedMatch.playing11?.team1?.[0]
+                    ? {
+                        id: selectedMatch.playing11.team1[0],
+                        name: players.find(p => p.id === selectedMatch.playing11?.team1?.[0])?.name || 'Batter',
+                      }
+                    : { id: '', name: 'Select Batter' }
+                }
+                initialBowler={
+                  selectedMatch.playing11?.team2?.[0]
+                    ? {
+                        id: selectedMatch.playing11.team2[0],
+                        name: players.find(p => p.id === selectedMatch.playing11?.team2?.[0])?.name || 'Bowler',
+                      }
+                    : { id: '', name: 'Select Bowler' }
+                }
+                playing11={selectedMatch.playing11}
+                venue={selectedMatch.venue || ''}
+                date={selectedMatch.date?.split('T')[0] || new Date().toISOString().split('T')[0]}
+                time={selectedMatch.time || '19:30'}
+                isEveningMatch={selectedMatch.isEveningMatch !== false}
+                toss={(selectedMatch.matchState?.toss || undefined) as any}
+                weather={selectedMatch.weather as any}
+                pitchReport={(selectedMatch as any).pitchReport || ''}
+                headToHead={(selectedMatch as any).headToHead}
+                initialState={initialLiveState}
+              />
             </div>
           )}
         </div>
