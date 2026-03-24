@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { SwapHorizontal, CheckCircle } from 'lucide-react';
+import { ArrowLeftRight, CheckCircle } from 'lucide-react';
 import { Player } from '@/types';
 
 interface ImpactPlayerSelectorProps {
@@ -55,7 +55,7 @@ export default function ImpactPlayerSelector({
     <div className="bg-green-500/20 border border-green-500/50 rounded-lg p-4">
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
-          <SwapHorizontal className="w-5 h-5 text-green-400" />
+          <ArrowLeftRight className="w-5 h-5 text-green-400" />
           <span className="text-white font-semibold">Impact Player</span>
           <span className="text-gray-400 text-sm">({teamName})</span>
         </div>
@@ -166,7 +166,7 @@ export default function ImpactPlayerSelector({
                 : 'bg-gray-600 text-gray-400 cursor-not-allowed'
             }`}
           >
-            <SwapHorizontal className="w-4 h-4 inline mr-2" />
+            <ArrowLeftRight className="w-4 h-4 inline mr-2" />
             Confirm Substitution
           </button>
         </div>
