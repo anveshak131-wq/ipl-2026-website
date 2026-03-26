@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import AdminSidebar from '@/components/admin/AdminSidebar';
+import WPLAdminSidebarNew from '@/components/admin/WPLAdminSidebarNew';
 import { api } from '@/lib/data';
 import { Match } from '@/types';
 
@@ -12,7 +12,6 @@ export default function IPLLiveScoreWithAIPage() {
   const [selectedMatch, setSelectedMatch] = useState<string>('');
   const [liveData, setLiveData] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
-  const [tossInfo, setTossInfo] = useState<string>('');
   const [aiCommentary, setAiCommentary] = useState<string>('');
   const [enhancedCommentary, setEnhancedCommentary] = useState<string>('');
   const [isGeneratingCommentary, setIsGeneratingCommentary] = useState(false);
@@ -52,6 +51,7 @@ export default function IPLLiveScoreWithAIPage() {
     const loadLiveData = async () => {
       setLoading(true);
       try {
+        // Poll live rows for the selected IPL match
         const resp = await fetch(`/api/wpl-live-score/save?matchId=${encodeURIComponent(selectedMatch)}`);
         if (resp.ok) {
           const data = await resp.json();
@@ -113,8 +113,8 @@ export default function IPLLiveScoreWithAIPage() {
       let enhanced = '';
 
       if (currentInnings.balls === 0) {
-        basicCommentary = `🏏 Match beginning — watch this space.`;
-        enhanced = `🎯 Match starting soon.`;
+        basicCommentary = `🏏 Welcome to the IPL live coverage!`;
+        enhanced = `🎯 Match starting — stay tuned for ball-by-ball updates.`;
       } else {
         const lastBall = currentInnings.lastFewBalls[currentInnings.lastFewBalls.length - 1];
         if (lastBall?.hasWicket) basicCommentary = `💥 WICKET! Score: ${currentInnings.runs}/${currentInnings.wickets} (${currentInnings.overs})`;
@@ -164,22 +164,26 @@ export default function IPLLiveScoreWithAIPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
       <div className="flex">
-        <AdminSidebar />
+        <WPLAdminSidebarNew />
         <main className="flex-1 p-8">
           <div className="max-w-7xl mx-auto">
+            {/* Header */}
             <div className="mb-8 text-center">
-              <h1 className="text-4xl font-bold text-white mb-2 bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
+              <h1 className="text-4xl font-bold text-white mb-2 bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
                 🤖 IPL Live Score with AI
               </h1>
-              <p className="text-gray-300">Real-time IPL scores with AI commentary and insights</p>
+              <p className="text-gray-300">Real-time IPL scores with AI-powered commentary and insights</p>
             </div>
 
+            {/* Match Selection */}
             <div className="mb-8">
               <label className="block text-white text-sm font-medium mb-2">Select Match</label>
               <select
                 value={selectedMatch}
                 onChange={(e) => setSelectedMatch(e.target.value)}
-                className="w-full px-4 py-3 bg-white/10 backdrop-blur-md border border-white/20 rounded-xl text-white"
+                className="w-full px-4 py-3 bg-white/10 backdrop-blur-md border border-white/20 rounded-xl 
+                         text-white focus:outline-none focus:border-white/40 focus:bg-white/15 
+                         transition-all duration-300 shadow-lg"
               >
                 <option value="" className="bg-gray-800">Choose a match...</option>
                 {matches.map((match) => (
@@ -192,50 +196,109 @@ export default function IPLLiveScoreWithAIPage() {
 
             {selectedMatch && (
               <>
+                {/* Live Score Display */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                  {/* Innings 1 */}
                   <div className="bg-gradient-to-br from-blue-500/20 to-purple-500/20 backdrop-blur-xl rounded-2xl p-6 border border-white/20 shadow-2xl">
-                    <h3 className="text-xl font-bold text-blue-100 mb-4">Innings 1</h3>
+                    <h3 className="text-xl font-bold text-blue-100 mb-4 flex items-center gap-2">
+                      <span className="w-3 h-3 bg-blue-400 rounded-full animate-pulse"></span>
+                      Innings 1
+                    </h3>
                     <div className="space-y-3">
                       <div className="bg-white/5 rounded-lg p-4">
                         <div className="flex justify-between items-center">
                           <span className="text-blue-200 font-medium">Score</span>
-                          <span className="font-mono text-white font-bold text-2xl">{calculateTeamTotal(1).runs}/{calculateTeamTotal(1).wickets}</span>
+                          <span className="font-mono text-white font-bold text-2xl">
+                            {calculateTeamTotal(1).runs}/{calculateTeamTotal(1).wickets}
+                          </span>
                         </div>
                       </div>
                       <div className="flex justify-between items-center p-3 bg-white/5 rounded-lg">
                         <span className="text-blue-200 font-medium">Overs</span>
                         <span className="font-mono text-white font-bold">{calculateTeamTotal(1).overs}</span>
                       </div>
+                      <div className="flex justify-between items-center p-3 bg-white/5 rounded-lg">
+                        <span className="text-blue-200 font-medium">Run Rate</span>
+                        <span className="font-mono text-white font-bold">{calculateTeamTotal(1).runRate}</span>
+                      </div>
                     </div>
                   </div>
 
+                  {/* Innings 2 */}
                   <div className="bg-gradient-to-br from-purple-500/20 to-pink-500/20 backdrop-blur-xl rounded-2xl p-6 border border-white/20 shadow-2xl">
-                    <h3 className="text-xl font-bold text-purple-100 mb-4">Innings 2</h3>
+                    <h3 className="text-xl font-bold text-purple-100 mb-4 flex items-center gap-2">
+                      <span className="w-3 h-3 bg-purple-400 rounded-full animate-pulse"></span>
+                      Innings 2
+                    </h3>
                     <div className="space-y-3">
                       <div className="bg-white/5 rounded-lg p-4">
                         <div className="flex justify-between items-center">
                           <span className="text-purple-200 font-medium">Score</span>
-                          <span className="font-mono text-white font-bold text-2xl">{calculateTeamTotal(2).runs}/{calculateTeamTotal(2).wickets}</span>
+                          <span className="font-mono text-white font-bold text-2xl">
+                            {calculateTeamTotal(2).runs}/{calculateTeamTotal(2).wickets}
+                          </span>
                         </div>
                       </div>
                       <div className="flex justify-between items-center p-3 bg-white/5 rounded-lg">
                         <span className="text-purple-200 font-medium">Overs</span>
                         <span className="font-mono text-white font-bold">{calculateTeamTotal(2).overs}</span>
                       </div>
+                      <div className="flex justify-between items-center p-3 bg-white/5 rounded-lg">
+                        <span className="text-purple-200 font-medium">Run Rate</span>
+                        <span className="font-mono text-white font-bold">{calculateTeamTotal(2).runRate}</span>
+                      </div>
                     </div>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-                  <div className="col-span-2 bg-white/5 rounded-2xl p-4">
-                    <h4 className="text-lg font-semibold text-white mb-3">AI Commentary</h4>
-                    <div className="text-gray-200 whitespace-pre-wrap">{aiCommentary}</div>
-                    <div className="text-gray-400 text-sm mt-3 whitespace-pre-wrap">{enhancedCommentary}</div>
+                {/* AI Commentary Section */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  {/* Basic AI Commentary */}
+                  <div className="bg-gradient-to-br from-green-500/20 to-emerald-500/20 backdrop-blur-xl rounded-2xl p-6 border border-white/20 shadow-2xl">
+                    <h3 className="text-xl font-bold text-green-100 mb-4 flex items-center gap-2">
+                      <span className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></span>
+                      🤖 AI Commentary
+                    </h3>
+                    <div className="bg-white/5 rounded-lg p-4 min-h-[120px]">
+                      {isGeneratingCommentary ? (
+                        <div className="flex items-center justify-center h-full">
+                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-400"></div>
+                        </div>
+                      ) : (
+                        <p className="text-green-200 leading-relaxed">{aiCommentary}</p>
+                      )}
+                    </div>
                   </div>
 
-                  <div className="bg-white/5 rounded-2xl p-4">
-                    <h4 className="text-lg font-semibold text-white mb-3">Live Feed</h4>
-                    <div className="overflow-auto max-h-96">
+                  {/* Enhanced AI Commentary */}
+                  <div className="bg-gradient-to-br from-orange-500/20 to-red-500/20 backdrop-blur-xl rounded-2xl p-6 border border-white/20 shadow-2xl">
+                    <h3 className="text-xl font-bold text-orange-100 mb-4 flex items-center gap-2">
+                      <span className="w-3 h-3 bg-orange-400 rounded-full animate-pulse"></span>
+                      ✨ Enhanced Commentary
+                    </h3>
+                    <div className="bg-white/5 rounded-lg p-4 min-h-[120px]">
+                      {isGeneratingCommentary ? (
+                        <div className="flex items-center justify-center h-full">
+                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-400"></div>
+                        </div>
+                      ) : (
+                        <div className="text-orange-200 leading-relaxed whitespace-pre-line">
+                          {enhancedCommentary}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Live Feed table (compact) */}
+                {liveData.length > 0 && (
+                  <div className="mt-8 bg-gradient-to-br from-gray-500/20 to-gray-600/20 backdrop-blur-xl rounded-2xl p-6 border border-white/20 shadow-2xl">
+                    <h3 className="text-xl font-bold text-gray-100 mb-6 flex items-center gap-2">
+                      <span className="w-3 h-3 bg-gray-400 rounded-full animate-pulse"></span>
+                      📊 Live Match View
+                    </h3>
+
+                    <div className="max-h-64 overflow-y-auto">
                       <table className="w-full text-sm text-left text-gray-200">
                         <thead>
                           <tr>
@@ -252,7 +315,7 @@ export default function IPLLiveScoreWithAIPage() {
                       </table>
                     </div>
                   </div>
-                </div>
+                )}
               </>
             )}
           </div>
