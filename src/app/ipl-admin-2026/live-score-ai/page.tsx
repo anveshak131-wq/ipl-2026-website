@@ -19,6 +19,9 @@ export default function IPLLiveScoreWithAIPage() {
   const [wicketData, setWicketData] = useState<Record<number, any>>({});
   const [extrasData, setExtrasData] = useState<Record<number, any>>({});
 
+  const selectedMatchObj = matches.find((m) => m.id === selectedMatch) || null;
+  const hasPlaying11 = Boolean(selectedMatchObj?.playing11?.team1?.length) && Boolean(selectedMatchObj?.playing11?.team2?.length);
+
   useEffect(() => {
     (async () => {
       try {
@@ -193,6 +196,31 @@ export default function IPLLiveScoreWithAIPage() {
                 ))}
               </select>
             </div>
+
+            {/* Playing 11 warning (IPL specific) */}
+            {selectedMatch && !hasPlaying11 && (
+              <div
+                className="rounded-2xl p-4 md:p-6 backdrop-blur-xl border mb-6"
+                style={{
+                  background: 'rgba(59, 130, 246, 0.08)',
+                  borderColor: 'rgba(59, 130, 246, 0.25)',
+                }}
+              >
+                <div className="flex items-center gap-3">
+                  <div className="text-sm text-blue-200">
+                    ⚠️ Playing 11 not set yet — IPL pages require Playing 11 + Impact Player configured in Scorecard
+                  </div>
+                  <div className="ml-auto">
+                    <a
+                      href="/ipl-admin-2026/playing-11"
+                      className="text-xs px-3 py-1.5 rounded-lg transition-colors hover:opacity-80 bg-blue-600 text-white"
+                    >
+                      Set Playing 11
+                    </a>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {selectedMatch && (
               <>
