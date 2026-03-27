@@ -46,9 +46,9 @@ export default function AdminLogin({ onLogin }: AdminLoginProps) {
         
         // Redirect based on user role
         if (data.user?.role === 'players_admin') {
-          router.push('/ipl-admin-2026/players');
+          router.push('/admin/ipl/players');
         } else {
-          router.push('/ipl-admin-2026/dashboard');
+          router.push('/admin/ipl');
         }
       } else {
         setError(data.error || 'Invalid credentials');
