@@ -351,6 +351,17 @@ export default function AdminMatches() {
         if (!value) return '';
         if (/^\d{4}-\d{2}-\d{2}$/.test(value)) return value;
 
+        // IPL fixture-table PDFs often use "28-MAR-26" / "28-MAR-2026"
+        const dashMonth = value.match(/^(\d{1,2})-([A-Za-z]{3,9})-(\d{2,4})$/);
+        if (dashMonth) {
+            const [, dd, monthRaw, yearRaw] = dashMonth;
+            const mm = monthMap[monthRaw.toLowerCase()];
+            if (mm) {
+                const yyyy = yearRaw.length === 2 ? `20${yearRaw}` : yearRaw;
+                return `${yyyy}-${mm}-${dd.padStart(2, '0')}`;
+            }
+        }
+
         const slash = value.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
         if (slash) {
             const [, dd, mm, yyyy] = slash;
@@ -459,7 +470,7 @@ export default function AdminMatches() {
                     return joined.includes('match') &&
                         joined.includes('date') &&
                         joined.includes('day') &&
-                        joined.includes('time') &&
+                        (joined.includes('time') || joined.includes('start')) &&
                         joined.includes('home') &&
                         joined.includes('away') &&
                         joined.includes('venue');
@@ -481,13 +492,13 @@ export default function AdminMatches() {
 
                 sortedHeader.forEach((item) => {
                     const lower = item.text.toLowerCase();
-                    if (lower === 'match' || lower === 'no') {
+                    if (lower === 'match' || lower === 'no' || lower === 'no.' || lower === 'match no' || lower === 'match no.') {
                         matchX = matchX === null ? item.x : Math.min(matchX, item.x);
                         return;
                     }
                     if (lower === 'date') { dateX ??= item.x; return; }
                     if (lower === 'day') { dayX ??= item.x; return; }
-                    if (lower === 'time') { timeX ??= item.x; return; }
+                    if (lower === 'time' || lower === 'start') { timeX ??= item.x; return; }
                     if (lower === 'home') { homeX ??= item.x; return; }
                     if (lower === 'away') { awayX ??= item.x; return; }
                     if (lower === 'venue') { venueX ??= item.x; }
@@ -557,7 +568,7 @@ export default function AdminMatches() {
                     const timeCell = cols[3].replace(/\s+/g, ' ').trim().toUpperCase();
                     const home = cols[4].replace(/\s+/g, ' ').trim();
                     const away = cols[5].replace(/\s+/g, ' ').trim();
-                    const venueCell = cols[6].replace(/\s+/g, ' ').trim();
+                    const venueCell = cols[6].replace(/\s+/g, ' ').replace(/,\s*/g, ' ').trim();
                     const teamCell = `${home} vs ${away}`.trim();
 
                     rows.push([match, teamCell, timeCell, dateCell, venueCell].join(','));
@@ -568,7 +579,7 @@ export default function AdminMatches() {
                 const teamCell = cols[1].replace(/\s+/g, ' ').trim();
                 const timeCell = cols[2].replace(/\s+/g, ' ').trim().toUpperCase();
                 const dateCell = normalizeImportedDate(cols[3].replace(/\s+/g, ' ').replace(/,\s*/g, ' ').trim());
-                const venueCell = cols[4].replace(/\s+/g, ' ').trim();
+                const venueCell = cols[4].replace(/\s+/g, ' ').replace(/,\s*/g, ' ').trim();
 
                 rows.push([match, teamCell, timeCell, dateCell, venueCell].join(','));
             });
@@ -710,7 +721,7 @@ export default function AdminMatches() {
                 const timeRaw = timeLines[i].toUpperCase().replace(/\s+/g, '');
                 const timeCell = to24h(timeRaw) ?? timeRaw;
                 const teamCell = `${homeLines[i]} vs ${awayLines[i]}`.replace(/\s+/g, ' ').trim();
-                const venueCell = venueLines[i];
+                const venueCell = venueLines[i].replace(/,\s*/g, ' ').trim();
                 parsed.push([match, teamCell, timeCell, dateCell, venueCell].join(','));
             }
 
