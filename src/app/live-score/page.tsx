@@ -379,6 +379,22 @@ function buildCommentaryFromRows(
   };
 
   const lines: string[] = [];
+
+  const ensureOutInDismissal = (batterName: string, text: string) => {
+    const batter = String(batterName || '').trim();
+    const raw = String(text || '').trim();
+    if (!batter || !raw) return raw;
+
+    const rawLower = raw.toLowerCase();
+    const batterLower = batter.toLowerCase();
+    if (!rawLower.startsWith(batterLower)) return raw;
+
+    const rest = raw.slice(batter.length).trimStart();
+    if (!rest) return `${batter} out`;
+    if (rest.toLowerCase().startsWith('out')) return raw;
+    return `${batter} out ${rest}`;
+  };
+
   rows.forEach((row, idx) => {
     if (String(row?.[2] || '') !== innings) return;
 
@@ -400,7 +416,8 @@ function buildCommentaryFromRows(
 
     const fromApi = String((commentaryData || {})[idx] || '').trim();
     const seed = `${innings}:${prefix}:${bowler}:${striker}:${idx}`;
-    const body = notes || fromApi || buildFallback(seed, runs, ex, wk);
+    const bodyRaw = notes || fromApi || buildFallback(seed, runs, ex, wk);
+    const body = wk.hasWicket ? ensureOutInDismissal(striker, bodyRaw) : bodyRaw;
     const line = `${header}${body}`.trim();
     if (line) lines.push(line);
   });

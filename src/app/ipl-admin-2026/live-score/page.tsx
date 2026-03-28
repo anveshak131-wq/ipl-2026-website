@@ -1537,7 +1537,15 @@ export default function IPLAdminLiveScoreTablePage() {
               </tbody>
             </table>
           </div>
-          <div className="px-4 py-3 border-t border-white/10 flex items-center justify-end">
+          <div className="px-4 py-3 border-t border-white/10 flex items-center justify-end gap-3">
+            <button
+              onClick={saveRows}
+              disabled={saveStatus === 'saving' || !selectedMatchId}
+              className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 disabled:opacity-60 text-white text-sm font-semibold"
+            >
+              <Save className="w-4 h-4" />
+              Save Rows
+            </button>
             <button
               onClick={() => addRowToInnings(1)}
               className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-sm font-semibold"
@@ -1602,7 +1610,15 @@ export default function IPLAdminLiveScoreTablePage() {
               </tbody>
             </table>
           </div>
-          <div className="px-4 py-3 border-t border-white/10 flex items-center justify-end">
+          <div className="px-4 py-3 border-t border-white/10 flex items-center justify-end gap-3">
+            <button
+              onClick={saveRows}
+              disabled={saveStatus === 'saving' || !selectedMatchId}
+              className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 disabled:opacity-60 text-white text-sm font-semibold"
+            >
+              <Save className="w-4 h-4" />
+              Save Rows
+            </button>
             <button
               onClick={() => addRowToInnings(2)}
               className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-fuchsia-600 hover:bg-fuchsia-700 text-white text-sm font-semibold"
