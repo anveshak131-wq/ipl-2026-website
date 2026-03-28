@@ -151,6 +151,12 @@ export default function IPLAdminLiveScoreTablePage() {
   const [wicketData, setWicketData] = useState<Record<number, WicketRow>>({});
   const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle');
   const [pdfGenerating, setPdfGenerating] = useState(false);
+  const [scorecardId, setScorecardId] = useState<string>('');
+  const [resultWinner, setResultWinner] = useState<string>('');
+  const [resultMargin, setResultMargin] = useState<string>('');
+  const [resultManOfTheMatch, setResultManOfTheMatch] = useState<string>('');
+  const [resultStatus, setResultStatus] = useState<SaveStatus>('idle');
+  const [resultLoading, setResultLoading] = useState(false);
   const [impactForms, setImpactForms] = useState<Record<TeamKey, ImpactForm>>({
     team1: { ...DEFAULT_IMPACT_FORM },
     team2: { ...DEFAULT_IMPACT_FORM },
@@ -282,6 +288,45 @@ export default function IPLAdminLiveScoreTablePage() {
       }
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedMatchId]);
+
+  // Load match result from scorecards for the selected match
+  useEffect(() => {
+    if (!selectedMatchId) {
+      setScorecardId('');
+      setResultWinner('');
+      setResultMargin('');
+      setResultManOfTheMatch('');
+      setResultStatus('idle');
+      return;
+    }
+
+    (async () => {
+      setResultLoading(true);
+      try {
+        const resp = await fetch(
+          `/api/scorecards?matchId=${encodeURIComponent(selectedMatchId)}&league=${encodeURIComponent(LEAGUE)}`
+        );
+        if (!resp.ok) throw new Error('Failed to load scorecards');
+        const scorecards = await resp.json();
+        const sc = Array.isArray(scorecards) ? scorecards[0] : null;
+
+        setScorecardId(String(sc?.id || '').trim());
+        setResultWinner(String(sc?.result?.winner || '').trim());
+        setResultMargin(String(sc?.result?.margin || '').trim());
+        setResultManOfTheMatch(String(sc?.result?.manOfTheMatch || '').trim());
+        setResultStatus('idle');
+      } catch (error) {
+        console.error('[IPL Live Score Table] Failed to load scorecard result:', error);
+        setScorecardId('');
+        setResultWinner('');
+        setResultMargin('');
+        setResultManOfTheMatch('');
+        setResultStatus('idle');
+      } finally {
+        setResultLoading(false);
+      }
+    })();
   }, [selectedMatchId]);
 
   // Persist locally as the user edits (per match)
@@ -1076,6 +1121,153 @@ export default function IPLAdminLiveScoreTablePage() {
         impactPlayer: selectedMatch.impactPlayer,
       },
     };
+  };
+
+  const toTeamIdNumber = (value: string | number | undefined) => {
+    if (typeof value === 'number') return value;
+    const n = parseInt(String(value || 0), 10);
+    return Number.isFinite(n) ? n : 0;
+  };
+
+  const createScorecardIfMissing = async (token: string) => {
+    if (!selectedMatch) throw new Error('Match not selected');
+
+    const team1Id = toTeamIdNumber(selectedMatch.team1?.id);
+    const team2Id = toTeamIdNumber(selectedMatch.team2?.id);
+
+    const innings1BattingKey = getBattingTeamKeyForInnings('1');
+    const innings1BattingTeamId = innings1BattingKey === 'team1' ? team1Id : team2Id;
+    const innings2BattingTeamId = innings1BattingKey === 'team1' ? team2Id : team1Id;
+
+    const tossWinnerName = matchToss
+      ? matchToss.winner === 'team1'
+        ? selectedMatch.team1?.name
+        : selectedMatch.team2?.name
+      : '';
+
+    const payload = {
+      matchId: selectedMatch.id,
+      league: LEAGUE,
+      matchInfo: {
+        matchId: selectedMatch.id,
+        team1: {
+          id: team1Id,
+          name: selectedMatch.team1?.name,
+          shortName: selectedMatch.team1?.shortName,
+        },
+        team2: {
+          id: team2Id,
+          name: selectedMatch.team2?.name,
+          shortName: selectedMatch.team2?.shortName,
+        },
+        venue: selectedMatch.venue,
+        date: selectedMatch.date,
+        time: selectedMatch.time,
+        toss: { winner: tossWinnerName || '', decision: matchToss?.decision || '' },
+        status: selectedMatch.status,
+      },
+      innings: [
+        {
+          inningsNumber: 1,
+          battingTeamId: innings1BattingTeamId,
+          batting: [],
+          bowling: [],
+          extras: { wides: 0, noBalls: 0, byes: 0, legByes: 0 },
+          totalRuns: 0,
+          totalWickets: 0,
+          totalOvers: 0,
+          fallOfWickets: [],
+          powerplays: {
+            mandatory: { overs: '', runs: 0 },
+            optional: { overs: '', runs: 0 },
+          },
+          partnerships: [],
+        },
+        {
+          inningsNumber: 2,
+          battingTeamId: innings2BattingTeamId,
+          batting: [],
+          bowling: [],
+          extras: { wides: 0, noBalls: 0, byes: 0, legByes: 0 },
+          totalRuns: 0,
+          totalWickets: 0,
+          totalOvers: 0,
+          fallOfWickets: [],
+          powerplays: {
+            mandatory: { overs: '', runs: 0 },
+            optional: { overs: '', runs: 0 },
+          },
+          partnerships: [],
+        },
+      ],
+      result: {
+        winner: String(resultWinner || '').trim(),
+        margin: String(resultMargin || '').trim(),
+        manOfTheMatch: String(resultManOfTheMatch || '').trim(),
+      },
+    };
+
+    const resp = await fetch('/api/scorecards', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(payload),
+    });
+    if (!resp.ok) throw new Error('Failed to create scorecard');
+    return resp.json();
+  };
+
+  const saveMatchResult = async () => {
+    try {
+      if (!selectedMatchId || !selectedMatch) return;
+
+      const token = localStorage.getItem('adminToken');
+      if (!token) {
+        alert('Admin token missing. Please login again.');
+        return;
+      }
+
+      setResultStatus('saving');
+
+      if (!scorecardId) {
+        const created = await createScorecardIfMissing(token);
+        const id = String(created?.id || '').trim();
+        setScorecardId(id);
+        setResultStatus('success');
+        setTimeout(() => setResultStatus('idle'), 2000);
+        return;
+      }
+
+      const resp = await fetch(`/api/scorecards/${encodeURIComponent(scorecardId)}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          result: {
+            winner: String(resultWinner || '').trim(),
+            margin: String(resultMargin || '').trim(),
+            manOfTheMatch: String(resultManOfTheMatch || '').trim(),
+          },
+        }),
+      });
+      if (!resp.ok) throw new Error('Failed to save match result');
+
+      const updated = await resp.json();
+      setResultWinner(String(updated?.result?.winner || '').trim());
+      setResultMargin(String(updated?.result?.margin || '').trim());
+      setResultManOfTheMatch(String(updated?.result?.manOfTheMatch || '').trim());
+
+      setResultStatus('success');
+      setTimeout(() => setResultStatus('idle'), 2000);
+    } catch (error) {
+      console.error('[IPL Live Score Table] Save match result error:', error);
+      setResultStatus('error');
+      setTimeout(() => setResultStatus('idle'), 3000);
+    }
   };
 
   const saveRows = async () => {
@@ -1880,6 +2072,100 @@ export default function IPLAdminLiveScoreTablePage() {
             >
               <Plus className="w-4 h-4" /> Add Ball
             </button>
+          </div>
+        </section>
+
+        {/* Match Result (saved in Scorecards) */}
+        <section className="rounded-2xl border border-white/10 bg-white/5 p-4">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <div className="text-sm font-semibold text-white">Match Result</div>
+              <div className="text-xs text-white/50">Saved in scorecard (draft by default)</div>
+            </div>
+            <div className="text-xs text-white/50">
+              {resultLoading ? 'Loading…' : scorecardId ? `Scorecard: ${scorecardId}` : 'No scorecard yet'}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+            <div>
+              <label className="block text-xs font-semibold text-white/70 mb-2">Winning Team</label>
+              <select
+                value={resultWinner}
+                onChange={(e) => setResultWinner(e.target.value)}
+                disabled={!selectedMatchId}
+                className="w-full border border-white/10 focus:border-purple-400 rounded-xl px-3 py-2 bg-slate-950 text-white disabled:opacity-60"
+              >
+                <option value="">Select Winning Team</option>
+                {selectedMatch && (
+                  <>
+                    <option value={selectedMatch.team1?.name}>{selectedMatch.team1?.name}</option>
+                    <option value={selectedMatch.team2?.name}>{selectedMatch.team2?.name}</option>
+                  </>
+                )}
+                <option value="No Result">No Result</option>
+                <option value="Match Tied">Match Tied</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-white/70 mb-2">Margin</label>
+              <input
+                value={resultMargin}
+                onChange={(e) => setResultMargin(e.target.value)}
+                disabled={!selectedMatchId}
+                placeholder="e.g., 3 wickets, 25 runs, Super Over"
+                className="w-full border border-white/10 focus:border-purple-400 rounded-xl px-3 py-2 bg-white/5 text-white placeholder-white/30 disabled:opacity-60"
+              />
+              <p className="text-[11px] text-white/50 mt-2">Enter the margin of victory (e.g., 3 wickets, 25 runs)</p>
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-white/70 mb-2">Man of the Match</label>
+              <select
+                value={resultManOfTheMatch}
+                onChange={(e) => setResultManOfTheMatch(e.target.value)}
+                disabled={!selectedMatchId}
+                className="w-full border border-white/10 focus:border-purple-400 rounded-xl px-3 py-2 bg-slate-950 text-white disabled:opacity-60"
+              >
+                <option value="">Select Player</option>
+                {selectedMatch && (
+                  <>
+                    <optgroup label={selectedMatch.team1?.name || 'Team 1'}>
+                      {squads.team1.map((p) => (
+                        <option key={p.id} value={p.name}>
+                          {p.name}
+                        </option>
+                      ))}
+                    </optgroup>
+                    <optgroup label={selectedMatch.team2?.name || 'Team 2'}>
+                      {squads.team2.map((p) => (
+                        <option key={p.id} value={p.name}>
+                          {p.name}
+                        </option>
+                      ))}
+                    </optgroup>
+                  </>
+                )}
+              </select>
+            </div>
+          </div>
+
+          <div className="mt-4 flex items-center gap-3">
+            <button
+              onClick={saveMatchResult}
+              disabled={!selectedMatchId || resultStatus === 'saving' || resultLoading}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white text-sm font-semibold"
+            >
+              <Save className="w-4 h-4" />
+              Save Match Result
+            </button>
+            <div className="text-xs">
+              {resultStatus === 'idle' && <span className="text-white/50">—</span>}
+              {resultStatus === 'saving' && <span className="text-yellow-300">Saving…</span>}
+              {resultStatus === 'success' && <span className="text-emerald-300">Saved</span>}
+              {resultStatus === 'error' && <span className="text-red-300">Error</span>}
+            </div>
           </div>
         </section>
       </div>
