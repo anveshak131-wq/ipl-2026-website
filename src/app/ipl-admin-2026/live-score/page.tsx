@@ -386,11 +386,8 @@ export default function IPLAdminLiveScoreTablePage() {
 
     const base = (fromXI.length ? fromXI : fromSquad).slice();
     if (impact?.impactName) {
-      if (impact.originalName) {
-        // Replaced player cannot take further part — remove them from future selections.
-        const idx = base.indexOf(impact.originalName);
-        if (idx >= 0) base.splice(idx, 1);
-      }
+      // Keep the OUT player in the dropdown so previously-entered rows don't go blank.
+      // Tagging/guardrails are handled in the UI, not by removing options.
       base.push(impact.impactName);
     }
     return uniqStrings(base);
@@ -904,6 +901,21 @@ export default function IPLAdminLiveScoreTablePage() {
     const bowlingOptions = getTeamPlayerOptions(bowlingKey);
     const battingCaptainName = matchCaptains[battingKey].name;
     const bowlingCaptainName = matchCaptains[bowlingKey].name;
+    const battingImpact = battingKey === 'team1' ? impactPlayerInfo.team1 : impactPlayerInfo.team2;
+    const bowlingImpact = bowlingKey === 'team1' ? impactPlayerInfo.team1 : impactPlayerInfo.team2;
+
+    const formatPlayerOptionLabel = (
+      name: string,
+      extras: { isCaptain?: boolean; isImpactIn?: boolean; isImpactOut?: boolean }
+    ) => {
+      const parts = [name];
+      const tags: string[] = [];
+      if (extras.isCaptain) tags.push('C');
+      if (extras.isImpactIn) tags.push('IP');
+      if (extras.isImpactOut) tags.push('OUT');
+      if (tags.length) parts.push(`(${tags.join(', ')})`);
+      return parts.join(' ');
+    };
 
     const ex = { ...DEFAULT_EXTRAS, ...(extrasData[rowIndex] || {}) };
     const wk = { ...DEFAULT_WICKET, ...(wicketData[rowIndex] || {}) };
@@ -946,7 +958,11 @@ export default function IPLAdminLiveScoreTablePage() {
             <option value="">{label}</option>
             {battingOptions.map((name) => (
               <option key={name} value={name}>
-                {name}{battingCaptainName && name === battingCaptainName ? ' (C)' : ''}
+                {formatPlayerOptionLabel(name, {
+                  isCaptain: Boolean(battingCaptainName && name === battingCaptainName),
+                  isImpactIn: Boolean(battingImpact.impactName && name === battingImpact.impactName),
+                  isImpactOut: Boolean(battingImpact.originalName && name === battingImpact.originalName),
+                })}
               </option>
             ))}
           </select>
@@ -962,7 +978,11 @@ export default function IPLAdminLiveScoreTablePage() {
             <option value="">Bowler</option>
             {bowlingOptions.map((name) => (
               <option key={name} value={name}>
-                {name}{bowlingCaptainName && name === bowlingCaptainName ? ' (C)' : ''}
+                {formatPlayerOptionLabel(name, {
+                  isCaptain: Boolean(bowlingCaptainName && name === bowlingCaptainName),
+                  isImpactIn: Boolean(bowlingImpact.impactName && name === bowlingImpact.impactName),
+                  isImpactOut: Boolean(bowlingImpact.originalName && name === bowlingImpact.originalName),
+                })}
               </option>
             ))}
           </select>
@@ -1402,7 +1422,7 @@ export default function IPLAdminLiveScoreTablePage() {
                       </div>
                     )}
                     <div className="text-xs text-white/60">
-                      Once saved, the OUT player is removed from the batter/bowler dropdowns for this match.
+                      Once saved, the Impact IN/OUT players are tagged in the batter/bowler dropdowns (IP / OUT).
                     </div>
                   </div>
 
