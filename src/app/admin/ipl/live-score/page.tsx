@@ -27,7 +27,9 @@ export default function AdminIplLiveScorePage() {
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    const token = localStorage.getItem('adminToken');
+    const token = localStorage.getItem('adminToken') || 
+                  localStorage.getItem('auth_token') ||
+                  localStorage.getItem('authToken');
     if (!token) {
       router.push('/admin/ipl');
       return;
@@ -144,7 +146,9 @@ export default function AdminIplLiveScorePage() {
       };
       localStorage.setItem(localKey, JSON.stringify(fullStateToSave));
 
-      const token = localStorage.getItem('adminToken');
+      const token = localStorage.getItem('adminToken') || 
+                  localStorage.getItem('auth_token') ||
+                  localStorage.getItem('authToken');
 
       const extendedState = state as any;
       
