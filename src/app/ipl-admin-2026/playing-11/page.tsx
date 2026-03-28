@@ -23,6 +23,8 @@ export default function Playing11Page() {
   const [selectedMatchId, setSelectedMatchId] = useState<string>('');
   const [team1Playing11, setTeam1Playing11] = useState<string[]>([]);
   const [team2Playing11, setTeam2Playing11] = useState<string[]>([]);
+  const [team1ImpactSubstitutes, setTeam1ImpactSubstitutes] = useState<string[]>(() => Array(4).fill(''));
+  const [team2ImpactSubstitutes, setTeam2ImpactSubstitutes] = useState<string[]>(() => Array(4).fill(''));
   const [team1ImpactPlayer, setTeam1ImpactPlayer] = useState<string>('');
   const [team2ImpactPlayer, setTeam2ImpactPlayer] = useState<string>('');
   const [team1ImpactOriginalPlayer, setTeam1ImpactOriginalPlayer] = useState<string>('');
@@ -173,11 +175,22 @@ export default function Playing11Page() {
         return [];
       };
 
+      const normalizeFixedLength = (value: unknown, length: number): string[] => {
+        const arr = normalizeIdArray(value).slice(0, length);
+        while (arr.length < length) arr.push('');
+        return arr;
+      };
+
       // Load from match data if available
       const existingTeam1 = normalizeIdArray((selectedMatch as any).playing11?.team1);
       const existingTeam2 = normalizeIdArray((selectedMatch as any).playing11?.team2);
       setTeam1Playing11(existingTeam1);
       setTeam2Playing11(existingTeam2);
+
+      const existingImpactSubs1 = normalizeFixedLength((selectedMatch as any).impactSubstitutes?.team1, 4);
+      const existingImpactSubs2 = normalizeFixedLength((selectedMatch as any).impactSubstitutes?.team2, 4);
+      setTeam1ImpactSubstitutes(existingImpactSubs1);
+      setTeam2ImpactSubstitutes(existingImpactSubs2);
 
       const normalizeImpact = (impact: any) => {
         if (!impact) return { playerId: '', substitutionTime: '', original: '' };
@@ -208,6 +221,8 @@ export default function Playing11Page() {
       setTeam2ImpactOriginalPlayer('');
       setTeam1SubstitutionTime('');
       setTeam2SubstitutionTime('');
+      setTeam1ImpactSubstitutes(Array(4).fill(''));
+      setTeam2ImpactSubstitutes(Array(4).fill(''));
     }
   }, [selectedMatch]);
 
@@ -441,6 +456,7 @@ export default function Playing11Page() {
       const token = localStorage.getItem('adminToken');
       
       const existingSetAt = (selectedMatch as any).playing11?.setAt;
+      const existingImpactSubsSetAt = (selectedMatch as any).impactSubstitutes?.setAt;
       const sanitizePlaying11 = (playing11: string[], impactId: string, originalId: string) => {
         let xi = playing11.map(String).filter(Boolean);
         if (impactId && originalId) {
@@ -467,43 +483,85 @@ export default function Playing11Page() {
         team2ImpactOriginalPlayer
       );
 
+      const sanitizeSubstitutes = (subs: string[]) =>
+        subs
+          .map(String)
+          .map((s) => s.trim())
+          .filter(Boolean);
+
+      const team1SubsRaw = sanitizeSubstitutes(team1ImpactSubstitutes);
+      const team2SubsRaw = sanitizeSubstitutes(team2ImpactSubstitutes);
+      const team1SubsUnique = Array.from(new Set(team1SubsRaw));
+      const team2SubsUnique = Array.from(new Set(team2SubsRaw));
+      const team1SubsOverlap = team1SubsUnique.filter((id) => sanitizedTeam1Playing11.includes(id));
+      const team2SubsOverlap = team2SubsUnique.filter((id) => sanitizedTeam2Playing11.includes(id));
+
+      const isIPL = currentLeague === 'ipl';
+      if (isIPL) {
+        if (team1SubsRaw.length !== team1SubsUnique.length || team2SubsRaw.length !== team2SubsUnique.length) {
+          alert('Impact substitutes must be unique (no duplicates).');
+          return;
+        }
+        if (team1SubsOverlap.length || team2SubsOverlap.length) {
+          alert('Impact substitutes must not include players from the Playing 11.');
+          return;
+        }
+        if (publish && (team1SubsUnique.length !== 4 || team2SubsUnique.length !== 4)) {
+          alert('Please select exactly 4 Impact substitutes for each team to publish.');
+          return;
+        }
+      }
+
       // Update match with playing 11
       // Use the match update API format
+      const payload: any = {
+        id: selectedMatch.id,
+        date: selectedMatch.date,
+        time: selectedMatch.time,
+        venue: selectedMatch.venue,
+        team1Id: selectedMatch.team1.id,
+        team2Id: selectedMatch.team2.id,
+        status: selectedMatch.status,
+        league: selectedMatch.league,
+        playing11: {
+          team1: sanitizedTeam1Playing11,
+          team2: sanitizedTeam2Playing11,
+          ...(publish ? { setAt: new Date().toISOString() } : (existingSetAt ? { setAt: existingSetAt } : {})),
+        },
+      };
+
+      if (isIPL) {
+        payload.impactSubstitutes = {
+          team1: team1SubsUnique,
+          team2: team2SubsUnique,
+          ...(publish
+            ? { setAt: new Date().toISOString() }
+            : (existingImpactSubsSetAt ? { setAt: existingImpactSubsSetAt } : {})),
+        };
+      } else {
+        payload.impactPlayer = {
+          team1: team1ImpactPlayer ? {
+            original: team1ImpactOriginalPlayer || '',
+            impact: team1ImpactPlayer,
+            substitutionTime: team1SubstitutionTime || '',
+            ...(team1SubstitutionTime ? { substitutedAt: Date.now() } : {}),
+          } : null,
+          team2: team2ImpactPlayer ? {
+            original: team2ImpactOriginalPlayer || '',
+            impact: team2ImpactPlayer,
+            substitutionTime: team2SubstitutionTime || '',
+            ...(team2SubstitutionTime ? { substitutedAt: Date.now() } : {}),
+          } : null
+        };
+      }
+
       const response = await fetch(`/api/matches?id=${selectedMatch.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
         },
-        body: JSON.stringify({
-          id: selectedMatch.id,
-          date: selectedMatch.date,
-          time: selectedMatch.time,
-          venue: selectedMatch.venue,
-          team1Id: selectedMatch.team1.id,
-          team2Id: selectedMatch.team2.id,
-          status: selectedMatch.status,
-          league: selectedMatch.league,
-          playing11: {
-            team1: sanitizedTeam1Playing11,
-            team2: sanitizedTeam2Playing11,
-            ...(publish ? { setAt: new Date().toISOString() } : (existingSetAt ? { setAt: existingSetAt } : {})),
-          },
-          impactPlayer: {
-            team1: team1ImpactPlayer ? {
-              original: team1ImpactOriginalPlayer || '',
-              impact: team1ImpactPlayer,
-              substitutionTime: team1SubstitutionTime || '',
-              ...(team1SubstitutionTime ? { substitutedAt: Date.now() } : {}),
-            } : null,
-            team2: team2ImpactPlayer ? {
-              original: team2ImpactOriginalPlayer || '',
-              impact: team2ImpactPlayer,
-              substitutionTime: team2SubstitutionTime || '',
-              ...(team2SubstitutionTime ? { substitutedAt: Date.now() } : {}),
-            } : null
-          }
-        }),
+        body: JSON.stringify(payload),
       });
 
       if (!response.ok) {
@@ -591,12 +649,17 @@ export default function Playing11Page() {
   };
 
   const isWPL = currentLeague === 'wpl';
+  const isIPL = currentLeague === 'ipl';
   const canExport = !!selectedMatch && (
     team1Playing11.length > 0 ||
     team2Playing11.length > 0 ||
     !!team1ImpactPlayer ||
-    !!team2ImpactPlayer
+    !!team2ImpactPlayer ||
+    team1ImpactSubstitutes.some(Boolean) ||
+    team2ImpactSubstitutes.some(Boolean)
   );
+  const team1ImpactSubsCount = Array.from(new Set(team1ImpactSubstitutes.filter((id) => Boolean(id)))).length;
+  const team2ImpactSubsCount = Array.from(new Set(team2ImpactSubstitutes.filter((id) => Boolean(id)))).length;
   const bgStyle = isWPL 
     ? { background: `linear-gradient(to bottom, ${WPLColors.base}, ${WPLColors.gradientStart}66, ${WPLColors.gradientMid}33, ${WPLColors.base})` }
     : { background: '#0B0F13' };
@@ -920,7 +983,119 @@ export default function Playing11Page() {
                 </div>
               </div>
 
-              {/* Team 1 Impact Player */}
+              {/* Team 1 Impact Player / Nominees */}
+              {isIPL && (
+                <div
+                  className="rounded-2xl p-6 backdrop-blur-xl border"
+                  style={isWPL ? {
+                    background: WPLColors.purpleRGBA[10],
+                    borderColor: WPLColors.purpleRGBA[30],
+                  } : {
+                    background: 'rgba(30, 41, 59, 0.4)',
+                    borderColor: 'rgba(255, 255, 255, 0.1)',
+                  }}
+                >
+                  <div className="flex items-center justify-between mb-4">
+                    <div>
+                      <h2 className="text-2xl font-bold text-white mb-1">
+                        {selectedMatch.team1.shortName || selectedMatch.team1.name} - Impact Substitutes
+                      </h2>
+                      <p className="text-sm" style={{ color: isWPL ? WPLColors.textMuted : '#9CA3AF' }}>
+                        IPL: nominate 4 substitutes at the toss (Impact Player is chosen during the match)
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2 px-4 py-2 rounded-lg" style={{
+                      background: team1ImpactSubsCount === 4
+                        ? 'rgba(34, 197, 94, 0.2)'
+                        : 'rgba(251, 191, 36, 0.2)',
+                      border: `1px solid ${team1ImpactSubsCount === 4 ? 'rgba(34, 197, 94, 0.3)' : 'rgba(251, 191, 36, 0.3)'}`
+                    }}>
+                      <Users className="w-5 h-5" style={{ color: team1ImpactSubsCount === 4 ? '#22C55E' : '#FBBF24' }} />
+                      <span className="font-bold" style={{ color: team1ImpactSubsCount === 4 ? '#22C55E' : '#FBBF24' }}>
+                        {team1ImpactSubsCount} / 4
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      {Array.from({ length: 4 }).map((_, idx) => {
+                        const selected = team1ImpactSubstitutes[idx] || '';
+                        const otherSelected = team1ImpactSubstitutes
+                          .filter((id, i) => i !== idx)
+                          .filter(Boolean);
+
+                        const options = team1Players
+                          .filter((player) => !team1Playing11.includes(player.id) || player.id === selected)
+                          .filter((player) => !otherSelected.includes(player.id));
+
+                        return (
+                          <div key={idx}>
+                            <h4 className="text-sm font-semibold mb-2 text-white">Substitute {idx + 1}</h4>
+                            <select
+                              value={selected}
+                              onChange={(e) => {
+                                const next = [...team1ImpactSubstitutes];
+                                next[idx] = e.target.value;
+                                setTeam1ImpactSubstitutes(next);
+                              }}
+                              className="w-full px-4 py-3 rounded-lg text-white"
+                              style={isWPL ? {
+                                background: WPLColors.purpleRGBA[20],
+                                border: `1px solid ${WPLColors.purpleRGBA[30]}`,
+                              } : {
+                                background: '#0F172A',
+                                border: '1px solid rgba(255, 255, 255, 0.1)',
+                              }}
+                            >
+                              <option value="">Select Substitute...</option>
+                              {options.map((player) => (
+                                <option key={player.id} value={player.id}>
+                                  {player.name} ({player.role}) {player.nationality !== 'India' && '🌍'}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    {team1ImpactSubstitutes.some((id) => id && team1Playing11.includes(id)) && (
+                      <div className="p-3 rounded-lg bg-yellow-600/20 border border-yellow-600/30">
+                        <p className="text-sm text-yellow-300">
+                          One or more substitutes are also selected in the Playing 11. Substitutes must be outside the Playing 11.
+                        </p>
+                      </div>
+                    )}
+
+                    {(() => {
+                      const impact = (selectedMatch as any).impactPlayer?.team1;
+                      const impactId = impact?.impact || impact?.playerId || '';
+                      const originalId = impact?.original || '';
+                      if (!impactId) return null;
+                      const impactName = team1Players.find((p) => p.id === impactId)?.name || impactId;
+                      const originalName = team1Players.find((p) => p.id === originalId)?.name || originalId;
+                      const time = impact?.substitutionTime || (impact?.substitutedAt ? new Date(impact.substitutedAt).toLocaleString() : '');
+                      return (
+                        <div className="p-3 rounded-lg bg-emerald-600/10 border border-emerald-500/25">
+                          <p className="text-sm text-emerald-200">
+                            Impact used: <span className="font-semibold">{impactName}</span> for <span className="font-semibold">{originalName || '—'}</span>
+                            {time ? ` • ${time}` : ''}
+                          </p>
+                        </div>
+                      );
+                    })()}
+
+                    <div className="p-3 rounded-lg bg-white/5 border border-white/10">
+                      <p className="text-sm text-white/70">
+                        Record the actual Impact Player substitution on the <strong>Live Score</strong> page (IN/OUT + timing).
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {!isIPL && (
               <div 
                 className="rounded-2xl p-6 backdrop-blur-xl border"
                 style={isWPL ? {
@@ -1048,6 +1223,7 @@ export default function Playing11Page() {
                   )}
                 </div>
               </div>
+              )}
 
               {/* Team 2 Selection */}
               <div 
@@ -1153,7 +1329,119 @@ export default function Playing11Page() {
                 </div>
               </div>
 
-              {/* Team 2 Impact Player */}
+              {/* Team 2 Impact Player / Nominees */}
+              {isIPL && (
+                <div
+                  className="rounded-2xl p-6 backdrop-blur-xl border"
+                  style={isWPL ? {
+                    background: WPLColors.purpleRGBA[10],
+                    borderColor: WPLColors.purpleRGBA[30],
+                  } : {
+                    background: 'rgba(30, 41, 59, 0.4)',
+                    borderColor: 'rgba(255, 255, 255, 0.1)',
+                  }}
+                >
+                  <div className="flex items-center justify-between mb-4">
+                    <div>
+                      <h2 className="text-2xl font-bold text-white mb-1">
+                        {selectedMatch.team2.shortName || selectedMatch.team2.name} - Impact Substitutes
+                      </h2>
+                      <p className="text-sm" style={{ color: isWPL ? WPLColors.textMuted : '#9CA3AF' }}>
+                        IPL: nominate 4 substitutes at the toss (Impact Player is chosen during the match)
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2 px-4 py-2 rounded-lg" style={{
+                      background: team2ImpactSubsCount === 4
+                        ? 'rgba(34, 197, 94, 0.2)'
+                        : 'rgba(251, 191, 36, 0.2)',
+                      border: `1px solid ${team2ImpactSubsCount === 4 ? 'rgba(34, 197, 94, 0.3)' : 'rgba(251, 191, 36, 0.3)'}`
+                    }}>
+                      <Users className="w-5 h-5" style={{ color: team2ImpactSubsCount === 4 ? '#22C55E' : '#FBBF24' }} />
+                      <span className="font-bold" style={{ color: team2ImpactSubsCount === 4 ? '#22C55E' : '#FBBF24' }}>
+                        {team2ImpactSubsCount} / 4
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      {Array.from({ length: 4 }).map((_, idx) => {
+                        const selected = team2ImpactSubstitutes[idx] || '';
+                        const otherSelected = team2ImpactSubstitutes
+                          .filter((id, i) => i !== idx)
+                          .filter(Boolean);
+
+                        const options = team2Players
+                          .filter((player) => !team2Playing11.includes(player.id) || player.id === selected)
+                          .filter((player) => !otherSelected.includes(player.id));
+
+                        return (
+                          <div key={idx}>
+                            <h4 className="text-sm font-semibold mb-2 text-white">Substitute {idx + 1}</h4>
+                            <select
+                              value={selected}
+                              onChange={(e) => {
+                                const next = [...team2ImpactSubstitutes];
+                                next[idx] = e.target.value;
+                                setTeam2ImpactSubstitutes(next);
+                              }}
+                              className="w-full px-4 py-3 rounded-lg text-white"
+                              style={isWPL ? {
+                                background: WPLColors.purpleRGBA[20],
+                                border: `1px solid ${WPLColors.purpleRGBA[30]}`,
+                              } : {
+                                background: '#0F172A',
+                                border: '1px solid rgba(255, 255, 255, 0.1)',
+                              }}
+                            >
+                              <option value="">Select Substitute...</option>
+                              {options.map((player) => (
+                                <option key={player.id} value={player.id}>
+                                  {player.name} ({player.role}) {player.nationality !== 'India' && '🌍'}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    {team2ImpactSubstitutes.some((id) => id && team2Playing11.includes(id)) && (
+                      <div className="p-3 rounded-lg bg-yellow-600/20 border border-yellow-600/30">
+                        <p className="text-sm text-yellow-300">
+                          One or more substitutes are also selected in the Playing 11. Substitutes must be outside the Playing 11.
+                        </p>
+                      </div>
+                    )}
+
+                    {(() => {
+                      const impact = (selectedMatch as any).impactPlayer?.team2;
+                      const impactId = impact?.impact || impact?.playerId || '';
+                      const originalId = impact?.original || '';
+                      if (!impactId) return null;
+                      const impactName = team2Players.find((p) => p.id === impactId)?.name || impactId;
+                      const originalName = team2Players.find((p) => p.id === originalId)?.name || originalId;
+                      const time = impact?.substitutionTime || (impact?.substitutedAt ? new Date(impact.substitutedAt).toLocaleString() : '');
+                      return (
+                        <div className="p-3 rounded-lg bg-emerald-600/10 border border-emerald-500/25">
+                          <p className="text-sm text-emerald-200">
+                            Impact used: <span className="font-semibold">{impactName}</span> for <span className="font-semibold">{originalName || '—'}</span>
+                            {time ? ` • ${time}` : ''}
+                          </p>
+                        </div>
+                      );
+                    })()}
+
+                    <div className="p-3 rounded-lg bg-white/5 border border-white/10">
+                      <p className="text-sm text-white/70">
+                        Record the actual Impact Player substitution on the <strong>Live Score</strong> page (IN/OUT + timing).
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {!isIPL && (
               <div 
                 className="rounded-2xl p-6 backdrop-blur-xl border"
                 style={isWPL ? {
@@ -1281,6 +1569,7 @@ export default function Playing11Page() {
                   )}
                 </div>
               </div>
+              )}
 
               {/* Save Button */}
               <div className="flex flex-col items-end gap-3">
@@ -1315,7 +1604,12 @@ export default function Playing11Page() {
 
                 <button
                   onClick={() => handleSave({ publish: true })}
-                  disabled={team1Playing11.length !== 11 || team2Playing11.length !== 11 || saveStatus === 'saving'}
+                  disabled={
+                    team1Playing11.length !== 11 ||
+                    team2Playing11.length !== 11 ||
+                    saveStatus === 'saving' ||
+                    (isIPL && (team1ImpactSubsCount !== 4 || team2ImpactSubsCount !== 4))
+                  }
                   className={`
                     px-8 py-4 rounded-xl font-bold flex items-center gap-2 transition-all
                     ${team1Playing11.length === 11 && team2Playing11.length === 11

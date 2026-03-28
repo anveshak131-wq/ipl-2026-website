@@ -25,6 +25,15 @@ const HEADERS = [
 
 type SaveStatus = 'idle' | 'saving' | 'success' | 'error';
 
+type TeamKey = 'team1' | 'team2';
+
+type ImpactForm = {
+  inId: string;
+  outId: string;
+  moment: string;
+  overBall: string;
+};
+
 type WicketRow = {
   hasWicket: boolean;
   wicketType: string;
@@ -74,6 +83,22 @@ const WICKET_TYPES = [
   'Mankad (Run out at non-striker end)',
 ];
 
+const IMPACT_MOMENTS = [
+  'Before Start of Innings',
+  'Innings Break',
+  'End of Over',
+  'Fall of Wicket',
+  'Batter Retired',
+  'Injury Replacement (Mid-Over)',
+];
+
+const DEFAULT_IMPACT_FORM: ImpactForm = {
+  inId: '',
+  outId: '',
+  moment: 'End of Over',
+  overBall: '',
+};
+
 function normalizeTeamId(value: string | number | undefined) {
   let str = String(value ?? '').trim();
   if (!str) return '';
@@ -99,6 +124,22 @@ function safeJsonParse<T>(value: string | null): T | null {
   }
 }
 
+function normalizeIdArray(value: unknown): string[] {
+  if (Array.isArray(value)) return value.map(String).map((s) => s.trim()).filter(Boolean);
+  if (typeof value === 'string') {
+    return value
+      .split(',')
+      .map((s) => s.trim())
+      .filter(Boolean);
+  }
+  return [];
+}
+
+function isIndianNationality(value: unknown) {
+  const normalized = String(value || '').trim().toLowerCase();
+  return normalized === 'india' || normalized === 'indian' || normalized === 'ind';
+}
+
 export default function IPLAdminLiveScoreTablePage() {
   const [matches, setMatches] = useState<Match[]>([]);
   const [players, setPlayers] = useState<Player[]>([]);
@@ -109,12 +150,36 @@ export default function IPLAdminLiveScoreTablePage() {
   const [extrasData, setExtrasData] = useState<Record<number, ExtrasRow>>({});
   const [wicketData, setWicketData] = useState<Record<number, WicketRow>>({});
   const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle');
+  const [impactForms, setImpactForms] = useState<Record<TeamKey, ImpactForm>>({
+    team1: { ...DEFAULT_IMPACT_FORM },
+    team2: { ...DEFAULT_IMPACT_FORM },
+  });
+  const [impactSaveStatus, setImpactSaveStatus] = useState<Record<TeamKey, SaveStatus>>({
+    team1: 'idle',
+    team2: 'idle',
+  });
 
   const selectedMatchFromList = useMemo(
     () => matches.find((m) => m.id === selectedMatchId) || null,
     [matches, selectedMatchId]
   );
   const selectedMatch = matchDetails || selectedMatchFromList;
+
+  // Reset Impact Player forms when switching matches
+  useEffect(() => {
+    if (!selectedMatch) return;
+    const extractIds = (value: any) => ({
+      inId: String(value?.impact || value?.playerId || '').trim(),
+      outId: String(value?.original || '').trim(),
+    });
+    const t1 = extractIds((selectedMatch as any)?.impactPlayer?.team1);
+    const t2 = extractIds((selectedMatch as any)?.impactPlayer?.team2);
+    setImpactForms({
+      team1: { ...DEFAULT_IMPACT_FORM, inId: t1.inId, outId: t1.outId },
+      team2: { ...DEFAULT_IMPACT_FORM, inId: t2.inId, outId: t2.outId },
+    });
+    setImpactSaveStatus({ team1: 'idle', team2: 'idle' });
+  }, [selectedMatch?.id]);
 
   const playerById = useMemo(() => {
     return new Map(players.map((p) => [p.id, p]));
@@ -259,21 +324,35 @@ export default function IPLAdminLiveScoreTablePage() {
     return { team1: uniqStrings(team1), team2: uniqStrings(team2) };
   }, [playerById, selectedMatch]);
 
-  const impactPlayerNames = useMemo(() => {
-    const team1ImpactId =
-      selectedMatch?.impactPlayer?.team1?.impact ||
-      selectedMatch?.impactPlayer?.team1?.playerId ||
-      '';
-    const team2ImpactId =
-      selectedMatch?.impactPlayer?.team2?.impact ||
-      selectedMatch?.impactPlayer?.team2?.playerId ||
-      '';
+  const impactPlayerInfo = useMemo(() => {
+    const extract = (value: any) => {
+      const impactId = String(value?.impact || value?.playerId || '').trim();
+      const originalId = String(value?.original || '').trim();
+      const impactName = impactId ? String(playerById.get(impactId)?.name || impactId).trim() : '';
+      const originalName = originalId ? String(playerById.get(originalId)?.name || originalId).trim() : '';
+      const substitutionTime = String(value?.substitutionTime || '').trim();
+      const substitutedAt = typeof value?.substitutedAt === 'number' ? value.substitutedAt : undefined;
+      return {
+        impactId,
+        impactName,
+        originalId,
+        originalName,
+        substitutionTime,
+        substitutedAt,
+      };
+    };
 
-    const team1 = team1ImpactId ? playerById.get(String(team1ImpactId))?.name || '' : '';
-    const team2 = team2ImpactId ? playerById.get(String(team2ImpactId))?.name || '' : '';
-
-    return { team1: team1.trim(), team2: team2.trim() };
+    return {
+      team1: extract((selectedMatch as any)?.impactPlayer?.team1),
+      team2: extract((selectedMatch as any)?.impactPlayer?.team2),
+    };
   }, [playerById, selectedMatch]);
+
+  const impactSubstituteIds = useMemo(() => {
+    const team1 = normalizeIdArray((selectedMatch as any)?.impactSubstitutes?.team1);
+    const team2 = normalizeIdArray((selectedMatch as any)?.impactSubstitutes?.team2);
+    return { team1: Array.from(new Set(team1)), team2: Array.from(new Set(team2)) };
+  }, [selectedMatch]);
 
   const hasPlaying11 = Boolean(playing11Names.team1.length) && Boolean(playing11Names.team2.length);
   const matchToss = selectedMatch?.matchState?.toss;
@@ -292,11 +371,113 @@ export default function IPLAdminLiveScoreTablePage() {
   const getTeamPlayerOptions = (teamKey: 'team1' | 'team2') => {
     const fromXI = teamKey === 'team1' ? playing11Names.team1 : playing11Names.team2;
     const fromSquad = (teamKey === 'team1' ? squads.team1 : squads.team2).map((p) => p.name);
-    const impact = teamKey === 'team1' ? impactPlayerNames.team1 : impactPlayerNames.team2;
+    const impact = teamKey === 'team1' ? impactPlayerInfo.team1 : impactPlayerInfo.team2;
 
     const base = (fromXI.length ? fromXI : fromSquad).slice();
-    if (impact) base.push(impact);
+    if (impact?.impactName) {
+      if (impact.originalName) {
+        // Replaced player cannot take further part — remove them from future selections.
+        const idx = base.indexOf(impact.originalName);
+        if (idx >= 0) base.splice(idx, 1);
+      }
+      base.push(impact.impactName);
+    }
     return uniqStrings(base);
+  };
+
+  const updateImpactForm = (teamKey: TeamKey, patch: Partial<ImpactForm>) => {
+    setImpactForms((prev) => ({
+      ...prev,
+      [teamKey]: { ...prev[teamKey], ...patch },
+    }));
+  };
+
+  const buildImpactSubstitutionTime = (moment: string, overBall: string) => {
+    const cleaned = String(overBall || '').trim();
+    return cleaned ? `${moment} (${cleaned})` : moment;
+  };
+
+  const saveImpactPlayer = async (teamKey: TeamKey) => {
+    try {
+      if (!selectedMatch) return;
+
+      const token = localStorage.getItem('adminToken');
+      if (!token) {
+        alert('Admin token missing. Please login again.');
+        return;
+      }
+
+      const form = impactForms[teamKey];
+      const inId = String(form.inId || '').trim();
+      const outId = String(form.outId || '').trim();
+      const moment = String(form.moment || '').trim() || DEFAULT_IMPACT_FORM.moment;
+
+      const nominees = impactSubstituteIds[teamKey] || [];
+      const playingXI = normalizeIdArray((selectedMatch as any)?.playing11?.[teamKey]);
+
+      if (!nominees.length) {
+        alert('No Impact substitutes found. Please set 4 substitutes in Playing 11 first.');
+        return;
+      }
+      if (!playingXI.length) {
+        alert('Playing 11 not found for this match. Please set Playing 11 first.');
+        return;
+      }
+      if (!inId || !outId) {
+        alert('Select both Impact IN and Player OUT.');
+        return;
+      }
+      if (inId === outId) {
+        alert('Impact IN and Player OUT cannot be the same player.');
+        return;
+      }
+      if (!nominees.includes(inId)) {
+        alert('Impact IN must be one of the 4 nominated substitutes.');
+        return;
+      }
+      if (!playingXI.includes(outId)) {
+        alert('Player OUT must be from the Playing 11.');
+        return;
+      }
+
+      setImpactSaveStatus((prev) => ({ ...prev, [teamKey]: 'saving' }));
+
+      const substitutionTime = buildImpactSubstitutionTime(moment, form.overBall);
+      const existingImpact = (selectedMatch as any)?.impactPlayer || {};
+      const nextImpactPlayer = {
+        team1: teamKey === 'team1'
+          ? { original: outId, impact: inId, substitutionTime, substitutedAt: Date.now() }
+          : (existingImpact.team1 ?? null),
+        team2: teamKey === 'team2'
+          ? { original: outId, impact: inId, substitutionTime, substitutedAt: Date.now() }
+          : (existingImpact.team2 ?? null),
+      };
+
+      const resp = await fetch(`/api/matches?id=${encodeURIComponent(selectedMatch.id)}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          id: selectedMatch.id,
+          impactPlayer: nextImpactPlayer,
+        }),
+      });
+
+      if (!resp.ok) throw new Error('Failed to save Impact Player');
+      const updated = (await resp.json()) as Match;
+
+      setMatchDetails(updated);
+      setMatches((prev) => prev.map((m) => (m.id === updated.id ? updated : m)));
+
+      setImpactSaveStatus((prev) => ({ ...prev, [teamKey]: 'success' }));
+      setTimeout(() => setImpactSaveStatus((prev) => ({ ...prev, [teamKey]: 'idle' })), 2000);
+    } catch (e) {
+      console.error('[IPL Live Score Table] Impact Player save error:', e);
+      setImpactSaveStatus((prev) => ({ ...prev, [teamKey]: 'error' }));
+      setTimeout(() => setImpactSaveStatus((prev) => ({ ...prev, [teamKey]: 'idle' })), 3000);
+    }
   };
 
   const updateCell = (rowIndex: number, colIndex: number, value: string) => {
@@ -960,7 +1141,7 @@ export default function IPLAdminLiveScoreTablePage() {
           <h1 className="text-3xl font-bold text-white">IPL Live Score (Table)</h1>
         </div>
         <p className="text-sm text-white/60">
-          WPL live-score-csv style UI • Uses IPL Playing XI + Impact Player
+          WPL live-score-csv style UI • Uses IPL Playing XI + Impact substitutes (4 nominees)
         </p>
       </div>
 
@@ -1002,8 +1183,8 @@ export default function IPLAdminLiveScoreTablePage() {
               </div>
               <div>
                 <span className="text-white/80">Impact Players:</span>{' '}
-                {(impactPlayerNames.team1 || impactPlayerNames.team2)
-                  ? `${impactPlayerNames.team1 || '-'} / ${impactPlayerNames.team2 || '-'}`
+                {(impactPlayerInfo.team1.impactName || impactPlayerInfo.team2.impactName)
+                  ? `${impactPlayerInfo.team1.impactName || '-'} / ${impactPlayerInfo.team2.impactName || '-'}`
                   : 'Not set'}
               </div>
             </div>
@@ -1052,6 +1233,195 @@ export default function IPLAdminLiveScoreTablePage() {
           </div>
         </div>
       </div>
+
+      {selectedMatch && (
+        <div className="rounded-2xl border border-white/10 bg-white/5 p-4 mb-6">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <div className="text-sm font-semibold text-white/80">Impact Player (IPL)</div>
+              <div className="text-xs text-white/60 mt-1">
+                Impact IN must be from the 4 nominated substitutes (set in Playing 11). Player OUT must be from the Playing XI.
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
+            {(['team1', 'team2'] as const).map((teamKey) => {
+              const team = teamKey === 'team1' ? selectedMatch.team1 : selectedMatch.team2;
+              const nominees = impactSubstituteIds[teamKey] || [];
+              const xi = normalizeIdArray((selectedMatch as any)?.playing11?.[teamKey]);
+
+              const impact = teamKey === 'team1' ? impactPlayerInfo.team1 : impactPlayerInfo.team2;
+              const status = impactSaveStatus[teamKey];
+              const form = impactForms[teamKey];
+
+              const overseasInXI = xi.reduce((count, id) => {
+                const p = playerById.get(String(id));
+                if (!p?.nationality) return count;
+                return isIndianNationality(p.nationality) ? count : count + 1;
+              }, 0);
+              const selectedInNationality = playerById.get(String(form.inId || ''))?.nationality;
+              const selectedInIsOverseas = Boolean(selectedInNationality) && !isIndianNationality(selectedInNationality);
+
+              const nomineeLabels = nominees
+                .map((id) => {
+                  const p = playerById.get(String(id));
+                  return p?.name || String(id);
+                })
+                .filter(Boolean)
+                .join(', ');
+
+              const xiLabels = xi
+                .map((id) => {
+                  const p = playerById.get(String(id));
+                  return p?.name || String(id);
+                })
+                .filter(Boolean)
+                .join(', ');
+
+              return (
+                <div key={teamKey} className="rounded-xl border border-white/10 bg-slate-950/30 p-4">
+                  <div className="flex items-center justify-between gap-3 mb-3">
+                    <div className="text-sm font-semibold text-white">
+                      {team?.shortName || team?.name || teamKey.toUpperCase()}
+                    </div>
+                    {impact.impactId ? (
+                      <span className="text-[10px] px-2 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/25 text-emerald-200">
+                        Used
+                      </span>
+                    ) : (
+                      <span className="text-[10px] px-2 py-1 rounded-full bg-white/5 border border-white/10 text-white/60">
+                        Not used
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="text-xs text-white/60 space-y-1 mb-3">
+                    <div>
+                      <span className="text-white/80">Nominees:</span>{' '}
+                      {nomineeLabels || 'Not set (set 4 substitutes in Playing 11)'}
+                    </div>
+                    <div>
+                      <span className="text-white/80">Playing XI:</span>{' '}
+                      {xiLabels || 'Not set'}
+                    </div>
+                    {impact.impactId && (
+                      <div>
+                        <span className="text-white/80">Current:</span>{' '}
+                        {impact.impactName || impact.impactId}
+                        {impact.originalId ? ` for ${impact.originalName || impact.originalId}` : ''}
+                        {impact.substitutionTime ? ` • ${impact.substitutionTime}` : ''}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div>
+                      <div className="text-[11px] font-semibold text-white/70 mb-1">Impact IN</div>
+                      <select
+                        value={form.inId || ''}
+                        onChange={(e) => updateImpactForm(teamKey, { inId: e.target.value })}
+                        disabled={!nominees.length}
+                        className="w-full border border-white/10 focus:border-purple-400 rounded-lg px-2 py-2 bg-slate-950 text-white text-sm disabled:opacity-60"
+                      >
+                        <option value="">{nominees.length ? 'Select nominee...' : 'Set nominees first'}</option>
+                        {nominees.map((id) => {
+                          const p = playerById.get(String(id));
+                          const label = p?.name || String(id);
+                          const globe = p?.nationality && !isIndianNationality(p.nationality) ? ' 🌍' : '';
+                          return (
+                            <option key={String(id)} value={String(id)}>
+                              {label}{globe}
+                            </option>
+                          );
+                        })}
+                      </select>
+                    </div>
+
+                    <div>
+                      <div className="text-[11px] font-semibold text-white/70 mb-1">Player OUT</div>
+                      <select
+                        value={form.outId || ''}
+                        onChange={(e) => updateImpactForm(teamKey, { outId: e.target.value })}
+                        disabled={!xi.length}
+                        className="w-full border border-white/10 focus:border-purple-400 rounded-lg px-2 py-2 bg-slate-950 text-white text-sm disabled:opacity-60"
+                      >
+                        <option value="">{xi.length ? 'Select from XI...' : 'Set Playing XI first'}</option>
+                        {xi.map((id) => {
+                          const p = playerById.get(String(id));
+                          const label = p?.name || String(id);
+                          return (
+                            <option key={String(id)} value={String(id)}>
+                              {label}
+                            </option>
+                          );
+                        })}
+                      </select>
+                    </div>
+
+                    <div>
+                      <div className="text-[11px] font-semibold text-white/70 mb-1">When</div>
+                      <select
+                        value={form.moment || DEFAULT_IMPACT_FORM.moment}
+                        onChange={(e) => updateImpactForm(teamKey, { moment: e.target.value })}
+                        className="w-full border border-white/10 focus:border-purple-400 rounded-lg px-2 py-2 bg-slate-950 text-white text-sm"
+                      >
+                        {IMPACT_MOMENTS.map((m) => (
+                          <option key={m} value={m}>
+                            {m}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div>
+                      <div className="text-[11px] font-semibold text-white/70 mb-1">Over.Ball (optional)</div>
+                      <input
+                        value={form.overBall || ''}
+                        onChange={(e) => updateImpactForm(teamKey, { overBall: e.target.value })}
+                        placeholder="e.g. 14.0"
+                        className="w-full border border-white/10 focus:border-purple-400 rounded-lg px-2 py-2 bg-white/5 text-white placeholder-white/30 text-sm"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="mt-3 space-y-2">
+                    {overseasInXI >= 4 && selectedInIsOverseas && (
+                      <div className="text-xs text-red-200 bg-red-500/10 border border-red-500/25 rounded-lg px-3 py-2">
+                        Overseas warning: starting XI already has {overseasInXI} overseas players — Impact Player should be Indian.
+                      </div>
+                    )}
+                    {String(form.moment || '').toLowerCase().includes('mid-over') && (
+                      <div className="text-xs text-yellow-200 bg-yellow-500/10 border border-yellow-500/25 rounded-lg px-3 py-2">
+                        Mid-over note: if the bowling side uses an Impact Player during an over, that player cannot bowl the remaining balls of that over.
+                      </div>
+                    )}
+                    <div className="text-xs text-white/60">
+                      Once saved, the OUT player is removed from the batter/bowler dropdowns for this match.
+                    </div>
+                  </div>
+
+                  <div className="mt-4 flex items-center gap-3">
+                    <button
+                      onClick={() => saveImpactPlayer(teamKey)}
+                      disabled={status === 'saving' || !selectedMatchId}
+                      className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 disabled:opacity-60 text-white text-sm font-semibold"
+                    >
+                      {impact.impactId ? 'Update Impact' : 'Use Impact'}
+                    </button>
+                    <div className="text-xs">
+                      {status === 'idle' && <span className="text-white/40">—</span>}
+                      {status === 'saving' && <span className="text-yellow-300">Saving…</span>}
+                      {status === 'success' && <span className="text-emerald-300">Saved</span>}
+                      {status === 'error' && <span className="text-red-300">Error</span>}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       <div className="flex flex-wrap gap-3 items-center mb-5">
         <button
@@ -1204,4 +1574,3 @@ export default function IPLAdminLiveScoreTablePage() {
     </div>
   );
 }
-

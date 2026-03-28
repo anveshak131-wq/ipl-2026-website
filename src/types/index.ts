@@ -139,6 +139,13 @@ export interface Match {
       playerId?: string;
     };
   };
+  // IPL Impact Player nominees (4 substitutes) named at the toss.
+  // The actual "Impact Player used" is stored under `impactPlayer`.
+  impactSubstitutes?: {
+    team1: string[]; // 4 player IDs
+    team2: string[]; // 4 player IDs
+    setAt?: string; // ISO timestamp when substitutes were set (optional)
+  };
   matchNumber?: string; // Auto-generated based on date and time ordering (e.g., "IPL-001", "WPL-001")
   playoffType?: PlayoffType; // Type of playoff match (null for regular matches)
   playing11?: {

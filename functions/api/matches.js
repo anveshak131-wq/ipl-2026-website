@@ -275,6 +275,7 @@ function formatMatch(match, teams) {
       playoffType: match.playoffType,
       playing11: match.playing11,
       impactPlayer: match.impactPlayer,
+      impactSubstitutes: match.impactSubstitutes,
       toss: match.toss,
       matchState: match.matchState,
       _isMock: match._isMock
@@ -332,6 +333,7 @@ function formatMatch(match, teams) {
     playoffType: match.playoffType,
     playing11: match.playing11,
     impactPlayer: match.impactPlayer,
+    impactSubstitutes: match.impactSubstitutes,
     toss: match.toss,
     matchState: match.matchState,
     _isMock: match._isMock
