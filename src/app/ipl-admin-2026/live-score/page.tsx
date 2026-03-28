@@ -1221,14 +1221,6 @@ export default function IPLAdminLiveScoreTablePage() {
           <div className="text-xs text-white/60 mt-1">
             Overs {inn1.overs} • Extras {inn1.extras} • W {inn1.wides} • NB {inn1.noBalls}
           </div>
-          <div className="mt-3 flex gap-2">
-            <button
-              onClick={() => addRowToInnings(1)}
-              className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-sm font-semibold"
-            >
-              <Plus className="w-4 h-4" /> Add Ball
-            </button>
-          </div>
         </div>
 
         <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
@@ -1241,14 +1233,6 @@ export default function IPLAdminLiveScoreTablePage() {
           </div>
           <div className="text-xs text-white/60 mt-1">
             Overs {inn2.overs} • Extras {inn2.extras} • W {inn2.wides} • NB {inn2.noBalls}
-          </div>
-          <div className="mt-3 flex gap-2">
-            <button
-              onClick={() => addRowToInnings(2)}
-              className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-fuchsia-600 hover:bg-fuchsia-700 text-white text-sm font-semibold"
-            >
-              <Plus className="w-4 h-4" /> Add Ball
-            </button>
           </div>
         </div>
       </div>
@@ -1526,12 +1510,20 @@ export default function IPLAdminLiveScoreTablePage() {
                 {!rows.some((r) => String(r?.[2] || '') === '1') && (
                   <tr>
                     <td colSpan={HEADERS.length + 1} className="px-4 py-6 text-center text-white/50">
-                      No deliveries yet. Click “Add Ball” under Innings 1.
+                      No deliveries yet. Click “Add Ball” below.
                     </td>
                   </tr>
                 )}
               </tbody>
             </table>
+          </div>
+          <div className="px-4 py-3 border-t border-white/10 flex items-center justify-end">
+            <button
+              onClick={() => addRowToInnings(1)}
+              className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-sm font-semibold"
+            >
+              <Plus className="w-4 h-4" /> Add Ball
+            </button>
           </div>
         </section>
 
@@ -1583,12 +1575,20 @@ export default function IPLAdminLiveScoreTablePage() {
                 {!rows.some((r) => String(r?.[2] || '') === '2') && (
                   <tr>
                     <td colSpan={HEADERS.length + 1} className="px-4 py-6 text-center text-white/50">
-                      No deliveries yet. Click “Add Ball” under Innings 2.
+                      No deliveries yet. Click “Add Ball” below.
                     </td>
                   </tr>
                 )}
               </tbody>
             </table>
+          </div>
+          <div className="px-4 py-3 border-t border-white/10 flex items-center justify-end">
+            <button
+              onClick={() => addRowToInnings(2)}
+              className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-fuchsia-600 hover:bg-fuchsia-700 text-white text-sm font-semibold"
+            >
+              <Plus className="w-4 h-4" /> Add Ball
+            </button>
           </div>
         </section>
       </div>
