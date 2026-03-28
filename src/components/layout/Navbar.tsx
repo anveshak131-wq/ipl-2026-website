@@ -68,8 +68,9 @@ export default function Navbar() {
 
   const primaryNavItems: NavItem[] = [
     // Real-time & Core Features (Highest Priority)
-    // Live Score temporarily hidden - use scorecard instead
-    // { href: '/live-score', label: 'Live Score', emoji: 'lightning' },
+    ...(currentLeague === 'ipl'
+      ? [{ href: '/live-score', label: 'Live Score', emoji: 'lightning' as NavEmojiName }]
+      : []),
     { href: getLeagueAwareHref('/matches'), label: 'Matches', emoji: 'cricket-bat' },
     // Explore & Discover
     { href: getLeagueAwareHref('/teams'), label: 'Teams', emoji: 'trophy' },
@@ -97,6 +98,7 @@ export default function Navbar() {
   };
 
   const getNavTooltip = (href: string): string | null => {
+    if (href === '/live-score') return 'Ball-by-ball updates and match situation';
     if (href === '/stats') return 'Leaderboards, records, and team comparisons';
     if (href === '/wpl/leaderboard') return 'Player stats and points table';
     return null;
