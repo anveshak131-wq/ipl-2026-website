@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import WPLAdminSidebarNew from '@/components/admin/WPLAdminSidebarNew';
 import { api } from '@/lib/data';
 import { Match } from '@/types';
 
@@ -37,29 +36,24 @@ export default function IPLLiveScoreWithAIPage() {
   }, []);
 
   useEffect(() => {
-    const savedWicketData = localStorage.getItem('liveScoreWicketData_ipl');
-    const savedExtrasData = localStorage.getItem('liveScoreExtrasData_ipl');
-
-    if (savedWicketData) {
-      try { setWicketData(JSON.parse(savedWicketData)); } catch (e) { console.error(e); }
-    }
-    if (savedExtrasData) {
-      try { setExtrasData(JSON.parse(savedExtrasData)); } catch (e) { console.error(e); }
-    }
-  }, []);
-
-  useEffect(() => {
     if (!selectedMatch) return;
 
     const loadLiveData = async () => {
       setLoading(true);
       try {
         // Poll live rows for the selected IPL match
-        const resp = await fetch(`/api/wpl-live-score/save?matchId=${encodeURIComponent(selectedMatch)}`);
+        const resp = await fetch(`/api/ipl-live-score/save?matchId=${encodeURIComponent(selectedMatch)}`);
         if (resp.ok) {
           const data = await resp.json();
-          if (Array.isArray(data.rows)) setLiveData(data.rows);
+          if (Array.isArray(data?.rows)) setLiveData(data.rows);
           else if (Array.isArray(data)) setLiveData(data);
+          else setLiveData([]);
+
+          if (data?.extrasData && typeof data.extrasData === 'object') setExtrasData(data.extrasData);
+          else setExtrasData({});
+
+          if (data?.wicketData && typeof data.wicketData === 'object') setWicketData(data.wicketData);
+          else setWicketData({});
         }
       } catch (error) {
         console.error('Error loading live data:', error);
@@ -95,8 +89,10 @@ export default function IPLLiveScoreWithAIPage() {
           if (!hasWide && !hasNoBall) totalBalls++;
           if (hasWicket) totalWickets++;
           totalRuns += runs;
-          if (hasWide) totalRuns += (extras.wideRuns || 0) + 1;
-          if (hasNoBall) totalRuns += (extras.noBallRuns || 0) + 1;
+          if (hasWide) totalRuns += (extras.wideExtraRuns || 0) + 1;
+          if (hasNoBall) totalRuns += 1;
+          if (extras.hasByes) totalRuns += extras.byesRuns || 0;
+          if (extras.hasLB) totalRuns += extras.lbRuns || 0;
           if (index >= data.length - 3) lastFewBalls.push({ runs, hasWicket, hasWide, hasNoBall, striker: row[3], bowler: row[5] });
         });
         const overs = Math.floor(totalBalls / 6);
@@ -156,8 +152,10 @@ export default function IPLLiveScoreWithAIPage() {
       if (!hasWide && !hasNoBall) totalBalls++;
       if (hasWicket) totalWickets++;
       totalRuns += runs;
-      if (hasWide) totalRuns += (extras.wideRuns || 0) + 1;
-      if (hasNoBall) totalRuns += (extras.noBallRuns || 0) + 1;
+      if (hasWide) totalRuns += (extras.wideExtraRuns || 0) + 1;
+      if (hasNoBall) totalRuns += 1;
+      if (extras.hasByes) totalRuns += extras.byesRuns || 0;
+      if (extras.hasLB) totalRuns += extras.lbRuns || 0;
     });
     const overs = Math.floor(totalBalls / 6);
     const balls = totalBalls % 6;
@@ -166,9 +164,7 @@ export default function IPLLiveScoreWithAIPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-      <div className="flex">
-        <WPLAdminSidebarNew />
-        <main className="flex-1 p-8">
+        <main className="p-8">
           <div className="max-w-7xl mx-auto">
             {/* Header */}
             <div className="mb-8 text-center">
@@ -348,7 +344,6 @@ export default function IPLLiveScoreWithAIPage() {
             )}
           </div>
         </main>
-      </div>
     </div>
   );
 }
