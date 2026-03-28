@@ -34,6 +34,7 @@ type LiveScoreTableState = {
   rows: string[][];
   extrasData?: Record<number, ExtrasRow>;
   wicketData?: Record<number, WicketRow>;
+  commentaryData?: Record<number, string>;
 };
 
 const DEFAULT_EXTRAS: ExtrasRow = {
@@ -247,52 +248,164 @@ function buildCommentaryFromRows(
   extrasData: Record<number, ExtrasRow>,
   wicketData: Record<number, WicketRow>,
   innings: '1' | '2',
-  limit: number = 12,
+  commentaryData: Record<number, string>,
 ) {
-  const lastRows: Array<{ row: string[]; idx: number }> = [];
-  for (let i = rows.length - 1; i >= 0; i--) {
-    if (String(rows[i]?.[2] || '') !== innings) continue;
-    lastRows.push({ row: rows[i], idx: i });
-    if (lastRows.length >= limit) break;
-  }
+  const stableHash = (input: string) => {
+    // FNV-1a 32-bit
+    let hash = 2166136261;
+    for (let i = 0; i < input.length; i++) {
+      hash ^= input.charCodeAt(i);
+      hash = Math.imul(hash, 16777619);
+    }
+    return hash >>> 0;
+  };
 
-  return lastRows
-    .reverse()
-    .map(({ row, idx }) => {
-      const over = row[0] || '';
-      const ball = row[1] || '';
-      const striker = row[3] || '';
-      const bowler = row[5] || '';
-      const notes = row[12] || '';
-      const runs = Number.parseInt(String(row[6] || ''), 10) || 0;
+  const pick = (options: string[], seed: string) => {
+    if (!Array.isArray(options) || options.length === 0) return '';
+    return options[stableHash(seed) % options.length] || options[0];
+  };
 
-      const ex = { ...DEFAULT_EXTRAS, ...(extrasData[idx] || {}) };
-      const wk = { ...DEFAULT_WICKET, ...(wicketData[idx] || {}) };
+  const formatRunWord = (n: number) => `${n} ${n === 1 ? 'run' : 'runs'}`;
 
-      const parts: string[] = [];
-      const prefix = over && ball ? `${over}.${ball}` : '';
-      if (prefix) parts.push(prefix);
-      if (bowler || striker) parts.push(`${bowler || 'Bowler'} to ${striker || 'Batter'}`);
+  const buildFallback = (seed: string, runs: number, ex: ExtrasRow, wk: WicketRow) => {
+    if (wk.hasWicket) {
+      const taker = wk.wicketTaker ? `, ${wk.wicketTaker}` : '';
+      const type = wk.wicketType ? ` (${wk.wicketType}${taker})` : taker ? ` (${taker.slice(2)})` : '';
+      return pick(
+        [
+          `Wicket${type}.`,
+          `Gone${type}! Big breakthrough.`,
+          `Wicket falls${type}.`,
+        ],
+        `wicket:${seed}`,
+      );
+    }
 
-      if (wk.hasWicket) {
-        parts.push(`WICKET${wk.wicketType ? ` (${wk.wicketType})` : ''}`);
-      }
+    const lbRuns = ex.hasLB ? ex.lbRuns || 0 : 0;
+    const byeRuns = ex.hasByes ? ex.byesRuns || 0 : 0;
+    const wideRuns = ex.hasWide ? 1 + (ex.wideExtraRuns || 0) : 0;
+    const hasNB = ex.hasNoBall;
 
-      if (ex.hasWide) {
-        parts.push(`Wide (${1 + (ex.wideExtraRuns || 0)})`);
-      } else if (ex.hasNoBall) {
-        parts.push('No-ball (+1)');
-      }
+    if (wideRuns > 0) {
+      return pick(
+        [
+          `Wide called. ${formatRunWord(wideRuns)} added.`,
+          `Sprays it wide — ${formatRunWord(wideRuns)} to the batting side.`,
+          `Down the wrong line, wide. ${formatRunWord(wideRuns)}.`,
+        ],
+        `wide:${seed}`,
+      );
+    }
 
-      if (ex.hasByes) parts.push(`Byes (${ex.byesRuns || 0})`);
-      if (ex.hasLB) parts.push(`LB (${ex.lbRuns || 0})`);
+    if (hasNB) {
+      const base = pick(
+        [
+          'No-ball called. Free hit coming up.',
+          'Oversteps — no-ball. Free hit next.',
+          'No-ball. Extra run added.',
+        ],
+        `nb:${seed}`,
+      );
 
-      if (!ex.hasWide) parts.push(`${runs} run${runs === 1 ? '' : 's'}`);
-      if (notes) parts.push(notes);
+      if (lbRuns > 0) return `${base} Plus ${lbRuns} leg bye${lbRuns === 1 ? '' : 's'}.`;
+      if (byeRuns > 0) return `${base} Plus ${byeRuns} bye${byeRuns === 1 ? '' : 's'}.`;
+      if (runs > 0) return `${base} Plus ${formatRunWord(runs)}.`;
+      return base;
+    }
 
-      return parts.filter(Boolean).join(' • ');
-    })
-    .filter(Boolean);
+    if (lbRuns > 0) {
+      return pick(
+        [
+          `Off the pads, ${lbRuns} leg bye${lbRuns === 1 ? '' : 's'}.`,
+          `Clips the pad and they sneak ${lbRuns} leg bye${lbRuns === 1 ? '' : 's'}.`,
+          `${lbRuns} leg bye${lbRuns === 1 ? '' : 's'} taken.`,
+        ],
+        `lb:${seed}`,
+      );
+    }
+
+    if (byeRuns > 0) {
+      return pick(
+        [
+          `Past the keeper, ${byeRuns} bye${byeRuns === 1 ? '' : 's'}.`,
+          `${byeRuns} bye${byeRuns === 1 ? '' : 's'} taken.`,
+          `They steal ${byeRuns} bye${byeRuns === 1 ? '' : 's'}.`,
+        ],
+        `byes:${seed}`,
+      );
+    }
+
+    if (runs === 0) {
+      return pick(
+        [
+          'No run. Tidy delivery.',
+          'Dot ball. Good pressure.',
+          'Defended well — no run.',
+        ],
+        `dot:${seed}`,
+      );
+    }
+
+    if (runs === 4) {
+      return pick(
+        [
+          'Four! Finds the boundary.',
+          'Cracked away for four.',
+          'Timed sweetly — four runs.',
+        ],
+        `four:${seed}`,
+      );
+    }
+
+    if (runs === 6) {
+      return pick(
+        [
+          'Six! Launched into the stands.',
+          'That is a maximum — six.',
+          'Sailed over the rope for six.',
+        ],
+        `six:${seed}`,
+      );
+    }
+
+    return pick(
+      [
+        `They take ${formatRunWord(runs)}.`,
+        `${formatRunWord(runs)} picked up.`,
+        `Good running — ${formatRunWord(runs)}.`,
+      ],
+      `runs:${seed}`,
+    );
+  };
+
+  const lines: string[] = [];
+  rows.forEach((row, idx) => {
+    if (String(row?.[2] || '') !== innings) return;
+
+    const over = row?.[0] || '';
+    const ball = row?.[1] || '';
+    const striker = row?.[3] || '';
+    const bowler = row?.[5] || '';
+    const notes = String(row?.[12] || '').trim();
+    const runs = Number.parseInt(String(row?.[6] || ''), 10) || 0;
+
+    const ex = { ...DEFAULT_EXTRAS, ...(extrasData[idx] || {}) };
+    const wk = { ...DEFAULT_WICKET, ...(wicketData[idx] || {}) };
+
+    const prefix = over && ball ? `${over}.${ball}` : '';
+    const headerParts: string[] = [];
+    if (prefix) headerParts.push(prefix);
+    if (bowler || striker) headerParts.push(`${bowler || 'Bowler'} to ${striker || 'Batter'}`);
+    const header = headerParts.length ? `${headerParts.join(' ')}: ` : '';
+
+    const fromApi = String((commentaryData || {})[idx] || '').trim();
+    const seed = `${innings}:${prefix}:${bowler}:${striker}:${idx}`;
+    const body = notes || fromApi || buildFallback(seed, runs, ex, wk);
+    const line = `${header}${body}`.trim();
+    if (line) lines.push(line);
+  });
+
+  return lines;
 }
 
 export default function LiveScorePage() {
@@ -353,7 +466,7 @@ export default function LiveScorePage() {
   );
 
   const fetchLiveRows = useCallback(async (matchId: string) => {
-    const resp = await fetch(`/api/ipl-live-score/save?matchId=${encodeURIComponent(matchId)}`, {
+    const resp = await fetch(`/api/ipl-live-score/save?matchId=${encodeURIComponent(matchId)}&withCommentary=1`, {
       cache: 'no-store',
     });
     if (!resp.ok) throw new Error(`Failed to fetch live score rows (${resp.status})`);
@@ -364,14 +477,15 @@ export default function LiveScorePage() {
         rows: data.rows as string[][],
         extrasData: (data.extrasData || {}) as Record<number, ExtrasRow>,
         wicketData: (data.wicketData || {}) as Record<number, WicketRow>,
+        commentaryData: (data.commentaryData || {}) as Record<number, string>,
       };
     }
 
     if (Array.isArray(data)) {
-      return { rows: data as string[][], extrasData: {}, wicketData: {} };
+      return { rows: data as string[][], extrasData: {}, wicketData: {}, commentaryData: {} };
     }
 
-    return { rows: [], extrasData: {}, wicketData: {} };
+    return { rows: [], extrasData: {}, wicketData: {}, commentaryData: {} };
   }, []);
 
   const refresh = useCallback(async () => {
@@ -418,6 +532,7 @@ export default function LiveScorePage() {
     const rows = Array.isArray(tableState.rows) ? tableState.rows : [];
     const extrasData = (tableState.extrasData || {}) as Record<number, ExtrasRow>;
     const wicketData = (tableState.wicketData || {}) as Record<number, WicketRow>;
+    const commentaryData = (tableState.commentaryData || {}) as Record<number, string>;
 
     const innings1 = calculateInningsTotals(rows, extrasData, wicketData, '1');
     const innings2 = calculateInningsTotals(rows, extrasData, wicketData, '2');
@@ -447,7 +562,8 @@ export default function LiveScorePage() {
       ? { name: bowlerName, ...computeBowlerStats(rows, extrasData, currentInnings, bowlerName) }
       : { name: '', runs: 0, legalBalls: 0, overs: '0.0' };
 
-    const commentary = buildCommentaryFromRows(rows, extrasData, wicketData, currentInnings, 12);
+    const innings1Feed = buildCommentaryFromRows(rows, extrasData, wicketData, '1', commentaryData);
+    const innings2Feed = buildCommentaryFromRows(rows, extrasData, wicketData, '2', commentaryData);
 
     const isChase = currentInnings === '2' && (innings2.legalBalls > 0 || hasInnings2);
     const target = isChase ? innings1.teamTotal + 1 : null;
@@ -469,7 +585,8 @@ export default function LiveScorePage() {
       striker,
       nonStriker,
       bowler,
-      commentary,
+      innings1Feed,
+      innings2Feed,
       target,
       remainingBalls,
       needed,
@@ -771,26 +888,61 @@ export default function LiveScorePage() {
                 </div>
 
                 <div className="rounded-2xl p-5 bg-white/5 backdrop-blur-xl border border-white/10">
-                  <div className="flex items-center justify-between gap-4 mb-3">
-                    <div className="text-xs font-semibold text-white/70">Recent balls</div>
+                  <div className="flex items-center justify-between gap-4 mb-4">
+                    <div className="text-xs font-semibold text-white/70">Ball-by-ball</div>
                     <div className="text-xs text-white/60">{derived.rowsCount} entries</div>
                   </div>
 
-                  {derived.commentary.length === 0 ? (
+                  {derived.innings1Feed.length === 0 && derived.innings2Feed.length === 0 ? (
                     <div className="text-white/60 text-sm">
                       No ball-by-ball updates yet. Once the scorer saves deliveries, they will appear here.
                     </div>
                   ) : (
-                    <ul className="space-y-2">
-                      {derived.commentary.map((line, idx) => (
-                        <li
-                          key={`${idx}-${line.slice(0, 18)}`}
-                          className="text-white/90 text-sm leading-relaxed rounded-xl px-3 py-2 bg-black/20 border border-white/10"
-                        >
-                          {line}
-                        </li>
-                      ))}
-                    </ul>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <div className="flex items-center justify-between gap-3 mb-2">
+                          <div className="text-xs font-semibold text-white/70">Innings 1</div>
+                          <div className="text-xs text-white/60">{derived.innings1Feed.length} balls</div>
+                        </div>
+                        {derived.innings1Feed.length === 0 ? (
+                          <div className="text-sm text-white/60">No deliveries yet.</div>
+                        ) : (
+                          <ul className="space-y-2 max-h-[560px] overflow-y-auto pr-1">
+                            {derived.innings1Feed.map((line, idx) => (
+                              <li
+                                key={`inn1-${idx}-${line.slice(0, 18)}`}
+                                className="text-white/90 text-sm leading-relaxed rounded-xl px-3 py-2 bg-black/20 border border-white/10"
+                              >
+                                {line}
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </div>
+
+                      <div>
+                        <div className="flex items-center justify-between gap-3 mb-2">
+                          <div className="text-xs font-semibold text-white/70">Innings 2</div>
+                          <div className="text-xs text-white/60">{derived.innings2Feed.length} balls</div>
+                        </div>
+                        {derived.innings2Feed.length === 0 ? (
+                          <div className="text-sm text-white/60">
+                            2nd innings hasn&apos;t started yet.
+                          </div>
+                        ) : (
+                          <ul className="space-y-2 max-h-[560px] overflow-y-auto pr-1">
+                            {derived.innings2Feed.map((line, idx) => (
+                              <li
+                                key={`inn2-${idx}-${line.slice(0, 18)}`}
+                                className="text-white/90 text-sm leading-relaxed rounded-xl px-3 py-2 bg-black/20 border border-white/10"
+                              >
+                                {line}
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </div>
+                    </div>
                   )}
                 </div>
               </>
@@ -803,4 +955,3 @@ export default function LiveScorePage() {
     </div>
   );
 }
-
