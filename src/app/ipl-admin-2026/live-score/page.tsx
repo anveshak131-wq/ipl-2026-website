@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { api } from '@/lib/data';
 import type { Match, Player } from '@/types';
-import { Activity, Download, Plus, Save, Trash2, UploadCloud } from 'lucide-react';
+import { Activity, Download, FileText, Plus, Save, Trash2, UploadCloud } from 'lucide-react';
 
 const LEAGUE = 'ipl' as const;
 
@@ -150,6 +150,7 @@ export default function IPLAdminLiveScoreTablePage() {
   const [extrasData, setExtrasData] = useState<Record<number, ExtrasRow>>({});
   const [wicketData, setWicketData] = useState<Record<number, WicketRow>>({});
   const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle');
+  const [pdfGenerating, setPdfGenerating] = useState(false);
   const [impactForms, setImpactForms] = useState<Record<TeamKey, ImpactForm>>({
     team1: { ...DEFAULT_IMPACT_FORM },
     team2: { ...DEFAULT_IMPACT_FORM },
@@ -691,6 +692,252 @@ export default function IPLAdminLiveScoreTablePage() {
     a.download = `ipl_live_score_${selectedMatchId || 'match'}.csv`;
     a.click();
     URL.revokeObjectURL(url);
+  };
+
+  const exportPDF = async () => {
+    if (!selectedMatch) {
+      alert('Select a match first.');
+      return;
+    }
+
+    if (pdfGenerating) return;
+    setPdfGenerating(true);
+
+    try {
+      const [{ default: jsPDF }, { default: autoTable }] = await Promise.all([import('jspdf'), import('jspdf-autotable')]);
+
+      const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const pageHeight = doc.internal.pageSize.getHeight();
+      const marginX = 10;
+      const marginBottom = 10;
+
+      const team1Label = selectedMatch.team1?.shortName || selectedMatch.team1?.name || 'Team 1';
+      const team2Label = selectedMatch.team2?.shortName || selectedMatch.team2?.name || 'Team 2';
+      const title = `${team1Label} vs ${team2Label}`;
+
+      const formatDateLine = () => {
+        const datePart = String(selectedMatch.date || '').split('T')[0] || String(selectedMatch.date || '');
+        return `${datePart} ${selectedMatch.time || ''}`.trim();
+      };
+
+      const tossLine = (() => {
+        if (!matchToss) return 'Not set';
+        const winnerName = matchToss.winner === 'team1' ? team1Label : team2Label;
+        return `${winnerName} chose ${matchToss.decision}`;
+      })();
+
+      const captainsLine =
+        (matchCaptains.team1.name || matchCaptains.team2.name)
+          ? `${matchCaptains.team1.name || '-'} / ${matchCaptains.team2.name || '-'}`
+          : 'Not set';
+
+      const playingXiLine = hasPlaying11 ? 'Set' : 'Not set';
+
+      const impactUsedLine =
+        (impactPlayerInfo.team1.impactName || impactPlayerInfo.team2.impactName)
+          ? `${impactPlayerInfo.team1.impactName || '-'} / ${impactPlayerInfo.team2.impactName || '-'}`
+          : 'Not set';
+
+      const parseImpactMoment = (substitutionTime: string) => {
+        const raw = String(substitutionTime || '').trim();
+        const match = raw.match(/^(.+?)\s*\((.+)\)\s*$/);
+        if (match) return { moment: match[1].trim(), overBall: match[2].trim() };
+        return { moment: raw, overBall: '' };
+      };
+
+      const formatPlayerName = (playerId: string) => {
+        const id = String(playerId || '').trim();
+        if (!id) return '';
+        const player = playerById.get(id);
+        const name = String(player?.name || id).trim();
+        const isOverseas = player?.nationality ? !isIndianNationality(player.nationality) : false;
+        return isOverseas ? `${name} (OS)` : name;
+      };
+
+      const formatPlayingXI = (teamKey: TeamKey) => {
+        const ids = normalizeIdArray((selectedMatch as any)?.playing11?.[teamKey]);
+        const captainId = matchCaptains[teamKey].id;
+        const names = ids.map((id) => {
+          const base = formatPlayerName(String(id));
+          if (captainId && String(id) === captainId && base) return `${base} (C)`;
+          return base;
+        });
+        return names.filter(Boolean).join(', ');
+      };
+
+      const formatNominees = (teamKey: TeamKey) => {
+        const nominees = normalizeIdArray((selectedMatch as any)?.impactSubstitutes?.[teamKey]).slice(0, 5);
+        return nominees.map((id) => formatPlayerName(String(id))).filter(Boolean).join(', ');
+      };
+
+      const formatImpactBlock = (teamKey: TeamKey) => {
+        const impact = teamKey === 'team1' ? impactPlayerInfo.team1 : impactPlayerInfo.team2;
+        const status = impact.impactName ? 'Used' : 'Not used';
+        const moment = parseImpactMoment(impact.substitutionTime || '');
+        const currentLine = impact.impactName
+          ? `Current: ${impact.impactName} for ${impact.originalName || '-'} • ${impact.substitutionTime || ''}`.trim()
+          : 'Current: —';
+
+        const lines = [
+          status,
+          `Nominees: ${formatNominees(teamKey) || '-'}`,
+          `Playing XI: ${formatPlayingXI(teamKey) || '-'}`,
+          currentLine,
+          '',
+          `Impact IN: ${impact.impactName || '-'}`,
+          `Player OUT: ${impact.originalName || '-'}`,
+          `When: ${moment.moment || '-'}`,
+          `Over.Ball: ${moment.overBall || '-'}`,
+        ];
+
+        return lines.join('\n');
+      };
+
+      // ── Page 1: Summary ──────────────────────────────────────────────────────
+      let y = 14;
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(20);
+      doc.text(title, pageWidth / 2, y, { align: 'center' });
+      y += 10;
+
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(11);
+      const infoLines = [
+        `Venue: ${selectedMatch.venue || '-'}`,
+        `Date: ${formatDateLine() || '-'}`,
+        `Toss: ${tossLine}`,
+        `Captains: ${captainsLine}`,
+        `Playing XI: ${playingXiLine}`,
+        `Impact Players: ${impactUsedLine}`,
+      ];
+
+      infoLines.forEach((line) => {
+        doc.text(line, marginX, y);
+        y += 6;
+      });
+      y += 2;
+
+      const inningsSummaryBody = [
+        [
+          'Innings 1',
+          String(innings1BattingName || ''),
+          `${inn1.teamTotal}/${inn1.wickets}`,
+          String(inn1.overs),
+          String(inn1.extras),
+          String(inn1.wides),
+          String(inn1.noBalls),
+        ],
+        [
+          'Innings 2',
+          String(innings2BattingName || ''),
+          `${inn2.teamTotal}/${inn2.wickets}`,
+          String(inn2.overs),
+          String(inn2.extras),
+          String(inn2.wides),
+          String(inn2.noBalls),
+        ],
+      ];
+
+      autoTable(doc, {
+        startY: y,
+        margin: { left: marginX, right: marginX, bottom: marginBottom },
+        head: [['Innings', 'Batting', 'Score', 'Overs', 'Extras', 'W', 'NB']],
+        body: inningsSummaryBody,
+        theme: 'grid',
+        styles: { font: 'helvetica', fontSize: 9, cellPadding: 2, valign: 'middle' },
+        headStyles: { fillColor: [24, 24, 27], textColor: 255, fontStyle: 'bold' },
+        columnStyles: {
+          0: { cellWidth: 22 },
+          1: { cellWidth: 40 },
+          2: { cellWidth: 26, halign: 'center' },
+          3: { cellWidth: 20, halign: 'center' },
+          4: { cellWidth: 20, halign: 'center' },
+          5: { cellWidth: 16, halign: 'center' },
+          6: { cellWidth: 16, halign: 'center' },
+        },
+      });
+
+      const lastSummaryY = (doc as any).lastAutoTable?.finalY || y;
+      y = lastSummaryY + 8;
+
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(13);
+      doc.text('Impact Player (IPL)', marginX, y);
+      y += 6;
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(10);
+      doc.text(
+        'Impact IN must be from the 5 nominated substitutes (set in Playing 11). Player OUT must be from the Playing XI.',
+        marginX,
+        y,
+      );
+      y += 5;
+      doc.text(
+        'Once saved, the Impact IN/OUT players are tagged in the batter/bowler dropdowns (IP / OUT).',
+        marginX,
+        y,
+      );
+      y += 2;
+
+      autoTable(doc, {
+        startY: y + 3,
+        margin: { left: marginX, right: marginX, bottom: marginBottom },
+        head: [[team1Label, team2Label]],
+        body: [[formatImpactBlock('team1'), formatImpactBlock('team2')]],
+        theme: 'grid',
+        styles: { font: 'helvetica', fontSize: 9, cellPadding: 3, valign: 'top' },
+        headStyles: { fillColor: [24, 24, 27], textColor: 255, fontStyle: 'bold' },
+      });
+
+      // ── Innings tables ───────────────────────────────────────────────────────
+      doc.addPage();
+
+      const normalizeRowForPdf = (r: string[]) => HEADERS.map((_, idx) => String(r?.[idx] ?? ''));
+
+      const innings1Rows = rows.filter((r) => String(r?.[2] || '') === '1').map((r) => normalizeRowForPdf(r));
+      const innings2Rows = rows.filter((r) => String(r?.[2] || '') === '2').map((r) => normalizeRowForPdf(r));
+
+      const renderInningsTable = (inningsLabel: string, battingName: string, bodyRows: string[][]) => {
+        const headerY = 14;
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(14);
+        doc.text(`${inningsLabel}${battingName ? ` — ${battingName}` : ''}`, marginX, headerY);
+
+        autoTable(doc, {
+          startY: headerY + 4,
+          margin: { left: marginX, right: marginX, top: headerY + 4, bottom: marginBottom },
+          head: [HEADERS],
+          body: bodyRows,
+          theme: 'grid',
+          styles: { font: 'helvetica', fontSize: 7, cellPadding: 1.6, valign: 'middle' },
+          headStyles: { fillColor: [24, 24, 27], textColor: 255, fontStyle: 'bold', fontSize: 7 },
+        });
+      };
+
+      renderInningsTable('Innings 1', String(innings1BattingName || ''), innings1Rows);
+
+      doc.addPage();
+      renderInningsTable('Innings 2', String(innings2BattingName || ''), innings2Rows);
+
+      // ── Page footer (page numbers) ───────────────────────────────────────────
+      const totalPages = (doc as any).internal?.getNumberOfPages?.() ? (doc as any).internal.getNumberOfPages() : (doc.internal as any).pages.length - 1;
+      for (let p = 1; p <= totalPages; p++) {
+        doc.setPage(p);
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(9);
+        doc.setTextColor(120);
+        doc.text(title, marginX, pageHeight - 4);
+        doc.text(`Page ${p} of ${totalPages}`, pageWidth - marginX, pageHeight - 4, { align: 'right' });
+      }
+
+      doc.save(`ipl_live_score_${selectedMatchId || selectedMatch.id}.pdf`);
+    } catch (err) {
+      console.error('[IPL Live Score Table] PDF export failed:', err);
+      alert('PDF export failed.');
+    } finally {
+      setPdfGenerating(false);
+    }
   };
 
   const buildCommentaryFromRows = (innings: '1' | '2') => {
@@ -1455,6 +1702,14 @@ export default function IPLAdminLiveScoreTablePage() {
         >
           <Download className="w-4 h-4" />
           Export CSV
+        </button>
+        <button
+          onClick={exportPDF}
+          disabled={pdfGenerating || !selectedMatchId}
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/10 hover:bg-white/15 border border-white/10 disabled:opacity-60 text-white text-sm font-semibold"
+        >
+          <FileText className="w-4 h-4" />
+          {pdfGenerating ? 'Exporting…' : 'Export PDF'}
         </button>
         <button
           onClick={saveRows}
