@@ -250,6 +250,9 @@ export async function syncScorecardToPlayers(scorecard: any, authToken?: string)
     }
 
     const result = await response.json();
+    if (result?.skipped) {
+      return { skipped: true, reason: result.reason || 'Skipped by server' };
+    }
     console.log('✅ Sync: Updated stats for', result.updatedCount || 0, 'players');
     
     return { success: true, updatedCount: result.updatedCount, details: result.details };
