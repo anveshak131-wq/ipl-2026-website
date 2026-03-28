@@ -348,18 +348,6 @@ export default function AdminSidebar({ currentPage = '', onLogout }: AdminSideba
         shortcut: 'D',
       },
       {
-        href: '/ipl-admin-2026/live-score-ai',
-        label: 'Live Score (AI)',
-        icon: (
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3" />
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-        ),
-        group: 'Tools',
-        shortcut: 'V',
-      },
-      {
         href: '/ipl-admin-2026/teams',
         label: 'Teams',
         icon: (
@@ -538,17 +526,6 @@ export default function AdminSidebar({ currentPage = '', onLogout }: AdminSideba
         ),
         group: 'Tools',
         shortcut: '1',
-      },
-      {
-        href: '/ipl-admin-2026/test-live-score',
-        label: 'Test Live Score',
-        icon: (
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-        ),
-        group: 'Tools',
-        shortcut: '2',
       },
       {
         href: '/ipl-admin-2026/moderation',
