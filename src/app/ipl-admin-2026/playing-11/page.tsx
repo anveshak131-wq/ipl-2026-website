@@ -25,8 +25,8 @@ export default function Playing11Page() {
   const [team2Playing11, setTeam2Playing11] = useState<string[]>([]);
   const [team1CaptainId, setTeam1CaptainId] = useState<string>('');
   const [team2CaptainId, setTeam2CaptainId] = useState<string>('');
-  const [team1ImpactSubstitutes, setTeam1ImpactSubstitutes] = useState<string[]>(() => Array(4).fill(''));
-  const [team2ImpactSubstitutes, setTeam2ImpactSubstitutes] = useState<string[]>(() => Array(4).fill(''));
+  const [team1ImpactSubstitutes, setTeam1ImpactSubstitutes] = useState<string[]>(() => Array(5).fill(''));
+  const [team2ImpactSubstitutes, setTeam2ImpactSubstitutes] = useState<string[]>(() => Array(5).fill(''));
   const [team1ImpactPlayer, setTeam1ImpactPlayer] = useState<string>('');
   const [team2ImpactPlayer, setTeam2ImpactPlayer] = useState<string>('');
   const [team1ImpactOriginalPlayer, setTeam1ImpactOriginalPlayer] = useState<string>('');
@@ -193,8 +193,8 @@ export default function Playing11Page() {
       setTeam1CaptainId(existingCaptains?.team1 ? String(existingCaptains.team1) : '');
       setTeam2CaptainId(existingCaptains?.team2 ? String(existingCaptains.team2) : '');
 
-      const existingImpactSubs1 = normalizeFixedLength((selectedMatch as any).impactSubstitutes?.team1, 4);
-      const existingImpactSubs2 = normalizeFixedLength((selectedMatch as any).impactSubstitutes?.team2, 4);
+      const existingImpactSubs1 = normalizeFixedLength((selectedMatch as any).impactSubstitutes?.team1, 5);
+      const existingImpactSubs2 = normalizeFixedLength((selectedMatch as any).impactSubstitutes?.team2, 5);
       setTeam1ImpactSubstitutes(existingImpactSubs1);
       setTeam2ImpactSubstitutes(existingImpactSubs2);
 
@@ -229,8 +229,8 @@ export default function Playing11Page() {
       setTeam2ImpactOriginalPlayer('');
       setTeam1SubstitutionTime('');
       setTeam2SubstitutionTime('');
-      setTeam1ImpactSubstitutes(Array(4).fill(''));
-      setTeam2ImpactSubstitutes(Array(4).fill(''));
+      setTeam1ImpactSubstitutes(Array(5).fill(''));
+      setTeam2ImpactSubstitutes(Array(5).fill(''));
     }
   }, [selectedMatch]);
 
@@ -552,8 +552,8 @@ export default function Playing11Page() {
           alert('Impact substitutes must not include players from the Playing 11.');
           return;
         }
-        if (publish && (team1SubsUnique.length !== 4 || team2SubsUnique.length !== 4)) {
-          alert('Please select exactly 4 Impact substitutes for each team to publish.');
+        if (publish && (team1SubsUnique.length !== 5 || team2SubsUnique.length !== 5)) {
+          alert('Please select exactly 5 Impact substitutes for each team to publish.');
           return;
         }
       }
@@ -1090,25 +1090,25 @@ export default function Playing11Page() {
                         {selectedMatch.team1.shortName || selectedMatch.team1.name} - Impact Substitutes
                       </h2>
                       <p className="text-sm" style={{ color: isWPL ? WPLColors.textMuted : '#9CA3AF' }}>
-                        IPL: nominate 4 substitutes at the toss (Impact Player is chosen during the match)
+                        IPL: nominate 5 substitutes at the toss (Impact Player is chosen during the match)
                       </p>
                     </div>
                     <div className="flex items-center gap-2 px-4 py-2 rounded-lg" style={{
-                      background: team1ImpactSubsCount === 4
+                      background: team1ImpactSubsCount === 5
                         ? 'rgba(34, 197, 94, 0.2)'
                         : 'rgba(251, 191, 36, 0.2)',
-                      border: `1px solid ${team1ImpactSubsCount === 4 ? 'rgba(34, 197, 94, 0.3)' : 'rgba(251, 191, 36, 0.3)'}`
+                      border: `1px solid ${team1ImpactSubsCount === 5 ? 'rgba(34, 197, 94, 0.3)' : 'rgba(251, 191, 36, 0.3)'}`
                     }}>
-                      <Users className="w-5 h-5" style={{ color: team1ImpactSubsCount === 4 ? '#22C55E' : '#FBBF24' }} />
-                      <span className="font-bold" style={{ color: team1ImpactSubsCount === 4 ? '#22C55E' : '#FBBF24' }}>
-                        {team1ImpactSubsCount} / 4
+                      <Users className="w-5 h-5" style={{ color: team1ImpactSubsCount === 5 ? '#22C55E' : '#FBBF24' }} />
+                      <span className="font-bold" style={{ color: team1ImpactSubsCount === 5 ? '#22C55E' : '#FBBF24' }}>
+                        {team1ImpactSubsCount} / 5
                       </span>
                     </div>
                   </div>
 
                   <div className="space-y-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                      {Array.from({ length: 4 }).map((_, idx) => {
+                      {Array.from({ length: 5 }).map((_, idx) => {
                         const selected = team1ImpactSubstitutes[idx] || '';
                         const otherSelected = team1ImpactSubstitutes
                           .filter((id, i) => i !== idx)
@@ -1462,25 +1462,25 @@ export default function Playing11Page() {
                         {selectedMatch.team2.shortName || selectedMatch.team2.name} - Impact Substitutes
                       </h2>
                       <p className="text-sm" style={{ color: isWPL ? WPLColors.textMuted : '#9CA3AF' }}>
-                        IPL: nominate 4 substitutes at the toss (Impact Player is chosen during the match)
+                        IPL: nominate 5 substitutes at the toss (Impact Player is chosen during the match)
                       </p>
                     </div>
                     <div className="flex items-center gap-2 px-4 py-2 rounded-lg" style={{
-                      background: team2ImpactSubsCount === 4
+                      background: team2ImpactSubsCount === 5
                         ? 'rgba(34, 197, 94, 0.2)'
                         : 'rgba(251, 191, 36, 0.2)',
-                      border: `1px solid ${team2ImpactSubsCount === 4 ? 'rgba(34, 197, 94, 0.3)' : 'rgba(251, 191, 36, 0.3)'}`
+                      border: `1px solid ${team2ImpactSubsCount === 5 ? 'rgba(34, 197, 94, 0.3)' : 'rgba(251, 191, 36, 0.3)'}`
                     }}>
-                      <Users className="w-5 h-5" style={{ color: team2ImpactSubsCount === 4 ? '#22C55E' : '#FBBF24' }} />
-                      <span className="font-bold" style={{ color: team2ImpactSubsCount === 4 ? '#22C55E' : '#FBBF24' }}>
-                        {team2ImpactSubsCount} / 4
+                      <Users className="w-5 h-5" style={{ color: team2ImpactSubsCount === 5 ? '#22C55E' : '#FBBF24' }} />
+                      <span className="font-bold" style={{ color: team2ImpactSubsCount === 5 ? '#22C55E' : '#FBBF24' }}>
+                        {team2ImpactSubsCount} / 5
                       </span>
                     </div>
                   </div>
 
                   <div className="space-y-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                      {Array.from({ length: 4 }).map((_, idx) => {
+                      {Array.from({ length: 5 }).map((_, idx) => {
                         const selected = team2ImpactSubstitutes[idx] || '';
                         const otherSelected = team2ImpactSubstitutes
                           .filter((id, i) => i !== idx)
@@ -1723,7 +1723,7 @@ export default function Playing11Page() {
                     team1Playing11.length !== 11 ||
                     team2Playing11.length !== 11 ||
                     saveStatus === 'saving' ||
-                    (isIPL && (team1ImpactSubsCount !== 4 || team2ImpactSubsCount !== 4))
+                    (isIPL && (team1ImpactSubsCount !== 5 || team2ImpactSubsCount !== 5))
                   }
                   className={`
                     px-8 py-4 rounded-xl font-bold flex items-center gap-2 transition-all

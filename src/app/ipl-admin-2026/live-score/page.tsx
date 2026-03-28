@@ -424,7 +424,7 @@ export default function IPLAdminLiveScoreTablePage() {
       const playingXI = normalizeIdArray((selectedMatch as any)?.playing11?.[teamKey]);
 
       if (!nominees.length) {
-        alert('No Impact substitutes found. Please set 4 substitutes in Playing 11 first.');
+        alert('No Impact substitutes found. Please set 5 substitutes in Playing 11 first.');
         return;
       }
       if (!playingXI.length) {
@@ -440,7 +440,7 @@ export default function IPLAdminLiveScoreTablePage() {
         return;
       }
       if (!nominees.includes(inId)) {
-        alert('Impact IN must be one of the 4 nominated substitutes.');
+        alert('Impact IN must be one of the 5 nominated substitutes.');
         return;
       }
       if (!playingXI.includes(outId)) {
@@ -1174,7 +1174,7 @@ export default function IPLAdminLiveScoreTablePage() {
           <h1 className="text-3xl font-bold text-white">IPL Live Score (Table)</h1>
         </div>
         <p className="text-sm text-white/60">
-          WPL live-score-csv style UI • Uses IPL Playing XI + Impact substitutes (4 nominees)
+          WPL live-score-csv style UI • Uses IPL Playing XI + Impact substitutes (5 nominees)
         </p>
       </div>
 
@@ -1263,7 +1263,7 @@ export default function IPLAdminLiveScoreTablePage() {
             <div>
               <div className="text-sm font-semibold text-white/80">Impact Player (IPL)</div>
               <div className="text-xs text-white/60 mt-1">
-                Impact IN must be from the 4 nominated substitutes (set in Playing 11). Player OUT must be from the Playing XI.
+                Impact IN must be from the 5 nominated substitutes (set in Playing 11). Player OUT must be from the Playing XI.
               </div>
             </div>
           </div>
@@ -1324,7 +1324,7 @@ export default function IPLAdminLiveScoreTablePage() {
                   <div className="text-xs text-white/60 space-y-1 mb-3">
                     <div>
                       <span className="text-white/80">Nominees:</span>{' '}
-                      {nomineeLabels || 'Not set (set 4 substitutes in Playing 11)'}
+                      {nomineeLabels || 'Not set (set 5 substitutes in Playing 11)'}
                     </div>
                     <div>
                       <span className="text-white/80">Playing XI:</span>{' '}
