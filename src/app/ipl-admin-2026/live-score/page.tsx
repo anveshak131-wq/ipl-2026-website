@@ -185,6 +185,17 @@ export default function IPLAdminLiveScoreTablePage() {
     return new Map(players.map((p) => [p.id, p]));
   }, [players]);
 
+  const matchCaptains = useMemo<Record<TeamKey, { id: string; name: string }>>(() => {
+    const team1Id = String(selectedMatch?.captains?.team1 || '').trim();
+    const team2Id = String(selectedMatch?.captains?.team2 || '').trim();
+    const resolveName = (id: string) => (id ? String(playerById.get(id)?.name || id).trim() : '');
+
+    return {
+      team1: { id: team1Id, name: resolveName(team1Id) },
+      team2: { id: team2Id, name: resolveName(team2Id) },
+    };
+  }, [playerById, selectedMatch]);
+
   const storageKeyPrefix = useMemo(() => {
     if (!selectedMatchId) return '';
     return `ipl-live-score:${selectedMatchId}`;
@@ -891,6 +902,8 @@ export default function IPLAdminLiveScoreTablePage() {
 
     const battingOptions = getTeamPlayerOptions(battingKey);
     const bowlingOptions = getTeamPlayerOptions(bowlingKey);
+    const battingCaptainName = matchCaptains[battingKey].name;
+    const bowlingCaptainName = matchCaptains[bowlingKey].name;
 
     const ex = { ...DEFAULT_EXTRAS, ...(extrasData[rowIndex] || {}) };
     const wk = { ...DEFAULT_WICKET, ...(wicketData[rowIndex] || {}) };
@@ -933,7 +946,7 @@ export default function IPLAdminLiveScoreTablePage() {
             <option value="">{label}</option>
             {battingOptions.map((name) => (
               <option key={name} value={name}>
-                {name}
+                {name}{battingCaptainName && name === battingCaptainName ? ' (C)' : ''}
               </option>
             ))}
           </select>
@@ -949,7 +962,7 @@ export default function IPLAdminLiveScoreTablePage() {
             <option value="">Bowler</option>
             {bowlingOptions.map((name) => (
               <option key={name} value={name}>
-                {name}
+                {name}{bowlingCaptainName && name === bowlingCaptainName ? ' (C)' : ''}
               </option>
             ))}
           </select>
@@ -1178,6 +1191,12 @@ export default function IPLAdminLiveScoreTablePage() {
                   : 'Not set'}
               </div>
               <div>
+                <span className="text-white/80">Captains:</span>{' '}
+                {(matchCaptains.team1.name || matchCaptains.team2.name)
+                  ? `${matchCaptains.team1.name || '-'} / ${matchCaptains.team2.name || '-'}`
+                  : 'Not set'}
+              </div>
+              <div>
                 <span className="text-white/80">Playing XI:</span>{' '}
                 {hasPlaying11 ? 'Set' : 'Not set (dropdown will use full squad)'}
               </div>
@@ -1271,10 +1290,12 @@ export default function IPLAdminLiveScoreTablePage() {
                 .filter(Boolean)
                 .join(', ');
 
+              const captainId = String(selectedMatch?.captains?.[teamKey] || '').trim();
               const xiLabels = xi
                 .map((id) => {
                   const p = playerById.get(String(id));
-                  return p?.name || String(id);
+                  const label = p?.name || String(id);
+                  return captainId && String(id) === captainId ? `${label} (C)` : label;
                 })
                 .filter(Boolean)
                 .join(', ');

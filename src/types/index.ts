@@ -109,6 +109,12 @@ export interface Match {
   venue: string;
   team1: Team;
   team2: Team;
+  // Match-wise captain (can differ from team/season captain due to injury/rest)
+  captains?: {
+    team1?: string; // playerId
+    team2?: string; // playerId
+    setAt?: string; // optional audit timestamp
+  };
   status: 'upcoming' | 'live' | 'completed' | 'cancelled';
   result?: string;
   resultType?: 'win' | 'loss' | 'tie' | 'no-result' | 'abandoned';

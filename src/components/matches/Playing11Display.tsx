@@ -15,6 +15,9 @@ interface Playing11DisplayProps {
 }
 
 export default function Playing11Display({ match, players }: Playing11DisplayProps) {
+  const team1CaptainId = match.captains?.team1;
+  const team2CaptainId = match.captains?.team2;
+
   const isVisible = useMemo(() => {
     if (!match.playing11) return false;
     return isPlaying11VisibleNow(match.date, match.time, match.playing11.setAt);
@@ -67,7 +70,9 @@ export default function Playing11Display({ match, players }: Playing11DisplayPro
             <div key={player.id} className="flex items-center justify-between p-2 bg-white/5 rounded">
               <span className="text-sm text-gray-200">
                 {player.name}
-                {player.isCaptain && <span className="ml-2 text-xs font-bold text-yellow-400">(C)</span>}
+                {(team1CaptainId ? player.id === team1CaptainId : player.isCaptain) && (
+                  <span className="ml-2 text-xs font-bold text-yellow-400">(C)</span>
+                )}
               </span>
               <span className="text-xs text-gray-400">#{player.jerseyNumber || '-'}</span>
             </div>
@@ -86,7 +91,9 @@ export default function Playing11Display({ match, players }: Playing11DisplayPro
             <div key={player.id} className="flex items-center justify-between p-2 bg-white/5 rounded">
               <span className="text-sm text-gray-200">
                 {player.name}
-                {player.isCaptain && <span className="ml-2 text-xs font-bold text-yellow-400">(C)</span>}
+                {(team2CaptainId ? player.id === team2CaptainId : player.isCaptain) && (
+                  <span className="ml-2 text-xs font-bold text-yellow-400">(C)</span>
+                )}
               </span>
               <span className="text-xs text-gray-400">#{player.jerseyNumber || '-'}</span>
             </div>

@@ -235,6 +235,8 @@ const buildExportRows = (payload: Playing11ExportPayload): ExportRow[] => {
     const team = teamSide === 'team1' ? match.team1 : match.team2;
     const isImpactPlayer = !!impactInfo.playerId && impactInfo.playerId === playerId;
     const playerRaw = player ? JSON.stringify(player) : '';
+    const matchCaptainId = match.captains?.[teamSide];
+    const isCaptain = matchCaptainId ? String(matchCaptainId) === String(playerId) : (player?.isCaptain ?? false);
 
     return {
       record_type: recordType,
@@ -256,7 +258,7 @@ const buildExportRows = (payload: Playing11ExportPayload): ExportRow[] => {
       date_of_birth: player?.dateOfBirth || '',
       nationality: player?.nationality || '',
       jersey_number: player?.jerseyNumber ?? '',
-      is_captain: player?.isCaptain ?? false,
+      is_captain: isCaptain,
       batting_style: player?.battingStyle || '',
       bowling_style: player?.bowlingStyle || '',
       is_playing11: isPlaying11,
@@ -616,13 +618,15 @@ export async function exportPlaying11ToPDF(payload: Playing11ExportPayload): Pro
       const player = payload.players.find(p => p.id === playerId);
       const impactInfo = normalizeImpact(payload.impact[teamSide] || undefined);
       const isImpact = impactInfo.playerId === playerId;
+      const matchCaptainId = payload.match.captains?.[teamSide];
+      const isCaptain = matchCaptainId ? String(matchCaptainId) === String(playerId) : Boolean(player?.isCaptain);
       return [
         String(index + 1),
         player?.name || 'Unknown',
         player?.role || '',
         player?.jerseyNumber ?? '',
         player?.nationality || '',
-        player?.isCaptain ? 'Yes' : 'No',
+        isCaptain ? 'Yes' : 'No',
         player?.battingStyle || '',
         player?.bowlingStyle || '',
         isImpact ? (impactInfo.substitutionTime || 'Impact') : ''

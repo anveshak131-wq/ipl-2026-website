@@ -332,12 +332,14 @@ export async function exportPlaying11ToPDFModern2025(payload: Playing11ExportPay
     const team1Data = playing11.team1.map((playerId, index) => {
       const player = players.find(p => p.id === playerId);
       const isImpact = team1Impact.playerId === playerId;
+      const matchCaptainId = match.captains?.team1;
+      const isCaptain = matchCaptainId ? String(matchCaptainId) === String(playerId) : Boolean(player?.isCaptain);
       return [
         String(index + 1),
         player?.name || 'Unknown',
         player?.role || 'N/A',
         String(player?.jerseyNumber || 'N/A'),
-        player?.isCaptain ? 'Yes' : 'No',
+        isCaptain ? 'Yes' : 'No',
         player?.battingStyle || 'N/A',
         player?.bowlingStyle || 'N/A',
         isImpact ? (team1Impact.substitutionTime || 'Yes') : 'No'
@@ -359,12 +361,14 @@ export async function exportPlaying11ToPDFModern2025(payload: Playing11ExportPay
     const team2Data = playing11.team2.map((playerId, index) => {
       const player = players.find(p => p.id === playerId);
       const isImpact = team2Impact.playerId === playerId;
+      const matchCaptainId = match.captains?.team2;
+      const isCaptain = matchCaptainId ? String(matchCaptainId) === String(playerId) : Boolean(player?.isCaptain);
       return [
         String(index + 1),
         player?.name || 'Unknown',
         player?.role || 'N/A',
         String(player?.jerseyNumber || 'N/A'),
-        player?.isCaptain ? 'Yes' : 'No',
+        isCaptain ? 'Yes' : 'No',
         player?.battingStyle || 'N/A',
         player?.bowlingStyle || 'N/A',
         isImpact ? (team2Impact.substitutionTime || 'Yes') : 'No'

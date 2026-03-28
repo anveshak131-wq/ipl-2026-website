@@ -23,6 +23,8 @@ export default function Playing11Page() {
   const [selectedMatchId, setSelectedMatchId] = useState<string>('');
   const [team1Playing11, setTeam1Playing11] = useState<string[]>([]);
   const [team2Playing11, setTeam2Playing11] = useState<string[]>([]);
+  const [team1CaptainId, setTeam1CaptainId] = useState<string>('');
+  const [team2CaptainId, setTeam2CaptainId] = useState<string>('');
   const [team1ImpactSubstitutes, setTeam1ImpactSubstitutes] = useState<string[]>(() => Array(4).fill(''));
   const [team2ImpactSubstitutes, setTeam2ImpactSubstitutes] = useState<string[]>(() => Array(4).fill(''));
   const [team1ImpactPlayer, setTeam1ImpactPlayer] = useState<string>('');
@@ -187,6 +189,10 @@ export default function Playing11Page() {
       setTeam1Playing11(existingTeam1);
       setTeam2Playing11(existingTeam2);
 
+      const existingCaptains = selectedMatch.captains;
+      setTeam1CaptainId(existingCaptains?.team1 ? String(existingCaptains.team1) : '');
+      setTeam2CaptainId(existingCaptains?.team2 ? String(existingCaptains.team2) : '');
+
       const existingImpactSubs1 = normalizeFixedLength((selectedMatch as any).impactSubstitutes?.team1, 4);
       const existingImpactSubs2 = normalizeFixedLength((selectedMatch as any).impactSubstitutes?.team2, 4);
       setTeam1ImpactSubstitutes(existingImpactSubs1);
@@ -215,6 +221,8 @@ export default function Playing11Page() {
     } else {
       setTeam1Playing11([]);
       setTeam2Playing11([]);
+      setTeam1CaptainId('');
+      setTeam2CaptainId('');
       setTeam1ImpactPlayer('');
       setTeam2ImpactPlayer('');
       setTeam1ImpactOriginalPlayer('');
@@ -225,6 +233,19 @@ export default function Playing11Page() {
       setTeam2ImpactSubstitutes(Array(4).fill(''));
     }
   }, [selectedMatch]);
+
+  // Ensure selected captain stays within the selected Playing XI
+  useEffect(() => {
+    if (team1CaptainId && !team1Playing11.includes(team1CaptainId)) {
+      setTeam1CaptainId('');
+    }
+  }, [team1CaptainId, team1Playing11]);
+
+  useEffect(() => {
+    if (team2CaptainId && !team2Playing11.includes(team2CaptainId)) {
+      setTeam2CaptainId('');
+    }
+  }, [team2CaptainId, team2Playing11]);
 
   // Get ALL players from each team's squad (no restrictions)
   const team1Players = useMemo(() => {
@@ -357,6 +378,16 @@ export default function Playing11Page() {
     return filtered;
   }, [players, selectedMatch]);
 
+  const team1Playing11Players = useMemo(() => {
+    const idSet = new Set(team1Playing11);
+    return team1Players.filter((player) => idSet.has(player.id));
+  }, [team1Players, team1Playing11]);
+
+  const team2Playing11Players = useMemo(() => {
+    const idSet = new Set(team2Playing11);
+    return team2Players.filter((player) => idSet.has(player.id));
+  }, [team2Players, team2Playing11]);
+
   const togglePlayer = (team: 'team1' | 'team2', playerId: string) => {
     console.log('togglePlayer called:', { team, playerId });
     if (team === 'team1') {
@@ -451,12 +482,22 @@ export default function Playing11Page() {
       return;
     }
 
+    if (team1CaptainId && !team1Playing11.includes(team1CaptainId)) {
+      alert('Team 1 captain must be selected from Team 1 Playing 11.');
+      return;
+    }
+    if (team2CaptainId && !team2Playing11.includes(team2CaptainId)) {
+      alert('Team 2 captain must be selected from Team 2 Playing 11.');
+      return;
+    }
+
     setSaveStatus('saving');
     try {
       const token = localStorage.getItem('adminToken');
       
       const existingSetAt = (selectedMatch as any).playing11?.setAt;
       const existingImpactSubsSetAt = (selectedMatch as any).impactSubstitutes?.setAt;
+      const existingCaptainsSetAt = selectedMatch.captains?.setAt;
       const sanitizePlaying11 = (playing11: string[], impactId: string, originalId: string) => {
         let xi = playing11.map(String).filter(Boolean);
         if (impactId && originalId) {
@@ -482,6 +523,11 @@ export default function Playing11Page() {
         team2ImpactPlayer,
         team2ImpactOriginalPlayer
       );
+
+      const sanitizedTeam1CaptainId =
+        team1CaptainId && sanitizedTeam1Playing11.includes(team1CaptainId) ? team1CaptainId : '';
+      const sanitizedTeam2CaptainId =
+        team2CaptainId && sanitizedTeam2Playing11.includes(team2CaptainId) ? team2CaptainId : '';
 
       const sanitizeSubstitutes = (subs: string[]) =>
         subs
@@ -523,6 +569,13 @@ export default function Playing11Page() {
         team2Id: selectedMatch.team2.id,
         status: selectedMatch.status,
         league: selectedMatch.league,
+        captains: {
+          team1: sanitizedTeam1CaptainId,
+          team2: sanitizedTeam2CaptainId,
+          ...(publish
+            ? { setAt: new Date().toISOString() }
+            : (existingCaptainsSetAt ? { setAt: existingCaptainsSetAt } : {})),
+        },
         playing11: {
           team1: sanitizedTeam1Playing11,
           team2: sanitizedTeam2Playing11,
@@ -585,8 +638,16 @@ export default function Playing11Page() {
 
   const buildExportPayload = useCallback(() => {
     if (!selectedMatch) return null;
+    const matchWithCaptains: Match = {
+      ...selectedMatch,
+      captains: {
+        ...(selectedMatch.captains || {}),
+        team1: team1CaptainId || '',
+        team2: team2CaptainId || '',
+      },
+    };
     return {
-      match: selectedMatch,
+      match: matchWithCaptains,
       players,
       playing11: {
         team1: team1Playing11,
@@ -612,6 +673,8 @@ export default function Playing11Page() {
     players,
     team1Playing11,
     team2Playing11,
+    team1CaptainId,
+    team2CaptainId,
     team1ImpactPlayer,
     team2ImpactPlayer,
     team1ImpactOriginalPlayer,
@@ -911,6 +974,30 @@ export default function Playing11Page() {
                     </span>
                   </div>
                 </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
+                  <div>
+                    <label className="block text-xs font-semibold text-white/70 mb-2">Match Captain (optional)</label>
+                    <select
+                      value={team1CaptainId}
+                      onChange={(e) => setTeam1CaptainId(e.target.value)}
+                      disabled={!team1Playing11Players.length}
+                      className="w-full border border-white/10 focus:border-purple-400 rounded-xl px-3 py-2 bg-slate-950 text-white disabled:opacity-60"
+                    >
+                      <option value="">
+                        {team1Playing11Players.length ? 'Select captain...' : 'Select Playing XI first'}
+                      </option>
+                      {team1Playing11Players.map((player) => (
+                        <option key={player.id} value={player.id}>
+                          {player.name}{player.isCaptain ? ' (Season captain)' : ''}
+                        </option>
+                      ))}
+                    </select>
+                    <p className="text-[11px] text-white/50 mt-1">
+                      Used for (C) on Playing XI, Impact Player, Scorecard, Live Score.
+                    </p>
+                  </div>
+                </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                   {team1Players.length === 0 ? (
                     <div className="col-span-full text-center py-8 px-4 rounded-xl border-2 border-dashed" style={isWPL ? {
@@ -945,6 +1032,7 @@ export default function Playing11Page() {
                   ) : (
                     team1Players.map((player) => {
                       const isSelected = team1Playing11.includes(player.id);
+                      const isMatchCaptain = player.id === team1CaptainId;
                       return (
                         <button
                           key={player.id}
@@ -974,7 +1062,8 @@ export default function Playing11Page() {
                           </div>
                           <div className="text-xs" style={{ color: isWPL ? WPLColors.textMuted : '#9CA3AF' }}>
                             {player.role} • #{player.jerseyNumber}
-                            {player.isCaptain && ' • Captain'}
+                            {isMatchCaptain && ' • Captain (Match)'}
+                            {!isMatchCaptain && player.isCaptain && ' • Captain (Season)'}
                           </div>
                         </button>
                       );
@@ -1257,6 +1346,30 @@ export default function Playing11Page() {
                     </span>
                   </div>
                 </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
+                  <div>
+                    <label className="block text-xs font-semibold text-white/70 mb-2">Match Captain (optional)</label>
+                    <select
+                      value={team2CaptainId}
+                      onChange={(e) => setTeam2CaptainId(e.target.value)}
+                      disabled={!team2Playing11Players.length}
+                      className="w-full border border-white/10 focus:border-purple-400 rounded-xl px-3 py-2 bg-slate-950 text-white disabled:opacity-60"
+                    >
+                      <option value="">
+                        {team2Playing11Players.length ? 'Select captain...' : 'Select Playing XI first'}
+                      </option>
+                      {team2Playing11Players.map((player) => (
+                        <option key={player.id} value={player.id}>
+                          {player.name}{player.isCaptain ? ' (Season captain)' : ''}
+                        </option>
+                      ))}
+                    </select>
+                    <p className="text-[11px] text-white/50 mt-1">
+                      Used for (C) on Playing XI, Impact Player, Scorecard, Live Score.
+                    </p>
+                  </div>
+                </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                   {team2Players.length === 0 ? (
                     <div className="col-span-full text-center py-8 px-4 rounded-xl border-2 border-dashed" style={isWPL ? {
@@ -1291,6 +1404,7 @@ export default function Playing11Page() {
                   ) : (
                     team2Players.map((player) => {
                       const isSelected = team2Playing11.includes(player.id);
+                      const isMatchCaptain = player.id === team2CaptainId;
                       return (
                         <button
                           key={player.id}
@@ -1320,7 +1434,8 @@ export default function Playing11Page() {
                           </div>
                           <div className="text-xs" style={{ color: isWPL ? WPLColors.textMuted : '#9CA3AF' }}>
                             {player.role} • #{player.jerseyNumber}
-                            {player.isCaptain && ' • Captain'}
+                            {isMatchCaptain && ' • Captain (Match)'}
+                            {!isMatchCaptain && player.isCaptain && ' • Captain (Season)'}
                           </div>
                         </button>
                       );

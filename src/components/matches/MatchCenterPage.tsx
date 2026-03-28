@@ -30,7 +30,9 @@ interface ScorecardInnings {
   totalWickets?: number;
   totalOvers?: number | string;
   batting?: Array<{
+    playerId?: string;
     name?: string;
+    isCaptain?: boolean;
     runs?: number;
     balls?: number;
     fours?: number;
@@ -41,7 +43,9 @@ interface ScorecardInnings {
     };
   }>;
   bowling?: Array<{
+    playerId?: string;
     name?: string;
+    isCaptain?: boolean;
     overs?: number;
     balls?: number;
     maidens?: number;
@@ -288,12 +292,28 @@ export default function MatchCenterPage({ backHref = '/matches', preferredLeague
 
   const team1Playing11 = useMemo(() => {
     if (!match?.playing11?.team1) return [];
-    return match.playing11.team1.map((id) => playerMap.get(id)?.name || id);
+    return match.playing11.team1.map((id) => ({ id, name: playerMap.get(id)?.name || id }));
   }, [match, playerMap]);
 
   const team2Playing11 = useMemo(() => {
     if (!match?.playing11?.team2) return [];
-    return match.playing11.team2.map((id) => playerMap.get(id)?.name || id);
+    return match.playing11.team2.map((id) => ({ id, name: playerMap.get(id)?.name || id }));
+  }, [match, playerMap]);
+
+  const playing11CaptainIds = useMemo(() => {
+    if (!match) return { team1: undefined as string | undefined, team2: undefined as string | undefined };
+    const explicitTeam1 = match.captains?.team1 ? String(match.captains.team1) : '';
+    const explicitTeam2 = match.captains?.team2 ? String(match.captains.team2) : '';
+
+    const fallbackTeam1 =
+      explicitTeam1 || match.playing11?.team1?.find((id) => playerMap.get(id)?.isCaptain) || '';
+    const fallbackTeam2 =
+      explicitTeam2 || match.playing11?.team2?.find((id) => playerMap.get(id)?.isCaptain) || '';
+
+    return {
+      team1: fallbackTeam1 || undefined,
+      team2: fallbackTeam2 || undefined,
+    };
   }, [match, playerMap]);
 
   const innings = useMemo(() => {
@@ -535,9 +555,12 @@ export default function MatchCenterPage({ backHref = '/matches', preferredLeague
                 <div className="rounded-2xl border border-cyan-300/25 bg-cyan-500/10 p-4">
                   <h3 className="font-bold text-cyan-100 mb-3">{match.team1.name}</h3>
                   <ul className="space-y-2 text-sm">
-                    {team1Playing11.map((name) => (
-                      <li key={name} className="rounded-lg border border-white/10 bg-white/5 px-3 py-2">
-                        {name}
+                    {team1Playing11.map((player) => (
+                      <li key={player.id} className="rounded-lg border border-white/10 bg-white/5 px-3 py-2">
+                        {player.name}
+                        {playing11CaptainIds.team1 && String(player.id) === String(playing11CaptainIds.team1) && (
+                          <span className="ml-2 text-xs font-bold text-yellow-300">(C)</span>
+                        )}
                       </li>
                     ))}
                   </ul>
@@ -546,9 +569,12 @@ export default function MatchCenterPage({ backHref = '/matches', preferredLeague
                 <div className="rounded-2xl border border-fuchsia-300/25 bg-fuchsia-500/10 p-4">
                   <h3 className="font-bold text-fuchsia-100 mb-3">{match.team2.name}</h3>
                   <ul className="space-y-2 text-sm">
-                    {team2Playing11.map((name) => (
-                      <li key={name} className="rounded-lg border border-white/10 bg-white/5 px-3 py-2">
-                        {name}
+                    {team2Playing11.map((player) => (
+                      <li key={player.id} className="rounded-lg border border-white/10 bg-white/5 px-3 py-2">
+                        {player.name}
+                        {playing11CaptainIds.team2 && String(player.id) === String(playing11CaptainIds.team2) && (
+                          <span className="ml-2 text-xs font-bold text-yellow-300">(C)</span>
+                        )}
                       </li>
                     ))}
                   </ul>
@@ -592,8 +618,12 @@ export default function MatchCenterPage({ backHref = '/matches', preferredLeague
                 )}
 
                 {innings.map((inning, index) => {
-                  const isTeam1Batting = inning.battingTeamId === match.team1.id;
+                  const isTeam1Batting = String(inning.battingTeamId) === String(match.team1.id);
                   const battingTeam = isTeam1Batting ? match.team1.name : match.team2.name;
+                  const battingCaptainId = isTeam1Batting ? playing11CaptainIds.team1 : playing11CaptainIds.team2;
+                  const bowlingCaptainId = isTeam1Batting ? playing11CaptainIds.team2 : playing11CaptainIds.team1;
+                  const battingCaptainName = battingCaptainId ? playerMap.get(String(battingCaptainId))?.name || '' : '';
+                  const bowlingCaptainName = bowlingCaptainId ? playerMap.get(String(bowlingCaptainId))?.name || '' : '';
 
                   return (
                     <div key={`${inning.inningsNumber || index}-${battingTeam}`} className="rounded-2xl border border-white/10 bg-white/5 p-4">
@@ -621,7 +651,18 @@ export default function MatchCenterPage({ backHref = '/matches', preferredLeague
                               {inning.batting.map((batter, batterIndex) => (
                                 <tr key={`${batter.name || 'batter'}-${batterIndex}`} className="border-b border-white/5 last:border-b-0">
                                   <td className="py-2 pr-4">
-                                    <p className="font-medium">{batter.name || 'Unknown'}</p>
+                                    <p className="font-medium">
+                                      {batter.name || 'Unknown'}
+                                      {(Boolean(batter.isCaptain) ||
+                                        (battingCaptainId &&
+                                          batter.playerId &&
+                                          String(batter.playerId) === String(battingCaptainId)) ||
+                                        (battingCaptainName &&
+                                          batter.name &&
+                                          batter.name.trim() === battingCaptainName.trim())) && (
+                                        <span className="ml-2 text-xs font-bold text-yellow-300">(C)</span>
+                                      )}
+                                    </p>
                                     {batter.dismissal?.details && (
                                       <p className="text-xs text-slate-400">{batter.dismissal.details}</p>
                                     )}
@@ -654,7 +695,18 @@ export default function MatchCenterPage({ backHref = '/matches', preferredLeague
                             <tbody>
                               {inning.bowling.map((bowler, bowlerIndex) => (
                                 <tr key={`${bowler.name || 'bowler'}-${bowlerIndex}`} className="border-b border-white/5 last:border-b-0">
-                                  <td className="py-2 pr-4 font-medium">{bowler.name || 'Unknown'}</td>
+                                  <td className="py-2 pr-4 font-medium">
+                                    {bowler.name || 'Unknown'}
+                                    {(Boolean(bowler.isCaptain) ||
+                                      (bowlingCaptainId &&
+                                        bowler.playerId &&
+                                        String(bowler.playerId) === String(bowlingCaptainId)) ||
+                                      (bowlingCaptainName &&
+                                        bowler.name &&
+                                        bowler.name.trim() === bowlingCaptainName.trim())) && (
+                                      <span className="ml-2 text-xs font-bold text-yellow-300">(C)</span>
+                                    )}
+                                  </td>
                                   <td className="text-right py-2">{bowler.overs || 0}.{bowler.balls || 0}</td>
                                   <td className="text-right py-2">{bowler.maidens || 0}</td>
                                   <td className="text-right py-2">{bowler.runs || 0}</td>

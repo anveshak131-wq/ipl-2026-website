@@ -877,8 +877,17 @@ export default function MatchCard({ match, index = 0, players, detailHref }: Mat
                   {scorecard.innings
                     ?.sort((a: any, b: any) => (a.inningsNumber || 1) - (b.inningsNumber || 1))
                     .map((inning: any, idx: number) => {
-                    const battingTeam = inning.battingTeamId === match.team1.id ? match.team1.name : match.team2.name;
+                    const isTeam1Batting = String(inning.battingTeamId) === String(match.team1.id);
+                    const battingTeam = isTeam1Batting ? match.team1.name : match.team2.name;
                     const inningsLabel = inning.inningsNumber || (idx + 1);
+                    const battingCaptainId = isTeam1Batting ? match.captains?.team1 : match.captains?.team2;
+                    const bowlingCaptainId = isTeam1Batting ? match.captains?.team2 : match.captains?.team1;
+                    const battingCaptainName = battingCaptainId
+                      ? players?.find((p) => String(p.id) === String(battingCaptainId))?.name || ''
+                      : '';
+                    const bowlingCaptainName = bowlingCaptainId
+                      ? players?.find((p) => String(p.id) === String(bowlingCaptainId))?.name || ''
+                      : '';
                     return (
                       <div key={idx} className="bg-white/5 rounded-2xl p-6 border-2 border-white/10">
                         <div className="flex items-center justify-between mb-4">
@@ -921,7 +930,15 @@ export default function MatchCard({ match, index = 0, players, detailHref }: Mat
                                       <td className="p-2">
                                         <div className="font-semibold">
                                           {batter.name}
-                                          {batter.isCaptain && <span className="ml-2 text-xs font-bold text-yellow-400">(C)</span>}
+                                          {((battingCaptainId
+                                            ? (batter.playerId &&
+                                                String(batter.playerId) === String(battingCaptainId)) ||
+                                              (battingCaptainName &&
+                                                batter.name &&
+                                                batter.name.trim() === battingCaptainName.trim())
+                                            : batter.isCaptain) && (
+                                            <span className="ml-2 text-xs font-bold text-yellow-400">(C)</span>
+                                          ))}
                                         </div>
                                         {batter.dismissal?.details && (
                                           <div className="text-xs text-gray-400">{batter.dismissal.details}</div>
@@ -973,7 +990,14 @@ export default function MatchCard({ match, index = 0, players, detailHref }: Mat
                                     <tr key={boidx} className="border-b border-white/10 text-white">
                                       <td className="p-2 font-semibold">
                                         {bowler.name}
-                                        {bowler.isCaptain && <span className="ml-2 text-xs font-bold text-yellow-400">(C)</span>}
+                                        {((bowlingCaptainId
+                                          ? (bowler.playerId && String(bowler.playerId) === String(bowlingCaptainId)) ||
+                                            (bowlingCaptainName &&
+                                              bowler.name &&
+                                              bowler.name.trim() === bowlingCaptainName.trim())
+                                          : bowler.isCaptain) && (
+                                          <span className="ml-2 text-xs font-bold text-yellow-400">(C)</span>
+                                        ))}
                                       </td>
                                       <td className="text-center p-2">{bowler.overs || 0}.{bowler.balls || 0}</td>
                                       <td className="text-center p-2">{bowler.maidens || 0}</td>

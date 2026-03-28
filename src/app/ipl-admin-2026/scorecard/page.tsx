@@ -8,6 +8,7 @@ interface Match {
   id: string;
   team1: { id: string | number; name: string; shortName?: string };
   team2: { id: string | number; name: string; shortName?: string };
+  captains?: { team1?: string; team2?: string; setAt?: string };
   venue: string;
   date: string;
   time: string;
@@ -22,11 +23,13 @@ interface Player {
   role?: string;
   battingStyle?: string;
   bowlingStyle?: string;
+  isCaptain?: boolean;
 }
 
 interface Batter {
   playerId: string;
   name: string;
+  isCaptain?: boolean;
   runs: number;
   balls: number;
   fours: number;
@@ -43,6 +46,7 @@ interface Batter {
 interface Bowler {
   playerId: string;
   name: string;
+  isCaptain?: boolean;
   overs: number;
   balls: number;
   runs: number;
@@ -180,6 +184,63 @@ export default function ScorecardAdminPage() {
     return players.filter(player => player.teamId === idStr);
   };
 
+  const getCaptainIdForTeam = (teamId: number | string): string | null => {
+    if (!selectedMatch?.captains) return null;
+    const teamIdStr = String(teamId);
+    if (teamIdStr === String(selectedMatch.team1.id)) {
+      return selectedMatch.captains.team1 ? String(selectedMatch.captains.team1) : null;
+    }
+    if (teamIdStr === String(selectedMatch.team2.id)) {
+      return selectedMatch.captains.team2 ? String(selectedMatch.captains.team2) : null;
+    }
+    return null;
+  };
+
+  const applyMatchCaptainsToScorecard = (sc: Scorecard, match: Match | null): Scorecard => {
+    const team1CaptainId = match?.captains?.team1 ? String(match.captains.team1) : '';
+    const team2CaptainId = match?.captains?.team2 ? String(match.captains.team2) : '';
+    if (!team1CaptainId && !team2CaptainId) return sc;
+
+    const team1Id = String(match?.team1?.id ?? '');
+    const team2Id = String(match?.team2?.id ?? '');
+
+    const captainIdForTeamId = (teamId: string | number | undefined | null) => {
+      const id = String(teamId ?? '');
+      if (id && team1Id && id === team1Id) return team1CaptainId || '';
+      if (id && team2Id && id === team2Id) return team2CaptainId || '';
+      return '';
+    };
+
+    const normalizeIsCaptain = (playerId: string, captainId: string, existing?: boolean) => {
+      if (captainId) return String(playerId) === String(captainId);
+      return Boolean(existing);
+    };
+
+    return {
+      ...sc,
+      innings: sc.innings.map((inning) => {
+        const battingCaptainId = captainIdForTeamId(inning.battingTeamId);
+        const bowlingTeamId =
+          String(inning.battingTeamId) === String(sc.matchInfo.team1.id)
+            ? sc.matchInfo.team2.id
+            : sc.matchInfo.team1.id;
+        const bowlingCaptainId = captainIdForTeamId(bowlingTeamId);
+
+        return {
+          ...inning,
+          batting: inning.batting.map((batter) => ({
+            ...batter,
+            isCaptain: normalizeIsCaptain(batter.playerId, battingCaptainId, batter.isCaptain),
+          })),
+          bowling: inning.bowling.map((bowler) => ({
+            ...bowler,
+            isCaptain: normalizeIsCaptain(bowler.playerId, bowlingCaptainId, bowler.isCaptain),
+          })),
+        };
+      }),
+    };
+  };
+
   const fetchMatches = async () => {
     try {
       const data = await api.getMatches('ipl');
@@ -253,16 +314,16 @@ export default function ScorecardAdminPage() {
     const remoteTime = parseUpdatedAt(remoteScorecard);
 
     if (localDraft && localTime >= remoteTime) {
-      setScorecard(localDraft);
+      setScorecard(applyMatchCaptainsToScorecard(localDraft, match));
     } else if (remoteScorecard) {
-      setScorecard(remoteScorecard);
+      setScorecard(applyMatchCaptainsToScorecard(remoteScorecard, match));
       try {
         localStorage.removeItem(draftKey);
       } catch {
         /* ignore */
       }
     } else if (localDraft) {
-      setScorecard(localDraft);
+      setScorecard(applyMatchCaptainsToScorecard(localDraft, match));
     } else {
       setScorecard(initializeScorecard(match));
     }
@@ -622,7 +683,9 @@ export default function ScorecardAdminPage() {
       const player = players.find(p => p.id === value);
       if (player) {
         batter.name = player.name;
-        batter.isCaptain = player.isCaptain;
+        const battingTeamId = updated.innings[activeInnings].battingTeamId;
+        const matchCaptainId = getCaptainIdForTeam(battingTeamId);
+        batter.isCaptain = matchCaptainId ? String(player.id) === String(matchCaptainId) : Boolean(player.isCaptain);
       }
     }
     
@@ -669,7 +732,13 @@ export default function ScorecardAdminPage() {
       const player = players.find(p => p.id === value);
       if (player) {
         bowler.name = player.name;
-        bowler.isCaptain = player.isCaptain;
+        const battingTeamId = updated.innings[activeInnings].battingTeamId;
+        const bowlingTeamId =
+          String(battingTeamId) === String(updated.matchInfo.team1.id)
+            ? updated.matchInfo.team2.id
+            : updated.matchInfo.team1.id;
+        const matchCaptainId = getCaptainIdForTeam(bowlingTeamId);
+        bowler.isCaptain = matchCaptainId ? String(player.id) === String(matchCaptainId) : Boolean(player.isCaptain);
       }
     }
     
