@@ -12,7 +12,7 @@ import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import ModernTeamLogo from '@/components/ui/ModernTeamLogo';
 import { useLeague } from '@/contexts/LeagueContext';
 import { api } from '@/lib/data';
-import type { Match } from '@/types';
+import type { Match, Player } from '@/types';
 
 type ExtrasRow = {
   hasWide: boolean;
@@ -28,6 +28,7 @@ type WicketRow = {
   hasWicket: boolean;
   wicketType: string;
   wicketTaker: string;
+  outBatter?: 'striker' | 'nonStriker';
 };
 
 type LiveScoreTableState = {
@@ -51,6 +52,7 @@ const DEFAULT_WICKET: WicketRow = {
   hasWicket: false,
   wicketType: '',
   wicketTaker: '',
+  outBatter: 'striker',
 };
 
 function otherTeamKey(teamKey: 'team1' | 'team2'): 'team1' | 'team2' {
@@ -161,7 +163,8 @@ function calculateInningsTotals(
     batsmanRuns += runs;
 
     if (wk.hasWicket) wickets += 1;
-    if (!ex.hasWide && !ex.hasNoBall) legalBalls += 1;
+    const isNonStrikerRunOut = wk.hasWicket && wk.wicketType === 'Mankad (Run out at non-striker end)';
+    if (!ex.hasWide && !ex.hasNoBall && !isNonStrikerRunOut) legalBalls += 1;
 
     if (ex.hasWide) {
       extras += 1 + (ex.wideExtraRuns || 0);
@@ -205,6 +208,9 @@ function computeBatterStats(
     if (String(row?.[3] || '') !== batterName && String(row?.[4] || '') !== batterName) return;
 
     const ex = { ...DEFAULT_EXTRAS, ...(extrasData[idx] || {}) };
+    const wk = { ...DEFAULT_WICKET, ...(wicketData[idx] || {}) };
+    const isNonStrikerRunOut = wk.hasWicket && wk.wicketType === 'Mankad (Run out at non-striker end)';
+    if (isNonStrikerRunOut) return;
     const r = Number.parseInt(String(row?.[6] || ''), 10) || 0;
 
     // Only count batter runs on deliveries where they were striker.
@@ -231,6 +237,9 @@ function computeBowlerStats(
     if (String(row?.[5] || '') !== bowlerName) return;
 
     const ex = { ...DEFAULT_EXTRAS, ...(extrasData[idx] || {}) };
+    const wk = { ...DEFAULT_WICKET, ...(wicketData[idx] || {}) };
+    const isNonStrikerRunOut = wk.hasWicket && wk.wicketType === 'Mankad (Run out at non-striker end)';
+    if (isNonStrikerRunOut) return;
     const batRuns = Number.parseInt(String(row?.[6] || ''), 10) || 0;
 
     runsConceded += batRuns;
@@ -249,6 +258,7 @@ function buildCommentaryFromRows(
   wicketData: Record<number, WicketRow>,
   innings: '1' | '2',
   commentaryData: Record<number, string>,
+  resolvePlayerName: (value: string) => string,
 ) {
   const stableHash = (input: string) => {
     // FNV-1a 32-bit
@@ -269,7 +279,8 @@ function buildCommentaryFromRows(
 
   const buildFallback = (seed: string, runs: number, ex: ExtrasRow, wk: WicketRow) => {
     if (wk.hasWicket) {
-      const taker = wk.wicketTaker ? `, ${wk.wicketTaker}` : '';
+      const takerName = wk.wicketTaker ? resolvePlayerName(wk.wicketTaker) : '';
+      const taker = takerName ? `, ${takerName}` : '';
       const type = wk.wicketType ? ` (${wk.wicketType}${taker})` : taker ? ` (${taker.slice(2)})` : '';
       return pick(
         [
@@ -400,8 +411,11 @@ function buildCommentaryFromRows(
 
     const over = row?.[0] || '';
     const ball = row?.[1] || '';
-    const striker = row?.[3] || '';
-    const bowler = row?.[5] || '';
+    const strikerKey = String(row?.[3] || '').trim();
+    const nonStrikerKey = String(row?.[4] || '').trim();
+    const bowlerKey = String(row?.[5] || '').trim();
+    const striker = resolvePlayerName(strikerKey);
+    const bowler = resolvePlayerName(bowlerKey);
     const notes = String(row?.[12] || '').trim();
     const runs = Number.parseInt(String(row?.[6] || ''), 10) || 0;
 
@@ -417,7 +431,14 @@ function buildCommentaryFromRows(
     const fromApi = String((commentaryData || {})[idx] || '').trim();
     const seed = `${innings}:${prefix}:${bowler}:${striker}:${idx}`;
     const bodyRaw = notes || fromApi || buildFallback(seed, runs, ex, wk);
-    const body = wk.hasWicket ? ensureOutInDismissal(striker, bodyRaw) : bodyRaw;
+    const outRole =
+      wk.wicketType === 'Mankad (Run out at non-striker end)'
+        ? 'nonStriker'
+        : wk.outBatter === 'nonStriker'
+          ? 'nonStriker'
+          : 'striker';
+    const dismissedName = outRole === 'nonStriker' ? resolvePlayerName(nonStrikerKey) : striker;
+    const body = wk.hasWicket ? ensureOutInDismissal(dismissedName, bodyRaw) : bodyRaw;
     const line = `${header}${body}`.trim();
     if (line) lines.push(line);
   });
@@ -430,12 +451,23 @@ export default function LiveScorePage() {
   const searchParams = useSearchParams();
 
   const [matches, setMatches] = useState<Match[]>([]);
+  const [players, setPlayers] = useState<Player[]>([]);
   const [selectedMatchId, setSelectedMatchId] = useState<string>('');
   const [tableState, setTableState] = useState<LiveScoreTableState>({ rows: [] });
   const [isLoadingMatches, setIsLoadingMatches] = useState(true);
   const [isLoadingScore, setIsLoadingScore] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [lastFetchAt, setLastFetchAt] = useState<number | null>(null);
+
+  const playerById = useMemo(() => new Map(players.map((p) => [p.id, p])), [players]);
+  const resolvePlayerName = useCallback(
+    (value: string) => {
+      const cleaned = String(value || '').trim();
+      if (!cleaned) return '';
+      return String(playerById.get(cleaned)?.name || cleaned).trim();
+    },
+    [playerById],
+  );
 
   // Ensure IPL context on this route.
   useEffect(() => {
@@ -449,10 +481,13 @@ export default function LiveScorePage() {
       setIsLoadingMatches(true);
       setError(null);
       try {
-        const data = await api.getMatches('ipl');
+        const [matchesData, playersData] = await Promise.all([
+          api.getMatches('ipl'),
+          api.getPlayers(undefined, 'ipl'),
+        ]);
         if (cancelled) return;
 
-        const sorted = [...(data || [])].sort((a, b) => {
+        const sorted = [...(matchesData || [])].sort((a, b) => {
           const ta = getMatchStartDate(a)?.getTime() ?? 0;
           const tb = getMatchStartDate(b)?.getTime() ?? 0;
           return ta - tb;
@@ -462,6 +497,7 @@ export default function LiveScorePage() {
         const initialId = pickDefaultMatchId(sorted, preferredMatchId);
 
         setMatches(sorted);
+        setPlayers((playersData || []) as Player[]);
         setSelectedMatchId((prev) => prev || initialId);
       } catch (e) {
         console.error('[Live Score] Failed to load matches:', e);
@@ -563,24 +599,24 @@ export default function LiveScorePage() {
     const battingTeamKey = getBattingTeamKeyForInnings(selectedMatch, currentInnings);
 
     const last = getLastRowForInnings(rows, currentInnings);
-    const strikerName = last?.row?.[3] || '';
-    const nonStrikerName = last?.row?.[4] || '';
-    const bowlerName = last?.row?.[5] || '';
+    const strikerKey = String(last?.row?.[3] || '').trim();
+    const nonStrikerKey = String(last?.row?.[4] || '').trim();
+    const bowlerKey = String(last?.row?.[5] || '').trim();
 
-    const striker = strikerName
-      ? { name: strikerName, ...computeBatterStats(rows, extrasData, currentInnings, strikerName) }
-      : { name: '', runs: 0, balls: 0 };
+    const striker = strikerKey
+      ? { id: strikerKey, name: resolvePlayerName(strikerKey), ...computeBatterStats(rows, extrasData, currentInnings, strikerKey) }
+      : { id: '', name: '', runs: 0, balls: 0 };
 
-    const nonStriker = nonStrikerName
-      ? { name: nonStrikerName, ...computeBatterStats(rows, extrasData, currentInnings, nonStrikerName) }
-      : { name: '', runs: 0, balls: 0 };
+    const nonStriker = nonStrikerKey
+      ? { id: nonStrikerKey, name: resolvePlayerName(nonStrikerKey), ...computeBatterStats(rows, extrasData, currentInnings, nonStrikerKey) }
+      : { id: '', name: '', runs: 0, balls: 0 };
 
-    const bowler = bowlerName
-      ? { name: bowlerName, ...computeBowlerStats(rows, extrasData, currentInnings, bowlerName) }
-      : { name: '', runs: 0, legalBalls: 0, overs: '0.0' };
+    const bowler = bowlerKey
+      ? { id: bowlerKey, name: resolvePlayerName(bowlerKey), ...computeBowlerStats(rows, extrasData, currentInnings, bowlerKey) }
+      : { id: '', name: '', runs: 0, legalBalls: 0, overs: '0.0' };
 
-    const innings1Feed = buildCommentaryFromRows(rows, extrasData, wicketData, '1', commentaryData);
-    const innings2Feed = buildCommentaryFromRows(rows, extrasData, wicketData, '2', commentaryData);
+    const innings1Feed = buildCommentaryFromRows(rows, extrasData, wicketData, '1', commentaryData, resolvePlayerName);
+    const innings2Feed = buildCommentaryFromRows(rows, extrasData, wicketData, '2', commentaryData, resolvePlayerName);
 
     const isChase = currentInnings === '2' && (innings2.legalBalls > 0 || hasInnings2);
     const target = isChase ? innings1.teamTotal + 1 : null;
@@ -609,7 +645,7 @@ export default function LiveScorePage() {
       needed,
       requiredRate,
     };
-  }, [selectedMatch, tableState]);
+  }, [resolvePlayerName, selectedMatch, tableState]);
 
   const matchStart = useMemo(() => (selectedMatch ? getMatchStartDate(selectedMatch) : null), [selectedMatch]);
   const matchCenterHref = useMemo(() => {

@@ -31,7 +31,9 @@ export async function onRequestGet(context) {
     const nb = ex?.hasNoBall ? 1 : 0;
     const byes = ex?.hasByes ? Number(ex?.byesRuns) || 0 : 0;
     const lb = ex?.hasLB ? Number(ex?.lbRuns) || 0 : 0;
-    const wicket = wk?.hasWicket ? `W:${wk?.wicketType || ''}:${wk?.wicketTaker || ''}` : '';
+    const wicket = wk?.hasWicket
+      ? `W:${wk?.wicketType || ''}:${wk?.outBatter || ''}:${wk?.wicketTaker || ''}`
+      : '';
 
     const signature = [
       innings,
@@ -67,8 +69,13 @@ export async function onRequestGet(context) {
 
   const buildFallbackCommentary = ({ seed, runs, ex, wk }) => {
     if (wk?.hasWicket) {
-      const taker = wk.wicketTaker ? `, ${wk.wicketTaker}` : '';
-      const type = wk.wicketType ? ` (${wk.wicketType}${taker})` : taker ? ` (${taker.slice(2)})` : '';
+      const outRole =
+        wk.wicketType === 'Mankad (Run out at non-striker end)'
+          ? ' (Non-striker)'
+          : wk.outBatter === 'nonStriker'
+            ? ' (Non-striker)'
+            : '';
+      const type = wk.wicketType ? ` (${wk.wicketType}${outRole})` : '';
       return pick(
         ['Wicket' + type + '.', 'Gone' + type + '! Big breakthrough.', 'Wicket falls' + type + '.'],
         `wicket:${seed}`,
@@ -163,8 +170,6 @@ export async function onRequestGet(context) {
     const payload = events.map((e) => ({
       id: e.id,
       overBall: e.overBall,
-      batter: e.batter,
-      bowler: e.bowler,
       outcome: e.outcome,
       note: e.note,
     }));
@@ -275,16 +280,20 @@ export async function onRequestGet(context) {
       const over = row?.[0] || '';
       const ball = row?.[1] || '';
       const overBall = over && ball ? `${over}.${ball}` : '';
-      const batter = String(row?.[3] || '');
-      const bowler = String(row?.[5] || '');
       const runs = Number.parseInt(String(row?.[6] || ''), 10) || 0;
 
       const wideTotal = ex.hasWide ? 1 + (Number(ex.wideExtraRuns) || 0) : 0;
       const nb = ex.hasNoBall ? 1 : 0;
       const byes = ex.hasByes ? Number(ex.byesRuns) || 0 : 0;
       const lb = ex.hasLB ? Number(ex.lbRuns) || 0 : 0;
+      const wicketOutRole =
+        wk?.wicketType === 'Mankad (Run out at non-striker end)'
+          ? ' (Non-striker)'
+          : wk?.outBatter === 'nonStriker'
+            ? ' (Non-striker)'
+            : '';
       const wicket =
-        wk?.hasWicket ? `WICKET${wk.wicketType ? ` (${wk.wicketType})` : ''}${wk.wicketTaker ? ` ${wk.wicketTaker}` : ''}` : '';
+        wk?.hasWicket ? `WICKET${wk.wicketType ? ` (${wk.wicketType}${wicketOutRole})` : ''}` : '';
 
       const outcomeParts = [];
       if (wicket) outcomeParts.push(wicket);
@@ -298,8 +307,6 @@ export async function onRequestGet(context) {
         id: ballKey,
         idx,
         overBall,
-        batter,
-        bowler,
         outcome: outcomeParts.filter(Boolean).join(', '),
         note: '',
         runs,
@@ -322,7 +329,7 @@ export async function onRequestGet(context) {
 
       missing.forEach((m) => {
         const ai = generated && typeof generated === 'object' ? String(generated[m.id] || '').trim() : '';
-        const seed = `${m.id}:${m.overBall}:${m.bowler}:${m.batter}`;
+        const seed = `${m.id}:${m.overBall}`;
         const finalText = ai || buildFallbackCommentary({ seed, runs: m.runs, ex: m.ex, wk: m.wk });
         commentaryData[m.idx] = finalText;
         commentaryByBallKey[m.id] = finalText;

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { api } from '@/lib/data';
 import type { Match, Player } from '@/types';
 import { Activity, Download, FileText, Plus, Save, Trash2, UploadCloud } from 'lucide-react';
@@ -27,6 +27,11 @@ type SaveStatus = 'idle' | 'saving' | 'success' | 'error';
 
 type TeamKey = 'team1' | 'team2';
 
+type PlayerOption = {
+  id: string;
+  name: string;
+};
+
 type ImpactForm = {
   inId: string;
   outId: string;
@@ -34,10 +39,13 @@ type ImpactForm = {
   overBall: string;
 };
 
+type WicketOutBatter = 'striker' | 'nonStriker';
+
 type WicketRow = {
   hasWicket: boolean;
   wicketType: string;
   wicketTaker: string;
+  outBatter: WicketOutBatter;
 };
 
 type ExtrasRow = {
@@ -64,6 +72,7 @@ const DEFAULT_WICKET: WicketRow = {
   hasWicket: false,
   wicketType: '',
   wicketTaker: '',
+  outBatter: 'striker',
 };
 
 // Common wicket modes as seen in modern scorecards
@@ -191,6 +200,12 @@ export default function IPLAdminLiveScoreTablePage() {
   const playerById = useMemo(() => {
     return new Map(players.map((p) => [p.id, p]));
   }, [players]);
+
+  const resolvePlayerName = (value: string) => {
+    const cleaned = String(value || '').trim();
+    if (!cleaned) return '';
+    return String(playerById.get(cleaned)?.name || cleaned).trim();
+  };
 
   const matchCaptains = useMemo<Record<TeamKey, { id: string; name: string }>>(() => {
     const team1Id = String(selectedMatch?.captains?.team1 || '').trim();
@@ -426,18 +441,123 @@ export default function IPLAdminLiveScoreTablePage() {
   };
 
   const getTeamPlayerOptions = (teamKey: 'team1' | 'team2') => {
-    const fromXI = teamKey === 'team1' ? playing11Names.team1 : playing11Names.team2;
-    const fromSquad = (teamKey === 'team1' ? squads.team1 : squads.team2).map((p) => p.name);
     const impact = teamKey === 'team1' ? impactPlayerInfo.team1 : impactPlayerInfo.team2;
 
-    const base = (fromXI.length ? fromXI : fromSquad).slice();
-    if (impact?.impactName) {
-      // Keep the OUT player in the dropdown so previously-entered rows don't go blank.
-      // Tagging/guardrails are handled in the UI, not by removing options.
-      base.push(impact.impactName);
-    }
-    return uniqStrings(base);
+    const fromXIIds = normalizeIdArray((selectedMatch as any)?.playing11?.[teamKey]);
+    const fromSquadIds = (teamKey === 'team1' ? squads.team1 : squads.team2).map((p) => String(p.id || '').trim()).filter(Boolean);
+
+    const baseIds = (fromXIIds.length ? fromXIIds : fromSquadIds).slice();
+    if (impact?.impactId) baseIds.push(String(impact.impactId));
+    if (impact?.originalId) baseIds.push(String(impact.originalId));
+
+    const uniqueIds = Array.from(new Set(baseIds.map(String).map((s) => s.trim()).filter(Boolean)));
+    return uniqueIds.map((id) => ({ id, name: resolvePlayerName(id) }));
   };
+
+  const didMigratePlayerIdsRef = useRef<Record<string, boolean>>({});
+
+  // One-time best-effort migration: convert legacy name-stored rows to player IDs (when unambiguous).
+  useEffect(() => {
+    if (!selectedMatchId) return;
+    if (!selectedMatch) return;
+    if (didMigratePlayerIdsRef.current[selectedMatchId]) return;
+    if (!players.length) return;
+    if (rows.length === 0 && Object.keys(wicketData).length === 0) return;
+
+    const normalize = (value: string) => String(value || '').trim().toLowerCase();
+    const resolveIdFromLegacy = (value: string, options: PlayerOption[]) => {
+      const cleaned = String(value || '').trim();
+      if (!cleaned) return '';
+      if (options.some((opt) => opt.id === cleaned)) return cleaned;
+
+      const matches = options.filter((opt) => normalize(opt.name) === normalize(cleaned));
+      return matches.length === 1 ? matches[0].id : cleaned;
+    };
+
+    let rowsChanged = false;
+    let wicketsChanged = false;
+
+    const nextRows = rows.map((r) => (Array.isArray(r) ? [...r] : []));
+    const nextWicketData: Record<number, WicketRow> = { ...wicketData };
+
+    for (let idx = 0; idx < nextRows.length; idx++) {
+      const row = nextRows[idx];
+      const innings = (String(row?.[2] || '1') as '1' | '2') || '1';
+      const battingKey = getBattingTeamKeyForInnings(innings);
+      const bowlingKey = otherTeamKey(battingKey);
+
+      const battingOptions = getTeamPlayerOptions(battingKey);
+      const bowlingOptions = getTeamPlayerOptions(bowlingKey);
+
+      const striker = String(row?.[3] || '');
+      const nonStriker = String(row?.[4] || '');
+      const bowler = String(row?.[5] || '');
+
+      const nextStriker = resolveIdFromLegacy(striker, battingOptions);
+      const nextNonStriker = resolveIdFromLegacy(nonStriker, battingOptions);
+      const nextBowler = resolveIdFromLegacy(bowler, bowlingOptions);
+
+      if (nextStriker !== striker) {
+        row[3] = nextStriker;
+        rowsChanged = true;
+      }
+      if (nextNonStriker !== nonStriker) {
+        row[4] = nextNonStriker;
+        rowsChanged = true;
+      }
+      if (nextBowler !== bowler) {
+        row[5] = nextBowler;
+        rowsChanged = true;
+      }
+
+      const wkRaw = wicketData[idx];
+      if (!wkRaw || typeof wkRaw !== 'object') continue;
+
+      const wkCurrent = { ...DEFAULT_WICKET, ...(wkRaw || {}) };
+      let wkNext = wkCurrent;
+
+      if (wkCurrent.wicketType === 'Mankad (Run out at non-striker end)') {
+        if (wkCurrent.outBatter !== 'nonStriker') wkNext = { ...wkNext, outBatter: 'nonStriker' };
+        const bowlerId = String(row?.[5] || '').trim();
+        if (bowlerId && wkNext.wicketTaker !== bowlerId) wkNext = { ...wkNext, wicketTaker: bowlerId };
+      } else if (wkCurrent.wicketType !== 'Run Out' && wkCurrent.wicketType !== 'Obstructing the Field') {
+        if (wkCurrent.outBatter !== 'striker') wkNext = { ...wkNext, outBatter: 'striker' };
+      }
+
+      if (wkNext.wicketType === 'Caught & Bowled') {
+        const bowlerId = String(row?.[5] || '').trim();
+        if (bowlerId && wkNext.wicketTaker !== bowlerId) wkNext = { ...wkNext, wicketTaker: bowlerId };
+      }
+
+      if (wkNext.wicketTaker) {
+        const currentTaker = String(wkNext.wicketTaker);
+        const nextTaker = resolveIdFromLegacy(currentTaker, bowlingOptions);
+        if (nextTaker !== currentTaker) wkNext = { ...wkNext, wicketTaker: nextTaker };
+      }
+
+      const didChangeWk =
+        wkNext.hasWicket !== wkCurrent.hasWicket ||
+        wkNext.wicketType !== wkCurrent.wicketType ||
+        wkNext.wicketTaker !== wkCurrent.wicketTaker ||
+        wkNext.outBatter !== wkCurrent.outBatter;
+
+      if (didChangeWk) {
+        nextWicketData[idx] = wkNext;
+        wicketsChanged = true;
+      }
+
+      const desc = generateWicketDescription(wkNext);
+      if (desc && String(row?.[11] || '') !== desc) {
+        row[11] = desc;
+        rowsChanged = true;
+      }
+    }
+
+    if (rowsChanged) setRows(nextRows);
+    if (wicketsChanged) setWicketData(nextWicketData);
+
+    didMigratePlayerIdsRef.current[selectedMatchId] = true;
+  }, [selectedMatchId, selectedMatch, players.length, rows, wicketData]);
 
   const updateImpactForm = (teamKey: TeamKey, patch: Partial<ImpactForm>) => {
     setImpactForms((prev) => ({
@@ -546,8 +666,16 @@ export default function IPLAdminLiveScoreTablePage() {
   const generateWicketDescription = (data: WicketRow) => {
     if (!data.hasWicket) return '';
     const type = data.wicketType || 'Wicket';
-    const taker = data.wicketTaker ? ` - ${data.wicketTaker}` : '';
-    return `${type}${taker}`.trim();
+    const takerName = data.wicketTaker ? resolvePlayerName(String(data.wicketTaker)) : '';
+    const taker = takerName ? ` - ${takerName}` : '';
+
+    const needsOutBatter =
+      type === 'Run Out' || type === 'Obstructing the Field' || type === 'Mankad (Run out at non-striker end)';
+    const outTag = needsOutBatter
+      ? ` (${type === 'Mankad (Run out at non-striker end)' ? 'Non-striker' : data.outBatter === 'nonStriker' ? 'Non-striker' : 'Striker'})`
+      : '';
+
+    return `${type}${outTag}${taker}`.trim();
   };
 
   const setExtrasForRow = (rowIndex: number, patch: Partial<ExtrasRow>) => {
@@ -593,6 +721,22 @@ export default function IPLAdminLiveScoreTablePage() {
     updateCell(rowIndex, 8, noBallTotal ? String(noBallTotal) : '');
     updateCell(rowIndex, 9, byesTotal);
     updateCell(rowIndex, 10, lbTotal);
+
+    // Guardrails (MCC Laws): enforce which dismissals are possible on No-ball/Wide.
+    const wk = { ...DEFAULT_WICKET, ...(wicketData[rowIndex] || {}) };
+    if (wk.hasWicket && wk.wicketType) {
+      const allowed = next.hasNoBall
+        ? ['Hit the Ball Twice', 'Obstructing the Field', 'Run Out']
+        : next.hasWide
+          ? ['Hit Wicket', 'Obstructing the Field', 'Run Out', 'Stumped']
+          : null;
+
+      if (allowed && !allowed.includes(wk.wicketType)) {
+        const cleared: WicketRow = { ...wk, wicketType: '', wicketTaker: '', outBatter: 'striker' };
+        setWicketForRow(rowIndex, cleared);
+        updateCell(rowIndex, 11, generateWicketDescription(cleared));
+      }
+    }
   };
 
   const onWicketChange = (rowIndex: number, field: keyof WicketRow, value: boolean | string) => {
@@ -602,6 +746,39 @@ export default function IPLAdminLiveScoreTablePage() {
     if (field === 'hasWicket' && value === false) {
       next.wicketType = '';
       next.wicketTaker = '';
+      next.outBatter = 'striker';
+    }
+
+    if (field === 'wicketType') {
+      const type = String(value || '').trim();
+
+      // Out batter selection is only meaningful for run-outs/rare cases.
+      if (type === 'Mankad (Run out at non-striker end)') {
+        next.outBatter = 'nonStriker';
+        // Usually effected by the bowler; default to bowler if present.
+        const bowlerId = String(rows?.[rowIndex]?.[5] || '').trim();
+        if (bowlerId) next.wicketTaker = bowlerId;
+      } else if (type === 'Run Out' || type === 'Obstructing the Field') {
+        next.outBatter = next.outBatter === 'nonStriker' ? 'nonStriker' : 'striker';
+      } else {
+        next.outBatter = 'striker';
+      }
+
+      // Clear wicket taker when it doesn't apply; keep it structured when it does.
+      const takerNotUsed =
+        type === 'Bowled' ||
+        type === 'LBW' ||
+        type === 'Hit Wicket' ||
+        type === 'Timed Out' ||
+        type === 'Retired Hurt' ||
+        type === 'Retired Out';
+
+      if (takerNotUsed) next.wicketTaker = '';
+
+      if (type === 'Caught & Bowled') {
+        const bowlerId = String(rows?.[rowIndex]?.[5] || '').trim();
+        next.wicketTaker = bowlerId || '';
+      }
     }
 
     setWicketForRow(rowIndex, next);
@@ -615,7 +792,9 @@ export default function IPLAdminLiveScoreTablePage() {
     rows.forEach((row, idx) => {
       if (String(row?.[2] || '') !== innings) return;
       const ex = { ...DEFAULT_EXTRAS, ...(extrasData[idx] || {}) };
-      if (!ex.hasWide && !ex.hasNoBall) balls += 1;
+      const wk = { ...DEFAULT_WICKET, ...(wicketData[idx] || {}) };
+      const isNonStrikerRunOut = wk.hasWicket && wk.wicketType === 'Mankad (Run out at non-striker end)';
+      if (!ex.hasWide && !ex.hasNoBall && !isNonStrikerRunOut) balls += 1;
     });
     return balls;
   };
@@ -691,7 +870,8 @@ export default function IPLAdminLiveScoreTablePage() {
 
       if (wk.hasWicket) wickets += 1;
 
-      if (!ex.hasWide && !ex.hasNoBall) {
+      const isNonStrikerRunOut = wk.hasWicket && wk.wicketType === 'Mankad (Run out at non-striker end)';
+      if (!ex.hasWide && !ex.hasNoBall && !isNonStrikerRunOut) {
         legalBalls += 1;
       }
 
@@ -726,8 +906,16 @@ export default function IPLAdminLiveScoreTablePage() {
 
   const exportCSV = () => {
     const headerLine = HEADERS.join(',');
+    const normalizeRowForExport = (r: string[]) => {
+      const next = HEADERS.map((_, idx) => String(r?.[idx] ?? ''));
+      next[3] = resolvePlayerName(next[3]);
+      next[4] = resolvePlayerName(next[4]);
+      next[5] = resolvePlayerName(next[5]);
+      return next;
+    };
+
     const body = rows
-      .map((r) => r.map((cell) => `"${String(cell ?? '').replace(/"/g, '""')}"`).join(','))
+      .map((r) => normalizeRowForExport(r).map((cell) => `"${String(cell ?? '').replace(/"/g, '""')}"`).join(','))
       .join('\n');
     const csv = [headerLine, body].filter(Boolean).join('\n');
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
@@ -938,7 +1126,13 @@ export default function IPLAdminLiveScoreTablePage() {
       // ── Innings tables ───────────────────────────────────────────────────────
       doc.addPage();
 
-      const normalizeRowForPdf = (r: string[]) => HEADERS.map((_, idx) => String(r?.[idx] ?? ''));
+      const normalizeRowForPdf = (r: string[]) => {
+        const next = HEADERS.map((_, idx) => String(r?.[idx] ?? ''));
+        next[3] = resolvePlayerName(next[3]);
+        next[4] = resolvePlayerName(next[4]);
+        next[5] = resolvePlayerName(next[5]);
+        return next;
+      };
 
       const innings1Rows = rows.filter((r) => String(r?.[2] || '') === '1').map((r) => normalizeRowForPdf(r));
       const innings2Rows = rows.filter((r) => String(r?.[2] || '') === '2').map((r) => normalizeRowForPdf(r));
@@ -997,8 +1191,8 @@ export default function IPLAdminLiveScoreTablePage() {
       .map(({ row, idx }) => {
         const over = row[0] || '';
         const ball = row[1] || '';
-        const striker = row[3] || '';
-        const bowler = row[5] || '';
+        const striker = resolvePlayerName(row[3] || '');
+        const bowler = resolvePlayerName(row[5] || '');
         const runs = parseInt(String(row[6] || ''), 10) || 0;
         const ex = { ...DEFAULT_EXTRAS, ...(extrasData[idx] || {}) };
         const wk = { ...DEFAULT_WICKET, ...(wicketData[idx] || {}) };
@@ -1038,6 +1232,9 @@ export default function IPLAdminLiveScoreTablePage() {
       if (String(row?.[2] || '') !== innings) return;
       if (String(row?.[3] || '') !== batterName) return;
       const ex = { ...DEFAULT_EXTRAS, ...(extrasData[idx] || {}) };
+      const wk = { ...DEFAULT_WICKET, ...(wicketData[idx] || {}) };
+      const isNonStrikerRunOut = wk.hasWicket && wk.wicketType === 'Mankad (Run out at non-striker end)';
+      if (isNonStrikerRunOut) return;
       const r = parseInt(String(row?.[6] || ''), 10) || 0;
       runs += r;
       if (!ex.hasWide && !ex.hasNoBall) balls += 1;
@@ -1053,6 +1250,9 @@ export default function IPLAdminLiveScoreTablePage() {
       if (String(row?.[5] || '') !== bowlerName) return;
 
       const ex = { ...DEFAULT_EXTRAS, ...(extrasData[idx] || {}) };
+      const wk = { ...DEFAULT_WICKET, ...(wicketData[idx] || {}) };
+      const isNonStrikerRunOut = wk.hasWicket && wk.wicketType === 'Mankad (Run out at non-striker end)';
+      if (isNonStrikerRunOut) return;
       const batRuns = parseInt(String(row?.[6] || ''), 10) || 0;
 
       // Batsman runs always count against bowler (unless user records byes/LB correctly as 0 in Runs)
@@ -1081,11 +1281,13 @@ export default function IPLAdminLiveScoreTablePage() {
     const battingTeamKey = getBattingTeamKeyForInnings(currentInnings);
 
     const last = getLastRowForInnings(currentInnings);
-    const currentBatterName = last?.row?.[3] || '';
-    const currentBowlerName = last?.row?.[5] || '';
+    const currentBatterId = String(last?.row?.[3] || '').trim();
+    const currentBowlerId = String(last?.row?.[5] || '').trim();
+    const currentBatterName = currentBatterId ? resolvePlayerName(currentBatterId) : '';
+    const currentBowlerName = currentBowlerId ? resolvePlayerName(currentBowlerId) : '';
 
-    const batterStats = currentBatterName ? computeBatterStats(currentInnings, currentBatterName) : { runs: 0, balls: 0 };
-    const bowlerStats = currentBowlerName ? computeBowlerStats(currentInnings, currentBowlerName) : { runs: 0, balls: 0 };
+    const batterStats = currentBatterId ? computeBatterStats(currentInnings, currentBatterId) : { runs: 0, balls: 0 };
+    const bowlerStats = currentBowlerId ? computeBowlerStats(currentInnings, currentBowlerId) : { runs: 0, balls: 0 };
 
     return {
       matchId: selectedMatch.id,
@@ -1338,8 +1540,8 @@ export default function IPLAdminLiveScoreTablePage() {
 
     const battingOptions = getTeamPlayerOptions(battingKey);
     const bowlingOptions = getTeamPlayerOptions(bowlingKey);
-    const battingCaptainName = matchCaptains[battingKey].name;
-    const bowlingCaptainName = matchCaptains[bowlingKey].name;
+    const battingCaptainId = matchCaptains[battingKey].id;
+    const bowlingCaptainId = matchCaptains[bowlingKey].id;
     const battingImpact = battingKey === 'team1' ? impactPlayerInfo.team1 : impactPlayerInfo.team2;
     const bowlingImpact = bowlingKey === 'team1' ? impactPlayerInfo.team1 : impactPlayerInfo.team2;
 
@@ -1388,6 +1590,8 @@ export default function IPLAdminLiveScoreTablePage() {
       case 3:
       case 4: {
         const label = colIndex === 3 ? 'Striker' : 'Non-Striker';
+        const hasLegacyValue =
+          Boolean(cellValue) && !battingOptions.some((opt) => opt.id === cellValue);
         return (
           <select
             value={cellValue || ''}
@@ -1395,12 +1599,15 @@ export default function IPLAdminLiveScoreTablePage() {
             className="w-full border border-white/10 focus:border-purple-400 rounded-lg px-2 py-1 bg-slate-950 text-white"
           >
             <option value="">{label}</option>
-            {battingOptions.map((name) => (
-              <option key={name} value={name}>
-                {formatPlayerOptionLabel(name, {
-                  isCaptain: Boolean(battingCaptainName && name === battingCaptainName),
-                  isImpactIn: Boolean(battingImpact.impactName && name === battingImpact.impactName),
-                  isImpactOut: Boolean(battingImpact.originalName && name === battingImpact.originalName),
+            {hasLegacyValue && (
+              <option value={cellValue}>{String(cellValue)} (legacy)</option>
+            )}
+            {battingOptions.map((opt) => (
+              <option key={opt.id} value={opt.id}>
+                {formatPlayerOptionLabel(opt.name, {
+                  isCaptain: Boolean(battingCaptainId && opt.id === battingCaptainId),
+                  isImpactIn: Boolean(battingImpact.impactId && opt.id === battingImpact.impactId),
+                  isImpactOut: Boolean(battingImpact.originalId && opt.id === battingImpact.originalId),
                 })}
               </option>
             ))}
@@ -1408,6 +1615,8 @@ export default function IPLAdminLiveScoreTablePage() {
         );
       }
       case 5: {
+        const hasLegacyValue =
+          Boolean(cellValue) && !bowlingOptions.some((opt) => opt.id === cellValue);
         return (
           <select
             value={cellValue || ''}
@@ -1415,12 +1624,15 @@ export default function IPLAdminLiveScoreTablePage() {
             className="w-full border border-white/10 focus:border-purple-400 rounded-lg px-2 py-1 bg-slate-950 text-white"
           >
             <option value="">Bowler</option>
-            {bowlingOptions.map((name) => (
-              <option key={name} value={name}>
-                {formatPlayerOptionLabel(name, {
-                  isCaptain: Boolean(bowlingCaptainName && name === bowlingCaptainName),
-                  isImpactIn: Boolean(bowlingImpact.impactName && name === bowlingImpact.impactName),
-                  isImpactOut: Boolean(bowlingImpact.originalName && name === bowlingImpact.originalName),
+            {hasLegacyValue && (
+              <option value={cellValue}>{String(cellValue)} (legacy)</option>
+            )}
+            {bowlingOptions.map((opt) => (
+              <option key={opt.id} value={opt.id}>
+                {formatPlayerOptionLabel(opt.name, {
+                  isCaptain: Boolean(bowlingCaptainId && opt.id === bowlingCaptainId),
+                  isImpactIn: Boolean(bowlingImpact.impactId && opt.id === bowlingImpact.impactId),
+                  isImpactOut: Boolean(bowlingImpact.originalId && opt.id === bowlingImpact.originalId),
                 })}
               </option>
             ))}
@@ -1541,6 +1753,31 @@ export default function IPLAdminLiveScoreTablePage() {
         );
       }
       case 11: {
+        const allowedWicketTypes = ex.hasNoBall
+          ? WICKET_TYPES.filter((t) => t === 'Hit the Ball Twice' || t === 'Obstructing the Field' || t === 'Run Out')
+          : ex.hasWide
+            ? WICKET_TYPES.filter((t) => t === 'Hit Wicket' || t === 'Obstructing the Field' || t === 'Run Out' || t === 'Stumped')
+            : WICKET_TYPES;
+
+        const showOutBatter =
+          wk.wicketType === 'Run Out' ||
+          wk.wicketType === 'Obstructing the Field' ||
+          wk.wicketType === 'Mankad (Run out at non-striker end)';
+
+        const outBatterDisabled = wk.wicketType === 'Mankad (Run out at non-striker end)';
+
+        const showWicketTaker = Boolean(wk.wicketType) && ![
+          'Bowled',
+          'LBW',
+          'Hit Wicket',
+          'Caught & Bowled',
+          'Timed Out',
+          'Retired Hurt',
+          'Retired Out',
+        ].includes(wk.wicketType);
+
+        const wicketTakerLegacy =
+          Boolean(wk.wicketTaker) && !bowlingOptions.some((opt) => opt.id === wk.wicketTaker);
         return (
           <div className="space-y-2">
             <div className="flex items-center gap-2">
@@ -1560,18 +1797,44 @@ export default function IPLAdminLiveScoreTablePage() {
                   className="w-full border border-white/10 focus:border-purple-400 rounded-lg px-2 py-1 bg-slate-950 text-white text-xs"
                 >
                   <option value="">Type...</option>
-                  {WICKET_TYPES.map((t) => (
+                  {allowedWicketTypes.map((t) => (
                     <option key={t} value={t}>
                       {t}
                     </option>
                   ))}
                 </select>
-                <input
-                  value={wk.wicketTaker}
-                  onChange={(e) => onWicketChange(rowIndex, 'wicketTaker', e.target.value)}
-                  placeholder="Fielder/Bowler"
-                  className="w-full border border-white/10 focus:border-purple-400 rounded-lg px-2 py-1 bg-white/5 text-white placeholder-white/30 text-xs"
-                />
+                {showOutBatter && (
+                  <select
+                    value={outBatterDisabled ? 'nonStriker' : wk.outBatter}
+                    onChange={(e) => onWicketChange(rowIndex, 'outBatter', e.target.value)}
+                    disabled={outBatterDisabled}
+                    className="w-full border border-white/10 focus:border-purple-400 rounded-lg px-2 py-1 bg-slate-950 text-white text-xs disabled:opacity-70"
+                  >
+                    <option value="striker">Out: Striker</option>
+                    <option value="nonStriker">Out: Non-striker</option>
+                  </select>
+                )}
+                {showWicketTaker && (
+                  <select
+                    value={wk.wicketTaker || ''}
+                    onChange={(e) => onWicketChange(rowIndex, 'wicketTaker', e.target.value)}
+                    className="w-full border border-white/10 focus:border-purple-400 rounded-lg px-2 py-1 bg-slate-950 text-white text-xs"
+                  >
+                    <option value="">Fielder/Bowler</option>
+                    {wicketTakerLegacy && (
+                      <option value={wk.wicketTaker}>{String(wk.wicketTaker)} (legacy)</option>
+                    )}
+                    {bowlingOptions.map((opt) => (
+                      <option key={opt.id} value={opt.id}>
+                        {formatPlayerOptionLabel(opt.name, {
+                          isCaptain: Boolean(bowlingCaptainId && opt.id === bowlingCaptainId),
+                          isImpactIn: Boolean(bowlingImpact.impactId && opt.id === bowlingImpact.impactId),
+                          isImpactOut: Boolean(bowlingImpact.originalId && opt.id === bowlingImpact.originalId),
+                        })}
+                      </option>
+                    ))}
+                  </select>
+                )}
               </>
             )}
           </div>
