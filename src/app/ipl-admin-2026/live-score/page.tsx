@@ -1731,41 +1731,132 @@ export default function IPLAdminLiveScoreTablePage() {
         let legalBalls = 0;
         let widesRuns = 0;
         let noBallRuns = 0;
-        let byesRuns = 0;
-        let legByesRuns = 0;
-        let wicketCount = 0;
-        const fallOfWickets: Array<{ player: string; score: string; over: string }> = [];
+	        let byesRuns = 0;
+	        let legByesRuns = 0;
+	        let wicketCount = 0;
+	        const fallOfWickets: Array<{ player: string; score: string; over: string }> = [];
 
-        rows.forEach((row, idx) => {
-          if (String(row?.[2] || '') !== innings) return;
+	        const toSortableNumber = (value: unknown) => {
+	          const n = Number.parseInt(String(value || '').trim(), 10);
+	          return Number.isFinite(n) ? n : Number.MAX_SAFE_INTEGER;
+	        };
 
-          const strikerId = String(row?.[3] || '').trim();
-          const nonStrikerId = String(row?.[4] || '').trim();
-          const bowlerId = String(row?.[5] || '').trim();
+	        const deliveries = rows
+	          .map((row, idx) => ({ row, idx }))
+	          .filter(({ row }) => String(row?.[2] || '') === innings)
+	          .sort((a, b) => {
+	            const overA = toSortableNumber(a.row?.[0]);
+	            const overB = toSortableNumber(b.row?.[0]);
+	            if (overA !== overB) return overA - overB;
+	            const ballA = toSortableNumber(a.row?.[1]);
+	            const ballB = toSortableNumber(b.row?.[1]);
+	            if (ballA !== ballB) return ballA - ballB;
+	            return a.idx - b.idx;
+	          });
 
-          ensureBatter(strikerId);
-          ensureBatter(nonStrikerId);
-          const bowler = ensureBowler(bowlerId);
+	        // T20: mandatory powerplay is first 6 overs (36 legal balls)
+	        const MANDATORY_POWERPLAY_BALLS = 36;
+	        let mandatoryPowerplayRuns = 0;
+	        let mandatoryPowerplayLegalBalls = 0;
 
-          const ex = { ...DEFAULT_EXTRAS, ...(extrasData[idx] || {}) };
-          const wk = { ...DEFAULT_WICKET, ...(wicketData[idx] || {}) };
-          const nonDelivery = isNonDeliveryWicket(wk);
+	        const partnerships: any[] = [];
+	        let currentPartnership: any = null;
 
-          const isWide = Boolean(ex.hasWide);
-          const isNoBall = Boolean(ex.hasNoBall);
+	        const startPartnership = (strikerId: string, nonStrikerId: string) => {
+	          const a = String(strikerId || '').trim();
+	          const b = String(nonStrikerId || '').trim();
+	          if (!a || !b || a === b) return;
+	          currentPartnership = {
+	            ids: [a, b],
+	            key: [a, b].slice().sort().join('|'),
+	            totalRuns: 0,
+	            runsById: { [a]: 0, [b]: 0 },
+	            ballsById: { [a]: 0, [b]: 0 },
+	          };
+	        };
 
-          const batRuns = !nonDelivery && !isWide ? parseInt(String(row?.[6] || ''), 10) || 0 : 0;
-          const wideRuns = !nonDelivery && isWide ? 1 + (ex.wideExtraRuns || 0) : 0;
-          const nbRuns = !nonDelivery && isNoBall ? 1 : 0;
-          const bRuns = !nonDelivery && ex.hasByes && !isWide ? ex.byesRuns || 0 : 0;
-          const lbRuns = !nonDelivery && ex.hasLB && !isWide ? ex.lbRuns || 0 : 0;
+	        const pushCurrentPartnership = () => {
+	          if (!currentPartnership) return;
+	          const [a, b] = currentPartnership.ids as [string, string];
+	          const totalRuns = Number(currentPartnership.totalRuns) || 0;
+	          const runsA = Number(currentPartnership.runsById?.[a]) || 0;
+	          const ballsA = Number(currentPartnership.ballsById?.[a]) || 0;
+	          const runsB = Number(currentPartnership.runsById?.[b]) || 0;
+	          const ballsB = Number(currentPartnership.ballsById?.[b]) || 0;
+	          const hasAny = totalRuns > 0 || ballsA > 0 || ballsB > 0;
 
-          if (!nonDelivery) {
-            teamTotal += batRuns + wideRuns + nbRuns + bRuns + lbRuns;
-            widesRuns += wideRuns;
-            noBallRuns += nbRuns;
-            byesRuns += bRuns;
-            legByesRuns += lbRuns;
+	          if (hasAny) {
+	            partnerships.push({
+	              batsman1: resolvePlayerName(a),
+	              batsman1Runs: String(runsA),
+	              batsman1Balls: String(ballsA),
+	              batsman2: resolvePlayerName(b),
+	              batsman2Runs: String(runsB),
+	              batsman2Balls: String(ballsB),
+	              totalRuns: String(totalRuns),
+	            });
+	          }
+
+	          currentPartnership = null;
+	        };
+
+	        deliveries.forEach(({ row, idx }) => {
+
+	          const strikerId = String(row?.[3] || '').trim();
+	          const nonStrikerId = String(row?.[4] || '').trim();
+	          const bowlerId = String(row?.[5] || '').trim();
+
+	          ensureBatter(strikerId);
+	          ensureBatter(nonStrikerId);
+	          const bowler = ensureBowler(bowlerId);
+
+	          const ex = { ...DEFAULT_EXTRAS, ...(extrasData[idx] || {}) };
+	          const wk = { ...DEFAULT_WICKET, ...(wicketData[idx] || {}) };
+	          const nonDelivery = isNonDeliveryWicket(wk);
+
+	          const isWide = Boolean(ex.hasWide);
+	          const isNoBall = Boolean(ex.hasNoBall);
+
+	          const batRuns = !nonDelivery && !isWide ? parseInt(String(row?.[6] || ''), 10) || 0 : 0;
+	          const wideRuns = !nonDelivery && isWide ? 1 + (ex.wideExtraRuns || 0) : 0;
+	          const nbRuns = !nonDelivery && isNoBall ? 1 : 0;
+	          const bRuns = !nonDelivery && ex.hasByes && !isWide ? ex.byesRuns || 0 : 0;
+	          const lbRuns = !nonDelivery && ex.hasLB && !isWide ? ex.lbRuns || 0 : 0;
+	          const totalRunsThisRow = batRuns + wideRuns + nbRuns + bRuns + lbRuns;
+
+	          // Mandatory powerplay aggregation (first 6 legal overs)
+	          if (mandatoryPowerplayLegalBalls < MANDATORY_POWERPLAY_BALLS) {
+	            mandatoryPowerplayRuns += totalRunsThisRow;
+	            if (!nonDelivery && !isWide && !isNoBall) mandatoryPowerplayLegalBalls += 1;
+	          }
+
+	          // Partnership aggregation (pair at crease)
+	          if (strikerId && nonStrikerId) {
+	            const key = [strikerId, nonStrikerId].slice().sort().join('|');
+	            if (!currentPartnership) {
+	              startPartnership(strikerId, nonStrikerId);
+	            } else if (key !== currentPartnership.key) {
+	              pushCurrentPartnership();
+	              startPartnership(strikerId, nonStrikerId);
+	            }
+	          }
+
+	          if (currentPartnership) {
+	            currentPartnership.totalRuns += totalRunsThisRow;
+	            if (strikerId) {
+	              currentPartnership.runsById[strikerId] = (currentPartnership.runsById[strikerId] || 0) + batRuns;
+	              if (!nonDelivery && !isWide) {
+	                currentPartnership.ballsById[strikerId] = (currentPartnership.ballsById[strikerId] || 0) + 1;
+	              }
+	            }
+	          }
+
+	          if (!nonDelivery) {
+	            teamTotal += totalRunsThisRow;
+	            widesRuns += wideRuns;
+	            noBallRuns += nbRuns;
+	            byesRuns += bRuns;
+	            legByesRuns += lbRuns;
 
             const striker = ensureBatter(strikerId);
             if (striker) {
@@ -1803,15 +1894,16 @@ export default function IPLAdminLiveScoreTablePage() {
                 ? 'nonStriker'
                 : 'striker';
 
-          const dismissedId = outRole === 'nonStriker' ? nonStrikerId : strikerId;
-          const dismissed = ensureBatter(dismissedId);
+	          const dismissedId = outRole === 'nonStriker' ? nonStrikerId : strikerId;
+	          const dismissed = ensureBatter(dismissedId);
 
-          if (isRetiredHurtEvent(wk)) {
-            if (dismissed && (!dismissed.dismissal || dismissed.dismissal.type === 'not-out')) {
-              dismissed.dismissal = buildDismissal(wk, bowlerId);
-            }
-            return;
-          }
+	          if (isRetiredHurtEvent(wk)) {
+	            if (dismissed && (!dismissed.dismissal || dismissed.dismissal.type === 'not-out')) {
+	              dismissed.dismissal = buildDismissal(wk, bowlerId);
+	            }
+	            pushCurrentPartnership();
+	            return;
+	          }
 
           wicketCount += 1;
 
@@ -1831,14 +1923,19 @@ export default function IPLAdminLiveScoreTablePage() {
             });
           }
 
-          if (bowler && isBowlerWicketType(wicketType)) {
-            bowler.wickets += 1;
-          }
-        });
+	          if (bowler && isBowlerWicketType(wicketType)) {
+	            bowler.wickets += 1;
+	          }
+	
+	          pushCurrentPartnership();
+	        });
 
-        const batting = batterOrder
-          .map((id) => {
-            const b = batters.get(id);
+	        // Last partnership (not ended by wicket)
+	        pushCurrentPartnership();
+
+	        const batting = batterOrder
+	          .map((id) => {
+	            const b = batters.get(id);
             if (!b) return null;
             const balls = Number(b.balls) || 0;
             const runs = Number(b.runs) || 0;
@@ -1875,12 +1972,21 @@ export default function IPLAdminLiveScoreTablePage() {
           })
           .filter(Boolean);
 
-        const inningsOvers = `${Math.floor(legalBalls / 6)}.${legalBalls % 6}`;
+	        const inningsOvers = `${Math.floor(legalBalls / 6)}.${legalBalls % 6}`;
 
-        const base =
-          existing && typeof existing === 'object'
-            ? { ...existing }
-            : {
+	        const formatOversFromBalls = (balls: number) => {
+	          const overs = Math.floor(balls / 6);
+	          const rem = balls % 6;
+	          return rem === 0 ? String(overs) : `${overs}.${rem}`;
+	        };
+
+	        const mandatoryPowerplayOvers =
+	          mandatoryPowerplayLegalBalls > 0 ? `0.1 - ${formatOversFromBalls(mandatoryPowerplayLegalBalls)}` : '';
+
+	        const base =
+	          existing && typeof existing === 'object'
+	            ? { ...existing }
+	            : {
                 inningsNumber,
                 battingTeamId,
                 batting: [],
@@ -1895,12 +2001,17 @@ export default function IPLAdminLiveScoreTablePage() {
                   optional: { overs: '', runs: 0 },
                 },
                 partnerships: [],
-              };
+	            };
 
-        return {
-          ...base,
-          inningsNumber,
-          battingTeamId,
+	        const optionalPowerplay =
+	          base?.powerplays && typeof base.powerplays === 'object' && base.powerplays.optional
+	            ? base.powerplays.optional
+	            : { overs: '', runs: 0 };
+
+	        return {
+	          ...base,
+	          inningsNumber,
+	          battingTeamId,
           batting,
           bowling,
           extras: {
@@ -1909,12 +2020,17 @@ export default function IPLAdminLiveScoreTablePage() {
             byes: byesRuns,
             legByes: legByesRuns,
           },
-          totalRuns: teamTotal,
-          totalWickets: wicketCount,
-          totalOvers: inningsOvers,
-          fallOfWickets,
-        };
-      };
+	          totalRuns: teamTotal,
+	          totalWickets: wicketCount,
+	          totalOvers: inningsOvers,
+	          fallOfWickets,
+	          powerplays: {
+	            mandatory: { overs: mandatoryPowerplayOvers, runs: mandatoryPowerplayRuns },
+	            optional: optionalPowerplay,
+	          },
+	          partnerships,
+	        };
+	      };
 
       const innings1 = buildInningsFromTable('1', existing1);
       const innings2 = buildInningsFromTable('2', existing2);
@@ -1962,6 +2078,9 @@ export default function IPLAdminLiveScoreTablePage() {
             },
             body: JSON.stringify(payload),
           });
+
+          // Keep scorecard (incl. powerplays/partnerships) in sync with the latest ball-by-ball table.
+          void syncScorecardFromTable();
         }
       } catch (e) {
         console.error('[IPL Live Score Table] Publish failed:', e);
@@ -1989,6 +2108,10 @@ export default function IPLAdminLiveScoreTablePage() {
         body: JSON.stringify(payload),
       });
       if (!resp.ok) throw new Error('Failed to publish');
+
+      // Also update the scorecard using the same ball-by-ball table (powerplays/partnerships included).
+      void syncScorecardFromTable();
+
       setSaveStatus('success');
       setTimeout(() => setSaveStatus('idle'), 2000);
     } catch (e) {
