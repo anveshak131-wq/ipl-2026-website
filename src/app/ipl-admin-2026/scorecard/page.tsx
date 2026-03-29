@@ -103,6 +103,41 @@ function parseUpdatedAt(obj: { updatedAt?: string } | null): number {
   const t = new Date(obj.updatedAt).getTime();
   return isNaN(t) ? 0 : t;
 }
+
+function mergeRemoteComputedSections(base: Scorecard, remote: Scorecard | null): Scorecard {
+  if (!remote) return base;
+  if (!Array.isArray(base?.innings) || !Array.isArray(remote?.innings)) return base;
+
+  const remoteByInningsNumber = new Map<number, Innings>();
+  for (const inn of remote.innings) {
+    const num = Number((inn as any)?.inningsNumber);
+    if (Number.isFinite(num)) remoteByInningsNumber.set(num, inn);
+  }
+
+  const nextInnings = base.innings.map((inn) => {
+    const num = Number((inn as any)?.inningsNumber);
+    const remoteInn = remoteByInningsNumber.get(num);
+    if (!remoteInn) return inn;
+
+    const next: Innings = { ...inn };
+
+    // Powerplays are derived from ball-by-ball in live-score sync; trust server version when present.
+    if (remoteInn.powerplays && typeof remoteInn.powerplays === 'object') {
+      const mandatory = remoteInn.powerplays.mandatory || next.powerplays?.mandatory || { overs: '', runs: 0 };
+      const optional = remoteInn.powerplays.optional || next.powerplays?.optional || { overs: '', runs: 0 };
+      next.powerplays = { mandatory, optional };
+    }
+
+    // Partnerships are derived from striker/non-striker pairs; prefer server-generated list when present.
+    if (Array.isArray(remoteInn.partnerships) && remoteInn.partnerships.length > 0) {
+      next.partnerships = remoteInn.partnerships;
+    }
+
+    return next;
+  });
+
+  return { ...base, innings: nextInnings };
+}
 function getSeasonYear(dateString: string | undefined | null): number | null {
   if (!dateString) return null;
   const parsed = new Date(dateString);
@@ -314,16 +349,19 @@ export default function ScorecardAdminPage() {
     const remoteTime = parseUpdatedAt(remoteScorecard);
 
     if (localDraft && localTime >= remoteTime) {
-      setScorecard(applyMatchCaptainsToScorecard(localDraft, match));
+      const merged = mergeRemoteComputedSections(localDraft, remoteScorecard);
+      setScorecard(applyMatchCaptainsToScorecard(merged, match));
     } else if (remoteScorecard) {
-      setScorecard(applyMatchCaptainsToScorecard(remoteScorecard, match));
+      const merged = mergeRemoteComputedSections(remoteScorecard, remoteScorecard);
+      setScorecard(applyMatchCaptainsToScorecard(merged, match));
       try {
         localStorage.removeItem(draftKey);
       } catch {
         /* ignore */
       }
     } else if (localDraft) {
-      setScorecard(applyMatchCaptainsToScorecard(localDraft, match));
+      const merged = mergeRemoteComputedSections(localDraft, remoteScorecard);
+      setScorecard(applyMatchCaptainsToScorecard(merged, match));
     } else {
       setScorecard(initializeScorecard(match));
     }
