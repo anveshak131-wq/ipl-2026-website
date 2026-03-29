@@ -1,4 +1,6 @@
-const DEFAULT_STATIC_MATCH_PAGE_COUNT = 600;
+// Needs to be higher than the maximum match id used in the dataset (e.g. `772`),
+// otherwise Next will 404 for `/matches/[matchId]` when `dynamicParams = false`.
+const DEFAULT_STATIC_MATCH_PAGE_COUNT = 2000;
 const MAX_STATIC_MATCH_PAGE_COUNT = 5000;
 
 function resolveStaticPageCount(): number {

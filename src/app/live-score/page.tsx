@@ -774,6 +774,7 @@ export default function LiveScorePage() {
                     {matchCenterHref && (
                       <Link
                         href={matchCenterHref}
+                        prefetch={false}
                         className="text-xs font-semibold text-blue-200 hover:text-blue-100 transition-colors"
                       >
                         Open match center →
