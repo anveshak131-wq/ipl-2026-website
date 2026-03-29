@@ -948,18 +948,20 @@ export default function ScorecardAdminPage() {
     });
   };
 
-  // Export scorecard to ultra-enhanced PDF with colorful fonts and premium design
+  // Export scorecard to ultra-enhanced PDF with colorful fonts and premium modern design
   const exportScorecardPDF = async (sc: Scorecard) => {
     try {
-      console.log('Starting 2025 Professional PDF export...');
+      console.log('Starting Enhanced 2025 Professional PDF export...');
       
-      // Import the 2025 PDF exporter
+      // Import the enhanced 2025 PDF exporter
       const { exportScorecardPDF2025 } = await import('./pdf-export-2025');
       
-      await exportScorecardPDF2025(sc);
-      console.log('2025 Professional PDF exported successfully');
+      // Export with enhanced visuals enabled by default
+      await exportScorecardPDF2025(sc, true);
+      console.log('Enhanced 2025 Professional PDF exported successfully');
       return;
       
+      // Fallback to original implementation if needed
       const jspdfAny = (window as any).jspdf || (window as any).jsPDF || null;
       const jsPDFCtor = jspdfAny && jspdfAny.jsPDF ? jspdfAny.jsPDF : (window as any).jsPDF;
       if (!jsPDFCtor) {
@@ -971,11 +973,11 @@ export default function ScorecardAdminPage() {
       const pageWidth = doc.internal.pageSize.getWidth();
       const pageHeight = doc.internal.pageSize.getHeight();
       
-      console.log('PDF document created, setting up colors...');
+      console.log('PDF document created, setting up enhanced colors...');
     
-    // 2025 Professional Color Palette - Based on Design Recommendations
+    // Enhanced 2025 Professional Color Palette with Modern UI/UX Principles
     const colors = {
-      // 2025 Pantone Color of the Year: Mocha Mousse
+      // Pantone 2025 Color of the Year: Mocha Mousse
       mochaMousse: [150, 75, 0],        // #964B00 - Primary accent
       etherealBlue: [168, 218, 220],     // #A8DADC - Secondary
       wheatfieldBeige: [245, 245, 220],  // #F5F5DC - Background
@@ -984,13 +986,24 @@ export default function ScorecardAdminPage() {
       burntOrange: [230, 57, 70],        // #E63946 - Important data
       creamyPastel: [241, 250, 238],     // #F1FAEE - Subtle backgrounds
       
-      // Professional alternatives
+      // Professional alternatives with enhanced contrast
       professionalBlue: [44, 62, 80],    // #2C3E50
       lightGrey: [248, 249, 250],        // #F8F9FA
       successGreen: [46, 213, 115],      // #2ED573
       dangerRed: [239, 68, 68],          // #EF4444
       warningAmber: [245, 158, 11],      // #F59E0B
       infoBlue: [59, 130, 246],          // #3B82F6
+      
+      // Modern gradient colors
+      gradientStart: [150, 75, 0],        // Mocha Mousse
+      gradientEnd: [255, 209, 102],      // Warm Yellow
+      
+      // IPL Brand Colors Enhanced
+      iplBlue: [0, 102, 204],           // IPL Blue
+      iplOrange: [255, 102, 0],         // IPL Orange
+      iplYellow: [255, 204, 0],         // IPL Yellow
+      iplPurple: [128, 0, 128],         // IPL Purple (new)
+      iplTeal: [0, 128, 128],           // IPL Teal (new)
     };
     
     // 2025 Typography & Layout Standards - Professional Design Guidelines
