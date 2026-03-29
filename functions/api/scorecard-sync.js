@@ -253,6 +253,38 @@ function calculatePlayerStatsUpdates(currentStats, scorecardStats) {
     return Number.isFinite(n) ? n : 0;
   };
 
+  // Convert overs to balls.
+  // Supports cricket notation (e.g. 4.2 = 4 overs + 2 balls) and true decimal overs (e.g. 4.3333).
+  const oversToBalls = (oversValue) => {
+    if (oversValue === null || oversValue === undefined) return 0;
+    const numeric = Number(oversValue);
+    if (Number.isFinite(numeric)) {
+      if (Number.isInteger(numeric)) return Math.max(0, numeric * 6);
+      const wholeOvers = Math.floor(numeric);
+      const fractional = numeric - wholeOvers;
+      const ballsByNotation = Math.round(fractional * 10);
+      const looksLikeNotation = Math.abs(fractional * 10 - ballsByNotation) < 1e-6;
+      if (looksLikeNotation) return Math.max(0, wholeOvers * 6 + ballsByNotation);
+      return Math.max(0, Math.round(numeric * 6));
+    }
+
+    const str = String(oversValue || '').trim();
+    if (!str) return 0;
+    const match = str.match(/^(\d+)(?:\.(\d+))?$/);
+    if (!match) return 0;
+    const wholeOvers = parseInt(match[1], 10) || 0;
+    const ballsPart = match[2] ? parseInt(match[2], 10) || 0 : 0;
+    return Math.max(0, wholeOvers * 6 + ballsPart);
+  };
+
+  const formatOversFromBalls = (balls) => {
+    const totalBalls = toNumber(balls);
+    if (totalBalls <= 0) return '0.0';
+    const overs = Math.floor(totalBalls / 6);
+    const rem = totalBalls % 6;
+    return `${overs}.${rem}`;
+  };
+
   let matchCounted = false;
   const ensureMatchCounted = () => {
     if (matchCounted) return;
@@ -311,8 +343,21 @@ function calculatePlayerStatsUpdates(currentStats, scorecardStats) {
     const bowlingInnings = toNumber(updates.bowlingInnings) + 1;
     updates.bowlingInnings = bowlingInnings;
 
-    const oversValue = parseFloat(String(bowling.overs || 0));
-    updates.overs = (parseFloat(String(updates.overs || 0)) + oversValue).toFixed(1);
+    // Ensure we keep "balls bowled" as the canonical store; convert overs to balls when needed.
+    // If older data has overs but missing balls, migrate overs->balls in-place (no double-count).
+    let existingBalls = toNumber(updates.balls);
+    if (existingBalls === 0) {
+      const derivedFromOvers = oversToBalls(updates.overs);
+      if (derivedFromOvers > 0) {
+        existingBalls = derivedFromOvers;
+        updates.balls = derivedFromOvers;
+      }
+    }
+
+    const matchBallsRaw = toNumber(bowling.balls);
+    const matchBalls = matchBallsRaw > 0 ? matchBallsRaw : oversToBalls(bowling.overs);
+    updates.balls = existingBalls + matchBalls;
+    updates.overs = formatOversFromBalls(updates.balls);
     updates.runsConceded = toNumber(updates.runsConceded) + toNumber(bowling.runs);
 
     updates.maidens = toNumber(updates.maidens) + toNumber(bowling.maidens);
@@ -336,9 +381,12 @@ function calculatePlayerStatsUpdates(currentStats, scorecardStats) {
       updates.bowlingAverage = (updates.runsConceded / updates.wickets).toFixed(2);
     }
 
-    const oversFloat = parseFloat(String(updates.overs || 0));
-    if (oversFloat > 0) {
-      updates.economy = ((updates.runsConceded || 0) / oversFloat).toFixed(2);
+    const totalBalls = toNumber(updates.balls);
+    if (totalBalls > 0) {
+      updates.economy = ((toNumber(updates.runsConceded) * 6) / totalBalls).toFixed(2);
+      if (toNumber(updates.wickets) > 0) {
+        updates.bowlingStrikeRate = (totalBalls / toNumber(updates.wickets)).toFixed(2);
+      }
     }
   }
 
