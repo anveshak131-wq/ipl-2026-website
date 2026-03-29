@@ -775,7 +775,7 @@ export default function ScorecardAdminPage() {
 
     // Calculate total wickets
     inning.totalWickets = inning.batting.filter(
-      (b) => b.dismissal && b.dismissal.type !== 'not-out'
+      (b) => b.dismissal && b.dismissal.type !== 'not-out' && b.dismissal.type !== 'retired-hurt'
     ).length;
 
     // Calculate total overs from bowling data
@@ -2710,6 +2710,7 @@ export default function ScorecardAdminPage() {
                                     <option value="stumped">Stumped</option>
                                     <option value="hit-wicket">Hit Wicket</option>
                                     <option value="retired-hurt">Retired Hurt</option>
+                                    <option value="retired-out">Retired Out</option>
                                     <option value="obstructing">Obstructing</option>
                                     <option value="handled-ball">Handled Ball</option>
                                     <option value="timed-out">Timed Out</option>

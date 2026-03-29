@@ -112,8 +112,8 @@ export function calculatePlayerStatsUpdates(
     const battingInnings = (updates.battingInnings || 0) + 1;
     updates.battingInnings = battingInnings;
 
-    // Track not-outs
-    if (scorecardStats.batting.dismissalType === 'not-out') {
+    // Track not-outs (Retired Hurt is not a dismissal)
+    if (scorecardStats.batting.dismissalType === 'not-out' || scorecardStats.batting.dismissalType === 'retired-hurt') {
       updates.notOuts = (updates.notOuts || 0) + 1;
     }
 

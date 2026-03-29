@@ -270,7 +270,7 @@ function calculatePlayerStatsUpdates(currentStats, scorecardStats) {
     const battingInnings = toNumber(updates.battingInnings) + 1;
     updates.battingInnings = battingInnings;
 
-    if (scorecardStats.batting.dismissalType === 'not-out') {
+    if (scorecardStats.batting.dismissalType === 'not-out' || scorecardStats.batting.dismissalType === 'retired-hurt') {
       updates.notOuts = toNumber(updates.notOuts) + 1;
     }
 

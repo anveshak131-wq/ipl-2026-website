@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { api } from '@/lib/data';
 import type { Match, Player } from '@/types';
-import { Activity, Download, FileText, Plus, Save, Trash2, UploadCloud } from 'lucide-react';
+import { Activity, Download, FileText, Plus, RefreshCw, Save, Trash2, UploadCloud } from 'lucide-react';
 
 const LEAGUE = 'ipl' as const;
 
@@ -45,6 +45,7 @@ type WicketRow = {
   hasWicket: boolean;
   wicketType: string;
   wicketTaker: string;
+  wicketAssistant: string;
   outBatter: WicketOutBatter;
 };
 
@@ -72,6 +73,7 @@ const DEFAULT_WICKET: WicketRow = {
   hasWicket: false,
   wicketType: '',
   wicketTaker: '',
+  wicketAssistant: '',
   outBatter: 'striker',
 };
 
@@ -91,6 +93,21 @@ const WICKET_TYPES = [
   'Timed Out',
   'Mankad (Run out at non-striker end)',
 ];
+
+const NON_DELIVERY_WICKET_TYPES = new Set([
+  'Mankad (Run out at non-striker end)',
+  'Timed Out',
+  'Retired Hurt',
+  'Retired Out',
+]);
+
+function isNonDeliveryWicket(wk: WicketRow) {
+  return Boolean(wk?.hasWicket && NON_DELIVERY_WICKET_TYPES.has(String(wk.wicketType || '').trim()));
+}
+
+function isRetiredHurtEvent(wk: WicketRow) {
+  return Boolean(wk?.hasWicket && String(wk.wicketType || '').trim() === 'Retired Hurt');
+}
 
 const IMPACT_MOMENTS = [
   'Before Start of Innings',
@@ -166,6 +183,7 @@ export default function IPLAdminLiveScoreTablePage() {
   const [resultManOfTheMatch, setResultManOfTheMatch] = useState<string>('');
   const [resultStatus, setResultStatus] = useState<SaveStatus>('idle');
   const [resultLoading, setResultLoading] = useState(false);
+  const [scorecardSyncStatus, setScorecardSyncStatus] = useState<SaveStatus>('idle');
   const [impactForms, setImpactForms] = useState<Record<TeamKey, ImpactForm>>({
     team1: { ...DEFAULT_IMPACT_FORM },
     team2: { ...DEFAULT_IMPACT_FORM },
@@ -535,10 +553,17 @@ export default function IPLAdminLiveScoreTablePage() {
         if (nextTaker !== currentTaker) wkNext = { ...wkNext, wicketTaker: nextTaker };
       }
 
+      if (wkNext.wicketAssistant) {
+        const currentAssistant = String(wkNext.wicketAssistant);
+        const nextAssistant = resolveIdFromLegacy(currentAssistant, bowlingOptions);
+        if (nextAssistant !== currentAssistant) wkNext = { ...wkNext, wicketAssistant: nextAssistant };
+      }
+
       const didChangeWk =
         wkNext.hasWicket !== wkCurrent.hasWicket ||
         wkNext.wicketType !== wkCurrent.wicketType ||
         wkNext.wicketTaker !== wkCurrent.wicketTaker ||
+        wkNext.wicketAssistant !== wkCurrent.wicketAssistant ||
         wkNext.outBatter !== wkCurrent.outBatter;
 
       if (didChangeWk) {
@@ -667,7 +692,9 @@ export default function IPLAdminLiveScoreTablePage() {
     if (!data.hasWicket) return '';
     const type = data.wicketType || 'Wicket';
     const takerName = data.wicketTaker ? resolvePlayerName(String(data.wicketTaker)) : '';
-    const taker = takerName ? ` - ${takerName}` : '';
+    const assistantName = data.wicketAssistant ? resolvePlayerName(String(data.wicketAssistant)) : '';
+    const takerCombined = [takerName, assistantName].filter(Boolean).join(' / ');
+    const taker = takerCombined ? ` - ${takerCombined}` : '';
 
     const needsOutBatter =
       type === 'Run Out' || type === 'Obstructing the Field' || type === 'Mankad (Run out at non-striker end)';
@@ -732,7 +759,7 @@ export default function IPLAdminLiveScoreTablePage() {
           : null;
 
       if (allowed && !allowed.includes(wk.wicketType)) {
-        const cleared: WicketRow = { ...wk, wicketType: '', wicketTaker: '', outBatter: 'striker' };
+        const cleared: WicketRow = { ...wk, wicketType: '', wicketTaker: '', wicketAssistant: '', outBatter: 'striker' };
         setWicketForRow(rowIndex, cleared);
         updateCell(rowIndex, 11, generateWicketDescription(cleared));
       }
@@ -746,6 +773,7 @@ export default function IPLAdminLiveScoreTablePage() {
     if (field === 'hasWicket' && value === false) {
       next.wicketType = '';
       next.wicketTaker = '';
+      next.wicketAssistant = '';
       next.outBatter = 'striker';
     }
 
@@ -773,12 +801,19 @@ export default function IPLAdminLiveScoreTablePage() {
         type === 'Retired Hurt' ||
         type === 'Retired Out';
 
-      if (takerNotUsed) next.wicketTaker = '';
+      if (takerNotUsed) {
+        next.wicketTaker = '';
+        next.wicketAssistant = '';
+      }
 
       if (type === 'Caught & Bowled') {
         const bowlerId = String(rows?.[rowIndex]?.[5] || '').trim();
         next.wicketTaker = bowlerId || '';
+        next.wicketAssistant = '';
       }
+
+      const assistantUsed = type === 'Run Out' || type === 'Obstructing the Field';
+      if (!assistantUsed) next.wicketAssistant = '';
     }
 
     setWicketForRow(rowIndex, next);
@@ -793,8 +828,7 @@ export default function IPLAdminLiveScoreTablePage() {
       if (String(row?.[2] || '') !== innings) return;
       const ex = { ...DEFAULT_EXTRAS, ...(extrasData[idx] || {}) };
       const wk = { ...DEFAULT_WICKET, ...(wicketData[idx] || {}) };
-      const isNonStrikerRunOut = wk.hasWicket && wk.wicketType === 'Mankad (Run out at non-striker end)';
-      if (!ex.hasWide && !ex.hasNoBall && !isNonStrikerRunOut) balls += 1;
+      if (!ex.hasWide && !ex.hasNoBall && !isNonDeliveryWicket(wk)) balls += 1;
     });
     return balls;
   };
@@ -864,16 +898,18 @@ export default function IPLAdminLiveScoreTablePage() {
 
       const ex = { ...DEFAULT_EXTRAS, ...(extrasData[idx] || {}) };
       const wk = { ...DEFAULT_WICKET, ...(wicketData[idx] || {}) };
+      const nonDelivery = isNonDeliveryWicket(wk);
 
-      const runs = parseInt(String(row?.[6] || ''), 10) || 0;
-      batsmanRuns += runs;
+      if (wk.hasWicket && !isRetiredHurtEvent(wk)) wickets += 1;
 
-      if (wk.hasWicket) wickets += 1;
-
-      const isNonStrikerRunOut = wk.hasWicket && wk.wicketType === 'Mankad (Run out at non-striker end)';
-      if (!ex.hasWide && !ex.hasNoBall && !isNonStrikerRunOut) {
+      if (!ex.hasWide && !ex.hasNoBall && !nonDelivery) {
         legalBalls += 1;
       }
+
+      if (nonDelivery) return;
+
+      const runs = ex.hasWide ? 0 : parseInt(String(row?.[6] || ''), 10) || 0;
+      batsmanRuns += runs;
 
       if (ex.hasWide) {
         wides += 1;
@@ -886,13 +922,13 @@ export default function IPLAdminLiveScoreTablePage() {
         extras += 1; // mandatory no-ball extra (additional runs should be recorded in Runs / Byes / LB)
       }
 
-      if (ex.hasByes) {
+      if (ex.hasByes && !ex.hasWide) {
         const r = ex.byesRuns || 0;
         byes += r;
         extras += r;
       }
 
-      if (ex.hasLB) {
+      if (ex.hasLB && !ex.hasWide) {
         const r = ex.lbRuns || 0;
         legByes += r;
         extras += r;
@@ -1233,11 +1269,10 @@ export default function IPLAdminLiveScoreTablePage() {
       if (String(row?.[3] || '') !== batterName) return;
       const ex = { ...DEFAULT_EXTRAS, ...(extrasData[idx] || {}) };
       const wk = { ...DEFAULT_WICKET, ...(wicketData[idx] || {}) };
-      const isNonStrikerRunOut = wk.hasWicket && wk.wicketType === 'Mankad (Run out at non-striker end)';
-      if (isNonStrikerRunOut) return;
-      const r = parseInt(String(row?.[6] || ''), 10) || 0;
+      if (isNonDeliveryWicket(wk)) return;
+      const r = ex.hasWide ? 0 : parseInt(String(row?.[6] || ''), 10) || 0;
       runs += r;
-      if (!ex.hasWide && !ex.hasNoBall) balls += 1;
+      if (!ex.hasWide) balls += 1;
     });
     return { runs, balls };
   };
@@ -1251,9 +1286,8 @@ export default function IPLAdminLiveScoreTablePage() {
 
       const ex = { ...DEFAULT_EXTRAS, ...(extrasData[idx] || {}) };
       const wk = { ...DEFAULT_WICKET, ...(wicketData[idx] || {}) };
-      const isNonStrikerRunOut = wk.hasWicket && wk.wicketType === 'Mankad (Run out at non-striker end)';
-      if (isNonStrikerRunOut) return;
-      const batRuns = parseInt(String(row?.[6] || ''), 10) || 0;
+      if (isNonDeliveryWicket(wk)) return;
+      const batRuns = ex.hasWide ? 0 : parseInt(String(row?.[6] || ''), 10) || 0;
 
       // Batsman runs always count against bowler (unless user records byes/LB correctly as 0 in Runs)
       runsConceded += batRuns;
@@ -1469,6 +1503,438 @@ export default function IPLAdminLiveScoreTablePage() {
       console.error('[IPL Live Score Table] Save match result error:', error);
       setResultStatus('error');
       setTimeout(() => setResultStatus('idle'), 3000);
+    }
+  };
+
+  const syncScorecardFromTable = async () => {
+    try {
+      if (!selectedMatchId || !selectedMatch) return;
+
+      const token = localStorage.getItem('adminToken');
+      if (!token) {
+        alert('Admin token missing. Please login again.');
+        return;
+      }
+
+      setScorecardSyncStatus('saving');
+
+      let activeScorecardId = String(scorecardId || '').trim();
+      if (!activeScorecardId) {
+        try {
+          const resp = await fetch(
+            `/api/scorecards?matchId=${encodeURIComponent(selectedMatchId)}&league=${encodeURIComponent(LEAGUE)}`
+          );
+          if (resp.ok) {
+            const scorecards = await resp.json();
+            const sc = Array.isArray(scorecards) ? scorecards[0] : null;
+            activeScorecardId = String(sc?.id || '').trim();
+          }
+        } catch {}
+      }
+
+      if (!activeScorecardId) {
+        const created = await createScorecardIfMissing(token);
+        activeScorecardId = String(created?.id || '').trim();
+      }
+
+      if (!activeScorecardId) throw new Error('Scorecard not found or created');
+      if (activeScorecardId !== scorecardId) setScorecardId(activeScorecardId);
+
+      let existingScorecard: any = null;
+      try {
+        const resp = await fetch(`/api/scorecards/${encodeURIComponent(activeScorecardId)}`);
+        if (resp.ok) existingScorecard = await resp.json();
+      } catch {}
+
+      const existingInnings = Array.isArray(existingScorecard?.innings) ? existingScorecard.innings : [];
+      const existing1 =
+        existingInnings.find((inn: any) => Number(inn?.inningsNumber) === 1) || existingInnings[0] || null;
+      const existing2 =
+        existingInnings.find((inn: any) => Number(inn?.inningsNumber) === 2) || existingInnings[1] || null;
+
+      const mapWicketTypeToDismissalType = (wicketType: string) => {
+        const type = String(wicketType || '').trim();
+        switch (type) {
+          case 'Bowled':
+            return 'bowled';
+          case 'Caught':
+          case 'Caught & Bowled':
+            return 'caught';
+          case 'LBW':
+            return 'lbw';
+          case 'Run Out':
+          case 'Mankad (Run out at non-striker end)':
+            return 'run-out';
+          case 'Stumped':
+            return 'stumped';
+          case 'Hit Wicket':
+            return 'hit-wicket';
+          case 'Obstructing the Field':
+            return 'obstructing';
+          case 'Hit the Ball Twice':
+            return 'handled-ball';
+          case 'Retired Hurt':
+            return 'retired-hurt';
+          case 'Retired Out':
+            return 'retired-out';
+          case 'Timed Out':
+            return 'timed-out';
+          default:
+            return type ? type.toLowerCase().replace(/\s+/g, '-') : 'run-out';
+        }
+      };
+
+      const isBowlerWicketType = (wicketType: string) => {
+        const type = String(wicketType || '').trim();
+        return (
+          type === 'Bowled' ||
+          type === 'Caught' ||
+          type === 'LBW' ||
+          type === 'Stumped' ||
+          type === 'Hit Wicket' ||
+          type === 'Caught & Bowled' ||
+          type === 'Hit the Ball Twice'
+        );
+      };
+
+      const buildDismissal = (wk: WicketRow, bowlerId: string) => {
+        const wicketType = String(wk.wicketType || '').trim();
+        const dismissalType = mapWicketTypeToDismissalType(wicketType);
+        const bowlerName = bowlerId ? resolvePlayerName(String(bowlerId)) : '';
+
+        const fielder1Id = String(wk.wicketTaker || '').trim();
+        const fielder2Id = String(wk.wicketAssistant || '').trim();
+        const fielderNames = [fielder1Id, fielder2Id]
+          .map((id) => (id ? resolvePlayerName(id) : ''))
+          .filter(Boolean);
+        const fielderCombined = fielderNames.join('/');
+
+        const dismissal: any = { type: dismissalType };
+
+        const setDetails = (details: string) => {
+          const cleaned = String(details || '').trim();
+          if (cleaned) dismissal.details = cleaned;
+        };
+
+        if (wicketType === 'Bowled') {
+          if (bowlerName) setDetails(`b ${bowlerName}`);
+          dismissal.bowlerId = bowlerId;
+        } else if (wicketType === 'LBW') {
+          if (bowlerName) setDetails(`lbw b ${bowlerName}`);
+          dismissal.bowlerId = bowlerId;
+        } else if (wicketType === 'Caught') {
+          if (fielderNames[0] && bowlerName) setDetails(`c ${fielderNames[0]} b ${bowlerName}`);
+          else if (bowlerName) setDetails(`c & b ${bowlerName}`);
+          dismissal.bowlerId = bowlerId;
+          if (fielder1Id) dismissal.fielderId = fielder1Id;
+        } else if (wicketType === 'Caught & Bowled') {
+          if (bowlerName) setDetails(`c & b ${bowlerName}`);
+          dismissal.bowlerId = bowlerId;
+          if (bowlerId) dismissal.fielderId = bowlerId;
+        } else if (wicketType === 'Stumped') {
+          if (fielderNames[0] && bowlerName) setDetails(`st ${fielderNames[0]} b ${bowlerName}`);
+          dismissal.bowlerId = bowlerId;
+          if (fielder1Id) dismissal.fielderId = fielder1Id;
+        } else if (wicketType === 'Hit Wicket') {
+          if (bowlerName) setDetails(`hit wicket b ${bowlerName}`);
+          dismissal.bowlerId = bowlerId;
+        } else if (wicketType === 'Run Out') {
+          if (fielderCombined) setDetails(`run out (${fielderCombined})`);
+          else setDetails('run out');
+          if (fielder1Id) dismissal.fielderId = fielder1Id;
+        } else if (wicketType === 'Mankad (Run out at non-striker end)') {
+          if (fielderCombined) setDetails(`run out (Mankad/${fielderCombined})`);
+          else setDetails('run out (Mankad)');
+          if (fielder1Id) dismissal.fielderId = fielder1Id;
+        } else if (wicketType === 'Obstructing the Field') {
+          setDetails('obstructing the field');
+          if (fielder1Id) dismissal.fielderId = fielder1Id;
+        } else if (wicketType === 'Hit the Ball Twice') {
+          setDetails('hit the ball twice');
+          dismissal.bowlerId = bowlerId;
+        } else if (wicketType === 'Timed Out') {
+          setDetails('timed out');
+        } else if (wicketType === 'Retired Out') {
+          setDetails('retired out');
+        } else if (wicketType === 'Retired Hurt') {
+          setDetails('retired hurt');
+        }
+
+        return dismissal;
+      };
+
+      const buildInningsFromTable = (innings: '1' | '2', existing: any) => {
+        const inningsNumber = innings === '1' ? 1 : 2;
+        const battingKey = getBattingTeamKeyForInnings(innings);
+        const bowlingKey = otherTeamKey(battingKey);
+        const battingCaptainId = matchCaptains[battingKey]?.id || '';
+        const bowlingCaptainId = matchCaptains[bowlingKey]?.id || '';
+
+        const team1Id = toTeamIdNumber(selectedMatch.team1?.id);
+        const team2Id = toTeamIdNumber(selectedMatch.team2?.id);
+        const battingTeamId = battingKey === 'team1' ? team1Id : team2Id;
+
+        const batterOrder: string[] = [];
+        const batterSeen = new Set<string>();
+        const bowlerOrder: string[] = [];
+        const bowlerSeen = new Set<string>();
+        const batters = new Map<string, any>();
+        const bowlers = new Map<string, any>();
+
+        const ensureBatter = (id: string) => {
+          const cleaned = String(id || '').trim();
+          if (!cleaned) return null;
+          if (!batterSeen.has(cleaned)) {
+            batterSeen.add(cleaned);
+            batterOrder.push(cleaned);
+          }
+          if (!batters.has(cleaned)) {
+            batters.set(cleaned, {
+              playerId: cleaned,
+              name: resolvePlayerName(cleaned),
+              isCaptain: Boolean(battingCaptainId && cleaned === battingCaptainId),
+              runs: 0,
+              balls: 0,
+              fours: 0,
+              sixes: 0,
+              strikeRate: 0,
+              dismissal: undefined,
+            });
+          }
+          return batters.get(cleaned);
+        };
+
+        const ensureBowler = (id: string) => {
+          const cleaned = String(id || '').trim();
+          if (!cleaned) return null;
+          if (!bowlerSeen.has(cleaned)) {
+            bowlerSeen.add(cleaned);
+            bowlerOrder.push(cleaned);
+          }
+          if (!bowlers.has(cleaned)) {
+            bowlers.set(cleaned, {
+              playerId: cleaned,
+              name: resolvePlayerName(cleaned),
+              isCaptain: Boolean(bowlingCaptainId && cleaned === bowlingCaptainId),
+              balls: 0, // legal balls only
+              runs: 0,
+              wickets: 0,
+              wides: 0,
+              noBalls: 0,
+              overAgg: new Map<string, { balls: number; runs: number }>(),
+            });
+          }
+          return bowlers.get(cleaned);
+        };
+
+        let teamTotal = 0;
+        let legalBalls = 0;
+        let widesRuns = 0;
+        let noBallRuns = 0;
+        let byesRuns = 0;
+        let legByesRuns = 0;
+        let wicketCount = 0;
+        const fallOfWickets: Array<{ player: string; score: string; over: string }> = [];
+
+        rows.forEach((row, idx) => {
+          if (String(row?.[2] || '') !== innings) return;
+
+          const strikerId = String(row?.[3] || '').trim();
+          const nonStrikerId = String(row?.[4] || '').trim();
+          const bowlerId = String(row?.[5] || '').trim();
+
+          ensureBatter(strikerId);
+          ensureBatter(nonStrikerId);
+          const bowler = ensureBowler(bowlerId);
+
+          const ex = { ...DEFAULT_EXTRAS, ...(extrasData[idx] || {}) };
+          const wk = { ...DEFAULT_WICKET, ...(wicketData[idx] || {}) };
+          const nonDelivery = isNonDeliveryWicket(wk);
+
+          const isWide = Boolean(ex.hasWide);
+          const isNoBall = Boolean(ex.hasNoBall);
+
+          const batRuns = !nonDelivery && !isWide ? parseInt(String(row?.[6] || ''), 10) || 0 : 0;
+          const wideRuns = !nonDelivery && isWide ? 1 + (ex.wideExtraRuns || 0) : 0;
+          const nbRuns = !nonDelivery && isNoBall ? 1 : 0;
+          const bRuns = !nonDelivery && ex.hasByes && !isWide ? ex.byesRuns || 0 : 0;
+          const lbRuns = !nonDelivery && ex.hasLB && !isWide ? ex.lbRuns || 0 : 0;
+
+          if (!nonDelivery) {
+            teamTotal += batRuns + wideRuns + nbRuns + bRuns + lbRuns;
+            widesRuns += wideRuns;
+            noBallRuns += nbRuns;
+            byesRuns += bRuns;
+            legByesRuns += lbRuns;
+
+            const striker = ensureBatter(strikerId);
+            if (striker) {
+              striker.runs += batRuns;
+              if (!isWide) striker.balls += 1; // no-balls count as a ball faced; wides do not
+              if (batRuns === 4) striker.fours += 1;
+              if (batRuns === 6) striker.sixes += 1;
+            }
+
+            if (bowler) {
+              bowler.runs += batRuns + wideRuns + nbRuns;
+              if (isWide) bowler.wides += 1;
+              if (isNoBall) bowler.noBalls += 1;
+              if (!isWide && !isNoBall) bowler.balls += 1;
+
+              const overKey = String(row?.[0] || '').trim();
+              if (overKey) {
+                const current = bowler.overAgg.get(overKey) || { balls: 0, runs: 0 };
+                if (!isWide && !isNoBall) current.balls += 1;
+                current.runs += batRuns + wideRuns + nbRuns;
+                bowler.overAgg.set(overKey, current);
+              }
+            }
+
+            if (!isWide && !isNoBall) legalBalls += 1;
+          }
+
+          if (!wk.hasWicket) return;
+
+          const wicketType = String(wk.wicketType || '').trim();
+          const outRole =
+            wicketType === 'Mankad (Run out at non-striker end)'
+              ? 'nonStriker'
+              : wk.outBatter === 'nonStriker'
+                ? 'nonStriker'
+                : 'striker';
+
+          const dismissedId = outRole === 'nonStriker' ? nonStrikerId : strikerId;
+          const dismissed = ensureBatter(dismissedId);
+
+          if (isRetiredHurtEvent(wk)) {
+            if (dismissed && (!dismissed.dismissal || dismissed.dismissal.type === 'not-out')) {
+              dismissed.dismissal = buildDismissal(wk, bowlerId);
+            }
+            return;
+          }
+
+          wicketCount += 1;
+
+          if (dismissed && (!dismissed.dismissal || dismissed.dismissal.type === 'retired-hurt')) {
+            dismissed.dismissal = buildDismissal(wk, bowlerId);
+          }
+
+          const over = String(row?.[0] || '').trim();
+          const ball = String(row?.[1] || '').trim();
+          const overBall = over && ball ? `${over}.${ball}` : '';
+          const dismissedName = dismissed ? String(dismissed.name || dismissedId) : resolvePlayerName(dismissedId);
+          if (dismissedName) {
+            fallOfWickets.push({
+              player: dismissedName,
+              score: `${teamTotal}/${wicketCount}`,
+              over: overBall,
+            });
+          }
+
+          if (bowler && isBowlerWicketType(wicketType)) {
+            bowler.wickets += 1;
+          }
+        });
+
+        const batting = batterOrder
+          .map((id) => {
+            const b = batters.get(id);
+            if (!b) return null;
+            const balls = Number(b.balls) || 0;
+            const runs = Number(b.runs) || 0;
+            const strikeRate = balls > 0 ? parseFloat(((runs / balls) * 100).toFixed(2)) : 0;
+            const dismissal = b.dismissal || { type: 'not-out' };
+            return { ...b, strikeRate, dismissal };
+          })
+          .filter(Boolean);
+
+        const bowling = bowlerOrder
+          .map((id) => {
+            const bw = bowlers.get(id);
+            if (!bw) return null;
+            const maidens = Array.from(bw.overAgg.values()).filter((o: any) => o.balls === 6 && (o.runs || 0) === 0)
+              .length;
+            const balls = Number(bw.balls) || 0;
+            const overs = `${Math.floor(balls / 6)}.${balls % 6}`;
+            const economyRate =
+              balls > 0 ? parseFloat(((Number(bw.runs || 0) / (balls / 6)) || 0).toFixed(2)) : 0;
+
+            return {
+              playerId: bw.playerId,
+              name: bw.name,
+              isCaptain: bw.isCaptain,
+              overs,
+              balls,
+              runs: Number(bw.runs) || 0,
+              wickets: Number(bw.wickets) || 0,
+              maidens,
+              economyRate,
+              wides: Number(bw.wides) || 0,
+              noBalls: Number(bw.noBalls) || 0,
+            };
+          })
+          .filter(Boolean);
+
+        const inningsOvers = `${Math.floor(legalBalls / 6)}.${legalBalls % 6}`;
+
+        const base =
+          existing && typeof existing === 'object'
+            ? { ...existing }
+            : {
+                inningsNumber,
+                battingTeamId,
+                batting: [],
+                bowling: [],
+                extras: { wides: 0, noBalls: 0, byes: 0, legByes: 0 },
+                totalRuns: 0,
+                totalWickets: 0,
+                totalOvers: 0,
+                fallOfWickets: [],
+                powerplays: {
+                  mandatory: { overs: '', runs: 0 },
+                  optional: { overs: '', runs: 0 },
+                },
+                partnerships: [],
+              };
+
+        return {
+          ...base,
+          inningsNumber,
+          battingTeamId,
+          batting,
+          bowling,
+          extras: {
+            wides: widesRuns,
+            noBalls: noBallRuns,
+            byes: byesRuns,
+            legByes: legByesRuns,
+          },
+          totalRuns: teamTotal,
+          totalWickets: wicketCount,
+          totalOvers: inningsOvers,
+          fallOfWickets,
+        };
+      };
+
+      const innings1 = buildInningsFromTable('1', existing1);
+      const innings2 = buildInningsFromTable('2', existing2);
+
+      const updateResp = await fetch(`/api/scorecards/${encodeURIComponent(activeScorecardId)}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ innings: [innings1, innings2] }),
+      });
+      if (!updateResp.ok) throw new Error('Failed to update scorecard innings');
+
+      setScorecardSyncStatus('success');
+      setTimeout(() => setScorecardSyncStatus('idle'), 2000);
+    } catch (error) {
+      console.error('[IPL Live Score Table] Scorecard sync error:', error);
+      setScorecardSyncStatus('error');
+      setTimeout(() => setScorecardSyncStatus('idle'), 3000);
     }
   };
 
@@ -1776,8 +2242,12 @@ export default function IPLAdminLiveScoreTablePage() {
           'Retired Out',
         ].includes(wk.wicketType);
 
+        const showWicketAssistant = wk.wicketType === 'Run Out';
+
         const wicketTakerLegacy =
           Boolean(wk.wicketTaker) && !bowlingOptions.some((opt) => opt.id === wk.wicketTaker);
+        const wicketAssistantLegacy =
+          Boolean(wk.wicketAssistant) && !bowlingOptions.some((opt) => opt.id === wk.wicketAssistant);
         return (
           <div className="space-y-2">
             <div className="flex items-center gap-2">
@@ -1833,6 +2303,29 @@ export default function IPLAdminLiveScoreTablePage() {
                         })}
                       </option>
                     ))}
+                  </select>
+                )}
+                {showWicketAssistant && (
+                  <select
+                    value={wk.wicketAssistant || ''}
+                    onChange={(e) => onWicketChange(rowIndex, 'wicketAssistant', e.target.value)}
+                    className="w-full border border-white/10 focus:border-purple-400 rounded-lg px-2 py-1 bg-slate-950 text-white text-xs"
+                  >
+                    <option value="">Assistant fielder (optional)</option>
+                    {wicketAssistantLegacy && (
+                      <option value={wk.wicketAssistant}>{String(wk.wicketAssistant)} (legacy)</option>
+                    )}
+                    {bowlingOptions
+                      .filter((opt) => !wk.wicketTaker || opt.id !== wk.wicketTaker)
+                      .map((opt) => (
+                        <option key={opt.id} value={opt.id}>
+                          {formatPlayerOptionLabel(opt.name, {
+                            isCaptain: Boolean(bowlingCaptainId && opt.id === bowlingCaptainId),
+                            isImpactIn: Boolean(bowlingImpact.impactId && opt.id === bowlingImpact.impactId),
+                            isImpactOut: Boolean(bowlingImpact.originalId && opt.id === bowlingImpact.originalId),
+                          })}
+                        </option>
+                      ))}
                   </select>
                 )}
               </>
@@ -2173,6 +2666,20 @@ export default function IPLAdminLiveScoreTablePage() {
         >
           <Save className="w-4 h-4" />
           Save Rows
+        </button>
+        <button
+          onClick={syncScorecardFromTable}
+          disabled={scorecardSyncStatus === 'saving' || !selectedMatchId}
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-60 text-white text-sm font-semibold"
+        >
+          <RefreshCw className="w-4 h-4" />
+          {scorecardSyncStatus === 'saving'
+            ? 'Syncing Scorecard…'
+            : scorecardSyncStatus === 'success'
+              ? 'Scorecard Synced'
+              : scorecardSyncStatus === 'error'
+                ? 'Sync Failed'
+                : 'Sync Scorecard'}
         </button>
         <button
           onClick={publishNow}

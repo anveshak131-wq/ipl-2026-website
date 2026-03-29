@@ -31,9 +31,13 @@ export async function onRequestGet(context) {
     const nb = ex?.hasNoBall ? 1 : 0;
     const byes = ex?.hasByes ? Number(ex?.byesRuns) || 0 : 0;
     const lb = ex?.hasLB ? Number(ex?.lbRuns) || 0 : 0;
-    const wicket = wk?.hasWicket
-      ? `W:${wk?.wicketType || ''}:${wk?.outBatter || ''}:${wk?.wicketTaker || ''}`
-      : '';
+    let wicket = '';
+    if (wk?.hasWicket) {
+      // Backward compatible signature: only include assistant when present.
+      wicket = `W:${wk?.wicketType || ''}:${wk?.outBatter || ''}:${wk?.wicketTaker || ''}`;
+      const assistant = String(wk?.wicketAssistant || '').trim();
+      if (assistant) wicket += `:${assistant}`;
+    }
 
     const signature = [
       innings,
