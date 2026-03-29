@@ -172,13 +172,16 @@ export class ProfessionalPDFExporter {
     this.doc.setDrawColor(...color);
     this.doc.setFillColor(...color);
     
-    // Draw diamond as a rotated square
+    // Draw diamond as connected lines
     const halfSize = size / 2;
     this.doc.moveTo(x, y - halfSize);
     this.doc.lineTo(x + halfSize, y);
     this.doc.lineTo(x, y + halfSize);
     this.doc.lineTo(x - halfSize, y);
-    this.doc.closePath();
+    this.doc.lineTo(x, y - halfSize);
+    
+    // Fill the diamond shape
+    this.doc.setFillColor(...color);
     this.doc.fill();
   }
 
