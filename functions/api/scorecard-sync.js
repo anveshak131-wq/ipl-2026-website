@@ -52,7 +52,7 @@ export async function onRequestPost(context) {
       });
     }
 
-    const normalizedLeague = league === 'wpl' ? 'wpl' : 'ipl';
+	    const normalizedLeague = league === 'wpl' ? 'wpl' : 'ipl';
 
     const normalizePlayerLeague = (player) => {
       const explicit = String(player?.league || '').trim().toLowerCase();
@@ -62,20 +62,28 @@ export async function onRequestPost(context) {
       return 'ipl';
     };
 
-    const syncKey = `scorecardSync:${scorecardId}`;
-    let alreadySyncedPlayerIds = new Set();
-    if (!force) {
-      try {
-        const existing = await env.IPL_CACHE.get(syncKey, 'json');
-        if (existing && typeof existing === 'object') {
-          const ids = Array.isArray(existing.playerIds) ? existing.playerIds.map(String) : [];
-          alreadySyncedPlayerIds = new Set(ids.filter(Boolean));
-        }
-      } catch (e) {
-        // If the sync marker is corrupted, ignore and proceed.
-        console.warn('[Scorecard Sync] Failed to read sync marker:', e);
-      }
-    }
+	    const syncKey = `scorecardSync:${scorecardId}`;
+	    let existingMarker = null;
+	    let alreadySyncedPlayerIds = new Set();
+	    let existingBowlingBallsByPlayerId = {};
+	    if (!force) {
+	      try {
+	        const existing = await env.IPL_CACHE.get(syncKey, 'json');
+	        if (existing && typeof existing === 'object') {
+	          existingMarker = existing;
+	          const ids = Array.isArray(existing.playerIds) ? existing.playerIds.map(String) : [];
+	          alreadySyncedPlayerIds = new Set(ids.filter(Boolean));
+	          if (existing.bowlingBallsByPlayerId && typeof existing.bowlingBallsByPlayerId === 'object') {
+	            existingBowlingBallsByPlayerId = { ...existing.bowlingBallsByPlayerId };
+	          }
+	        }
+	      } catch (e) {
+	        // If the sync marker is corrupted, ignore and proceed.
+	        console.warn('[Scorecard Sync] Failed to read sync marker:', e);
+	      }
+	    }
+	
+	    const nextBowlingBallsByPlayerId = { ...existingBowlingBallsByPlayerId };
 
     const incomingPlayerStats = Array.isArray(playerStats) ? playerStats : [];
 
@@ -84,9 +92,15 @@ export async function onRequestPost(context) {
 
     console.log(`[Scorecard Sync] Processing ${playerStats.length} players for match ${matchId}`);
 
-    const updatedPlayers = [];
-    const backfilledPlayers = [];
-    const errors = [];
+	    const updatedPlayers = [];
+	    const backfilledPlayers = [];
+	    const errors = [];
+
+	    const computeMatchBowlingBalls = (stat) => {
+	      const raw = toNumber(stat?.bowling?.balls);
+	      if (raw > 0) return raw;
+	      return oversToBalls(stat?.bowling?.overs);
+	    };
 
     // Process each player's stats
     for (const playerStat of incomingPlayerStats) {
@@ -118,15 +132,20 @@ export async function onRequestPost(context) {
           continue;
         }
 
-        const player = players[playerIndex];
-        const currentStats = player?.stats || {};
+	        const player = players[playerIndex];
+	        const currentStats = player?.stats || {};
 
-        const isAlreadySynced = !force && alreadySyncedPlayerIds.has(playerId);
+	        const isAlreadySynced = !force && alreadySyncedPlayerIds.has(playerId);
 
-        // Calculate new stats. If already synced, only backfill missing bowling balls derived from overs.
-        const updatedStats = isAlreadySynced
-          ? calculatePlayerStatsBackfillUpdates(currentStats, playerStat)
-          : calculatePlayerStatsUpdates(currentStats, playerStat);
+	        const hasBowling = Boolean(playerStat?.bowling);
+	        const matchBowlingBalls = hasBowling ? computeMatchBowlingBalls(playerStat) : 0;
+	        const prevBowlingBalls = hasBowling ? toNumber(existingBowlingBallsByPlayerId[playerId]) : 0;
+	        if (hasBowling) nextBowlingBallsByPlayerId[playerId] = matchBowlingBalls;
+
+	        // Calculate new stats. If already synced, only apply bowling-balls delta (prevents double counting runs/wkts/etc).
+	        const updatedStats = isAlreadySynced
+	          ? calculatePlayerStatsAlreadySyncedUpdates(currentStats, playerStat, prevBowlingBalls, matchBowlingBalls)
+	          : calculatePlayerStatsUpdates(currentStats, playerStat);
 
         if (!updatedStats) {
           continue;
@@ -175,31 +194,36 @@ export async function onRequestPost(context) {
       }
     }
 
-    if (updatedPlayers.length > 0 || backfilledPlayers.length > 0) {
-      await env.IPL_CACHE.put('players', JSON.stringify(players));
-    }
+	        if (updatedPlayers.length > 0 || backfilledPlayers.length > 0) {
+	      await env.IPL_CACHE.put('players', JSON.stringify(players));
+	    }
 
-    // Write sync marker to avoid double-counting on repeated publishes/saves.
-    // Store the playerIds updated so partial retries don't double count.
-    if (!force) {
-      try {
-        const existing = await env.IPL_CACHE.get(syncKey, 'json');
-        const existingIds = Array.isArray(existing?.playerIds) ? existing.playerIds.map(String) : [];
-        const nextIds = new Set([...existingIds, ...updatedPlayers.map((p) => String(p.playerId || '').trim())]);
-        const nextIdList = Array.from(nextIds).filter(Boolean);
-        const marker = {
-          scorecardId,
-          matchId,
-          league: normalizedLeague,
-          playerIds: nextIdList,
-          updatedCount: nextIdList.length,
-          syncedAt: new Date().toISOString(),
-        };
-        await env.IPL_CACHE.put(syncKey, JSON.stringify(marker));
-      } catch (e) {
-        console.warn('[Scorecard Sync] Failed to write sync marker:', e);
-      }
-    }
+	    // Write sync marker to avoid double-counting on repeated publishes/saves.
+	    // Store the playerIds updated so partial retries don't double count.
+	    if (!force) {
+	      try {
+	        const existingIds = Array.isArray(existingMarker?.playerIds) ? existingMarker.playerIds.map(String) : [];
+	        const nextIds = new Set([
+	          ...existingIds,
+	          ...updatedPlayers.map((p) => String(p.playerId || '').trim()),
+	          ...backfilledPlayers.map((p) => String(p.playerId || '').trim()),
+	        ]);
+	        const nextIdList = Array.from(nextIds).filter(Boolean);
+	        const marker = {
+	          scorecardId,
+	          matchId,
+	          league: normalizedLeague,
+	          playerIds: nextIdList,
+	          updatedCount: nextIdList.length,
+	          schemaVersion: 2,
+	          bowlingBallsByPlayerId: nextBowlingBallsByPlayerId,
+	          syncedAt: new Date().toISOString(),
+	        };
+	        await env.IPL_CACHE.put(syncKey, JSON.stringify(marker));
+	      } catch (e) {
+	        console.warn('[Scorecard Sync] Failed to write sync marker:', e);
+	      }
+	    }
 
     const didAnyUpdate = updatedPlayers.length > 0 || backfilledPlayers.length > 0;
     if (!force && !didAnyUpdate) {
@@ -409,25 +433,31 @@ function calculatePlayerStatsUpdates(currentStats, scorecardStats) {
 }
 
 /**
- * Helper: Backfill missing bowling balls after a scorecard was already synced (prevents double counting).
+ * Helper: Apply bowling-balls delta after a scorecard was already synced (prevents double counting).
+ * We only adjust `stats.balls`/derived metrics based on the per-scorecard bowling balls contribution.
  */
-function calculatePlayerStatsBackfillUpdates(currentStats, scorecardStats) {
+function calculatePlayerStatsAlreadySyncedUpdates(currentStats, scorecardStats, prevBowlingBalls, matchBowlingBalls) {
   const updates = { ...currentStats };
 
   const hasBowling = Boolean(scorecardStats?.bowling);
   if (!hasBowling) return null;
 
   const currentBalls = toNumber(updates.balls);
-  const derivedFromExistingOvers = oversToBalls(updates.overs);
+  let baseBalls = currentBalls;
+  if (baseBalls === 0) {
+    const derivedFromExistingOvers = oversToBalls(updates.overs);
+    if (derivedFromExistingOvers > 0) baseBalls = derivedFromExistingOvers;
+  }
 
-  const matchBallsRaw = toNumber(scorecardStats?.bowling?.balls);
-  const matchBalls = matchBallsRaw > 0 ? matchBallsRaw : oversToBalls(scorecardStats?.bowling?.overs);
+  const prevMatchBalls = toNumber(prevBowlingBalls);
+  const matchBalls = toNumber(matchBowlingBalls);
+  const deltaBalls = matchBalls - prevMatchBalls;
 
-  let nextBalls = currentBalls;
-  if (derivedFromExistingOvers > nextBalls) nextBalls = derivedFromExistingOvers;
-  if (nextBalls === 0 && matchBalls > 0) nextBalls = matchBalls;
+  let nextBalls = baseBalls + deltaBalls;
+  if (nextBalls < 0) nextBalls = 0;
 
-  if (nextBalls === currentBalls) return null;
+  // If nothing changes (no delta, no migration), skip writing.
+  if (nextBalls === currentBalls && baseBalls === currentBalls) return null;
 
   updates.balls = nextBalls;
   updates.overs = formatOversFromBalls(nextBalls);
