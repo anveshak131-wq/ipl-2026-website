@@ -938,7 +938,7 @@ function RunsByOverChart({
       </div>
 
       <div className="mt-5">
-        <div className="flex items-end gap-1.5 h-40">
+        <div className="flex items-end gap-1.5 h-[260px] md:h-[360px]">
           {innings1.overRuns.map((_, overIdx) => {
             const r1 = innings1.overRuns[overIdx] || 0;
             const r2 = innings2.overRuns[overIdx] || 0;
@@ -954,7 +954,7 @@ function RunsByOverChart({
                 className="group relative flex-1 min-w-[10px] h-full flex flex-col items-center justify-end"
                 title={`Over ${overIdx}: ${label1} ${r1} (${w1}W), ${label2} ${r2} (${w2}W)`}
               >
-                <div className="relative w-full h-[132px] flex items-end justify-center gap-[2px]">
+                <div className="relative w-full flex-1 flex items-end justify-center gap-[2px]">
                   <motion.div
                     className="w-[42%] rounded-t-lg border border-white/10"
                     style={{ background: barFill(color1) }}
@@ -1049,11 +1049,11 @@ function WormChart({
   color1: string;
   color2: string;
   motionEnabled: boolean;
-}) {
-  const width = 640;
-  const height = 240;
-  const maxX = Math.max(20, ...innings1.cumulativePoints.map((p) => p.x), ...innings2.cumulativePoints.map((p) => p.x));
-  const maxY = Math.max(1, ...innings1.cumulativePoints.map((p) => p.y), ...innings2.cumulativePoints.map((p) => p.y));
+	}) {
+	  const width = 640;
+	  const height = 320;
+	  const maxX = Math.max(20, ...innings1.cumulativePoints.map((p) => p.x), ...innings2.cumulativePoints.map((p) => p.x));
+	  const maxY = Math.max(1, ...innings1.cumulativePoints.map((p) => p.y), ...innings2.cumulativePoints.map((p) => p.y));
 
   const path1 = buildSvgLinePath(innings1.cumulativePoints, maxX, maxY, width, height);
   const path2 = buildSvgLinePath(innings2.cumulativePoints, maxX, maxY, width, height);
@@ -1078,7 +1078,7 @@ function WormChart({
       </div>
 
       <div className="mt-4">
-        <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-[220px]">
+        <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-[260px] md:h-[360px]">
           <defs>
             <linearGradient id="wormGradient1" x1="0" y1="0" x2="1" y2="0">
               <stop offset="0%" stopColor={color1} stopOpacity="0.95" />
