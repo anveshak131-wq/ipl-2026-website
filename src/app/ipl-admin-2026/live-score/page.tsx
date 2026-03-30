@@ -978,8 +978,77 @@ export default function IPLAdminLiveScoreTablePage() {
       const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
       const pageWidth = doc.internal.pageSize.getWidth();
       const pageHeight = doc.internal.pageSize.getHeight();
-      const marginX = 10;
+      const marginX = 12;
+      const marginTop = 10;
       const marginBottom = 10;
+
+      type RGB = readonly [number, number, number];
+      const palette = {
+        bg: [13, 20, 27] as RGB, // deep ink
+        panel: [25, 38, 46] as RGB, // canvas
+        panelSoft: [33, 50, 60] as RGB, // raised canvas
+        accent: [60, 110, 113] as RGB, // petrol teal
+        accentSoft: [176, 138, 82] as RGB, // warm ochre
+        danger: [203, 97, 92] as RGB, // muted vermillion
+        text: [235, 238, 240] as RGB,
+        muted: [160, 171, 178] as RGB,
+        grid: [49, 68, 78] as RGB,
+      } as const;
+
+      const setFill = (color: RGB) => doc.setFillColor(color[0], color[1], color[2]);
+      const setText = (color: RGB) => doc.setTextColor(color[0], color[1], color[2]);
+      const setDraw = (color: RGB) => doc.setDrawColor(color[0], color[1], color[2]);
+
+      const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
+      const mix = (from: RGB, to: RGB, t: number): RGB => ([
+        Math.round(lerp(from[0], to[0], t)),
+        Math.round(lerp(from[1], to[1], t)),
+        Math.round(lerp(from[2], to[2], t)),
+      ] as const);
+
+      const drawBackground = (variant: 'cover' | 'table') => {
+        const steps = 18;
+        const top = variant === 'cover' ? mix(palette.panel, palette.bg, 0.15) : mix(palette.panel, palette.bg, 0.35);
+        const bottom = palette.bg;
+        for (let i = 0; i < steps; i++) {
+          const t = i / Math.max(1, steps - 1);
+          setFill(mix(top, bottom, t));
+          const y = (pageHeight * i) / steps;
+          const h = pageHeight / steps + 0.2;
+          doc.rect(0, y, pageWidth, h, 'F');
+        }
+
+        // Subtle oil-canvas accents (kept away from content areas).
+        setFill(palette.accent);
+        doc.circle(24, 22, 9, 'F');
+        setFill(palette.accentSoft);
+        doc.circle(pageWidth - 26, 18, 7, 'F');
+        doc.circle(pageWidth - 52, 32, 12, 'F');
+      };
+
+      const drawCard = (x: number, y: number, w: number, h: number, fill: RGB = palette.panel) => {
+        doc.setLineWidth(0.25);
+        setFill(fill);
+        doc.roundedRect(x, y, w, h, 6, 6, 'F');
+        setDraw(palette.grid);
+        doc.roundedRect(x, y, w, h, 6, 6, 'S');
+      };
+
+      const fitText = (text: string, maxWidth: number) => {
+        const clean = String(text || '').replace(/\s+/g, ' ').trim();
+        if (!clean) return '-';
+        if (doc.getTextWidth(clean) <= maxWidth) return clean;
+        let s = clean;
+        while (s.length > 0 && doc.getTextWidth(`${s}…`) > maxWidth) s = s.slice(0, -1);
+        return s ? `${s}…` : '';
+      };
+
+      const drawSectionLabel = (label: string, x: number, y: number) => {
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(10);
+        setText(palette.accentSoft);
+        doc.text(label.toUpperCase(), x, y);
+      };
 
       const team1Label = selectedMatch.team1?.shortName || selectedMatch.team1?.name || 'Team 1';
       const team2Label = selectedMatch.team2?.shortName || selectedMatch.team2?.name || 'Team 2';
@@ -1063,100 +1132,180 @@ export default function IPLAdminLiveScoreTablePage() {
         return lines.join('\n');
       };
 
-      // ── Page 1: Summary ──────────────────────────────────────────────────────
-      let y = 14;
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(20);
-      doc.text(title, pageWidth / 2, y, { align: 'center' });
-      y += 10;
+      // ── Page 1: Modern summary (oil palette) ─────────────────────────────────
+      drawBackground('cover');
 
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(11);
-      const infoLines = [
-        `Venue: ${selectedMatch.venue || '-'}`,
-        `Date: ${formatDateLine() || '-'}`,
-        `Toss: ${tossLine}`,
-        `Captains: ${captainsLine}`,
-        `Playing XI: ${playingXiLine}`,
-        `Impact Players: ${impactUsedLine}`,
-      ];
+      const contentW = pageWidth - marginX * 2;
+      const gap = 8;
 
-      infoLines.forEach((line) => {
-        doc.text(line, marginX, y);
-        y += 6;
-      });
-      y += 2;
+      // Header card
+      const headerX = marginX;
+      const headerY = marginTop;
+      const headerW = contentW;
+      const headerH = 34;
+      drawCard(headerX, headerY, headerW, headerH, palette.panel);
 
-      const inningsSummaryBody = [
-        [
-          'Innings 1',
-          String(innings1BattingName || ''),
-          `${inn1.teamTotal}/${inn1.wickets}`,
-          String(inn1.overs),
-          String(inn1.extras),
-          String(inn1.wides),
-          String(inn1.noBalls),
-        ],
-        [
-          'Innings 2',
-          String(innings2BattingName || ''),
-          `${inn2.teamTotal}/${inn2.wickets}`,
-          String(inn2.overs),
-          String(inn2.extras),
-          String(inn2.wides),
-          String(inn2.noBalls),
-        ],
-      ];
+      // Decorative “oil paint” blobs
+      setFill(palette.accent);
+      doc.circle(headerX + 18, headerY + 18, 10, 'F');
+      setFill(palette.accentSoft);
+      doc.circle(headerX + headerW - 18, headerY + 12, 6, 'F');
+      doc.circle(headerX + headerW - 36, headerY + 26, 12, 'F');
 
-      autoTable(doc, {
-        startY: y,
-        margin: { left: marginX, right: marginX, bottom: marginBottom },
-        head: [['Innings', 'Batting', 'Score', 'Overs', 'Extras', 'W', 'NB']],
-        body: inningsSummaryBody,
-        theme: 'grid',
-        styles: { font: 'helvetica', fontSize: 9, cellPadding: 2, valign: 'middle' },
-        headStyles: { fillColor: [24, 24, 27], textColor: 255, fontStyle: 'bold' },
-        columnStyles: {
-          0: { cellWidth: 22 },
-          1: { cellWidth: 40 },
-          2: { cellWidth: 26, halign: 'center' },
-          3: { cellWidth: 20, halign: 'center' },
-          4: { cellWidth: 20, halign: 'center' },
-          5: { cellWidth: 16, halign: 'center' },
-          6: { cellWidth: 16, halign: 'center' },
-        },
-      });
-
-      const lastSummaryY = (doc as any).lastAutoTable?.finalY || y;
-      y = lastSummaryY + 8;
-
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(13);
-      doc.text('Impact Player (IPL)', marginX, y);
-      y += 6;
+      // Header text
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(10);
+      setText(palette.muted);
+      doc.text('IPL 2026 • Live Score Export', headerX + 34, headerY + 9);
       doc.text(
-        'Impact IN must be from the 5 nominated substitutes (set in Playing 11). Player OUT must be from the Playing XI.',
-        marginX,
-        y,
+        fitText(`${formatDateLine() || '-'} • ${selectedMatch.venue || '-'}`, headerW - 70),
+        headerX + headerW - 10,
+        headerY + 9,
+        { align: 'right' },
       );
-      y += 5;
+
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(20);
+      setText(palette.text);
+      doc.text(fitText(title, headerW - 40), pageWidth / 2, headerY + 20, { align: 'center' });
+
+      setFill(palette.accent);
+      doc.rect(headerX + 10, headerY + headerH - 5, headerW - 20, 1, 'F');
+
+      // Two top cards: match details + score snapshot
+      const topRowY = headerY + headerH + 8;
+      const topCardH = 52;
+      const colW = (contentW - gap) / 2;
+
+      const detailsX = marginX;
+      const detailsY = topRowY;
+      drawCard(detailsX, detailsY, colW, topCardH, palette.panelSoft);
+      drawSectionLabel('Match Details', detailsX + 10, detailsY + 12);
+
+      const drawInfoRow = (label: string, value: string, rowY: number) => {
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(9);
+        setText(palette.muted);
+        doc.text(`${label}:`, detailsX + 10, rowY);
+        doc.setFont('helvetica', 'normal');
+        setText(palette.text);
+        doc.text(fitText(value, colW - 44), detailsX + 34, rowY);
+      };
+
+      let dy = detailsY + 22;
+      const rowStep = 6.2;
+      drawInfoRow('Venue', selectedMatch.venue || '-', dy);
+      dy += rowStep;
+      drawInfoRow('Toss', tossLine, dy);
+      dy += rowStep;
+      drawInfoRow('Captains', captainsLine, dy);
+      dy += rowStep;
+      drawInfoRow('Playing XI', playingXiLine, dy);
+      dy += rowStep;
+      drawInfoRow('Impact', impactUsedLine, dy);
+
+      const scoreX = marginX + colW + gap;
+      const scoreY = topRowY;
+      drawCard(scoreX, scoreY, colW, topCardH, palette.panelSoft);
+      drawSectionLabel('Score Snapshot', scoreX + 10, scoreY + 12);
+
+      const drawScoreBlock = (
+        blockY: number,
+        label: string,
+        teamName: string,
+        totals: { teamTotal: number; wickets: number; overs: string; extras: number; wides: number; noBalls: number },
+      ) => {
+        const x = scoreX + 10;
+        const w = colW - 20;
+        const h = 18;
+        setFill(palette.bg);
+        doc.roundedRect(x, blockY, w, h, 4, 4, 'F');
+        setDraw(palette.grid);
+        doc.setLineWidth(0.2);
+        doc.roundedRect(x, blockY, w, h, 4, 4, 'S');
+
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(9);
+        setText(palette.muted);
+        doc.text(fitText(`${label} — ${teamName || '-'}`, w - 46), x + 6, blockY + 6.8);
+
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(13);
+        setText(palette.accentSoft);
+        doc.text(`${totals.teamTotal}/${totals.wickets}`, x + w - 6, blockY + 8.4, { align: 'right' });
+
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(8.5);
+        setText(palette.text);
+        doc.text(
+          fitText(`Overs ${totals.overs} • Extras ${totals.extras} • W ${totals.wides} • NB ${totals.noBalls}`, w - 12),
+          x + 6,
+          blockY + 15,
+        );
+      };
+
+      drawScoreBlock(scoreY + 18, 'Innings 1', String(innings1BattingName || ''), inn1);
+      drawScoreBlock(scoreY + 38, 'Innings 2', String(innings2BattingName || ''), inn2);
+
+      // Impact player card
+      const impactX = marginX;
+      const impactY = topRowY + topCardH + 8;
+      const impactW = contentW;
+      const impactH = pageHeight - impactY - marginBottom;
+      drawCard(impactX, impactY, impactW, impactH, palette.panel);
+      drawSectionLabel('Impact Player', impactX + 10, impactY + 12);
+
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(9);
+      setText(palette.muted);
       doc.text(
-        'Once saved, the Impact IN/OUT players are tagged in the batter/bowler dropdowns (IP / OUT).',
-        marginX,
-        y,
+        fitText('Impact IN must be from the 5 nominated subs; OUT must be from the Playing XI.', impactW - 96),
+        impactX + impactW - 10,
+        impactY + 12,
+        { align: 'right' },
       );
-      y += 2;
 
       autoTable(doc, {
-        startY: y + 3,
-        margin: { left: marginX, right: marginX, bottom: marginBottom },
+        startY: impactY + 16,
+        margin: { left: marginX + 10, right: marginX + 10, bottom: marginBottom },
         head: [[team1Label, team2Label]],
         body: [[formatImpactBlock('team1'), formatImpactBlock('team2')]],
         theme: 'grid',
-        styles: { font: 'helvetica', fontSize: 9, cellPadding: 3, valign: 'top' },
-        headStyles: { fillColor: [24, 24, 27], textColor: 255, fontStyle: 'bold' },
+        styles: {
+          font: 'helvetica',
+          fontSize: 8.6,
+          cellPadding: { top: 3.4, right: 3.4, bottom: 3.4, left: 3.4 },
+          valign: 'top',
+          textColor: [palette.text[0], palette.text[1], palette.text[2]],
+          fillColor: [palette.bg[0], palette.bg[1], palette.bg[2]],
+          lineColor: [palette.grid[0], palette.grid[1], palette.grid[2]],
+          lineWidth: 0.25,
+        },
+        headStyles: {
+          fillColor: [palette.accent[0], palette.accent[1], palette.accent[2]],
+          textColor: [palette.text[0], palette.text[1], palette.text[2]],
+          fontStyle: 'bold',
+          fontSize: 9.4,
+        },
+        willDrawPage: (data) => {
+          if (data.pageNumber === 1) return;
+          drawBackground('cover');
+          const barX = marginX;
+          const barY = marginTop;
+          const barW = pageWidth - marginX * 2;
+          const barH = 22;
+          drawCard(barX, barY, barW, barH, palette.panel);
+          setFill(palette.accent);
+          doc.rect(barX + 10, barY + barH - 4, barW - 20, 0.9, 'F');
+          doc.setFont('helvetica', 'bold');
+          doc.setFontSize(13);
+          setText(palette.text);
+          doc.text(fitText('Impact Player (continued)', barW - 120), barX + 10, barY + 13);
+          doc.setFont('helvetica', 'normal');
+          doc.setFontSize(10);
+          setText(palette.muted);
+          doc.text(fitText(title, barW - 40), barX + barW - 10, barY + 13, { align: 'right' });
+        },
       });
 
       // ── Innings tables ───────────────────────────────────────────────────────
@@ -1173,36 +1322,133 @@ export default function IPLAdminLiveScoreTablePage() {
       const innings1Rows = rows.filter((r) => String(r?.[2] || '') === '1').map((r) => normalizeRowForPdf(r));
       const innings2Rows = rows.filter((r) => String(r?.[2] || '') === '2').map((r) => normalizeRowForPdf(r));
 
-      const renderInningsTable = (inningsLabel: string, battingName: string, bodyRows: string[][]) => {
-        const headerY = 14;
-        doc.setFont('helvetica', 'bold');
-        doc.setFontSize(14);
-        doc.text(`${inningsLabel}${battingName ? ` — ${battingName}` : ''}`, marginX, headerY);
+      const renderInningsTable = (
+        inningsLabel: string,
+        battingName: string,
+        totals: { teamTotal: number; wickets: number; overs: string; extras: number },
+        bodyRows: string[][],
+      ) => {
+        const barX = marginX;
+        const barY = marginTop;
+        const barW = pageWidth - marginX * 2;
+        const barH = 22;
+        const tableStartY = barY + barH + 8;
 
         autoTable(doc, {
-          startY: headerY + 4,
-          margin: { left: marginX, right: marginX, top: headerY + 4, bottom: marginBottom },
+          startY: tableStartY,
+          margin: { left: marginX + 4, right: marginX + 4, top: tableStartY, bottom: marginBottom + 6 },
           head: [HEADERS],
           body: bodyRows,
           theme: 'grid',
-          styles: { font: 'helvetica', fontSize: 7, cellPadding: 1.6, valign: 'middle' },
-          headStyles: { fillColor: [24, 24, 27], textColor: 255, fontStyle: 'bold', fontSize: 7 },
+          styles: {
+            font: 'helvetica',
+            fontSize: 7,
+            cellPadding: { top: 2.0, right: 1.8, bottom: 2.0, left: 1.8 },
+            valign: 'middle',
+            textColor: [palette.text[0], palette.text[1], palette.text[2]],
+            fillColor: [palette.bg[0], palette.bg[1], palette.bg[2]],
+            lineColor: [palette.grid[0], palette.grid[1], palette.grid[2]],
+            lineWidth: 0.2,
+            overflow: 'linebreak',
+          },
+          headStyles: {
+            fillColor: [palette.accent[0], palette.accent[1], palette.accent[2]],
+            textColor: [palette.text[0], palette.text[1], palette.text[2]],
+            fontStyle: 'bold',
+            fontSize: 7,
+            halign: 'center',
+            valign: 'middle',
+            cellPadding: { top: 2.2, right: 1.8, bottom: 2.2, left: 1.8 },
+          },
+          alternateRowStyles: {
+            fillColor: [palette.panel[0], palette.panel[1], palette.panel[2]],
+          },
+          columnStyles: {
+            0: { cellWidth: 10, halign: 'center' }, // Over
+            1: { cellWidth: 10, halign: 'center' }, // Ball
+            2: { cellWidth: 12, halign: 'center' }, // Inn
+            6: { cellWidth: 10, halign: 'center' }, // Runs
+            7: { cellWidth: 10, halign: 'center' }, // Wide
+            8: { cellWidth: 12, halign: 'center' }, // No Ball
+            9: { cellWidth: 10, halign: 'center' }, // Byes
+            10: { cellWidth: 10, halign: 'center' }, // LB
+          },
+          didParseCell: (data) => {
+            if (data.section !== 'body') return;
+            const col = data.column.index;
+            const cellText = String(data.cell.raw ?? '').trim();
+            const wicketCol = HEADERS.indexOf('Wicket');
+            const wideCol = HEADERS.indexOf('Wide');
+            const noBallCol = HEADERS.indexOf('No Ball');
+
+            if (col === wicketCol && cellText) {
+              (data.cell.styles as any).textColor = [palette.danger[0], palette.danger[1], palette.danger[2]];
+              (data.cell.styles as any).fontStyle = 'bold';
+            }
+
+            if ((col === wideCol || col === noBallCol) && Number(cellText || 0) > 0) {
+              (data.cell.styles as any).textColor = [palette.accentSoft[0], palette.accentSoft[1], palette.accentSoft[2]];
+              (data.cell.styles as any).fontStyle = 'bold';
+            }
+          },
+          willDrawPage: () => {
+            drawBackground('table');
+
+            // Header bar
+            drawCard(barX, barY, barW, barH, palette.panel);
+            setFill(palette.accent);
+            doc.rect(barX + 10, barY + barH - 4, barW - 20, 0.9, 'F');
+
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(13);
+            setText(palette.text);
+            doc.text(fitText(`${inningsLabel}${battingName ? ` — ${battingName}` : ''}`, barW - 120), barX + 10, barY + 13);
+
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(9.6);
+            setText(palette.muted);
+            doc.text(
+              fitText(`${totals.teamTotal}/${totals.wickets} • ${totals.overs} ov • Extras ${totals.extras}`, barW - 120),
+              barX + 10,
+              barY + 18.6,
+            );
+
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(10);
+            setText(palette.text);
+            doc.text(fitText(title, barW - 20), barX + barW - 10, barY + 13, { align: 'right' });
+
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(8.8);
+            setText(palette.muted);
+            doc.text(fitText('Ball-by-ball (including extras & wicket notes)', barW - 20), barX + barW - 10, barY + 18.6, { align: 'right' });
+
+            // Table "card" behind content area
+            const cardX = marginX;
+            const cardY = tableStartY - 4;
+            const cardW = pageWidth - marginX * 2;
+            const cardH = pageHeight - cardY - marginBottom;
+            drawCard(cardX, cardY, cardW, cardH, palette.panelSoft);
+          },
         });
       };
 
-      renderInningsTable('Innings 1', String(innings1BattingName || ''), innings1Rows);
+      renderInningsTable('Innings 1', String(innings1BattingName || ''), inn1, innings1Rows);
 
       doc.addPage();
-      renderInningsTable('Innings 2', String(innings2BattingName || ''), innings2Rows);
+      renderInningsTable('Innings 2', String(innings2BattingName || ''), inn2, innings2Rows);
 
       // ── Page footer (page numbers) ───────────────────────────────────────────
       const totalPages = (doc as any).internal?.getNumberOfPages?.() ? (doc as any).internal.getNumberOfPages() : (doc.internal as any).pages.length - 1;
       for (let p = 1; p <= totalPages; p++) {
         doc.setPage(p);
         doc.setFont('helvetica', 'normal');
-        doc.setFontSize(9);
-        doc.setTextColor(120);
-        doc.text(title, marginX, pageHeight - 4);
+        doc.setFontSize(8.6);
+        setText(palette.muted);
+        doc.setLineWidth(0.2);
+        setDraw(palette.grid);
+        doc.line(marginX, pageHeight - 8, pageWidth - marginX, pageHeight - 8);
+        doc.text(fitText(title, pageWidth - marginX * 2 - 70), marginX, pageHeight - 4);
         doc.text(`Page ${p} of ${totalPages}`, pageWidth - marginX, pageHeight - 4, { align: 'right' });
       }
 
