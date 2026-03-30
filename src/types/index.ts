@@ -118,6 +118,8 @@ export interface Match {
   status: 'upcoming' | 'live' | 'completed' | 'cancelled';
   result?: string;
   resultType?: 'win' | 'loss' | 'tie' | 'no-result' | 'abandoned';
+  resultReason?: string;
+  resultReasonDetail?: string;
   team1Score?: string; // e.g., "154/6 (20.0 overs)"
   team2Score?: string; // e.g., "157/7 (20.0 overs)"
   points?: {

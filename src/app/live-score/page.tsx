@@ -40,6 +40,8 @@ type LiveScoreTableState = {
   commentaryData?: Record<number, string>;
 };
 
+type ResultType = 'win' | 'tie' | 'no-result' | 'abandoned';
+
 type ScorecardDoc = {
   id?: string;
   draft?: boolean;
@@ -50,6 +52,9 @@ type ScorecardDoc = {
     winner?: string;
     margin?: string;
     manOfTheMatch?: string;
+    resultType?: ResultType;
+    reason?: string;
+    reasonDetail?: string;
   };
 };
 
@@ -59,6 +64,9 @@ type ScorecardResultInfo = {
   winner: string;
   margin: string;
   manOfTheMatch: string;
+  resultType?: ResultType;
+  reason?: string;
+  reasonDetail?: string;
 };
 
 type LiveTabKey = 'overview' | 'commentary' | 'stats' | 'scorecard';
@@ -115,6 +123,53 @@ function isRetiredHurtEvent(wk: WicketRow) {
 
 function otherTeamKey(teamKey: 'team1' | 'team2'): 'team1' | 'team2' {
   return teamKey === 'team1' ? 'team2' : 'team1';
+}
+
+function normalizeText(value: unknown): string {
+  return String(value ?? '').trim();
+}
+
+function inferResultType(result?: { resultType?: string; winner?: string }): ResultType | '' {
+  const explicit = normalizeText(result?.resultType) as ResultType | '';
+  if (explicit) return explicit;
+  const winner = normalizeText(result?.winner).toLowerCase();
+  if (!winner) return '';
+  if (winner.includes('no result')) return 'no-result';
+  if (winner.includes('abandon')) return 'abandoned';
+  if (winner.includes('tie')) return 'tie';
+  return 'win';
+}
+
+function buildResultReason(reason?: string, detail?: string): string {
+  const cleanReason = normalizeText(reason);
+  const cleanDetail = normalizeText(detail);
+  if (cleanReason && cleanDetail) {
+    if (cleanReason.toLowerCase() === 'other') return cleanDetail;
+    return `${cleanReason}: ${cleanDetail}`;
+  }
+  return cleanReason || cleanDetail;
+}
+
+function buildResultText(
+  resultType: ResultType,
+  winner: string,
+  margin: string,
+  reasonText: string
+): string {
+  if (resultType === 'win') {
+    if (!winner) return '';
+    return margin ? `${winner} won by ${margin}` : `${winner} won`;
+  }
+  if (resultType === 'tie') {
+    return margin ? `Match tied • ${margin}` : 'Match tied';
+  }
+  if (resultType === 'no-result') {
+    return reasonText ? `No result • ${reasonText}` : 'No result';
+  }
+  if (resultType === 'abandoned') {
+    return reasonText ? `Match abandoned • ${reasonText}` : 'Match abandoned';
+  }
+  return '';
 }
 
 function parseTimeTo24Hour(timeString: string): { hours: number; minutes: number } | null {
@@ -1291,10 +1346,13 @@ export default function LiveScorePage() {
         winner: String(sc?.result?.winner || '').trim(),
         margin: String(sc?.result?.margin || '').trim(),
         manOfTheMatch: String(sc?.result?.manOfTheMatch || '').trim(),
+        resultType: inferResultType(sc?.result),
+        reason: String(sc?.result?.reason || '').trim(),
+        reasonDetail: String(sc?.result?.reasonDetail || '').trim(),
       },
     });
 
-    const withResult = list.map(normalize).filter((sc) => Boolean(sc.result?.winner));
+    const withResult = list.map(normalize).filter((sc) => Boolean(sc.result?.resultType || sc.result?.winner));
     if (withResult.length === 0) return null;
 
     const published = withResult.find((sc) => sc.draft === false);
@@ -1307,6 +1365,9 @@ export default function LiveScorePage() {
       winner: best.result?.winner || '',
       margin: best.result?.margin || '',
       manOfTheMatch: best.result?.manOfTheMatch || '',
+      resultType: best.result?.resultType,
+      reason: best.result?.reason,
+      reasonDetail: best.result?.reasonDetail,
     } satisfies ScorecardResultInfo;
   }, []);
 
@@ -1370,31 +1431,35 @@ export default function LiveScorePage() {
   const computedResultText = useMemo(() => {
     if (!selectedMatch) return '';
 
-    const fromMatch = String(selectedMatch.result || '').trim();
+    const fromMatch = normalizeText(selectedMatch.result);
     if (fromMatch) return fromMatch;
 
-    const winnerRaw = String(scorecardResultInfo?.winner || '').trim();
-    if (!winnerRaw) return '';
+    const winnerRaw = normalizeText(scorecardResultInfo?.winner);
+    const margin = normalizeText(scorecardResultInfo?.margin);
+    const matchResultType = selectedMatch.resultType as ResultType | undefined;
+    const scorecardResultType = scorecardResultInfo?.resultType;
+    const inferredType = inferResultType({ resultType: scorecardResultType, winner: winnerRaw });
+    const resultType = (matchResultType || scorecardResultType || inferredType) as ResultType | '';
 
-    const margin = String(scorecardResultInfo?.margin || '').trim();
-    const lower = winnerRaw.toLowerCase();
-
-    if (lower === 'no result' || lower === 'abandoned' || lower === 'match abandoned') {
-      return margin ? `No result • ${margin}` : 'No result';
-    }
-    if (lower === 'match tied' || lower === 'tie') {
-      return margin ? `Match tied • ${margin}` : 'Match tied';
-    }
+    const reasonFromMatch = buildResultReason(selectedMatch.resultReason, selectedMatch.resultReasonDetail);
+    const reasonFromScorecard = buildResultReason(scorecardResultInfo?.reason, scorecardResultInfo?.reasonDetail);
+    const reasonText = reasonFromScorecard || reasonFromMatch;
 
     const team1Name = String(selectedMatch.team1?.name || '').trim();
     const team2Name = String(selectedMatch.team2?.name || '').trim();
     const team1Short = String(selectedMatch.team1?.shortName || team1Name).trim() || 'Team 1';
     const team2Short = String(selectedMatch.team2?.shortName || team2Name).trim() || 'Team 2';
 
-    const winner =
+    const displayWinner =
       winnerRaw === team1Name ? team1Short : winnerRaw === team2Name ? team2Short : winnerRaw;
 
-    return margin ? `${winner} won by ${margin}` : `${winner} won`;
+    if (resultType) {
+      return buildResultText(resultType, displayWinner, margin, reasonText);
+    }
+
+    if (!winnerRaw) return '';
+
+    return margin ? `${displayWinner} won by ${margin}` : `${displayWinner} won`;
   }, [scorecardResultInfo, selectedMatch]);
 
   const isMatchComplete = useMemo(() => {

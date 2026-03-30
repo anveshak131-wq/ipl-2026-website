@@ -5,6 +5,63 @@ import { api as dataApi } from '@/lib/data';
 import { syncScorecardToPlayers } from '@/lib/scorecard-stats-sync';
 import WPLAdminSidebarNew from '@/components/admin/WPLAdminSidebarNew';
 
+type ResultType = 'win' | 'tie' | 'no-result' | 'abandoned';
+const RESULT_REASONS = [
+  'Rain',
+  'Wet outfield',
+  'Bad light',
+  'Unsafe pitch',
+  'Dangerous weather',
+  'Equipment failure',
+  'Crowd disturbance',
+  'Security issue',
+  'Scheduling/curfew',
+  'Other',
+] as const;
+function normalizeText(value: unknown): string {
+  return String(value ?? '').trim();
+}
+function inferResultType(result?: { resultType?: string; winner?: string }): ResultType | '' {
+  const explicit = normalizeText(result?.resultType) as ResultType | '';
+  if (explicit) return explicit;
+  const winner = normalizeText(result?.winner).toLowerCase();
+  if (!winner) return '';
+  if (winner.includes('no result')) return 'no-result';
+  if (winner.includes('abandon')) return 'abandoned';
+  if (winner.includes('tie')) return 'tie';
+  return 'win';
+}
+function buildResultReason(reason?: string, detail?: string): string {
+  const cleanReason = normalizeText(reason);
+  const cleanDetail = normalizeText(detail);
+  if (cleanReason && cleanDetail) {
+    if (cleanReason.toLowerCase() === 'other') return cleanDetail;
+    return `${cleanReason}: ${cleanDetail}`;
+  }
+  return cleanReason || cleanDetail;
+}
+function buildResultText(
+  resultType: ResultType,
+  winner: string,
+  margin: string,
+  reasonText: string
+): string {
+  if (resultType === 'win') {
+    if (!winner) return '';
+    return margin ? `${winner} won by ${margin}` : `${winner} won`;
+  }
+  if (resultType === 'tie') {
+    return margin ? `Match tied • ${margin}` : 'Match tied';
+  }
+  if (resultType === 'no-result') {
+    return reasonText ? `No result • ${reasonText}` : 'No result';
+  }
+  if (resultType === 'abandoned') {
+    return reasonText ? `Match abandoned • ${reasonText}` : 'Match abandoned';
+  }
+  return '';
+}
+
 interface Match {
   id: string;
   team1: { id: number; name: string; shortName?: string };
@@ -106,9 +163,12 @@ interface Scorecard {
   };
   innings: Innings[];
   result?: {
-    winner: string;
-    margin: string;
+    winner?: string;
+    margin?: string;
     manOfTheMatch?: string;
+    resultType?: ResultType;
+    reason?: string;
+    reasonDetail?: string;
   };
   draft?: boolean;
   createdAt?: string;
@@ -124,7 +184,7 @@ export default function ScorecardAdminPage() {
   const [scorecard, setScorecard] = useState<Scorecard | null>(null);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
-  const [activeTab, setActiveTab] = useState<'matchInfo' | 'innings1' | 'innings2'>('matchInfo');
+  const [activeTab, setActiveTab] = useState<'matchInfo' | 'innings1' | 'innings2' | 'result'>('matchInfo');
   const [activeInnings, setActiveInnings] = useState(0);
   const [saving, setSaving] = useState(false);
 
@@ -324,6 +384,14 @@ export default function ScorecardAdminPage() {
         : undefined;
 
       const tossWinner = published.matchInfo.toss?.winner === published.matchInfo.team1.name ? 'team1' : 'team2';
+      const resultType = inferResultType(published.result);
+      const winner = normalizeText(published.result?.winner);
+      const margin = normalizeText(published.result?.margin);
+      const reason = normalizeText(published.result?.reason);
+      const reasonDetail = normalizeText(published.result?.reasonDetail);
+      const reasonText = buildResultReason(reason, reasonDetail);
+      const resultText = resultType ? buildResultText(resultType, winner, margin, reasonText) : '';
+      const hasResult = Boolean(resultText);
 
       await fetch('/api/matches', {
         method: 'PUT',
@@ -335,10 +403,11 @@ export default function ScorecardAdminPage() {
           ...match,
           team1Score: team1ScoreStr,
           team2Score: team2ScoreStr,
-          result: published.result?.winner
-            ? `${published.result.winner} won by ${published.result.margin}`
-            : match.result,
-          status: published.result?.winner ? 'completed' : match.status,
+          result: hasResult ? resultText : match.result,
+          resultType: hasResult ? resultType : match.resultType,
+          resultReason: hasResult ? (reason || undefined) : match.resultReason,
+          resultReasonDetail: hasResult ? (reasonDetail || undefined) : match.resultReasonDetail,
+          status: hasResult ? 'completed' : match.status,
           matchState: {
             ...match.matchState,
             toss: published.matchInfo.toss?.winner
@@ -2085,6 +2154,14 @@ export default function ScorecardAdminPage() {
     }
   };
 
+  const currentResultType = inferResultType(scorecard?.result);
+  const updateResult = (patch: Partial<Scorecard['result']>) => {
+    if (!scorecard) return;
+    const updated = { ...scorecard };
+    updated.result = { ...updated.result, ...patch };
+    setScorecard(updated);
+  };
+
   if (loading) {
     console.log('Still loading...');
     return (
@@ -3116,59 +3193,129 @@ export default function ScorecardAdminPage() {
             {activeTab === 'result' && (
               <div className="bg-gray-800 p-6 rounded-lg">
                 <h3 className="text-xl font-bold mb-6">Match Result</h3>
-                <div className="grid grid-cols-1 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-sm text-gray-400 mb-2">Winning Team</label>
+                    <label className="block text-sm text-gray-400 mb-2">Result Type</label>
                     <select
-                      value={scorecard.result?.winner || ''}
+                      value={currentResultType}
                       onChange={(e) => {
+                        const nextType = e.target.value as ResultType | '';
+                        if (!scorecard) return;
                         const updated = { ...scorecard };
-                        updated.result = { ...updated.result, winner: e.target.value };
+                        const base = { ...updated.result };
+                        const next = { ...base, resultType: nextType || undefined };
+                        const team1Name = scorecard.matchInfo.team1.name;
+                        const team2Name = scorecard.matchInfo.team2.name;
+                        const validWinner = (name?: string) => name === team1Name || name === team2Name;
+
+                        if (!nextType) {
+                          next.winner = '';
+                          next.margin = '';
+                          next.reason = '';
+                          next.reasonDetail = '';
+                        } else if (nextType === 'win') {
+                          if (!validWinner(next.winner)) next.winner = '';
+                          next.reason = '';
+                          next.reasonDetail = '';
+                        } else if (nextType === 'tie') {
+                          next.winner = 'Match Tied';
+                          next.reason = '';
+                          next.reasonDetail = '';
+                        } else if (nextType === 'no-result') {
+                          next.winner = 'No Result';
+                          next.margin = '';
+                        } else if (nextType === 'abandoned') {
+                          next.winner = 'Match Abandoned';
+                          next.margin = '';
+                        }
+
+                        updated.result = next;
                         setScorecard(updated);
                       }}
                       className="w-full bg-gray-700 p-3 rounded border border-gray-600 text-white"
                     >
-                      <option value="">Select Winning Team</option>
-                      <option value={scorecard.matchInfo.team1.name}>{scorecard.matchInfo.team1.name}</option>
-                      <option value={scorecard.matchInfo.team2.name}>{scorecard.matchInfo.team2.name}</option>
-                      <option value="No Result">No Result</option>
-                      <option value="Match Tied">Match Tied</option>
+                      <option value="">Select result...</option>
+                      <option value="win">Win</option>
+                      <option value="tie">Tie</option>
+                      <option value="no-result">No Result</option>
+                      <option value="abandoned">Abandoned</option>
                     </select>
                   </div>
-                  <div>
-                    <label className="block text-sm text-gray-400 mb-2">Margin</label>
-                    <input
-                      type="text"
-                      value={scorecard.result?.margin || ''}
-                      onChange={(e) => {
-                        const updated = { ...scorecard };
-                        updated.result = { ...updated.result, margin: e.target.value };
-                        setScorecard(updated);
-                      }}
-                      placeholder="e.g., 3 wickets, 25 runs, Super Over"
-                      className="w-full bg-gray-700 p-3 rounded border border-gray-600 text-white placeholder-gray-500"
-                    />
-                    <p className="text-xs text-gray-500 mt-1">Enter the margin of victory (e.g., 3 wickets, 25 runs)</p>
-                  </div>
-                  <div>
+
+                  {currentResultType === 'win' && (
+                    <div>
+                      <label className="block text-sm text-gray-400 mb-2">Winning Team</label>
+                      <select
+                        value={scorecard.result?.winner || ''}
+                        onChange={(e) => updateResult({ winner: e.target.value, resultType: 'win' })}
+                        className="w-full bg-gray-700 p-3 rounded border border-gray-600 text-white"
+                      >
+                        <option value="">Select Winning Team</option>
+                        <option value={scorecard.matchInfo.team1.name}>{scorecard.matchInfo.team1.name}</option>
+                        <option value={scorecard.matchInfo.team2.name}>{scorecard.matchInfo.team2.name}</option>
+                      </select>
+                    </div>
+                  )}
+
+                  {(currentResultType === 'win' || currentResultType === 'tie') && (
+                    <div>
+                      <label className="block text-sm text-gray-400 mb-2">
+                        {currentResultType === 'tie' ? 'Tie Notes' : 'Margin'}
+                      </label>
+                      <input
+                        type="text"
+                        value={scorecard.result?.margin || ''}
+                        onChange={(e) => updateResult({ margin: e.target.value })}
+                        placeholder={currentResultType === 'tie' ? 'e.g., Super Over, DLS tied' : 'e.g., 3 wickets, 25 runs'}
+                        className="w-full bg-gray-700 p-3 rounded border border-gray-600 text-white placeholder-gray-500"
+                      />
+                      {currentResultType === 'win' && (
+                        <p className="text-xs text-gray-500 mt-1">Enter the margin of victory (e.g., 3 wickets, 25 runs)</p>
+                      )}
+                    </div>
+                  )}
+
+                  {(currentResultType === 'no-result' || currentResultType === 'abandoned') && (
+                    <>
+                      <div>
+                        <label className="block text-sm text-gray-400 mb-2">Reason</label>
+                        <select
+                          value={scorecard.result?.reason || ''}
+                          onChange={(e) => updateResult({ reason: e.target.value })}
+                          className="w-full bg-gray-700 p-3 rounded border border-gray-600 text-white"
+                        >
+                          <option value="">Select reason...</option>
+                          {RESULT_REASONS.map((reason) => (
+                            <option key={reason} value={reason}>{reason}</option>
+                          ))}
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-sm text-gray-400 mb-2">Reason Detail</label>
+                        <input
+                          type="text"
+                          value={scorecard.result?.reasonDetail || ''}
+                          onChange={(e) => updateResult({ reasonDetail: e.target.value })}
+                          placeholder="Optional details (e.g., heavy rain, unsafe square leg)"
+                          className="w-full bg-gray-700 p-3 rounded border border-gray-600 text-white placeholder-gray-500"
+                        />
+                      </div>
+                    </>
+                  )}
+
+                  <div className="md:col-span-2">
                     <label className="block text-sm text-gray-400 mb-2">Man of the Match</label>
                     <select
                       value={scorecard.result?.manOfTheMatch || ''}
-                      onChange={(e) => {
-                        const updated = { ...scorecard };
-                        updated.result = { ...updated.result, manOfTheMatch: e.target.value };
-                        setScorecard(updated);
-                      }}
+                      onChange={(e) => updateResult({ manOfTheMatch: e.target.value })}
                       className="w-full bg-gray-700 p-3 rounded border border-gray-600 text-white"
                     >
                       <option value="">Select Player</option>
-                      {/* Team 1 Players */}
                       <optgroup label={scorecard.matchInfo.team1.name}>
                         {getPlayersByTeam(scorecard.matchInfo.team1.id).map(player => (
                           <option key={player.id} value={player.name}>{player.name}</option>
                         ))}
                       </optgroup>
-                      {/* Team 2 Players */}
                       <optgroup label={scorecard.matchInfo.team2.name}>
                         {getPlayersByTeam(scorecard.matchInfo.team2.id).map(player => (
                           <option key={player.id} value={player.name}>{player.name}</option>
