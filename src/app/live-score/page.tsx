@@ -3,13 +3,14 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import { Activity, Clock, MapPin, RefreshCw, Trophy } from 'lucide-react';
+import { motion, useReducedMotion } from 'framer-motion';
+import { Clock, MapPin, RefreshCw, Trophy } from 'lucide-react';
 
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
-import AuroraBackground from '@/components/ui/AuroraBackground';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import ModernTeamLogo from '@/components/ui/ModernTeamLogo';
+import GradientText from '@/components/ui/GradientText';
 import { useLeague } from '@/contexts/LeagueContext';
 import { api } from '@/lib/data';
 import type { Match, Player } from '@/types';
@@ -76,6 +77,21 @@ const DEFAULT_WICKET: WicketRow = {
   wicketTaker: '',
   outBatter: 'striker',
 };
+
+const OIL_NOISE_BG = `url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`;
+
+const LIVE_SCORE_OIL_THEME = {
+  base: 'linear-gradient(155deg, #0b0713 0%, #140b1d 34%, #0b2238 72%, #050a15 100%)',
+  hazeA:
+    'radial-gradient(85% 70% at 16% 12%, rgba(251,146,60,0.22) 0%, rgba(236,72,153,0.09) 55%, transparent 78%)',
+  hazeB:
+    'radial-gradient(80% 64% at 86% 86%, rgba(34,211,238,0.18) 0%, rgba(99,102,241,0.10) 55%, transparent 78%)',
+  conic:
+    'conic-gradient(from 220deg at 50% 35%, rgba(34,211,238,0.10), rgba(168,85,247,0.14), rgba(251,146,60,0.10), rgba(236,72,153,0.10), rgba(99,102,241,0.10), transparent 62%)',
+  brush:
+    'linear-gradient(112deg, rgba(251,146,60,0.18), rgba(168,85,247,0.12), rgba(34,211,238,0.08), rgba(99,102,241,0.05))',
+  accentLine: 'linear-gradient(90deg, rgba(34,211,238,0.65), rgba(168,85,247,0.62), rgba(251,146,60,0.6))',
+} as const;
 
 const NON_DELIVERY_WICKET_TYPES = new Set([
   'Mankad (Run out at non-striker end)',
@@ -487,6 +503,8 @@ function buildCommentaryFromRows(
 export default function LiveScorePage() {
   const { setCurrentLeague } = useLeague();
   const searchParams = useSearchParams();
+  const prefersReducedMotion = useReducedMotion();
+  const motionEnabled = !prefersReducedMotion;
 
   const [matches, setMatches] = useState<Match[]>([]);
   const [players, setPlayers] = useState<Player[]>([]);
@@ -495,6 +513,7 @@ export default function LiveScorePage() {
   const [scorecardResultInfo, setScorecardResultInfo] = useState<ScorecardResultInfo | null>(null);
   const [isLoadingMatches, setIsLoadingMatches] = useState(true);
   const [isLoadingScore, setIsLoadingScore] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [lastFetchAt, setLastFetchAt] = useState<number | null>(null);
 
@@ -633,11 +652,12 @@ export default function LiveScorePage() {
     } satisfies ScorecardResultInfo;
   }, []);
 
-  const refresh = useCallback(async () => {
+  const refresh = useCallback(async (mode: 'auto' | 'manual' = 'auto') => {
     if (!selectedMatchId) return;
 
     const firstLoad = lastFetchAt === null;
     if (firstLoad) setIsLoadingScore(true);
+    if (!firstLoad && mode === 'manual') setIsRefreshing(true);
 
     setError(null);
     try {
@@ -659,8 +679,16 @@ export default function LiveScorePage() {
       setError('Failed to load live score data.');
     } finally {
       if (firstLoad) setIsLoadingScore(false);
+      if (!firstLoad && mode === 'manual') setIsRefreshing(false);
     }
-  }, [fetchLiveRows, lastFetchAt, selectedMatchId]);
+  }, [
+    fetchLiveRows,
+    fetchMatchFresh,
+    fetchScorecardsForMatch,
+    lastFetchAt,
+    pickBestScorecardResultInfo,
+    selectedMatchId,
+  ]);
 
   useEffect(() => {
     if (!selectedMatchId) return;
@@ -669,7 +697,7 @@ export default function LiveScorePage() {
 
     const tick = async () => {
       if (cancelled) return;
-      await refresh();
+      await refresh('auto');
     };
 
     tick();
@@ -796,125 +824,207 @@ export default function LiveScorePage() {
 
   return (
     <div className="min-h-screen">
-      <AuroraBackground />
       <Navbar />
 
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-8">
-          <div>
-            <h1 className="text-3xl md:text-4xl font-black text-white tracking-tight">
-              IPL Live Score
-            </h1>
-            <p className="text-white/70 mt-2">
-              Ball-by-ball updates powered by the IPL scorer.
-            </p>
+      {/* Oil-canvas background */}
+      <div className="fixed inset-0 -z-10 overflow-hidden">
+        <div className="absolute inset-0" style={{ background: LIVE_SCORE_OIL_THEME.base }} />
+        <div className="absolute inset-0" style={{ background: LIVE_SCORE_OIL_THEME.hazeA, mixBlendMode: 'screen' }} />
+        <div className="absolute inset-0" style={{ background: LIVE_SCORE_OIL_THEME.hazeB, mixBlendMode: 'screen' }} />
+        <div className="absolute inset-0 opacity-[0.16]" style={{ background: LIVE_SCORE_OIL_THEME.conic, mixBlendMode: 'screen' }} />
+
+        <motion.div
+          className="absolute -top-28 left-[-14%] w-[72%] h-[38%] rounded-[120px] blur-2xl opacity-80"
+          style={{ background: LIVE_SCORE_OIL_THEME.brush, transform: 'rotate(-10deg)' }}
+          animate={motionEnabled ? { x: [0, 12, 0], y: [0, -10, 0] } : { x: 0, y: 0 }}
+          transition={motionEnabled ? { duration: 22, repeat: Infinity, ease: 'easeInOut' } : { duration: 0 }}
+        />
+        <motion.div
+          className="absolute -bottom-24 right-[-12%] w-[70%] h-[36%] rounded-[120px] blur-2xl opacity-70"
+          style={{ background: LIVE_SCORE_OIL_THEME.brush, transform: 'rotate(8deg)' }}
+          animate={motionEnabled ? { x: [0, -12, 0], y: [0, 10, 0] } : { x: 0, y: 0 }}
+          transition={motionEnabled ? { duration: 26, repeat: Infinity, ease: 'easeInOut', delay: 0.6 } : { duration: 0 }}
+        />
+
+        <div
+          className="absolute inset-0 opacity-[0.08]"
+          style={{
+            backgroundImage:
+              'repeating-linear-gradient(0deg, rgba(255,255,255,0.05) 0px, rgba(255,255,255,0.05) 1px, transparent 1px, transparent 4px), repeating-linear-gradient(90deg, rgba(255,255,255,0.04) 0px, rgba(255,255,255,0.04) 1px, transparent 1px, transparent 4px)',
+            mixBlendMode: 'soft-light',
+          }}
+        />
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background:
+              'radial-gradient(circle at 50% 42%, transparent 0%, rgba(2,6,23,0.26) 62%, rgba(2,6,23,0.62) 100%)',
+          }}
+        />
+        <div className="absolute inset-0 pointer-events-none opacity-[0.06]" style={{ backgroundImage: OIL_NOISE_BG, mixBlendMode: 'overlay' }} />
+      </div>
+
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        <motion.div
+          className="relative overflow-hidden rounded-3xl border border-white/15 bg-black/30 backdrop-blur-xl shadow-[0_20px_60px_rgba(0,0,0,0.35)] p-6 md:p-8 mb-6"
+          initial={{ opacity: 0, y: 14 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.45 }}
+        >
+          <div className="absolute inset-x-0 top-0 h-[2px] opacity-80" style={{ background: LIVE_SCORE_OIL_THEME.accentLine }} />
+
+          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+            <div>
+              <h1 className="text-3xl md:text-5xl font-black tracking-tight text-white">
+                IPL{' '}
+                <GradientText gradient="from-cyan-300 via-purple-300 to-amber-300" animate={motionEnabled}>
+                  Live Score
+                </GradientText>
+              </h1>
+              <p className="text-white/70 mt-2 leading-relaxed max-w-xl">
+                Live ball-by-ball, running scores, and key match moments — refreshed every few seconds.
+              </p>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={() => refresh('manual')}
+                disabled={!selectedMatchId}
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/10 hover:bg-white/15 disabled:opacity-60 border border-white/15 text-white text-sm font-semibold transition-colors"
+                title="Refresh now"
+              >
+                <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+                Refresh
+              </button>
+              {lastFetchAt && (
+                <div className="text-xs text-white/60 whitespace-nowrap">
+                  Updated {new Date(lastFetchAt).toLocaleTimeString()}
+                </div>
+              )}
+            </div>
           </div>
 
-          <div className="flex items-center gap-3">
-            <button
-              type="button"
-              onClick={() => refresh()}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/10 hover:bg-white/15 border border-white/15 text-white text-sm font-semibold transition-colors"
-              title="Refresh now"
-            >
-              <RefreshCw className="w-4 h-4" />
-              Refresh
-            </button>
-            {lastFetchAt && (
-              <div className="text-xs text-white/60 whitespace-nowrap">
-                Updated {new Date(lastFetchAt).toLocaleTimeString()}
+          <div className="mt-6 grid grid-cols-1 lg:grid-cols-[1.15fr_0.85fr] gap-4">
+            <div>
+              <label className="block text-xs font-black text-white/70 uppercase tracking-[0.22em] mb-2">
+                Select match
+              </label>
+              <select
+                value={selectedMatchId}
+                onChange={(e) => setSelectedMatchId(e.target.value)}
+                disabled={isLoadingMatches || matches.length === 0}
+                className="w-full px-4 py-3 rounded-2xl bg-black/30 text-white border border-white/15 focus:outline-none focus:ring-2 focus:ring-cyan-400/30 focus:border-white/25 disabled:opacity-60"
+              >
+                {isLoadingMatches ? (
+                  <option value="">Loading matches…</option>
+                ) : matches.length === 0 ? (
+                  <option value="">No matches yet</option>
+                ) : null}
+
+                <optgroup label="Live">
+                  {matches
+                    .filter((m) => m.status === 'live')
+                    .map((m) => (
+                      <option key={m.id} value={m.id} className="bg-[#0b0f1a]">
+                        {m.team1.shortName} vs {m.team2.shortName} • {m.date} {m.time}
+                      </option>
+                    ))}
+                </optgroup>
+                <optgroup label="Upcoming">
+                  {matches
+                    .filter((m) => m.status === 'upcoming')
+                    .map((m) => (
+                      <option key={m.id} value={m.id} className="bg-[#0b0f1a]">
+                        {m.team1.shortName} vs {m.team2.shortName} • {m.date} {m.time}
+                      </option>
+                    ))}
+                </optgroup>
+                <optgroup label="Completed">
+                  {matches
+                    .filter((m) => m.status === 'completed')
+                    .map((m) => (
+                      <option key={m.id} value={m.id} className="bg-[#0b0f1a]">
+                        {m.team1.shortName} vs {m.team2.shortName} • {m.date}
+                      </option>
+                    ))}
+                </optgroup>
+              </select>
+            </div>
+
+            {selectedMatch ? (
+              <div className="rounded-2xl border border-white/15 bg-white/5 p-5">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="text-xs font-black uppercase tracking-[0.22em] text-white/70">
+                    Match info
+                  </div>
+                  <div className="inline-flex items-center gap-2 text-xs text-white/70">
+                    <span
+                      className={`inline-flex items-center gap-2 ${
+                        !isMatchComplete && selectedMatch.status === 'live' ? 'text-emerald-200' : 'text-white/70'
+                      }`}
+                    >
+                      <span
+                        className={`w-2 h-2 rounded-full ${
+                          !isMatchComplete && selectedMatch.status === 'live'
+                            ? 'bg-emerald-400 animate-pulse'
+                            : 'bg-white/30'
+                        }`}
+                      />
+                      <span className="capitalize">{isMatchComplete ? 'completed' : selectedMatch.status}</span>
+                    </span>
+                  </div>
+                </div>
+
+                {computedResultText && (
+                  <div className="mt-3 inline-flex items-start gap-2 text-amber-200/90">
+                    <Trophy className="w-4 h-4 mt-[1px]" />
+                    <span className="text-sm font-semibold leading-snug">{computedResultText}</span>
+                  </div>
+                )}
+
+                <div className="mt-4 space-y-2 text-sm text-white/70">
+                  <div className="flex items-center gap-2">
+                    <MapPin className="w-4 h-4 text-white/60" />
+                    <span className="min-w-0 truncate">{selectedMatch.venue}</span>
+                  </div>
+                  {matchStart && (
+                    <div className="flex items-center gap-2">
+                      <Clock className="w-4 h-4 text-white/60" />
+                      <span>{matchStart.toLocaleString()}</span>
+                    </div>
+                  )}
+                  {matchCenterHref && (
+                    <Link
+                      href={matchCenterHref}
+                      prefetch={false}
+                      className="inline-flex items-center gap-2 text-xs font-semibold text-cyan-200 hover:text-cyan-100 transition-colors"
+                    >
+                      Open match center →
+                    </Link>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <div className="rounded-2xl border border-white/10 bg-white/5 p-5 text-sm text-white/60">
+                Select a match to see the live score.
               </div>
             )}
           </div>
-        </div>
+        </motion.div>
 
         {isLoadingMatches ? (
           <div className="flex items-center justify-center h-64">
             <LoadingSpinner size="lg" />
           </div>
         ) : matches.length === 0 ? (
-          <div className="rounded-2xl p-6 bg-white/5 border border-white/10 text-white/80">
+          <div className="rounded-3xl p-6 bg-black/25 border border-white/10 text-white/80 backdrop-blur-xl shadow-[0_18px_55px_rgba(0,0,0,0.35)]">
             No IPL matches found yet.
           </div>
         ) : (
           <>
-            <div className="rounded-2xl p-4 md:p-5 bg-white/5 backdrop-blur-xl border border-white/10 mb-6">
-              <div className="flex flex-col md:flex-row md:items-center gap-3">
-                <div className="flex-1">
-                  <label className="block text-xs font-semibold text-white/70 mb-2">Select match</label>
-                  <select
-                    value={selectedMatchId}
-                    onChange={(e) => setSelectedMatchId(e.target.value)}
-                    className="w-full px-4 py-3 rounded-xl bg-black/30 text-white border border-white/15 focus:outline-none focus:ring-2 focus:ring-blue-500/40"
-                  >
-                    <optgroup label="Live">
-                      {matches
-                        .filter((m) => m.status === 'live')
-                        .map((m) => (
-                          <option key={m.id} value={m.id} className="bg-[#0b0f1a]">
-                            {m.team1.shortName} vs {m.team2.shortName} • {m.date} {m.time}
-                          </option>
-                        ))}
-                    </optgroup>
-                    <optgroup label="Upcoming">
-                      {matches
-                        .filter((m) => m.status === 'upcoming')
-                        .map((m) => (
-                          <option key={m.id} value={m.id} className="bg-[#0b0f1a]">
-                            {m.team1.shortName} vs {m.team2.shortName} • {m.date} {m.time}
-                          </option>
-                        ))}
-                    </optgroup>
-                    <optgroup label="Completed">
-                      {matches
-                        .filter((m) => m.status === 'completed')
-                        .map((m) => (
-                          <option key={m.id} value={m.id} className="bg-[#0b0f1a]">
-                            {m.team1.shortName} vs {m.team2.shortName} • {m.date}
-                          </option>
-                        ))}
-                    </optgroup>
-                  </select>
-                </div>
-
-                {selectedMatch && (
-                  <div className="flex flex-col gap-2 text-sm text-white/70 md:items-end">
-                    <div className="inline-flex items-center gap-2">
-                      <Activity className="w-4 h-4" />
-                      <span className="capitalize">{isMatchComplete ? 'completed' : selectedMatch.status}</span>
-                    </div>
-                    {computedResultText && (
-                      <div className="inline-flex items-start gap-2 text-xs text-amber-200/90">
-                        <Trophy className="w-4 h-4 mt-[1px]" />
-                        <span className="max-w-[42ch] leading-snug">{computedResultText}</span>
-                      </div>
-                    )}
-                    {matchStart && (
-                      <div className="inline-flex items-center gap-2">
-                        <Clock className="w-4 h-4" />
-                        <span>{matchStart.toLocaleString()}</span>
-                      </div>
-                    )}
-                    <div className="inline-flex items-center gap-2">
-                      <MapPin className="w-4 h-4" />
-                      <span className="max-w-[32ch] truncate">{selectedMatch.venue}</span>
-                    </div>
-                    {matchCenterHref && (
-                      <Link
-                        href={matchCenterHref}
-                        prefetch={false}
-                        className="text-xs font-semibold text-blue-200 hover:text-blue-100 transition-colors"
-                      >
-                        Open match center →
-                      </Link>
-                    )}
-                  </div>
-                )}
-              </div>
-            </div>
-
             {error && (
-              <div className="rounded-2xl p-4 bg-red-500/10 border border-red-500/30 text-red-200 mb-6">
+              <div className="rounded-2xl p-4 bg-red-500/10 border border-red-500/30 text-red-100 mb-6">
                 {error}
               </div>
             )}
@@ -926,26 +1036,46 @@ export default function LiveScorePage() {
             ) : (
               <>
                 {computedResultText && (
-                  <div className="rounded-2xl p-4 bg-amber-500/10 border border-amber-400/30 text-amber-100 mb-6">
+                  <div className="relative overflow-hidden rounded-3xl border border-amber-300/25 bg-amber-500/10 p-5 md:p-6 mb-6">
+                    <div
+                      className="absolute inset-x-0 top-0 h-[2px] opacity-70"
+                      style={{
+                        background:
+                          'linear-gradient(90deg, rgba(251,191,36,0.7), rgba(34,211,238,0.35), rgba(168,85,247,0.45))',
+                      }}
+                    />
                     <div className="text-[11px] font-black uppercase tracking-[0.22em] text-amber-100/80 mb-2">
                       Match Result
                     </div>
-                    <div className="text-white font-semibold">{computedResultText}</div>
+                    <div className="text-white text-lg font-black tracking-tight">{computedResultText}</div>
                     {scorecardResultInfo?.manOfTheMatch ? (
                       <div className="text-sm text-white/70 mt-1">
-                        Man of the Match: {scorecardResultInfo.manOfTheMatch}
+                        Man of the Match:{' '}
+                        <span className="text-white font-semibold">{scorecardResultInfo.manOfTheMatch}</span>
                       </div>
                     ) : null}
                   </div>
                 )}
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                  <div
-                    className={`rounded-2xl p-5 border backdrop-blur-xl ${
+                  <motion.div
+                    className={`relative overflow-hidden rounded-3xl p-5 md:p-6 border backdrop-blur-xl shadow-[0_18px_55px_rgba(0,0,0,0.35)] ${
                       !isMatchComplete && derived.battingTeamKey === 'team1'
-                        ? 'bg-blue-500/10 border-blue-400/30'
-                        : 'bg-white/5 border-white/10'
+                        ? 'bg-cyan-500/10 border-cyan-300/30'
+                        : 'bg-black/25 border-white/10'
                     }`}
+                    initial={{ opacity: 0, y: 12 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.35 }}
                   >
+                    <div
+                      className="absolute inset-x-0 top-0 h-[2px] opacity-70"
+                      style={{
+                        background: `linear-gradient(90deg, ${selectedMatch.team1?.colors?.primary || '#22d3ee'}, ${
+                          selectedMatch.team1?.colors?.secondary || '#a855f7'
+                        })`,
+                      }}
+                    />
                     <div className="flex items-center gap-4">
                       <ModernTeamLogo
                         teamId={selectedMatch.team1.id}
@@ -956,7 +1086,7 @@ export default function LiveScorePage() {
                       />
                       <div className="flex-1">
                         <div className="text-white/70 text-xs font-semibold">{selectedMatch.team1.name}</div>
-                        <div className="text-white text-3xl font-black tracking-tight">
+                        <div className="text-white text-3xl md:text-4xl font-black tracking-tight">
                           {derived.team1Totals.teamTotal}/{derived.team1Totals.wickets}
                         </div>
                         <div className="text-white/70 text-sm">
@@ -964,20 +1094,31 @@ export default function LiveScorePage() {
                         </div>
                       </div>
                       {!isMatchComplete && derived.battingTeamKey === 'team1' && (
-                        <div className="text-[11px] font-bold text-blue-200 bg-blue-500/15 border border-blue-400/20 px-2 py-1 rounded-lg">
-                          Batting
+                        <div className="text-[11px] font-black uppercase tracking-widest text-cyan-100 bg-cyan-500/15 border border-cyan-300/25 px-2.5 py-1 rounded-full">
+                          Batting now
                         </div>
                       )}
                     </div>
-                  </div>
+                  </motion.div>
 
-                  <div
-                    className={`rounded-2xl p-5 border backdrop-blur-xl ${
+                  <motion.div
+                    className={`relative overflow-hidden rounded-3xl p-5 md:p-6 border backdrop-blur-xl shadow-[0_18px_55px_rgba(0,0,0,0.35)] ${
                       !isMatchComplete && derived.battingTeamKey === 'team2'
-                        ? 'bg-blue-500/10 border-blue-400/30'
-                        : 'bg-white/5 border-white/10'
+                        ? 'bg-cyan-500/10 border-cyan-300/30'
+                        : 'bg-black/25 border-white/10'
                     }`}
+                    initial={{ opacity: 0, y: 12 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.35, delay: 0.06 }}
                   >
+                    <div
+                      className="absolute inset-x-0 top-0 h-[2px] opacity-70"
+                      style={{
+                        background: `linear-gradient(90deg, ${selectedMatch.team2?.colors?.primary || '#22d3ee'}, ${
+                          selectedMatch.team2?.colors?.secondary || '#a855f7'
+                        })`,
+                      }}
+                    />
                     <div className="flex items-center gap-4">
                       <ModernTeamLogo
                         teamId={selectedMatch.team2.id}
@@ -988,7 +1129,7 @@ export default function LiveScorePage() {
                       />
                       <div className="flex-1">
                         <div className="text-white/70 text-xs font-semibold">{selectedMatch.team2.name}</div>
-                        <div className="text-white text-3xl font-black tracking-tight">
+                        <div className="text-white text-3xl md:text-4xl font-black tracking-tight">
                           {derived.team2Totals.teamTotal}/{derived.team2Totals.wickets}
                         </div>
                         <div className="text-white/70 text-sm">
@@ -996,28 +1137,25 @@ export default function LiveScorePage() {
                         </div>
                       </div>
                       {!isMatchComplete && derived.battingTeamKey === 'team2' && (
-                        <div className="text-[11px] font-bold text-blue-200 bg-blue-500/15 border border-blue-400/20 px-2 py-1 rounded-lg">
-                          Batting
+                        <div className="text-[11px] font-black uppercase tracking-widest text-cyan-100 bg-cyan-500/15 border border-cyan-300/25 px-2.5 py-1 rounded-full">
+                          Batting now
                         </div>
                       )}
                     </div>
-                  </div>
+                  </motion.div>
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
-                  <div className="rounded-2xl p-5 bg-white/5 backdrop-blur-xl border border-white/10">
-                    <div className="text-xs font-semibold text-white/70 mb-3">Current</div>
+                  <div className="rounded-3xl p-5 md:p-6 bg-black/25 backdrop-blur-xl border border-white/10 shadow-[0_18px_55px_rgba(0,0,0,0.35)]">
+                    <div className="text-[11px] font-black uppercase tracking-[0.22em] text-white/70 mb-4">Current</div>
                     {isMatchComplete ? (
-                      <div className="text-sm text-white/60">
-                        Match completed.
-                      </div>
+                      <div className="text-sm text-white/60">Match completed.</div>
                     ) : (
                       <div className="space-y-3">
                         <div className="flex items-center justify-between gap-3">
                           <span className="text-white/70 text-sm">Striker</span>
                           <div className="text-white font-semibold text-sm text-right">
-                            {derived.striker.name || '—'}
-                            {' '}
+                            {derived.striker.name || '—'}{' '}
                             {derived.striker.name ? (
                               <span className="text-white/70 font-medium">
                                 {derived.striker.runs}({derived.striker.balls})
@@ -1028,8 +1166,7 @@ export default function LiveScorePage() {
                         <div className="flex items-center justify-between gap-3">
                           <span className="text-white/70 text-sm">Non-striker</span>
                           <div className="text-white font-semibold text-sm text-right">
-                            {derived.nonStriker.name || '—'}
-                            {' '}
+                            {derived.nonStriker.name || '—'}{' '}
                             {derived.nonStriker.name ? (
                               <span className="text-white/70 font-medium">
                                 {derived.nonStriker.runs}({derived.nonStriker.balls})
@@ -1040,8 +1177,7 @@ export default function LiveScorePage() {
                         <div className="flex items-center justify-between gap-3">
                           <span className="text-white/70 text-sm">Bowler</span>
                           <div className="text-white font-semibold text-sm text-right">
-                            {derived.bowler.name || '—'}
-                            {' '}
+                            {derived.bowler.name || '—'}{' '}
                             {derived.bowler.name ? (
                               <span className="text-white/70 font-medium">
                                 {derived.bowler.runs} runs • {derived.bowler.overs} ov
@@ -1049,45 +1185,160 @@ export default function LiveScorePage() {
                             ) : null}
                           </div>
                         </div>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="rounded-3xl p-5 md:p-6 bg-black/25 backdrop-blur-xl border border-white/10 shadow-[0_18px_55px_rgba(0,0,0,0.35)]">
+                    <div className="text-[11px] font-black uppercase tracking-[0.22em] text-white/70 mb-4">Innings</div>
+                    <div className="text-white text-sm">
+                      <div className="flex items-center justify-between gap-3">
+                        <span className="text-white/70">Current</span>
+                        <span className="font-semibold">Innings {derived.currentInnings}</span>
+                      </div>
+                      <div className="mt-3 grid grid-cols-2 gap-3">
+                        <div className="rounded-2xl p-3 bg-black/25 border border-white/10">
+                          <div className="text-xs text-white/60 font-semibold mb-1">1st inns</div>
+                          <div className="text-white font-black">
+                            {derived.innings1.teamTotal}/{derived.innings1.wickets}
+                          </div>
+                          <div className="text-xs text-white/60">{derived.innings1.overs} ov</div>
+                        </div>
+                        <div className="rounded-2xl p-3 bg-black/25 border border-white/10">
+                          <div className="text-xs text-white/60 font-semibold mb-1">2nd inns</div>
+                          <div className="text-white font-black">
+                            {derived.innings2.teamTotal}/{derived.innings2.wickets}
+                          </div>
+                          <div className="text-xs text-white/60">{derived.innings2.overs} ov</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="rounded-3xl p-5 md:p-6 bg-black/25 backdrop-blur-xl border border-white/10 shadow-[0_18px_55px_rgba(0,0,0,0.35)]">
+                    <div className="text-[11px] font-black uppercase tracking-[0.22em] text-white/70 mb-4">Chase</div>
+                    {isMatchComplete ? (
+                      <div className="text-sm text-white/60">Final scores locked in.</div>
+                    ) : derived.target ? (
+                      <div className="space-y-3 text-sm text-white">
+                        <div className="flex items-center justify-between gap-3">
+                          <span className="text-white/70">Target</span>
+                          <span className="font-semibold">{derived.target}</span>
+                        </div>
+                        <div className="flex items-center justify-between gap-3">
+                          <span className="text-white/70">Needed</span>
+                          <span className="font-semibold">{derived.needed}</span>
+                        </div>
+                        <div className="flex items-center justify-between gap-3">
+                          <span className="text-white/70">Balls left</span>
+                          <span className="font-semibold">{derived.remainingBalls}</span>
+                        </div>
+                        <div className="flex items-center justify-between gap-3">
+                          <span className="text-white/70">Req RR</span>
+                          <span className="font-semibold">{derived.requiredRate ?? '—'}</span>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="text-sm text-white/60">
+                        Chase metrics appear once the 2nd innings starts.
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div className="rounded-3xl p-5 md:p-6 bg-black/25 backdrop-blur-xl border border-white/10 shadow-[0_18px_55px_rgba(0,0,0,0.35)]">
+                  <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-5">
+                    <div>
+                      <div className="text-[11px] font-black uppercase tracking-[0.22em] text-white/70">Ball-by-ball</div>
+                      <div className="text-white/70 text-sm mt-1">Every delivery from both innings.</div>
+                    </div>
+                    <div className="text-xs text-white/60">{derived.rowsCount} entries</div>
+                  </div>
+
+                  {derived.innings1Feed.length === 0 && derived.innings2Feed.length === 0 ? (
+                    <div className="text-white/60 text-sm">
+                      No ball-by-ball updates yet. Once the scorer saves deliveries, they will appear here.
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
                         <div className="flex items-center justify-between gap-3 mb-2">
-                          <div className="text-xs font-semibold text-white/70">Innings 1</div>
+                          <div className="text-xs font-black text-white/70 uppercase tracking-widest">Innings 1</div>
                           <div className="text-xs text-white/60">{derived.innings1Feed.length} balls</div>
                         </div>
                         {derived.innings1Feed.length === 0 ? (
                           <div className="text-sm text-white/60">No deliveries yet.</div>
                         ) : (
                           <ul className="space-y-2 max-h-[560px] overflow-y-auto pr-1">
-                            {derived.innings1Feed.map((line, idx) => (
-                              <li
-                                key={`inn1-${idx}-${line.slice(0, 18)}`}
-                                className="text-white/90 text-sm leading-relaxed rounded-xl px-3 py-2 bg-black/20 border border-white/10"
-                              >
-                                {line}
-                              </li>
-                            ))}
+                            {derived.innings1Feed.map((line, idx) => {
+                              const parts = line.split(': ');
+                              const meta = parts.length > 1 ? parts[0] : '';
+                              const body = parts.length > 1 ? parts.slice(1).join(': ') : line;
+                              const lower = body.toLowerCase();
+                              const isWicket = lower.includes(' out ') || lower.includes('wicket');
+                              const isWide = lower.includes('wide');
+                              const isNoBall = lower.includes('no-ball') || lower.includes('noball');
+                              const accent = isWicket
+                                ? 'border-red-400/35 bg-red-500/10'
+                                : isWide
+                                  ? 'border-purple-300/25 bg-purple-500/10'
+                                  : isNoBall
+                                    ? 'border-amber-300/25 bg-amber-500/10'
+                                    : 'border-white/10 bg-black/20';
+
+                              return (
+                                <li
+                                  key={`inn1-${idx}-${line.slice(0, 18)}`}
+                                  className={`text-white/90 text-sm leading-relaxed rounded-2xl px-3.5 py-3 border ${accent}`}
+                                >
+                                  {meta ? (
+                                    <div className="text-[11px] text-white/60 font-semibold mb-1">{meta}</div>
+                                  ) : null}
+                                  <div className="text-white/90">{body}</div>
+                                </li>
+                              );
+                            })}
                           </ul>
                         )}
                       </div>
 
                       <div>
                         <div className="flex items-center justify-between gap-3 mb-2">
-                          <div className="text-xs font-semibold text-white/70">Innings 2</div>
+                          <div className="text-xs font-black text-white/70 uppercase tracking-widest">Innings 2</div>
                           <div className="text-xs text-white/60">{derived.innings2Feed.length} balls</div>
                         </div>
                         {derived.innings2Feed.length === 0 ? (
-                          <div className="text-sm text-white/60">
-                            2nd innings hasn&apos;t started yet.
-                          </div>
+                          <div className="text-sm text-white/60">2nd innings hasn&apos;t started yet.</div>
                         ) : (
                           <ul className="space-y-2 max-h-[560px] overflow-y-auto pr-1">
-                            {derived.innings2Feed.map((line, idx) => (
-                              <li
-                                key={`inn2-${idx}-${line.slice(0, 18)}`}
-                                className="text-white/90 text-sm leading-relaxed rounded-xl px-3 py-2 bg-black/20 border border-white/10"
-                              >
-                                {line}
-                              </li>
-                            ))}
+                            {derived.innings2Feed.map((line, idx) => {
+                              const parts = line.split(': ');
+                              const meta = parts.length > 1 ? parts[0] : '';
+                              const body = parts.length > 1 ? parts.slice(1).join(': ') : line;
+                              const lower = body.toLowerCase();
+                              const isWicket = lower.includes(' out ') || lower.includes('wicket');
+                              const isWide = lower.includes('wide');
+                              const isNoBall = lower.includes('no-ball') || lower.includes('noball');
+                              const accent = isWicket
+                                ? 'border-red-400/35 bg-red-500/10'
+                                : isWide
+                                  ? 'border-purple-300/25 bg-purple-500/10'
+                                  : isNoBall
+                                    ? 'border-amber-300/25 bg-amber-500/10'
+                                    : 'border-white/10 bg-black/20';
+
+                              return (
+                                <li
+                                  key={`inn2-${idx}-${line.slice(0, 18)}`}
+                                  className={`text-white/90 text-sm leading-relaxed rounded-2xl px-3.5 py-3 border ${accent}`}
+                                >
+                                  {meta ? (
+                                    <div className="text-[11px] text-white/60 font-semibold mb-1">{meta}</div>
+                                  ) : null}
+                                  <div className="text-white/90">{body}</div>
+                                </li>
+                              );
+                            })}
                           </ul>
                         )}
                       </div>
