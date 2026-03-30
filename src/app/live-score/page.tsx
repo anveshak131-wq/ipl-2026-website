@@ -1014,9 +1014,10 @@ export default function LiveScorePage() {
                     ) : (
                       <div className="space-y-3">
                         <div className="flex items-center justify-between gap-3">
-                          <div className="text-white/70 text-sm">Striker</div>
+                          <span className="text-white/70 text-sm">Striker</span>
                           <div className="text-white font-semibold text-sm text-right">
-                            {derived.striker.name || '—'}{' '}
+                            {derived.striker.name || '—'}
+                            {' '}
                             {derived.striker.name ? (
                               <span className="text-white/70 font-medium">
                                 {derived.striker.runs}({derived.striker.balls})
@@ -1025,9 +1026,10 @@ export default function LiveScorePage() {
                           </div>
                         </div>
                         <div className="flex items-center justify-between gap-3">
-                          <div className="text-white/70 text-sm">Non-striker</div>
+                          <span className="text-white/70 text-sm">Non-striker</span>
                           <div className="text-white font-semibold text-sm text-right">
-                            {derived.nonStriker.name || '—'}{' '}
+                            {derived.nonStriker.name || '—'}
+                            {' '}
                             {derived.nonStriker.name ? (
                               <span className="text-white/70 font-medium">
                                 {derived.nonStriker.runs}({derived.nonStriker.balls})
@@ -1036,9 +1038,10 @@ export default function LiveScorePage() {
                           </div>
                         </div>
                         <div className="flex items-center justify-between gap-3">
-                          <div className="text-white/70 text-sm">Bowler</div>
+                          <span className="text-white/70 text-sm">Bowler</span>
                           <div className="text-white font-semibold text-sm text-right">
-                            {derived.bowler.name || '—'}{' '}
+                            {derived.bowler.name || '—'}
+                            {' '}
                             {derived.bowler.name ? (
                               <span className="text-white/70 font-medium">
                                 {derived.bowler.runs} runs • {derived.bowler.overs} ov
@@ -1046,82 +1049,6 @@ export default function LiveScorePage() {
                             ) : null}
                           </div>
                         </div>
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="rounded-2xl p-5 bg-white/5 backdrop-blur-xl border border-white/10">
-                    <div className="text-xs font-semibold text-white/70 mb-3">Innings</div>
-                    <div className="text-white text-sm">
-                      <div className="flex items-center justify-between gap-3">
-                        <span className="text-white/70">Current</span>
-                        <span className="font-semibold">Innings {derived.currentInnings}</span>
-                      </div>
-                      <div className="mt-3 grid grid-cols-2 gap-3">
-                        <div className="rounded-xl p-3 bg-black/20 border border-white/10">
-                          <div className="text-xs text-white/60 font-semibold mb-1">1st inns</div>
-                          <div className="text-white font-bold">
-                            {derived.innings1.teamTotal}/{derived.innings1.wickets}
-                          </div>
-                          <div className="text-xs text-white/60">{derived.innings1.overs} ov</div>
-                        </div>
-                        <div className="rounded-xl p-3 bg-black/20 border border-white/10">
-                          <div className="text-xs text-white/60 font-semibold mb-1">2nd inns</div>
-                          <div className="text-white font-bold">
-                            {derived.innings2.teamTotal}/{derived.innings2.wickets}
-                          </div>
-                          <div className="text-xs text-white/60">{derived.innings2.overs} ov</div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="rounded-2xl p-5 bg-white/5 backdrop-blur-xl border border-white/10">
-                    <div className="text-xs font-semibold text-white/70 mb-3">Chase</div>
-                    {isMatchComplete ? (
-                      <div className="text-sm text-white/60">
-                        Final scores locked in.
-                      </div>
-                    ) : derived.target ? (
-                      <div className="space-y-3 text-sm text-white">
-                        <div className="flex items-center justify-between gap-3">
-                          <span className="text-white/70">Target</span>
-                          <span className="font-semibold">{derived.target}</span>
-                        </div>
-                        <div className="flex items-center justify-between gap-3">
-                          <span className="text-white/70">Needed</span>
-                          <span className="font-semibold">{derived.needed}</span>
-                        </div>
-                        <div className="flex items-center justify-between gap-3">
-                          <span className="text-white/70">Balls left</span>
-                          <span className="font-semibold">{derived.remainingBalls}</span>
-                        </div>
-                        <div className="flex items-center justify-between gap-3">
-                          <span className="text-white/70">Req RR</span>
-                          <span className="font-semibold">{derived.requiredRate ?? '—'}</span>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="text-sm text-white/60">
-                        Chase metrics appear once the 2nd innings starts.
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                <div className="rounded-2xl p-5 bg-white/5 backdrop-blur-xl border border-white/10">
-                  <div className="flex items-center justify-between gap-4 mb-4">
-                    <div className="text-xs font-semibold text-white/70">Ball-by-ball</div>
-                    <div className="text-xs text-white/60">{derived.rowsCount} entries</div>
-                  </div>
-
-                  {derived.innings1Feed.length === 0 && derived.innings2Feed.length === 0 ? (
-                    <div className="text-white/60 text-sm">
-                      No ball-by-ball updates yet. Once the scorer saves deliveries, they will appear here.
-                    </div>
-                  ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
                         <div className="flex items-center justify-between gap-3 mb-2">
                           <div className="text-xs font-semibold text-white/70">Innings 1</div>
                           <div className="text-xs text-white/60">{derived.innings1Feed.length} balls</div>
