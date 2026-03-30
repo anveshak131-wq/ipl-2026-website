@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import { Activity, Clock, MapPin, RefreshCw } from 'lucide-react';
+import { Activity, Clock, MapPin, RefreshCw, Trophy } from 'lucide-react';
 
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
@@ -37,6 +37,27 @@ type LiveScoreTableState = {
   extrasData?: Record<number, ExtrasRow>;
   wicketData?: Record<number, WicketRow>;
   commentaryData?: Record<number, string>;
+};
+
+type ScorecardDoc = {
+  id?: string;
+  draft?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+  publishedAt?: string;
+  result?: {
+    winner?: string;
+    margin?: string;
+    manOfTheMatch?: string;
+  };
+};
+
+type ScorecardResultInfo = {
+  scorecardId: string;
+  draft: boolean;
+  winner: string;
+  margin: string;
+  manOfTheMatch: string;
 };
 
 const DEFAULT_EXTRAS: ExtrasRow = {
@@ -471,6 +492,7 @@ export default function LiveScorePage() {
   const [players, setPlayers] = useState<Player[]>([]);
   const [selectedMatchId, setSelectedMatchId] = useState<string>('');
   const [tableState, setTableState] = useState<LiveScoreTableState>({ rows: [] });
+  const [scorecardResultInfo, setScorecardResultInfo] = useState<ScorecardResultInfo | null>(null);
   const [isLoadingMatches, setIsLoadingMatches] = useState(true);
   const [isLoadingScore, setIsLoadingScore] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -499,7 +521,12 @@ export default function LiveScorePage() {
       setError(null);
       try {
         const [matchesData, playersData] = await Promise.all([
-          api.getMatches('ipl'),
+          (async () => {
+            const resp = await fetch('/api/matches?league=ipl', { cache: 'no-store' });
+            if (!resp.ok) return [];
+            const data = await resp.json();
+            return Array.isArray(data) ? (data as Match[]) : [];
+          })(),
           api.getPlayers(undefined, 'ipl'),
         ]);
         if (cancelled) return;
@@ -535,6 +562,10 @@ export default function LiveScorePage() {
     [matches, selectedMatchId],
   );
 
+  useEffect(() => {
+    setScorecardResultInfo(null);
+  }, [selectedMatchId]);
+
   const fetchLiveRows = useCallback(async (matchId: string) => {
     const resp = await fetch(`/api/ipl-live-score/save?matchId=${encodeURIComponent(matchId)}&withCommentary=1`, {
       cache: 'no-store',
@@ -558,6 +589,50 @@ export default function LiveScorePage() {
     return { rows: [], extrasData: {}, wicketData: {}, commentaryData: {} };
   }, []);
 
+  const fetchMatchFresh = useCallback(async (matchId: string) => {
+    const resp = await fetch(`/api/matches?league=ipl&id=${encodeURIComponent(matchId)}`, { cache: 'no-store' });
+    if (!resp.ok) return null;
+    const data = await resp.json();
+    return data && typeof data === 'object' ? (data as Match) : null;
+  }, []);
+
+  const fetchScorecardsForMatch = useCallback(async (matchId: string) => {
+    const resp = await fetch(`/api/scorecards?matchId=${encodeURIComponent(matchId)}&league=ipl`, {
+      cache: 'no-store',
+    });
+    if (!resp.ok) return [];
+    const data = await resp.json();
+    return Array.isArray(data) ? (data as ScorecardDoc[]) : [];
+  }, []);
+
+  const pickBestScorecardResultInfo = useCallback((scorecards: ScorecardDoc[]) => {
+    const list = Array.isArray(scorecards) ? scorecards : [];
+    const normalize = (sc: ScorecardDoc) => ({
+      ...sc,
+      draft: Boolean(sc?.draft),
+      result: {
+        winner: String(sc?.result?.winner || '').trim(),
+        margin: String(sc?.result?.margin || '').trim(),
+        manOfTheMatch: String(sc?.result?.manOfTheMatch || '').trim(),
+      },
+    });
+
+    const withResult = list.map(normalize).filter((sc) => Boolean(sc.result?.winner));
+    if (withResult.length === 0) return null;
+
+    const published = withResult.find((sc) => sc.draft === false);
+    const best = published || withResult[0];
+    const id = String(best?.id || '').trim();
+
+    return {
+      scorecardId: id || 'scorecard',
+      draft: Boolean(best?.draft),
+      winner: best.result?.winner || '',
+      margin: best.result?.margin || '',
+      manOfTheMatch: best.result?.manOfTheMatch || '',
+    } satisfies ScorecardResultInfo;
+  }, []);
+
   const refresh = useCallback(async () => {
     if (!selectedMatchId) return;
 
@@ -566,8 +641,18 @@ export default function LiveScorePage() {
 
     setError(null);
     try {
-      const next = await fetchLiveRows(selectedMatchId);
+      const [next, freshMatch, scorecards] = await Promise.all([
+        fetchLiveRows(selectedMatchId),
+        fetchMatchFresh(selectedMatchId),
+        fetchScorecardsForMatch(selectedMatchId),
+      ]);
+
       setTableState(next);
+      if (freshMatch) {
+        setMatches((prev) => prev.map((m) => (m.id === freshMatch.id ? freshMatch : m)));
+      }
+      const bestResultInfo = pickBestScorecardResultInfo(scorecards);
+      setScorecardResultInfo(bestResultInfo);
       setLastFetchAt(Date.now());
     } catch (e) {
       console.error('[Live Score] Failed to load live rows:', e);
@@ -595,6 +680,43 @@ export default function LiveScorePage() {
       clearInterval(interval);
     };
   }, [refresh, selectedMatchId]);
+
+  const computedResultText = useMemo(() => {
+    if (!selectedMatch) return '';
+
+    const fromMatch = String(selectedMatch.result || '').trim();
+    if (fromMatch) return fromMatch;
+
+    const winnerRaw = String(scorecardResultInfo?.winner || '').trim();
+    if (!winnerRaw) return '';
+
+    const margin = String(scorecardResultInfo?.margin || '').trim();
+    const lower = winnerRaw.toLowerCase();
+
+    if (lower === 'no result' || lower === 'abandoned' || lower === 'match abandoned') {
+      return margin ? `No result • ${margin}` : 'No result';
+    }
+    if (lower === 'match tied' || lower === 'tie') {
+      return margin ? `Match tied • ${margin}` : 'Match tied';
+    }
+
+    const team1Name = String(selectedMatch.team1?.name || '').trim();
+    const team2Name = String(selectedMatch.team2?.name || '').trim();
+    const team1Short = String(selectedMatch.team1?.shortName || team1Name).trim() || 'Team 1';
+    const team2Short = String(selectedMatch.team2?.shortName || team2Name).trim() || 'Team 2';
+
+    const winner =
+      winnerRaw === team1Name ? team1Short : winnerRaw === team2Name ? team2Short : winnerRaw;
+
+    return margin ? `${winner} won by ${margin}` : `${winner} won`;
+  }, [scorecardResultInfo, selectedMatch]);
+
+  const isMatchComplete = useMemo(() => {
+    if (!selectedMatch) return false;
+    if (selectedMatch.status === 'completed') return true;
+    if (selectedMatch.matchState?.currentState === 'complete') return true;
+    return Boolean(computedResultText);
+  }, [computedResultText, selectedMatch]);
 
   const derived = useMemo(() => {
     if (!selectedMatch) return null;
@@ -759,8 +881,14 @@ export default function LiveScorePage() {
                   <div className="flex flex-col gap-2 text-sm text-white/70 md:items-end">
                     <div className="inline-flex items-center gap-2">
                       <Activity className="w-4 h-4" />
-                      <span className="capitalize">{selectedMatch.status}</span>
+                      <span className="capitalize">{isMatchComplete ? 'completed' : selectedMatch.status}</span>
                     </div>
+                    {computedResultText && (
+                      <div className="inline-flex items-start gap-2 text-xs text-amber-200/90">
+                        <Trophy className="w-4 h-4 mt-[1px]" />
+                        <span className="max-w-[42ch] leading-snug">{computedResultText}</span>
+                      </div>
+                    )}
                     {matchStart && (
                       <div className="inline-flex items-center gap-2">
                         <Clock className="w-4 h-4" />
@@ -797,10 +925,23 @@ export default function LiveScorePage() {
               </div>
             ) : (
               <>
+                {computedResultText && (
+                  <div className="rounded-2xl p-4 bg-amber-500/10 border border-amber-400/30 text-amber-100 mb-6">
+                    <div className="text-[11px] font-black uppercase tracking-[0.22em] text-amber-100/80 mb-2">
+                      Match Result
+                    </div>
+                    <div className="text-white font-semibold">{computedResultText}</div>
+                    {scorecardResultInfo?.manOfTheMatch ? (
+                      <div className="text-sm text-white/70 mt-1">
+                        Man of the Match: {scorecardResultInfo.manOfTheMatch}
+                      </div>
+                    ) : null}
+                  </div>
+                )}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                   <div
                     className={`rounded-2xl p-5 border backdrop-blur-xl ${
-                      derived.battingTeamKey === 'team1'
+                      !isMatchComplete && derived.battingTeamKey === 'team1'
                         ? 'bg-blue-500/10 border-blue-400/30'
                         : 'bg-white/5 border-white/10'
                     }`}
@@ -822,7 +963,7 @@ export default function LiveScorePage() {
                           {derived.team1Totals.overs} ov • RR {derived.team1Totals.runRate}
                         </div>
                       </div>
-                      {derived.battingTeamKey === 'team1' && (
+                      {!isMatchComplete && derived.battingTeamKey === 'team1' && (
                         <div className="text-[11px] font-bold text-blue-200 bg-blue-500/15 border border-blue-400/20 px-2 py-1 rounded-lg">
                           Batting
                         </div>
@@ -832,7 +973,7 @@ export default function LiveScorePage() {
 
                   <div
                     className={`rounded-2xl p-5 border backdrop-blur-xl ${
-                      derived.battingTeamKey === 'team2'
+                      !isMatchComplete && derived.battingTeamKey === 'team2'
                         ? 'bg-blue-500/10 border-blue-400/30'
                         : 'bg-white/5 border-white/10'
                     }`}
@@ -854,7 +995,7 @@ export default function LiveScorePage() {
                           {derived.team2Totals.overs} ov • RR {derived.team2Totals.runRate}
                         </div>
                       </div>
-                      {derived.battingTeamKey === 'team2' && (
+                      {!isMatchComplete && derived.battingTeamKey === 'team2' && (
                         <div className="text-[11px] font-bold text-blue-200 bg-blue-500/15 border border-blue-400/20 px-2 py-1 rounded-lg">
                           Batting
                         </div>
@@ -866,41 +1007,47 @@ export default function LiveScorePage() {
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
                   <div className="rounded-2xl p-5 bg-white/5 backdrop-blur-xl border border-white/10">
                     <div className="text-xs font-semibold text-white/70 mb-3">Current</div>
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between gap-3">
-                        <div className="text-white/70 text-sm">Striker</div>
-                        <div className="text-white font-semibold text-sm text-right">
-                          {derived.striker.name || '—'}{' '}
-                          {derived.striker.name ? (
-                            <span className="text-white/70 font-medium">
-                              {derived.striker.runs}({derived.striker.balls})
-                            </span>
-                          ) : null}
+                    {isMatchComplete ? (
+                      <div className="text-sm text-white/60">
+                        Match completed.
+                      </div>
+                    ) : (
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between gap-3">
+                          <div className="text-white/70 text-sm">Striker</div>
+                          <div className="text-white font-semibold text-sm text-right">
+                            {derived.striker.name || '—'}{' '}
+                            {derived.striker.name ? (
+                              <span className="text-white/70 font-medium">
+                                {derived.striker.runs}({derived.striker.balls})
+                              </span>
+                            ) : null}
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between gap-3">
+                          <div className="text-white/70 text-sm">Non-striker</div>
+                          <div className="text-white font-semibold text-sm text-right">
+                            {derived.nonStriker.name || '—'}{' '}
+                            {derived.nonStriker.name ? (
+                              <span className="text-white/70 font-medium">
+                                {derived.nonStriker.runs}({derived.nonStriker.balls})
+                              </span>
+                            ) : null}
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between gap-3">
+                          <div className="text-white/70 text-sm">Bowler</div>
+                          <div className="text-white font-semibold text-sm text-right">
+                            {derived.bowler.name || '—'}{' '}
+                            {derived.bowler.name ? (
+                              <span className="text-white/70 font-medium">
+                                {derived.bowler.runs} runs • {derived.bowler.overs} ov
+                              </span>
+                            ) : null}
+                          </div>
                         </div>
                       </div>
-                      <div className="flex items-center justify-between gap-3">
-                        <div className="text-white/70 text-sm">Non-striker</div>
-                        <div className="text-white font-semibold text-sm text-right">
-                          {derived.nonStriker.name || '—'}{' '}
-                          {derived.nonStriker.name ? (
-                            <span className="text-white/70 font-medium">
-                              {derived.nonStriker.runs}({derived.nonStriker.balls})
-                            </span>
-                          ) : null}
-                        </div>
-                      </div>
-                      <div className="flex items-center justify-between gap-3">
-                        <div className="text-white/70 text-sm">Bowler</div>
-                        <div className="text-white font-semibold text-sm text-right">
-                          {derived.bowler.name || '—'}{' '}
-                          {derived.bowler.name ? (
-                            <span className="text-white/70 font-medium">
-                              {derived.bowler.runs} runs • {derived.bowler.overs} ov
-                            </span>
-                          ) : null}
-                        </div>
-                      </div>
-                    </div>
+                    )}
                   </div>
 
                   <div className="rounded-2xl p-5 bg-white/5 backdrop-blur-xl border border-white/10">
@@ -931,7 +1078,11 @@ export default function LiveScorePage() {
 
                   <div className="rounded-2xl p-5 bg-white/5 backdrop-blur-xl border border-white/10">
                     <div className="text-xs font-semibold text-white/70 mb-3">Chase</div>
-                    {derived.target ? (
+                    {isMatchComplete ? (
+                      <div className="text-sm text-white/60">
+                        Final scores locked in.
+                      </div>
+                    ) : derived.target ? (
                       <div className="space-y-3 text-sm text-white">
                         <div className="flex items-center justify-between gap-3">
                           <span className="text-white/70">Target</span>
