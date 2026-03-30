@@ -78,32 +78,6 @@ export async function onRequestPost(context) {
     }
 
     const incomingPlayerStats = Array.isArray(playerStats) ? playerStats : [];
-    const pendingPlayerStats = incomingPlayerStats.filter((p) => {
-      const id = String(p?.playerId || '').trim();
-      if (!id) return false;
-      if (force) return true;
-      return !alreadySyncedPlayerIds.has(id);
-    });
-
-    if (!force && pendingPlayerStats.length === 0) {
-      return new Response(
-        JSON.stringify({
-          success: true,
-          skipped: true,
-          reason: 'Already synced for this scorecard',
-          scorecardId,
-          matchId,
-          updatedCount: 0,
-        }),
-        {
-          status: 200,
-          headers: {
-            'Content-Type': 'application/json',
-            'Access-Control-Allow-Origin': '*',
-          },
-        }
-      );
-    }
 
     const playersData = await env.IPL_CACHE.get('players', 'json');
     const players = Array.isArray(playersData) ? playersData : [];
@@ -111,10 +85,11 @@ export async function onRequestPost(context) {
     console.log(`[Scorecard Sync] Processing ${playerStats.length} players for match ${matchId}`);
 
     const updatedPlayers = [];
+    const backfilledPlayers = [];
     const errors = [];
 
     // Process each player's stats
-    for (const playerStat of pendingPlayerStats) {
+    for (const playerStat of incomingPlayerStats) {
       try {
         const playerId = String(playerStat.playerId || '').trim();
         if (!playerId) {
@@ -146,8 +121,16 @@ export async function onRequestPost(context) {
         const player = players[playerIndex];
         const currentStats = player?.stats || {};
 
-        // Calculate new stats
-        const updatedStats = calculatePlayerStatsUpdates(currentStats, playerStat);
+        const isAlreadySynced = !force && alreadySyncedPlayerIds.has(playerId);
+
+        // Calculate new stats. If already synced, only backfill missing bowling balls derived from overs.
+        const updatedStats = isAlreadySynced
+          ? calculatePlayerStatsBackfillUpdates(currentStats, playerStat)
+          : calculatePlayerStatsUpdates(currentStats, playerStat);
+
+        if (!updatedStats) {
+          continue;
+        }
 
         // Update player with new stats
         players[playerIndex] = {
@@ -164,18 +147,25 @@ export async function onRequestPost(context) {
           wickets: updatedStats.wickets
         });
 
-        updatedPlayers.push({
+        const record = {
           playerId,
           playerName: playerStat.playerName,
           batting: !!playerStat.batting,
           bowling: !!playerStat.bowling,
+          backfilled: isAlreadySynced,
           stats: {
             runs: updatedStats.runs,
             wickets: updatedStats.wickets,
+            balls: updatedStats.balls,
+            overs: updatedStats.overs,
             battingAverage: updatedStats.battingAverage,
-            bowlingAverage: updatedStats.bowlingAverage
+            bowlingAverage: updatedStats.bowlingAverage,
+            economy: updatedStats.economy,
           }
-        });
+        };
+
+        if (isAlreadySynced) backfilledPlayers.push(record);
+        else updatedPlayers.push(record);
       } catch (error) {
         console.error(`[Scorecard Sync] Error updating player ${playerStat.playerId}:`, error);
         errors.push({
@@ -185,7 +175,7 @@ export async function onRequestPost(context) {
       }
     }
 
-    if (updatedPlayers.length > 0) {
+    if (updatedPlayers.length > 0 || backfilledPlayers.length > 0) {
       await env.IPL_CACHE.put('players', JSON.stringify(players));
     }
 
@@ -211,15 +201,39 @@ export async function onRequestPost(context) {
       }
     }
 
-    console.log(`[Scorecard Sync] Completed: ${updatedPlayers.length} updated, ${errors.length} errors`);
+    const didAnyUpdate = updatedPlayers.length > 0 || backfilledPlayers.length > 0;
+    if (!force && !didAnyUpdate) {
+      return new Response(
+        JSON.stringify({
+          success: true,
+          skipped: true,
+          reason: 'Already synced for this scorecard',
+          scorecardId,
+          matchId,
+          updatedCount: 0,
+        }),
+        {
+          status: 200,
+          headers: {
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': '*',
+          },
+        }
+      );
+    }
+
+    console.log(
+      `[Scorecard Sync] Completed: ${updatedPlayers.length} updated, ${backfilledPlayers.length} backfilled, ${errors.length} errors`
+    );
 
     return new Response(JSON.stringify({
       success: true,
       scorecardId,
       matchId,
       skipped: false,
-      updatedCount: updatedPlayers.length,
-      details: updatedPlayers,
+      updatedCount: updatedPlayers.length + backfilledPlayers.length,
+      details: [...updatedPlayers, ...backfilledPlayers],
+      backfilledCount: backfilledPlayers.length,
       errors: errors.length > 0 ? errors : undefined
     }), {
       status: 200,
@@ -246,44 +260,45 @@ export async function onRequestPost(context) {
 /**
  * Helper: Calculate updated player stats from scorecard performance
  */
+const toNumber = (value) => {
+  const n = Number(value);
+  return Number.isFinite(n) ? n : 0;
+};
+
+// Convert overs to balls.
+// Supports cricket notation (e.g. 4.2 = 4 overs + 2 balls) and true decimal overs (e.g. 4.3333).
+const oversToBalls = (oversValue) => {
+  if (oversValue === null || oversValue === undefined) return 0;
+  const numeric = Number(oversValue);
+  if (Number.isFinite(numeric)) {
+    if (Number.isInteger(numeric)) return Math.max(0, numeric * 6);
+    const wholeOvers = Math.floor(numeric);
+    const fractional = numeric - wholeOvers;
+    const ballsByNotation = Math.round(fractional * 10);
+    const looksLikeNotation = Math.abs(fractional * 10 - ballsByNotation) < 1e-6;
+    if (looksLikeNotation) return Math.max(0, wholeOvers * 6 + ballsByNotation);
+    return Math.max(0, Math.round(numeric * 6));
+  }
+
+  const str = String(oversValue || '').trim();
+  if (!str) return 0;
+  const match = str.match(/^(\d+)(?:\.(\d+))?$/);
+  if (!match) return 0;
+  const wholeOvers = parseInt(match[1], 10) || 0;
+  const ballsPart = match[2] ? parseInt(match[2], 10) || 0 : 0;
+  return Math.max(0, wholeOvers * 6 + ballsPart);
+};
+
+const formatOversFromBalls = (balls) => {
+  const totalBalls = toNumber(balls);
+  if (totalBalls <= 0) return '0.0';
+  const overs = Math.floor(totalBalls / 6);
+  const rem = totalBalls % 6;
+  return `${overs}.${rem}`;
+};
+
 function calculatePlayerStatsUpdates(currentStats, scorecardStats) {
   const updates = { ...currentStats };
-  const toNumber = (value) => {
-    const n = Number(value);
-    return Number.isFinite(n) ? n : 0;
-  };
-
-  // Convert overs to balls.
-  // Supports cricket notation (e.g. 4.2 = 4 overs + 2 balls) and true decimal overs (e.g. 4.3333).
-  const oversToBalls = (oversValue) => {
-    if (oversValue === null || oversValue === undefined) return 0;
-    const numeric = Number(oversValue);
-    if (Number.isFinite(numeric)) {
-      if (Number.isInteger(numeric)) return Math.max(0, numeric * 6);
-      const wholeOvers = Math.floor(numeric);
-      const fractional = numeric - wholeOvers;
-      const ballsByNotation = Math.round(fractional * 10);
-      const looksLikeNotation = Math.abs(fractional * 10 - ballsByNotation) < 1e-6;
-      if (looksLikeNotation) return Math.max(0, wholeOvers * 6 + ballsByNotation);
-      return Math.max(0, Math.round(numeric * 6));
-    }
-
-    const str = String(oversValue || '').trim();
-    if (!str) return 0;
-    const match = str.match(/^(\d+)(?:\.(\d+))?$/);
-    if (!match) return 0;
-    const wholeOvers = parseInt(match[1], 10) || 0;
-    const ballsPart = match[2] ? parseInt(match[2], 10) || 0 : 0;
-    return Math.max(0, wholeOvers * 6 + ballsPart);
-  };
-
-  const formatOversFromBalls = (balls) => {
-    const totalBalls = toNumber(balls);
-    if (totalBalls <= 0) return '0.0';
-    const overs = Math.floor(totalBalls / 6);
-    const rem = totalBalls % 6;
-    return `${overs}.${rem}`;
-  };
 
   let matchCounted = false;
   const ensureMatchCounted = () => {
@@ -387,6 +402,43 @@ function calculatePlayerStatsUpdates(currentStats, scorecardStats) {
       if (toNumber(updates.wickets) > 0) {
         updates.bowlingStrikeRate = (totalBalls / toNumber(updates.wickets)).toFixed(2);
       }
+    }
+  }
+
+  return updates;
+}
+
+/**
+ * Helper: Backfill missing bowling balls after a scorecard was already synced (prevents double counting).
+ */
+function calculatePlayerStatsBackfillUpdates(currentStats, scorecardStats) {
+  const updates = { ...currentStats };
+
+  const hasBowling = Boolean(scorecardStats?.bowling);
+  if (!hasBowling) return null;
+
+  const currentBalls = toNumber(updates.balls);
+  const derivedFromExistingOvers = oversToBalls(updates.overs);
+
+  const matchBallsRaw = toNumber(scorecardStats?.bowling?.balls);
+  const matchBalls = matchBallsRaw > 0 ? matchBallsRaw : oversToBalls(scorecardStats?.bowling?.overs);
+
+  let nextBalls = currentBalls;
+  if (derivedFromExistingOvers > nextBalls) nextBalls = derivedFromExistingOvers;
+  if (nextBalls === 0 && matchBalls > 0) nextBalls = matchBalls;
+
+  if (nextBalls === currentBalls) return null;
+
+  updates.balls = nextBalls;
+  updates.overs = formatOversFromBalls(nextBalls);
+
+  const wickets = toNumber(updates.wickets);
+  const runsConceded = toNumber(updates.runsConceded);
+
+  if (nextBalls > 0) {
+    updates.economy = ((runsConceded * 6) / nextBalls).toFixed(2);
+    if (wickets > 0) {
+      updates.bowlingStrikeRate = (nextBalls / wickets).toFixed(2);
     }
   }
 
