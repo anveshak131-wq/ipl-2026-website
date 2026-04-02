@@ -3,6 +3,9 @@
  * Handles GET, POST, PUT, DELETE operations for matches
  */
 
+const MATCHES_CACHE_TTL = 60;
+const TEAMS_CACHE_TTL = 300;
+
 // Mock teams for reference (IPL + WPL)
 const mockTeams = [
   // IPL Teams (IDs 1-10)
@@ -363,21 +366,8 @@ async function handleGetRequest(context) {
     const resolvedSeasonYear = Number.isFinite(seasonYear) ? seasonYear : DEFAULT_SEASON_YEAR;
     
     // Try to get matches from KV storage
-    const kvMatches = await env.IPL_CACHE.get('matches', 'json');
-    
-    // Check if KV key exists (even if empty array)
-    const kvExists = await env.IPL_CACHE.get('matches');
-    
-    let matches;
-    // Start with empty array - no default/sample matches
-    // If KV exists, use what's in KV (even if empty array)
-    if (kvExists === null) {
-      // KV key doesn't exist - first time, start with empty array
-      matches = [];
-    } else {
-      // KV key exists - use what's in KV (even if empty array)
-      matches = kvMatches || [];
-    }
+    const kvMatches = await env.IPL_CACHE.get('matches', { type: 'json', cacheTtl: MATCHES_CACHE_TTL });
+    let matches = kvMatches === null ? [] : kvMatches || [];
     
     // Ensure all matches have league property (migration for existing data)
     let needsUpdate = false;
@@ -414,10 +404,12 @@ async function handleGetRequest(context) {
     }
     
     // Fetch teams from KV storage to properly resolve team objects
-    let allTeams = await env.IPL_CACHE.get('teams', 'json');
-    if (!allTeams || allTeams.length === 0) {
-      // Fallback to mockTeams if KV is empty
-      allTeams = mockTeams;
+    let allTeams = mockTeams;
+    if (matches.length) {
+      const kvTeams = await env.IPL_CACHE.get('teams', { type: 'json', cacheTtl: TEAMS_CACHE_TTL });
+      if (Array.isArray(kvTeams) && kvTeams.length) {
+        allTeams = kvTeams;
+      }
     }
     
     // Format matches with team objects
@@ -586,17 +578,7 @@ async function handlePostRequest(context) {
     
     // Get existing matches from KV
     let matches = await env.IPL_CACHE.get('matches', 'json');
-    
-    // Check if KV key exists
-    const kvExists = await env.IPL_CACHE.get('matches');
-    
-    // Start with empty array - no default/sample matches
-    // If KV exists but is empty, use empty array
-    if (kvExists === null) {
-      matches = [];
-    } else {
-      matches = matches || [];
-    }
+    matches = matches === null ? [] : matches || [];
     
     // Generate new ID
     const newId = String(Math.max(...matches.map(m => parseInt(m.id) || 0), 0) + 1);
@@ -701,17 +683,7 @@ async function handlePutRequest(context) {
     
     // Get existing matches from KV
     let matches = await env.IPL_CACHE.get('matches', 'json');
-    
-    // Check if KV key exists
-    const kvExists = await env.IPL_CACHE.get('matches');
-    
-    // Start with empty array - no default/sample matches
-    // If KV exists but is empty, use empty array
-    if (kvExists === null) {
-      matches = [];
-    } else {
-      matches = matches || [];
-    }
+    matches = matches === null ? [] : matches || [];
     
     // Find and update match
     const matchIndex = matches.findIndex(m => m.id === id);
@@ -805,12 +777,7 @@ async function handleDeleteRequest(context) {
       }
 
       let matches = await env.IPL_CACHE.get('matches', 'json');
-      const kvExists = await env.IPL_CACHE.get('matches');
-      if (kvExists === null) {
-        matches = [];
-      } else {
-        matches = matches || [];
-      }
+      matches = matches === null ? [] : matches || [];
 
       const idSet = new Set(matchIds);
       const existingIds = new Set(matches.map((m) => String(m.id)));
@@ -842,17 +809,7 @@ async function handleDeleteRequest(context) {
     
     // Get existing matches from KV
     let matches = await env.IPL_CACHE.get('matches', 'json');
-    
-    // Check if KV key exists
-    const kvExists = await env.IPL_CACHE.get('matches');
-    
-    // Start with empty array - no default/sample matches
-    // If KV exists but is empty, use empty array
-    if (kvExists === null) {
-      matches = [];
-    } else {
-      matches = matches || [];
-    }
+    matches = matches === null ? [] : matches || [];
     
     // Ensure all matches have league property
     matches = matches.map(m => ({

@@ -19,6 +19,8 @@ export const onRequest = async (context) => {
   const url = new URL(request.url);
   const page = url.searchParams.get('page') || url.searchParams.get('slug') || 'legal';
   const key = `legal-page:${page}`;
+  const LEGAL_CACHE_TTL = 300;
+  const AUTH_CACHE_TTL = 60;
 
   try {
     if (method === 'GET') {
@@ -29,7 +31,7 @@ export const onRequest = async (context) => {
         );
       }
 
-      const stored = await env.SPORTS_KV.get(key, 'json');
+      const stored = await env.SPORTS_KV.get(key, { type: 'json', cacheTtl: LEGAL_CACHE_TTL });
       return new Response(
         JSON.stringify({ page, content: stored?.content || null, updatedAt: stored?.updatedAt || null }),
         { status: 200, headers: { 'Content-Type': 'application/json', ...corsHeaders } },
@@ -53,7 +55,7 @@ export const onRequest = async (context) => {
         );
       }
 
-      const tokenValue = await env.SPORTS_KV.get(`token:${token}`);
+      const tokenValue = await env.SPORTS_KV.get(`token:${token}`, { cacheTtl: AUTH_CACHE_TTL });
       if (!tokenValue) {
         return new Response(
           JSON.stringify({ error: 'Invalid token' }),
@@ -74,7 +76,7 @@ export const onRequest = async (context) => {
         }
       }
 
-      const userData = await env.SPORTS_KV.get(`user:${email}`);
+      const userData = await env.SPORTS_KV.get(`user:${email}`, { cacheTtl: AUTH_CACHE_TTL });
       if (!userData) {
         return new Response(
           JSON.stringify({ error: 'User not found' }),

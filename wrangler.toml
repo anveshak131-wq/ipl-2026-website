@@ -24,6 +24,17 @@ vars = {
   ENVIRONMENT = "production",
   OPENWEATHER_API_KEY = "4521f1357955496894b160548251012"
 }
+[[env.production.kv_namespaces]]
+binding = "SPORTS_KV"
+id = "local-sports-kv"
+
+[[env.production.kv_namespaces]]
+binding = "IPL_CACHE"
+id = "local-ipl-cache"
+
+[[env.production.kv_namespaces]]
+binding = "WEATHER_CACHE"
+id = "local-weather-cache"
 
 # Development environment variables
 [env.development]
@@ -31,6 +42,17 @@ vars = {
   ENVIRONMENT = "development",
   OPENWEATHER_API_KEY = "4521f1357955496894b160548251012"
 }
+[[env.development.kv_namespaces]]
+binding = "SPORTS_KV"
+id = "local-sports-kv-preview"
+
+[[env.development.kv_namespaces]]
+binding = "IPL_CACHE"
+id = "local-ipl-cache-preview"
+
+[[env.development.kv_namespaces]]
+binding = "WEATHER_CACHE"
+id = "local-weather-cache-preview"
 
 # Scheduled event for email reminders
 # This cron job runs every 5 minutes to check for matches starting in 30 minutes

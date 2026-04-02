@@ -89,6 +89,6 @@ async function fetchWeatherForecast(ground, env, days) {
 }
 
 async function getGroundsFromKV(env) {
-  const groundsList = await env.SPORTS_KV.get('grounds:list');
+  const groundsList = await env.SPORTS_KV.get('grounds:list', { cacheTtl: 3600 });
   return groundsList ? JSON.parse(groundsList) : [];
 }

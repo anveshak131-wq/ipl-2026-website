@@ -2,6 +2,8 @@
 
 import { StatsCalculator } from '@/lib/statsCalculator';
 
+const SCORECARD_CACHE_TTL = 300;
+
 export const runtime = 'edge';
 
 export async function GET(request: Request) {
@@ -26,7 +28,9 @@ export async function GET(request: Request) {
     const keys = listResult.keys.map((k: any) => k.name);
 
     // Fetch all scorecards and filter by league
-    const scorecardPromises = keys.map((key: string) => kvNamespace.get(key, 'json'));
+    const scorecardPromises = keys.map((key: string) =>
+      kvNamespace.get(key, { type: 'json', cacheTtl: SCORECARD_CACHE_TTL })
+    );
     const allScorecards = (await Promise.all(scorecardPromises)).filter(Boolean);
     
     // Filter by league and only get published (non-draft) scorecards

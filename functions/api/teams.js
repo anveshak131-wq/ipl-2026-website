@@ -376,6 +376,7 @@ function buildSeedTeams() {
 }
 
 async function readTeamsFromKV(env) {
+  const TEAMS_CACHE_TTL = 120;
   if (!env || !env.IPL_CACHE) {
     return { teams: null, error: 'KV binding IPL_CACHE is missing' };
   }
@@ -383,7 +384,7 @@ async function readTeamsFromKV(env) {
   const kv = env.IPL_CACHE;
 
   try {
-    const teams = await kv.get('teams', { type: 'json', cacheTtl: 0 });
+    const teams = await kv.get('teams', { type: 'json', cacheTtl: TEAMS_CACHE_TTL });
     return { teams: Array.isArray(teams) ? teams : null, error: null };
   } catch (errorWithCacheTtl) {
     try {

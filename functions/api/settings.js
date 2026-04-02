@@ -12,6 +12,8 @@ function verifyAdminToken(request) {
   return true;
 }
 
+const SETTINGS_CACHE_TTL = 300;
+
 // Default settings
 const defaultSettings = {
   siteName: 'SportsUP18',
@@ -38,7 +40,7 @@ async function handleGetRequest(context) {
   
   try {
     // Try to get settings from KV storage
-    let settings = await env.IPL_CACHE.get('settings', 'json');
+    let settings = await env.IPL_CACHE.get('settings', { type: 'json', cacheTtl: SETTINGS_CACHE_TTL });
     
     // Fallback to default settings if KV storage is empty, otherwise
     // merge stored settings on top of defaults so new fields get defaults.

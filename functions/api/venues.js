@@ -7,6 +7,8 @@ export const onRequest = async (context) => {
   const { request, env } = context;
   const { pathname, searchParams } = new URL(request.url);
   const method = request.method;
+  const VENUES_CACHE_TTL = 3600;
+  const AUTH_CACHE_TTL = 60;
 
   const corsHeaders = {
     'Access-Control-Allow-Origin': '*',
@@ -31,7 +33,7 @@ export const onRequest = async (context) => {
       }
       
       const token = authHeader.replace('Bearer ', '');
-      const tokenValue = await env.SPORTS_KV.get(`token:${token}`);
+      const tokenValue = await env.SPORTS_KV.get(`token:${token}`, { cacheTtl: AUTH_CACHE_TTL });
       if (!tokenValue) return false;
       
       // Parse token value (JSON or plain email)
@@ -47,7 +49,7 @@ export const onRequest = async (context) => {
         }
       }
       
-      const userData = await env.SPORTS_KV.get(`user:${email}`);
+      const userData = await env.SPORTS_KV.get(`user:${email}`, { cacheTtl: AUTH_CACHE_TTL });
       if (!userData) return false;
       
       const user = JSON.parse(userData);
@@ -56,7 +58,7 @@ export const onRequest = async (context) => {
 
     // GET all venues
     if (method === 'GET') {
-      const venuesList = await env.SPORTS_KV.get('venues:list');
+      const venuesList = await env.SPORTS_KV.get('venues:list', { cacheTtl: VENUES_CACHE_TTL });
       const venues = venuesList ? JSON.parse(venuesList) : getDefaultVenues();
       
       return new Response(JSON.stringify({ venues }), {

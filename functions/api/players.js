@@ -19,10 +19,13 @@ function verifyAdminToken(request) {
   return true;
 }
 
+const PLAYERS_CACHE_TTL = 300;
+const TEAMS_CACHE_TTL = 600;
+
 // Helper: get team name by team ID
 async function getTeamNameById(players, teamId, league, env) {
   try {
-    const teamsData = await env.IPL_CACHE.get('teams', 'json');
+    const teamsData = await env.IPL_CACHE.get('teams', { type: 'json', cacheTtl: TEAMS_CACHE_TTL });
     const teams = teamsData || [];
     const team = teams.find(t => (t.league || 'ipl') === league && t.id === teamId);
     return team ? team.name : `Team ${teamId}`;
@@ -75,14 +78,16 @@ export const onRequest = async (context) => {
       const fixEllyse = url.searchParams.get('fixEllyse') === 'true';
       const diagnostic = url.searchParams.get('diagnostic') === 'true';
       
-      let playersData = await env.IPL_CACHE.get('players', 'json');
-      let players = playersData || [];
+      let playersData;
+      let players = [];
 
-      // Force refresh if requested
+      // Force refresh if requested (skip initial KV read)
       if (forceRefresh) {
-        // Clear cache and reload
         await env.IPL_CACHE.delete('players');
-        playersData = await env.IPL_CACHE.get('players', 'json');
+        playersData = await env.IPL_CACHE.get('players', { type: 'json' });
+        players = playersData || [];
+      } else {
+        playersData = await env.IPL_CACHE.get('players', { type: 'json', cacheTtl: PLAYERS_CACHE_TTL });
         players = playersData || [];
       }
 

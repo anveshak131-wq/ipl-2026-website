@@ -1,4 +1,5 @@
 // API endpoint to calculate statistics from scorecards
+const SCORECARD_CACHE_TTL = 300;
 
 export async function onRequest(context) {
   const { request, env } = context;
@@ -23,7 +24,7 @@ export async function onRequest(context) {
     const keys = listResult.keys.map(k => k.name);
 
     // Fetch all scorecards and filter by league
-    const scorecardPromises = keys.map(key => kvNamespace.get(key, 'json'));
+    const scorecardPromises = keys.map(key => kvNamespace.get(key, { type: 'json', cacheTtl: SCORECARD_CACHE_TTL }));
     const allScorecards = (await Promise.all(scorecardPromises)).filter(Boolean);
     
     const debugInfo = {

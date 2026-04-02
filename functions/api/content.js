@@ -28,6 +28,7 @@ function verifyAdminToken(request) {
 const kv = globalThis.IPL_CACHE;
 
 const KV_KEY = 'ipl:content';
+const CONTENT_CACHE_TTL = 300;
 
 export const onRequest = async (context) => {
   const { request, env } = context;
@@ -55,7 +56,7 @@ export const onRequest = async (context) => {
       const type = url.searchParams.get('type');
       const league = url.searchParams.get('league');
 
-      const cached = await kvNamespace.get(KV_KEY);
+      const cached = await kvNamespace.get(KV_KEY, { cacheTtl: CONTENT_CACHE_TTL });
       let content = cached ? JSON.parse(cached) : [];
 
       // Ensure all content has league property (migration for existing data)
