@@ -73,6 +73,13 @@ type BallRow = {
   notes: string;
 };
 
+type BallTotals = {
+  batRuns: number;
+  extrasRuns: number;
+  totalRuns: number;
+  completedRuns: number;
+};
+
 const DEFAULT_EXTRAS: ExtrasRow = {
   hasWide: false,
   wideExtraRuns: 0,
@@ -101,6 +108,38 @@ function findPlayerName(id: string) {
   return PLAYERS.find((p) => p.id === id)?.name || '';
 }
 
+const NO_BALL_ALLOWED_WICKETS = new Set(['Run Out', 'Hit the Ball Twice', 'Obstructing the Field']);
+
+function getAllowedWicketTypes(extras: ExtrasRow) {
+  if (extras.hasNoBall) {
+    return WICKET_TYPES.filter((t) => NO_BALL_ALLOWED_WICKETS.has(t));
+  }
+  return WICKET_TYPES;
+}
+
+function computeBallTotals(runs: number, extras: ExtrasRow): BallTotals {
+  const batRuns = extras.hasWide || extras.hasByes || extras.hasLB ? 0 : runs;
+  const byeRuns = extras.hasByes ? extras.byesRuns : 0;
+  const legByeRuns = extras.hasLB ? extras.lbRuns : 0;
+  const wideExtraRuns = extras.hasWide ? extras.wideExtraRuns : 0;
+  const penaltyRuns = (extras.hasNoBall ? 1 : 0) + (extras.hasWide ? 1 : 0);
+  const extrasRuns = penaltyRuns + byeRuns + legByeRuns + wideExtraRuns;
+  const completedRuns = extras.hasWide
+    ? wideExtraRuns
+    : extras.hasByes
+      ? byeRuns
+      : extras.hasLB
+        ? legByeRuns
+        : runs;
+
+  return {
+    batRuns,
+    extrasRuns,
+    totalRuns: batRuns + extrasRuns,
+    completedRuns,
+  };
+}
+
 export default function LiveScoreFastTestPage() {
   const [innings, setInnings] = useState<'1' | '2'>('1');
   const [strikerId, setStrikerId] = useState('t1-p1');
@@ -113,6 +152,7 @@ export default function LiveScoreFastTestPage() {
   const [pendingExtras, setPendingExtras] = useState<ExtrasRow>({ ...DEFAULT_EXTRAS });
   const [pendingWicket, setPendingWicket] = useState<WicketRow>({ ...DEFAULT_WICKET });
   const [pendingNotes, setPendingNotes] = useState('');
+  const [autoSwapStrike, setAutoSwapStrike] = useState(true);
 
   const legalBalls = useMemo(() => {
     return rows
@@ -130,6 +170,11 @@ export default function LiveScoreFastTestPage() {
     return rows.slice(-6).reverse();
   }, [rows]);
 
+  const pendingTotals = useMemo(
+    () => computeBallTotals(pendingRuns, pendingExtras),
+    [pendingRuns, pendingExtras]
+  );
+
   const addRow = (data: Partial<BallRow>) => {
     const row: BallRow = {
       id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
@@ -145,15 +190,88 @@ export default function LiveScoreFastTestPage() {
       notes: data.notes || '',
     };
     setRows((prev) => [...prev, row]);
+
+    if (autoSwapStrike && !row.wicket.hasWicket) {
+      const totals = computeBallTotals(row.runs, row.extras);
+      if (totals.completedRuns % 2 === 1) {
+        setStrikerId(row.nonStrikerId);
+        setNonStrikerId(row.strikerId);
+      }
+    }
   };
 
   const quickAddRuns = (runs: number) => {
     addRow({ runs, extras: { ...DEFAULT_EXTRAS }, wicket: { ...DEFAULT_WICKET } });
   };
 
+  const toggleWide = () => {
+    setPendingExtras((prev) => {
+      const next = { ...prev, hasWide: !prev.hasWide };
+      if (next.hasWide) {
+        next.hasNoBall = false;
+        next.hasByes = false;
+        next.hasLB = false;
+        next.byesRuns = 0;
+        next.lbRuns = 0;
+      }
+      return next;
+    });
+    setPendingWicket((prev) => ({ ...prev, wicketType: '' }));
+    setPendingRuns(0);
+  };
+
+  const toggleNoBall = () => {
+    const nextHasNoBall = !pendingExtras.hasNoBall;
+    setPendingExtras((prev) => {
+      const next = { ...prev, hasNoBall: nextHasNoBall };
+      if (next.hasNoBall) {
+        next.hasWide = false;
+        next.wideExtraRuns = 0;
+      }
+      return next;
+    });
+    if (nextHasNoBall && !NO_BALL_ALLOWED_WICKETS.has(pendingWicket.wicketType)) {
+      setPendingWicket((prev) => ({ ...prev, wicketType: '' }));
+    }
+  };
+
+  const toggleByes = () => {
+    setPendingExtras((prev) => {
+      const next = { ...prev, hasByes: !prev.hasByes };
+      if (next.hasByes) {
+        next.hasWide = false;
+        next.hasLB = false;
+        next.wideExtraRuns = 0;
+        next.lbRuns = 0;
+      } else {
+        next.byesRuns = 0;
+      }
+      return next;
+    });
+    setPendingRuns(0);
+  };
+
+  const toggleLegByes = () => {
+    setPendingExtras((prev) => {
+      const next = { ...prev, hasLB: !prev.hasLB };
+      if (next.hasLB) {
+        next.hasWide = false;
+        next.hasByes = false;
+        next.wideExtraRuns = 0;
+        next.byesRuns = 0;
+      } else {
+        next.lbRuns = 0;
+      }
+      return next;
+    });
+    setPendingRuns(0);
+  };
+
   const addSpecialBall = () => {
+    const sanitizedRuns =
+      pendingExtras.hasWide || pendingExtras.hasByes || pendingExtras.hasLB ? 0 : pendingRuns;
     addRow({
-      runs: pendingRuns,
+      runs: sanitizedRuns,
       extras: { ...pendingExtras },
       wicket: { ...pendingWicket },
       notes: pendingNotes,
@@ -176,6 +294,9 @@ export default function LiveScoreFastTestPage() {
   };
 
   const editRow = editingIndex !== null ? rows[editingIndex] : null;
+  const editAllowedWickets = editRow ? getAllowedWicketTypes(editRow.extras) : WICKET_TYPES;
+  const editHasLegacyWicket =
+    !!editRow?.wicket?.wicketType && !editAllowedWickets.includes(editRow.wicket.wicketType);
 
   return (
     <div className="min-h-screen bg-slate-950 text-white">
@@ -283,7 +404,7 @@ export default function LiveScoreFastTestPage() {
                         W
                       </button>
                       <button
-                        onClick={() => setPendingExtras((prev) => ({ ...prev, hasWide: !prev.hasWide }))}
+                        onClick={toggleWide}
                         className={`h-10 rounded-xl px-4 text-sm font-semibold ${
                           pendingExtras.hasWide ? 'bg-amber-500' : 'bg-white/10'
                         }`}
@@ -291,7 +412,7 @@ export default function LiveScoreFastTestPage() {
                         WD
                       </button>
                       <button
-                        onClick={() => setPendingExtras((prev) => ({ ...prev, hasNoBall: !prev.hasNoBall }))}
+                        onClick={toggleNoBall}
                         className={`h-10 rounded-xl px-4 text-sm font-semibold ${
                           pendingExtras.hasNoBall ? 'bg-amber-500' : 'bg-white/10'
                         }`}
@@ -299,7 +420,7 @@ export default function LiveScoreFastTestPage() {
                         NB
                       </button>
                       <button
-                        onClick={() => setPendingExtras((prev) => ({ ...prev, hasByes: !prev.hasByes }))}
+                        onClick={toggleByes}
                         className={`h-10 rounded-xl px-4 text-sm font-semibold ${
                           pendingExtras.hasByes ? 'bg-sky-500' : 'bg-white/10'
                         }`}
@@ -307,7 +428,7 @@ export default function LiveScoreFastTestPage() {
                         B
                       </button>
                       <button
-                        onClick={() => setPendingExtras((prev) => ({ ...prev, hasLB: !prev.hasLB }))}
+                        onClick={toggleLegByes}
                         className={`h-10 rounded-xl px-4 text-sm font-semibold ${
                           pendingExtras.hasLB ? 'bg-sky-500' : 'bg-white/10'
                         }`}
@@ -316,12 +437,23 @@ export default function LiveScoreFastTestPage() {
                       </button>
                     </div>
                   </div>
-                  <button
-                    onClick={undoLast}
-                    className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/10 px-4 py-2 text-sm"
-                  >
-                    <Undo2 className="h-4 w-4" /> Undo Last
-                  </button>
+                  <div className="flex flex-wrap items-center gap-3">
+                    <label className="flex items-center gap-2 text-xs text-white/60">
+                      <input
+                        type="checkbox"
+                        checked={autoSwapStrike}
+                        onChange={(e) => setAutoSwapStrike(e.target.checked)}
+                        className="rounded border-white/20 bg-slate-950"
+                      />
+                      Auto swap strike on odd runs (skips wickets)
+                    </label>
+                    <button
+                      onClick={undoLast}
+                      className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/10 px-4 py-2 text-sm"
+                    >
+                      <Undo2 className="h-4 w-4" /> Undo Last
+                    </button>
+                  </div>
                 </div>
 
                 <div className="mt-4 grid gap-4 lg:grid-cols-[1fr,1fr,1.4fr]">
@@ -345,6 +477,15 @@ export default function LiveScoreFastTestPage() {
                       </button>
                     </div>
                     <div className="mt-2 text-xs text-white/50">Use this when adding WD/NB/B/LB or wicket balls.</div>
+                    <div className="mt-2 text-xs text-white/60">
+                      Ball total: <span className="text-white">{pendingTotals.totalRuns}</span> (bat{' '}
+                      {pendingTotals.batRuns} + extras {pendingTotals.extrasRuns})
+                    </div>
+                    {(pendingExtras.hasNoBall || pendingExtras.hasWide) && (
+                      <div className="mt-1 text-[11px] text-white/45">
+                        Includes +1 {pendingExtras.hasNoBall ? 'no-ball' : 'wide'} penalty run.
+                      </div>
+                    )}
                   </div>
 
                   <div>
@@ -401,6 +542,9 @@ export default function LiveScoreFastTestPage() {
                         </label>
                       )}
                     </div>
+                    <div className="mt-2 text-[11px] text-white/45">
+                      Wide and no-ball are mutually exclusive. Byes/LB disable wide.
+                    </div>
                   </div>
 
                   <div>
@@ -414,12 +558,17 @@ export default function LiveScoreFastTestPage() {
                             className="rounded-lg border border-white/10 bg-slate-950 px-2 py-1"
                           >
                             <option value="">Wicket type...</option>
-                            {WICKET_TYPES.map((t) => (
+                            {getAllowedWicketTypes(pendingExtras).map((t) => (
                               <option key={t} value={t}>
                                 {t}
                               </option>
                             ))}
                           </select>
+                          {pendingExtras.hasNoBall && (
+                            <div className="text-[11px] text-white/50">
+                              No-ball allows only Run Out, Hit the Ball Twice, or Obstructing the Field.
+                            </div>
+                          )}
                           <select
                             value={pendingWicket.outBatter}
                             onChange={(e) =>
@@ -634,13 +783,50 @@ export default function LiveScoreFastTestPage() {
                       onChange={(e) =>
                         setRows((prev) =>
                           prev.map((r, i) =>
-                            i === editingIndex ? { ...r, extras: { ...r.extras, hasWide: e.target.checked } } : r
+                            i === editingIndex
+                              ? {
+                                  ...r,
+                                  extras: {
+                                    ...r.extras,
+                                    hasWide: e.target.checked,
+                                    hasNoBall: e.target.checked ? false : r.extras.hasNoBall,
+                                    hasByes: e.target.checked ? false : r.extras.hasByes,
+                                    hasLB: e.target.checked ? false : r.extras.hasLB,
+                                    byesRuns: e.target.checked ? 0 : r.extras.byesRuns,
+                                    lbRuns: e.target.checked ? 0 : r.extras.lbRuns,
+                                  },
+                                }
+                              : r
                           )
                         )
                       }
                     />
                     Wide
                   </label>
+                  {editRow.extras.hasWide && (
+                    <select
+                      value={editRow.extras.wideExtraRuns}
+                      onChange={(e) =>
+                        setRows((prev) =>
+                          prev.map((r, i) =>
+                            i === editingIndex
+                              ? {
+                                  ...r,
+                                  extras: { ...r.extras, wideExtraRuns: Number(e.target.value) },
+                                }
+                              : r
+                          )
+                        )
+                      }
+                      className="rounded-lg border border-white/10 bg-slate-900 px-3 py-2 text-xs"
+                    >
+                      {[0, 1, 2, 3, 4].map((v) => (
+                        <option key={v} value={v}>
+                          Wide extra +{v}
+                        </option>
+                      ))}
+                    </select>
+                  )}
                   <label className="flex items-center gap-2 text-xs">
                     <input
                       type="checkbox"
@@ -648,7 +834,17 @@ export default function LiveScoreFastTestPage() {
                       onChange={(e) =>
                         setRows((prev) =>
                           prev.map((r, i) =>
-                            i === editingIndex ? { ...r, extras: { ...r.extras, hasNoBall: e.target.checked } } : r
+                            i === editingIndex
+                              ? {
+                                  ...r,
+                                  extras: {
+                                    ...r.extras,
+                                    hasNoBall: e.target.checked,
+                                    hasWide: e.target.checked ? false : r.extras.hasWide,
+                                    wideExtraRuns: e.target.checked ? 0 : r.extras.wideExtraRuns,
+                                  },
+                                }
+                              : r
                           )
                         )
                       }
@@ -662,13 +858,49 @@ export default function LiveScoreFastTestPage() {
                       onChange={(e) =>
                         setRows((prev) =>
                           prev.map((r, i) =>
-                            i === editingIndex ? { ...r, extras: { ...r.extras, hasByes: e.target.checked } } : r
+                            i === editingIndex
+                              ? {
+                                  ...r,
+                                  extras: {
+                                    ...r.extras,
+                                    hasByes: e.target.checked,
+                                    hasLB: e.target.checked ? false : r.extras.hasLB,
+                                    hasWide: e.target.checked ? false : r.extras.hasWide,
+                                    wideExtraRuns: e.target.checked ? 0 : r.extras.wideExtraRuns,
+                                    lbRuns: e.target.checked ? 0 : r.extras.lbRuns,
+                                  },
+                                }
+                              : r
                           )
                         )
                       }
                     />
                     Byes
                   </label>
+                  {editRow.extras.hasByes && (
+                    <select
+                      value={editRow.extras.byesRuns}
+                      onChange={(e) =>
+                        setRows((prev) =>
+                          prev.map((r, i) =>
+                            i === editingIndex
+                              ? {
+                                  ...r,
+                                  extras: { ...r.extras, byesRuns: Number(e.target.value) },
+                                }
+                              : r
+                          )
+                        )
+                      }
+                      className="rounded-lg border border-white/10 bg-slate-900 px-3 py-2 text-xs"
+                    >
+                      {[0, 1, 2, 3, 4, 5, 6].map((v) => (
+                        <option key={v} value={v}>
+                          Byes {v}
+                        </option>
+                      ))}
+                    </select>
+                  )}
                   <label className="flex items-center gap-2 text-xs">
                     <input
                       type="checkbox"
@@ -676,13 +908,49 @@ export default function LiveScoreFastTestPage() {
                       onChange={(e) =>
                         setRows((prev) =>
                           prev.map((r, i) =>
-                            i === editingIndex ? { ...r, extras: { ...r.extras, hasLB: e.target.checked } } : r
+                            i === editingIndex
+                              ? {
+                                  ...r,
+                                  extras: {
+                                    ...r.extras,
+                                    hasLB: e.target.checked,
+                                    hasByes: e.target.checked ? false : r.extras.hasByes,
+                                    hasWide: e.target.checked ? false : r.extras.hasWide,
+                                    wideExtraRuns: e.target.checked ? 0 : r.extras.wideExtraRuns,
+                                    byesRuns: e.target.checked ? 0 : r.extras.byesRuns,
+                                  },
+                                }
+                              : r
                           )
                         )
                       }
                     />
                     Leg byes
                   </label>
+                  {editRow.extras.hasLB && (
+                    <select
+                      value={editRow.extras.lbRuns}
+                      onChange={(e) =>
+                        setRows((prev) =>
+                          prev.map((r, i) =>
+                            i === editingIndex
+                              ? {
+                                  ...r,
+                                  extras: { ...r.extras, lbRuns: Number(e.target.value) },
+                                }
+                              : r
+                          )
+                        )
+                      }
+                      className="rounded-lg border border-white/10 bg-slate-900 px-3 py-2 text-xs"
+                    >
+                      {[0, 1, 2, 3, 4, 5, 6].map((v) => (
+                        <option key={v} value={v}>
+                          LB {v}
+                        </option>
+                      ))}
+                    </select>
+                  )}
                 </div>
               </div>
 
@@ -715,12 +983,22 @@ export default function LiveScoreFastTestPage() {
                     className="rounded-lg border border-white/10 bg-slate-900 px-3 py-2 text-xs"
                   >
                     <option value="">Type...</option>
-                    {WICKET_TYPES.map((t) => (
+                    {editHasLegacyWicket && (
+                      <option value={editRow.wicket.wicketType}>
+                        {editRow.wicket.wicketType} (legacy)
+                      </option>
+                    )}
+                    {editAllowedWickets.map((t) => (
                       <option key={t} value={t}>
                         {t}
                       </option>
                     ))}
                   </select>
+                  {editRow.extras.hasNoBall && (
+                    <div className="text-[11px] text-white/50">
+                      No-ball allows only Run Out, Hit the Ball Twice, or Obstructing the Field.
+                    </div>
+                  )}
                   <select
                     value={editRow.wicket.outBatter}
                     onChange={(e) =>
