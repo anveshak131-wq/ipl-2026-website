@@ -6,6 +6,8 @@ import type { Match, Player } from '@/types';
 import { Activity, Download, FileText, Plus, RefreshCw, Save, Trash2, UploadCloud } from 'lucide-react';
 
 const LEAGUE = 'ipl' as const;
+const MAX_OVERS = 20;
+const MAX_LEGAL_BALLS = MAX_OVERS * 6;
 
 const HEADERS = [
   'Over',
@@ -824,33 +826,48 @@ export default function IPLAdminLiveScoreTablePage() {
 
   const countLegalBallsInInnings = (innings: '1' | '2') => {
     let balls = 0;
-    rows.forEach((row, idx) => {
-      if (String(row?.[2] || '') !== innings) return;
+    for (let idx = 0; idx < rows.length; idx++) {
+      const row = rows[idx];
+      if (String(row?.[2] || '') !== innings) continue;
+      if (balls >= MAX_LEGAL_BALLS) break;
       const ex = { ...DEFAULT_EXTRAS, ...(extrasData[idx] || {}) };
       const wk = { ...DEFAULT_WICKET, ...(wicketData[idx] || {}) };
       if (!ex.hasWide && !ex.hasNoBall && !isNonDeliveryWicket(wk)) balls += 1;
-    });
+    }
     return balls;
   };
 
   const getNextBallForInnings = (innings: '1' | '2') => {
     const legalBalls = countLegalBallsInInnings(innings);
+    if (legalBalls >= MAX_LEGAL_BALLS) {
+      return { over: String(MAX_OVERS), ball: '0', isComplete: true };
+    }
     const over = Math.floor(legalBalls / 6);
     const ball = (legalBalls % 6) + 1;
-    return { over: String(over), ball: String(ball) };
+    return { over: String(over), ball: String(ball), isComplete: false };
   };
 
   const getLastRowForInnings = (innings: '1' | '2') => {
-    for (let i = rows.length - 1; i >= 0; i--) {
-      if (String(rows[i]?.[2] || '') === innings) return { row: rows[i], index: i };
+    let legalBalls = 0;
+    let last: { row: string[]; index: number } | null = null;
+    for (let idx = 0; idx < rows.length; idx++) {
+      const row = rows[idx];
+      if (String(row?.[2] || '') !== innings) continue;
+      if (legalBalls >= MAX_LEGAL_BALLS) break;
+      const ex = { ...DEFAULT_EXTRAS, ...(extrasData[idx] || {}) };
+      const wk = { ...DEFAULT_WICKET, ...(wicketData[idx] || {}) };
+      const nonDelivery = isNonDeliveryWicket(wk);
+      if (!ex.hasWide && !ex.hasNoBall && !nonDelivery) legalBalls += 1;
+      last = { row, index: idx };
     }
-    return null;
+    return last;
   };
 
   const addRowToInnings = (inningsNumber: 1 | 2) => {
     const innings = String(inningsNumber) as '1' | '2';
     const newRow = Array(HEADERS.length).fill('');
     const nextBall = getNextBallForInnings(innings);
+    if (nextBall.isComplete) return;
     newRow[0] = nextBall.over;
     newRow[1] = nextBall.ball;
     newRow[2] = innings;
@@ -893,8 +910,10 @@ export default function IPLAdminLiveScoreTablePage() {
     let legalBalls = 0;
     let extras = 0;
 
-    rows.forEach((row, idx) => {
-      if (String(row?.[2] || '') !== innings) return;
+    for (let idx = 0; idx < rows.length; idx++) {
+      const row = rows[idx];
+      if (String(row?.[2] || '') !== innings) continue;
+      if (legalBalls >= MAX_LEGAL_BALLS) break;
 
       const ex = { ...DEFAULT_EXTRAS, ...(extrasData[idx] || {}) };
       const wk = { ...DEFAULT_WICKET, ...(wicketData[idx] || {}) };
@@ -906,7 +925,7 @@ export default function IPLAdminLiveScoreTablePage() {
         legalBalls += 1;
       }
 
-      if (nonDelivery) return;
+      if (nonDelivery) continue;
 
       const runs = ex.hasWide ? 0 : parseInt(String(row?.[6] || ''), 10) || 0;
       batsmanRuns += runs;
@@ -933,7 +952,7 @@ export default function IPLAdminLiveScoreTablePage() {
         legByes += r;
         extras += r;
       }
-    });
+    }
 
     const overs = `${Math.floor(legalBalls / 6)}.${legalBalls % 6}`;
     const teamTotal = batsmanRuns + extras;
@@ -1510,40 +1529,55 @@ export default function IPLAdminLiveScoreTablePage() {
   const computeBatterStats = (innings: '1' | '2', batterName: string) => {
     let runs = 0;
     let balls = 0;
-    rows.forEach((row, idx) => {
-      if (String(row?.[2] || '') !== innings) return;
-      if (String(row?.[3] || '') !== batterName) return;
+    let legalBalls = 0;
+    for (let idx = 0; idx < rows.length; idx++) {
+      const row = rows[idx];
+      if (String(row?.[2] || '') !== innings) continue;
+      if (legalBalls >= MAX_LEGAL_BALLS) break;
+
       const ex = { ...DEFAULT_EXTRAS, ...(extrasData[idx] || {}) };
       const wk = { ...DEFAULT_WICKET, ...(wicketData[idx] || {}) };
-      if (isNonDeliveryWicket(wk)) return;
-      const r = ex.hasWide ? 0 : parseInt(String(row?.[6] || ''), 10) || 0;
-      runs += r;
-      if (!ex.hasWide) balls += 1;
-    });
+      const nonDelivery = isNonDeliveryWicket(wk);
+
+      if (!nonDelivery && String(row?.[3] || '') === batterName) {
+        const r = ex.hasWide ? 0 : parseInt(String(row?.[6] || ''), 10) || 0;
+        runs += r;
+        if (!ex.hasWide) balls += 1;
+      }
+
+      if (!ex.hasWide && !ex.hasNoBall && !nonDelivery) legalBalls += 1;
+    }
     return { runs, balls };
   };
 
   const computeBowlerStats = (innings: '1' | '2', bowlerName: string) => {
     let runsConceded = 0;
     let balls = 0;
-    rows.forEach((row, idx) => {
-      if (String(row?.[2] || '') !== innings) return;
-      if (String(row?.[5] || '') !== bowlerName) return;
+    let inningsLegalBalls = 0;
+    for (let idx = 0; idx < rows.length; idx++) {
+      const row = rows[idx];
+      if (String(row?.[2] || '') !== innings) continue;
+      if (inningsLegalBalls >= MAX_LEGAL_BALLS) break;
 
       const ex = { ...DEFAULT_EXTRAS, ...(extrasData[idx] || {}) };
       const wk = { ...DEFAULT_WICKET, ...(wicketData[idx] || {}) };
-      if (isNonDeliveryWicket(wk)) return;
-      const batRuns = ex.hasWide ? 0 : parseInt(String(row?.[6] || ''), 10) || 0;
+      if (isNonDeliveryWicket(wk)) continue;
 
-      // Batsman runs always count against bowler (unless user records byes/LB correctly as 0 in Runs)
-      runsConceded += batRuns;
+      if (String(row?.[5] || '') === bowlerName) {
+        const batRuns = ex.hasWide ? 0 : parseInt(String(row?.[6] || ''), 10) || 0;
 
-      // Wide/no-ball penalties count against bowler; byes/LB do not.
-      if (ex.hasWide) runsConceded += 1 + (ex.wideExtraRuns || 0);
-      if (ex.hasNoBall) runsConceded += 1;
+        // Batsman runs always count against bowler (unless user records byes/LB correctly as 0 in Runs)
+        runsConceded += batRuns;
 
-      if (!ex.hasWide && !ex.hasNoBall) balls += 1;
-    });
+        // Wide/no-ball penalties count against bowler; byes/LB do not.
+        if (ex.hasWide) runsConceded += 1 + (ex.wideExtraRuns || 0);
+        if (ex.hasNoBall) runsConceded += 1;
+
+        if (!ex.hasWide && !ex.hasNoBall) balls += 1;
+      }
+
+      if (!ex.hasWide && !ex.hasNoBall) inningsLegalBalls += 1;
+    }
     return { runs: runsConceded, balls };
   };
 
@@ -2046,7 +2080,8 @@ export default function IPLAdminLiveScoreTablePage() {
 	          currentPartnership = null;
 	        };
 
-	        deliveries.forEach(({ row, idx }) => {
+	        for (const { row, idx } of deliveries) {
+            if (legalBalls >= MAX_LEGAL_BALLS) break;
 
 	          const strikerId = String(row?.[3] || '').trim();
 	          const nonStrikerId = String(row?.[4] || '').trim();
@@ -2174,7 +2209,7 @@ export default function IPLAdminLiveScoreTablePage() {
 	          }
 	
 	          pushCurrentPartnership();
-	        });
+	        }
 
 	        // Last partnership (not ended by wicket)
 	        pushCurrentPartnership();
@@ -2729,6 +2764,8 @@ export default function IPLAdminLiveScoreTablePage() {
 
   const inn1 = calculateInningsTotals('1');
   const inn2 = calculateInningsTotals('2');
+  const innings1Complete = inn1.legalBalls >= MAX_LEGAL_BALLS;
+  const innings2Complete = inn2.legalBalls >= MAX_LEGAL_BALLS;
 
   return (
     <div className="rounded-3xl border border-white/10 bg-gradient-to-br from-slate-950 via-purple-950/40 to-slate-950 p-6 shadow-2xl">
@@ -2804,6 +2841,7 @@ export default function IPLAdminLiveScoreTablePage() {
           </div>
           <div className="text-xs text-white/60 mt-1">
             Overs {inn1.overs} • Extras {inn1.extras} • W {inn1.wides} • NB {inn1.noBalls}
+            {innings1Complete ? ` • Innings complete (${MAX_OVERS} ov)` : ''}
           </div>
         </div>
 
@@ -2817,6 +2855,7 @@ export default function IPLAdminLiveScoreTablePage() {
           </div>
           <div className="text-xs text-white/60 mt-1">
             Overs {inn2.overs} • Extras {inn2.extras} • W {inn2.wides} • NB {inn2.noBalls}
+            {innings2Complete ? ` • Innings complete (${MAX_OVERS} ov)` : ''}
           </div>
         </div>
       </div>
@@ -3134,7 +3173,8 @@ export default function IPLAdminLiveScoreTablePage() {
             </button>
             <button
               onClick={() => addRowToInnings(1)}
-              className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-sm font-semibold"
+              disabled={innings1Complete}
+              className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 disabled:opacity-60 text-white text-sm font-semibold"
             >
               <Plus className="w-4 h-4" /> Add Ball
             </button>
@@ -3207,7 +3247,8 @@ export default function IPLAdminLiveScoreTablePage() {
             </button>
             <button
               onClick={() => addRowToInnings(2)}
-              className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-fuchsia-600 hover:bg-fuchsia-700 text-white text-sm font-semibold"
+              disabled={innings2Complete}
+              className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-fuchsia-600 hover:bg-fuchsia-700 disabled:opacity-60 text-white text-sm font-semibold"
             >
               <Plus className="w-4 h-4" /> Add Ball
             </button>

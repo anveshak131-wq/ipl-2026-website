@@ -505,6 +505,8 @@ export default function AdminIplLiveScorePage() {
                 weather={selectedMatch.weather as any}
                 pitchReport={(selectedMatch as any).pitchReport || ''}
                 headToHead={(selectedMatch as any).headToHead}
+                resultType={selectedMatch.resultType}
+                isPlayoff={Boolean(selectedMatch.playoffType)}
                 initialState={initialLiveState}
               />
             </div>

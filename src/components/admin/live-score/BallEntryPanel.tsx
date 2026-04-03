@@ -30,6 +30,8 @@ import { Users, RotateCcw, Save } from 'lucide-react';
 import { initializeMatchState, transitionState } from '@/lib/matchStateMachine';
 import { LiveScoreState } from '@/hooks/useLiveScore';
 
+type ResultType = 'win' | 'loss' | 'tie' | 'no-result' | 'abandoned';
+
 interface BallEntryPanelProps {
   matchId: string;
   team1Name: string;
@@ -67,6 +69,8 @@ interface BallEntryPanelProps {
     team2Wins: number;
     lastResult?: string;
   };
+  resultType?: ResultType;
+  isPlayoff?: boolean;
   isTestPage?: boolean; // For test pages, skip match state restrictions
   isEveningMatch?: boolean;
 }
@@ -91,6 +95,8 @@ export default function BallEntryPanel({
   weather,
   pitchReport,
   headToHead,
+  resultType,
+  isPlayoff = false,
   isTestPage = false,
   isEveningMatch: propIsEveningMatch,
 }: BallEntryPanelProps) {
@@ -1013,7 +1019,8 @@ export default function BallEntryPanel({
        matchState.innings1?.completed && 
        matchState.innings2?.completed &&
        !superOverState &&
-       state.team1.runs === state.team2.runs && (
+       state.team1.runs === state.team2.runs &&
+       (!(resultType === 'no-result' || resultType === 'abandoned') || isPlayoff) && (
         <div className="bg-gradient-to-r from-purple-600/30 to-pink-600/30 border-2 border-purple-500/50 rounded-xl p-6 mb-6">
           <div className="text-center">
             <h3 className="text-white font-bold text-xl mb-2">⚡ Match Tied!</h3>

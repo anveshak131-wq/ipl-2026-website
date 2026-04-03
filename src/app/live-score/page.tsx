@@ -89,6 +89,9 @@ const DEFAULT_WICKET: WicketRow = {
   outBatter: 'striker',
 };
 
+const MAX_OVERS = 20;
+const MAX_LEGAL_BALLS = MAX_OVERS * 6;
+
 const OIL_NOISE_BG = `url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`;
 
 const LIVE_SCORE_OIL_THEME = {
@@ -266,8 +269,10 @@ function calculateInningsTotals(
   let legalBalls = 0;
   let extras = 0;
 
-  rows.forEach((row, idx) => {
-    if (String(row?.[2] || '') !== innings) return;
+  for (let idx = 0; idx < rows.length; idx++) {
+    const row = rows[idx];
+    if (String(row?.[2] || '') !== innings) continue;
+    if (legalBalls >= MAX_LEGAL_BALLS) break;
 
     const ex = { ...DEFAULT_EXTRAS, ...(extrasData[idx] || {}) };
     const wk = { ...DEFAULT_WICKET, ...(wicketData[idx] || {}) };
@@ -276,7 +281,7 @@ function calculateInningsTotals(
     if (wk.hasWicket && !isRetiredHurtEvent(wk)) wickets += 1;
     if (!ex.hasWide && !ex.hasNoBall && !nonDelivery) legalBalls += 1;
 
-    if (nonDelivery) return;
+    if (nonDelivery) continue;
 
     const runs = ex.hasWide ? 0 : Number.parseInt(String(row?.[6] || ''), 10) || 0;
     batsmanRuns += runs;
@@ -292,7 +297,7 @@ function calculateInningsTotals(
     if (ex.hasLB && !ex.hasWide) {
       extras += ex.lbRuns || 0;
     }
-  });
+  }
 
   const overs = `${Math.floor(legalBalls / 6)}.${legalBalls % 6}`;
   const teamTotal = batsmanRuns + extras;
@@ -316,19 +321,24 @@ function calculateExtrasBreakdown(
 ): ExtrasBreakdown {
   const breakdown: ExtrasBreakdown = { wides: 0, noBalls: 0, byes: 0, legByes: 0 };
 
-  rows.forEach((row, idx) => {
-    if (String(row?.[2] || '') !== innings) return;
+  let legalBalls = 0;
+  for (let idx = 0; idx < rows.length; idx++) {
+    const row = rows[idx];
+    if (String(row?.[2] || '') !== innings) continue;
+    if (legalBalls >= MAX_LEGAL_BALLS) break;
 
     const ex = { ...DEFAULT_EXTRAS, ...(extrasData[idx] || {}) };
     const wk = { ...DEFAULT_WICKET, ...(wicketData[idx] || {}) };
-    if (isNonDeliveryWicket(wk)) return;
+    if (isNonDeliveryWicket(wk)) continue;
 
     if (ex.hasWide) breakdown.wides += 1 + (ex.wideExtraRuns || 0);
     else if (ex.hasNoBall) breakdown.noBalls += 1;
 
     if (ex.hasByes && !ex.hasWide) breakdown.byes += ex.byesRuns || 0;
     if (ex.hasLB && !ex.hasWide) breakdown.legByes += ex.lbRuns || 0;
-  });
+
+    if (!ex.hasWide && !ex.hasNoBall) legalBalls += 1;
+  }
 
   return breakdown;
 }
@@ -368,26 +378,31 @@ function buildBattingLeaders(
     return created;
   };
 
-  rows.forEach((row, idx) => {
-    if (String(row?.[2] || '') !== innings) return;
+  let legalBalls = 0;
+  for (let idx = 0; idx < rows.length; idx++) {
+    const row = rows[idx];
+    if (String(row?.[2] || '') !== innings) continue;
+    if (legalBalls >= MAX_LEGAL_BALLS) break;
 
     const strikerId = String(row?.[3] || '').trim();
-    if (!strikerId) return;
+    if (!strikerId) continue;
 
     const ex = { ...DEFAULT_EXTRAS, ...(extrasData[idx] || {}) };
     const wk = { ...DEFAULT_WICKET, ...(wicketData[idx] || {}) };
-    if (isNonDeliveryWicket(wk)) return;
+    if (isNonDeliveryWicket(wk)) continue;
 
     const batRuns = ex.hasWide ? 0 : Number.parseInt(String(row?.[6] || ''), 10) || 0;
 
     const batter = ensure(strikerId);
-    if (!batter) return;
+    if (!batter) continue;
 
     batter.runs += batRuns;
     if (!ex.hasWide) batter.balls += 1;
     if (batRuns === 4) batter.fours += 1;
     if (batRuns === 6) batter.sixes += 1;
-  });
+
+    if (!ex.hasWide && !ex.hasNoBall) legalBalls += 1;
+  }
 
   return Array.from(map.values())
     .filter((p) => p.balls > 0 || p.runs > 0)
@@ -398,11 +413,29 @@ function buildBattingLeaders(
     });
 }
 
-function getLastRowForInnings(rows: string[][], innings: '1' | '2') {
-  for (let i = rows.length - 1; i >= 0; i--) {
-    if (String(rows[i]?.[2] || '') === innings) return { row: rows[i], idx: i };
+function getLastRowForInnings(
+  rows: string[][],
+  extrasData: Record<number, ExtrasRow>,
+  wicketData: Record<number, WicketRow>,
+  innings: '1' | '2',
+) {
+  let legalBalls = 0;
+  let last: { row: string[]; idx: number } | null = null;
+
+  for (let idx = 0; idx < rows.length; idx++) {
+    const row = rows[idx];
+    if (String(row?.[2] || '') !== innings) continue;
+    if (legalBalls >= MAX_LEGAL_BALLS) break;
+
+    const ex = { ...DEFAULT_EXTRAS, ...(extrasData[idx] || {}) };
+    const wk = { ...DEFAULT_WICKET, ...(wicketData[idx] || {}) };
+    const nonDelivery = isNonDeliveryWicket(wk);
+
+    if (!ex.hasWide && !ex.hasNoBall && !nonDelivery) legalBalls += 1;
+    last = { row, idx };
   }
-  return null;
+
+  return last;
 }
 
 function computeBatterStats(
@@ -414,22 +447,30 @@ function computeBatterStats(
 ) {
   let runs = 0;
   let balls = 0;
+  let legalBalls = 0;
 
-  rows.forEach((row, idx) => {
-    if (String(row?.[2] || '') !== innings) return;
-    if (String(row?.[3] || '') !== batterName && String(row?.[4] || '') !== batterName) return;
+  for (let idx = 0; idx < rows.length; idx++) {
+    const row = rows[idx];
+    if (String(row?.[2] || '') !== innings) continue;
+    if (legalBalls >= MAX_LEGAL_BALLS) break;
 
     const ex = { ...DEFAULT_EXTRAS, ...(extrasData[idx] || {}) };
     const wk = { ...DEFAULT_WICKET, ...(wicketData[idx] || {}) };
-    if (isNonDeliveryWicket(wk)) return;
-    const r = ex.hasWide ? 0 : Number.parseInt(String(row?.[6] || ''), 10) || 0;
+    const nonDelivery = isNonDeliveryWicket(wk);
 
-    // Only count batter runs on deliveries where they were striker.
-    if (String(row?.[3] || '') === batterName) {
-      runs += r;
-      if (!ex.hasWide) balls += 1;
+    const involvesBatter =
+      String(row?.[3] || '') === batterName || String(row?.[4] || '') === batterName;
+
+    if (!nonDelivery && involvesBatter) {
+      const r = ex.hasWide ? 0 : Number.parseInt(String(row?.[6] || ''), 10) || 0;
+      if (String(row?.[3] || '') === batterName) {
+        runs += r;
+        if (!ex.hasWide) balls += 1;
+      }
     }
-  });
+
+    if (!ex.hasWide && !ex.hasNoBall && !nonDelivery) legalBalls += 1;
+  }
 
   return { runs, balls };
 }
@@ -443,21 +484,28 @@ function computeBowlerStats(
 ) {
   let runsConceded = 0;
   let legalBalls = 0;
+  let inningsLegalBalls = 0;
 
-  rows.forEach((row, idx) => {
-    if (String(row?.[2] || '') !== innings) return;
-    if (String(row?.[5] || '') !== bowlerName) return;
+  for (let idx = 0; idx < rows.length; idx++) {
+    const row = rows[idx];
+    if (String(row?.[2] || '') !== innings) continue;
+    if (inningsLegalBalls >= MAX_LEGAL_BALLS) break;
 
     const ex = { ...DEFAULT_EXTRAS, ...(extrasData[idx] || {}) };
     const wk = { ...DEFAULT_WICKET, ...(wicketData[idx] || {}) };
-    if (isNonDeliveryWicket(wk)) return;
-    const batRuns = ex.hasWide ? 0 : Number.parseInt(String(row?.[6] || ''), 10) || 0;
+    if (isNonDeliveryWicket(wk)) continue;
 
-    runsConceded += batRuns;
-    if (ex.hasWide) runsConceded += 1 + (ex.wideExtraRuns || 0);
-    if (ex.hasNoBall) runsConceded += 1;
-    if (!ex.hasWide && !ex.hasNoBall) legalBalls += 1;
-  });
+    if (String(row?.[5] || '') === bowlerName) {
+      const batRuns = ex.hasWide ? 0 : Number.parseInt(String(row?.[6] || ''), 10) || 0;
+
+      runsConceded += batRuns;
+      if (ex.hasWide) runsConceded += 1 + (ex.wideExtraRuns || 0);
+      if (ex.hasNoBall) runsConceded += 1;
+      if (!ex.hasWide && !ex.hasNoBall) legalBalls += 1;
+    }
+
+    if (!ex.hasWide && !ex.hasNoBall) inningsLegalBalls += 1;
+  }
 
   const overs = `${Math.floor(legalBalls / 6)}.${legalBalls % 6}`;
   return { runs: runsConceded, legalBalls, overs };
@@ -509,8 +557,10 @@ function buildInningsChartSeries(
   let legalBalls = 0;
   const cumulativePoints: ChartPoint[] = [{ x: 0, y: 0 }];
 
-  rows.forEach((row, idx) => {
-    if (String(row?.[2] || '') !== innings) return;
+  for (let idx = 0; idx < rows.length; idx++) {
+    const row = rows[idx];
+    if (String(row?.[2] || '') !== innings) continue;
+    if (legalBalls >= MAX_LEGAL_BALLS) break;
 
     const over = Number.parseInt(String(row?.[0] || ''), 10);
     const ex = { ...DEFAULT_EXTRAS, ...(extrasData[idx] || {}) };
@@ -526,7 +576,7 @@ function buildInningsChartSeries(
 
     if (outcome.legalBall) legalBalls += 1;
     cumulativePoints.push({ x: legalBalls / 6, y: totalRuns });
-  });
+  }
 
   return { overRuns, overWickets, cumulativePoints, totalRuns, legalBalls };
 }
@@ -660,9 +710,12 @@ function buildCommentaryItemsFromRows(
   };
 
   const items: CommentaryItem[] = [];
+  let legalBalls = 0;
 
-  rows.forEach((row, idx) => {
-    if (String(row?.[2] || '') !== innings) return;
+  for (let idx = 0; idx < rows.length; idx++) {
+    const row = rows[idx];
+    if (String(row?.[2] || '') !== innings) continue;
+    if (legalBalls >= MAX_LEGAL_BALLS) break;
 
     const overRaw = Number.parseInt(String(row?.[0] || ''), 10);
     const ballRaw = Number.parseInt(String(row?.[1] || ''), 10);
@@ -746,7 +799,9 @@ function buildCommentaryItemsFromRows(
       resultLabel,
       totalRuns: outcome.totalRuns,
     });
-  });
+
+    if (outcome.legalBall) legalBalls += 1;
+  }
 
   return items;
 }
@@ -889,6 +944,7 @@ function buildCommentaryFromRows(
   };
 
   const lines: string[] = [];
+  let legalBalls = 0;
 
   const ensureOutInDismissal = (batterName: string, text: string) => {
     const batter = String(batterName || '').trim();
@@ -905,8 +961,10 @@ function buildCommentaryFromRows(
     return `${batter} out ${rest}`;
   };
 
-  rows.forEach((row, idx) => {
-    if (String(row?.[2] || '') !== innings) return;
+  for (let idx = 0; idx < rows.length; idx++) {
+    const row = rows[idx];
+    if (String(row?.[2] || '') !== innings) continue;
+    if (legalBalls >= MAX_LEGAL_BALLS) break;
 
     const over = row?.[0] || '';
     const ball = row?.[1] || '';
@@ -940,7 +998,11 @@ function buildCommentaryFromRows(
     const body = wk.hasWicket ? ensureOutInDismissal(dismissedName, bodyRaw) : bodyRaw;
     const line = `${header}${body}`.trim();
     if (line) lines.push(line);
-  });
+
+    if (!ex.hasWide && !ex.hasNoBall && !isNonDeliveryWicket(wk)) {
+      legalBalls += 1;
+    }
+  }
 
   return lines;
 }
@@ -1487,12 +1549,16 @@ export default function LiveScorePage() {
     const innings1BattingKey = getBattingTeamKeyForInnings(selectedMatch, '1');
     const team1Totals = innings1BattingKey === 'team1' ? innings1 : innings2;
     const team2Totals = innings1BattingKey === 'team1' ? innings2 : innings1;
+    const innings1Complete = innings1.legalBalls >= MAX_LEGAL_BALLS;
+    const innings2Complete = innings2.legalBalls >= MAX_LEGAL_BALLS;
+    const team1InningsComplete = team1Totals.legalBalls >= MAX_LEGAL_BALLS;
+    const team2InningsComplete = team2Totals.legalBalls >= MAX_LEGAL_BALLS;
 
     const hasInnings2 = rows.some((r) => String(r?.[2] || '') === '2');
     const currentInnings: '1' | '2' = hasInnings2 ? '2' : '1';
     const battingTeamKey = getBattingTeamKeyForInnings(selectedMatch, currentInnings);
 
-    const last = getLastRowForInnings(rows, currentInnings);
+    const last = getLastRowForInnings(rows, extrasData, wicketData, currentInnings);
     const strikerKey = String(last?.row?.[3] || '').trim();
     const nonStrikerKey = String(last?.row?.[4] || '').trim();
     const bowlerKey = String(last?.row?.[5] || '').trim();
@@ -1533,7 +1599,7 @@ export default function LiveScorePage() {
 
     const isChase = currentInnings === '2' && (innings2.legalBalls > 0 || hasInnings2);
     const target = isChase ? innings1.teamTotal + 1 : null;
-    const remainingBalls = isChase ? Math.max(0, 120 - innings2.legalBalls) : null;
+    const remainingBalls = isChase ? Math.max(0, MAX_LEGAL_BALLS - innings2.legalBalls) : null;
     const needed = isChase && target !== null ? Math.max(0, target - innings2.teamTotal) : null;
     const requiredRate =
       isChase && needed !== null && remainingBalls !== null && remainingBalls > 0
@@ -1553,6 +1619,10 @@ export default function LiveScorePage() {
       innings2BattingLeaders,
       team1Totals,
       team2Totals,
+      innings1Complete,
+      innings2Complete,
+      team1InningsComplete,
+      team2InningsComplete,
       striker,
       nonStriker,
       bowler,
@@ -1927,6 +1997,7 @@ export default function LiveScorePage() {
                               </div>
                               <div className="text-white/70 text-sm">
                                 {derived.team1Totals.overs} ov • RR {derived.team1Totals.runRate}
+                                {derived.team1InningsComplete ? ` • Innings complete (${MAX_OVERS} ov)` : ''}
                               </div>
                               {!isMatchComplete && derived.battingTeamKey === 'team1' && derived.lastSix.length > 0 ? (
                                 <div className="mt-3 flex flex-wrap items-center gap-1.5">
@@ -1997,6 +2068,7 @@ export default function LiveScorePage() {
                               </div>
                               <div className="text-white/70 text-sm">
                                 {derived.team2Totals.overs} ov • RR {derived.team2Totals.runRate}
+                                {derived.team2InningsComplete ? ` • Innings complete (${MAX_OVERS} ov)` : ''}
                               </div>
                               {!isMatchComplete && derived.battingTeamKey === 'team2' && derived.lastSix.length > 0 ? (
                                 <div className="mt-3 flex flex-wrap items-center gap-1.5">
@@ -2096,14 +2168,20 @@ export default function LiveScorePage() {
                                 <div className="text-white font-black">
                                   {derived.innings1.teamTotal}/{derived.innings1.wickets}
                                 </div>
-                                <div className="text-xs text-white/60">{derived.innings1.overs} ov</div>
+                                <div className="text-xs text-white/60">
+                                  {derived.innings1.overs} ov
+                                  {derived.innings1Complete ? ` • complete (${MAX_OVERS} ov)` : ''}
+                                </div>
                               </div>
                               <div className="rounded-2xl p-3 bg-black/25 border border-white/10">
                                 <div className="text-xs text-white/60 font-semibold mb-1">2nd inns</div>
                                 <div className="text-white font-black">
                                   {derived.innings2.teamTotal}/{derived.innings2.wickets}
                                 </div>
-                                <div className="text-xs text-white/60">{derived.innings2.overs} ov</div>
+                                <div className="text-xs text-white/60">
+                                  {derived.innings2.overs} ov
+                                  {derived.innings2Complete ? ` • complete (${MAX_OVERS} ov)` : ''}
+                                </div>
                               </div>
                             </div>
                           </div>
