@@ -1288,6 +1288,7 @@ export default function LiveScorePage() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [lastFetchAt, setLastFetchAt] = useState<number | null>(null);
+  const [isPageVisible, setIsPageVisible] = useState(true);
 
   const playerById = useMemo(() => new Map(players.map((p) => [p.id, p])), [players]);
   const resolvePlayerName = useCallback(
@@ -1303,6 +1304,14 @@ export default function LiveScorePage() {
   useEffect(() => {
     setCurrentLeague('ipl');
   }, [setCurrentLeague]);
+
+  useEffect(() => {
+    if (typeof document === 'undefined') return;
+    const onVisibilityChange = () => setIsPageVisible(!document.hidden);
+    onVisibilityChange();
+    document.addEventListener('visibilitychange', onVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', onVisibilityChange);
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -1360,8 +1369,12 @@ export default function LiveScorePage() {
     setCommentaryOrder('latest');
   }, [selectedMatchId]);
 
-  const fetchLiveRows = useCallback(async (matchId: string) => {
-    const resp = await fetch(`/api/ipl-live-score/save?matchId=${encodeURIComponent(matchId)}&withCommentary=1`, {
+  const fetchLiveRows = useCallback(async (matchId: string, withCommentary: boolean) => {
+    const params = new URLSearchParams({
+      matchId,
+      withCommentary: withCommentary ? '1' : '0',
+    });
+    const resp = await fetch(`/api/ipl-live-score/save?${params.toString()}`, {
       cache: 'no-store',
     });
     if (!resp.ok) throw new Error(`Failed to fetch live score rows (${resp.status})`);
@@ -1384,7 +1397,10 @@ export default function LiveScorePage() {
   }, []);
 
   const fetchMatchFresh = useCallback(async (matchId: string) => {
-    const resp = await fetch(`/api/matches?league=ipl&id=${encodeURIComponent(matchId)}`, { cache: 'no-store' });
+    const resp = await fetch(
+      `/api/matches?league=ipl&id=${encodeURIComponent(matchId)}&syncScorecards=0`,
+      { cache: 'no-store' },
+    );
     if (!resp.ok) return null;
     const data = await resp.json();
     return data && typeof data === 'object' ? (data as Match) : null;
@@ -1442,10 +1458,13 @@ export default function LiveScorePage() {
 
     setError(null);
     try {
+      const shouldFetchScorecards =
+        activeTab === 'scorecard' || selectedMatch?.status === 'completed';
+
       const [next, freshMatch, scorecards] = await Promise.all([
-        fetchLiveRows(selectedMatchId),
+        fetchLiveRows(selectedMatchId, activeTab === 'commentary'),
         fetchMatchFresh(selectedMatchId),
-        fetchScorecardsForMatch(selectedMatchId),
+        shouldFetchScorecards ? fetchScorecardsForMatch(selectedMatchId) : Promise.resolve([]),
       ]);
 
       setTableState(next);
@@ -1463,13 +1482,22 @@ export default function LiveScorePage() {
       if (!firstLoad && mode === 'manual') setIsRefreshing(false);
     }
   }, [
+    activeTab,
     fetchLiveRows,
     fetchMatchFresh,
     fetchScorecardsForMatch,
     lastFetchAt,
     pickBestScorecardResultInfo,
+    selectedMatch,
     selectedMatchId,
   ]);
+
+  const pollIntervalMs = useMemo(() => {
+    if (!selectedMatch) return 15000;
+    if (!isPageVisible) return 60000;
+    if (selectedMatch.status === 'live') return 5000;
+    return 30000;
+  }, [isPageVisible, selectedMatch]);
 
   useEffect(() => {
     if (!selectedMatchId) return;
@@ -1482,13 +1510,13 @@ export default function LiveScorePage() {
     };
 
     tick();
-    const interval = setInterval(tick, 5000);
+    const interval = setInterval(tick, pollIntervalMs);
 
     return () => {
       cancelled = true;
       clearInterval(interval);
     };
-  }, [refresh, selectedMatchId]);
+  }, [pollIntervalMs, refresh, selectedMatchId]);
 
   const computedResultText = useMemo(() => {
     if (!selectedMatch) return '';

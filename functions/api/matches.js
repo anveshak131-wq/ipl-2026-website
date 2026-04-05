@@ -358,25 +358,29 @@ async function handleGetRequest(context) {
     const league = url.searchParams.get('league');
     const matchId = url.searchParams.get('id');
     const includeAll = url.searchParams.get('includeAll') === 'true';
+    const disableScorecardSync =
+      url.searchParams.get('syncScorecards') === '0' || url.searchParams.get('noScorecardSync') === '1';
+    const forceScorecardSync = url.searchParams.get('syncScorecards') === '1';
     const seasonParam = url.searchParams.get('season') || url.searchParams.get('year');
     const seasonYear = Number.parseInt(seasonParam || '', 10);
     const resolvedSeasonYear = Number.isFinite(seasonYear) ? seasonYear : DEFAULT_SEASON_YEAR;
     
     // Try to get matches from KV storage
-    const kvMatches = await env.IPL_CACHE.get('matches', 'json');
-    
-    // Check if KV key exists (even if empty array)
-    const kvExists = await env.IPL_CACHE.get('matches');
-    
+    const kvRaw = await env.IPL_CACHE.get('matches');
+
     let matches;
     // Start with empty array - no default/sample matches
     // If KV exists, use what's in KV (even if empty array)
-    if (kvExists === null) {
+    if (kvRaw === null) {
       // KV key doesn't exist - first time, start with empty array
       matches = [];
     } else {
       // KV key exists - use what's in KV (even if empty array)
-      matches = kvMatches || [];
+      try {
+        matches = JSON.parse(kvRaw) || [];
+      } catch {
+        matches = [];
+      }
     }
     
     // Ensure all matches have league property (migration for existing data)
@@ -424,35 +428,40 @@ async function handleGetRequest(context) {
     const formattedMatches = matches.map(match => formatMatch(match, allTeams));
     
     // Sync results from scorecards for completed matches with missing results
-    try {
-      const scorecardsResponse = await fetch(`${request.url.replace('/api/matches', '/api/scorecards')}&league=${league || 'ipl'}`);
-      if (scorecardsResponse.ok) {
-        const scorecards = await scorecardsResponse.json();
-        if (Array.isArray(scorecards)) {
-          // Update matches with scorecard results
-          formattedMatches.forEach(match => {
-            if (match.status === 'completed' && !match.result) {
-              // Only use published scorecards to avoid leaking draft results.
-              const scorecard = scorecards.find(sc => sc.matchId === match.id && sc.draft === false);
-              if (scorecard && scorecard.result && scorecard.result.winner) {
-                // Create result text from scorecard
-                const winnerTeam = allTeams.find(t => t.name === scorecard.result.winner);
-                const isTeam1Winner = winnerTeam && winnerTeam.id === match.team1?.id;
-                
-                if (isTeam1Winner) {
-                  match.result = `${match.team1?.shortName || match.team1?.name} won by ${scorecard.result.margin}`;
-                } else {
-                  match.result = `${match.team2?.shortName || match.team2?.name} won by ${scorecard.result.margin}`;
+    const shouldSyncScorecards = forceScorecardSync || (!disableScorecardSync && !matchId);
+    if (shouldSyncScorecards) {
+      try {
+        const scorecardsResponse = await fetch(
+          `${request.url.replace('/api/matches', '/api/scorecards')}&league=${league || 'ipl'}`
+        );
+        if (scorecardsResponse.ok) {
+          const scorecards = await scorecardsResponse.json();
+          if (Array.isArray(scorecards)) {
+            // Update matches with scorecard results
+            formattedMatches.forEach(match => {
+              if (match.status === 'completed' && !match.result) {
+                // Only use published scorecards to avoid leaking draft results.
+                const scorecard = scorecards.find(sc => sc.matchId === match.id && sc.draft === false);
+                if (scorecard && scorecard.result && scorecard.result.winner) {
+                  // Create result text from scorecard
+                  const winnerTeam = allTeams.find(t => t.name === scorecard.result.winner);
+                  const isTeam1Winner = winnerTeam && winnerTeam.id === match.team1?.id;
+                  
+                  if (isTeam1Winner) {
+                    match.result = `${match.team1?.shortName || match.team1?.name} won by ${scorecard.result.margin}`;
+                  } else {
+                    match.result = `${match.team2?.shortName || match.team2?.name} won by ${scorecard.result.margin}`;
+                  }
+                  
+                  console.log(`Updated match ${match.id} result from scorecard:`, match.result);
                 }
-                
-                console.log(`Updated match ${match.id} result from scorecard:`, match.result);
               }
-            }
-          });
+            });
+          }
         }
+      } catch (error) {
+        console.error('Error syncing scorecard results:', error);
       }
-    } catch (error) {
-      console.error('Error syncing scorecard results:', error);
     }
     
     if (matchId) {
@@ -896,6 +905,7 @@ async function handleDeleteRequest(context) {
 export async function onRequest(context) {
   const { request } = context;
   const method = request.method;
+  const url = new URL(request.url);
   
   // Enable CORS for your domain
   if (method === 'OPTIONS') {
@@ -909,6 +919,18 @@ export async function onRequest(context) {
     });
   }
   
+  const hasAuth = Boolean(request.headers.get('authorization') || request.headers.get('Authorization'));
+  const bypassCache =
+    request.headers.get('cache-control')?.includes('no-cache') || url.searchParams.get('nocache') === '1';
+  const shouldCache = method === 'GET' && !hasAuth && !bypassCache;
+  const cache = shouldCache && typeof caches !== 'undefined' ? caches.default : null;
+  const cacheKey = cache ? new Request(request.url, request) : null;
+
+  if (cache && cacheKey) {
+    const cached = await cache.match(cacheKey);
+    if (cached) return cached;
+  }
+
   let response;
   
   switch (method) {
@@ -943,6 +965,16 @@ export async function onRequest(context) {
   response.headers.set('Access-Control-Allow-Origin', '*');
   response.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
   response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+
+  if (cache && cacheKey && response.ok) {
+    const cacheTtl = url.searchParams.get('id') ? 10 : 30;
+    response.headers.set('Cache-Control', `public, max-age=${cacheTtl}`);
+    if (context.waitUntil) {
+      context.waitUntil(cache.put(cacheKey, response.clone()));
+    } else {
+      cache.put(cacheKey, response.clone());
+    }
+  }
   
   return response;
 }

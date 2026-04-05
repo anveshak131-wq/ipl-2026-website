@@ -10,6 +10,8 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'Content-Type, Authorization',
 };
 
+const CACHE_TTL_SECONDS = 30;
+
 const IPL_TEAM_IDS = new Set(['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '16', '17', '18', '19', '20']);
 const WPL_TEAM_IDS = new Set(['11', '12', '13', '14', '15']);
 
@@ -72,6 +74,29 @@ export async function onRequest(context) {
 
   try {
     const url = new URL(request.url);
+    const hasAuth = Boolean(request.headers.get('authorization') || request.headers.get('Authorization'));
+    const bypassCache = request.headers.get('cache-control')?.includes('no-cache') || url.searchParams.get('nocache') === '1';
+    const shouldCache = request.method === 'GET' && !hasAuth && !bypassCache;
+    const cache = shouldCache && typeof caches !== 'undefined' ? caches.default : null;
+    const cacheKey = cache ? new Request(request.url, request) : null;
+
+    if (cache && cacheKey) {
+      const cached = await cache.match(cacheKey);
+      if (cached) return cached;
+    }
+
+    const maybeCache = (response) => {
+      if (cache && cacheKey && response && response.ok) {
+        response.headers.set('Cache-Control', `public, max-age=${CACHE_TTL_SECONDS}`);
+        if (context.waitUntil) {
+          context.waitUntil(cache.put(cacheKey, response.clone()));
+        } else {
+          cache.put(cacheKey, response.clone());
+        }
+      }
+      return response;
+    };
+
     const isMatchQuery = url.searchParams.has('matchId');
     const matchId = url.searchParams.get('matchId');
     const leagueParam = normalizeLeague(url.searchParams.get('league'));
@@ -100,10 +125,12 @@ export async function onRequest(context) {
 
         scorecards.sort((a, b) => getScorecardTimestamp(b) - getScorecardTimestamp(a));
         
-        return new Response(JSON.stringify(scorecards), {
-          status: 200,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        });
+        return maybeCache(
+          new Response(JSON.stringify(scorecards), {
+            status: 200,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          })
+        );
       } else {
         // Get all scorecards
         const list = await env.IPL_CACHE.list({ prefix: 'scorecard_' });
@@ -124,10 +151,12 @@ export async function onRequest(context) {
 
         scorecards.sort((a, b) => getScorecardTimestamp(b) - getScorecardTimestamp(a));
         
-        return new Response(JSON.stringify(scorecards), {
-          status: 200,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        });
+        return maybeCache(
+          new Response(JSON.stringify(scorecards), {
+            status: 200,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          })
+        );
       }
     }
 

@@ -7,6 +7,29 @@ export async function onRequestGet(context) {
     return new Response(JSON.stringify({ error: 'SPORTS_KV binding missing in env' }), { status: 500 });
   }
 
+  const withCommentary = url.searchParams.get('withCommentary') === '1';
+  const cacheTtl = withCommentary ? 10 : 15;
+  const cache = typeof caches !== 'undefined' ? caches.default : null;
+  const cacheKey = cache ? new Request(request.url, request) : null;
+  const bypassCache = request.headers.get('cache-control')?.includes('no-cache');
+
+  if (cache && cacheKey && !bypassCache) {
+    const cached = await cache.match(cacheKey);
+    if (cached) return cached;
+  }
+
+  const maybeCache = (response) => {
+    if (cache && cacheKey && response && response.ok && !bypassCache) {
+      response.headers.set('Cache-Control', `public, max-age=${cacheTtl}`);
+      if (context.waitUntil) {
+        context.waitUntil(cache.put(cacheKey, response.clone()));
+      } else {
+        cache.put(cacheKey, response.clone());
+      }
+    }
+    return response;
+  };
+
   const fnv1a64Hex = (input) => {
     let hash = 0xcbf29ce484222325n;
     const prime = 0x100000001b3n;
@@ -225,21 +248,27 @@ export async function onRequestGet(context) {
   try {
     // Support ?matchId=... for per-match table data
     const matchId = url.searchParams.get('matchId') || '';
-    const withCommentary = url.searchParams.get('withCommentary') === '1';
     const key = matchId ? `ipl-live-score-${matchId}` : 'ipl-live-score';
     const value = await KV.get(key);
-    if (!value) return new Response(JSON.stringify({ rows: [] }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+    if (!value) {
+      return maybeCache(
+        new Response(JSON.stringify({ rows: [] }), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        })
+      );
+    }
 
     let parsed;
     try {
       parsed = JSON.parse(value);
     } catch {
       // Legacy/raw payload: return as-is
-      return new Response(value, { status: 200, headers: { 'Content-Type': 'application/json' } });
+      return maybeCache(new Response(value, { status: 200, headers: { 'Content-Type': 'application/json' } }));
     }
 
     if (Array.isArray(parsed)) {
-      return new Response(JSON.stringify(parsed), { status: 200, headers: { 'Content-Type': 'application/json' } });
+      return maybeCache(new Response(JSON.stringify(parsed), { status: 200, headers: { 'Content-Type': 'application/json' } }));
     }
 
     const rows = Array.isArray(parsed?.rows) ? parsed.rows : [];
@@ -247,10 +276,12 @@ export async function onRequestGet(context) {
     const wicketData = parsed?.wicketData && typeof parsed.wicketData === 'object' ? parsed.wicketData : {};
 
     if (!withCommentary) {
-      return new Response(JSON.stringify({ rows, extrasData, wicketData }), {
-        status: 200,
-        headers: { 'Content-Type': 'application/json' },
-      });
+      return maybeCache(
+        new Response(JSON.stringify({ rows, extrasData, wicketData }), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        })
+      );
     }
 
     const commentaryByBallKey =
@@ -343,9 +374,11 @@ export async function onRequestGet(context) {
       await KV.put(key, JSON.stringify(parsed));
     }
 
-    return new Response(
-      JSON.stringify({ rows, extrasData, wicketData, commentaryData }),
-      { status: 200, headers: { 'Content-Type': 'application/json' } }
+    return maybeCache(
+      new Response(JSON.stringify({ rows, extrasData, wicketData, commentaryData }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      })
     );
   } catch (e) {
     return new Response(JSON.stringify({ error: e.message }), { status: 500 });
@@ -378,6 +411,27 @@ export const onRequestPost = async (context) => {
       existing?.commentaryByBallKey && typeof existing.commentaryByBallKey === 'object' ? existing.commentaryByBallKey : {};
 
     await KV.put(key, JSON.stringify({ ...data, commentaryByBallKey }));
+
+    // Best-effort cache purge for this match
+    try {
+      if (typeof caches !== 'undefined') {
+        const cache = caches.default;
+        const baseUrl = new URL(request.url);
+        if (matchId) baseUrl.searchParams.set('matchId', matchId);
+        else baseUrl.searchParams.delete('matchId');
+
+        const purge = async (withCommentary) => {
+          if (withCommentary === null) baseUrl.searchParams.delete('withCommentary');
+          else baseUrl.searchParams.set('withCommentary', withCommentary);
+          await cache.delete(new Request(baseUrl.toString(), { method: 'GET' }));
+        };
+
+        await purge('1');
+        await purge('0');
+        await purge(null);
+      }
+    } catch {}
+
     return new Response(JSON.stringify({ ok: true }), { status: 200 });
   } catch (e) {
     return new Response(JSON.stringify({ error: e.message }), { status: 500 });
