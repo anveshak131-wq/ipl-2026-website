@@ -83,7 +83,11 @@ export async function onRequestPost(context) {
       return json({ error: 'Unauthorized' }, 401);
     }
 
-    const token = authHeader.replace('Bearer ', '');
+    const token = authHeader.replace('Bearer ', '').trim();
+    if (!token || token.toLowerCase() === 'null' || token.toLowerCase() === 'undefined') {
+      return json({ error: 'Invalid token' }, 401);
+    }
+
     const userToken = await context.env.SPORTS_KV.get(`token:${token}`);
 
     let tokenData;
@@ -96,7 +100,15 @@ export async function onRequestPost(context) {
     } else {
       // Fallback: support base64 admin tokens from /api/admin/login
       try {
-        const decoded = JSON.parse(atob(token));
+        let decodedRaw = null;
+        if (typeof atob === 'function') {
+          decodedRaw = atob(token);
+        } else if (typeof Buffer !== 'undefined') {
+          decodedRaw = Buffer.from(token, 'base64').toString('utf8');
+        }
+        if (!decodedRaw) throw new Error('No decoder available');
+
+        const decoded = JSON.parse(decodedRaw);
         if (decoded && typeof decoded === 'object') {
           const exp = typeof decoded.exp === 'number' ? decoded.exp : null;
           if (!exp || exp > Date.now()) {
