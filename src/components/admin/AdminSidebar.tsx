@@ -78,6 +78,7 @@ export default function AdminSidebar({ currentPage = '', onLogout }: AdminSideba
     if (href.includes('batting-stats')) return 'batting-stats';
     if (href.includes('bowling-stats')) return 'bowling-stats';
     if (href.includes('players')) return 'players';
+    if (href.includes('achievements')) return 'achievements';
     if (href.includes('coaches')) return 'coaches';
     if (href.includes('key-players')) return 'key-players';
     if (href.includes('news')) return 'news';
@@ -147,6 +148,11 @@ export default function AdminSidebar({ currentPage = '', onLogout }: AdminSideba
       'key-players': (
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.802 2.036a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.802-2.036a1 1 0 00-1.176 0l-2.802 2.036c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+        </svg>
+      ),
+      achievements: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l3 3 3-3M12 8v8m-7 4h14a2 2 0 002-2V8a2 2 0 00-2-2h-3m-8 0H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
         </svg>
       ),
       news: (
@@ -390,6 +396,17 @@ export default function AdminSidebar({ currentPage = '', onLogout }: AdminSideba
         ),
         group: 'Main',
         shortcut: 'Y',
+      },
+      {
+        href: '/ipl-admin-2026/achievements',
+        label: 'Achievements',
+        icon: (
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l3 3 3-3M12 8v8m-7 4h14a2 2 0 002-2V8a2 2 0 00-2-2h-3m-8 0H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+          </svg>
+        ),
+        group: 'Main',
+        shortcut: 'A',
       },
       {
         href: '/ipl-admin-2026/batting-stats',

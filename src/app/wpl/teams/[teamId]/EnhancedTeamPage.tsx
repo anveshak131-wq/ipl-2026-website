@@ -41,6 +41,8 @@ import {
 import * as CI from './CricketIcons';
 import WPLFloatingParticles from '@/components/animations/WPLFloatingParticles';
 import { WPLColors, getWPLGlassmorphism, getWPLHoverGlow } from '@/lib/wplColors';
+import type { AchievementEntry } from '@/types';
+import { SEASON_YEAR } from '@/lib/season';
 
 // Import types
 interface Team {
@@ -139,6 +141,8 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
   const [isInitialized, setIsInitialized] = useState(false);
   const [teamStats, setTeamStats] = useState<TeamStats | null>(null);
   const [allTeams, setAllTeams] = useState<Team[]>([]);
+  const [achievements, setAchievements] = useState<AchievementEntry[]>([]);
+  const [achievementsLoading, setAchievementsLoading] = useState(false);
   // Helper: normalize team references (object, id string, or shortName)
   const resolveTeam = (t: any) => {
     if (!t) return { short: 'TBD', full: 'TBD' };
@@ -221,9 +225,56 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
         await fetchPointsTableData();
       }
     };
-    
+
     fetchData();
   }, [teamId]);
+
+  useEffect(() => {
+    if (!team?.id) return;
+    let cancelled = false;
+
+    const fetchAchievements = async () => {
+      setAchievementsLoading(true);
+      try {
+        const res = await fetch(
+          `/api/achievements?league=wpl&season=${SEASON_YEAR}&teamId=${encodeURIComponent(String(team.id))}`
+        );
+        if (!res.ok) throw new Error('Failed to fetch achievements');
+        const data = await res.json();
+        if (!cancelled) {
+          setAchievements(Array.isArray(data) ? data : []);
+        }
+      } catch (error) {
+        console.error('Failed to fetch WPL achievements:', error);
+        if (!cancelled) setAchievements([]);
+      } finally {
+        if (!cancelled) setAchievementsLoading(false);
+      }
+    };
+
+    fetchAchievements();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [team?.id]);
+
+  const sortedAchievements = useMemo(() => {
+    return [...achievements].sort((a, b) => {
+      const aTime = new Date(a.matchDate || a.updatedAt || '').getTime();
+      const bTime = new Date(b.matchDate || b.updatedAt || '').getTime();
+      if (Number.isNaN(aTime) && Number.isNaN(bTime)) return 0;
+      if (Number.isNaN(aTime)) return 1;
+      if (Number.isNaN(bTime)) return -1;
+      return bTime - aTime;
+    });
+  }, [achievements]);
+
+  const getAchievementPlayerName = (entry: AchievementEntry): string => {
+    if (!entry.playerId) return team?.shortName ? `${team.shortName} squad` : 'Team';
+    const found = players.find((player) => String(player.id) === String(entry.playerId));
+    return found?.name || 'Player';
+  };
   
   // Fetch points table data for team stats
   const fetchPointsTableData = async () => {
@@ -2890,6 +2941,65 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
                     </div>
                   </div>
                 </motion.div>
+
+                {(achievementsLoading || sortedAchievements.length > 0) && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.35 }}
+                    className="relative"
+                    style={{
+                      ...getWPLGlassmorphism('violet', 20),
+                      border: `1px solid ${teamColors.secondary}30`,
+                      borderRadius: '1.5rem',
+                    }}
+                  >
+                    <div className="relative z-10 p-8">
+                      <div className="flex items-center justify-between gap-3 mb-6">
+                        <div className="flex items-center gap-3">
+                          <Award className="w-7 h-7 text-yellow-400" />
+                          <h2 className="text-2xl font-black text-white">Season achievements</h2>
+                        </div>
+                        <span className="text-xs uppercase tracking-wider text-white/60">Season {SEASON_YEAR}</span>
+                      </div>
+
+                      {achievementsLoading ? (
+                        <div className="text-sm text-white/70">Loading achievements...</div>
+                      ) : (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          {sortedAchievements.map((achievement) => (
+                            <div
+                              key={achievement.id}
+                              className="rounded-2xl border border-white/10 bg-white/10 p-4"
+                            >
+                              <div className="flex items-center justify-between text-xs text-white/60 mb-2">
+                                <span className="uppercase tracking-wide">
+                                  {achievement.matchLabel || 'Match highlight'}
+                                </span>
+                                {achievement.matchDate && (
+                                  <span>
+                                    {new Date(achievement.matchDate).toLocaleDateString('en-IN', {
+                                      day: 'numeric',
+                                      month: 'short',
+                                    })}
+                                  </span>
+                                )}
+                              </div>
+                              <p className="text-base font-semibold text-white mb-1">{achievement.title}</p>
+                              <p className="text-xs text-white/70 mb-2">{getAchievementPlayerName(achievement)}</p>
+                              {achievement.value && (
+                                <p className="text-sm text-yellow-300 mb-1">{achievement.value}</p>
+                              )}
+                              {achievement.description && (
+                                <p className="text-xs text-white/70">{achievement.description}</p>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </motion.div>
+                )}
               </motion.div>
             )}
 

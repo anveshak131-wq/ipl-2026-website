@@ -4,9 +4,10 @@ import { useEffect, useState } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
-import { Player, Team } from '@/types';
+import { AchievementEntry, Player, Team } from '@/types';
 import { api } from '@/lib/data';
 import { calculateAge, formatDateMonthDDYYYY } from '@/lib/dateUtils';
+import { SEASON_YEAR } from '@/lib/season';
 
 interface PlayerDetailClientProps {
   playerId: string;
@@ -36,6 +37,8 @@ export default function PlayerDetailClient({ playerId }: PlayerDetailClientProps
   const [team, setTeam] = useState<Team | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'overview' | 'batting' | 'bowling'>('overview');
+  const [playerAchievements, setPlayerAchievements] = useState<AchievementEntry[]>([]);
+  const [achievementsLoading, setAchievementsLoading] = useState(false);
 
   useEffect(() => {
     const load = async () => {
@@ -65,6 +68,37 @@ export default function PlayerDetailClient({ playerId }: PlayerDetailClientProps
 
     load();
   }, [playerId]);
+
+  useEffect(() => {
+    if (!player) return;
+    let cancelled = false;
+
+    const fetchAchievements = async () => {
+      setAchievementsLoading(true);
+      try {
+        const league = player.league || team?.league || 'ipl';
+        const res = await fetch(
+          `/api/achievements?league=${league}&season=${SEASON_YEAR}&playerId=${encodeURIComponent(player.id)}`
+        );
+        if (!res.ok) throw new Error('Failed to fetch achievements');
+        const data = await res.json();
+        if (!cancelled) {
+          setPlayerAchievements(Array.isArray(data) ? data : []);
+        }
+      } catch (error) {
+        console.error('Failed to fetch player achievements:', error);
+        if (!cancelled) setPlayerAchievements([]);
+      } finally {
+        if (!cancelled) setAchievementsLoading(false);
+      }
+    };
+
+    fetchAchievements();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [player, team]);
 
   if (isLoading) {
     return (
@@ -123,6 +157,15 @@ export default function PlayerDetailClient({ playerId }: PlayerDetailClientProps
     { label: 'Economy', value: stats.economy.toFixed(1) },
     { label: 'Matches', value: stats.matches },
   ];
+
+  const sortedAchievements = [...playerAchievements].sort((a, b) => {
+    const aTime = new Date(a.matchDate || a.updatedAt || '').getTime();
+    const bTime = new Date(b.matchDate || b.updatedAt || '').getTime();
+    if (Number.isNaN(aTime) && Number.isNaN(bTime)) return 0;
+    if (Number.isNaN(aTime)) return 1;
+    if (Number.isNaN(bTime)) return -1;
+    return bTime - aTime;
+  });
 
   const age = player.dateOfBirth ? calculateAge(player.dateOfBirth) : player.age;
 
@@ -229,6 +272,52 @@ export default function PlayerDetailClient({ playerId }: PlayerDetailClientProps
             )}
           </div>
         </section>
+
+        {(achievementsLoading || sortedAchievements.length > 0) && (
+          <section className="mb-8">
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-lg md:text-xl font-bold text-white">
+                Season achievements <span className="text-xs text-gray-400 font-normal">(admin)</span>
+              </h2>
+              <span className="text-xs text-gray-400">Season {SEASON_YEAR}</span>
+            </div>
+            {achievementsLoading ? (
+              <div className="rounded-2xl bg-black/40 border border-white/10 px-4 py-3 text-sm text-gray-400">
+                Loading achievements...
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {sortedAchievements.map((achievement) => (
+                  <div
+                    key={achievement.id}
+                    className="rounded-2xl bg-black/40 border border-white/10 p-4"
+                  >
+                    <div className="flex items-center justify-between mb-2 text-xs text-gray-400">
+                      <span className="uppercase tracking-wide">
+                        {achievement.matchLabel || 'Match highlight'}
+                      </span>
+                      {achievement.matchDate && (
+                        <span>
+                          {new Date(achievement.matchDate).toLocaleDateString('en-IN', {
+                            day: 'numeric',
+                            month: 'short',
+                          })}
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-base font-semibold text-white mb-1">{achievement.title}</p>
+                    {achievement.value && (
+                      <p className="text-sm text-ipl-gold mb-1">{achievement.value}</p>
+                    )}
+                    {achievement.description && (
+                      <p className="text-xs text-gray-300">{achievement.description}</p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </section>
+        )}
 
         {/* Tabs - Hide for WPL players */}
         {!isWPLPlayer && (

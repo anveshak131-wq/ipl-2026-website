@@ -273,6 +273,25 @@ export interface KeyPlayers {
   allRoundXFactorIds?: string[];
 }
 
+export type AchievementTarget = 'player' | 'team';
+
+export interface AchievementEntry {
+  id: string;
+  league: League;
+  season: number;
+  matchId: string;
+  matchLabel?: string;
+  matchDate?: string;
+  target: AchievementTarget;
+  teamId?: string;
+  playerId?: string;
+  title: string;
+  description?: string;
+  value?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
 export interface Prediction {
   id: string;
   userId: string;

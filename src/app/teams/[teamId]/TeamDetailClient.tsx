@@ -34,10 +34,11 @@ import {
   CricketBatIcon,
   TrophyIcon
 } from '@/components/ui/CustomIcons';
-import { Team, Player, CoachingStaff, KeyPlayers, Match, Trophy } from '@/types';
+import { AchievementEntry, Team, Player, CoachingStaff, KeyPlayers, Match, Trophy } from '@/types';
 import { PlayerCardProps, KeyPlayersSectionProps, StatsTabProps, AboutTabProps } from '@/types/components';
 import { sortPlayersByRoleAndAge } from '@/lib/playerSort';
 import { getAnimatedLogoPath, getLogoPath } from '@/lib/logoUtils';
+import { SEASON_YEAR } from '@/lib/season';
 import RCBLottie from '@/components/ui/RCBLottie';
 import RCBLionLogo from '@/components/RCBLion/RCBLionLogo';
 import FlagImage from '@/components/ui/FlagImage';
@@ -192,6 +193,8 @@ export default function TeamDetailClient({ teamId, league }: TeamDetailClientPro
   const [playerStats, setPlayerStats] = useState<any[]>([]);
   const [coachingStaff, setCoachingStaff] = useState<CoachingStaff | null>(null);
   const [keyPlayers, setKeyPlayers] = useState<KeyPlayers | null>(null);
+  const [teamAchievements, setTeamAchievements] = useState<AchievementEntry[]>([]);
+  const [achievementsLoading, setAchievementsLoading] = useState(false);
   const [showPlayerComparison, setShowPlayerComparison] = useState(false);
   const [showScorecardModal, setShowScorecardModal] = useState(false);
   const [scorecard, setScorecard] = useState<any>(null);
@@ -526,6 +529,39 @@ export default function TeamDetailClient({ teamId, league }: TeamDetailClientPro
     };
   }, [teamId, league]);
 
+  useEffect(() => {
+    if (!teamData?.id) return;
+    let cancelled = false;
+
+    const fetchAchievements = async () => {
+      setAchievementsLoading(true);
+      try {
+        const teamLeague = league || (teamData.league as 'ipl' | 'wpl') || 'ipl';
+        const res = await fetch(
+          `/api/achievements?league=${teamLeague}&season=${SEASON_YEAR}&teamId=${encodeURIComponent(
+            String(teamData.id)
+          )}`
+        );
+        if (!res.ok) throw new Error('Failed to fetch achievements');
+        const data = await res.json();
+        if (!cancelled) {
+          setTeamAchievements(Array.isArray(data) ? data : []);
+        }
+      } catch (error) {
+        console.error('Error fetching team achievements:', error);
+        if (!cancelled) setTeamAchievements([]);
+      } finally {
+        if (!cancelled) setAchievementsLoading(false);
+      }
+    };
+
+    fetchAchievements();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [teamData?.id, teamData?.league, league]);
+
   // Real-time player updates - refresh team data when players are updated
   usePlayerUpdates(async (playerId: string) => {
     if (!teamData) return;
@@ -647,6 +683,21 @@ export default function TeamDetailClient({ teamId, league }: TeamDetailClientPro
     loadMatches();
     fetchPlayerStats();
   }, [teamData, league]);
+
+  const sortedTeamAchievements = [...teamAchievements].sort((a, b) => {
+    const aTime = new Date(a.matchDate || a.updatedAt || '').getTime();
+    const bTime = new Date(b.matchDate || b.updatedAt || '').getTime();
+    if (Number.isNaN(aTime) && Number.isNaN(bTime)) return 0;
+    if (Number.isNaN(aTime)) return 1;
+    if (Number.isNaN(bTime)) return -1;
+    return bTime - aTime;
+  });
+
+  const getAchievementPlayerName = (entry: AchievementEntry): string => {
+    if (!entry.playerId) return teamData?.shortName ? `${teamData.shortName} squad` : 'Team';
+    const found = teamData?.players?.find((p) => p.id === entry.playerId);
+    return found?.name || 'Player';
+  };
 
   if (isLoading) {
     return (
@@ -1148,6 +1199,59 @@ export default function TeamDetailClient({ teamId, league }: TeamDetailClientPro
                         <p className="text-sm text-gray-300/80">No upcoming matches scheduled yet.</p>
                       )}
                     </div>
+                  </div>
+                )}
+
+                {(achievementsLoading || sortedTeamAchievements.length > 0) && (
+                  <div
+                    className="rounded-3xl backdrop-blur-xl p-8 border shadow-xl"
+                    style={{
+                      background: 'linear-gradient(135deg, rgba(15,23,42,0.78), rgba(15,23,42,0.92))',
+                      borderColor: 'rgba(148,163,184,0.35)',
+                    }}
+                  >
+                    <div className="flex items-center justify-between mb-6">
+                      <div className="flex items-center gap-3">
+                        <TrophyIcon className="w-7 h-7" color={primaryColor.solid} />
+                        <h3 className="text-2xl font-black text-white">Season achievements</h3>
+                      </div>
+                      <span className="text-xs uppercase tracking-wide text-gray-400">Season {SEASON_YEAR}</span>
+                    </div>
+
+                    {achievementsLoading ? (
+                      <div className="text-sm text-gray-400">Loading achievements...</div>
+                    ) : (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {sortedTeamAchievements.map((achievement) => (
+                          <div
+                            key={achievement.id}
+                            className="rounded-2xl border border-white/10 bg-white/5 p-4"
+                          >
+                            <div className="flex items-center justify-between text-xs text-gray-400 mb-2">
+                              <span className="uppercase tracking-wide">
+                                {achievement.matchLabel || 'Match highlight'}
+                              </span>
+                              {achievement.matchDate && (
+                                <span>
+                                  {new Date(achievement.matchDate).toLocaleDateString('en-IN', {
+                                    day: 'numeric',
+                                    month: 'short',
+                                  })}
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-base font-semibold text-white mb-1">{achievement.title}</p>
+                            <p className="text-xs text-gray-300 mb-2">{getAchievementPlayerName(achievement)}</p>
+                            {achievement.value && (
+                              <p className="text-sm text-ipl-gold mb-1">{achievement.value}</p>
+                            )}
+                            {achievement.description && (
+                              <p className="text-xs text-gray-300">{achievement.description}</p>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 )}
               </motion.div>
