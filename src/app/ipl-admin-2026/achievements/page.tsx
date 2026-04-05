@@ -304,7 +304,14 @@ export default function AdminAchievementsPage() {
     setMessage(null);
 
     try {
-      const token = localStorage.getItem('adminToken') || localStorage.getItem('auth_token');
+      const pickToken = (...candidates: Array<string | null>) =>
+        candidates.find((value) => value && value !== 'null' && value !== 'undefined') || null;
+      const token = pickToken(
+        localStorage.getItem('auth_token'),
+        localStorage.getItem('adminToken'),
+        sessionStorage.getItem('auth_token'),
+        sessionStorage.getItem('adminToken')
+      );
       if (!token) {
         setMessage({ type: 'error', text: 'Missing admin token. Please sign in again.' });
         return;
