@@ -85,15 +85,31 @@ export async function onRequestPost(context) {
 
     const token = authHeader.replace('Bearer ', '');
     const userToken = await context.env.SPORTS_KV.get(`token:${token}`);
-    if (!userToken) {
-      return json({ error: 'Invalid token' }, 401);
-    }
 
     let tokenData;
-    try {
-      tokenData = JSON.parse(userToken);
-    } catch {
-      tokenData = { email: userToken, role: 'admin' };
+    if (userToken) {
+      try {
+        tokenData = JSON.parse(userToken);
+      } catch {
+        tokenData = { email: userToken, role: 'admin' };
+      }
+    } else {
+      // Fallback: support base64 admin tokens from /api/admin/login
+      try {
+        const decoded = JSON.parse(atob(token));
+        if (decoded && typeof decoded === 'object') {
+          const exp = typeof decoded.exp === 'number' ? decoded.exp : null;
+          if (!exp || exp > Date.now()) {
+            tokenData = decoded;
+          }
+        }
+      } catch {
+        // ignore
+      }
+    }
+
+    if (!tokenData) {
+      return json({ error: 'Invalid token' }, 401);
     }
 
     if (tokenData.role !== 'admin' && tokenData.role !== 'super_admin') {
