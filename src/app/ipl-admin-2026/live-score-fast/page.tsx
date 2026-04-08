@@ -232,6 +232,10 @@ export default function IPLAdminLiveScoreTablePage() {
   const [resultManOfTheMatch, setResultManOfTheMatch] = useState<string>('');
   const [resultStatus, setResultStatus] = useState<SaveStatus>('idle');
   const [resultLoading, setResultLoading] = useState(false);
+  const [advisoryNote, setAdvisoryNote] = useState<string>('');
+  const [advisoryOvers, setAdvisoryOvers] = useState<string>('');
+  const [advisoryDls, setAdvisoryDls] = useState<boolean>(false);
+  const [advisoryStatus, setAdvisoryStatus] = useState<SaveStatus>('idle');
   const [scorecardSyncStatus, setScorecardSyncStatus] = useState<SaveStatus>('idle');
   const [impactForms, setImpactForms] = useState<Record<TeamKey, ImpactForm>>({
     team1: { ...DEFAULT_IMPACT_FORM },
@@ -330,7 +334,14 @@ export default function IPLAdminLiveScoreTablePage() {
 
   // Load match details + saved table state for the selected match
   useEffect(() => {
-    if (!selectedMatchId) return;
+    if (!selectedMatchId) {
+      setMatchDetails(null);
+      setAdvisoryNote('');
+      setAdvisoryOvers('');
+      setAdvisoryDls(false);
+      setAdvisoryStatus('idle');
+      return;
+    }
 
     (async () => {
       // 1) Try KV (shared/persisted)
@@ -373,6 +384,14 @@ export default function IPLAdminLiveScoreTablePage() {
         if (matchResp.ok) {
           const matchData = (await matchResp.json()) as Match;
           setMatchDetails(matchData);
+          setAdvisoryNote(String(matchData?.statusNote || '').trim());
+          setAdvisoryOvers(
+            Number.isFinite(Number(matchData?.reducedOversTo)) && Number(matchData?.reducedOversTo) > 0
+              ? String(matchData.reducedOversTo)
+              : ''
+          );
+          setAdvisoryDls(Boolean(matchData?.dlsApplied));
+          setAdvisoryStatus('idle');
         } else {
           setMatchDetails(null);
         }
@@ -2171,6 +2190,59 @@ export default function IPLAdminLiveScoreTablePage() {
     }
   };
 
+  const saveMatchAdvisory = async () => {
+    try {
+      if (!selectedMatchId || !selectedMatch) return;
+
+      const token = localStorage.getItem('adminToken');
+      if (!token) {
+        alert('Admin token missing. Please login again.');
+        return;
+      }
+
+      setAdvisoryStatus('saving');
+
+      const trimmedNote = advisoryNote.trim();
+      const reducedOversValue = advisoryOvers ? Number(advisoryOvers) : undefined;
+
+      const payload: Partial<Match> & { id: string } = {
+        id: selectedMatch.id,
+        statusNote: trimmedNote || undefined,
+        reducedOversTo: Number.isFinite(reducedOversValue) && reducedOversValue > 0 ? reducedOversValue : undefined,
+        dlsApplied: advisoryDls ? true : undefined,
+      };
+
+      const resp = await fetch(`/api/matches?id=${encodeURIComponent(selectedMatch.id)}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
+      });
+      if (!resp.ok) throw new Error('Failed to save match advisory');
+
+      const updated = (await resp.json()) as Match;
+      setMatchDetails(updated);
+      setMatches((prev) => prev.map((m) => (m.id === updated.id ? updated : m)));
+
+      setAdvisoryNote(String(updated?.statusNote || '').trim());
+      setAdvisoryOvers(
+        Number.isFinite(Number(updated?.reducedOversTo)) && Number(updated?.reducedOversTo) > 0
+          ? String(updated.reducedOversTo)
+          : ''
+      );
+      setAdvisoryDls(Boolean(updated?.dlsApplied));
+
+      setAdvisoryStatus('success');
+      setTimeout(() => setAdvisoryStatus('idle'), 2000);
+    } catch (error) {
+      console.error('[IPL Live Score Table] Save match advisory error:', error);
+      setAdvisoryStatus('error');
+      setTimeout(() => setAdvisoryStatus('idle'), 3000);
+    }
+  };
+
   const syncScorecardFromTable = async () => {
     try {
       if (!selectedMatchId || !selectedMatch) return;
@@ -3196,6 +3268,73 @@ export default function IPLAdminLiveScoreTablePage() {
                 {(impactPlayerInfo.team1.impactName || impactPlayerInfo.team2.impactName)
                   ? `${impactPlayerInfo.team1.impactName || '-'} / ${impactPlayerInfo.team2.impactName || '-'}`
                   : 'Not set'}
+              </div>
+            </div>
+          )}
+
+          {selectedMatch && (
+            <div className="mt-4 border-t border-white/10 pt-4">
+              <div className="flex items-center justify-between">
+                <div className="text-xs font-semibold uppercase tracking-wide text-white/70">Match Advisory</div>
+                <div className="text-[11px] text-white/50">
+                  {advisoryStatus === 'idle' && '—'}
+                  {advisoryStatus === 'saving' && 'Saving…'}
+                  {advisoryStatus === 'success' && 'Saved'}
+                  {advisoryStatus === 'error' && 'Error'}
+                </div>
+              </div>
+              <p className="text-[11px] text-white/40 mt-1">
+                Use this for abandoned/reduced-overs updates. Shows on match cards and match center.
+              </p>
+
+              <textarea
+                value={advisoryNote}
+                onChange={(e) => setAdvisoryNote(e.target.value)}
+                rows={3}
+                placeholder="Example: Start delayed due to rain. Overs reduced to 8 per side."
+                className="mt-3 w-full border border-white/10 focus:border-purple-400 rounded-xl px-3 py-2 bg-slate-950 text-white text-xs"
+              />
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3">
+                <div>
+                  <label className="block text-[11px] font-semibold text-white/60 mb-1">
+                    Reduced overs per side
+                  </label>
+                  <input
+                    type="number"
+                    min={1}
+                    max={20}
+                    value={advisoryOvers}
+                    onChange={(e) => setAdvisoryOvers(e.target.value)}
+                    placeholder="e.g., 8"
+                    className="w-full border border-white/10 focus:border-purple-400 rounded-xl px-3 py-2 bg-slate-950 text-white text-xs"
+                  />
+                </div>
+                <div className="flex items-center">
+                  <label className="flex items-center gap-2 text-xs text-white/70">
+                    <input
+                      type="checkbox"
+                      checked={advisoryDls}
+                      onChange={(e) => setAdvisoryDls(e.target.checked)}
+                      className="h-4 w-4 rounded border-white/20 text-purple-400 focus:ring-purple-400/30"
+                    />
+                    DLS method applied
+                  </label>
+                </div>
+              </div>
+
+              <div className="mt-3 flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={saveMatchAdvisory}
+                  disabled={advisoryStatus === 'saving' || !selectedMatchId}
+                  className="px-4 py-2 rounded-xl bg-purple-600 text-white text-xs font-semibold hover:bg-purple-500 disabled:opacity-50"
+                >
+                  Save advisory
+                </button>
+                {advisoryStatus === 'error' && (
+                  <span className="text-xs text-red-300">Failed to save. Try again.</span>
+                )}
               </div>
             </div>
           )}
