@@ -769,7 +769,7 @@ export default function WPLHomePage() {
                     >
                       <div className="text-5xl font-black mb-3" style={{ color: WPLColors.textPrimary }}>VS</div>
                       <div className="text-sm mb-4" style={{ color: WPLColors.textSecondary }}>
-                        {formatMatchTime(featuredLiveMatch.date, featuredLiveMatch.time)}
+                        {formatMatchTime(featuredLiveMatch.time, featuredLiveMatch.date)}
                       </div>
                       {/* Display Toss Information */}
                       {featuredLiveMatch.toss && (

@@ -14,8 +14,19 @@ export function convertISTToLocalTime(istTime: string, date: string): {
   localTimeZone: string;
 } {
   try {
+    const safeTime = String(istTime || '').trim();
+    const safeDate = String(date || '').trim();
+    if (!safeTime || !safeDate) {
+      throw new Error('Missing time or date');
+    }
+
     // Parse IST time (HH:MM format)
-    const [hours, minutes] = istTime.split(':').map(Number);
+    const [hoursRaw, minutesRaw] = safeTime.split(':');
+    const hours = Number(hoursRaw);
+    const minutes = Number(minutesRaw ?? 0);
+    if (!Number.isFinite(hours) || !Number.isFinite(minutes)) {
+      throw new Error('Invalid time');
+    }
     
     // Format IST time for display
     const istHour = hours % 12 || 12;
@@ -24,7 +35,10 @@ export function convertISTToLocalTime(istTime: string, date: string): {
     
     // Create date string in UTC format (treating the input as IST)
     // IST is UTC+5:30, so we need to subtract 5:30 to get UTC
-    const [year, month, day] = date.split('-').map(Number);
+    const [year, month, day] = safeDate.split('-').map(Number);
+    if (!Number.isFinite(year) || !Number.isFinite(month) || !Number.isFinite(day)) {
+      throw new Error('Invalid date');
+    }
     
     // Create a date object representing the IST time
     // We'll create it as if it's UTC, then adjust
@@ -57,12 +71,16 @@ export function convertISTToLocalTime(istTime: string, date: string): {
   } catch (error) {
     console.error('Error converting time:', error);
     // Fallback to just showing IST
-    const [hours, minutes] = istTime.split(':').map(Number);
-    const hour = hours % 12 || 12;
-    const ampm = hours >= 12 ? 'PM' : 'AM';
+    const fallbackTime = String(istTime || '').trim();
+    const [hoursRaw, minutesRaw] = fallbackTime.split(':');
+    const hours = Number(hoursRaw);
+    const minutes = Number(minutesRaw ?? 0);
+    const isNumeric = Number.isFinite(hours) && Number.isFinite(minutes);
+    const hour = isNumeric ? (hours % 12 || 12) : 12;
+    const ampm = isNumeric ? (hours >= 12 ? 'PM' : 'AM') : 'PM';
     return {
-      ist: `${hour}:${String(minutes).padStart(2, '0')} ${ampm} IST`,
-      local: `${hour}:${String(minutes).padStart(2, '0')} ${ampm}`,
+      ist: fallbackTime ? `${hour}:${String(minutes).padStart(2, '0')} ${ampm} IST` : 'TBD',
+      local: fallbackTime ? `${hour}:${String(minutes).padStart(2, '0')} ${ampm}` : 'TBD',
       localTimeZone: 'Local'
     };
   }
@@ -75,16 +93,32 @@ export function convertISTToLocalTime(istTime: string, date: string): {
  * @param showLocal - Whether to show local time (default: true)
  * @returns Formatted time string
  */
-export function formatMatchTime(time: string, date: string, showLocal: boolean = true): string {
+export function formatMatchTime(time?: string | null, date?: string | null, showLocal: boolean = true): string {
+  const safeTime = typeof time === 'string' ? time.trim() : '';
+  const safeDate = typeof date === 'string' ? date.trim() : '';
+  if (!safeTime || !safeDate) {
+    return 'TBD';
+  }
+
+  const timeLooksValid = /^\d{1,2}:\d{2}/.test(safeTime);
+  const dateLooksValid = /^\d{4}-\d{2}-\d{2}$/.test(safeDate);
+  if (!timeLooksValid || !dateLooksValid) {
+    return safeTime || 'TBD';
+  }
+
   if (!showLocal) {
     // Just format IST time
-    const [hours, minutes] = time.split(':').map(Number);
+    const [hoursRaw, minutesRaw] = safeTime.split(':');
+    const hours = Number(hoursRaw);
+    const minutes = Number(minutesRaw ?? 0);
+    if (!Number.isFinite(hours) || !Number.isFinite(minutes)) {
+      return safeTime;
+    }
     const hour = hours % 12 || 12;
     const ampm = hours >= 12 ? 'PM' : 'AM';
     return `${hour}:${String(minutes).padStart(2, '0')} ${ampm} IST`;
   }
   
-  const converted = convertISTToLocalTime(time, date);
+  const converted = convertISTToLocalTime(safeTime, safeDate);
   return `${converted.ist} / ${converted.local}`;
 }
-

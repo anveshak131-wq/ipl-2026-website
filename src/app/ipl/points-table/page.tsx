@@ -646,7 +646,7 @@ export default function IPLPointsTablePage() {
                             <div className="text-center">
                               <div className="text-2xl font-black text-white mb-1">VS</div>
                               <div className="text-xs text-gray-400">
-                                {formatMatchTime(match.date, match.time)}
+                                {formatMatchTime(match.time, match.date)}
                               </div>
                             </div>
 

@@ -1539,8 +1539,7 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
                 ease: "easeInOut"
               }}
             />
-          );
-        })}
+                        ))}
         
         {/* Premium geometric shapes with gradient borders */}
         {[...Array(12)].map((_, i) => {

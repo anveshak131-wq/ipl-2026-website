@@ -663,7 +663,7 @@ export default function IPLHomePage() {
                     >
                       <div className="text-5xl font-black text-white mb-3">VS</div>
                       <div className="text-sm text-gray-300 mb-4">
-                        {formatMatchTime(featuredLiveMatch.date, featuredLiveMatch.time)}
+                        {formatMatchTime(featuredLiveMatch.time, featuredLiveMatch.date)}
                       </div>
                       {/* Display Toss Information */}
                       {featuredLiveMatch.toss && (

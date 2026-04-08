@@ -281,7 +281,9 @@ export default function MatchCenterPage({ backHref = '/matches', preferredLeague
     }
 
     if (match.matchState?.toss?.winner && match.matchState.toss.decision) {
-      const tossWinner = match.matchState.toss.winner === 'team1' ? match.team1.name : match.team2.name;
+      const tossWinner = match.matchState.toss.winner === 'team1'
+        ? (match.team1?.name || 'Team 1')
+        : (match.team2?.name || 'Team 2');
       return `${tossWinner} won the toss and chose to ${match.matchState.toss.decision}.`;
     }
 
@@ -304,13 +306,13 @@ export default function MatchCenterPage({ backHref = '/matches', preferredLeague
   }, [players]);
 
   const team1Playing11 = useMemo(() => {
-    if (!match?.playing11?.team1) return [];
-    return match.playing11.team1.map((id) => playerMap.get(id)?.name || id);
+    const team1Ids = Array.isArray(match?.playing11?.team1) ? match.playing11!.team1 : [];
+    return team1Ids.map((id) => playerMap.get(id)?.name || id);
   }, [match, playerMap]);
 
   const team2Playing11 = useMemo(() => {
-    if (!match?.playing11?.team2) return [];
-    return match.playing11.team2.map((id) => playerMap.get(id)?.name || id);
+    const team2Ids = Array.isArray(match?.playing11?.team2) ? match.playing11!.team2 : [];
+    return team2Ids.map((id) => playerMap.get(id)?.name || id);
   }, [match, playerMap]);
 
   const innings = useMemo(() => {
@@ -353,12 +355,19 @@ export default function MatchCenterPage({ backHref = '/matches', preferredLeague
     );
   }
 
+  const team1Id = match.team1?.id ?? '';
+  const team2Id = match.team2?.id ?? '';
+  const team1ShortName = match.team1?.shortName || 'TBD';
+  const team2ShortName = match.team2?.shortName || 'TBD';
+  const team1Name = match.team1?.name || 'Team 1';
+  const team2Name = match.team2?.name || 'Team 2';
+
   const team1Logo = match.team1?.logo && !String(match.team1.logo).endsWith('.json')
     ? String(match.team1.logo)
-    : getAnimatedLogoPath(match.team1?.id, match.team1?.shortName || '', match.league);
+    : getAnimatedLogoPath(team1Id, team1ShortName, match.league);
   const team2Logo = match.team2?.logo && !String(match.team2.logo).endsWith('.json')
     ? String(match.team2.logo)
-    : getAnimatedLogoPath(match.team2?.id, match.team2?.shortName || '', match.league);
+    : getAnimatedLogoPath(team2Id, team2ShortName, match.league);
 
   const pageOilTheme = match.league === 'wpl'
     ? {
@@ -476,16 +485,16 @@ export default function MatchCenterPage({ backHref = '/matches', preferredLeague
               <div className="flex flex-col items-center text-center gap-2">
                 <Image
                   src={team1Logo}
-                  alt={`${match.team1.shortName} logo`}
+                  alt={`${team1ShortName} logo`}
                   width={84}
                   height={84}
                   className="rounded-2xl object-contain"
                   onError={(event) => {
-                    (event.target as HTMLImageElement).src = getLogoPath(match.team1.id);
+                    (event.target as HTMLImageElement).src = getLogoPath(team1Id);
                   }}
                 />
-                <p className="text-lg md:text-xl font-black">{match.team1.shortName}</p>
-                <p className="text-xs md:text-sm text-slate-300">{match.team1.name}</p>
+                <p className="text-lg md:text-xl font-black">{team1ShortName}</p>
+                <p className="text-xs md:text-sm text-slate-300">{team1Name}</p>
                 {match.team1Score && <p className="text-sm font-semibold text-cyan-200">{match.team1Score}</p>}
               </div>
 
@@ -496,16 +505,16 @@ export default function MatchCenterPage({ backHref = '/matches', preferredLeague
               <div className="flex flex-col items-center text-center gap-2">
                 <Image
                   src={team2Logo}
-                  alt={`${match.team2.shortName} logo`}
+                  alt={`${team2ShortName} logo`}
                   width={84}
                   height={84}
                   className="rounded-2xl object-contain"
                   onError={(event) => {
-                    (event.target as HTMLImageElement).src = getLogoPath(match.team2.id);
+                    (event.target as HTMLImageElement).src = getLogoPath(team2Id);
                   }}
                 />
-                <p className="text-lg md:text-xl font-black">{match.team2.shortName}</p>
-                <p className="text-xs md:text-sm text-slate-300">{match.team2.name}</p>
+                <p className="text-lg md:text-xl font-black">{team2ShortName}</p>
+                <p className="text-xs md:text-sm text-slate-300">{team2Name}</p>
                 {match.team2Score && <p className="text-sm font-semibold text-cyan-200">{match.team2Score}</p>}
               </div>
             </div>
@@ -513,7 +522,7 @@ export default function MatchCenterPage({ backHref = '/matches', preferredLeague
             <div className="mt-6 grid gap-3 md:grid-cols-3 text-sm">
               <div className="rounded-xl border border-white/10 bg-white/5 p-3">
                 <p className="text-slate-400 text-xs uppercase tracking-wide">Date</p>
-                <p className="font-semibold">{new Date(match.date || '').toDateString()}</p>
+                <p className="font-semibold">{match.date ? new Date(match.date).toDateString() : 'TBD'}</p>
               </div>
               <div className="rounded-xl border border-white/10 bg-white/5 p-3">
                 <p className="text-slate-400 text-xs uppercase tracking-wide">Time</p>
@@ -571,7 +580,7 @@ export default function MatchCenterPage({ backHref = '/matches', preferredLeague
             {isPlaying11Visible ? (
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="rounded-2xl border border-cyan-300/25 bg-cyan-500/10 p-4">
-                  <h3 className="font-bold text-cyan-100 mb-3">{match.team1.name}</h3>
+                  <h3 className="font-bold text-cyan-100 mb-3">{team1Name}</h3>
                   <ul className="space-y-2 text-sm">
                     {team1Playing11.map((name) => (
                       <li key={name} className="rounded-lg border border-white/10 bg-white/5 px-3 py-2">
@@ -582,7 +591,7 @@ export default function MatchCenterPage({ backHref = '/matches', preferredLeague
                 </div>
 
                 <div className="rounded-2xl border border-fuchsia-300/25 bg-fuchsia-500/10 p-4">
-                  <h3 className="font-bold text-fuchsia-100 mb-3">{match.team2.name}</h3>
+                  <h3 className="font-bold text-fuchsia-100 mb-3">{team2Name}</h3>
                   <ul className="space-y-2 text-sm">
                     {team2Playing11.map((name) => (
                       <li key={name} className="rounded-lg border border-white/10 bg-white/5 px-3 py-2">
@@ -630,8 +639,8 @@ export default function MatchCenterPage({ backHref = '/matches', preferredLeague
                 )}
 
                 {innings.map((inning, index) => {
-                  const isTeam1Batting = String(inning.battingTeamId) === String(match.team1.id);
-                  const battingTeam = isTeam1Batting ? match.team1.name : match.team2.name;
+                  const isTeam1Batting = String(inning.battingTeamId) === String(team1Id);
+                  const battingTeam = isTeam1Batting ? team1Name : team2Name;
 
                   return (
                     <div key={`${inning.inningsNumber || index}-${battingTeam}`} className="rounded-2xl border border-white/10 bg-white/5 p-4">
