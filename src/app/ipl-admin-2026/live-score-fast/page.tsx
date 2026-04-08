@@ -79,6 +79,8 @@ const DEFAULT_WICKET: WicketRow = {
   outBatter: 'striker',
 };
 
+const ADVISORY_REASONS = ['Rain', 'Wet outfield', 'Bad light', 'Safety', 'Technical'];
+
 // Common wicket modes as seen in modern scorecards
 const WICKET_TYPES = [
   'Bowled',
@@ -236,6 +238,7 @@ export default function IPLAdminLiveScoreTablePage() {
   const [advisoryOvers, setAdvisoryOvers] = useState<string>('');
   const [advisoryDls, setAdvisoryDls] = useState<boolean>(false);
   const [advisoryStatus, setAdvisoryStatus] = useState<SaveStatus>('idle');
+  const [advisoryReason, setAdvisoryReason] = useState<string>('');
   const [scorecardSyncStatus, setScorecardSyncStatus] = useState<SaveStatus>('idle');
   const [impactForms, setImpactForms] = useState<Record<TeamKey, ImpactForm>>({
     team1: { ...DEFAULT_IMPACT_FORM },
@@ -339,6 +342,7 @@ export default function IPLAdminLiveScoreTablePage() {
       setAdvisoryNote('');
       setAdvisoryOvers('');
       setAdvisoryDls(false);
+      setAdvisoryReason('');
       setAdvisoryStatus('idle');
       return;
     }
@@ -384,13 +388,18 @@ export default function IPLAdminLiveScoreTablePage() {
         if (matchResp.ok) {
           const matchData = (await matchResp.json()) as Match;
           setMatchDetails(matchData);
-          setAdvisoryNote(String(matchData?.statusNote || '').trim());
+          const nextNote = String(matchData?.statusNote || '').trim();
+          const inferredReason =
+            ADVISORY_REASONS.find((reason) => nextNote.toLowerCase().includes(reason.toLowerCase())) || '';
+
+          setAdvisoryNote(nextNote);
           setAdvisoryOvers(
             Number.isFinite(Number(matchData?.reducedOversTo)) && Number(matchData?.reducedOversTo) > 0
               ? String(matchData.reducedOversTo)
               : ''
           );
           setAdvisoryDls(Boolean(matchData?.dlsApplied));
+          setAdvisoryReason(inferredReason);
           setAdvisoryStatus('idle');
         } else {
           setMatchDetails(null);
@@ -2203,11 +2212,20 @@ export default function IPLAdminLiveScoreTablePage() {
       setAdvisoryStatus('saving');
 
       const trimmedNote = advisoryNote.trim();
+      const reasonText = advisoryReason ? `Reason: ${advisoryReason}.` : '';
+      const mergedNote = (() => {
+        if (!trimmedNote && !reasonText) return '';
+        if (!trimmedNote) return reasonText;
+        if (!reasonText) return trimmedNote;
+        const normalized = trimmedNote.toLowerCase();
+        if (normalized.includes(advisoryReason.toLowerCase())) return trimmedNote;
+        return `${trimmedNote} ${reasonText}`;
+      })();
       const reducedOversValue = advisoryOvers ? Number(advisoryOvers) : undefined;
 
       const payload: Partial<Match> & { id: string } = {
         id: selectedMatch.id,
-        statusNote: trimmedNote || undefined,
+        statusNote: mergedNote || undefined,
         reducedOversTo: Number.isFinite(reducedOversValue) && reducedOversValue > 0 ? reducedOversValue : undefined,
         dlsApplied: advisoryDls ? true : undefined,
       };
@@ -2241,6 +2259,26 @@ export default function IPLAdminLiveScoreTablePage() {
       setAdvisoryStatus('error');
       setTimeout(() => setAdvisoryStatus('idle'), 3000);
     }
+  };
+
+  const reasonSuffix = advisoryReason ? ` due to ${advisoryReason.toLowerCase()}` : '';
+
+  const applyAdvisoryPreset = (preset: 'abandoned' | 'no-result' | 'reduced-overs') => {
+    if (preset === 'abandoned') {
+      setAdvisoryNote(`Match abandoned${reasonSuffix}.`);
+      setAdvisoryOvers('');
+      setAdvisoryDls(false);
+      return;
+    }
+    if (preset === 'no-result') {
+      setAdvisoryNote(`No result${reasonSuffix}.`);
+      setAdvisoryOvers('');
+      setAdvisoryDls(false);
+      return;
+    }
+
+    const oversText = advisoryOvers ? ` to ${advisoryOvers} per side` : '';
+    setAdvisoryNote(`Overs reduced${oversText}${reasonSuffix}.`);
   };
 
   const syncScorecardFromTable = async () => {
@@ -3287,6 +3325,30 @@ export default function IPLAdminLiveScoreTablePage() {
                 Use this for abandoned/reduced-overs updates. Shows on match cards and match center.
               </p>
 
+              <div className="mt-3 flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={() => applyAdvisoryPreset('abandoned')}
+                  className="px-3 py-1.5 rounded-full border border-red-400/40 text-[11px] text-red-200 hover:bg-red-500/10"
+                >
+                  Abandoned
+                </button>
+                <button
+                  type="button"
+                  onClick={() => applyAdvisoryPreset('no-result')}
+                  className="px-3 py-1.5 rounded-full border border-amber-400/40 text-[11px] text-amber-200 hover:bg-amber-500/10"
+                >
+                  No Result
+                </button>
+                <button
+                  type="button"
+                  onClick={() => applyAdvisoryPreset('reduced-overs')}
+                  className="px-3 py-1.5 rounded-full border border-blue-400/40 text-[11px] text-blue-200 hover:bg-blue-500/10"
+                >
+                  Reduced Overs
+                </button>
+              </div>
+
               <textarea
                 value={advisoryNote}
                 onChange={(e) => setAdvisoryNote(e.target.value)}
@@ -3297,6 +3359,22 @@ export default function IPLAdminLiveScoreTablePage() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3">
                 <div>
+                  <label className="block text-[11px] font-semibold text-white/60 mb-1">
+                    Reason
+                  </label>
+                  <select
+                    value={advisoryReason}
+                    onChange={(e) => setAdvisoryReason(e.target.value)}
+                    className="mb-3 w-full border border-white/10 focus:border-purple-400 rounded-xl px-3 py-2 bg-slate-950 text-white text-xs"
+                  >
+                    <option value="">Select reason…</option>
+                    {ADVISORY_REASONS.map((reason) => (
+                      <option key={reason} value={reason}>
+                        {reason}
+                      </option>
+                    ))}
+                  </select>
+
                   <label className="block text-[11px] font-semibold text-white/60 mb-1">
                     Reduced overs per side
                   </label>

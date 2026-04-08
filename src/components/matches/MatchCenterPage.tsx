@@ -521,20 +521,36 @@ export default function MatchCenterPage({ backHref = '/matches', preferredLeague
               </div>
             </div>
 
-            <div className="mt-6 grid gap-3 md:grid-cols-3 text-sm">
-              <div className="rounded-xl border border-white/10 bg-white/5 p-3">
-                <p className="text-slate-400 text-xs uppercase tracking-wide">Date</p>
-                <p className="font-semibold">{match.date ? new Date(match.date).toDateString() : 'TBD'}</p>
-              </div>
-              <div className="rounded-xl border border-white/10 bg-white/5 p-3">
-                <p className="text-slate-400 text-xs uppercase tracking-wide">Time</p>
-                <p className="font-semibold">{formatMatchTime(match.time, match.date)}</p>
-              </div>
-              <div className="rounded-xl border border-white/10 bg-white/5 p-3">
-                <p className="text-slate-400 text-xs uppercase tracking-wide">Venue</p>
-                <p className="font-semibold line-clamp-2">{match.venue}</p>
-              </div>
-            </div>
+            {(() => {
+              const hasOversInfo = Boolean(match.reducedOversTo) || Boolean(match.dlsApplied);
+              return (
+                <div className={`mt-6 grid gap-3 ${hasOversInfo ? 'md:grid-cols-4' : 'md:grid-cols-3'} text-sm`}>
+                  <div className="rounded-xl border border-white/10 bg-white/5 p-3">
+                    <p className="text-slate-400 text-xs uppercase tracking-wide">Date</p>
+                    <p className="font-semibold">{match.date ? new Date(match.date).toDateString() : 'TBD'}</p>
+                  </div>
+                  <div className="rounded-xl border border-white/10 bg-white/5 p-3">
+                    <p className="text-slate-400 text-xs uppercase tracking-wide">Time</p>
+                    <p className="font-semibold">{formatMatchTime(match.time, match.date)}</p>
+                  </div>
+                  <div className="rounded-xl border border-white/10 bg-white/5 p-3">
+                    <p className="text-slate-400 text-xs uppercase tracking-wide">Venue</p>
+                    <p className="font-semibold line-clamp-2">{match.venue}</p>
+                  </div>
+                  {hasOversInfo && (
+                    <div className="rounded-xl border border-white/10 bg-white/5 p-3">
+                      <p className="text-slate-400 text-xs uppercase tracking-wide">Overs</p>
+                      <p className="font-semibold">
+                        {match.reducedOversTo ? `${match.reducedOversTo} per side` : '—'}
+                      </p>
+                      {match.dlsApplied && (
+                        <p className="text-xs text-slate-400 mt-1">DLS applied</p>
+                      )}
+                    </div>
+                  )}
+                </div>
+              );
+            })()}
 
             {!scorecard && !isPlaying11Visible && !tossMessage && (
               <div className="mt-6 rounded-2xl border border-slate-300/20 bg-slate-900/40 p-4 text-slate-200">
