@@ -163,7 +163,10 @@ export default function AdminMatches() {
         team2Id: '',
         status: 'upcoming' as 'upcoming' | 'live' | 'completed' | 'cancelled',
         league: 'ipl' as 'ipl' | 'wpl', // Will be set from currentLeague when adding
-        playoffType: null as PlayoffType
+        playoffType: null as PlayoffType,
+        statusNote: '',
+        reducedOversTo: '',
+        dlsApplied: false
     });
 
     const [showPlayoffForm, setShowPlayoffForm] = useState(false);
@@ -1574,7 +1577,10 @@ export default function AdminMatches() {
             team2Id: '',
             status: 'upcoming',
             league: 'ipl',
-            playoffType: null
+            playoffType: null,
+            statusNote: '',
+            reducedOversTo: '',
+            dlsApplied: false
         });
         setEditingId(null);
         setShowForm(false);
@@ -1914,7 +1920,10 @@ export default function AdminMatches() {
             team2Id: match.team2.id,
             status: match.status,
             league: match.league,
-            playoffType: match.playoffType || null
+            playoffType: match.playoffType || null,
+            statusNote: match.statusNote || '',
+            reducedOversTo: match.reducedOversTo ? String(match.reducedOversTo) : '',
+            dlsApplied: Boolean(match.dlsApplied)
         });
         setEditingId(match.id);
         setShowForm(true);
@@ -2093,10 +2102,16 @@ export default function AdminMatches() {
             setIsSubmitting(true);
             setError(null);
 
+            const trimmedNote = formData.statusNote.trim();
+            const reducedOversValue = formData.reducedOversTo ? Number(formData.reducedOversTo) : undefined;
+
             // Ensure league is set from currentLeague context
             const matchData = {
                 ...formData,
-                league: currentLeague
+                league: currentLeague,
+                statusNote: trimmedNote || undefined,
+                reducedOversTo: Number.isFinite(reducedOversValue) && reducedOversValue > 0 ? reducedOversValue : undefined,
+                dlsApplied: formData.dlsApplied ? true : undefined
             };
 
             if (editingId) {
@@ -3395,6 +3410,61 @@ export default function AdminMatches() {
                                                                 </motion.button>
                                                             );
                                                         })}
+                                                    </div>
+                                                </div>
+
+                                                <div className="md:col-span-2 space-y-4">
+                                                    <div className="space-y-1.5">
+                                                        <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                                                            Match Advisory (optional)
+                                                        </label>
+                                                        <textarea
+                                                            value={formData.statusNote}
+                                                            onChange={(e) => setFormData({ ...formData, statusNote: e.target.value })}
+                                                            rows={3}
+                                                            className="w-full px-4 py-3 rounded-xl border border-white/10 text-white text-sm focus:outline-none focus:border-yellow-500/50 focus:ring-2 focus:ring-yellow-500/15 transition-all resize-none"
+                                                            style={{ background: 'rgba(255,255,255,0.06)', colorScheme: 'dark' }}
+                                                            placeholder="Example: Match abandoned due to rain. Overs reduced to 8 per side."
+                                                        />
+                                                        <p className="text-[11px] text-gray-500">
+                                                            Shown on match cards and match center so fans know about abandonments or reduced overs.
+                                                        </p>
+                                                    </div>
+
+                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                        <div className="space-y-1.5">
+                                                            <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                                                                Reduced overs per side
+                                                            </label>
+                                                            <input
+                                                                type="number"
+                                                                min={1}
+                                                                max={20}
+                                                                step={1}
+                                                                value={formData.reducedOversTo}
+                                                                onChange={(e) => setFormData({ ...formData, reducedOversTo: e.target.value })}
+                                                                className="w-full px-4 py-3 rounded-xl border border-white/10 text-white text-sm focus:outline-none focus:border-yellow-500/50 focus:ring-2 focus:ring-yellow-500/15 transition-all"
+                                                                style={{ background: 'rgba(255,255,255,0.06)', colorScheme: 'dark' }}
+                                                                placeholder="e.g., 8"
+                                                            />
+                                                        </div>
+
+                                                        <div className="space-y-1.5">
+                                                            <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                                                                DLS applied
+                                                            </label>
+                                                            <label className="flex items-center gap-3 px-4 py-3 rounded-xl border border-white/10 text-sm text-gray-300 cursor-pointer"
+                                                                style={{ background: 'rgba(255,255,255,0.06)' }}
+                                                            >
+                                                                <input
+                                                                    type="checkbox"
+                                                                    checked={formData.dlsApplied}
+                                                                    onChange={(e) => setFormData({ ...formData, dlsApplied: e.target.checked })}
+                                                                    className="h-4 w-4 rounded border-white/20 text-yellow-500 focus:ring-yellow-500/30"
+                                                                />
+                                                                <span>Duckworth-Lewis-Stern method used</span>
+                                                            </label>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>

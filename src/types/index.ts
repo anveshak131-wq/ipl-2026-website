@@ -120,6 +120,9 @@ export interface Match {
   resultType?: 'win' | 'loss' | 'tie' | 'no-result' | 'abandoned';
   resultReason?: string;
   resultReasonDetail?: string;
+  statusNote?: string;
+  reducedOversTo?: number;
+  dlsApplied?: boolean;
   team1Score?: string; // e.g., "154/6 (20.0 overs)"
   team2Score?: string; // e.g., "157/7 (20.0 overs)"
   points?: {

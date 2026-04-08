@@ -5,7 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useParams, useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { ArrowLeft, FileText, Lock, Trophy, Users } from 'lucide-react';
+import { ArrowLeft, FileText, Lock, Trophy, Users, AlertTriangle, CloudRain, Info } from 'lucide-react';
 
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
@@ -14,6 +14,7 @@ import { useLeague } from '@/contexts/LeagueContext';
 import { api } from '@/lib/data';
 import { getAnimatedLogoPath, getLogoPath } from '@/lib/logoUtils';
 import { getMatchNumberDisplay } from '@/lib/matchNumberUtils';
+import { getMatchAdvisory } from '@/lib/matchAdvisory';
 import { getPlaying11VisibilityMessage, isPlaying11VisibleNow } from '@/lib/playing11Utils';
 import { formatMatchTime } from '@/lib/timeUtils';
 import { League, Match, Player } from '@/types';
@@ -256,6 +257,22 @@ export default function MatchCenterPage({ backHref = '/matches', preferredLeague
     return getMatchNumberDisplay(match);
   }, [match]);
 
+  const advisory = useMemo(() => getMatchAdvisory(match), [match]);
+  const advisoryConfig = useMemo(() => {
+    if (!advisory) return null;
+    switch (advisory.type) {
+      case 'abandoned':
+        return { icon: AlertTriangle, border: 'rgba(248,113,113,0.45)', bg: 'rgba(248,113,113,0.12)', accent: '#f87171' };
+      case 'reduced-overs':
+        return { icon: CloudRain, border: 'rgba(96,165,250,0.45)', bg: 'rgba(96,165,250,0.12)', accent: '#60a5fa' };
+      case 'no-result':
+        return { icon: AlertTriangle, border: 'rgba(251,191,36,0.5)', bg: 'rgba(251,191,36,0.12)', accent: '#fbbf24' };
+      default:
+        return { icon: Info, border: 'rgba(148,163,184,0.35)', bg: 'rgba(148,163,184,0.1)', accent: '#cbd5f5' };
+    }
+  }, [advisory]);
+  const AdvisoryIcon = advisoryConfig?.icon;
+
   const tossMessage = useMemo(() => {
     if (!match) return null;
 
@@ -433,6 +450,27 @@ export default function MatchCenterPage({ backHref = '/matches', preferredLeague
                 {matchNumber}
               </span>
             </div>
+
+            {advisory && advisoryConfig && AdvisoryIcon && (
+              <div
+                className="mb-5 rounded-2xl border px-4 py-3 text-sm"
+                style={{ background: advisoryConfig.bg, borderColor: advisoryConfig.border }}
+              >
+                <div className="flex items-start gap-3">
+                  <AdvisoryIcon className="mt-0.5 h-4 w-4 flex-shrink-0" style={{ color: advisoryConfig.accent }} />
+                  <div>
+                    <p className="text-[11px] font-semibold uppercase tracking-wide" style={{ color: advisoryConfig.accent }}>
+                      {advisory.title}
+                    </p>
+                    {advisory.detail && (
+                      <p className="text-sm text-slate-100/80 mt-0.5">
+                        {advisory.detail}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
 
             <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-4">
               <div className="flex flex-col items-center text-center gap-2">

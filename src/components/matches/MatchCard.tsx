@@ -10,9 +10,10 @@ import { getAnimatedLogoPath, getLogoPath } from '@/lib/logoUtils';
 import { CustomEmoji } from '@/components/emoji/Emoji';
 import { formatMatchTime } from '@/lib/timeUtils';
 import { getMatchNumberDisplay } from '@/lib/matchNumberUtils';
+import { getMatchAdvisory } from '@/lib/matchAdvisory';
 import CountdownTimer from '@/components/ui/CountdownTimer';
 import Playing11Display from '@/components/matches/Playing11Display';
-import { X, MapPin, Calendar, Clock, Trophy, Zap, Users, ChevronRight } from 'lucide-react';
+import { X, MapPin, Calendar, Clock, Trophy, Zap, Users, ChevronRight, AlertTriangle, CloudRain, Info } from 'lucide-react';
 
 interface MatchCardProps {
   match: Match;
@@ -159,6 +160,20 @@ export default function MatchCard({ match, index = 0, players, detailHref }: Mat
   const isLive = match.status === 'live';
   const isCompleted = match.status === 'completed';
   const matchNumberDisplay = getMatchNumberDisplay(match);
+  const advisory = getMatchAdvisory(match);
+  const advisoryConfig = advisory ? (() => {
+    switch (advisory.type) {
+      case 'abandoned':
+        return { icon: AlertTriangle, border: 'rgba(248,113,113,0.4)', bg: 'rgba(248,113,113,0.12)', accent: '#f87171' };
+      case 'reduced-overs':
+        return { icon: CloudRain, border: 'rgba(96,165,250,0.4)', bg: 'rgba(96,165,250,0.12)', accent: '#60a5fa' };
+      case 'no-result':
+        return { icon: AlertTriangle, border: 'rgba(251,191,36,0.45)', bg: 'rgba(251,191,36,0.12)', accent: '#fbbf24' };
+      default:
+        return { icon: Info, border: 'rgba(148,163,184,0.35)', bg: 'rgba(148,163,184,0.12)', accent: '#94a3b8' };
+    }
+  })() : null;
+  const AdvisoryIcon = advisoryConfig?.icon;
 
   // ── 10 distinct oil-paint palettes cycling by card index ──────────────────
   // Each palette: [bg, orb1-topleft, orb2-bottomright, orb3-topright, conicMix, borderRGB, accentA, accentB, accentC]
@@ -405,9 +420,9 @@ export default function MatchCard({ match, index = 0, players, detailHref }: Mat
               )}
             </div>
 
-            {matchNumberDisplay && matchNumberDisplay !== 'TBD' && (
-              <span
-                className="text-[11px] font-black tracking-widest px-2 py-1 rounded-lg"
+          {matchNumberDisplay && matchNumberDisplay !== 'TBD' && (
+            <span
+              className="text-[11px] font-black tracking-widest px-2 py-1 rounded-lg"
                 style={{
                   background: 'rgba(255,215,0,0.08)',
                   border: '1px solid rgba(255,215,0,0.2)',
@@ -416,12 +431,33 @@ export default function MatchCard({ match, index = 0, players, detailHref }: Mat
                 }}
               >
                 {matchNumberDisplay}
-              </span>
-            )}
-          </div>
+            </span>
+          )}
+        </div>
 
-          {/* ── TEAMS BATTLE ARENA ── */}
-          <div className="px-4 py-2 pb-4">
+        {advisory && advisoryConfig && AdvisoryIcon && (
+          <div
+            className="mx-4 mt-3 rounded-2xl border px-3 py-2 text-[11px] font-semibold"
+            style={{ background: advisoryConfig.bg, borderColor: advisoryConfig.border }}
+          >
+            <div className="flex items-start gap-2">
+              <AdvisoryIcon className="mt-0.5 h-4 w-4 flex-shrink-0" style={{ color: advisoryConfig.accent }} />
+              <div className="min-w-0">
+                <p className="uppercase tracking-wider text-[10px]" style={{ color: advisoryConfig.accent }}>
+                  {advisory.title}
+                </p>
+                {advisory.detail && (
+                  <p className="text-slate-100/80 text-[11px] mt-0.5 truncate">
+                    {advisory.detail}
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ── TEAMS BATTLE ARENA ── */}
+        <div className="px-4 py-2 pb-4">
 
             {/* Decorative cricket pitch strip */}
             <div

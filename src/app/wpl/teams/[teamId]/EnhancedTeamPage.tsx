@@ -43,6 +43,7 @@ import WPLFloatingParticles from '@/components/animations/WPLFloatingParticles';
 import { WPLColors, getWPLGlassmorphism, getWPLHoverGlow } from '@/lib/wplColors';
 import type { AchievementEntry } from '@/types';
 import { SEASON_YEAR } from '@/lib/season';
+import { getMatchAdvisory, type MatchAdvisory } from '@/lib/matchAdvisory';
 
 // Import types
 interface Team {
@@ -91,7 +92,13 @@ interface Match {
   time?: string;
   venue?: string;
   result?: string;
+  resultType?: string;
+  resultReason?: string;
+  resultReasonDetail?: string;
   status?: string;
+  statusNote?: string;
+  reducedOversTo?: number;
+  dlsApplied?: boolean;
   league?: string;
 }
 
@@ -117,6 +124,9 @@ interface RecentMatch {
   score: string;
   date: string;
   venue: string;
+  advisory?: MatchAdvisory | null;
+  team1?: Team | string;
+  team2?: Team | string;
 }
 
 interface PlayerStats {
@@ -1021,10 +1031,25 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
         date: match.date || 'TBD',
         venue: match.venue || 'TBD',
         team1: match.team1,
-        team2: match.team2
+        team2: match.team2,
+        advisory: getMatchAdvisory(match)
       };
     });
   }, [matches, teamId]);
+
+  const getAdvisoryTone = (advisory?: MatchAdvisory | null) => {
+    if (!advisory) return null;
+    switch (advisory.type) {
+      case 'abandoned':
+        return { border: 'rgba(248,113,113,0.45)', bg: 'rgba(248,113,113,0.12)', text: 'text-red-200' };
+      case 'reduced-overs':
+        return { border: 'rgba(96,165,250,0.45)', bg: 'rgba(96,165,250,0.12)', text: 'text-blue-200' };
+      case 'no-result':
+        return { border: 'rgba(251,191,36,0.5)', bg: 'rgba(251,191,36,0.12)', text: 'text-amber-200' };
+      default:
+        return { border: 'rgba(148,163,184,0.35)', bg: 'rgba(148,163,184,0.1)', text: 'text-slate-200' };
+    }
+  };
 
   // ── Helpers to normalise admin scorecard data for export ──────
   const buildExportData = (sc: any) => {
@@ -2937,7 +2962,8 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
                             </motion.div>
                           </div>
                         </motion.div>
-                      ))}
+                      );
+                    })}
                     </div>
                   </div>
                 </motion.div>
@@ -3069,29 +3095,31 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
                     </motion.div>
                     
                     <div className="space-y-4">
-                      {recentMatches.map((match, index) => (
-                        <motion.div
-                          key={match.id}
-                          initial={{ opacity: 0, x: -30 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: 0.5 + index * 0.1, duration: 0.6 }}
-                          whileHover={{ 
-                            scale: 1.02,
-                            x: 10,
-                            transition: { duration: 0.3 }
-                          }}
-                          whileTap={{ scale: 0.98 }}
-                          className={`relative group overflow-hidden rounded-2xl cursor-pointer ${
-                            hasScorecard(match) 
-                              ? 'border-green-500/40' 
-                              : 'border-white/20'
-                          }`}
-                          style={{
-                            ...getWPLGlassmorphism('violet', 20),
-                            border: `1px solid ${hasScorecard(match) ? 'rgba(16, 185, 129, 0.4)' : 'rgba(255, 255, 255, 0.2)'}`,
-                          }}
-                          onClick={() => handleMatchClick(match)}
-                        >
+                      {recentMatches.map((match, index) => {
+                        const advisoryTone = getAdvisoryTone(match.advisory);
+                        return (
+                          <motion.div
+                            key={match.id}
+                            initial={{ opacity: 0, x: -30 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: 0.5 + index * 0.1, duration: 0.6 }}
+                            whileHover={{ 
+                              scale: 1.02,
+                              x: 10,
+                              transition: { duration: 0.3 }
+                            }}
+                            whileTap={{ scale: 0.98 }}
+                            className={`relative group overflow-hidden rounded-2xl cursor-pointer ${
+                              hasScorecard(match) 
+                                ? 'border-green-500/40' 
+                                : 'border-white/20'
+                            }`}
+                            style={{
+                              ...getWPLGlassmorphism('violet', 20),
+                              border: `1px solid ${hasScorecard(match) ? 'rgba(16, 185, 129, 0.4)' : 'rgba(255, 255, 255, 0.2)'}`,
+                            }}
+                            onClick={() => handleMatchClick(match)}
+                          >
                           {/* Hover background effect */}
                           <motion.div
                             className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
@@ -3144,6 +3172,17 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
                                   >
                                     {match.score}
                                   </motion.div>
+                                  {match.advisory && advisoryTone && (
+                                    <div
+                                      className={`mt-2 inline-flex items-center gap-2 rounded-full border px-3 py-1 text-[10px] font-semibold ${advisoryTone.text}`}
+                                      style={{ borderColor: advisoryTone.border, background: advisoryTone.bg }}
+                                    >
+                                      <span className="uppercase tracking-wide">{match.advisory.title}</span>
+                                      {match.advisory.detail && (
+                                        <span className="opacity-80 line-clamp-1">{match.advisory.detail}</span>
+                                      )}
+                                    </div>
+                                  )}
                                 </div>
                               </div>
                               

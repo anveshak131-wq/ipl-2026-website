@@ -49,6 +49,7 @@ import QuickActionsBar from '@/components/teams/QuickActionsBar';
 import TrophyCounter from '@/components/teams/TrophyCounter';
 import QualifiedBadge from '@/components/ui/QualifiedBadge';
 import { getMatchResult } from '@/lib/matchUtils';
+import { getMatchAdvisory } from '@/lib/matchAdvisory';
 
 interface TeamDetailClientProps {
   teamId: string;
@@ -200,6 +201,39 @@ export default function TeamDetailClient({ teamId, league }: TeamDetailClientPro
   const [scorecard, setScorecard] = useState<any>(null);
   const [loadingScorecard, setLoadingScorecard] = useState(false);
   const [showPlayerCards, setShowPlayerCards] = useState(false);
+
+  const renderMatchAdvisory = (match: Match | null) => {
+    const advisory = getMatchAdvisory(match);
+    if (!advisory) return null;
+    const tone = (() => {
+      switch (advisory.type) {
+        case 'abandoned':
+          return { border: 'rgba(248,113,113,0.4)', bg: 'rgba(248,113,113,0.12)', accent: '#fca5a5' };
+        case 'reduced-overs':
+          return { border: 'rgba(96,165,250,0.4)', bg: 'rgba(96,165,250,0.12)', accent: '#93c5fd' };
+        case 'no-result':
+          return { border: 'rgba(251,191,36,0.45)', bg: 'rgba(251,191,36,0.12)', accent: '#fcd34d' };
+        default:
+          return { border: 'rgba(148,163,184,0.35)', bg: 'rgba(148,163,184,0.1)', accent: '#cbd5f5' };
+      }
+    })();
+
+    return (
+      <div
+        className="mb-3 rounded-lg border px-3 py-2 text-xs"
+        style={{ borderColor: tone.border, background: tone.bg }}
+      >
+        <div className="text-[10px] font-semibold uppercase tracking-wide" style={{ color: tone.accent }}>
+          {advisory.title}
+        </div>
+        {advisory.detail && (
+          <div className="text-gray-200/80 mt-1 line-clamp-2">
+            {advisory.detail}
+          </div>
+        )}
+      </div>
+    );
+  };
 
   useEffect(() => {
     if (!pendingScrollTarget) return;
@@ -1148,6 +1182,7 @@ export default function TeamDetailClient({ teamId, league }: TeamDetailClientPro
                           </p>
                           <p className="text-sm text-gray-200/80 mb-3 max-w-full overflow-hidden truncate whitespace-nowrap">{lastMatch.result || 'Result not available'}</p>
                           <p className="text-xs text-gray-400 mb-3">Status: {lastMatch.status}</p>
+                          {renderMatchAdvisory(lastMatch)}
                           {lastMatch.status === 'completed' && (
                             <button
                               onClick={() => fetchScorecard(lastMatch.id)}
@@ -1186,6 +1221,7 @@ export default function TeamDetailClient({ teamId, league }: TeamDetailClientPro
                             {nextMatch.team1.shortName} vs {nextMatch.team2.shortName}
                           </p>
                           <p className="text-xs text-gray-400 mb-3">Status: {nextMatch.status}</p>
+                          {renderMatchAdvisory(nextMatch)}
                           <button
                             onClick={() => {
                               setPendingScrollTarget({ tab: 'overview', section: 'fixtures' });

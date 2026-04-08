@@ -271,6 +271,9 @@ function formatMatch(match, teams) {
       resultType: match.resultType,
       resultReason: match.resultReason,
       resultReasonDetail: match.resultReasonDetail,
+      statusNote: match.statusNote,
+      reducedOversTo: match.reducedOversTo,
+      dlsApplied: match.dlsApplied,
       score: match.score,
       team1Score: match.team1Score,
       team2Score: match.team2Score,
@@ -333,6 +336,9 @@ function formatMatch(match, teams) {
     resultType: match.resultType,
     resultReason: match.resultReason,
     resultReasonDetail: match.resultReasonDetail,
+    statusNote: match.statusNote,
+    reducedOversTo: match.reducedOversTo,
+    dlsApplied: match.dlsApplied,
     score: match.score,
     team1Score: match.team1Score,
     team2Score: match.team2Score,
@@ -547,6 +553,11 @@ async function handleBulkPostRequest(context) {
         team1Id: m.team1Id,
         team2Id: m.team2Id,
         status: m.status || 'upcoming',
+        ...(m.statusNote ? { statusNote: String(m.statusNote).trim() } : {}),
+        ...(Number.isFinite(Number(m.reducedOversTo)) && Number(m.reducedOversTo) > 0
+          ? { reducedOversTo: Number(m.reducedOversTo) }
+          : {}),
+        ...(typeof m.dlsApplied === 'boolean' ? { dlsApplied: m.dlsApplied } : {}),
         ...(m.playoffType ? { playoffType: m.playoffType } : {}),
       };
       matches.push(newMatch);
@@ -583,7 +594,7 @@ async function handlePostRequest(context) {
   
   try {
     const body = await request.json();
-    const { date, time, venue, team1Id, team2Id, status, league } = body;
+    const { date, time, venue, team1Id, team2Id, status, league, statusNote, reducedOversTo, dlsApplied } = body;
     
     // Validate required fields
     if (!date || !time || !venue || !team1Id || !team2Id) {
@@ -619,7 +630,12 @@ async function handlePostRequest(context) {
       venue,
       team1Id,
       team2Id,
-      status: status || 'upcoming'
+      status: status || 'upcoming',
+      ...(statusNote ? { statusNote: String(statusNote).trim() } : {}),
+      ...(Number.isFinite(Number(reducedOversTo)) && Number(reducedOversTo) > 0
+        ? { reducedOversTo: Number(reducedOversTo) }
+        : {}),
+      ...(typeof dlsApplied === 'boolean' ? { dlsApplied } : {})
     };
     
     // Add to matches array
