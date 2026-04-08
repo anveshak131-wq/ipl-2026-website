@@ -30,9 +30,7 @@ interface ScorecardInnings {
   totalWickets?: number;
   totalOvers?: number | string;
   batting?: Array<{
-    playerId?: string;
     name?: string;
-    isCaptain?: boolean;
     runs?: number;
     balls?: number;
     fours?: number;
@@ -43,9 +41,7 @@ interface ScorecardInnings {
     };
   }>;
   bowling?: Array<{
-    playerId?: string;
     name?: string;
-    isCaptain?: boolean;
     overs?: number;
     balls?: number;
     maidens?: number;
@@ -112,7 +108,7 @@ async function fetchPublishedScorecard(matchId: string, league?: League): Promis
 export default function MatchCenterPage({ backHref = '/matches', preferredLeague }: MatchCenterPageProps) {
   const params = useParams<{ matchId: string }>();
   const searchParams = useSearchParams();
-  const searchKey = searchParams.toString();
+  const searchKey = typeof searchParams?.toString === 'function' ? searchParams.toString() : '';
   const matchId = typeof params?.matchId === 'string' ? decodeURIComponent(params.matchId) : '';
 
   const { setCurrentLeague } = useLeague();
@@ -292,28 +288,12 @@ export default function MatchCenterPage({ backHref = '/matches', preferredLeague
 
   const team1Playing11 = useMemo(() => {
     if (!match?.playing11?.team1) return [];
-    return match.playing11.team1.map((id) => ({ id, name: playerMap.get(id)?.name || id }));
+    return match.playing11.team1.map((id) => playerMap.get(id)?.name || id);
   }, [match, playerMap]);
 
   const team2Playing11 = useMemo(() => {
     if (!match?.playing11?.team2) return [];
-    return match.playing11.team2.map((id) => ({ id, name: playerMap.get(id)?.name || id }));
-  }, [match, playerMap]);
-
-  const playing11CaptainIds = useMemo(() => {
-    if (!match) return { team1: undefined as string | undefined, team2: undefined as string | undefined };
-    const explicitTeam1 = match.captains?.team1 ? String(match.captains.team1) : '';
-    const explicitTeam2 = match.captains?.team2 ? String(match.captains.team2) : '';
-
-    const fallbackTeam1 =
-      explicitTeam1 || match.playing11?.team1?.find((id) => playerMap.get(id)?.isCaptain) || '';
-    const fallbackTeam2 =
-      explicitTeam2 || match.playing11?.team2?.find((id) => playerMap.get(id)?.isCaptain) || '';
-
-    return {
-      team1: fallbackTeam1 || undefined,
-      team2: fallbackTeam2 || undefined,
-    };
+    return match.playing11.team2.map((id) => playerMap.get(id)?.name || id);
   }, [match, playerMap]);
 
   const innings = useMemo(() => {
@@ -356,12 +336,12 @@ export default function MatchCenterPage({ backHref = '/matches', preferredLeague
     );
   }
 
-  const team1Logo = match.team1.logo && !match.team1.logo.endsWith('.json')
-    ? match.team1.logo
-    : getAnimatedLogoPath(match.team1.id, match.team1.shortName || '', match.league);
-  const team2Logo = match.team2.logo && !match.team2.logo.endsWith('.json')
-    ? match.team2.logo
-    : getAnimatedLogoPath(match.team2.id, match.team2.shortName || '', match.league);
+  const team1Logo = match.team1?.logo && !String(match.team1.logo).endsWith('.json')
+    ? String(match.team1.logo)
+    : getAnimatedLogoPath(match.team1?.id, match.team1?.shortName || '', match.league);
+  const team2Logo = match.team2?.logo && !String(match.team2.logo).endsWith('.json')
+    ? String(match.team2.logo)
+    : getAnimatedLogoPath(match.team2?.id, match.team2?.shortName || '', match.league);
 
   const pageOilTheme = match.league === 'wpl'
     ? {
@@ -447,7 +427,7 @@ export default function MatchCenterPage({ backHref = '/matches', preferredLeague
           >
             <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
               <span className="inline-flex items-center rounded-full border border-cyan-300/35 bg-cyan-500/10 px-3 py-1 text-xs font-bold tracking-[0.18em] text-cyan-100 uppercase">
-                {match.league.toUpperCase()} Match Center
+                {(match.league || '').toUpperCase()} Match Center
               </span>
               <span className="text-xs font-semibold text-amber-200 bg-amber-500/10 border border-amber-300/35 px-3 py-1 rounded-full">
                 {matchNumber}
@@ -495,7 +475,7 @@ export default function MatchCenterPage({ backHref = '/matches', preferredLeague
             <div className="mt-6 grid gap-3 md:grid-cols-3 text-sm">
               <div className="rounded-xl border border-white/10 bg-white/5 p-3">
                 <p className="text-slate-400 text-xs uppercase tracking-wide">Date</p>
-                <p className="font-semibold">{new Date(match.date).toDateString()}</p>
+                <p className="font-semibold">{new Date(match.date || '').toDateString()}</p>
               </div>
               <div className="rounded-xl border border-white/10 bg-white/5 p-3">
                 <p className="text-slate-400 text-xs uppercase tracking-wide">Time</p>
@@ -555,12 +535,9 @@ export default function MatchCenterPage({ backHref = '/matches', preferredLeague
                 <div className="rounded-2xl border border-cyan-300/25 bg-cyan-500/10 p-4">
                   <h3 className="font-bold text-cyan-100 mb-3">{match.team1.name}</h3>
                   <ul className="space-y-2 text-sm">
-                    {team1Playing11.map((player) => (
-                      <li key={player.id} className="rounded-lg border border-white/10 bg-white/5 px-3 py-2">
-                        {player.name}
-                        {playing11CaptainIds.team1 && String(player.id) === String(playing11CaptainIds.team1) && (
-                          <span className="ml-2 text-xs font-bold text-yellow-300">(C)</span>
-                        )}
+                    {team1Playing11.map((name) => (
+                      <li key={name} className="rounded-lg border border-white/10 bg-white/5 px-3 py-2">
+                        {name}
                       </li>
                     ))}
                   </ul>
@@ -569,12 +546,9 @@ export default function MatchCenterPage({ backHref = '/matches', preferredLeague
                 <div className="rounded-2xl border border-fuchsia-300/25 bg-fuchsia-500/10 p-4">
                   <h3 className="font-bold text-fuchsia-100 mb-3">{match.team2.name}</h3>
                   <ul className="space-y-2 text-sm">
-                    {team2Playing11.map((player) => (
-                      <li key={player.id} className="rounded-lg border border-white/10 bg-white/5 px-3 py-2">
-                        {player.name}
-                        {playing11CaptainIds.team2 && String(player.id) === String(playing11CaptainIds.team2) && (
-                          <span className="ml-2 text-xs font-bold text-yellow-300">(C)</span>
-                        )}
+                    {team2Playing11.map((name) => (
+                      <li key={name} className="rounded-lg border border-white/10 bg-white/5 px-3 py-2">
+                        {name}
                       </li>
                     ))}
                   </ul>
@@ -620,10 +594,6 @@ export default function MatchCenterPage({ backHref = '/matches', preferredLeague
                 {innings.map((inning, index) => {
                   const isTeam1Batting = String(inning.battingTeamId) === String(match.team1.id);
                   const battingTeam = isTeam1Batting ? match.team1.name : match.team2.name;
-                  const battingCaptainId = isTeam1Batting ? playing11CaptainIds.team1 : playing11CaptainIds.team2;
-                  const bowlingCaptainId = isTeam1Batting ? playing11CaptainIds.team2 : playing11CaptainIds.team1;
-                  const battingCaptainName = battingCaptainId ? playerMap.get(String(battingCaptainId))?.name || '' : '';
-                  const bowlingCaptainName = bowlingCaptainId ? playerMap.get(String(bowlingCaptainId))?.name || '' : '';
 
                   return (
                     <div key={`${inning.inningsNumber || index}-${battingTeam}`} className="rounded-2xl border border-white/10 bg-white/5 p-4">
@@ -651,18 +621,7 @@ export default function MatchCenterPage({ backHref = '/matches', preferredLeague
                               {inning.batting.map((batter, batterIndex) => (
                                 <tr key={`${batter.name || 'batter'}-${batterIndex}`} className="border-b border-white/5 last:border-b-0">
                                   <td className="py-2 pr-4">
-                                    <p className="font-medium">
-                                      {batter.name || 'Unknown'}
-                                      {(Boolean(batter.isCaptain) ||
-                                        (battingCaptainId &&
-                                          batter.playerId &&
-                                          String(batter.playerId) === String(battingCaptainId)) ||
-                                        (battingCaptainName &&
-                                          batter.name &&
-                                          batter.name.trim() === battingCaptainName.trim())) && (
-                                        <span className="ml-2 text-xs font-bold text-yellow-300">(C)</span>
-                                      )}
-                                    </p>
+                                    <p className="font-medium">{batter.name || 'Unknown'}</p>
                                     {batter.dismissal?.details && (
                                       <p className="text-xs text-slate-400">{batter.dismissal.details}</p>
                                     )}
@@ -671,7 +630,7 @@ export default function MatchCenterPage({ backHref = '/matches', preferredLeague
                                   <td className="text-right py-2">{batter.balls || 0}</td>
                                   <td className="text-right py-2">{batter.fours || 0}</td>
                                   <td className="text-right py-2">{batter.sixes || 0}</td>
-                                  <td className="text-right py-2">{(batter.strikeRate || 0).toFixed(2)}</td>
+                                  <td className="text-right py-2">{Number(batter.strikeRate || 0).toFixed(2)}</td>
                                 </tr>
                               ))}
                             </tbody>
@@ -695,23 +654,12 @@ export default function MatchCenterPage({ backHref = '/matches', preferredLeague
                             <tbody>
                               {inning.bowling.map((bowler, bowlerIndex) => (
                                 <tr key={`${bowler.name || 'bowler'}-${bowlerIndex}`} className="border-b border-white/5 last:border-b-0">
-                                  <td className="py-2 pr-4 font-medium">
-                                    {bowler.name || 'Unknown'}
-                                    {(Boolean(bowler.isCaptain) ||
-                                      (bowlingCaptainId &&
-                                        bowler.playerId &&
-                                        String(bowler.playerId) === String(bowlingCaptainId)) ||
-                                      (bowlingCaptainName &&
-                                        bowler.name &&
-                                        bowler.name.trim() === bowlingCaptainName.trim())) && (
-                                      <span className="ml-2 text-xs font-bold text-yellow-300">(C)</span>
-                                    )}
-                                  </td>
+                                  <td className="py-2 pr-4 font-medium">{bowler.name || 'Unknown'}</td>
                                   <td className="text-right py-2">{bowler.overs || 0}.{bowler.balls || 0}</td>
                                   <td className="text-right py-2">{bowler.maidens || 0}</td>
                                   <td className="text-right py-2">{bowler.runs || 0}</td>
                                   <td className="text-right py-2">{bowler.wickets || 0}</td>
-                                  <td className="text-right py-2">{(bowler.economyRate || 0).toFixed(2)}</td>
+                                  <td className="text-right py-2">{Number(bowler.economyRate || 0).toFixed(2)}</td>
                                 </tr>
                               ))}
                             </tbody>
