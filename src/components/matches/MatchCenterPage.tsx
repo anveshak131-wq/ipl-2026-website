@@ -316,8 +316,10 @@ export default function MatchCenterPage({ backHref = '/matches', preferredLeague
   }, [match, playerMap]);
 
   const innings = useMemo(() => {
-    if (!scorecard?.innings) return [];
-    return [...scorecard.innings].sort((a, b) => (a.inningsNumber || 0) - (b.inningsNumber || 0));
+    if (!Array.isArray(scorecard?.innings)) return [];
+    return scorecard.innings
+      .filter((inning): inning is ScorecardInnings => Boolean(inning))
+      .sort((a, b) => (a.inningsNumber ?? 0) - (b.inningsNumber ?? 0));
   }, [scorecard]);
 
   if (isLoading) {
