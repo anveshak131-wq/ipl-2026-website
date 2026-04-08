@@ -1539,7 +1539,8 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
                 ease: "easeInOut"
               }}
             />
-                        ))}
+          );
+        })}
         
         {/* Premium geometric shapes with gradient borders */}
         {[...Array(12)].map((_, i) => {
@@ -2848,8 +2849,9 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
                     </motion.div>
                     
                     <div className="grid md:grid-cols-3 gap-6">
-                      {players.slice(0, 3).map((player, index) => (
-                        <motion.div
+                      {players.slice(0, 3).map((player, index) => {
+                        return (
+                          <motion.div
                           key={player.id}
                           initial={{ opacity: 0, scale: 0.8, y: 20 }}
                           animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -2960,9 +2962,9 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
                               />
                             </motion.div>
                           </div>
-                        </motion.div>
-                      );
-                    })}
+                          </motion.div>
+                        );
+                      })}
                     </div>
                   </div>
                 </motion.div>
@@ -3259,7 +3261,8 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
                             </motion.div>
                           </div>
                         </motion.div>
-                      ))}
+                      );
+                    })}
                     </div>
                   </div>
                 </motion.div>
