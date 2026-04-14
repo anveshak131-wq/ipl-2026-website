@@ -938,7 +938,14 @@ export default function AdminMatches() {
              .trim();
 
         const findTeam = (raw: string) => {
-            const norm = normaliseName(raw);
+            // Historical franchise renames — map old names to current names
+            const HISTORICAL_ALIASES: Record<string, string> = {
+                'kings xi punjab':     'Punjab Kings',
+                'kings eleven punjab': 'Punjab Kings',
+                'delhi daredevils':    'Delhi Capitals',
+            };
+            const resolved = HISTORICAL_ALIASES[raw.trim().toLowerCase()] ?? raw;
+            const norm = normaliseName(resolved);
             if (!norm || norm === 'tbd') return null;
             return teams.find(t => {
                 const tName = normaliseName(t.name ?? '');
