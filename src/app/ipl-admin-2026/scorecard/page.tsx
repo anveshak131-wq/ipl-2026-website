@@ -254,16 +254,16 @@ export default function ScorecardAdminPage() {
       const remoteTime = parseUpdatedAt(remoteScorecard);
 
       if (localDraft && localTime >= remoteTime) {
-        setScorecard(localDraft);
+        setScorecard(normalizeScorecard(localDraft, match));
       } else if (remoteScorecard) {
-        setScorecard(remoteScorecard);
+        setScorecard(normalizeScorecard(remoteScorecard, match));
         try {
           localStorage.removeItem(draftKey);
         } catch {
           /* ignore */
         }
       } else if (localDraft) {
-        setScorecard(localDraft);
+        setScorecard(normalizeScorecard(localDraft, match));
       } else {
         setScorecard(initializeScorecard(match));
       }
@@ -331,7 +331,27 @@ export default function ScorecardAdminPage() {
     };
   };
 
+  const buildDefaultInnings = (inningsNumber: number, battingTeamId: number): Innings => ({
+    inningsNumber,
+    battingTeamId,
+    batting: [],
+    bowling: [],
+    extras: { wides: 0, noBalls: 0, byes: 0, legByes: 0 },
+    totalRuns: 0,
+    totalWickets: 0,
+    totalOvers: 0,
+    fallOfWickets: [],
+    powerplays: {
+      mandatory: { overs: '', runs: 0 },
+      optional: { overs: '', runs: 0 }
+    },
+    partnerships: []
+  });
+
   const initializeInningsData = (innings: any) => {
+    if (!innings || typeof innings !== 'object') {
+      return buildDefaultInnings(1, 0);
+    }
     if (!innings.fallOfWickets) {
       innings.fallOfWickets = [];
     }
@@ -345,6 +365,37 @@ export default function ScorecardAdminPage() {
       innings.partnerships = [];
     }
     return innings;
+  };
+
+  const normalizeScorecard = (incoming: Scorecard, match: Match): Scorecard => {
+    const defaultScorecard = initializeScorecard(match);
+    const normalized: Scorecard = {
+      ...defaultScorecard,
+      ...incoming,
+      matchInfo: {
+        ...defaultScorecard.matchInfo,
+        ...(incoming.matchInfo || {}),
+      },
+    };
+
+    const sourceInnings = Array.isArray(incoming.innings) ? incoming.innings : [];
+    const firstInnings = initializeInningsData({
+      ...buildDefaultInnings(1, defaultScorecard.innings[0].battingTeamId),
+      ...(sourceInnings[0] || {}),
+    });
+    const secondDefaultBattingTeamId =
+      firstInnings.battingTeamId === defaultScorecard.matchInfo.team1.id
+        ? defaultScorecard.matchInfo.team2.id
+        : defaultScorecard.matchInfo.team1.id;
+    const secondInnings = initializeInningsData({
+      ...buildDefaultInnings(2, secondDefaultBattingTeamId),
+      ...(sourceInnings[1] || {}),
+    });
+
+    normalized.innings = [firstInnings, secondInnings];
+    normalized.matchInfo.matchId = normalized.matchInfo.matchId || match.id;
+
+    return normalized;
   };
 
   // Ensure data is initialized when scorecard changes
