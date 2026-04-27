@@ -2854,9 +2854,11 @@ export default function IPLAdminLiveScoreTablePage() {
             },
             body: JSON.stringify(payload),
           });
-
-          // Keep scorecard (incl. powerplays/partnerships) in sync with the latest ball-by-ball table.
-          void syncScorecardFromTable();
+        }
+        // Keep scorecard (incl. powerplays/partnerships) in sync with the latest ball-by-ball table.
+        // Await here so "Saved" status reflects both KV save and scorecard sync completion.
+        if (token) {
+          await syncScorecardFromTable();
         }
       } catch (e) {
         console.error('[IPL Live Score Table] Publish failed:', e);
@@ -2886,7 +2888,7 @@ export default function IPLAdminLiveScoreTablePage() {
       if (!resp.ok) throw new Error('Failed to publish');
 
       // Also update the scorecard using the same ball-by-ball table (powerplays/partnerships included).
-      void syncScorecardFromTable();
+      await syncScorecardFromTable();
 
       setSaveStatus('success');
       setTimeout(() => setSaveStatus('idle'), 2000);
