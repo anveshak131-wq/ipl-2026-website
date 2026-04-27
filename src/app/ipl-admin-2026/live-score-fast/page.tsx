@@ -2148,11 +2148,14 @@ export default function IPLAdminLiveScoreTablePage() {
     return resp.json();
   };
 
+  const getAdminAuthToken = () =>
+    localStorage.getItem('adminToken') || localStorage.getItem('auth_token') || '';
+
   const saveMatchResult = async () => {
     try {
       if (!selectedMatchId || !selectedMatch) return;
 
-      const token = localStorage.getItem('adminToken');
+      const token = getAdminAuthToken();
       if (!token) {
         alert('Admin token missing. Please login again.');
         return;
@@ -2203,7 +2206,7 @@ export default function IPLAdminLiveScoreTablePage() {
     try {
       if (!selectedMatchId || !selectedMatch) return;
 
-      const token = localStorage.getItem('adminToken');
+      const token = getAdminAuthToken();
       if (!token) {
         alert('Admin token missing. Please login again.');
         return;
@@ -2285,7 +2288,7 @@ export default function IPLAdminLiveScoreTablePage() {
     try {
       if (!selectedMatchId || !selectedMatch) return;
 
-      const token = localStorage.getItem('adminToken');
+      const token = getAdminAuthToken();
       if (!token) {
         alert('Admin token missing. Please login again.');
         return;
@@ -2660,7 +2663,7 @@ export default function IPLAdminLiveScoreTablePage() {
             if (!isWide && !isNoBall) legalBalls += 1;
           }
 
-          if (!wk.hasWicket) return;
+          if (!wk.hasWicket) continue;
 
           const wicketType = String(wk.wicketType || '').trim();
           const outRole =
@@ -2678,7 +2681,7 @@ export default function IPLAdminLiveScoreTablePage() {
 	              dismissed.dismissal = buildDismissal(wk, bowlerId);
 	            }
 	            pushCurrentPartnership();
-	            return;
+	            continue;
 	          }
 
           wicketCount += 1;
@@ -2844,7 +2847,7 @@ export default function IPLAdminLiveScoreTablePage() {
       // Best-effort publish to the public live-score API
       try {
         const payload = buildLiveScorePayload();
-        const token = localStorage.getItem('adminToken');
+        const token = getAdminAuthToken();
         if (payload && token) {
           await fetch('/api/live-score', {
             method: 'POST',
@@ -2876,7 +2879,7 @@ export default function IPLAdminLiveScoreTablePage() {
   const publishNow = async () => {
     try {
       const payload = buildLiveScorePayload();
-      const token = localStorage.getItem('adminToken');
+      const token = getAdminAuthToken();
       if (!payload || !token) return;
 
       setSaveStatus('saving');
