@@ -2844,11 +2844,12 @@ export default function IPLAdminLiveScoreTablePage() {
       });
       if (!resp.ok) throw new Error('Failed saving rows to KV');
 
-      // Best-effort publish to the public live-score API
-      try {
-        const payload = buildLiveScorePayload();
-        const token = getAdminAuthToken();
-        if (payload && token) {
+      const token = getAdminAuthToken();
+
+      // Best-effort publish to the public live-score API (must not block scorecard sync).
+      const payload = buildLiveScorePayload();
+      if (payload && token) {
+        try {
           await fetch('/api/live-score', {
             method: 'POST',
             headers: {
@@ -2857,14 +2858,14 @@ export default function IPLAdminLiveScoreTablePage() {
             },
             body: JSON.stringify(payload),
           });
+        } catch (e) {
+          console.error('[IPL Live Score Table] Publish failed:', e);
         }
-        // Keep scorecard (incl. powerplays/partnerships) in sync with the latest ball-by-ball table.
-        // Await here so "Saved" status reflects both KV save and scorecard sync completion.
-        if (token) {
-          await syncScorecardFromTable();
-        }
-      } catch (e) {
-        console.error('[IPL Live Score Table] Publish failed:', e);
+      }
+
+      // Scorecard sync is required for IPL Live Score <-> Scorecard consistency.
+      if (token) {
+        await syncScorecardFromTable();
       }
 
       setSaveStatus('success');
