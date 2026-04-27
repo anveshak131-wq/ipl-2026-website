@@ -8,7 +8,6 @@ interface Match {
   id: string;
   team1: { id: string | number; name: string; shortName?: string };
   team2: { id: string | number; name: string; shortName?: string };
-  captains?: { team1?: string; team2?: string; setAt?: string };
   venue: string;
   date: string;
   time: string;
@@ -23,13 +22,11 @@ interface Player {
   role?: string;
   battingStyle?: string;
   bowlingStyle?: string;
-  isCaptain?: boolean;
 }
 
 interface Batter {
   playerId: string;
   name: string;
-  isCaptain?: boolean;
   runs: number;
   balls: number;
   fours: number;
@@ -46,7 +43,6 @@ interface Batter {
 interface Bowler {
   playerId: string;
   name: string;
-  isCaptain?: boolean;
   overs: number;
   balls: number;
   runs: number;
@@ -95,19 +91,6 @@ interface Innings {
 
 const DRAFT_KEY_PREFIX = 'ipl_scorecard_draft_';
 const DEFAULT_SEASON_YEAR = 2026;
-type ResultType = 'win' | 'tie' | 'no-result' | 'abandoned';
-const RESULT_REASONS = [
-  'Rain',
-  'Wet outfield',
-  'Bad light',
-  'Unsafe pitch',
-  'Dangerous weather',
-  'Equipment failure',
-  'Crowd disturbance',
-  'Security issue',
-  'Scheduling/curfew',
-  'Other',
-] as const;
 function getDraftKey(matchId: string) {
   return `${DRAFT_KEY_PREFIX}${matchId}`;
 }
@@ -116,90 +99,12 @@ function parseUpdatedAt(obj: { updatedAt?: string } | null): number {
   const t = new Date(obj.updatedAt).getTime();
   return isNaN(t) ? 0 : t;
 }
-
-function mergeRemoteComputedSections(base: Scorecard, remote: Scorecard | null): Scorecard {
-  if (!remote) return base;
-  if (!Array.isArray(base?.innings) || !Array.isArray(remote?.innings)) return base;
-
-  const remoteByInningsNumber = new Map<number, Innings>();
-  for (const inn of remote.innings) {
-    const num = Number((inn as any)?.inningsNumber);
-    if (Number.isFinite(num)) remoteByInningsNumber.set(num, inn);
-  }
-
-  const nextInnings = base.innings.map((inn) => {
-    const num = Number((inn as any)?.inningsNumber);
-    const remoteInn = remoteByInningsNumber.get(num);
-    if (!remoteInn) return inn;
-
-    const next: Innings = { ...inn };
-
-    // Powerplays are derived from ball-by-ball in live-score sync; trust server version when present.
-    if (remoteInn.powerplays && typeof remoteInn.powerplays === 'object') {
-      const mandatory = remoteInn.powerplays.mandatory || next.powerplays?.mandatory || { overs: '', runs: 0 };
-      const optional = remoteInn.powerplays.optional || next.powerplays?.optional || { overs: '', runs: 0 };
-      next.powerplays = { mandatory, optional };
-    }
-
-    // Partnerships are derived from striker/non-striker pairs; prefer server-generated list when present.
-    if (Array.isArray(remoteInn.partnerships) && remoteInn.partnerships.length > 0) {
-      next.partnerships = remoteInn.partnerships;
-    }
-
-    return next;
-  });
-
-  return { ...base, innings: nextInnings };
-}
 function getSeasonYear(dateString: string | undefined | null): number | null {
   if (!dateString) return null;
   const parsed = new Date(dateString);
   if (!isNaN(parsed.getTime())) return parsed.getFullYear();
   const match = String(dateString).match(/(19|20)\d{2}/);
   return match ? parseInt(match[0], 10) : null;
-}
-function normalizeText(value: unknown): string {
-  return String(value ?? '').trim();
-}
-function inferResultType(result?: { resultType?: string; winner?: string }): ResultType | '' {
-  const explicit = normalizeText(result?.resultType) as ResultType | '';
-  if (explicit) return explicit;
-  const winner = normalizeText(result?.winner).toLowerCase();
-  if (!winner) return '';
-  if (winner.includes('no result')) return 'no-result';
-  if (winner.includes('abandon')) return 'abandoned';
-  if (winner.includes('tie')) return 'tie';
-  return 'win';
-}
-function buildResultReason(reason?: string, detail?: string): string {
-  const cleanReason = normalizeText(reason);
-  const cleanDetail = normalizeText(detail);
-  if (cleanReason && cleanDetail) {
-    if (cleanReason.toLowerCase() === 'other') return cleanDetail;
-    return `${cleanReason}: ${cleanDetail}`;
-  }
-  return cleanReason || cleanDetail;
-}
-function buildResultText(
-  resultType: ResultType,
-  winner: string,
-  margin: string,
-  reasonText: string
-): string {
-  if (resultType === 'win') {
-    if (!winner) return '';
-    return margin ? `${winner} won by ${margin}` : `${winner} won`;
-  }
-  if (resultType === 'tie') {
-    return margin ? `Match tied • ${margin}` : 'Match tied';
-  }
-  if (resultType === 'no-result') {
-    return reasonText ? `No result • ${reasonText}` : 'No result';
-  }
-  if (resultType === 'abandoned') {
-    return reasonText ? `Match abandoned • ${reasonText}` : 'Match abandoned';
-  }
-  return '';
 }
 
 interface Scorecard {
@@ -218,12 +123,9 @@ interface Scorecard {
   };
   innings: Innings[];
   result?: {
-    winner?: string;
-    margin?: string;
+    winner: string;
+    margin: string;
     manOfTheMatch?: string;
-    resultType?: ResultType;
-    reason?: string;
-    reasonDetail?: string;
   };
   draft?: boolean;
   createdAt?: string;
@@ -239,7 +141,7 @@ export default function ScorecardAdminPage() {
   const [scorecard, setScorecard] = useState<Scorecard | null>(null);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
-  const [activeTab, setActiveTab] = useState<'matchInfo' | 'innings1' | 'innings2' | 'result'>('matchInfo');
+  const [activeTab, setActiveTab] = useState<'matchInfo' | 'innings1' | 'innings2'>('matchInfo');
   const [activeInnings, setActiveInnings] = useState(0);
   const [saving, setSaving] = useState(false);
   const [seasonYear, setSeasonYear] = useState<number | null>(DEFAULT_SEASON_YEAR);
@@ -276,63 +178,6 @@ export default function ScorecardAdminPage() {
   const getPlayersByTeam = (teamId: number | string): Player[] => {
     const idStr = String(teamId);
     return players.filter(player => player.teamId === idStr);
-  };
-
-  const getCaptainIdForTeam = (teamId: number | string): string | null => {
-    if (!selectedMatch?.captains) return null;
-    const teamIdStr = String(teamId);
-    if (teamIdStr === String(selectedMatch.team1.id)) {
-      return selectedMatch.captains.team1 ? String(selectedMatch.captains.team1) : null;
-    }
-    if (teamIdStr === String(selectedMatch.team2.id)) {
-      return selectedMatch.captains.team2 ? String(selectedMatch.captains.team2) : null;
-    }
-    return null;
-  };
-
-  const applyMatchCaptainsToScorecard = (sc: Scorecard, match: Match | null): Scorecard => {
-    const team1CaptainId = match?.captains?.team1 ? String(match.captains.team1) : '';
-    const team2CaptainId = match?.captains?.team2 ? String(match.captains.team2) : '';
-    if (!team1CaptainId && !team2CaptainId) return sc;
-
-    const team1Id = String(match?.team1?.id ?? '');
-    const team2Id = String(match?.team2?.id ?? '');
-
-    const captainIdForTeamId = (teamId: string | number | undefined | null) => {
-      const id = String(teamId ?? '');
-      if (id && team1Id && id === team1Id) return team1CaptainId || '';
-      if (id && team2Id && id === team2Id) return team2CaptainId || '';
-      return '';
-    };
-
-    const normalizeIsCaptain = (playerId: string, captainId: string, existing?: boolean) => {
-      if (captainId) return String(playerId) === String(captainId);
-      return Boolean(existing);
-    };
-
-    return {
-      ...sc,
-      innings: sc.innings.map((inning) => {
-        const battingCaptainId = captainIdForTeamId(inning.battingTeamId);
-        const bowlingTeamId =
-          String(inning.battingTeamId) === String(sc.matchInfo.team1.id)
-            ? sc.matchInfo.team2.id
-            : sc.matchInfo.team1.id;
-        const bowlingCaptainId = captainIdForTeamId(bowlingTeamId);
-
-        return {
-          ...inning,
-          batting: inning.batting.map((batter) => ({
-            ...batter,
-            isCaptain: normalizeIsCaptain(batter.playerId, battingCaptainId, batter.isCaptain),
-          })),
-          bowling: inning.bowling.map((bowler) => ({
-            ...bowler,
-            isCaptain: normalizeIsCaptain(bowler.playerId, bowlingCaptainId, bowler.isCaptain),
-          })),
-        };
-      }),
-    };
   };
 
   const fetchMatches = async () => {
@@ -373,58 +218,61 @@ export default function ScorecardAdminPage() {
     setMessage('');
     const draftKey = getDraftKey(match.id);
 
-    // 1. Check localStorage draft first (ensures data persists on refresh)
-    let localDraft: Scorecard | null = null;
     try {
-      const raw = localStorage.getItem(draftKey);
-      if (raw) {
-        const parsed = JSON.parse(raw);
-        if (parsed?.matchId) localDraft = parsed;
-      }
-    } catch {
-      /* ignore */
-    }
-
-    // 2. Fetch remote scorecard
-    let remoteScorecard: Scorecard | null = null;
-    try {
-      const base = typeof window !== 'undefined' ? window.location.origin : '';
-      const response = await fetch(`${base}/api/scorecards?matchId=${encodeURIComponent(match.id)}&league=ipl`);
-      if (response.ok) {
-        const data = await response.json();
-        if (data && data.length > 0) {
-          remoteScorecard = data[0];
-          if (!remoteScorecard.matchInfo.matchId) {
-            (remoteScorecard.matchInfo as { matchId?: string }).matchId = match.id;
-          }
-        }
-      }
-    } catch {
-      /* fallback to local or new */
-    }
-
-    // 3. Prefer local draft when newer; otherwise remote; otherwise create new
-    const localTime = parseUpdatedAt(localDraft);
-    const remoteTime = parseUpdatedAt(remoteScorecard);
-
-    if (localDraft && localTime >= remoteTime) {
-      const merged = mergeRemoteComputedSections(localDraft, remoteScorecard);
-      setScorecard(applyMatchCaptainsToScorecard(merged, match));
-    } else if (remoteScorecard) {
-      const merged = mergeRemoteComputedSections(remoteScorecard, remoteScorecard);
-      setScorecard(applyMatchCaptainsToScorecard(merged, match));
+      // 1. Check localStorage draft first (ensures data persists on refresh)
+      let localDraft: Scorecard | null = null;
       try {
-        localStorage.removeItem(draftKey);
+        const raw = localStorage.getItem(draftKey);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (parsed?.matchId) localDraft = parsed;
+        }
       } catch {
         /* ignore */
       }
-    } else if (localDraft) {
-      const merged = mergeRemoteComputedSections(localDraft, remoteScorecard);
-      setScorecard(applyMatchCaptainsToScorecard(merged, match));
-    } else {
+
+      // 2. Fetch remote scorecard
+      let remoteScorecard: Scorecard | null = null;
+      try {
+        const base = typeof window !== 'undefined' ? window.location.origin : '';
+        const response = await fetch(`${base}/api/scorecards?matchId=${encodeURIComponent(match.id)}&league=ipl`);
+        if (response.ok) {
+          const data = await response.json();
+          if (Array.isArray(data) && data.length > 0) {
+            remoteScorecard = data[0];
+            if (remoteScorecard.matchInfo && !remoteScorecard.matchInfo.matchId) {
+              remoteScorecard.matchInfo.matchId = match.id;
+            }
+          }
+        }
+      } catch {
+        /* fallback to local or new */
+      }
+
+      // 3. Prefer local draft when newer; otherwise remote; otherwise create new
+      const localTime = parseUpdatedAt(localDraft);
+      const remoteTime = parseUpdatedAt(remoteScorecard);
+
+      if (localDraft && localTime >= remoteTime) {
+        setScorecard(localDraft);
+      } else if (remoteScorecard) {
+        setScorecard(remoteScorecard);
+        try {
+          localStorage.removeItem(draftKey);
+        } catch {
+          /* ignore */
+        }
+      } else if (localDraft) {
+        setScorecard(localDraft);
+      } else {
+        setScorecard(initializeScorecard(match));
+      }
+    } catch {
+      // Always recover with a fresh scorecard if anything unexpected fails.
       setScorecard(initializeScorecard(match));
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const toTeamId = (id: string | number): number => {
@@ -545,14 +393,6 @@ export default function ScorecardAdminPage() {
         : undefined;
 
       const tossWinner = published.matchInfo.toss?.winner === published.matchInfo.team1.name ? 'team1' : 'team2';
-      const resultType = inferResultType(published.result);
-      const winner = normalizeText(published.result?.winner);
-      const margin = normalizeText(published.result?.margin);
-      const reason = normalizeText(published.result?.reason);
-      const reasonDetail = normalizeText(published.result?.reasonDetail);
-      const reasonText = buildResultReason(reason, reasonDetail);
-      const resultText = resultType ? buildResultText(resultType, winner, margin, reasonText) : '';
-      const hasResult = Boolean(resultText);
 
       await fetch(`${base}/api/matches`, {
         method: 'PUT',
@@ -564,11 +404,10 @@ export default function ScorecardAdminPage() {
           ...match,
           team1Score: team1ScoreStr,
           team2Score: team2ScoreStr,
-          result: hasResult ? resultText : match.result,
-          resultType: hasResult ? resultType : match.resultType,
-          resultReason: hasResult ? (reason || undefined) : match.resultReason,
-          resultReasonDetail: hasResult ? (reasonDetail || undefined) : match.resultReasonDetail,
-          status: hasResult ? 'completed' : match.status,
+          result: published.result?.winner
+            ? `${published.result.winner} won by ${published.result.margin}`
+            : match.result,
+          status: published.result?.winner ? 'completed' : match.status,
           matchState: {
             ...match.matchState,
             toss: published.matchInfo.toss?.winner
@@ -789,9 +628,7 @@ export default function ScorecardAdminPage() {
       const player = players.find(p => p.id === value);
       if (player) {
         batter.name = player.name;
-        const battingTeamId = updated.innings[activeInnings].battingTeamId;
-        const matchCaptainId = getCaptainIdForTeam(battingTeamId);
-        batter.isCaptain = matchCaptainId ? String(player.id) === String(matchCaptainId) : Boolean(player.isCaptain);
+        batter.isCaptain = player.isCaptain;
       }
     }
     
@@ -838,13 +675,7 @@ export default function ScorecardAdminPage() {
       const player = players.find(p => p.id === value);
       if (player) {
         bowler.name = player.name;
-        const battingTeamId = updated.innings[activeInnings].battingTeamId;
-        const bowlingTeamId =
-          String(battingTeamId) === String(updated.matchInfo.team1.id)
-            ? updated.matchInfo.team2.id
-            : updated.matchInfo.team1.id;
-        const matchCaptainId = getCaptainIdForTeam(bowlingTeamId);
-        bowler.isCaptain = matchCaptainId ? String(player.id) === String(matchCaptainId) : Boolean(player.isCaptain);
+        bowler.isCaptain = player.isCaptain;
       }
     }
     
@@ -881,7 +712,7 @@ export default function ScorecardAdminPage() {
 
     // Calculate total wickets
     inning.totalWickets = inning.batting.filter(
-      (b) => b.dismissal && b.dismissal.type !== 'not-out' && b.dismissal.type !== 'retired-hurt'
+      (b) => b.dismissal && b.dismissal.type !== 'not-out'
     ).length;
 
     // Calculate total overs from bowling data
@@ -1054,20 +885,18 @@ export default function ScorecardAdminPage() {
     });
   };
 
-  // Export scorecard to ultra-enhanced PDF with colorful fonts and premium modern design
+  // Export scorecard to ultra-enhanced PDF with colorful fonts and premium design
   const exportScorecardPDF = async (sc: Scorecard) => {
     try {
-      console.log('Starting Enhanced 2025 Professional PDF export...');
+      console.log('Starting 2025 Professional PDF export...');
       
-      // Import the enhanced 2025 PDF exporter
+      // Import the 2025 PDF exporter
       const { exportScorecardPDF2025 } = await import('./pdf-export-2025');
       
-      // Export with enhanced visuals enabled by default
-      await exportScorecardPDF2025(sc, true);
-      console.log('Enhanced 2025 Professional PDF exported successfully');
+      await exportScorecardPDF2025(sc);
+      console.log('2025 Professional PDF exported successfully');
       return;
       
-      // Fallback to original implementation if needed
       const jspdfAny = (window as any).jspdf || (window as any).jsPDF || null;
       const jsPDFCtor = jspdfAny && jspdfAny.jsPDF ? jspdfAny.jsPDF : (window as any).jsPDF;
       if (!jsPDFCtor) {
@@ -1079,11 +908,11 @@ export default function ScorecardAdminPage() {
       const pageWidth = doc.internal.pageSize.getWidth();
       const pageHeight = doc.internal.pageSize.getHeight();
       
-      console.log('PDF document created, setting up enhanced colors...');
+      console.log('PDF document created, setting up colors...');
     
-    // Enhanced 2025 Professional Color Palette with Modern UI/UX Principles
+    // 2025 Professional Color Palette - Based on Design Recommendations
     const colors = {
-      // Pantone 2025 Color of the Year: Mocha Mousse
+      // 2025 Pantone Color of the Year: Mocha Mousse
       mochaMousse: [150, 75, 0],        // #964B00 - Primary accent
       etherealBlue: [168, 218, 220],     // #A8DADC - Secondary
       wheatfieldBeige: [245, 245, 220],  // #F5F5DC - Background
@@ -1092,24 +921,13 @@ export default function ScorecardAdminPage() {
       burntOrange: [230, 57, 70],        // #E63946 - Important data
       creamyPastel: [241, 250, 238],     // #F1FAEE - Subtle backgrounds
       
-      // Professional alternatives with enhanced contrast
+      // Professional alternatives
       professionalBlue: [44, 62, 80],    // #2C3E50
       lightGrey: [248, 249, 250],        // #F8F9FA
       successGreen: [46, 213, 115],      // #2ED573
       dangerRed: [239, 68, 68],          // #EF4444
       warningAmber: [245, 158, 11],      // #F59E0B
       infoBlue: [59, 130, 246],          // #3B82F6
-      
-      // Modern gradient colors
-      gradientStart: [150, 75, 0],        // Mocha Mousse
-      gradientEnd: [255, 209, 102],      // Warm Yellow
-      
-      // IPL Brand Colors Enhanced
-      iplBlue: [0, 102, 204],           // IPL Blue
-      iplOrange: [255, 102, 0],         // IPL Orange
-      iplYellow: [255, 204, 0],         // IPL Yellow
-      iplPurple: [128, 0, 128],         // IPL Purple (new)
-      iplTeal: [0, 128, 128],           // IPL Teal (new)
     };
     
     // 2025 Typography & Layout Standards - Professional Design Guidelines
@@ -2357,14 +2175,6 @@ export default function ScorecardAdminPage() {
     }
   };
 
-  const currentResultType = inferResultType(scorecard?.result);
-  const updateResult = (patch: Partial<Scorecard['result']>) => {
-    if (!scorecard) return;
-    const updated = { ...scorecard };
-    updated.result = { ...updated.result, ...patch };
-    setScorecard(updated);
-  };
-
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 text-white flex items-center justify-center">
@@ -2824,7 +2634,6 @@ export default function ScorecardAdminPage() {
                                     <option value="stumped">Stumped</option>
                                     <option value="hit-wicket">Hit Wicket</option>
                                     <option value="retired-hurt">Retired Hurt</option>
-                                    <option value="retired-out">Retired Out</option>
                                     <option value="obstructing">Obstructing</option>
                                     <option value="handled-ball">Handled Ball</option>
                                     <option value="timed-out">Timed Out</option>
@@ -3425,129 +3234,59 @@ export default function ScorecardAdminPage() {
             {activeTab === 'result' && (
               <div className="bg-gray-800 p-6 rounded-lg">
                 <h3 className="text-xl font-bold mb-6">Match Result</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 gap-6">
                   <div>
-                    <label className="block text-sm text-gray-400 mb-2">Result Type</label>
+                    <label className="block text-sm text-gray-400 mb-2">Winning Team</label>
                     <select
-                      value={currentResultType}
+                      value={scorecard.result?.winner || ''}
                       onChange={(e) => {
-                        const nextType = e.target.value as ResultType | '';
-                        if (!scorecard) return;
                         const updated = { ...scorecard };
-                        const base = { ...updated.result };
-                        const next = { ...base, resultType: nextType || undefined };
-                        const team1Name = scorecard.matchInfo.team1.name;
-                        const team2Name = scorecard.matchInfo.team2.name;
-                        const validWinner = (name?: string) => name === team1Name || name === team2Name;
-
-                        if (!nextType) {
-                          next.winner = '';
-                          next.margin = '';
-                          next.reason = '';
-                          next.reasonDetail = '';
-                        } else if (nextType === 'win') {
-                          if (!validWinner(next.winner)) next.winner = '';
-                          next.reason = '';
-                          next.reasonDetail = '';
-                        } else if (nextType === 'tie') {
-                          next.winner = 'Match Tied';
-                          next.reason = '';
-                          next.reasonDetail = '';
-                        } else if (nextType === 'no-result') {
-                          next.winner = 'No Result';
-                          next.margin = '';
-                        } else if (nextType === 'abandoned') {
-                          next.winner = 'Match Abandoned';
-                          next.margin = '';
-                        }
-
-                        updated.result = next;
+                        updated.result = { ...updated.result, winner: e.target.value };
                         setScorecard(updated);
                       }}
                       className="w-full bg-gray-700 p-3 rounded border border-gray-600 text-white"
                     >
-                      <option value="">Select result...</option>
-                      <option value="win">Win</option>
-                      <option value="tie">Tie</option>
-                      <option value="no-result">No Result</option>
-                      <option value="abandoned">Abandoned</option>
+                      <option value="">Select Winning Team</option>
+                      <option value={scorecard.matchInfo.team1.name}>{scorecard.matchInfo.team1.name}</option>
+                      <option value={scorecard.matchInfo.team2.name}>{scorecard.matchInfo.team2.name}</option>
+                      <option value="No Result">No Result</option>
+                      <option value="Match Tied">Match Tied</option>
                     </select>
                   </div>
-
-                  {currentResultType === 'win' && (
-                    <div>
-                      <label className="block text-sm text-gray-400 mb-2">Winning Team</label>
-                      <select
-                        value={scorecard.result?.winner || ''}
-                        onChange={(e) => updateResult({ winner: e.target.value, resultType: 'win' })}
-                        className="w-full bg-gray-700 p-3 rounded border border-gray-600 text-white"
-                      >
-                        <option value="">Select Winning Team</option>
-                        <option value={scorecard.matchInfo.team1.name}>{scorecard.matchInfo.team1.name}</option>
-                        <option value={scorecard.matchInfo.team2.name}>{scorecard.matchInfo.team2.name}</option>
-                      </select>
-                    </div>
-                  )}
-
-                  {(currentResultType === 'win' || currentResultType === 'tie') && (
-                    <div>
-                      <label className="block text-sm text-gray-400 mb-2">
-                        {currentResultType === 'tie' ? 'Tie Notes' : 'Margin'}
-                      </label>
-                      <input
-                        type="text"
-                        value={scorecard.result?.margin || ''}
-                        onChange={(e) => updateResult({ margin: e.target.value })}
-                        placeholder={currentResultType === 'tie' ? 'e.g., Super Over, DLS tied' : 'e.g., 3 wickets, 25 runs'}
-                        className="w-full bg-gray-700 p-3 rounded border border-gray-600 text-white placeholder-gray-500"
-                      />
-                      {currentResultType === 'win' && (
-                        <p className="text-xs text-gray-500 mt-1">Enter the margin of victory (e.g., 3 wickets, 25 runs)</p>
-                      )}
-                    </div>
-                  )}
-
-                  {(currentResultType === 'no-result' || currentResultType === 'abandoned') && (
-                    <>
-                      <div>
-                        <label className="block text-sm text-gray-400 mb-2">Reason</label>
-                        <select
-                          value={scorecard.result?.reason || ''}
-                          onChange={(e) => updateResult({ reason: e.target.value })}
-                          className="w-full bg-gray-700 p-3 rounded border border-gray-600 text-white"
-                        >
-                          <option value="">Select reason...</option>
-                          {RESULT_REASONS.map((reason) => (
-                            <option key={reason} value={reason}>{reason}</option>
-                          ))}
-                        </select>
-                      </div>
-                      <div>
-                        <label className="block text-sm text-gray-400 mb-2">Reason Detail</label>
-                        <input
-                          type="text"
-                          value={scorecard.result?.reasonDetail || ''}
-                          onChange={(e) => updateResult({ reasonDetail: e.target.value })}
-                          placeholder="Optional details (e.g., heavy rain, unsafe square leg)"
-                          className="w-full bg-gray-700 p-3 rounded border border-gray-600 text-white placeholder-gray-500"
-                        />
-                      </div>
-                    </>
-                  )}
-
-                  <div className="md:col-span-2">
+                  <div>
+                    <label className="block text-sm text-gray-400 mb-2">Margin</label>
+                    <input
+                      type="text"
+                      value={scorecard.result?.margin || ''}
+                      onChange={(e) => {
+                        const updated = { ...scorecard };
+                        updated.result = { ...updated.result, margin: e.target.value };
+                        setScorecard(updated);
+                      }}
+                      placeholder="e.g., 3 wickets, 25 runs, Super Over"
+                      className="w-full bg-gray-700 p-3 rounded border border-gray-600 text-white placeholder-gray-500"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">Enter the margin of victory (e.g., 3 wickets, 25 runs)</p>
+                  </div>
+                  <div>
                     <label className="block text-sm text-gray-400 mb-2">Man of the Match</label>
                     <select
                       value={scorecard.result?.manOfTheMatch || ''}
-                      onChange={(e) => updateResult({ manOfTheMatch: e.target.value })}
+                      onChange={(e) => {
+                        const updated = { ...scorecard };
+                        updated.result = { ...updated.result, manOfTheMatch: e.target.value };
+                        setScorecard(updated);
+                      }}
                       className="w-full bg-gray-700 p-3 rounded border border-gray-600 text-white"
                     >
                       <option value="">Select Player</option>
+                      {/* Team 1 Players */}
                       <optgroup label={scorecard.matchInfo.team1.name}>
                         {getPlayersByTeam(scorecard.matchInfo.team1.id).map(player => (
                           <option key={player.id} value={player.name}>{player.name}</option>
                         ))}
                       </optgroup>
+                      {/* Team 2 Players */}
                       <optgroup label={scorecard.matchInfo.team2.name}>
                         {getPlayersByTeam(scorecard.matchInfo.team2.id).map(player => (
                           <option key={player.id} value={player.name}>{player.name}</option>
