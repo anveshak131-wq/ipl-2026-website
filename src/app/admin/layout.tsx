@@ -23,6 +23,18 @@ export default function AdminLayout({
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const hasCheckedAuth = useRef(false);
 
+  const handleLogin = (token: string) => {
+    setIsAuthenticated(true);
+
+    try {
+      localStorage.setItem('adminToken', token);
+      localStorage.setItem('auth_token', token);
+      localStorage.setItem('authToken', token);
+    } catch {
+      // localStorage not available
+    }
+  };
+
   const handleLogout = async () => {
     // Immediately update UI state
     setIsSearchOpen(false);
@@ -48,11 +60,7 @@ export default function AdminLayout({
       });
     } catch {
       try {
-        await fetch('/api/auth/signout', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ token }),
-        });
+        await fetch('/api/auth?action=logout', { method: 'POST' });
       } catch {
         // Network errors - continue with local cleanup
       }
@@ -93,16 +101,12 @@ export default function AdminLayout({
         }
 
         // Verify token with server
-        const response = await fetch('/api/auth/verify', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ token }),
-        });
+        const response = await fetch(`/api/auth?action=verify&token=${encodeURIComponent(token)}`);
 
         if (response.ok) {
           const data = await response.json();
           setIsAuthenticated(true);
-          setUserRole(data.role || 'admin');
+          setUserRole(data.user?.role || 'admin');
         } else {
           // Token invalid, clear it
           try {
@@ -132,7 +136,7 @@ export default function AdminLayout({
   }
 
   if (!isAuthenticated) {
-    return <AdminLogin onSuccess={() => setIsAuthenticated(true)} />;
+    return <AdminLogin onLogin={handleLogin} />;
   }
 
   const isPlayersPage = pathname?.includes('/players');

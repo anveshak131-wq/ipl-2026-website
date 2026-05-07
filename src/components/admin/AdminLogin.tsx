@@ -1,13 +1,29 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 
 interface AdminLoginProps {
-  onLogin: (token: string) => void;
+  onLogin?: (token: string) => void;
+  onSuccess?: (token: string) => void;
+  redirectTo?: string;
 }
 
-export default function AdminLogin({ onLogin }: AdminLoginProps) {
+const getDefaultRedirect = (pathname: string, role?: string) => {
+  const isPlayersAdmin = role === 'players_admin';
+
+  if (pathname.startsWith('/wpl-admin-2026')) {
+    return isPlayersAdmin ? '/wpl-admin-2026/players' : '/wpl-admin-2026/dashboard';
+  }
+
+  if (pathname.startsWith('/ipl-admin-2026')) {
+    return isPlayersAdmin ? '/ipl-admin-2026/players' : '/ipl-admin-2026/dashboard';
+  }
+
+  return isPlayersAdmin ? '/admin/ipl/players' : '/admin/ipl';
+};
+
+export default function AdminLogin({ onLogin, onSuccess, redirectTo }: AdminLoginProps) {
   const [credentials, setCredentials] = useState({
     username: '',
     password: '',
@@ -16,6 +32,7 @@ export default function AdminLogin({ onLogin }: AdminLoginProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const router = useRouter();
+  const pathname = usePathname();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -23,7 +40,7 @@ export default function AdminLogin({ onLogin }: AdminLoginProps) {
     setError('');
 
     try {
-      const response = await fetch('/api/admin/login/', {
+      const response = await fetch('/api/admin/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -31,10 +48,19 @@ export default function AdminLogin({ onLogin }: AdminLoginProps) {
         body: JSON.stringify(credentials),
       });
 
-      const data = await response.json();
+      const responseType = response.headers.get('content-type') || '';
+      const data = responseType.includes('application/json')
+        ? await response.json()
+        : null;
+
+      if (!data) {
+        setError('Admin login endpoint returned an unexpected response.');
+        return;
+      }
 
       if (response.ok && data.token) {
-        onLogin(data.token);
+        const loginHandler = onLogin ?? onSuccess;
+        loginHandler?.(data.token);
         localStorage.setItem('adminToken', data.token);
         // Also set the generic auth token key so admin pages that
         // expect `auth_token` will recognize the session.
@@ -43,18 +69,17 @@ export default function AdminLogin({ onLogin }: AdminLoginProps) {
         } catch (e) {
           // ignore if localStorage isn't available
         }
-        
-        // Redirect based on user role
-        if (data.user?.role === 'players_admin') {
-          router.push('/admin/ipl/players');
-        } else {
-          router.push('/admin/ipl');
-        }
+
+        router.push(redirectTo || getDefaultRedirect(pathname, data.user?.role));
       } else {
         setError(data.error || 'Invalid credentials');
       }
     } catch (error) {
-      setError('Login failed. Please try again.');
+      setError(
+        error instanceof Error && error.message
+          ? error.message
+          : 'Login failed. Please try again.'
+      );
     } finally {
       setIsLoading(false);
     }

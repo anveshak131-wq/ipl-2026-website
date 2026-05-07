@@ -72,14 +72,15 @@ export default function AdminSetup() {
       const data = await response.json();
 
       if (response.ok) {
+        const token = data.user?.token;
         setMessage('Admin account created successfully! You can now login.');
         setMessageType('success');
-        setAdminToken(data.token || '');
+        setAdminToken(token || '');
         
         // Store token for immediate login
-        if (data.token) {
-          localStorage.setItem('adminToken', data.token);
-          localStorage.setItem('auth_token', data.token);
+        if (token) {
+          localStorage.setItem('adminToken', token);
+          localStorage.setItem('auth_token', token);
           
           // Redirect after a short delay
           setTimeout(() => {
