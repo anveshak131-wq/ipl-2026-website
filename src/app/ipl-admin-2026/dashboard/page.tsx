@@ -64,6 +64,10 @@ export default function AdminDashboard() {
   });
 
   const hasFetchedStats = useRef(false);
+  const getStoredAdminToken = () =>
+    localStorage.getItem('auth_token') ||
+    localStorage.getItem('adminToken') ||
+    localStorage.getItem('authToken');
 
   // Fetch stats on mount (auth is handled by layout)
   useEffect(() => {
@@ -75,7 +79,7 @@ export default function AdminDashboard() {
 
   const fetchStats = async () => {
     try {
-      const token = localStorage.getItem('auth_token');
+      const token = getStoredAdminToken();
 
       // Fetch active users
       let usersData = { users: [] };

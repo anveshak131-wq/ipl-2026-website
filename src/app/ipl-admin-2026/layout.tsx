@@ -22,6 +22,28 @@ export default function AdminLayout({
   const [isLoading, setIsLoading] = useState(true);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const hasCheckedAuth = useRef(false);
+  const isIndexRoute = pathname === '/ipl-admin-2026' || pathname === '/ipl-admin-2026/';
+
+  const getStoredAdminToken = () => {
+    try {
+      return (
+        localStorage.getItem('adminToken') ||
+        localStorage.getItem('auth_token') ||
+        localStorage.getItem('authToken')
+      );
+    } catch {
+      return null;
+    }
+  };
+
+  const parseRoleFromToken = (token: string) => {
+    try {
+      const tokenPayload = JSON.parse(atob(token));
+      return tokenPayload.role || null;
+    } catch {
+      return null;
+    }
+  };
 
   const handleLogout = async () => {
     // Immediately update UI state
@@ -29,15 +51,7 @@ export default function AdminLayout({
     setUserRole(null);
     setIsAuthenticated(false);
 
-    let token: string | null = null;
-    try {
-      token =
-        localStorage.getItem('adminToken') ||
-        localStorage.getItem('auth_token') ||
-        localStorage.getItem('authToken');
-    } catch {
-      // localStorage not available
-    }
+    const token = getStoredAdminToken();
 
     // Best-effort server logout (clears HttpOnly cookie + revokes token in KV when possible)
     try {
@@ -71,38 +85,44 @@ export default function AdminLayout({
     hasCheckedAuth.current = true;
 
     const checkAuth = async () => {
+      const token = getStoredAdminToken();
+
       try {
-        const token = localStorage.getItem('adminToken') || localStorage.getItem('auth_token');
-        if (token) {
-          setIsAuthenticated(true);
-          
-          try {
-            const response = await fetch(`/api/auth?action=verify&token=${token}`);
-            const data = await response.json();
-            
-            if (response.ok && data.success) {
-              const role = data.user?.role;
-              setUserRole(role);
-            } else {
-              try {
-                const tokenPayload = JSON.parse(atob(token));
-                if (tokenPayload.role) {
-                  setUserRole(tokenPayload.role);
-                }
-              } catch {
-                // Token parsing failed
-              }
-            }
-          } catch (error) {
-            try {
-              const tokenPayload = JSON.parse(atob(token));
-              if (tokenPayload.role) {
-                setUserRole(tokenPayload.role);
-              }
-            } catch {
-              // Token parsing failed
-            }
+        if (!token) {
+          setIsAuthenticated(false);
+          setUserRole(null);
+          return;
+        }
+
+        setIsAuthenticated(true);
+
+        const fallbackRole = parseRoleFromToken(token);
+        if (fallbackRole) {
+          setUserRole(fallbackRole);
+        }
+
+        try {
+          const response = await fetch(`/api/auth?action=verify&token=${encodeURIComponent(token)}`);
+          const data = await response.json();
+
+          if (response.ok && data.success) {
+            setUserRole(data.user?.role || fallbackRole);
+            return;
           }
+        } catch {
+          // Ignore verify failures and fall back to the token payload.
+        }
+
+        if (!fallbackRole) {
+          try {
+            localStorage.removeItem('adminToken');
+            localStorage.removeItem('auth_token');
+            localStorage.removeItem('authToken');
+          } catch {
+            // localStorage not available
+          }
+          setIsAuthenticated(false);
+          setUserRole(null);
         }
       } catch (error) {
         console.log('localStorage not available');
@@ -114,13 +134,23 @@ export default function AdminLayout({
     checkAuth();
   }, []);
 
+  useEffect(() => {
+    if (!isLoading && isAuthenticated && isIndexRoute) {
+      router.replace('/ipl-admin-2026/dashboard');
+    }
+  }, [isAuthenticated, isIndexRoute, isLoading, router]);
+
   const handleLogin = (token: string) => {
     setIsAuthenticated(true);
+    setUserRole(parseRoleFromToken(token));
     try {
       localStorage.setItem('adminToken', token);
+      localStorage.setItem('auth_token', token);
+      localStorage.setItem('authToken', token);
     } catch (error) {
       console.log('localStorage not available');
     }
+    setIsLoading(false);
   };
 
   if (isLoading) {
@@ -138,8 +168,7 @@ export default function AdminLayout({
   }
 
   // For authenticated users at the index route, redirect to dashboard
-  if (pathname === '/ipl-admin-2026' || pathname === '/ipl-admin-2026/') {
-    router.push('/ipl-admin-2026/dashboard');
+  if (isIndexRoute) {
     return (
       <div className="min-h-screen bg-gray-950">
         <div className="flex-1 flex items-center justify-center">

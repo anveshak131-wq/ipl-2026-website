@@ -59,16 +59,18 @@ export default function AdminLogin({ onLogin, onSuccess, redirectTo }: AdminLogi
       }
 
       if (response.ok && data.token) {
-        const loginHandler = onLogin ?? onSuccess;
-        loginHandler?.(data.token);
         localStorage.setItem('adminToken', data.token);
         // Also set the generic auth token key so admin pages that
         // expect `auth_token` will recognize the session.
         try {
           localStorage.setItem('auth_token', data.token);
+          localStorage.setItem('authToken', data.token);
         } catch (e) {
           // ignore if localStorage isn't available
         }
+
+        const loginHandler = onLogin ?? onSuccess;
+        loginHandler?.(data.token);
 
         router.push(redirectTo || getDefaultRedirect(pathname, data.user?.role));
       } else {
