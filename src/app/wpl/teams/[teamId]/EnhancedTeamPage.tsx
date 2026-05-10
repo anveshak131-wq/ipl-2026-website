@@ -1461,7 +1461,7 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
       case 'UPW': return '/logos/wpl_upw_logo_modern.svg';
 
       // IPL teams - use the new 2026 modern logos
-      case 'RCB': return '/logos/rcb_logo_2026_modern.svg';
+      case 'RCB': return '/logos/rcb_logo_premium.svg';
       case 'MI': return '/logos/mi_logo_2026_modern.svg';
       case 'CSK': return '/logos/csk_logo_2026_modern.svg';
       case 'KKR': return '/logos/kkr_logo_2026_modern.svg';

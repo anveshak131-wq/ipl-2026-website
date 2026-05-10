@@ -1,19 +1,21 @@
 "use client";
 
 import React from 'react';
+import Image from 'next/image';
 
 interface Props {
   className?: string;
 }
 
-// Premium RCB logo component - renders the new premium animated logo
 export default function RCBLionLogo({ className }: Props) {
   return (
-    <div className={`rcb-logo-shell ${className ?? ''}`}>
-      <img
-        src="/logos/rcb_logo_premium.svg"
-        alt="Royal Challengers Bangalore premium logo"
-        className="w-full h-full object-contain"
+    <div className={`rcb-logo-shell relative overflow-hidden ${className ?? ''}`}>
+      <Image
+        src="/logos/rcb_logo_official.png"
+        alt="Royal Challengers Bengaluru logo"
+        fill
+        sizes="(max-width: 768px) 96px, 160px"
+        className="object-contain"
       />
     </div>
   );
