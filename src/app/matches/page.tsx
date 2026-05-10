@@ -13,7 +13,6 @@ import Icon from '@/components/ui/Icon';
 import GradientText from '@/components/ui/GradientText';
 import { getMatchNumberDisplay } from '@/lib/matchNumberUtils';
 import { exportToICal, type CalendarEvent } from '@/lib/admin/exportUtils';
-import { parseColorToRgb } from '@/lib/colorUtils';
 
 export default function MatchesPage() {
   const TARGET_CALENDAR_SEASON = 2026;
@@ -23,41 +22,12 @@ export default function MatchesPage() {
   const [matches, setMatches] = useState<Match[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'upcoming' | 'live' | 'completed'>('all');
-  const [selectedTeams, setSelectedTeams] = useState<string[]>([]);
 
   const getMatchYear = (dateString: string): number | null => {
     const parsed = new Date(dateString);
     if (!isNaN(parsed.getTime())) return parsed.getFullYear();
     const match = dateString.match(/(20\d{2}|19\d{2})/);
     return match ? parseInt(match[1], 10) : null;
-  };
-
-  const getTeamKey = (team?: Match['team1']): string => {
-    if (!team) return '';
-    return String(team.id || team.shortName || team.name || '');
-  };
-
-  const getTeamLabel = (team?: Match['team1']): string => {
-    if (!team) return 'Team';
-    return team.shortName || team.name || 'Team';
-  };
-
-  const getTeamAccent = (team?: Match['team1']): string => {
-    return team?.colors?.primary || '#94a3b8';
-  };
-
-  const toRgba = (color: string, alpha: number): string => {
-    const rgb = parseColorToRgb(color);
-    if (!rgb) return `rgba(148, 163, 184, ${alpha})`;
-    return `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, ${alpha})`;
-  };
-
-  const toggleTeam = (teamKey: string) => {
-    setSelectedTeams((prev) => (
-      prev.includes(teamKey)
-        ? prev.filter((key) => key !== teamKey)
-        : [...prev, teamKey]
-    ));
   };
 
   const parseTimeTo24Hour = (timeString: string): { hours: number; minutes: number } | null => {
@@ -145,42 +115,6 @@ export default function MatchesPage() {
     [matches]
   );
 
-  const teamOptions = useMemo(() => {
-    const map = new Map<string, Match['team1']>();
-
-    matches.forEach((match) => {
-      const matchYear = getMatchYear(match.date);
-      if (matchYear !== TARGET_CALENDAR_SEASON) return;
-
-      [match.team1, match.team2].forEach((team) => {
-        if (!team) return;
-        const key = getTeamKey(team);
-        if (!key || map.has(key)) return;
-        map.set(key, team);
-      });
-    });
-
-    return Array.from(map.values()).sort((a, b) => {
-      const aLabel = getTeamLabel(a).toUpperCase();
-      const bLabel = getTeamLabel(b).toUpperCase();
-      return aLabel.localeCompare(bLabel);
-    });
-  }, [matches]);
-
-  useEffect(() => {
-    setSelectedTeams([]);
-  }, [currentLeague]);
-
-  useEffect(() => {
-    if (teamOptions.length === 0) {
-      setSelectedTeams([]);
-      return;
-    }
-
-    const optionKeys = new Set(teamOptions.map((team) => getTeamKey(team)));
-    setSelectedTeams((prev) => prev.filter((key) => optionKeys.has(key)));
-  }, [teamOptions]);
-
   const handleDownloadIcalSeason = (season: number = TARGET_CALENDAR_SEASON) => {
     const events = buildSeasonCalendarEvents(season);
     if (events.length === 0) {
@@ -207,7 +141,6 @@ export default function MatchesPage() {
 
   const seasonLabel = TARGET_CALENDAR_SEASON;
   const subtitleSeason = `${TARGET_CALENDAR_SEASON} season`;
-  const filterLabel = filter === 'all' ? 'matches' : `${filter} matches`;
 
   const pageOilTheme = currentLeague === 'wpl'
     ? {
@@ -250,12 +183,9 @@ export default function MatchesPage() {
       const matchesStatus = filter === 'all' || match.status === filter;
       const matchYear = getMatchYear(match.date);
       const matchesSeason = matchYear === TARGET_CALENDAR_SEASON;
-      const matchesTeam = selectedTeams.length === 0
-        || selectedTeams.includes(getTeamKey(match.team1))
-        || selectedTeams.includes(getTeamKey(match.team2));
-      return matchesStatus && matchesSeason && matchesTeam;
+      return matchesStatus && matchesSeason;
     });
-  }, [filter, matches, selectedTeams]);
+  }, [filter, matches]);
 
   const deferredMatches = useDeferredValue(filteredMatches);
 
@@ -362,9 +292,6 @@ export default function MatchesPage() {
 
             <div className="mt-4 inline-flex items-center rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-slate-200">
               Showing {TARGET_CALENDAR_SEASON} season · {filteredMatches.length} match{filteredMatches.length === 1 ? '' : 'es'}
-              {selectedTeams.length > 0 && (
-                <> · {selectedTeams.length} team{selectedTeams.length === 1 ? '' : 's'} filtered</>
-              )}
             </div>
           </motion.div>
 
@@ -456,99 +383,6 @@ export default function MatchesPage() {
             </div>
           </div>
 
-          {/* Team Filter */}
-          <div className="mb-10 rounded-2xl border border-white/12 bg-black/20 backdrop-blur-xl p-4 shadow-[0_12px_30px_rgba(0,0,0,0.26)]">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div className="flex items-center gap-2">
-                <span className="text-[11px] uppercase tracking-[0.28em] text-slate-400 font-semibold">
-                  Team Filter
-                </span>
-                <span className="text-xs text-slate-400">
-                  {teamOptions.length} team{teamOptions.length === 1 ? '' : 's'}
-                </span>
-              </div>
-              {selectedTeams.length > 0 && (
-                <button
-                  onClick={() => setSelectedTeams([])}
-                  className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-200/90 border border-white/15 px-3 py-1.5 rounded-full transition"
-                  style={{ background: 'rgba(255,255,255,0.06)' }}
-                >
-                  Clear
-                </button>
-              )}
-            </div>
-
-            {teamOptions.length > 0 ? (
-              <div className="mt-3 flex flex-wrap gap-2">
-                {(() => {
-                  const allTeamsColor = '#94a3b8';
-                  const allTeamsActive = selectedTeams.length === 0;
-                  return (
-                    <button
-                      onClick={() => setSelectedTeams([])}
-                      className="px-4 py-2.5 rounded-lg text-sm font-semibold whitespace-nowrap flex items-center gap-2 border transition-all duration-200"
-                      aria-pressed={allTeamsActive}
-                      style={allTeamsActive ? {
-                        background: `linear-gradient(135deg, ${toRgba(allTeamsColor, 0.35)}, ${toRgba(allTeamsColor, 0.2)})`,
-                        color: '#ffffff',
-                        borderColor: toRgba(allTeamsColor, 0.65),
-                        boxShadow: `0 6px 18px ${toRgba(allTeamsColor, 0.35)}`,
-                      } : {
-                        background: 'rgba(255,255,255,0.04)',
-                        color: '#cbd5e1',
-                        borderColor: 'rgba(255,255,255,0.12)',
-                      }}
-                    >
-                      <span className="inline-flex items-center gap-2">
-                        <span className="h-2.5 w-2.5 rounded-full" style={{ background: allTeamsColor }} />
-                        All Teams
-                      </span>
-                    </button>
-                  );
-                })()}
-
-                {teamOptions.map((team) => {
-                  const teamKey = getTeamKey(team);
-                  const teamAccent = getTeamAccent(team);
-                  const isActive = selectedTeams.includes(teamKey);
-                  return (
-                    <button
-                      key={teamKey}
-                      onClick={() => toggleTeam(teamKey)}
-                      className="px-4 py-2.5 rounded-lg text-sm font-semibold whitespace-nowrap flex items-center gap-2 border transition-all duration-200"
-                      aria-pressed={isActive}
-                      style={isActive ? {
-                        background: `linear-gradient(135deg, ${toRgba(teamAccent, 0.35)}, ${toRgba(teamAccent, 0.18)})`,
-                        color: '#ffffff',
-                        borderColor: toRgba(teamAccent, 0.7),
-                        boxShadow: `0 6px 18px ${toRgba(teamAccent, 0.35)}`,
-                      } : {
-                        background: 'rgba(255,255,255,0.04)',
-                        color: '#cbd5e1',
-                        borderColor: 'rgba(255,255,255,0.12)',
-                      }}
-                    >
-                      <span className="inline-flex items-center gap-2">
-                        <span className="h-2.5 w-2.5 rounded-full" style={{ background: teamAccent }} />
-                        {getTeamLabel(team)}
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
-            ) : (
-              <div className="mt-3 text-sm text-slate-400">
-                Team list will appear once matches are available.
-              </div>
-            )}
-
-            {selectedTeams.length > 0 && (
-              <div className="mt-3 text-xs text-slate-400">
-                Filtering {selectedTeams.length} team{selectedTeams.length === 1 ? '' : 's'}.
-              </div>
-            )}
-          </div>
-
           {/* Matches Grid */}
           <AnimatePresence mode="wait">
             {deferredMatches.length > 0 ? (
@@ -589,10 +423,10 @@ export default function MatchesPage() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
                 <p className="text-gray-300 text-lg font-semibold">
-                  No {filterLabel} found{selectedTeams.length > 0 ? ' for selected teams' : ''}
+                  No {filter} matches found
                 </p>
                 <p className="text-gray-400 text-sm mt-2">
-                  Try selecting a different filter or team
+                  Try selecting a different filter
                 </p>
               </div>
             </div>

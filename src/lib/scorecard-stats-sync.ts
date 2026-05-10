@@ -112,8 +112,8 @@ export function calculatePlayerStatsUpdates(
     const battingInnings = (updates.battingInnings || 0) + 1;
     updates.battingInnings = battingInnings;
 
-    // Track not-outs (Retired Hurt is not a dismissal)
-    if (scorecardStats.batting.dismissalType === 'not-out' || scorecardStats.batting.dismissalType === 'retired-hurt') {
+    // Track not-outs
+    if (scorecardStats.batting.dismissalType === 'not-out') {
       updates.notOuts = (updates.notOuts || 0) + 1;
     }
 
@@ -250,9 +250,6 @@ export async function syncScorecardToPlayers(scorecard: any, authToken?: string)
     }
 
     const result = await response.json();
-    if (result?.skipped) {
-      return { skipped: true, reason: result.reason || 'Skipped by server' };
-    }
     console.log('✅ Sync: Updated stats for', result.updatedCount || 0, 'players');
     
     return { success: true, updatedCount: result.updatedCount, details: result.details };

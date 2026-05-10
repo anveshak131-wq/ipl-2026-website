@@ -51,6 +51,49 @@ const IPL_TEAMS_BY_SEASON: Record<number, string[]> = {
 };
 
 const IPL_STORAGE_KEY = 'iplPointsTableStats';
+const STATUS_BUTTON_BASE =
+  'w-full px-3 py-2 rounded-full border text-xs font-black uppercase tracking-wide transition-all';
+
+type StandingsStatus = 'qualified' | 'eliminated';
+
+type SavedRow = {
+  matchesPlayed?: number | null;
+  wins?: number | null;
+  losses?: number | null;
+  noResult?: number | null;
+  points?: number | null;
+  netRunRate?: number | null;
+  qualified?: boolean;
+  eliminated?: boolean;
+};
+
+type EditData = {
+  matchesPlayed?: number | null;
+  wins?: number | null;
+  losses?: number | null;
+  noResult?: number | null;
+  points?: number | null;
+  netRunRate?: number | string | null;
+  qualified?: boolean;
+  eliminated?: boolean;
+};
+
+const getStatusPatch = (status: StandingsStatus, value: boolean) => {
+  if (status === 'qualified') {
+    return value
+      ? { qualified: true, eliminated: false }
+      : { qualified: false };
+  }
+
+  return value
+    ? { qualified: false, eliminated: true }
+    : { eliminated: false };
+};
+
+const getStatusButtonClasses = (active: boolean, activeClasses: string) =>
+  active
+    ? `${activeClasses} shadow-lg`
+    : 'bg-slate-800/70 text-gray-400 border-white/10 hover:border-white/20 hover:text-white';
 
 export default function IPLAdminPointsTablePage() {
   const [teams, setTeams] = useState<Team[]>([]);
@@ -61,7 +104,7 @@ export default function IPLAdminPointsTablePage() {
   const [availableYears, setAvailableYears] = useState<number[]>([]);
   const [isEditing, setIsEditing] = useState(false);
   const [editingTeam, setEditingTeam] = useState<string | null>(null);
-  const [editData, setEditData] = useState<Record<string, unknown>>({});
+  const [editData, setEditData] = useState<EditData>({});
   const [showExportMenu, setShowExportMenu] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0 });
@@ -132,16 +175,6 @@ export default function IPLAdminPointsTablePage() {
     const seasonTeamIds = IPL_TEAMS_BY_SEASON[selectedYear] || [];
     const seasonTeams = teams.filter((team) => seasonTeamIds.includes(team.id));
 
-    type SavedRow = {
-      matchesPlayed?: number;
-      wins?: number;
-      losses?: number;
-      noResult?: number;
-      points?: number;
-      netRunRate?: number;
-      qualified?: boolean;
-    };
-
     let savedStats: Record<string, SavedRow> = {};
     if (typeof window !== 'undefined') {
       try {
@@ -165,7 +198,8 @@ export default function IPLAdminPointsTablePage() {
     return seasonTeams.map((team) => {
       const displayShortName = team.shortName || team.name.split(' ').map((w) => w[0]).join('');
       const displayName = team.name || '';
-      const row = savedStats[team.id] || {};
+      const persistedStats = ((team as Team & { stats?: SavedRow }).stats ?? {}) as SavedRow;
+      const row = { ...persistedStats, ...(savedStats[team.id] || {}) };
 
       return {
         ...team,
@@ -178,6 +212,7 @@ export default function IPLAdminPointsTablePage() {
         points: row.points ?? null,
         netRunRate: row.netRunRate ?? null,
         qualified: row.qualified ?? false,
+        eliminated: row.eliminated ?? false,
       };
     });
   }, [teams, selectedYear]);
@@ -238,12 +273,14 @@ export default function IPLAdminPointsTablePage() {
         losses: team.losses,
         noResult: (team as any).noResult ?? 0,
         points: team.points,
-        netRunRate: team.netRunRate
+        netRunRate: team.netRunRate,
+        qualified: team.qualified,
+        eliminated: team.eliminated
       });
     }
   };
 
-  const handleToggleQualified = async (teamId: string, qualified: boolean) => {
+  const handleToggleStatus = async (teamId: string, status: StandingsStatus, value: boolean) => {
     try {
       const token = localStorage.getItem('adminToken') || localStorage.getItem('auth_token');
       if (!token) return;
@@ -251,9 +288,10 @@ export default function IPLAdminPointsTablePage() {
       const teamToUpdate = teams.find(t => t.id === teamId);
       if (!teamToUpdate) return;
 
+      const statusPatch = getStatusPatch(status, value);
       const updated = {
         ...teamToUpdate,
-        stats: { ...(teamToUpdate.stats as object || {}), qualified }
+        stats: { ...(teamToUpdate.stats as Record<string, unknown> || {}), ...statusPatch }
       };
 
       // Save to localStorage for current year
@@ -264,7 +302,10 @@ export default function IPLAdminPointsTablePage() {
       if (!allSavedStats[selectedYear][teamId]) {
         allSavedStats[selectedYear][teamId] = {};
       }
-      allSavedStats[selectedYear][teamId].qualified = qualified;
+      allSavedStats[selectedYear][teamId] = {
+        ...allSavedStats[selectedYear][teamId],
+        ...statusPatch
+      };
       localStorage.setItem(IPL_STORAGE_KEY, JSON.stringify(allSavedStats));
 
       const base = typeof window !== 'undefined' ? window.location.origin : '';
@@ -289,6 +330,11 @@ export default function IPLAdminPointsTablePage() {
         ...editData,
         netRunRate: parseFloat(String(editData.netRunRate)) || 0
       };
+      const statusPatch = Boolean(dataToSave.qualified)
+        ? getStatusPatch('qualified', true)
+        : Boolean(dataToSave.eliminated)
+          ? getStatusPatch('eliminated', true)
+          : { qualified: false, eliminated: false };
 
       const teamToUpdate = teams.find(t => t.id === teamId);
       if (!teamToUpdate) return;
@@ -302,7 +348,7 @@ export default function IPLAdminPointsTablePage() {
           noResult: Number((dataToSave as { noResult?: number }).noResult) || 0,
           points: Number(dataToSave.points) || 0,
           netRunRate: Number(dataToSave.netRunRate) || 0,
-          qualified: Boolean((dataToSave as { qualified?: boolean }).qualified)
+          ...statusPatch
         }
       };
 
@@ -761,7 +807,7 @@ export default function IPLAdminPointsTablePage() {
             </motion.div>
           ) : (
             <motion.div className="space-y-4" initial="hidden" animate="visible">
-              <div className="grid grid-cols-[40px_200px_1fr_90px_80px_80px_80px_80px_100px_120px_140px] gap-4 px-6 py-4 rounded-3xl backdrop-blur-2xl border-2 border-white/20 bg-gradient-to-br from-slate-900/90 via-slate-800/80 to-slate-900/90 text-sm font-bold uppercase tracking-wider text-gray-300 max-w-full overflow-x-auto">
+              <div className="grid grid-cols-[40px_200px_1fr_90px_80px_80px_80px_80px_100px_130px_130px_140px] gap-4 px-6 py-4 rounded-3xl backdrop-blur-2xl border-2 border-white/20 bg-gradient-to-br from-slate-900/90 via-slate-800/80 to-slate-900/90 text-sm font-bold uppercase tracking-wider text-gray-300 max-w-full overflow-x-auto">
                 <div className="flex items-center justify-center">Rank</div>
                 <div className="flex items-center gap-2">Team <Info className="w-4 h-4 text-gray-500" /></div>
                 <div>Name</div>
@@ -772,6 +818,7 @@ export default function IPLAdminPointsTablePage() {
                 <div>Points</div>
                 <div>NRR</div>
                 <div className="flex justify-center">Qualified</div>
+                <div className="flex justify-center">Eliminated</div>
                 <div className="flex justify-center">Actions</div>
               </div>
 
@@ -781,6 +828,7 @@ export default function IPLAdminPointsTablePage() {
                   const isTop4 = rank <= 4;
                   const isBottom2 = rank >= sortedPointsTable.length - 1;
                   const isCurrentlyEditing = editingTeam === team.id;
+                  const isEliminated = Boolean(team.eliminated);
                   const nrr = team.netRunRate ?? null;
 
                   return (
@@ -792,13 +840,14 @@ export default function IPLAdminPointsTablePage() {
                       exit={{ opacity: 0, scale: 0.8, y: -20 }}
                       transition={{ duration: 0.6, delay: index * 0.05, ease: [0.22, 1, 0.36, 1] }}
                       whileHover={{ y: -5, scale: 1.02 }}
-                      className={`relative group grid grid-cols-[40px_200px_1fr_90px_80px_80px_80px_80px_100px_120px_140px] gap-4 items-center px-6 py-5 rounded-3xl backdrop-blur-2xl border-2 border-white/10 bg-gradient-to-br from-slate-900/80 via-slate-800/70 to-slate-900/80 max-w-full overflow-x-auto ${
+                      className={`relative group grid grid-cols-[40px_200px_1fr_90px_80px_80px_80px_80px_100px_130px_130px_140px] gap-4 items-center px-6 py-5 rounded-3xl backdrop-blur-2xl border-2 border-white/10 bg-gradient-to-br from-slate-900/80 via-slate-800/70 to-slate-900/80 max-w-full overflow-x-auto ${
                         isTop4 ? 'border-amber-500/50 bg-gradient-to-br from-amber-900/30 via-orange-800/20 to-amber-900/30' :
+                        isEliminated ? 'border-rose-500/50 bg-gradient-to-br from-rose-900/30 via-red-900/20 to-rose-900/30' :
                         isBottom2 ? 'border-orange-500/50 bg-gradient-to-br from-orange-900/30 via-amber-800/20 to-orange-900/30' :
                         'hover:border-amber-500/50'
                       }`}
                     >
-                      <div className={`flex justify-center text-2xl font-black ${isTop4 ? 'text-amber-400' : isBottom2 ? 'text-orange-400' : 'text-white'}`}>
+                      <div className={`flex justify-center text-2xl font-black ${isTop4 ? 'text-amber-400' : isEliminated ? 'text-rose-300' : isBottom2 ? 'text-orange-400' : 'text-white'}`}>
                         {rank}
                       </div>
 
@@ -920,24 +969,49 @@ export default function IPLAdminPointsTablePage() {
 
                       <div className="flex justify-center">
                         {isCurrentlyEditing ? (
-                          <label className="inline-flex items-center gap-2">
-                            <input
-                              type="checkbox"
-                              checked={Boolean((editData as { qualified?: boolean }).qualified)}
-                              onChange={(e) => setEditData({ ...editData, qualified: e.target.checked })}
-                              className="w-5 h-5 rounded text-amber-500"
-                            />
-                            <span className="text-sm text-gray-300">Qualified</span>
-                          </label>
+                          <motion.button
+                            type="button"
+                            onClick={() => setEditData({ ...editData, ...getStatusPatch('qualified', !Boolean(editData.qualified)) })}
+                            className={`${STATUS_BUTTON_BASE} ${getStatusButtonClasses(Boolean(editData.qualified), 'bg-emerald-500/20 text-emerald-300 border-emerald-400/40')}`}
+                            whileHover={{ scale: 1.04 }}
+                            whileTap={{ scale: 0.96 }}
+                          >
+                            Qualified
+                          </motion.button>
                         ) : (
-                          <label className="inline-flex items-center gap-2 cursor-pointer">
-                            <input
-                              type="checkbox"
-                              checked={Boolean(team.qualified)}
-                              onChange={(e) => handleToggleQualified(team.id, e.target.checked)}
-                              className="w-5 h-5 rounded text-amber-500"
-                            />
-                          </label>
+                          <motion.button
+                            type="button"
+                            onClick={() => handleToggleStatus(team.id, 'qualified', !Boolean(team.qualified))}
+                            className={`${STATUS_BUTTON_BASE} ${getStatusButtonClasses(Boolean(team.qualified), 'bg-emerald-500/20 text-emerald-300 border-emerald-400/40')}`}
+                            whileHover={{ scale: 1.04 }}
+                            whileTap={{ scale: 0.96 }}
+                          >
+                            Qualified
+                          </motion.button>
+                        )}
+                      </div>
+
+                      <div className="flex justify-center">
+                        {isCurrentlyEditing ? (
+                          <motion.button
+                            type="button"
+                            onClick={() => setEditData({ ...editData, ...getStatusPatch('eliminated', !Boolean(editData.eliminated)) })}
+                            className={`${STATUS_BUTTON_BASE} ${getStatusButtonClasses(Boolean(editData.eliminated), 'bg-rose-500/20 text-rose-300 border-rose-400/40')}`}
+                            whileHover={{ scale: 1.04 }}
+                            whileTap={{ scale: 0.96 }}
+                          >
+                            Eliminated
+                          </motion.button>
+                        ) : (
+                          <motion.button
+                            type="button"
+                            onClick={() => handleToggleStatus(team.id, 'eliminated', !Boolean(team.eliminated))}
+                            className={`${STATUS_BUTTON_BASE} ${getStatusButtonClasses(Boolean(team.eliminated), 'bg-rose-500/20 text-rose-300 border-rose-400/40')}`}
+                            whileHover={{ scale: 1.04 }}
+                            whileTap={{ scale: 0.96 }}
+                          >
+                            Eliminated
+                          </motion.button>
                         )}
                       </div>
 

@@ -43,7 +43,7 @@ export async function onRequestPost(context) {
     }
 
     const data = await request.json();
-    const { scorecardId, league = 'ipl', matchId, playerStats = [], force = false } = data;
+    const { scorecardId, league = 'ipl', matchId, playerStats = [] } = data;
 
     if (!scorecardId || !playerStats || playerStats.length === 0) {
       return new Response(JSON.stringify({ error: 'Missing required fields' }), {
@@ -52,112 +52,55 @@ export async function onRequestPost(context) {
       });
     }
 
-	    const normalizedLeague = league === 'wpl' ? 'wpl' : 'ipl';
-
-    const normalizePlayerLeague = (player) => {
-      const explicit = String(player?.league || '').trim().toLowerCase();
-      if (explicit === 'ipl' || explicit === 'wpl') return explicit;
-      const teamId = String(player?.teamId || '').trim();
-      if (['11', '12', '13', '14', '15'].includes(teamId)) return 'wpl';
-      return 'ipl';
-    };
-
-	    const syncKey = `scorecardSync:${scorecardId}`;
-	    let existingMarker = null;
-	    let alreadySyncedPlayerIds = new Set();
-	    let existingBowlingBallsByPlayerId = {};
-	    if (!force) {
-	      try {
-	        const existing = await env.IPL_CACHE.get(syncKey, 'json');
-	        if (existing && typeof existing === 'object') {
-	          existingMarker = existing;
-	          const ids = Array.isArray(existing.playerIds) ? existing.playerIds.map(String) : [];
-	          alreadySyncedPlayerIds = new Set(ids.filter(Boolean));
-	          if (existing.bowlingBallsByPlayerId && typeof existing.bowlingBallsByPlayerId === 'object') {
-	            existingBowlingBallsByPlayerId = { ...existing.bowlingBallsByPlayerId };
-	          }
-	        }
-	      } catch (e) {
-	        // If the sync marker is corrupted, ignore and proceed.
-	        console.warn('[Scorecard Sync] Failed to read sync marker:', e);
-	      }
-	    }
-	
-	    const nextBowlingBallsByPlayerId = { ...existingBowlingBallsByPlayerId };
-
-    const incomingPlayerStats = Array.isArray(playerStats) ? playerStats : [];
-
-    const playersData = await env.IPL_CACHE.get('players', 'json');
-    const players = Array.isArray(playersData) ? playersData : [];
-
     console.log(`[Scorecard Sync] Processing ${playerStats.length} players for match ${matchId}`);
 
-	    const updatedPlayers = [];
-	    const backfilledPlayers = [];
-	    const errors = [];
-
-	    const computeMatchBowlingBalls = (stat) => {
-	      const raw = toNumber(stat?.bowling?.balls);
-	      if (raw > 0) return raw;
-	      return oversToBalls(stat?.bowling?.overs);
-	    };
+    const updatedPlayers = [];
+    const errors = [];
 
     // Process each player's stats
-    for (const playerStat of incomingPlayerStats) {
+    for (const playerStat of playerStats) {
       try {
-        const playerId = String(playerStat.playerId || '').trim();
+        const playerId = playerStat.playerId;
         if (!playerId) {
           console.warn('[Scorecard Sync] Skipping player with no ID');
           continue;
         }
 
-        let playerIndex = players.findIndex(
-          (p) => String(p?.id || '').trim() === playerId && normalizePlayerLeague(p) === normalizedLeague
-        );
-        if (playerIndex === -1) {
-          const byId = players
-            .map((p, index) => ({ p, index }))
-            .filter(({ p }) => String(p?.id || '').trim() === playerId);
-          if (byId.length === 1) {
-            playerIndex = byId[0].index;
-          }
-        }
-
-        if (playerIndex === -1) {
-          console.warn(`[Scorecard Sync] Player ${playerId} not found in players list`);
-          errors.push({
-            playerId,
-            error: 'Player not found in /api/players dataset',
-          });
+        // Get current player data
+        const playerKey = `player_${playerId}`;
+        const playerData = await env.IPL_CACHE.get(playerKey);
+        
+        if (!playerData) {
+          console.warn(`[Scorecard Sync] Player ${playerId} not found, creating new entry`);
+          // Create basic entry if doesn't exist
+          const newPlayer = {
+            id: playerId,
+            name: playerStat.playerName,
+            league,
+            stats: {}
+          };
+          
+          // Apply stats updates
+          const statUpdates = calculatePlayerStatsUpdates(newPlayer.stats, playerStat);
+          newPlayer.stats = statUpdates;
+          
+          await env.IPL_CACHE.put(playerKey, JSON.stringify(newPlayer));
+          updatedPlayers.push({ playerId, operation: 'created' });
           continue;
         }
 
-	        const player = players[playerIndex];
-	        const currentStats = player?.stats || {};
+        const player = JSON.parse(playerData);
+        const currentStats = player.stats || {};
 
-	        const isAlreadySynced = !force && alreadySyncedPlayerIds.has(playerId);
-
-	        const hasBowling = Boolean(playerStat?.bowling);
-	        const matchBowlingBalls = hasBowling ? computeMatchBowlingBalls(playerStat) : 0;
-	        const prevBowlingBalls = hasBowling ? toNumber(existingBowlingBallsByPlayerId[playerId]) : 0;
-	        if (hasBowling) nextBowlingBallsByPlayerId[playerId] = matchBowlingBalls;
-
-	        // Calculate new stats. If already synced, only apply bowling-balls delta (prevents double counting runs/wkts/etc).
-	        const updatedStats = isAlreadySynced
-	          ? calculatePlayerStatsAlreadySyncedUpdates(currentStats, playerStat, prevBowlingBalls, matchBowlingBalls)
-	          : calculatePlayerStatsUpdates(currentStats, playerStat);
-
-        if (!updatedStats) {
-          continue;
-        }
+        // Calculate new stats
+        const updatedStats = calculatePlayerStatsUpdates(currentStats, playerStat);
 
         // Update player with new stats
-        players[playerIndex] = {
-          ...player,
-          stats: updatedStats,
-          updatedAt: new Date().toISOString(),
-          lastSyncScorecard: scorecardId,
-        };
+        player.stats = updatedStats;
+        player.updatedAt = new Date().toISOString();
+        player.lastSyncScorecard = scorecardId;
+
+        await env.IPL_CACHE.put(playerKey, JSON.stringify(player));
         
         console.log(`[Scorecard Sync] Updated player ${playerId}:`, {
           batting: !!playerStat.batting,
@@ -166,25 +109,18 @@ export async function onRequestPost(context) {
           wickets: updatedStats.wickets
         });
 
-        const record = {
+        updatedPlayers.push({
           playerId,
           playerName: playerStat.playerName,
           batting: !!playerStat.batting,
           bowling: !!playerStat.bowling,
-          backfilled: isAlreadySynced,
           stats: {
             runs: updatedStats.runs,
             wickets: updatedStats.wickets,
-            balls: updatedStats.balls,
-            overs: updatedStats.overs,
             battingAverage: updatedStats.battingAverage,
-            bowlingAverage: updatedStats.bowlingAverage,
-            economy: updatedStats.economy,
+            bowlingAverage: updatedStats.bowlingAverage
           }
-        };
-
-        if (isAlreadySynced) backfilledPlayers.push(record);
-        else updatedPlayers.push(record);
+        });
       } catch (error) {
         console.error(`[Scorecard Sync] Error updating player ${playerStat.playerId}:`, error);
         errors.push({
@@ -194,70 +130,14 @@ export async function onRequestPost(context) {
       }
     }
 
-	        if (updatedPlayers.length > 0 || backfilledPlayers.length > 0) {
-	      await env.IPL_CACHE.put('players', JSON.stringify(players));
-	    }
-
-	    // Write sync marker to avoid double-counting on repeated publishes/saves.
-	    // Store the playerIds updated so partial retries don't double count.
-	    if (!force) {
-	      try {
-	        const existingIds = Array.isArray(existingMarker?.playerIds) ? existingMarker.playerIds.map(String) : [];
-	        const nextIds = new Set([
-	          ...existingIds,
-	          ...updatedPlayers.map((p) => String(p.playerId || '').trim()),
-	          ...backfilledPlayers.map((p) => String(p.playerId || '').trim()),
-	        ]);
-	        const nextIdList = Array.from(nextIds).filter(Boolean);
-	        const marker = {
-	          scorecardId,
-	          matchId,
-	          league: normalizedLeague,
-	          playerIds: nextIdList,
-	          updatedCount: nextIdList.length,
-	          schemaVersion: 2,
-	          bowlingBallsByPlayerId: nextBowlingBallsByPlayerId,
-	          syncedAt: new Date().toISOString(),
-	        };
-	        await env.IPL_CACHE.put(syncKey, JSON.stringify(marker));
-	      } catch (e) {
-	        console.warn('[Scorecard Sync] Failed to write sync marker:', e);
-	      }
-	    }
-
-    const didAnyUpdate = updatedPlayers.length > 0 || backfilledPlayers.length > 0;
-    if (!force && !didAnyUpdate) {
-      return new Response(
-        JSON.stringify({
-          success: true,
-          skipped: true,
-          reason: 'Already synced for this scorecard',
-          scorecardId,
-          matchId,
-          updatedCount: 0,
-        }),
-        {
-          status: 200,
-          headers: {
-            'Content-Type': 'application/json',
-            'Access-Control-Allow-Origin': '*',
-          },
-        }
-      );
-    }
-
-    console.log(
-      `[Scorecard Sync] Completed: ${updatedPlayers.length} updated, ${backfilledPlayers.length} backfilled, ${errors.length} errors`
-    );
+    console.log(`[Scorecard Sync] Completed: ${updatedPlayers.length} updated, ${errors.length} errors`);
 
     return new Response(JSON.stringify({
       success: true,
       scorecardId,
       matchId,
-      skipped: false,
-      updatedCount: updatedPlayers.length + backfilledPlayers.length,
-      details: [...updatedPlayers, ...backfilledPlayers],
-      backfilledCount: backfilledPlayers.length,
+      updatedCount: updatedPlayers.length,
+      details: updatedPlayers,
       errors: errors.length > 0 ? errors : undefined
     }), {
       status: 200,
@@ -284,77 +164,33 @@ export async function onRequestPost(context) {
 /**
  * Helper: Calculate updated player stats from scorecard performance
  */
-const toNumber = (value) => {
-  const n = Number(value);
-  return Number.isFinite(n) ? n : 0;
-};
-
-// Convert overs to balls.
-// Supports cricket notation (e.g. 4.2 = 4 overs + 2 balls) and true decimal overs (e.g. 4.3333).
-const oversToBalls = (oversValue) => {
-  if (oversValue === null || oversValue === undefined) return 0;
-  const numeric = Number(oversValue);
-  if (Number.isFinite(numeric)) {
-    if (Number.isInteger(numeric)) return Math.max(0, numeric * 6);
-    const wholeOvers = Math.floor(numeric);
-    const fractional = numeric - wholeOvers;
-    const ballsByNotation = Math.round(fractional * 10);
-    const looksLikeNotation = Math.abs(fractional * 10 - ballsByNotation) < 1e-6;
-    if (looksLikeNotation) return Math.max(0, wholeOvers * 6 + ballsByNotation);
-    return Math.max(0, Math.round(numeric * 6));
-  }
-
-  const str = String(oversValue || '').trim();
-  if (!str) return 0;
-  const match = str.match(/^(\d+)(?:\.(\d+))?$/);
-  if (!match) return 0;
-  const wholeOvers = parseInt(match[1], 10) || 0;
-  const ballsPart = match[2] ? parseInt(match[2], 10) || 0 : 0;
-  return Math.max(0, wholeOvers * 6 + ballsPart);
-};
-
-const formatOversFromBalls = (balls) => {
-  const totalBalls = toNumber(balls);
-  if (totalBalls <= 0) return '0.0';
-  const overs = Math.floor(totalBalls / 6);
-  const rem = totalBalls % 6;
-  return `${overs}.${rem}`;
-};
-
 function calculatePlayerStatsUpdates(currentStats, scorecardStats) {
   const updates = { ...currentStats };
-
-  let matchCounted = false;
-  const ensureMatchCounted = () => {
-    if (matchCounted) return;
-    updates.matches = toNumber(updates.matches) + 1;
-    matchCounted = true;
-  };
 
   // Update batting stats
   if (scorecardStats.batting) {
     const batting = scorecardStats.batting;
     
-    ensureMatchCounted();
-    updates.runs = toNumber(updates.runs) + toNumber(batting.runs);
+    updates.matches = (updates.matches || 0) + 1;
+    updates.runs = (updates.runs || 0) + batting.runs;
     
-    const battingInnings = toNumber(updates.battingInnings) + 1;
+    const battingInnings = (updates.battingInnings || 0) + 1;
     updates.battingInnings = battingInnings;
 
-    if (scorecardStats.batting.dismissalType === 'not-out' || scorecardStats.batting.dismissalType === 'retired-hurt') {
-      updates.notOuts = toNumber(updates.notOuts) + 1;
+    if (scorecardStats.batting.dismissalType === 'not-out') {
+      updates.notOuts = (updates.notOuts || 0) + 1;
     }
 
-    updates.ballsFaced = toNumber(updates.ballsFaced) + toNumber(batting.balls);
-    updates.fours = toNumber(updates.fours) + toNumber(batting.fours);
-    updates.sixes = toNumber(updates.sixes) + toNumber(batting.sixes);
+    updates.ballsFaced = (updates.ballsFaced || 0) + batting.balls;
+    updates.fours = (updates.fours || 0) + batting.fours;
+    updates.sixes = (updates.sixes || 0) + batting.sixes;
 
     if (batting.runs >= 50 && batting.runs < 100) {
-      updates.fifties = toNumber(updates.fifties) + 1;
+      updates.fifties = (updates.fifties || 0) + 1;
     }
     if (batting.runs >= 100) {
-      updates.hundreds = toNumber(updates.hundreds) + 1;
-      updates.fifties = toNumber(updates.fifties) + 1;
+      updates.hundreds = (updates.hundreds || 0) + 1;
+      updates.fifties = (updates.fifties || 0) + 1;
     }
 
     const highest = parseInt(String(updates.highest || 0), 10);
@@ -362,13 +198,13 @@ function calculatePlayerStatsUpdates(currentStats, scorecardStats) {
       updates.highest = batting.runs;
     }
 
-    const dismissals = battingInnings - toNumber(updates.notOuts);
+    const dismissals = battingInnings - (updates.notOuts || 0);
     if (dismissals > 0) {
       updates.battingAverage = (updates.runs / dismissals).toFixed(2);
     }
 
-    if (toNumber(updates.ballsFaced) > 0) {
-      updates.battingStrikeRate = ((toNumber(updates.runs) / toNumber(updates.ballsFaced)) * 100).toFixed(2);
+    if (updates.ballsFaced > 0) {
+      updates.battingStrikeRate = ((updates.runs / updates.ballsFaced) * 100).toFixed(2);
     }
   }
 
@@ -376,35 +212,21 @@ function calculatePlayerStatsUpdates(currentStats, scorecardStats) {
   if (scorecardStats.bowling) {
     const bowling = scorecardStats.bowling;
     
-    ensureMatchCounted();
-    updates.wickets = toNumber(updates.wickets) + toNumber(bowling.wickets);
+    updates.wickets = (updates.wickets || 0) + bowling.wickets;
     
-    const bowlingInnings = toNumber(updates.bowlingInnings) + 1;
+    const bowlingInnings = (updates.bowlingInnings || 0) + 1;
     updates.bowlingInnings = bowlingInnings;
 
-    // Ensure we keep "balls bowled" as the canonical store; convert overs to balls when needed.
-    // If older data has overs but missing balls, migrate overs->balls in-place (no double-count).
-    let existingBalls = toNumber(updates.balls);
-    if (existingBalls === 0) {
-      const derivedFromOvers = oversToBalls(updates.overs);
-      if (derivedFromOvers > 0) {
-        existingBalls = derivedFromOvers;
-        updates.balls = derivedFromOvers;
-      }
-    }
+    const oversValue = parseFloat(String(bowling.overs || 0));
+    updates.overs = (parseFloat(String(updates.overs || 0)) + oversValue).toFixed(1);
+    updates.runsConceded = (updates.runsConceded || 0) + bowling.runs;
 
-    const matchBallsRaw = toNumber(bowling.balls);
-    const matchBalls = matchBallsRaw > 0 ? matchBallsRaw : oversToBalls(bowling.overs);
-    updates.balls = existingBalls + matchBalls;
-    updates.overs = formatOversFromBalls(updates.balls);
-    updates.runsConceded = toNumber(updates.runsConceded) + toNumber(bowling.runs);
-
-    updates.maidens = toNumber(updates.maidens) + toNumber(bowling.maidens);
-    updates.wides = toNumber(updates.wides) + toNumber(bowling.wides);
-    updates.noBalls = toNumber(updates.noBalls) + toNumber(bowling.noBalls);
+    updates.maidens = (updates.maidens || 0) + (bowling.maidens || 0);
+    updates.wides = (updates.wides || 0) + (bowling.wides || 0);
+    updates.noBalls = (updates.noBalls || 0) + (bowling.noBalls || 0);
 
     if (bowling.wickets >= 5) {
-      updates.fiveWickets = toNumber(updates.fiveWickets) + 1;
+      updates.fiveWickets = (updates.fiveWickets || 0) + 1;
     }
 
     const currentBest = updates.bestBowling || '0/0';
@@ -420,55 +242,9 @@ function calculatePlayerStatsUpdates(currentStats, scorecardStats) {
       updates.bowlingAverage = (updates.runsConceded / updates.wickets).toFixed(2);
     }
 
-    const totalBalls = toNumber(updates.balls);
-    if (totalBalls > 0) {
-      updates.economy = ((toNumber(updates.runsConceded) * 6) / totalBalls).toFixed(2);
-      if (toNumber(updates.wickets) > 0) {
-        updates.bowlingStrikeRate = (totalBalls / toNumber(updates.wickets)).toFixed(2);
-      }
-    }
-  }
-
-  return updates;
-}
-
-/**
- * Helper: Apply bowling-balls delta after a scorecard was already synced (prevents double counting).
- * We only adjust `stats.balls`/derived metrics based on the per-scorecard bowling balls contribution.
- */
-function calculatePlayerStatsAlreadySyncedUpdates(currentStats, scorecardStats, prevBowlingBalls, matchBowlingBalls) {
-  const updates = { ...currentStats };
-
-  const hasBowling = Boolean(scorecardStats?.bowling);
-  if (!hasBowling) return null;
-
-  const currentBalls = toNumber(updates.balls);
-  let baseBalls = currentBalls;
-  if (baseBalls === 0) {
-    const derivedFromExistingOvers = oversToBalls(updates.overs);
-    if (derivedFromExistingOvers > 0) baseBalls = derivedFromExistingOvers;
-  }
-
-  const prevMatchBalls = toNumber(prevBowlingBalls);
-  const matchBalls = toNumber(matchBowlingBalls);
-  const deltaBalls = matchBalls - prevMatchBalls;
-
-  let nextBalls = baseBalls + deltaBalls;
-  if (nextBalls < 0) nextBalls = 0;
-
-  // If nothing changes (no delta, no migration), skip writing.
-  if (nextBalls === currentBalls && baseBalls === currentBalls) return null;
-
-  updates.balls = nextBalls;
-  updates.overs = formatOversFromBalls(nextBalls);
-
-  const wickets = toNumber(updates.wickets);
-  const runsConceded = toNumber(updates.runsConceded);
-
-  if (nextBalls > 0) {
-    updates.economy = ((runsConceded * 6) / nextBalls).toFixed(2);
-    if (wickets > 0) {
-      updates.bowlingStrikeRate = (nextBalls / wickets).toFixed(2);
+    const oversFloat = parseFloat(String(updates.overs || 0));
+    if (oversFloat > 0) {
+      updates.economy = ((updates.runsConceded || 0) / oversFloat).toFixed(2);
     }
   }
 
