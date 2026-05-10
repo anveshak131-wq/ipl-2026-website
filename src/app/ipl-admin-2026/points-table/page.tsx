@@ -2,70 +2,32 @@
 
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { createPortal } from 'react-dom';
-import { Trophy, TrendingUp, TrendingDown, Info, Award, Users, Calendar, Clock, Search, X, Edit, Save, RefreshCw, Download, FileText, Table, Database } from 'lucide-react';
+import { Trophy, TrendingUp, TrendingDown, Info, Award, Users, Search, X, Edit, Save, RefreshCw, Download, FileText, Table, Database } from 'lucide-react';
 import { api } from '@/lib/data';
 import { Team } from '@/types';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import GradientText from '@/components/ui/GradientText';
+import IplStatusPill from '@/components/points-table/IplStatusPill';
 import {
   exportPointsTableToCSV,
   exportPointsTableToExcel,
   exportPointsTableToPDF,
   exportPointsTableToDatabase,
-  exportPointsTableAllFormats,
   type PointsTableExportData,
-  validateExportData,
-  getExportStatistics
+  validateExportData
 } from './points-table-export';
+import {
+  getIplAvailableYears,
+  getIplSeasonTeamIds,
+  getStatusPatch,
+  IPL_STORAGE_KEY,
+  readIplSavedRows,
+  type IplSavedRow,
+  type IplStandingsStatus,
+} from '@/lib/iplPointsTable';
 
-// IPL Teams by Season - mapped to the CURRENT IPL team IDs returned by `/api/teams`
-// Team IDs (from `functions/api/teams.js`):
-// 1=RCB, 2=MI, 3=SRH, 4=GT, 5=PBKS, 6=DC, 7=LSG, 8=RR, 9=KKR, 10=CSK
-//
-// Note: historical franchises (Kochi, Pune, Gujarat Lions, RPS) are not present in the current Teams API,
-// so for now season-specific tables vary by showing/hiding current franchises (8-team era vs 10-team era).
-const IPL_TEAMS_BY_SEASON: Record<number, string[]> = {
-  // 8-team era (use SRH slot as Deccan/SRH continuity)
-  2008: ['1', '2', '3', '5', '6', '8', '9', '10'],
-  2009: ['1', '2', '3', '5', '6', '8', '9', '10'],
-  2010: ['1', '2', '3', '5', '6', '8', '9', '10'],
-  2011: ['1', '2', '3', '5', '6', '8', '9', '10'],
-  2012: ['1', '2', '3', '5', '6', '8', '9', '10'],
-  2013: ['1', '2', '3', '5', '6', '8', '9', '10'],
-  2014: ['1', '2', '3', '5', '6', '8', '9', '10'],
-  2015: ['1', '2', '3', '5', '6', '8', '9', '10'],
-  2016: ['1', '2', '3', '5', '6', '8', '9', '10'],
-  2017: ['1', '2', '3', '5', '6', '8', '9', '10'],
-  2018: ['1', '2', '3', '5', '6', '8', '9', '10'],
-  2019: ['1', '2', '3', '5', '6', '8', '9', '10'],
-  2020: ['1', '2', '3', '5', '6', '8', '9', '10'],
-  2021: ['1', '2', '3', '5', '6', '8', '9', '10'],
-
-  // 10-team era (adds GT + LSG)
-  2022: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10'],
-  2023: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10'],
-  2024: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10'],
-  2025: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10'],
-  2026: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10'],
-};
-
-const IPL_STORAGE_KEY = 'iplPointsTableStats';
 const STATUS_BUTTON_BASE =
   'w-full px-3 py-2 rounded-full border text-xs font-black uppercase tracking-wide transition-all';
-
-type StandingsStatus = 'qualified' | 'eliminated';
-
-type SavedRow = {
-  matchesPlayed?: number | null;
-  wins?: number | null;
-  losses?: number | null;
-  noResult?: number | null;
-  points?: number | null;
-  netRunRate?: number | null;
-  qualified?: boolean;
-  eliminated?: boolean;
-};
 
 type EditData = {
   matchesPlayed?: number | null;
@@ -76,18 +38,6 @@ type EditData = {
   netRunRate?: number | string | null;
   qualified?: boolean;
   eliminated?: boolean;
-};
-
-const getStatusPatch = (status: StandingsStatus, value: boolean) => {
-  if (status === 'qualified') {
-    return value
-      ? { qualified: true, eliminated: false }
-      : { qualified: false };
-  }
-
-  return value
-    ? { qualified: false, eliminated: true }
-    : { eliminated: false };
 };
 
 const getStatusButtonClasses = (active: boolean, activeClasses: string) =>
@@ -107,7 +57,6 @@ export default function IPLAdminPointsTablePage() {
   const [editData, setEditData] = useState<EditData>({});
   const [showExportMenu, setShowExportMenu] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
-  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0 });
   const exportButtonRef = useRef<HTMLButtonElement>(null);
 
   // Fetch IPL teams
@@ -129,30 +78,15 @@ export default function IPLAdminPointsTablePage() {
 
   // Generate available years (2008 to current year for IPL)
   useEffect(() => {
-    const currentYear = new Date().getFullYear();
-    const years: number[] = [];
-    for (let year = 2008; year <= currentYear; year++) {
-      years.push(year);
-    }
+    const years = getIplAvailableYears();
     setAvailableYears(years);
-    setSelectedYear(currentYear);
+    setSelectedYear(years[years.length - 1] || new Date().getFullYear());
   }, []);
 
   // Force re-render when year changes to reload data
   useEffect(() => {
     // This will trigger the pointsTable useMemo to recalculate with new year
   }, [selectedYear]);
-
-  // Calculate dropdown position relative to button
-  const updateDropdownPosition = () => {
-    if (exportButtonRef.current) {
-      const rect = exportButtonRef.current.getBoundingClientRect();
-      setDropdownPosition({
-        top: rect.bottom + window.scrollY,
-        left: rect.right + window.scrollX - 224 // 224 is dropdown width
-      });
-    }
-  };
 
   // Close export menu when clicking outside
   useEffect(() => {
@@ -172,33 +106,15 @@ export default function IPLAdminPointsTablePage() {
   // Calculate points table - filter teams by selected year first, then use year-based localStorage
   const pointsTable = useMemo(() => {
     // Get teams for the selected season
-    const seasonTeamIds = IPL_TEAMS_BY_SEASON[selectedYear] || [];
+    const seasonTeamIds = getIplSeasonTeamIds(selectedYear);
     const seasonTeams = teams.filter((team) => seasonTeamIds.includes(team.id));
 
-    let savedStats: Record<string, SavedRow> = {};
-    if (typeof window !== 'undefined') {
-      try {
-        // Get ALL years' stats from localStorage
-        const allStats = JSON.parse(localStorage.getItem(IPL_STORAGE_KEY) || '{}') || {};
-
-        // Ensure we have a proper year-based structure
-        if (!allStats[selectedYear] || typeof allStats[selectedYear] !== 'object') {
-          // Initialize this year's data if it doesn't exist
-          allStats[selectedYear] = {};
-          localStorage.setItem(IPL_STORAGE_KEY, JSON.stringify(allStats));
-        }
-
-        // Get stats for the current year only
-        savedStats = (allStats[selectedYear] as Record<string, SavedRow>) || {};
-      } catch {
-        /* ignore */
-      }
-    }
+    const savedStats = readIplSavedRows(selectedYear);
 
     return seasonTeams.map((team) => {
       const displayShortName = team.shortName || team.name.split(' ').map((w) => w[0]).join('');
       const displayName = team.name || '';
-      const persistedStats = ((team as Team & { stats?: SavedRow }).stats ?? {}) as SavedRow;
+      const persistedStats = ((team as Team & { stats?: IplSavedRow }).stats ?? {}) as IplSavedRow;
       const row = { ...persistedStats, ...(savedStats[team.id] || {}) };
 
       return {
@@ -258,6 +174,12 @@ export default function IPLAdminPointsTablePage() {
     return result;
   }, [pointsTable, searchTerm, sortBy]);
 
+  const seasonTeamCount = useMemo(() => getIplSeasonTeamIds(selectedYear).length, [selectedYear]);
+  const statusCounts = useMemo(() => ({
+    qualified: pointsTable.filter((team) => team.qualified).length,
+    eliminated: pointsTable.filter((team) => team.eliminated).length,
+  }), [pointsTable]);
+
   const clearFilters = () => {
     setSearchTerm('');
     setSortBy('points');
@@ -280,7 +202,7 @@ export default function IPLAdminPointsTablePage() {
     }
   };
 
-  const handleToggleStatus = async (teamId: string, status: StandingsStatus, value: boolean) => {
+  const handleToggleStatus = async (teamId: string, status: IplStandingsStatus, value: boolean) => {
     try {
       const token = localStorage.getItem('adminToken') || localStorage.getItem('auth_token');
       if (!token) return;
@@ -475,11 +397,6 @@ export default function IPLAdminPointsTablePage() {
     }
   };
 
-  const getExportStats = () => {
-    const exportData = prepareExportData();
-    return getExportStatistics(exportData);
-  };
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-amber-950 via-orange-900 to-black">
       <main className="flex-1 relative z-10">
@@ -491,7 +408,11 @@ export default function IPLAdminPointsTablePage() {
                   IPL Points Table Admin
                 </GradientText>
               </h1>
-              <p className="text-gray-300">Manage IPL championship standings</p>
+              <p className="text-gray-300">Manage IPL championship standings and control fan-facing Q / E status markers.</p>
+              <div className="mt-3 flex flex-wrap items-center gap-2">
+                <IplStatusPill status="qualified" compact />
+                <IplStatusPill status="eliminated" compact />
+              </div>
             </div>
             <div className="flex items-center gap-4">
               <motion.button
@@ -510,7 +431,6 @@ export default function IPLAdminPointsTablePage() {
                   type="button"
                   ref={exportButtonRef}
                   onClick={() => {
-                    updateDropdownPosition();
                     setShowExportMenu(!showExportMenu);
                   }}
                   disabled={isExporting || sortedPointsTable.length === 0}
@@ -767,7 +687,7 @@ export default function IPLAdminPointsTablePage() {
 
               <div className="flex items-center justify-between pt-6 mt-6 border-t border-white/10">
                 <span className="text-sm text-gray-400">
-                  Showing <span className="font-black text-white text-lg">{sortedPointsTable.length}</span> of <span className="font-black text-white text-lg">{(IPL_TEAMS_BY_SEASON[selectedYear] || []).length}</span> IPL teams for Season {selectedYear}
+                  Showing <span className="font-black text-white text-lg">{sortedPointsTable.length}</span> of <span className="font-black text-white text-lg">{seasonTeamCount}</span> IPL teams for Season {selectedYear}
                 </span>
                 <div className="flex items-center gap-3">
                   <span className="px-3 py-1.5 rounded-lg text-xs font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
@@ -781,6 +701,29 @@ export default function IPLAdminPointsTablePage() {
                 </div>
               </div>
             </div>
+          </motion.div>
+
+          <motion.div
+            className="grid gap-4 md:grid-cols-4 mb-8"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.45, delay: 0.1 }}
+          >
+            {[
+              { label: 'Season Teams', value: seasonTeamCount, meta: 'Visible in this IPL season' },
+              { label: 'Qualified', value: statusCounts.qualified, meta: 'Admin-marked Q status' },
+              { label: 'Eliminated', value: statusCounts.eliminated, meta: 'Admin-marked E status' },
+              { label: 'Editable Rows', value: sortedPointsTable.length, meta: isEditing ? 'Edit mode active' : 'Read mode active' },
+            ].map((summary) => (
+              <div
+                key={summary.label}
+                className="rounded-[28px] border border-white/10 bg-white/[0.03] px-5 py-4 backdrop-blur-xl"
+              >
+                <div className="text-[11px] font-black uppercase tracking-[0.28em] text-gray-400">{summary.label}</div>
+                <div className="mt-3 text-3xl font-black text-white">{summary.value}</div>
+                <div className="mt-1 text-sm text-gray-400">{summary.meta}</div>
+              </div>
+            ))}
           </motion.div>
 
           {isLoading ? (
@@ -817,8 +760,8 @@ export default function IPLAdminPointsTablePage() {
                 <div className="text-center">NR</div>
                 <div>Points</div>
                 <div>NRR</div>
-                <div className="flex justify-center">Qualified</div>
-                <div className="flex justify-center">Eliminated</div>
+                <div className="flex justify-center">Q</div>
+                <div className="flex justify-center">E</div>
                 <div className="flex justify-center">Actions</div>
               </div>
 
@@ -828,6 +771,7 @@ export default function IPLAdminPointsTablePage() {
                   const isTop4 = rank <= 4;
                   const isBottom2 = rank >= sortedPointsTable.length - 1;
                   const isCurrentlyEditing = editingTeam === team.id;
+                  const isQualified = Boolean(team.qualified);
                   const isEliminated = Boolean(team.eliminated);
                   const nrr = team.netRunRate ?? null;
 
@@ -841,13 +785,14 @@ export default function IPLAdminPointsTablePage() {
                       transition={{ duration: 0.6, delay: index * 0.05, ease: [0.22, 1, 0.36, 1] }}
                       whileHover={{ y: -5, scale: 1.02 }}
                       className={`relative group grid grid-cols-[40px_200px_1fr_90px_80px_80px_80px_80px_100px_130px_130px_140px] gap-4 items-center px-6 py-5 rounded-3xl backdrop-blur-2xl border-2 border-white/10 bg-gradient-to-br from-slate-900/80 via-slate-800/70 to-slate-900/80 max-w-full overflow-x-auto ${
+                        isQualified ? 'border-emerald-500/45 bg-gradient-to-br from-emerald-900/25 via-slate-800/70 to-lime-900/20' :
                         isTop4 ? 'border-amber-500/50 bg-gradient-to-br from-amber-900/30 via-orange-800/20 to-amber-900/30' :
                         isEliminated ? 'border-rose-500/50 bg-gradient-to-br from-rose-900/30 via-red-900/20 to-rose-900/30' :
                         isBottom2 ? 'border-orange-500/50 bg-gradient-to-br from-orange-900/30 via-amber-800/20 to-orange-900/30' :
                         'hover:border-amber-500/50'
                       }`}
                     >
-                      <div className={`flex justify-center text-2xl font-black ${isTop4 ? 'text-amber-400' : isEliminated ? 'text-rose-300' : isBottom2 ? 'text-orange-400' : 'text-white'}`}>
+                      <div className={`flex justify-center text-2xl font-black ${isQualified ? 'text-emerald-300' : isTop4 ? 'text-amber-400' : isEliminated ? 'text-rose-300' : isBottom2 ? 'text-orange-400' : 'text-white'}`}>
                         {rank}
                       </div>
 
@@ -871,7 +816,18 @@ export default function IPLAdminPointsTablePage() {
                         <span className="text-xl font-black text-white">{team.shortName || team.name}</span>
                       </div>
 
-                      <div className="text-white font-semibold truncate">{team.name}</div>
+                      <div className="min-w-0">
+                        <div className="truncate text-white font-semibold">{team.name}</div>
+                        <div className="mt-2 flex flex-wrap items-center gap-2">
+                          {isQualified && <IplStatusPill status="qualified" compact />}
+                          {isEliminated && <IplStatusPill status="eliminated" compact />}
+                          {!isQualified && !isEliminated && isTop4 && (
+                            <span className="inline-flex rounded-full border border-amber-400/20 bg-amber-500/10 px-3 py-1 text-[10px] font-black uppercase tracking-[0.22em] text-amber-200">
+                              Playoff pace
+                            </span>
+                          )}
+                        </div>
+                      </div>
 
                       <div className="text-white font-bold">
                         {isCurrentlyEditing ? (
@@ -976,7 +932,7 @@ export default function IPLAdminPointsTablePage() {
                             whileHover={{ scale: 1.04 }}
                             whileTap={{ scale: 0.96 }}
                           >
-                            Qualified
+                            Q Qualified
                           </motion.button>
                         ) : (
                           <motion.button
@@ -986,7 +942,7 @@ export default function IPLAdminPointsTablePage() {
                             whileHover={{ scale: 1.04 }}
                             whileTap={{ scale: 0.96 }}
                           >
-                            Qualified
+                            Q Qualified
                           </motion.button>
                         )}
                       </div>
@@ -1000,7 +956,7 @@ export default function IPLAdminPointsTablePage() {
                             whileHover={{ scale: 1.04 }}
                             whileTap={{ scale: 0.96 }}
                           >
-                            Eliminated
+                            E Eliminated
                           </motion.button>
                         ) : (
                           <motion.button
@@ -1010,7 +966,7 @@ export default function IPLAdminPointsTablePage() {
                             whileHover={{ scale: 1.04 }}
                             whileTap={{ scale: 0.96 }}
                           >
-                            Eliminated
+                            E Eliminated
                           </motion.button>
                         )}
                       </div>
@@ -1063,10 +1019,10 @@ export default function IPLAdminPointsTablePage() {
             transition={{ duration: 0.8, delay: 0.5 }}
           >
             {[
-              { label: 'IPL Teams', value: (IPL_TEAMS_BY_SEASON[selectedYear] || []).length, icon: Users, color: 'from-amber-500 to-orange-500' },
+              { label: 'IPL Teams', value: seasonTeamCount, icon: Users, color: 'from-amber-500 to-orange-500' },
               { label: 'Total Points', value: pointsTable.reduce((sum, t) => sum + (t.points ?? 0), 0), icon: Award, color: 'from-orange-500 to-amber-500' },
-              { label: 'Season', value: selectedYear, icon: Calendar, color: 'from-amber-500 to-orange-500' },
-              { label: 'Showing', value: sortedPointsTable.length, icon: Clock, color: 'from-orange-500 to-amber-500' }
+              { label: 'Qualified', value: statusCounts.qualified, icon: Trophy, color: 'from-emerald-500 to-lime-500' },
+              { label: 'Eliminated', value: statusCounts.eliminated, icon: X, color: 'from-rose-500 to-orange-500' }
             ].map((stat, index) => (
               <motion.div
                 key={index}

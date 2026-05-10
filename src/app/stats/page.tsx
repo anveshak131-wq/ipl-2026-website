@@ -17,6 +17,14 @@ import LeaderboardSection from '@/components/stats/LeaderboardSection';
 import QuickStatsGrid from '@/components/stats/QuickStatsGrid';
 import TeamStatsSection from '@/components/stats/TeamStatsSection';
 import { Trophy, Award, TrendingUp, Target, Sparkles, Filter } from 'lucide-react';
+import IplStatusPill from '@/components/points-table/IplStatusPill';
+import {
+  formatNetRunRate,
+  getIplAvailableYears,
+  getIplSeasonTeamIds,
+  readIplSavedRows,
+  type IplSavedRow,
+} from '@/lib/iplPointsTable';
 
 interface TeamAggregate {
   team: Team | null;
@@ -305,13 +313,9 @@ export default function StatsPage() {
 
   // Available years for end-user IPL points table (mirror admin UX)
   useEffect(() => {
-    const currentYear = new Date().getFullYear();
-    const years: number[] = [];
-    for (let year = 2008; year <= currentYear; year++) {
-      years.push(year);
-    }
+    const years = getIplAvailableYears();
     setAvailablePointsYears(years);
-    setPointsYear(currentYear);
+    setPointsYear(years[years.length - 1] || new Date().getFullYear());
   }, []);
 
   const computedTopRunScorers = useMemo(() => {
@@ -389,28 +393,18 @@ export default function StatsPage() {
 
   // IPL points table for end-user stats page (read-only)
   const pointsTable = useMemo(() => {
-    // Mirror admin logic: prefer locally saved stats (year -> teamId -> stats), then team.stats, then zeros
-    let savedStats: Record<string, { matchesPlayed?: number; wins?: number; losses?: number; noResult?: number; points?: number; netRunRate?: number }> = {};
-    if (typeof window !== 'undefined') {
-      try {
-        const allStats = JSON.parse(window.localStorage.getItem('iplPointsTableStats') || '{}') || {};
-        if (allStats[pointsYear] && typeof allStats[pointsYear] === 'object') {
-          savedStats = allStats[pointsYear];
-        } else {
-          savedStats = {};
-        }
-      } catch {
-        // ignore parse errors and fall back to team.stats
-      }
-    }
+    const savedStats = readIplSavedRows(pointsYear);
+    const seasonTeamIds = new Set(getIplSeasonTeamIds(pointsYear));
+    const currentYear = new Date().getFullYear();
 
     return teams
-      .filter((team) => team.league === 'ipl')
+      .filter((team) => team.league === 'ipl' && seasonTeamIds.has(team.id))
       .map((team) => {
         const displayShortName = team.shortName || team.name.split(' ').map((w) => w[0]).join('');
         const displayName = team.name || '';
-
-        const row = savedStats[team.id] || {};
+        const persistedStats = ((team as Team & { stats?: IplSavedRow }).stats ?? {}) as IplSavedRow;
+        const apiSeasonRow = pointsYear === currentYear ? persistedStats : {};
+        const row = { ...apiSeasonRow, ...(savedStats[team.id] || {}) };
 
         return {
           ...team,
@@ -419,29 +413,17 @@ export default function StatsPage() {
           matchesPlayed: row.matchesPlayed ?? 0,
           wins: row.wins ?? 0,
           losses: row.losses ?? 0,
+          noResult: row.noResult ?? 0,
           points: row.points ?? 0,
           netRunRate: row.netRunRate ?? 0,
+          qualified: Boolean(row.qualified),
+          eliminated: Boolean(row.eliminated),
         };
       });
   }, [teams, pointsYear]);
 
   const sortedPointsTable = useMemo(() => {
-    // Season-specific team visibility (can be extended with historical franchises)
-    const filterTeamBySeason = (team: Team, year: number) => {
-      const short = (team.shortName || '').toUpperCase();
-
-      // Hide new expansion teams before they existed
-      if (year < 2022 && (short === 'GT' || short === 'LSG')) {
-        return false;
-      }
-
-      // Default: show team
-      return true;
-    };
-
-    const filtered = pointsTable.filter((team) => filterTeamBySeason(team, pointsYear));
-
-    const copy = [...filtered];
+    const copy = [...pointsTable];
     copy.sort((a, b) => {
       if ((b as any).points !== (a as any).points) {
         return ((b as any).points ?? 0) - ((a as any).points ?? 0);
@@ -450,7 +432,7 @@ export default function StatsPage() {
     });
     // Show top 10 teams on stats page
     return copy.slice(0, 10);
-  }, [pointsTable, pointsYear]);
+  }, [pointsTable]);
 
   if (isLoading) {
     return (
@@ -619,6 +601,10 @@ export default function StatsPage() {
                           <p className="text-xs text-gray-400 mt-1">
                             Read-only snapshot using the same admin points data (including any manual edits).
                           </p>
+                          <div className="mt-3 flex flex-wrap items-center gap-2">
+                            <IplStatusPill status="qualified" compact />
+                            <IplStatusPill status="eliminated" compact />
+                          </div>
                         </div>
                         <div className="flex items-center gap-2">
                           <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
@@ -647,19 +633,29 @@ export default function StatsPage() {
                               <th className="py-2 pr-4 text-center">M</th>
                               <th className="py-2 pr-4 text-center">W</th>
                               <th className="py-2 pr-4 text-center">L</th>
+                              <th className="py-2 pr-4 text-center">NR</th>
                               <th className="py-2 pr-4 text-center">Pts</th>
                               <th className="py-2 pr-4 text-right">NRR</th>
+                              <th className="py-2 text-right">Status</th>
                             </tr>
                           </thead>
                           <tbody>
                             {sortedPointsTable.map((team, index) => {
                               const nrr = (team as any).netRunRate ?? 0;
                               const isTop4 = index < 4;
+                              const isQualified = Boolean((team as any).qualified);
+                              const isEliminated = Boolean((team as any).eliminated);
                               return (
                                 <tr
                                   key={team.id}
                                   className={`border-b border-white/5 last:border-0 ${
-                                    isTop4 ? 'bg-white/5' : ''
+                                    isQualified
+                                      ? 'bg-emerald-500/[0.06]'
+                                      : isEliminated
+                                        ? 'bg-rose-500/[0.06]'
+                                        : isTop4
+                                          ? 'bg-white/5'
+                                          : ''
                                   }`}
                                 >
                                   <td className="py-2 pr-4 font-bold text-gray-200">
@@ -702,6 +698,9 @@ export default function StatsPage() {
                                   <td className="py-2 pr-4 text-center text-red-300 font-semibold">
                                     {(team as any).losses ?? 0}
                                   </td>
+                                  <td className="py-2 pr-4 text-center text-sky-300 font-semibold">
+                                    {(team as any).noResult ?? 0}
+                                  </td>
                                   <td className="py-2 pr-4 text-center font-black text-ipl-gold">
                                     {(team as any).points ?? 0}
                                   </td>
@@ -714,7 +713,13 @@ export default function StatsPage() {
                                         : 'text-gray-200'
                                     }`}
                                   >
-                                    {nrr > 0 ? `+${nrr.toFixed(2)}` : nrr.toFixed(2)}
+                                    {formatNetRunRate(nrr)}
+                                  </td>
+                                  <td className="py-2 text-right">
+                                    <div className="flex items-center justify-end gap-2">
+                                      {isQualified && <IplStatusPill status="qualified" compact />}
+                                      {isEliminated && <IplStatusPill status="eliminated" compact />}
+                                    </div>
                                   </td>
                                 </tr>
                               );

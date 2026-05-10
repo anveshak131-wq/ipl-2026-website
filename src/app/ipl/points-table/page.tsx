@@ -6,21 +6,23 @@ import { useRouter } from 'next/navigation';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import AuroraBackground from '@/components/ui/AuroraBackground';
-import { Trophy, ArrowLeft, ArrowRight, TrendingUp, TrendingDown, Info, Star, Award, Users, Calendar, Clock, Filter, Search, X } from 'lucide-react';
+import { Trophy, ArrowRight, TrendingUp, TrendingDown, Star, Award, Users, Calendar, Clock, Search, X, Info } from 'lucide-react';
 import { api } from '@/lib/data';
 import { Team, Match } from '@/types';
 import { useLeague } from '@/contexts/LeagueContext';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import GradientText from '@/components/ui/GradientText';
-import AnimatedSection from '@/components/ui/AnimatedSection';
 import { formatMatchTime } from '@/lib/timeUtils';
-
-const IPL_STORAGE_KEY = 'iplPointsTableStats';
-
-type PublicPointsStatus = {
-  qualified?: boolean;
-  eliminated?: boolean;
-};
+import IplStatusPill from '@/components/points-table/IplStatusPill';
+import {
+  buildComputedIplRow,
+  formatNetRunRate,
+  getIplAvailableYears,
+  getIplSeasonTeamIds,
+  readIplSavedRows,
+  type IplPointsTableRow,
+  type IplSavedRow,
+} from '@/lib/iplPointsTable';
 
 // Custom components for the points table
 export default function IPLPointsTablePage() {
@@ -31,7 +33,6 @@ export default function IPLPointsTablePage() {
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState<'points' | 'wins' | 'losses' | 'nrr'>('points');
-  const [showFilters, setShowFilters] = useState(false);
   const [favorites, setFavorites] = useState<string[]>([]);
   const [showFavoritesFirst, setShowFavoritesFirst] = useState(false);
   const [selectedYear, setSelectedYear] = useState<number>(2026);
@@ -67,86 +68,36 @@ export default function IPLPointsTablePage() {
 
   // Generate available years (2008 to current year)
   useEffect(() => {
-    const currentYear = new Date().getFullYear();
-    const years = [];
-    for (let year = 2008; year <= currentYear; year++) {
-      years.push(year);
-    }
-    setAvailableYears(years);
+    setAvailableYears(getIplAvailableYears());
   }, []);
 
   // Calculate points table data
-  const pointsTable = useMemo(() => {
-    let savedStatuses: Record<string, PublicPointsStatus> = {};
-    if (typeof window !== 'undefined') {
-      try {
-        const allStats = JSON.parse(localStorage.getItem(IPL_STORAGE_KEY) || '{}') || {};
-        savedStatuses = (allStats[selectedYear] as Record<string, PublicPointsStatus>) || {};
-      } catch {
-        /* ignore */
-      }
-    }
-
+  const pointsTable = useMemo<IplPointsTableRow[]>(() => {
+    const savedRows = readIplSavedRows(selectedYear);
+    const seasonTeamIds = new Set(getIplSeasonTeamIds(selectedYear));
     const currentYear = new Date().getFullYear();
 
-    return teams.map(team => {
-      const teamMatches = matches.filter(m =>
-        (m.team1.id === team.id || m.team2.id === team.id) &&
-        m.status === 'completed' &&
-        new Date(m.date).getFullYear() === selectedYear
-      );
-       
-      const wins = teamMatches.filter(m => {
-        if (!m.result) return false;
-        return m.result.includes(team.shortName) || m.result.includes(team.name);
-      }).length;
-       
-      const losses = teamMatches.length - wins;
-      const points = wins * 2;
-       
-      // Calculate Net Run Rate (simplified)
-      let netRunRate = 0;
-      if (teamMatches.length > 0) {
-        const totalRunsScored = teamMatches.reduce((sum, match) => {
-          if (match.team1.id === team.id) {
-            return sum + (match.team1Score || 0);
-          } else if (match.team2.id === team.id) {
-            return sum + (match.team2Score || 0);
-          }
-          return sum;
-        }, 0);
-         
-        const totalRunsConceded = teamMatches.reduce((sum, match) => {
-          if (match.team1.id === team.id) {
-            return sum + (match.team2Score || 0);
-          } else if (match.team2.id === team.id) {
-            return sum + (match.team1Score || 0);
-          }
-          return sum;
-        }, 0);
-         
-        netRunRate = (totalRunsScored - totalRunsConceded) / (teamMatches.length * 20);
-      }
+    return teams
+      .filter((team) => seasonTeamIds.has(team.id))
+      .map((team) => {
+        const computedRow = buildComputedIplRow(team, matches, selectedYear);
+        const persistedStats = ((team as Team & { stats?: IplSavedRow }).stats ?? {}) as IplSavedRow;
+        const seasonApiRow = selectedYear === currentYear ? persistedStats : {};
+        const savedRow = savedRows[team.id] || {};
+        const row = { ...computedRow, ...seasonApiRow, ...savedRow };
 
-      const apiStatus = ((team as Team & { stats?: PublicPointsStatus }).stats ?? {}) as PublicPointsStatus;
-      const localStatus = savedStatuses[team.id] || {};
-      const seasonStatus = Object.keys(localStatus).length > 0
-        ? localStatus
-        : selectedYear === currentYear
-          ? apiStatus
-          : {};
-       
-      return {
-        ...team,
-        matchesPlayed: teamMatches.length,
-        wins,
-        losses,
-        points,
-        netRunRate: parseFloat(netRunRate.toFixed(2)),
-        qualified: Boolean(seasonStatus.qualified),
-        eliminated: Boolean(seasonStatus.eliminated)
-      };
-    });
+        return {
+          ...team,
+          matchesPlayed: row.matchesPlayed ?? 0,
+          wins: row.wins ?? 0,
+          losses: row.losses ?? 0,
+          noResult: row.noResult ?? 0,
+          points: row.points ?? 0,
+          netRunRate: row.netRunRate ?? 0,
+          qualified: Boolean(row.qualified),
+          eliminated: Boolean(row.eliminated),
+        };
+      });
   }, [teams, matches, selectedYear]);
 
   // Sort and filter points table
@@ -211,6 +162,12 @@ export default function IPLPointsTablePage() {
       .slice(0, 3);
   }, [matches]);
 
+  const seasonTeamCount = useMemo(() => getIplSeasonTeamIds(selectedYear).length, [selectedYear]);
+  const statusCounts = useMemo(() => ({
+    qualified: pointsTable.filter((team) => team.qualified).length,
+    eliminated: pointsTable.filter((team) => team.eliminated).length,
+  }), [pointsTable]);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-black overflow-hidden">
       <Navbar />
@@ -262,9 +219,21 @@ export default function IPLPointsTablePage() {
               animate={{ opacity: 1 }}
               transition={{ duration: 0.8, delay: 0.4 }}
             >
-              Track the race for the playoffs with real-time points, wins, and net run rate. 
-              See which teams are leading the pack and who needs to step up their game!
+              Follow the playoff race with admin-synced standings, cleaner status signals, and a sharper view of who is in, who is out, and who is still alive.
             </motion.p>
+
+            <motion.div
+              className="mb-12 flex flex-wrap items-center justify-center gap-3"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, delay: 0.45 }}
+            >
+              <IplStatusPill status="qualified" />
+              <IplStatusPill status="eliminated" />
+              <span className="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-bold uppercase tracking-[0.28em] text-gray-300">
+                Admin markers stay visible for fans
+              </span>
+            </motion.div>
 
             {/* Quick Stats */}
             <motion.div
@@ -274,10 +243,10 @@ export default function IPLPointsTablePage() {
               transition={{ duration: 0.8, delay: 0.5 }}
             >
               {[
-                { label: 'Teams', value: teams.length, icon: Users, color: 'from-red-500 to-yellow-500' },
-                { label: 'Matches Played', value: matches.filter(m => m.status === 'completed').length, icon: Calendar, color: 'from-yellow-500 to-red-500' },
+                { label: 'Season Teams', value: seasonTeamCount, icon: Users, color: 'from-red-500 to-yellow-500' },
+                { label: 'Qualified', value: statusCounts.qualified, icon: Trophy, color: 'from-emerald-500 to-lime-500' },
+                { label: 'Eliminated', value: statusCounts.eliminated, icon: X, color: 'from-rose-500 to-orange-500' },
                 { label: 'Upcoming', value: upcomingMatches.length, icon: Clock, color: 'from-red-500 to-yellow-500' },
-                { label: 'Total Points', value: pointsTable.reduce((sum, team) => sum + team.points, 0), icon: Award, color: 'from-yellow-500 to-red-500' }
               ].map((stat, index) => (
                 <motion.div
                   key={index}
@@ -285,11 +254,11 @@ export default function IPLPointsTablePage() {
                   initial={{ opacity: 0, scale: 0.9, y: 20 }}
                   animate={{ opacity: 1, scale: 1, y: 0 }}
                   transition={{ duration: 0.6, delay: 0.6 + index * 0.1 }}
-                  whileHover={{ scale: 1.1, y: -10 }}
+                  whileHover={{ scale: 1.03, y: -6 }}
                 >
                   <div className="relative z-10">
                     <motion.div
-                      className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${stat.color} flex items-center justify-center mb-4 group-hover:scale-110 group-hover:rotate-12 transition-all duration-300`}
+                      className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${stat.color} flex items-center justify-center mb-4 group-hover:scale-105 transition-all duration-300`}
                     >
                       <stat.icon className="w-6 h-6 text-white" />
                     </motion.div>
@@ -415,7 +384,7 @@ export default function IPLPointsTablePage() {
                 <div className="flex items-center justify-between pt-6 mt-6 border-t border-white/10">
                   <div className="flex items-center gap-3">
                     <span className="text-sm text-gray-400">
-                      Showing <span className="font-black text-white text-lg">{sortedPointsTable.length}</span> of <span className="font-black text-white text-lg">{teams.length}</span> teams
+                      Showing <span className="font-black text-white text-lg">{sortedPointsTable.length}</span> of <span className="font-black text-white text-lg">{seasonTeamCount}</span> teams for {selectedYear}
                     </span>
                     {hasActiveFilters && (
                       <span className="px-3 py-1.5 rounded-lg text-xs font-bold bg-blue-500/20 text-blue-300 border border-blue-500/30">
@@ -485,137 +454,209 @@ export default function IPLPointsTablePage() {
                   },
                 }}
               >
-                {/* Table Header */}
-                <div className="grid grid-cols-[40px_200px_1fr_100px_100px_100px_100px_100px_60px] gap-4 px-6 py-4 rounded-3xl backdrop-blur-2xl border-2 border-white/20 bg-gradient-to-br from-slate-900/90 via-slate-800/80 to-slate-900/90 text-sm font-bold uppercase tracking-wider text-gray-300">
-                  <div className="flex items-center justify-center">Rank</div>
-                  <div className="flex items-center gap-2">Team <Info className="w-4 h-4 text-gray-500" /></div>
-                  <div className="flex items-center gap-2">Name</div>
-                  <div className="flex items-center gap-2">Played</div>
-                  <div className="flex items-center gap-2">Wins</div>
-                  <div className="flex items-center gap-2">Losses</div>
-                  <div className="flex items-center gap-2">Points</div>
-                  <div className="flex items-center gap-2">NRR</div>
-                  <div className="flex items-center justify-center">Favorite</div>
+                <div className="grid gap-4 md:grid-cols-4">
+                  {[
+                    {
+                      label: 'Playoff Line',
+                      value: 'Top 4',
+                      meta: `${Math.max(4 - statusCounts.qualified, 0)} spots still open`,
+                    },
+                    {
+                      label: 'Qualified',
+                      value: String(statusCounts.qualified),
+                      meta: 'Admin-marked lock',
+                    },
+                    {
+                      label: 'Eliminated',
+                      value: String(statusCounts.eliminated),
+                      meta: 'Admin-marked out',
+                    },
+                    {
+                      label: 'Favorites',
+                      value: String(favorites.length),
+                      meta: showFavoritesFirst ? 'Pinned to top' : 'Personal shortlist',
+                    },
+                  ].map((summary) => (
+                    <div
+                      key={summary.label}
+                      className="rounded-[28px] border border-white/10 bg-white/[0.03] px-5 py-4 backdrop-blur-xl"
+                    >
+                      <div className="text-[11px] font-black uppercase tracking-[0.28em] text-gray-400">
+                        {summary.label}
+                      </div>
+                      <div className="mt-3 text-3xl font-black text-white">{summary.value}</div>
+                      <div className="mt-1 text-sm text-gray-400">{summary.meta}</div>
+                    </div>
+                  ))}
                 </div>
 
-                {/* Table Rows */}
+                <div className="hidden xl:grid grid-cols-[72px_minmax(0,2.2fr)_minmax(0,1.2fr)_110px_110px_96px] gap-4 px-5 text-[11px] font-black uppercase tracking-[0.3em] text-gray-400">
+                  <div>Pos</div>
+                  <div>Team</div>
+                  <div>Record</div>
+                  <div>Points</div>
+                  <div>NRR</div>
+                  <div className="text-center">Fav</div>
+                </div>
+
                 <AnimatePresence mode="popLayout">
                   {sortedPointsTable.map((team, index) => {
                     const isFavorite = favorites.includes(team.id);
                     const rank = index + 1;
                     const isTop4 = rank <= 4;
-                    const isBottom2 = rank >= sortedPointsTable.length - 1;
                     const isQualified = Boolean(team.qualified);
                     const isEliminated = Boolean(team.eliminated);
+                    const rankTone = isQualified
+                      ? 'text-emerald-300'
+                      : isEliminated
+                        ? 'text-rose-300'
+                        : isTop4
+                          ? 'text-yellow-300'
+                          : 'text-white';
+                    const accentBar = isQualified
+                      ? 'from-emerald-300 to-lime-400'
+                      : isEliminated
+                        ? 'from-rose-300 to-orange-400'
+                        : isTop4
+                          ? 'from-yellow-300 to-amber-500'
+                          : 'from-white/20 to-white/0';
+                    const surfaceTone = isQualified
+                      ? 'border-emerald-400/30 bg-emerald-500/[0.07]'
+                      : isEliminated
+                        ? 'border-rose-400/30 bg-rose-500/[0.07]'
+                        : isTop4
+                          ? 'border-yellow-400/25 bg-yellow-500/[0.06]'
+                          : 'border-white/10 bg-white/[0.03] hover:border-yellow-400/20';
+                    const noResult = team.noResult ?? 0;
 
                     return (
-                      <motion.div
+                      <motion.article
                         key={team.id}
                         layout
-                        initial={{ opacity: 0, y: 50, scale: 0.9 }}
-                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.8, y: -20 }}
+                        initial={{ opacity: 0, y: 28 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -16 }}
                         transition={{
-                          duration: 0.6,
-                          delay: index * 0.05,
+                          duration: 0.45,
+                          delay: index * 0.035,
                           ease: [0.22, 1, 0.36, 1],
                         }}
                         whileHover={{
-                          y: -5,
-                          scale: 1.02,
-                          transition: { duration: 0.3 }
+                          y: -4,
+                          transition: { duration: 0.2 }
                         }}
-                        className={`relative group grid grid-cols-[40px_200px_1fr_100px_100px_100px_100px_100px_60px] gap-4 items-center px-6 py-5 rounded-3xl backdrop-blur-2xl border-2 border-white/10 bg-gradient-to-br from-slate-900/80 via-slate-800/70 to-slate-900/80 transition-all duration-300 cursor-pointer ${
-                          isQualified || isTop4 ? 'border-yellow-500/50 bg-gradient-to-br from-yellow-900/30 via-yellow-800/20 to-yellow-900/30' :
-                          isEliminated ? 'border-rose-500/50 bg-gradient-to-br from-rose-900/30 via-rose-800/20 to-rose-900/30' :
-                          isBottom2 ? 'border-red-500/50 bg-gradient-to-br from-red-900/30 via-red-800/20 to-red-900/30' :
-                          'hover:border-yellow-500/50 hover:bg-gradient-to-br from-yellow-900/20 via-yellow-800/10 to-yellow-900/20'
-                        }`}
+                        className={`group relative overflow-hidden rounded-[30px] border backdrop-blur-2xl transition-all duration-300 cursor-pointer ${surfaceTone}`}
                         onClick={() => router.push(`/teams/${team.id}`)}
                       >
-                        {/* Rank */}
-                        <div className={`flex items-center justify-center text-2xl font-black ${
-                          isQualified || isTop4 ? 'text-yellow-400' : isEliminated || isBottom2 ? 'text-rose-300' : 'text-white'
-                        }`}>
-                          {rank}
-                        </div>
-
-                        {/* Team Logo */}
-                        <div className="flex items-center gap-3">
-                          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-red-500 to-yellow-500 flex items-center justify-center text-white font-black text-lg shadow-lg">
-                            {team.shortName.slice(0, 2)}
-                          </div>
-                          <span className="text-xl font-black text-white">{team.shortName}</span>
-                        </div>
-
-                        {/* Team Name */}
-                        <div className="min-w-0">
-                          <div className="text-white font-semibold truncate">{team.name}</div>
-                          {(isQualified || isEliminated) && (
-                            <div className="mt-2 flex items-center gap-2">
-                              {isQualified && (
-                                <span className="inline-flex items-center rounded-full border border-yellow-400/40 bg-yellow-500/15 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.2em] text-yellow-300">
-                                  Qualified
-                                </span>
-                              )}
-                              {isEliminated && (
-                                <span className="inline-flex items-center rounded-full border border-rose-400/40 bg-rose-500/15 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.2em] text-rose-300">
-                                  Eliminated
-                                </span>
-                              )}
+                        <div className={`absolute inset-y-5 left-0 w-1 rounded-r-full bg-gradient-to-b ${accentBar}`} />
+                        <div className="grid gap-5 p-5 xl:grid-cols-[72px_minmax(0,2.2fr)_minmax(0,1.2fr)_110px_110px_96px] xl:items-center xl:p-6">
+                          <div className="flex items-center justify-between xl:block">
+                            <div className={`text-4xl font-black leading-none ${rankTone}`}>{rank}</div>
+                            <div className="mt-2 inline-flex rounded-full border border-white/10 bg-black/20 px-3 py-1 text-[10px] font-black uppercase tracking-[0.22em] text-gray-300">
+                              {isQualified ? 'Locked' : isEliminated ? 'Out' : isTop4 ? 'Pace' : 'Race'}
                             </div>
-                          )}
+                          </div>
+
+                          <div className="min-w-0">
+                            <div className="flex items-start gap-4">
+                              <div className="relative h-14 w-14 overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-red-500/80 to-yellow-500/90 shadow-lg shadow-yellow-500/10">
+                                <img
+                                  src={team.logo}
+                                  alt={team.shortName || team.name}
+                                  className="h-full w-full object-cover"
+                                  onError={(e) => {
+                                    const target = e.target as HTMLImageElement;
+                                    target.style.display = 'none';
+                                    target.nextElementSibling?.classList.remove('hidden');
+                                  }}
+                                />
+                                <div className="hidden h-full w-full items-center justify-center text-base font-black text-white">
+                                  {team.shortName.slice(0, 2)}
+                                </div>
+                              </div>
+                              <div className="min-w-0 flex-1">
+                                <div className="flex flex-wrap items-center gap-3">
+                                  <span className="text-2xl font-black text-white">{team.shortName}</span>
+                                  {isQualified && <IplStatusPill status="qualified" compact />}
+                                  {isEliminated && <IplStatusPill status="eliminated" compact />}
+                                  {!isQualified && !isEliminated && isTop4 && (
+                                    <span className="inline-flex rounded-full border border-yellow-300/20 bg-yellow-400/10 px-3 py-1 text-[10px] font-black uppercase tracking-[0.22em] text-yellow-200">
+                                      Playoff pace
+                                    </span>
+                                  )}
+                                </div>
+                                <div className="mt-1 truncate text-sm text-gray-400">{team.name}</div>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                            {[
+                              { label: 'P', value: team.matchesPlayed, tone: 'text-white' },
+                              { label: 'W', value: team.wins, tone: 'text-emerald-300' },
+                              { label: 'L', value: team.losses, tone: 'text-rose-300' },
+                              { label: 'NR', value: noResult, tone: 'text-sky-300' },
+                            ].map((item) => (
+                              <div key={item.label} className="rounded-2xl border border-white/10 bg-black/20 px-3 py-3">
+                                <div className="text-[10px] font-black uppercase tracking-[0.28em] text-gray-500">{item.label}</div>
+                                <div className={`mt-2 text-xl font-black ${item.tone}`}>{item.value}</div>
+                              </div>
+                            ))}
+                          </div>
+
+                          <div>
+                            <div className="text-[10px] font-black uppercase tracking-[0.28em] text-gray-500">Points</div>
+                            <div className="mt-2 text-4xl font-black text-yellow-300">{team.points}</div>
+                          </div>
+
+                          <div>
+                            <div className="text-[10px] font-black uppercase tracking-[0.28em] text-gray-500">NRR</div>
+                            <div
+                              className={`mt-2 text-2xl font-black ${
+                                (team.netRunRate ?? 0) > 0
+                                  ? 'text-emerald-300'
+                                  : (team.netRunRate ?? 0) < 0
+                                    ? 'text-rose-300'
+                                    : 'text-white'
+                              }`}
+                            >
+                              {formatNetRunRate(team.netRunRate)}
+                            </div>
+                          </div>
+
+                          <div className="flex items-center justify-between xl:justify-center">
+                            <span className="text-[10px] font-black uppercase tracking-[0.28em] text-gray-500 xl:hidden">
+                              Favorite
+                            </span>
+                            <motion.button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                toggleFavorite(team.id);
+                              }}
+                              className={`rounded-full p-3 transition-all ${
+                                isFavorite
+                                  ? 'bg-gradient-to-r from-rose-500 to-pink-500 text-white shadow-lg shadow-rose-500/30'
+                                  : 'bg-slate-800/60 text-gray-400 hover:bg-slate-700/60'
+                              }`}
+                              whileHover={{ scale: 1.08 }}
+                              whileTap={{ scale: 0.94 }}
+                            >
+                              <Star className={`h-5 w-5 ${isFavorite ? 'fill-current' : ''}`} />
+                            </motion.button>
+                          </div>
                         </div>
 
-                        {/* Matches Played */}
-                        <div className="text-white font-bold">{team.matchesPlayed}</div>
-
-                        {/* Wins */}
-                        <div className="text-green-400 font-bold flex items-center gap-1">
-                          <TrendingUp className="w-4 h-4" />
-                          {team.wins}
-                        </div>
-
-                        {/* Losses */}
-                        <div className="text-red-400 font-bold flex items-center gap-1">
-                          <TrendingDown className="w-4 h-4" />
-                          {team.losses}
-                        </div>
-
-                        {/* Points */}
-                        <div className="text-yellow-400 font-black text-xl">{team.points}</div>
-
-                        {/* Net Run Rate */}
-                        <div className={`font-bold ${
-                          team.netRunRate > 0 ? 'text-green-400' : team.netRunRate < 0 ? 'text-red-400' : 'text-white'
-                        }`}>
-                          {team.netRunRate}
-                        </div>
-
-                        {/* Favorite Button */}
-                        <div className="flex items-center justify-center">
-                          <motion.button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              toggleFavorite(team.id);
-                            }}
-                            className={`p-2 rounded-full transition-all ${
-                              isFavorite ? 'bg-gradient-to-r from-rose-500 to-pink-500 text-white' : 'bg-slate-800/60 text-gray-400 hover:bg-slate-700/60'
-                            }`}
-                            whileHover={{ scale: 1.2, rotate: isFavorite ? 0 : 15 }}
-                            whileTap={{ scale: 0.9 }}
-                          >
-                            <Star className={`w-5 h-5 ${isFavorite ? 'fill-current' : ''}`} />
-                          </motion.button>
-                        </div>
-
-                        {/* Hover effects */}
-                        <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 -z-10 rounded-3xl blur-2xl" style={{
-                          background: isQualified || isTop4 ? 'linear-gradient(135deg, rgba(255, 215, 0, 0.3), rgba(236, 28, 36, 0.3))' :
-                                      isEliminated || isBottom2 ? 'linear-gradient(135deg, rgba(244, 63, 94, 0.28), rgba(127, 29, 29, 0.3))' :
-                                      'linear-gradient(135deg, rgba(236, 28, 36, 0.2), rgba(255, 215, 0, 0.2))'
-                        }} />
-                      </motion.div>
+                        <div
+                          className="pointer-events-none absolute inset-0 -z-10 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+                          style={{
+                            background: isQualified
+                              ? 'radial-gradient(circle at top right, rgba(52, 211, 153, 0.16), transparent 45%)'
+                              : isEliminated
+                                ? 'radial-gradient(circle at top right, rgba(251, 113, 133, 0.18), transparent 45%)'
+                                : 'radial-gradient(circle at top right, rgba(250, 204, 21, 0.16), transparent 45%)',
+                          }}
+                        />
+                      </motion.article>
                     );
                   })}
                 </AnimatePresence>
@@ -658,7 +699,7 @@ export default function IPLPointsTablePage() {
                     </h2>
 
                     <p className="text-gray-300 text-xl md:text-2xl max-w-3xl mx-auto leading-relaxed">
-                      Don't miss these crucial encounters that could shake up the points table!
+                      Don&apos;t miss these crucial encounters that could shake up the points table!
                     </p>
                   </motion.div>
 
