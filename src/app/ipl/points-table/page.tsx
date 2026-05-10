@@ -15,6 +15,13 @@ import GradientText from '@/components/ui/GradientText';
 import AnimatedSection from '@/components/ui/AnimatedSection';
 import { formatMatchTime } from '@/lib/timeUtils';
 
+const IPL_STORAGE_KEY = 'iplPointsTableStats';
+
+type PublicPointsStatus = {
+  qualified?: boolean;
+  eliminated?: boolean;
+};
+
 // Custom components for the points table
 export default function IPLPointsTablePage() {
   const router = useRouter();
@@ -70,6 +77,18 @@ export default function IPLPointsTablePage() {
 
   // Calculate points table data
   const pointsTable = useMemo(() => {
+    let savedStatuses: Record<string, PublicPointsStatus> = {};
+    if (typeof window !== 'undefined') {
+      try {
+        const allStats = JSON.parse(localStorage.getItem(IPL_STORAGE_KEY) || '{}') || {};
+        savedStatuses = (allStats[selectedYear] as Record<string, PublicPointsStatus>) || {};
+      } catch {
+        /* ignore */
+      }
+    }
+
+    const currentYear = new Date().getFullYear();
+
     return teams.map(team => {
       const teamMatches = matches.filter(m =>
         (m.team1.id === team.id || m.team2.id === team.id) &&
@@ -108,6 +127,14 @@ export default function IPLPointsTablePage() {
          
         netRunRate = (totalRunsScored - totalRunsConceded) / (teamMatches.length * 20);
       }
+
+      const apiStatus = ((team as Team & { stats?: PublicPointsStatus }).stats ?? {}) as PublicPointsStatus;
+      const localStatus = savedStatuses[team.id] || {};
+      const seasonStatus = Object.keys(localStatus).length > 0
+        ? localStatus
+        : selectedYear === currentYear
+          ? apiStatus
+          : {};
        
       return {
         ...team,
@@ -115,7 +142,9 @@ export default function IPLPointsTablePage() {
         wins,
         losses,
         points,
-        netRunRate: parseFloat(netRunRate.toFixed(2))
+        netRunRate: parseFloat(netRunRate.toFixed(2)),
+        qualified: Boolean(seasonStatus.qualified),
+        eliminated: Boolean(seasonStatus.eliminated)
       };
     });
   }, [teams, matches, selectedYear]);
@@ -476,6 +505,8 @@ export default function IPLPointsTablePage() {
                     const rank = index + 1;
                     const isTop4 = rank <= 4;
                     const isBottom2 = rank >= sortedPointsTable.length - 1;
+                    const isQualified = Boolean(team.qualified);
+                    const isEliminated = Boolean(team.eliminated);
 
                     return (
                       <motion.div
@@ -495,7 +526,8 @@ export default function IPLPointsTablePage() {
                           transition: { duration: 0.3 }
                         }}
                         className={`relative group grid grid-cols-[40px_200px_1fr_100px_100px_100px_100px_100px_60px] gap-4 items-center px-6 py-5 rounded-3xl backdrop-blur-2xl border-2 border-white/10 bg-gradient-to-br from-slate-900/80 via-slate-800/70 to-slate-900/80 transition-all duration-300 cursor-pointer ${
-                          isTop4 ? 'border-yellow-500/50 bg-gradient-to-br from-yellow-900/30 via-yellow-800/20 to-yellow-900/30' :
+                          isQualified || isTop4 ? 'border-yellow-500/50 bg-gradient-to-br from-yellow-900/30 via-yellow-800/20 to-yellow-900/30' :
+                          isEliminated ? 'border-rose-500/50 bg-gradient-to-br from-rose-900/30 via-rose-800/20 to-rose-900/30' :
                           isBottom2 ? 'border-red-500/50 bg-gradient-to-br from-red-900/30 via-red-800/20 to-red-900/30' :
                           'hover:border-yellow-500/50 hover:bg-gradient-to-br from-yellow-900/20 via-yellow-800/10 to-yellow-900/20'
                         }`}
@@ -503,7 +535,7 @@ export default function IPLPointsTablePage() {
                       >
                         {/* Rank */}
                         <div className={`flex items-center justify-center text-2xl font-black ${
-                          isTop4 ? 'text-yellow-400' : isBottom2 ? 'text-red-400' : 'text-white'
+                          isQualified || isTop4 ? 'text-yellow-400' : isEliminated || isBottom2 ? 'text-rose-300' : 'text-white'
                         }`}>
                           {rank}
                         </div>
@@ -517,7 +549,23 @@ export default function IPLPointsTablePage() {
                         </div>
 
                         {/* Team Name */}
-                        <div className="text-white font-semibold">{team.name}</div>
+                        <div className="min-w-0">
+                          <div className="text-white font-semibold truncate">{team.name}</div>
+                          {(isQualified || isEliminated) && (
+                            <div className="mt-2 flex items-center gap-2">
+                              {isQualified && (
+                                <span className="inline-flex items-center rounded-full border border-yellow-400/40 bg-yellow-500/15 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.2em] text-yellow-300">
+                                  Qualified
+                                </span>
+                              )}
+                              {isEliminated && (
+                                <span className="inline-flex items-center rounded-full border border-rose-400/40 bg-rose-500/15 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.2em] text-rose-300">
+                                  Eliminated
+                                </span>
+                              )}
+                            </div>
+                          )}
+                        </div>
 
                         {/* Matches Played */}
                         <div className="text-white font-bold">{team.matchesPlayed}</div>
@@ -563,8 +611,8 @@ export default function IPLPointsTablePage() {
 
                         {/* Hover effects */}
                         <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 -z-10 rounded-3xl blur-2xl" style={{
-                          background: isTop4 ? 'linear-gradient(135deg, rgba(255, 215, 0, 0.3), rgba(236, 28, 36, 0.3))' :
-                                      isBottom2 ? 'linear-gradient(135deg, rgba(236, 28, 36, 0.3), rgba(255, 215, 0, 0.3))' :
+                          background: isQualified || isTop4 ? 'linear-gradient(135deg, rgba(255, 215, 0, 0.3), rgba(236, 28, 36, 0.3))' :
+                                      isEliminated || isBottom2 ? 'linear-gradient(135deg, rgba(244, 63, 94, 0.28), rgba(127, 29, 29, 0.3))' :
                                       'linear-gradient(135deg, rgba(236, 28, 36, 0.2), rgba(255, 215, 0, 0.2))'
                         }} />
                       </motion.div>
