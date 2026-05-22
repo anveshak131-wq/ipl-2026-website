@@ -114,7 +114,12 @@ function didTeamWin(match: Match, team: Team): boolean {
 export function buildComputedIplRow(team: Team, matches: Match[], selectedYear: number): IplSavedRow {
   const completedMatches = matches.filter((match) => {
     const isTeamMatch = match.team1.id === team.id || match.team2.id === team.id;
-    return isTeamMatch && match.status === 'completed' && new Date(match.date).getFullYear() === selectedYear;
+    return (
+      isTeamMatch &&
+      !match.playoffType &&
+      match.status === 'completed' &&
+      new Date(match.date).getFullYear() === selectedYear
+    );
   });
 
   const wins = completedMatches.filter((match) => didTeamWin(match, team)).length;

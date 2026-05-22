@@ -42,6 +42,7 @@ import { Match, Team } from '@/types';
 import { api } from '@/lib/data';
 import PointsSystemDisplay from '@/components/admin/matches/PointsSystemDisplay';
 import ModernMatchCard from '@/components/admin/matches/ModernMatchCard';
+import PlayoffOverview from '@/components/admin/matches/PlayoffOverview';
 import { Search, Upload, Download, AlertTriangle, CheckCircle, X as XIcon, FileText } from 'lucide-react';
 
 const IconTable = ({ className }: { className?: string }) => (
@@ -2117,7 +2118,10 @@ export default function AdminMatches() {
                 ...formData,
                 league: currentLeague,
                 statusNote: trimmedNote || undefined,
-                reducedOversTo: Number.isFinite(reducedOversValue) && reducedOversValue > 0 ? reducedOversValue : undefined,
+                reducedOversTo:
+                    reducedOversValue !== undefined && Number.isFinite(reducedOversValue) && reducedOversValue > 0
+                        ? reducedOversValue
+                        : undefined,
                 dlsApplied: formData.dlsApplied ? true : undefined
             };
 
@@ -2767,6 +2771,13 @@ export default function AdminMatches() {
                             </div>
                         </motion.div>
                     </StaggeredList>
+
+                    <PlayoffOverview
+                        league={currentLeague}
+                        selectedSeason={selectedSeason}
+                        seasonMatches={seasonMatches}
+                        teams={teams}
+                    />
 
                     {/* Venue Filter Dropdown */}
                     <div className="mb-6 relative max-w-xs">
@@ -3586,7 +3597,7 @@ export default function AdminMatches() {
                                     setIsSubmitting(true);
                                     setError(null);
 
-                                    const playoffDetails = getPlayoffMatchDetails(selectedPlayoffType, currentLeague);
+                                    const playoffDetails = getPlayoffMatchDetails(selectedPlayoffType, currentLeague, selectedSeason);
                                     if (!playoffDetails) {
                                         setError('Invalid playoff type');
                                         return;
@@ -3730,7 +3741,7 @@ export default function AdminMatches() {
                                                     const playoffType = e.target.value as PlayoffType;
                                                     setSelectedPlayoffType(playoffType);
                                                     if (playoffType) {
-                                                        const details = getPlayoffMatchDetails(playoffType, currentLeague);
+                                                        const details = getPlayoffMatchDetails(playoffType, currentLeague, selectedSeason);
                                                         if (details) {
                                                             setFormData(prev => ({
                                                                 ...prev,
@@ -3758,7 +3769,7 @@ export default function AdminMatches() {
                                     </div>
 
                                     {selectedPlayoffType && (() => {
-                                        const details = getPlayoffMatchDetails(selectedPlayoffType, currentLeague);
+                                        const details = getPlayoffMatchDetails(selectedPlayoffType, currentLeague, selectedSeason);
                                         if (!details) return null;
                                         return (
                                             <motion.div

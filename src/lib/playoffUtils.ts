@@ -39,7 +39,11 @@ export function getTBDTeam(league: League, position: string = 'TBD'): Team {
  * @param league - The league (IPL or WPL)
  * @returns Object with date, time, venue, and team labels
  */
-export function getPlayoffMatchDetails(playoffType: PlayoffType, league: League): {
+export function getPlayoffMatchDetails(
+  playoffType: PlayoffType,
+  league: League,
+  seasonYear: number = new Date().getFullYear()
+): {
   date: string;
   time: string;
   venue: string;
@@ -52,31 +56,31 @@ export function getPlayoffMatchDetails(playoffType: PlayoffType, league: League)
   // IPL Playoff venues and times (adjust as needed)
   const iplPlayoffs = {
     qualifier1: {
-      date: '2026-05-20', // Adjust based on season
+      date: `${seasonYear}-05-26`,
       time: '19:30',
-      venue: 'Narendra Modi Stadium, Ahmedabad',
+      venue: 'Himachal Pradesh Cricket Association Stadium, Dharamshala',
       team1Label: '1st Place',
       team2Label: '2nd Place',
       title: 'Qualifier 1'
     },
     eliminator: {
-      date: '2026-05-21',
+      date: `${seasonYear}-05-27`,
       time: '19:30',
-      venue: 'Narendra Modi Stadium, Ahmedabad',
+      venue: 'New International Cricket Stadium, New Chandigarh',
       team1Label: '3rd Place',
       team2Label: '4th Place',
       title: 'Eliminator'
     },
     qualifier2: {
-      date: '2026-05-23',
+      date: `${seasonYear}-05-29`,
       time: '19:30',
-      venue: 'Narendra Modi Stadium, Ahmedabad',
+      venue: 'New International Cricket Stadium, New Chandigarh',
       team1Label: 'Loser of Qualifier 1',
       team2Label: 'Winner of Eliminator',
       title: 'Qualifier 2'
     },
     final: {
-      date: '2026-05-25',
+      date: `${seasonYear}-05-31`,
       time: '19:30',
       venue: 'Narendra Modi Stadium, Ahmedabad',
       team1Label: 'Winner of Qualifier 1',
@@ -89,7 +93,7 @@ export function getPlayoffMatchDetails(playoffType: PlayoffType, league: League)
   // WPL Structure: 2nd vs 3rd in Eliminator, Winner vs 1st in Final
   const wplPlayoffs = {
     qualifier1: {
-      date: '2026-03-15', // Adjust based on season - can be edited manually
+      date: `${seasonYear}-03-15`, // Adjust based on season - can be edited manually
       time: '19:30', // Can be edited manually
       venue: 'Dr. DY Patil Sports Academy, Navi Mumbai', // Can be edited manually
       team1Label: '1st Place',
@@ -97,7 +101,7 @@ export function getPlayoffMatchDetails(playoffType: PlayoffType, league: League)
       title: 'Qualifier 1'
     },
     eliminator: {
-      date: '2026-03-16', // Can be edited manually in admin
+      date: `${seasonYear}-03-16`, // Can be edited manually in admin
       time: '19:30', // Can be edited manually in admin
       venue: 'Dr. DY Patil Sports Academy, Navi Mumbai', // Can be edited manually in admin
       team1Label: '2nd Place',
@@ -105,7 +109,7 @@ export function getPlayoffMatchDetails(playoffType: PlayoffType, league: League)
       title: 'Eliminator'
     },
     qualifier2: {
-      date: '2026-03-18', // Can be edited manually
+      date: `${seasonYear}-03-18`, // Can be edited manually
       time: '19:30', // Can be edited manually
       venue: 'Dr. DY Patil Sports Academy, Navi Mumbai', // Can be edited manually
       team1Label: 'Loser of Qualifier 1',
@@ -113,7 +117,7 @@ export function getPlayoffMatchDetails(playoffType: PlayoffType, league: League)
       title: 'Qualifier 2'
     },
     final: {
-      date: '2026-03-20', // Can be edited manually in admin
+      date: `${seasonYear}-03-20`, // Can be edited manually in admin
       time: '19:30', // Can be edited manually in admin
       venue: 'Dr. DY Patil Sports Academy, Navi Mumbai', // Can be edited manually in admin
       team1Label: '1st Place',
@@ -170,4 +174,3 @@ export function isPlaceholderTeam(team: Team): boolean {
     shortNameLower.includes(indicator.toLowerCase())
   );
 }
-
