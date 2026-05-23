@@ -23,6 +23,7 @@ type RankedTeam = Team & {
   noResult: number;
   points: number;
   netRunRate: number;
+  qualified: boolean;
 };
 
 type PlayoffCardData = {
@@ -188,10 +189,19 @@ export default function PlayoffOverview({
           noResult: row.noResult ?? 0,
           points: row.points ?? 0,
           netRunRate: row.netRunRate ?? 0,
+          qualified: row.qualified ?? false,
         };
       })
       .sort(sortStandings);
   }, [league, selectedSeason, seasonMatches, teams]);
+
+  const qualifiedStandings = useMemo(
+    () => standings.filter((team) => team.qualified).sort(sortStandings),
+    [standings]
+  );
+
+  const hasExplicitQualifiedTeams = qualifiedStandings.length > 0;
+  const seededStandings = hasExplicitQualifiedTeams ? qualifiedStandings : standings;
 
   const playoffCards = useMemo<PlayoffCardData[]>(() => {
     const playoffMatches = new Map<PlayoffKey, Match>();
@@ -208,10 +218,10 @@ export default function PlayoffOverview({
     const eliminatorMatch = playoffMatches.get('eliminator') || null;
     const qualifier2Match = playoffMatches.get('qualifier2') || null;
 
-    const topOne = standings[0] || null;
-    const topTwo = standings[1] || null;
-    const topThree = standings[2] || null;
-    const topFour = standings[3] || null;
+    const topOne = seededStandings[0] || null;
+    const topTwo = seededStandings[1] || null;
+    const topThree = seededStandings[2] || null;
+    const topFour = seededStandings[3] || null;
 
     const qualifier1Winner = getWinningTeam(qualifier1Match);
     const qualifier1Loser = getLosingTeam(qualifier1Match);
@@ -253,13 +263,13 @@ export default function PlayoffOverview({
         status: match?.status || 'not-created',
       };
     });
-  }, [league, seasonMatches, selectedSeason, standings]);
+  }, [league, seasonMatches, seededStandings, selectedSeason]);
 
   if (league !== 'ipl') {
     return null;
   }
 
-  const standingsReady = standings.length >= 4;
+  const standingsReady = seededStandings.length >= 4;
 
   return (
     <section
@@ -282,16 +292,27 @@ export default function PlayoffOverview({
             </div>
           </div>
 
-          <div className="text-xs text-gray-400 max-w-md">
-            Qualifier 1 and Eliminator use the current IPL standings. Qualifier 2 and Final auto-resolve once the
-            earlier playoff results are completed.
+          <div className="text-right">
+            {hasExplicitQualifiedTeams && (
+              <div className="inline-flex items-center px-3 py-1 rounded-full border border-emerald-500/30 bg-emerald-500/12 text-emerald-300 text-xs font-semibold mb-2">
+                {qualifiedStandings.length}/4 qualified
+              </div>
+            )}
+            <div className="text-xs text-gray-400 max-w-md">
+              Qualifier 1 and Eliminator use admin-qualified teams when available, otherwise current IPL standings.
+              Qualifier 2 and Final auto-resolve once the earlier playoff results are completed.
+            </div>
           </div>
         </div>
 
         {!standingsReady && (
           <div className="mb-5 rounded-2xl border border-amber-500/20 bg-amber-500/10 px-4 py-3 text-sm text-amber-100 flex items-start gap-2">
             <AlertTriangle className="w-4 h-4 mt-0.5 flex-shrink-0 text-amber-300" />
-            <span>Top four standings are not fully available yet. Placeholder labels will be shown where needed.</span>
+            <span>
+              {hasExplicitQualifiedTeams
+                ? `Only ${qualifiedStandings.length} team${qualifiedStandings.length === 1 ? '' : 's'} qualified so far. Remaining playoff slots stay unresolved until admin marks more teams as qualified in the points table.`
+                : 'Top four standings are not fully available yet. Placeholder labels will be shown where needed.'}
+            </span>
           </div>
         )}
 
@@ -370,7 +391,8 @@ export default function PlayoffOverview({
 
                 {!card.hasMatch && (
                   <div className="mt-4 text-xs text-amber-200/85">
-                    No playoff fixture record exists yet for this slot. The schedule shown here is the current preset.
+                    No playoff fixture record exists yet for this slot. Admin still needs to create the actual playoff
+                    match from the Matches page; the schedule shown here is the current preset.
                   </div>
                 )}
               </motion.div>
