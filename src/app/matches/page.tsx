@@ -5,7 +5,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import MatchCard from '@/components/matches/MatchCard';
-import { Match } from '@/types';
+import PublicPlayoffOverview from '@/components/matches/PublicPlayoffOverview';
+import { Match, Team } from '@/types';
 import { api } from '@/lib/data';
 import { useLeague } from '@/contexts/LeagueContext';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
@@ -20,6 +21,7 @@ export default function MatchesPage() {
 
   const { currentLeague, setCurrentLeague } = useLeague();
   const [matches, setMatches] = useState<Match[]>([]);
+  const [teams, setTeams] = useState<Team[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'upcoming' | 'live' | 'completed'>('all');
 
@@ -166,8 +168,12 @@ export default function MatchesPage() {
   useEffect(() => {
     const fetchMatches = async () => {
       try {
-        const matchesData = await api.getMatches(currentLeague);
+        const [matchesData, teamsData] = await Promise.all([
+          api.getMatches(currentLeague),
+          api.getTeams(currentLeague),
+        ]);
         setMatches(matchesData);
+        setTeams(teamsData);
       } catch (error) {
         console.error('Failed to fetch matches:', error);
       } finally {
@@ -178,14 +184,16 @@ export default function MatchesPage() {
     fetchMatches();
   }, [currentLeague]); // Re-fetch when league changes
 
+  const seasonMatches = useMemo(() => {
+    return matches.filter((match) => getMatchYear(match.date) === TARGET_CALENDAR_SEASON);
+  }, [matches]);
+
   const filteredMatches = useMemo(() => {
-    return matches.filter(match => {
+    return seasonMatches.filter(match => {
       const matchesStatus = filter === 'all' || match.status === filter;
-      const matchYear = getMatchYear(match.date);
-      const matchesSeason = matchYear === TARGET_CALENDAR_SEASON;
-      return matchesStatus && matchesSeason;
+      return matchesStatus;
     });
-  }, [filter, matches]);
+  }, [filter, seasonMatches]);
 
   const deferredMatches = useDeferredValue(filteredMatches);
 
@@ -348,6 +356,13 @@ export default function MatchesPage() {
               Only {TARGET_CALENDAR_SEASON} fixtures are shown on this page.
             </p>
           </div>
+
+          <PublicPlayoffOverview
+            league={currentLeague}
+            season={TARGET_CALENDAR_SEASON}
+            matches={seasonMatches}
+            teams={teams}
+          />
 
           {/* Filter Tabs */}
           <div className="mb-10 rounded-2xl border border-white/12 bg-black/20 backdrop-blur-xl p-3 shadow-[0_12px_30px_rgba(0,0,0,0.26)]">
