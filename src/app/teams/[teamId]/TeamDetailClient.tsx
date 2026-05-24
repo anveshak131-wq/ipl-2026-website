@@ -870,7 +870,12 @@ export default function TeamDetailClient({ teamId, league }: TeamDetailClientPro
                   {isWPL && <span className="text-sm font-bold text-purple-400">WPL</span>}
                   <span className="text-sm font-bold text-white">{teamData.shortName}</span>
                   <div className="ml-2">
-                    <QualifiedBadge qualified={Boolean(teamData.stats?.qualified)} />
+                    <QualifiedBadge
+                      qualified={Boolean(teamData.stats?.qualified)}
+                      eliminated={Boolean(teamData.stats?.eliminated)}
+                      season={SEASON_YEAR}
+                      showSeason
+                    />
                   </div>
                 </motion.div>
 

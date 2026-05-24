@@ -248,7 +248,10 @@ export default function AnimatedTeamCard({ team, onPlayerClick, isFavorite = fal
                 {team.shortName}
               </motion.h3>
               <div>
-                <QualifiedBadge qualified={Boolean(team.stats?.qualified)} />
+                <QualifiedBadge
+                  qualified={Boolean(team.stats?.qualified)}
+                  eliminated={Boolean(team.stats?.eliminated)}
+                />
               </div>
               {trophyCount > 0 && (
                 <motion.span 

@@ -107,7 +107,10 @@ export default function TeamCard({ team, onPlayerClick }: TeamCardProps) {
             {team.name}
           </p>
           <div className="mt-2 flex items-center justify-center">
-            <QualifiedBadge qualified={Boolean(team.stats?.qualified)} />
+            <QualifiedBadge
+              qualified={Boolean(team.stats?.qualified)}
+              eliminated={Boolean(team.stats?.eliminated)}
+            />
           </div>
         </div>
 
