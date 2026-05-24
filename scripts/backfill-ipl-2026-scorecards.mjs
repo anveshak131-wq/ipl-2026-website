@@ -3,6 +3,14 @@ const OFFICIAL_FEED_BASE = 'https://scores.iplt20.com/ipl/feeds';
 const ADMIN_BEARER = process.env.ADMIN_BEARER || 'codex-backfill';
 const APPLY = process.argv.includes('--apply');
 const DRY_RUN = !APPLY;
+const MATCH_IDS_ARG = process.argv.find((arg) => arg.startsWith('--match-ids='));
+const TARGET_MATCH_IDS = new Set(
+  String(MATCH_IDS_ARG ? MATCH_IDS_ARG.split('=')[1] : '')
+    .split(',')
+    .map((value) => value.trim())
+    .filter(Boolean)
+);
+const INCLUDE_PUBLISHED = process.argv.includes('--include-published');
 
 const IPL_SHORT_CODES = new Set(['RCB', 'MI', 'CSK', 'KKR', 'GT', 'SRH', 'RR', 'PBKS', 'DC', 'LSG']);
 
@@ -297,6 +305,18 @@ function buildResult(match, officialItem, officialTeamIdToLocal) {
   };
 }
 
+function buildResultText(match, officialItem, officialTeamIdToLocal) {
+  const result = buildResult(match, officialItem, officialTeamIdToLocal);
+  const winnerTeam = officialTeamIdToLocal.get(String(officialItem.WinningTeamID || '')) || null;
+  const comments = collapseWhitespace(officialItem.Comments || officialItem.Commentss || match.result || '');
+
+  if (winnerTeam && result.margin) {
+    return `${winnerTeam.shortName || winnerTeam.name} ${result.margin}`;
+  }
+
+  return comments;
+}
+
 function inferTossDecision(tossDetails) {
   const lower = String(tossDetails || '').toLowerCase();
   if (lower.includes('field')) return 'bowl';
@@ -325,6 +345,43 @@ function buildMatchInfo(match, officialItem, officialTeamIdToLocal) {
       winner: tossWinner,
       decision: inferTossDecision(officialItem.TossDetails),
     } : undefined,
+  };
+}
+
+function formatScoreSummary(innings) {
+  if (!innings) return '';
+  return `${Number(innings.totalRuns || 0)}/${Number(innings.totalWickets || 0)} (${innings.totalOvers || '0.0'} overs)`;
+}
+
+function buildMatchPatch(match, innings, officialItem, officialTeamIdToLocal) {
+  const inningsByTeamId = new Map(
+    innings
+      .filter(Boolean)
+      .map((entry) => [String(entry.battingTeamId), entry])
+  );
+  const team1Innings = inningsByTeamId.get(String(match.team1.id));
+  const team2Innings = inningsByTeamId.get(String(match.team2.id));
+
+  return {
+    result: buildResultText(match, officialItem, officialTeamIdToLocal),
+    team1Score: formatScoreSummary(team1Innings),
+    team2Score: formatScoreSummary(team2Innings),
+    score: {
+      team1: team1Innings
+        ? {
+            runs: Number(team1Innings.totalRuns || 0),
+            wickets: Number(team1Innings.totalWickets || 0),
+            overs: String(team1Innings.totalOvers || '0.0'),
+          }
+        : undefined,
+      team2: team2Innings
+        ? {
+            runs: Number(team2Innings.totalRuns || 0),
+            wickets: Number(team2Innings.totalWickets || 0),
+            overs: String(team2Innings.totalOvers || '0.0'),
+          }
+        : undefined,
+    },
   };
 }
 
@@ -461,6 +518,15 @@ function mapInternalToOfficialMatch(match, officialLookup) {
   return officialLookup.byExact.get(exactKey) || (officialLookup.byUnordered.get(unorderedKey) || [])[0] || null;
 }
 
+function getScorecardTimestamp(scorecard) {
+  const candidates = [scorecard?.updatedAt, scorecard?.publishedAt, scorecard?.createdAt];
+  for (const value of candidates) {
+    const timestamp = new Date(value).getTime();
+    if (!Number.isNaN(timestamp)) return timestamp;
+  }
+  return 0;
+}
+
 async function upsertScorecard(existingDraft, scorecard) {
   const headers = {
     Authorization: `Bearer ${ADMIN_BEARER}`,
@@ -503,6 +569,24 @@ async function publishScorecard(scorecardId) {
   return response.json();
 }
 
+async function updateMatch(matchId, patch) {
+  const response = await fetch(`${SITE_BASE}/api/matches`, {
+    method: 'PUT',
+    headers: {
+      Authorization: `Bearer ${ADMIN_BEARER}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      id: String(matchId),
+      ...patch,
+    }),
+  });
+  if (!response.ok) {
+    throw new Error(`Failed updating match ${matchId}: ${response.status} ${await response.text()}`);
+  }
+  return response.json();
+}
+
 async function main() {
   const [matches, scorecards, players, scheduleText] = await Promise.all([
     fetchJson(`${SITE_BASE}/api/matches?league=ipl`, { cache: 'no-store' }),
@@ -524,7 +608,13 @@ async function main() {
     scorecardsByMatch.get(key).push(scorecard);
   }
 
-  const missingMatches = completedMatches.filter((match) => {
+  const filteredCompletedMatches =
+    TARGET_MATCH_IDS.size > 0
+      ? completedMatches.filter((match) => TARGET_MATCH_IDS.has(String(match.id)))
+      : completedMatches;
+
+  const targetMatches = filteredCompletedMatches.filter((match) => {
+    if (INCLUDE_PUBLISHED) return true;
     const rows = scorecardsByMatch.get(String(match.id)) || [];
     return !rows.some((row) => !row.draft);
   });
@@ -532,7 +622,7 @@ async function main() {
   const unmatched = [];
   const actions = [];
 
-  for (const match of missingMatches) {
+  for (const match of targetMatches) {
     const officialItem = mapInternalToOfficialMatch(match, officialLookup);
     if (!officialItem) {
       throw new Error(
@@ -579,14 +669,23 @@ async function main() {
       result: buildResult(match, officialItem, officialTeamIdToLocal),
     };
 
-    const existingDrafts = (scorecardsByMatch.get(String(match.id)) || []).filter((row) => row.draft);
-    const existingDraft = existingDrafts[0] || null;
+    const existingRows = (scorecardsByMatch.get(String(match.id)) || []).slice().sort(
+      (a, b) => getScorecardTimestamp(b) - getScorecardTimestamp(a)
+    );
+    const existingPublished = existingRows.find((row) => row.draft === false) || null;
+    const existingDraft = existingRows.find((row) => row.draft === true) || null;
+    const existingScorecard = existingPublished || existingDraft || null;
+    if (existingPublished) {
+      scorecardDoc.draft = false;
+      scorecardDoc.publishedAt = existingPublished.publishedAt || new Date().toISOString();
+    }
 
     actions.push({
       matchId: String(match.id),
       officialMatchId: String(officialItem.MatchID),
       label: `${match.date} ${match.team1.shortName} vs ${match.team2.shortName}`,
-      existingDraftId: existingDraft?.id || null,
+      existingScorecard,
+      matchPatch: buildMatchPatch(match, innings, officialItem, officialTeamIdToLocal),
       scorecard: scorecardDoc,
     });
   }
@@ -594,7 +693,13 @@ async function main() {
   const uniqueUnmatched = Array.from(new Map(unmatched.map((row) => [`${row.teamId}|${row.normalized}`, row])).values());
 
   console.log(`Completed IPL matches: ${completedMatches.length}`);
-  console.log(`Missing published scorecards: ${missingMatches.length}`);
+  console.log(`Missing published scorecards: ${completedMatches.filter((match) => {
+    const rows = scorecardsByMatch.get(String(match.id)) || [];
+    return !rows.some((row) => !row.draft);
+  }).length}`);
+  if (TARGET_MATCH_IDS.size > 0) {
+    console.log(`Targeted matches: ${Array.from(TARGET_MATCH_IDS).join(', ')}`);
+  }
   console.log(`Prepared actions: ${actions.length}`);
   console.log(`Unmatched players: ${uniqueUnmatched.length}`);
 
@@ -609,7 +714,10 @@ async function main() {
   if (DRY_RUN) {
     for (const action of actions.slice(0, 8)) {
       console.log(
-        `DRY_RUN ${action.label} <- official ${action.officialMatchId} ${action.existingDraftId ? `(update ${action.existingDraftId})` : '(create)'}`
+        `DRY_RUN ${action.label} <- official ${action.officialMatchId} ${action.existingScorecard ? `(update ${action.existingScorecard.id}${action.existingScorecard.draft === false ? ', published' : ', draft'})` : '(create)'}`
+      );
+      console.log(
+        `DRY_RUN_MATCH ${action.matchId} result="${action.matchPatch.result}" team1Score="${action.matchPatch.team1Score}" team2Score="${action.matchPatch.team2Score}"`
       );
     }
     return;
@@ -618,13 +726,20 @@ async function main() {
   let created = 0;
   let updated = 0;
   let published = 0;
+  let matchesUpdated = 0;
 
   for (const action of actions) {
-    const saved = await upsertScorecard(action.existingDraftId ? { id: action.existingDraftId } : null, action.scorecard);
-    if (action.existingDraftId) updated += 1;
+    const saved = await upsertScorecard(action.existingScorecard ? { id: action.existingScorecard.id } : null, action.scorecard);
+    if (action.existingScorecard) updated += 1;
     else created += 1;
-    await publishScorecard(saved.id);
-    published += 1;
+    if (saved.draft === false) {
+      published += 1;
+    } else {
+      await publishScorecard(saved.id);
+      published += 1;
+    }
+    await updateMatch(action.matchId, action.matchPatch);
+    matchesUpdated += 1;
     console.log(`APPLIED ${action.label} -> ${saved.id}`);
   }
 
@@ -643,6 +758,7 @@ async function main() {
   console.log(`Created: ${created}`);
   console.log(`Updated drafts: ${updated}`);
   console.log(`Published: ${published}`);
+  console.log(`Matches updated: ${matchesUpdated}`);
   console.log(`Remaining missing published scorecards: ${remainingMissing.length}`);
   if (remainingMissing.length > 0) {
     for (const match of remainingMissing) {
