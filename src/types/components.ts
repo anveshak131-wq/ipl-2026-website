@@ -40,6 +40,7 @@ export interface StatsTabProps {
   allRounders: Player[];
   wicketkeepers: Player[];
   playerStats?: any[];
+  seasonTeamStats?: any | null;
 }
 
 // About Tab Props
@@ -109,4 +110,3 @@ export interface MatchUpdateData {
   score?: Match['score'];
   [key: string]: unknown;
 }
-

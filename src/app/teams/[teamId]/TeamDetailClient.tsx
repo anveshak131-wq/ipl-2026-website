@@ -192,6 +192,7 @@ export default function TeamDetailClient({ teamId, league }: TeamDetailClientPro
   const [nextMatch, setNextMatch] = useState<Match | null>(null);
   const [allMatches, setAllMatches] = useState<Match[]>([]);
   const [playerStats, setPlayerStats] = useState<any[]>([]);
+  const [seasonTeamStats, setSeasonTeamStats] = useState<any | null>(null);
   const [coachingStaff, setCoachingStaff] = useState<CoachingStaff | null>(null);
   const [keyPlayers, setKeyPlayers] = useState<KeyPlayers | null>(null);
   const [teamAchievements, setTeamAchievements] = useState<AchievementEntry[]>([]);
@@ -252,44 +253,86 @@ export default function TeamDetailClient({ teamId, league }: TeamDetailClientPro
 
   const fetchPlayerStats = async () => {
     if (!teamData || !league) return;
-    
-    console.log('Starting fetchPlayerStats for league:', league);
-    
+
     try {
-      // Fetch both batting and bowling stats
-      const [battingResponse, bowlingResponse] = await Promise.all([
-        fetch(`/api/stats?league=${league}&type=batting`),
-        fetch(`/api/stats?league=${league}&type=bowling`)
-      ]);
-      
-      if (battingResponse.ok && bowlingResponse.ok) {
-        const battingData = await battingResponse.json();
-        const bowlingData = await bowlingResponse.json();
-        
-        const battingStats = battingData.battingStats || [];
-        const bowlingStats = bowlingData.bowlingStats || [];
-        
-        console.log('Fetched batting stats:', battingStats.length);
-        console.log('Fetched bowling stats:', bowlingStats.length);
-        
-        // Merge batting and bowling stats by playerId
-        const mergedStats = battingStats.map(battingStat => {
-          const bowlingStat = bowlingStats.find(b => b.playerId === battingStat.playerId);
-          return {
-            ...battingStat,
-            wickets: bowlingStat?.wickets || 0,
-            bowlingAverage: bowlingStat?.average || 0,
-            economy: bowlingStat?.economy || 0,
-            bestBowling: bowlingStat?.bestBowling || '0/0'
-          };
-        });
-        
-        setPlayerStats(mergedStats);
-        console.log('Merged player stats:', mergedStats.length, 'players');
-        console.log('Sample merged stat:', mergedStats[0]);
-      } else {
-        console.error('Failed to fetch stats:', battingResponse.status, bowlingResponse.status);
+      const statsResponse = await fetch(`/api/stats?league=${league}&type=all&season=${SEASON_YEAR}`);
+
+      if (!statsResponse.ok) {
+        console.error('Failed to fetch season stats:', statsResponse.status);
+        return;
       }
+
+      const statsData = await statsResponse.json();
+      const battingStats = Array.isArray(statsData?.battingStats) ? statsData.battingStats : [];
+      const bowlingStats = Array.isArray(statsData?.bowlingStats) ? statsData.bowlingStats : [];
+      const teamStatsRows = Array.isArray(statsData?.teamStats) ? statsData.teamStats : [];
+
+      const mergedStatsMap = new Map<string, any>();
+
+      battingStats.forEach((battingStat: any) => {
+        const key = String(battingStat.playerId || battingStat.playerName || '');
+        if (!key) return;
+        mergedStatsMap.set(key, {
+          playerId: battingStat.playerId,
+          playerName: battingStat.playerName,
+          matches: battingStat.matches || 0,
+          innings: battingStat.innings || 0,
+          runs: battingStat.runs || 0,
+          ballsFaced: battingStat.ballsFaced || 0,
+          average: battingStat.average || 0,
+          strikeRate: battingStat.strikeRate || 0,
+          highestScore: battingStat.highestScore || 0,
+          fours: battingStat.fours || 0,
+          sixes: battingStat.sixes || 0,
+          fifties: battingStat.fifties || 0,
+          hundreds: battingStat.hundreds || 0,
+          notOuts: battingStat.notOuts || 0,
+          wickets: 0,
+          bowlingAverage: 0,
+          economy: 0,
+          bestBowling: '0/0',
+        });
+      });
+
+      bowlingStats.forEach((bowlingStat: any) => {
+        const key = String(bowlingStat.playerId || bowlingStat.playerName || '');
+        if (!key) return;
+        const existing = mergedStatsMap.get(key) || {
+          playerId: bowlingStat.playerId,
+          playerName: bowlingStat.playerName,
+          matches: bowlingStat.matches || 0,
+          innings: 0,
+          runs: 0,
+          ballsFaced: 0,
+          average: 0,
+          strikeRate: 0,
+          highestScore: 0,
+          fours: 0,
+          sixes: 0,
+          fifties: 0,
+          hundreds: 0,
+          notOuts: 0,
+        };
+
+        mergedStatsMap.set(key, {
+          ...existing,
+          matches: Math.max(existing.matches || 0, bowlingStat.matches || 0),
+          wickets: bowlingStat.wickets || 0,
+          bowlingAverage: bowlingStat.average || 0,
+          economy: bowlingStat.economy || 0,
+          bestBowling: bowlingStat.bestBowling || '0/0',
+        });
+      });
+
+      setPlayerStats(Array.from(mergedStatsMap.values()));
+
+      const currentTeamStats =
+        teamStatsRows.find((stat: any) => String(stat.teamId) === String(teamData.id)) ||
+        teamStatsRows.find((stat: any) => String(stat.teamName || '').toLowerCase() === String(teamData.name || '').toLowerCase()) ||
+        teamStatsRows.find((stat: any) => String(stat.teamName || '').toLowerCase() === String(teamData.shortName || '').toLowerCase()) ||
+        null;
+
+      setSeasonTeamStats(currentTeamStats);
     } catch (error) {
       console.error('Error fetching player stats:', error);
     }
@@ -1557,6 +1600,7 @@ export default function TeamDetailClient({ teamId, league }: TeamDetailClientPro
                 allRounders={allRounders}
                 wicketkeepers={wicketkeepers}
                 playerStats={playerStats}
+                seasonTeamStats={seasonTeamStats}
               />
               
               {/* Player Performance Charts */}
@@ -2615,67 +2659,127 @@ function KeyPlayersSection({ teamData, keyPlayers, primaryColor, secondaryColor 
 }
 
 // Stats Tab
-function StatsTab({ teamData, primaryColor, secondaryColor, batsmen, bowlers, allRounders, wicketkeepers, playerStats = [] }: StatsTabProps) {
+function StatsTab({
+  teamData,
+  primaryColor,
+  secondaryColor,
+  batsmen,
+  bowlers,
+  allRounders,
+  wicketkeepers,
+  playerStats = [],
+  seasonTeamStats = null,
+}: StatsTabProps) {
+  const [playerStatsScope, setPlayerStatsScope] = useState<'season' | 'overall'>('season');
+
   if (!teamData) return null;
   const squad: Player[] = (teamData.players || []) as Player[];
 
-  // Function to get real stats for a player
-  const getPlayerRealStats = (player: Player) => {
-    const playerStat = playerStats.find(stat => 
-      stat.playerId === player.id || 
-      stat.playerName === player.name
-    );
-    
-    if (playerStat) {
-      return {
-        matches: playerStat.matches || 0,
-        runs: playerStat.runs || 0,
-        wickets: playerStat.wickets || 0,
-        average: playerStat.average || 0,
-        strikeRate: playerStat.strikeRate || 0,
-        highestScore: playerStat.highestScore || 0,
-        fifties: playerStat.fifties || 0,
-        hundreds: playerStat.hundreds || 0,
-        fours: playerStat.fours || 0,
-        sixes: playerStat.sixes || 0,
-        bowlingAverage: playerStat.bowlingAverage || 0,
-        economy: playerStat.economy || 0,
-        bestBowling: playerStat.bestBowling || '0/0'
-      };
-    }
-    
-    // Fallback to original stats
-    return player.stats || {};
+  const toNumber = (value: unknown) => {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : 0;
   };
 
-  const totals = squad.reduce(
-    (acc, p) => {
-      const s = getPlayerRealStats(p);
-      acc.matches += s.matches || 0;
-      acc.runs += s.runs || 0;
-      acc.wickets += s.wickets || 0;
-      acc.fours += s.fours || 0;
-      acc.sixes += s.sixes || 0;
-      acc.fifties += s.fifties || 0;
-      acc.hundreds += s.hundreds || 0;
-      return acc;
-    },
-    { matches: 0, runs: 0, wickets: 0, fours: 0, sixes: 0, fifties: 0, hundreds: 0 },
-  );
+  const findSeasonPlayerStat = (player: Player) =>
+    playerStats.find(
+      (stat) =>
+        String(stat.playerId || '') === String(player.id) ||
+        String(stat.playerName || '').toLowerCase() === String(player.name || '').toLowerCase()
+    );
 
-  const totalFiftyPlus = totals.fifties + totals.hundreds;
+  const seasonPlayerRows = squad
+    .map((player) => {
+      const stat = findSeasonPlayerStat(player) || {};
+      return {
+        playerId: String(player.id),
+        playerName: player.name,
+        role: player.role,
+        matches: toNumber(stat.matches),
+        runs: toNumber(stat.runs),
+        average: toNumber(stat.average),
+        strikeRate: toNumber(stat.strikeRate),
+        highestScore: toNumber(stat.highestScore),
+        fours: toNumber(stat.fours),
+        sixes: toNumber(stat.sixes),
+        fifties: toNumber(stat.fifties),
+        hundreds: toNumber(stat.hundreds),
+        wickets: toNumber(stat.wickets),
+        bowlingAverage: toNumber(stat.bowlingAverage),
+        economy: toNumber(stat.economy),
+        bestBowling: stat.bestBowling || '0/0',
+      };
+    })
+    .sort((a, b) => b.matches - a.matches || b.runs - a.runs || b.wickets - a.wickets);
 
-  const topRunScorer = squad.reduce<Player | null>((best, p) => {
-    const currentRuns = getPlayerRealStats(p).runs || 0;
-    const bestRuns = best ? getPlayerRealStats(best).runs || 0 : 0;
-    return currentRuns > bestRuns ? p : best;
-  }, null);
+  const overallPlayerRows = squad
+    .map((player) => {
+      const stat = player.stats || {};
+      return {
+        playerId: String(player.id),
+        playerName: player.name,
+        role: player.role,
+        matches: toNumber(stat.matches),
+        runs: toNumber(stat.runs),
+        average: toNumber(stat.average ?? stat.battingAverage),
+        strikeRate: toNumber(stat.strikeRate ?? stat.battingStrikeRate),
+        highestScore: toNumber(stat.highest ?? stat.highestScore),
+        fours: toNumber(stat.fours),
+        sixes: toNumber(stat.sixes),
+        fifties: toNumber(stat.fifties),
+        hundreds: toNumber(stat.hundreds),
+        wickets: toNumber(stat.wickets),
+        bowlingAverage: toNumber(stat.bowlingAverage),
+        economy: toNumber(stat.economy),
+        bestBowling: stat.bestBowling || '0/0',
+      };
+    })
+    .sort((a, b) => b.matches - a.matches || b.runs - a.runs || b.wickets - a.wickets);
 
-  const topWicketTaker = squad.reduce<Player | null>((best, p) => {
-    const currentWkts = getPlayerRealStats(p).wickets || 0;
-    const bestWkts = best ? getPlayerRealStats(best).wickets || 0 : 0;
-    return currentWkts > bestWkts ? p : best;
-  }, null);
+  const aggregateRows = (rows: typeof seasonPlayerRows) =>
+    rows.reduce(
+      (acc, row) => {
+        acc.matches += row.matches;
+        acc.runs += row.runs;
+        acc.wickets += row.wickets;
+        acc.fours += row.fours;
+        acc.sixes += row.sixes;
+        acc.fifties += row.fifties;
+        acc.hundreds += row.hundreds;
+        return acc;
+      },
+      { matches: 0, runs: 0, wickets: 0, fours: 0, sixes: 0, fifties: 0, hundreds: 0 }
+    );
+
+  const overallTotals = aggregateRows(overallPlayerRows);
+  const totalFiftyPlus = overallTotals.fifties + overallTotals.hundreds;
+
+  const getLeader = (rows: typeof seasonPlayerRows, field: 'runs' | 'wickets') => {
+    const sorted = [...rows].sort((a, b) => b[field] - a[field]);
+    const leader = sorted[0];
+    return leader && leader[field] > 0 ? leader : null;
+  };
+
+  const seasonTopRunScorer = getLeader(seasonPlayerRows, 'runs');
+  const seasonTopWicketTaker = getLeader(seasonPlayerRows, 'wickets');
+  const overallTopRunScorer = getLeader(overallPlayerRows, 'runs');
+  const overallTopWicketTaker = getLeader(overallPlayerRows, 'wickets');
+
+  const displayedPlayerRows = playerStatsScope === 'season' ? seasonPlayerRows : overallPlayerRows;
+
+  const seasonSummary = {
+    matches: toNumber(seasonTeamStats?.matches ?? seasonTeamStats?.matchesPlayed),
+    wins: toNumber(seasonTeamStats?.wins),
+    losses: toNumber(seasonTeamStats?.losses),
+    noResult: toNumber(seasonTeamStats?.noResult ?? seasonTeamStats?.noResults),
+    points: toNumber(seasonTeamStats?.points),
+    netRunRate: toNumber(seasonTeamStats?.netRunRate),
+    runsScored: toNumber(seasonTeamStats?.runsScored),
+    runsConceded: toNumber(seasonTeamStats?.runsConceded),
+    wicketsTaken: toNumber(seasonTeamStats?.wicketsTaken),
+    wicketsLost: toNumber(seasonTeamStats?.wicketsLost),
+    oversPlayed: toNumber(seasonTeamStats?.oversPlayed ?? seasonTeamStats?.oversFaced),
+    oversBowled: toNumber(seasonTeamStats?.oversBowled),
+  };
 
   return (
     <div className="space-y-8">
@@ -2764,79 +2868,216 @@ function StatsTab({ teamData, primaryColor, secondaryColor, batsmen, bowlers, al
         </div>
       </div>
 
-      {squad.length > 0 && (
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
         <div
           className="rounded-3xl backdrop-blur-xl p-8 border shadow-xl animate-fade-in"
           style={{
             background: `linear-gradient(135deg, ${primaryColor.light}, ${secondaryColor.light})`,
             borderColor: primaryColor.medium,
-            animationDelay: '200ms',
             boxShadow: `0 10px 30px ${primaryColor.glow}20`,
           }}
         >
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-3">
-              <CricketBatIcon className="w-7 h-7" color={primaryColor.solid} />
+          <div className="flex items-center justify-between gap-4 mb-6">
+            <div>
               <h3 className="text-2xl font-black" style={{ color: primaryColor.textOnLight }}>
-                Team Stats (from player careers)
+                Season {SEASON_YEAR} Team Stats
               </h3>
+              <p className="text-xs uppercase tracking-wide text-gray-100/75 mt-1">
+                Published scorecards only
+              </p>
             </div>
-            <p className="text-[11px] uppercase tracking-wide text-gray-100/80">
-              Aggregated from squad player stats
-            </p>
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
-            <div className="p-4 rounded-xl bg-black/20 border border-white/10">
-              <p className="text-xs uppercase text-gray-300 mb-1">Total Runs</p>
-              <p className="text-2xl font-black text-white">{totals.runs}</p>
-            </div>
-            <div className="p-4 rounded-xl bg-black/20 border border-white/10">
-              <p className="text-xs uppercase text-gray-300 mb-1">Total Wickets</p>
-              <p className="text-2xl font-black text-white">{totals.wickets}</p>
-            </div>
-            <div className="p-4 rounded-xl bg-black/20 border border-white/10">
-              <p className="text-xs uppercase text-gray-300 mb-1">50+ Scores</p>
-              <p className="text-2xl font-black text-white">{totalFiftyPlus}</p>
-            </div>
-            <div className="p-4 rounded-xl bg-black/20 border border-white/10">
-              <p className="text-xs uppercase text-gray-300 mb-1">Total Fours</p>
-              <p className="text-2xl font-black text-white">{totals.fours}</p>
-            </div>
-            <div className="p-4 rounded-xl bg-black/20 border border-white/10">
-              <p className="text-xs uppercase text-gray-300 mb-1">Total Sixes</p>
-              <p className="text-2xl font-black text-white">{totals.sixes}</p>
-            </div>
-            <div className="p-4 rounded-xl bg-black/20 border border-white/10">
-              <p className="text-xs uppercase text-gray-300 mb-1">Player Matches (sum)</p>
-              <p className="text-2xl font-black text-white">{totals.matches}</p>
-            </div>
+            {[
+              { label: 'Matches', value: seasonSummary.matches },
+              { label: 'Wins', value: seasonSummary.wins },
+              { label: 'Losses', value: seasonSummary.losses },
+              { label: 'No Result', value: seasonSummary.noResult },
+              { label: 'Points', value: seasonSummary.points },
+              { label: 'Net Run Rate', value: seasonSummary.netRunRate ? `${seasonSummary.netRunRate > 0 ? '+' : ''}${seasonSummary.netRunRate.toFixed(2)}` : '0.00' },
+              { label: 'Runs Scored', value: seasonSummary.runsScored },
+              { label: 'Runs Conceded', value: seasonSummary.runsConceded },
+              { label: 'Wkts Taken', value: seasonSummary.wicketsTaken },
+              { label: 'Wkts Lost', value: seasonSummary.wicketsLost },
+              { label: 'Overs Faced', value: seasonSummary.oversPlayed.toFixed(1) },
+              { label: 'Overs Bowled', value: seasonSummary.oversBowled.toFixed(1) },
+            ].map((item) => (
+              <div key={item.label} className="p-4 rounded-xl bg-black/20 border border-white/10">
+                <p className="text-xs uppercase text-gray-300 mb-1">{item.label}</p>
+                <p className="text-2xl font-black text-white">{item.value}</p>
+              </div>
+            ))}
           </div>
 
           <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-            {topRunScorer && (
+            {seasonTopRunScorer && (
               <div className="p-4 rounded-xl bg-black/25 border border-white/10 flex flex-col gap-1">
-                <p className="text-xs uppercase text-gray-300">Top run-scorer in squad</p>
-                <p className="text-base font-semibold text-white">{topRunScorer.name}</p>
+                <p className="text-xs uppercase text-gray-300">Season top run-scorer</p>
+                <p className="text-base font-semibold text-white">{seasonTopRunScorer.playerName}</p>
                 <p className="text-xs text-gray-300">
-                  Runs: <span className="font-semibold text-white">{getPlayerRealStats(topRunScorer).runs}</span> ·
-                  Matches: <span className="font-semibold text-white">{getPlayerRealStats(topRunScorer).matches}</span>
+                  Runs: <span className="font-semibold text-white">{seasonTopRunScorer.runs}</span> ·
+                  Matches: <span className="font-semibold text-white">{seasonTopRunScorer.matches}</span>
                 </p>
               </div>
             )}
-            {topWicketTaker && (
+            {seasonTopWicketTaker && (
               <div className="p-4 rounded-xl bg-black/25 border border-white/10 flex flex-col gap-1">
-                <p className="text-xs uppercase text-gray-300">Top wicket-taker in squad</p>
-                <p className="text-base font-semibold text-white">{topWicketTaker.name}</p>
+                <p className="text-xs uppercase text-gray-300">Season top wicket-taker</p>
+                <p className="text-base font-semibold text-white">{seasonTopWicketTaker.playerName}</p>
                 <p className="text-xs text-gray-300">
-                  Wickets: <span className="font-semibold text-white">{getPlayerRealStats(topWicketTaker).wickets}</span> ·
-                  Matches: <span className="font-semibold text-white">{getPlayerRealStats(topWicketTaker).matches}</span>
+                  Wickets: <span className="font-semibold text-white">{seasonTopWicketTaker.wickets}</span> ·
+                  Economy: <span className="font-semibold text-white">{seasonTopWicketTaker.economy.toFixed(2)}</span>
                 </p>
               </div>
             )}
           </div>
         </div>
-      )}
+
+        <div
+          className="rounded-3xl backdrop-blur-xl p-8 border shadow-xl animate-fade-in"
+          style={{
+            background: `linear-gradient(135deg, ${primaryColor.light}, ${secondaryColor.light})`,
+            borderColor: primaryColor.medium,
+            boxShadow: `0 10px 30px ${primaryColor.glow}20`,
+          }}
+        >
+          <div className="flex items-center justify-between gap-4 mb-6">
+            <div>
+              <h3 className="text-2xl font-black" style={{ color: primaryColor.textOnLight }}>
+                Overall Squad Career Stats
+              </h3>
+              <p className="text-xs uppercase tracking-wide text-gray-100/75 mt-1">
+                Aggregated from stored player career records
+              </p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
+            {[
+              { label: 'Player Matches', value: overallTotals.matches },
+              { label: 'Career Runs', value: overallTotals.runs },
+              { label: 'Career Wickets', value: overallTotals.wickets },
+              { label: '50+ Scores', value: totalFiftyPlus },
+              { label: 'Hundreds', value: overallTotals.hundreds },
+              { label: 'Fours', value: overallTotals.fours },
+              { label: 'Sixes', value: overallTotals.sixes },
+              { label: 'Squad Size', value: squad.length },
+            ].map((item) => (
+              <div key={item.label} className="p-4 rounded-xl bg-black/20 border border-white/10">
+                <p className="text-xs uppercase text-gray-300 mb-1">{item.label}</p>
+                <p className="text-2xl font-black text-white">{item.value}</p>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+            {overallTopRunScorer && (
+              <div className="p-4 rounded-xl bg-black/25 border border-white/10 flex flex-col gap-1">
+                <p className="text-xs uppercase text-gray-300">Career top run-scorer in squad</p>
+                <p className="text-base font-semibold text-white">{overallTopRunScorer.playerName}</p>
+                <p className="text-xs text-gray-300">
+                  Runs: <span className="font-semibold text-white">{overallTopRunScorer.runs}</span> ·
+                  Matches: <span className="font-semibold text-white">{overallTopRunScorer.matches}</span>
+                </p>
+              </div>
+            )}
+            {overallTopWicketTaker && (
+              <div className="p-4 rounded-xl bg-black/25 border border-white/10 flex flex-col gap-1">
+                <p className="text-xs uppercase text-gray-300">Career top wicket-taker in squad</p>
+                <p className="text-base font-semibold text-white">{overallTopWicketTaker.playerName}</p>
+                <p className="text-xs text-gray-300">
+                  Wickets: <span className="font-semibold text-white">{overallTopWicketTaker.wickets}</span> ·
+                  Matches: <span className="font-semibold text-white">{overallTopWicketTaker.matches}</span>
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      <div
+        className="rounded-3xl backdrop-blur-xl p-8 border shadow-xl animate-fade-in"
+        style={{
+          background: `linear-gradient(135deg, ${primaryColor.light}, ${secondaryColor.light})`,
+          borderColor: primaryColor.medium,
+          boxShadow: `0 10px 30px ${primaryColor.glow}20`,
+        }}
+      >
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-6">
+          <div>
+            <h3 className="text-2xl font-black" style={{ color: primaryColor.textOnLight }}>
+              Individual Player Stats
+            </h3>
+            <p className="text-sm text-gray-100/75 mt-1">
+              Switch between {SEASON_YEAR} scorecard stats and stored overall career stats.
+            </p>
+          </div>
+          <div className="inline-flex rounded-full border border-white/15 bg-black/20 p-1">
+            {[
+              { key: 'season', label: `Season ${SEASON_YEAR}` },
+              { key: 'overall', label: 'Overall' },
+            ].map((option) => {
+              const active = playerStatsScope === option.key;
+              return (
+                <button
+                  key={option.key}
+                  onClick={() => setPlayerStatsScope(option.key as 'season' | 'overall')}
+                  className={`rounded-full px-4 py-2 text-sm font-semibold transition-all ${
+                    active ? 'text-white shadow-lg' : 'text-gray-300 hover:text-white'
+                  }`}
+                  style={{
+                    background: active ? `linear-gradient(135deg, ${primaryColor.solid}, ${secondaryColor.solid})` : 'transparent',
+                  }}
+                >
+                  {option.label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="min-w-full text-sm text-left">
+            <thead>
+              <tr className="border-b border-white/10 text-gray-300 uppercase tracking-[0.18em] text-[11px]">
+                <th className="py-3 pr-4">Player</th>
+                <th className="py-3 pr-4">Role</th>
+                <th className="py-3 pr-4 text-right">Mat</th>
+                <th className="py-3 pr-4 text-right">Runs</th>
+                <th className="py-3 pr-4 text-right">Avg</th>
+                <th className="py-3 pr-4 text-right">SR</th>
+                <th className="py-3 pr-4 text-right">HS</th>
+                <th className="py-3 pr-4 text-right">50/100</th>
+                <th className="py-3 pr-4 text-right">Wkts</th>
+                <th className="py-3 pr-4 text-right">Econ</th>
+                <th className="py-3 text-right">Best</th>
+              </tr>
+            </thead>
+            <tbody>
+              {displayedPlayerRows.map((row) => (
+                <tr key={`${playerStatsScope}-${row.playerId}`} className="border-b border-white/5">
+                  <td className="py-3 pr-4">
+                    <div className="font-semibold text-white">{row.playerName}</div>
+                  </td>
+                  <td className="py-3 pr-4 text-gray-300">{row.role}</td>
+                  <td className="py-3 pr-4 text-right text-white">{row.matches}</td>
+                  <td className="py-3 pr-4 text-right text-white">{row.runs}</td>
+                  <td className="py-3 pr-4 text-right text-white">{row.average.toFixed(2)}</td>
+                  <td className="py-3 pr-4 text-right text-white">{row.strikeRate.toFixed(2)}</td>
+                  <td className="py-3 pr-4 text-right text-white">{row.highestScore}</td>
+                  <td className="py-3 pr-4 text-right text-white">
+                    {row.fifties}/{row.hundreds}
+                  </td>
+                  <td className="py-3 pr-4 text-right text-white">{row.wickets}</td>
+                  <td className="py-3 pr-4 text-right text-white">{row.economy.toFixed(2)}</td>
+                  <td className="py-3 text-right text-white">{row.bestBowling}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
   );
 }

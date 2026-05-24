@@ -1,4 +1,5 @@
 'use client';
+/* eslint-disable @next/next/no-img-element */
 
 import { motion } from 'framer-motion';
 
@@ -10,10 +11,10 @@ interface RCBPremiumLogoProps {
 }
 
 const sizeClasses = {
-  sm: 'w-40 h-56',
-  md: 'w-64 h-[22rem]',
-  lg: 'w-80 h-[28rem]',
-  xl: 'w-[24rem] h-[34rem]',
+  sm: 'h-40 w-40',
+  md: 'h-64 w-64',
+  lg: 'h-80 w-80',
+  xl: 'h-[26rem] w-[26rem]',
 } as const;
 
 const particles = [
@@ -70,8 +71,8 @@ export default function RCBPremiumLogo({
         transition={{ duration: 0.28, ease: 'easeOut' }}
       >
         <motion.img
-          src="/logos/rcb_logo_official.png"
-          alt="Royal Challengers Bengaluru premium logo"
+          src="/logos/rcb_logo_premium.svg"
+          alt="Original RCB-inspired premium logo"
           className="h-full w-full object-contain drop-shadow-[0_20px_50px_rgba(200,16,46,0.42)]"
           animate={
             animated

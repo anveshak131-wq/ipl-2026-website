@@ -9,6 +9,8 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const league = searchParams.get('league') || 'wpl';
     const statsType = searchParams.get('type') || 'all'; // all, batting, bowling, teams, orangeCap, purpleCap
+    const seasonParam = searchParams.get('season');
+    const requestedSeason = seasonParam ? parseInt(seasonParam, 10) : null;
 
     // Fetch all published scorecards for the league
     const env = process.env as any;
@@ -30,8 +32,10 @@ export async function GET(request: Request) {
     const allScorecards = (await Promise.all(scorecardPromises)).filter(Boolean);
     
     // Filter by league and only get published (non-draft) scorecards
-    const scorecards = allScorecards.filter((s: any) => 
-      s.league === league && s.draft === false
+    const scorecards = allScorecards.filter((s: any) =>
+      s.league === league &&
+      s.draft === false &&
+      (requestedSeason ? getScorecardSeason(s) === requestedSeason : true)
     );
 
     // Initialize stats calculator
@@ -108,4 +112,27 @@ export async function GET(request: Request) {
       }
     );
   }
+}
+
+function getScorecardSeason(scorecard: any): number | null {
+  const candidates = [
+    scorecard?.matchInfo?.date,
+    scorecard?.date,
+    scorecard?.publishedAt,
+    scorecard?.updatedAt,
+    scorecard?.createdAt,
+  ];
+
+  for (const candidate of candidates) {
+    const value = String(candidate || '').trim();
+    if (!value) continue;
+    const directYear = value.match(/^(\d{4})/);
+    if (directYear) return parseInt(directYear[1], 10);
+    const parsed = Date.parse(value);
+    if (!Number.isNaN(parsed)) {
+      return new Date(parsed).getUTCFullYear();
+    }
+  }
+
+  return null;
 }

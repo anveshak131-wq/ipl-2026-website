@@ -1,3 +1,166 @@
-<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="500" height="711" viewBox="0 0 500 711" role="img" aria-label="Royal Challengers Bengaluru logo">
-  <image href="../logos/rcb_logo_official.png" xlink:href="../logos/rcb_logo_official.png" width="500" height="711" preserveAspectRatio="xMidYMid meet" />
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  width="240"
+  height="240"
+  viewBox="0 0 240 240"
+  role="img"
+  aria-label="Original RCB-inspired lion crest"
+>
+  <defs>
+    <linearGradient id="outerGold" x1="46" y1="18" x2="194" y2="224" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#fff1b9" />
+      <stop offset="35%" stop-color="#f6cc62" />
+      <stop offset="70%" stop-color="#cd8a25" />
+      <stop offset="100%" stop-color="#8b520f" />
+    </linearGradient>
+    <linearGradient id="shieldRed" x1="64" y1="28" x2="176" y2="204" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#f44d63" />
+      <stop offset="48%" stop-color="#c8102e" />
+      <stop offset="100%" stop-color="#610a17" />
+    </linearGradient>
+    <linearGradient id="coreDark" x1="82" y1="56" x2="158" y2="174" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#241014" />
+      <stop offset="55%" stop-color="#080607" />
+      <stop offset="100%" stop-color="#171013" />
+    </linearGradient>
+    <linearGradient id="maneGold" x1="70" y1="56" x2="170" y2="158" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#ffe9a8" />
+      <stop offset="44%" stop-color="#f5c553" />
+      <stop offset="100%" stop-color="#c77c1f" />
+    </linearGradient>
+    <linearGradient id="faceGold" x1="104" y1="98" x2="138" y2="146" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#fff1bf" />
+      <stop offset="100%" stop-color="#f1c55e" />
+    </linearGradient>
+    <linearGradient id="ribbonRed" x1="60" y1="164" x2="180" y2="193" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#680d1a" />
+      <stop offset="50%" stop-color="#c8102e" />
+      <stop offset="100%" stop-color="#680d1a" />
+    </linearGradient>
+    <radialGradient id="coreGlow" cx="50%" cy="42%" r="52%">
+      <stop offset="0%" stop-color="#d61f3d" stop-opacity="0.46" />
+      <stop offset="72%" stop-color="#d61f3d" stop-opacity="0" />
+    </radialGradient>
+    <filter id="shadow" x="-25%" y="-25%" width="150%" height="150%">
+      <feDropShadow dx="0" dy="8" stdDeviation="8" flood-color="#000000" flood-opacity="0.35" />
+    </filter>
+  </defs>
+
+  <g filter="url(#shadow)">
+    <path
+      d="M120 16 L175 33 L198 68 V138 C198 179 168 210 120 224 C72 210 42 179 42 138 V68 L65 33 Z"
+      fill="url(#outerGold)"
+    />
+    <path
+      d="M120 24 L169 40 L189 71 V136 C189 171 163 198 120 212 C77 198 51 171 51 136 V71 L71 40 Z"
+      fill="url(#shieldRed)"
+    />
+    <path
+      d="M120 39 L159 51 L176 77 V133 C176 160 155 183 120 196 C85 183 64 160 64 133 V77 L81 51 Z"
+      fill="url(#coreDark)"
+      stroke="#8f2032"
+      stroke-width="2"
+    />
+  </g>
+
+  <ellipse cx="120" cy="108" rx="50" ry="48" fill="url(#coreGlow)">
+    <animate attributeName="opacity" values="0.55;0.92;0.55" dur="4.4s" repeatCount="indefinite" />
+  </ellipse>
+
+  <g>
+    <animateTransform attributeName="transform" type="translate" values="0 0;0 -2;0 0" dur="4.8s" repeatCount="indefinite" />
+    <path
+      d="M120 33 L134 42 L149 38 L146 51 L159 59 L147 67 L150 81 L136 74 L127 87 L120 77 L113 87 L104 74 L90 81 L93 67 L81 59 L94 51 L91 38 L106 42 Z"
+      fill="url(#outerGold)"
+      stroke="#4f2208"
+      stroke-width="2"
+      stroke-linejoin="round"
+    />
+    <circle cx="120" cy="43" r="5" fill="#c8102e">
+      <animate attributeName="opacity" values="1;0.55;1" dur="2.8s" repeatCount="indefinite" />
+    </circle>
+    <circle cx="95" cy="53" r="3.8" fill="#c8102e">
+      <animate attributeName="opacity" values="0.6;1;0.6" dur="2.2s" repeatCount="indefinite" />
+    </circle>
+    <circle cx="145" cy="53" r="3.8" fill="#c8102e">
+      <animate attributeName="opacity" values="0.6;1;0.6" dur="2.6s" repeatCount="indefinite" />
+    </circle>
+  </g>
+
+  <g fill="url(#maneGold)" stroke="#6f420f" stroke-width="2" stroke-linejoin="round">
+    <path d="M120 58 C106 71 105 88 120 100 C135 88 134 71 120 58 Z">
+      <animateTransform attributeName="transform" additive="sum" type="translate" values="0 0;0 -1.5;0 0" dur="5s" repeatCount="indefinite" />
+    </path>
+    <path d="M95 67 C80 77 75 93 88 107 C104 101 109 82 95 67 Z" />
+    <path d="M145 67 C160 77 165 93 152 107 C136 101 131 82 145 67 Z" />
+    <path d="M79 92 C67 106 67 124 82 135 C95 122 95 103 79 92 Z" />
+    <path d="M161 92 C173 106 173 124 158 135 C145 122 145 103 161 92 Z" />
+    <path d="M88 122 C79 136 82 152 97 160 C106 147 103 132 88 122 Z" />
+    <path d="M152 122 C161 136 158 152 143 160 C134 147 137 132 152 122 Z" />
+    <path d="M120 132 C109 145 109 163 120 173 C131 163 131 145 120 132 Z" />
+  </g>
+
+  <g>
+    <path
+      d="M120 78
+         C102 78 88 94 88 116
+         C88 133 96 147 109 156
+         L109 132 L101 118 L105 95
+         C109 86 114 82 120 80
+         C126 82 131 86 135 95
+         L139 118 L131 132 L131 156
+         C144 147 152 133 152 116
+         C152 94 138 78 120 78 Z"
+      fill="#0b0709"
+      stroke="#f5c75b"
+      stroke-width="2.4"
+      stroke-linejoin="round"
+    />
+    <path
+      d="M120 100
+         C109 100 101 108 101 120
+         C101 129 108 136 120 142
+         C132 136 139 129 139 120
+         C139 108 131 100 120 100 Z"
+      fill="url(#faceGold)"
+    />
+    <path d="M108 96 L115 100" stroke="#c8102e" stroke-width="4" stroke-linecap="round" />
+    <path d="M132 96 L125 100" stroke="#c8102e" stroke-width="4" stroke-linecap="round" />
+    <path d="M109 101 L115 104" stroke="#fff0bd" stroke-width="2.3" stroke-linecap="round" />
+    <path d="M131 101 L125 104" stroke="#fff0bd" stroke-width="2.3" stroke-linecap="round" />
+    <path d="M114 112 L120 118 L126 112 L120 108 Z" fill="#1c1013" />
+    <path d="M111 126 Q120 132 129 126" stroke="#1c1013" stroke-width="2.8" stroke-linecap="round" fill="none" />
+    <path d="M103 117 L92 115" stroke="#f0c454" stroke-width="2" stroke-linecap="round" opacity="0.9" />
+    <path d="M137 117 L148 115" stroke="#f0c454" stroke-width="2" stroke-linecap="round" opacity="0.9" />
+  </g>
+
+  <path
+    d="M61 165
+       C81 174 100 178 120 178
+       C140 178 159 174 179 165
+       L174 192
+       C157 201 140 205 120 205
+       C100 205 83 201 66 192 Z"
+    fill="url(#ribbonRed)"
+    stroke="url(#outerGold)"
+    stroke-width="3"
+    stroke-linejoin="round"
+  />
+  <path d="M76 170 C97 178 143 178 164 170" fill="none" stroke="#ffd97c" stroke-width="2" opacity="0.55">
+    <animate attributeName="opacity" values="0.25;0.75;0.25" dur="3.2s" repeatCount="indefinite" />
+  </path>
+  <text
+    x="120"
+    y="191"
+    text-anchor="middle"
+    font-family="Arial Black, Arial, sans-serif"
+    font-size="34"
+    letter-spacing="2.4"
+    fill="#fff0b5"
+    stroke="#52210d"
+    stroke-width="2.2"
+    paint-order="stroke fill"
+  >
+    RCB
+  </text>
 </svg>
