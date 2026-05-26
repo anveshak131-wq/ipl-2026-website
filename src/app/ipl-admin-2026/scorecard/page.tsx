@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { api } from '@/lib/data';
+import { PlayoffType } from '@/types';
 import {
   filterMatchesBySeason,
   getAvailableSeasonYears,
@@ -21,6 +22,7 @@ interface Match {
   time: string;
   status?: string;
   league?: string;
+  playoffType?: PlayoffType;
 }
 
 interface Player {
@@ -107,11 +109,31 @@ function parseUpdatedAt(obj: { updatedAt?: string } | null): number {
   const t = new Date(obj.updatedAt).getTime();
   return isNaN(t) ? 0 : t;
 }
+
+function isPlaceholderTeamRef(team: { id?: string | number; name?: string; shortName?: string } | null | undefined): boolean {
+  const id = String(team?.id || '').toLowerCase();
+  const name = String(team?.name || '').toLowerCase();
+  const shortName = String(team?.shortName || '').toLowerCase();
+
+  if (!team) return true;
+  if (!id || id === '0' || id.includes('tbd-')) return true;
+
+  return (
+    name.includes('tbd-') ||
+    name.includes('place team') ||
+    name.includes('1st place') ||
+    name.includes('2nd place') ||
+    name.includes('3rd place') ||
+    name.includes('4th place') ||
+    shortName.includes('tbd')
+  );
+}
 interface Scorecard {
   id?: string;
   matchId: string;
   league: string;
   matchInfo: {
+    matchId?: string;
     team1: { id: number; name: string; shortName?: string };
     team2: { id: number; name: string; shortName?: string };
     venue: string;
@@ -264,9 +286,10 @@ export default function ScorecardAdminPage() {
         if (response.ok) {
           const data = await response.json();
           if (Array.isArray(data) && data.length > 0) {
-            remoteScorecard = data[0];
-            if (remoteScorecard.matchInfo && !remoteScorecard.matchInfo.matchId) {
-              remoteScorecard.matchInfo.matchId = match.id;
+            const fetchedScorecard = data[0] as Scorecard;
+            remoteScorecard = fetchedScorecard;
+            if (fetchedScorecard.matchInfo && !fetchedScorecard.matchInfo.matchId) {
+              fetchedScorecard.matchInfo.matchId = match.id;
             }
           }
         }
@@ -302,6 +325,15 @@ export default function ScorecardAdminPage() {
 
   const toTeamId = (id: string | number): number => {
     return typeof id === 'number' ? id : parseInt(String(id || 0), 10) || 0;
+  };
+
+  const normalizeBattingTeamId = (
+    battingTeamId: number | string | undefined,
+    validTeamIds: number[],
+    fallbackTeamId: number
+  ): number => {
+    const normalizedId = toTeamId(battingTeamId ?? 0);
+    return validTeamIds.includes(normalizedId) ? normalizedId : fallbackTeamId;
   };
 
   const initializeScorecard = (match: Match): Scorecard => {
@@ -394,13 +426,37 @@ export default function ScorecardAdminPage() {
 
   const normalizeScorecard = (incoming: Scorecard, match: Match): Scorecard => {
     const defaultScorecard = initializeScorecard(match);
+    const incomingMatchInfo = incoming.matchInfo || {};
+    const shouldSyncPlayoffTeams =
+      Boolean(match.playoffType) &&
+      (isPlaceholderTeamRef(incomingMatchInfo.team1) || isPlaceholderTeamRef(incomingMatchInfo.team2));
+
+    const mergedMatchInfo = {
+      ...defaultScorecard.matchInfo,
+      ...incomingMatchInfo,
+      ...(shouldSyncPlayoffTeams
+        ? {
+            team1: defaultScorecard.matchInfo.team1,
+            team2: defaultScorecard.matchInfo.team2,
+          }
+        : {}),
+    };
+
+    if (
+      mergedMatchInfo.toss?.winner &&
+      mergedMatchInfo.toss.winner !== mergedMatchInfo.team1.name &&
+      mergedMatchInfo.toss.winner !== mergedMatchInfo.team2.name
+    ) {
+      mergedMatchInfo.toss = {
+        ...mergedMatchInfo.toss,
+        winner: '',
+      };
+    }
+
     const normalized: Scorecard = {
       ...defaultScorecard,
       ...incoming,
-      matchInfo: {
-        ...defaultScorecard.matchInfo,
-        ...(incoming.matchInfo || {}),
-      },
+      matchInfo: mergedMatchInfo,
     };
 
     const sourceInnings = Array.isArray(incoming.innings) ? incoming.innings : [];
@@ -408,6 +464,11 @@ export default function ScorecardAdminPage() {
       ...buildDefaultInnings(1, defaultScorecard.innings[0].battingTeamId),
       ...(sourceInnings[0] || {}),
     });
+    firstInnings.battingTeamId = normalizeBattingTeamId(
+      sourceInnings[0]?.battingTeamId,
+      [normalized.matchInfo.team1.id, normalized.matchInfo.team2.id],
+      defaultScorecard.innings[0].battingTeamId
+    );
     const secondDefaultBattingTeamId =
       firstInnings.battingTeamId === defaultScorecard.matchInfo.team1.id
         ? defaultScorecard.matchInfo.team2.id
@@ -416,6 +477,11 @@ export default function ScorecardAdminPage() {
       ...buildDefaultInnings(2, secondDefaultBattingTeamId),
       ...(sourceInnings[1] || {}),
     });
+    secondInnings.battingTeamId = normalizeBattingTeamId(
+      sourceInnings[1]?.battingTeamId,
+      [normalized.matchInfo.team1.id, normalized.matchInfo.team2.id],
+      secondDefaultBattingTeamId
+    );
 
     normalized.innings = [firstInnings, secondInnings];
     normalized.matchInfo.matchId = normalized.matchInfo.matchId || match.id;
@@ -2542,8 +2608,8 @@ export default function ScorecardAdminPage() {
                       }}
                       className="w-full bg-gray-700 p-3 rounded border border-gray-600 text-white"
                     >
-                      <option value={scorecard.matchInfo.team1.id}>{scorecard.matchInfo.team1.name} (Team 1)</option>
-                      <option value={scorecard.matchInfo.team2.id}>{scorecard.matchInfo.team2.name} (Team 2)</option>
+                      <option value={scorecard.matchInfo.team1.id}>{scorecard.matchInfo.team1.name}</option>
+                      <option value={scorecard.matchInfo.team2.id}>{scorecard.matchInfo.team2.name}</option>
                     </select>
                     <p className="text-xs text-gray-500 mt-2">
                       2nd Innings will automatically be assigned to: {
