@@ -3,23 +3,22 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import AuroraBackground from '@/components/ui/AuroraBackground';
-import { Match, Player, Team } from '@/types';
+import { Match, Player } from '@/types';
 import { api } from '@/lib/data';
 import { LoadingSpinner } from '@/components/admin/animations';
 import { CheckCircle2, AlertCircle, Users, Save, RefreshCw, FileDown, FileText, FileSpreadsheet, Database } from 'lucide-react';
-import { useLeague } from '@/contexts/LeagueContext';
 import { WPLColors } from '@/lib/wplColors';
 import { exportPlaying11ToCSV, exportPlaying11ToExcel, exportPlaying11ToPDF, exportPlaying11ToDatabase } from './playing-11-export';
 import { exportPlaying11ToPDFModern2025 } from './pdf-export-modern-2025';
 
+const LEAGUE = 'ipl' as const;
+
 export default function Playing11Page() {
   const router = useRouter();
-  const { currentLeague } = useLeague();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [matches, setMatches] = useState<Match[]>([]);
   const [players, setPlayers] = useState<Player[]>([]);
-  const [teams, setTeams] = useState<Team[]>([]);
   const [selectedMatchId, setSelectedMatchId] = useState<string>('');
   const [team1Playing11, setTeam1Playing11] = useState<string[]>([]);
   const [team2Playing11, setTeam2Playing11] = useState<string[]>([]);
@@ -62,7 +61,7 @@ export default function Playing11Page() {
     checkAuth();
   }, [router]);
 
-  // Load matches, players, and teams
+  // Load matches and players
   const loadData = useCallback(async (showLoading = false) => {
     if (!isAuthenticated) return;
 
@@ -71,19 +70,17 @@ export default function Playing11Page() {
     }
 
     try {
-              const [matchesData, playersData, teamsData] = await Promise.all([
-                api.getMatches(currentLeague, { includeAll: true }),
-                api.getPlayers(undefined, currentLeague),
-                api.getTeams(currentLeague),
+              const [matchesData, playersData] = await Promise.all([
+                api.getMatches(LEAGUE, { includeAll: true }),
+                api.getPlayers(undefined, LEAGUE),
               ]);
       setMatches(matchesData);
       setPlayers(playersData);
-      setTeams(teamsData);
       
       // Debug: Log players data from KV
       console.log('=== PLAYERS LOADED FROM KV (playing-11) ===');
       console.log('Total players loaded:', playersData.length);
-      console.log('Current league:', currentLeague);
+      console.log('Current league:', LEAGUE);
       console.log('All players:', playersData.map(p => ({
         id: p.id,
         name: p.name,
@@ -95,9 +92,9 @@ export default function Playing11Page() {
       
       const playersByLeague = playersData.filter(p => {
         const playerLeague = p.league || 'ipl';
-        return playerLeague === currentLeague;
+        return playerLeague === LEAGUE;
       });
-      console.log(`Players for ${currentLeague}:`, playersByLeague.length);
+      console.log(`Players for ${LEAGUE}:`, playersByLeague.length);
       console.log('Players by league:', playersByLeague.map(p => ({
         id: p.id,
         name: p.name,
@@ -109,7 +106,7 @@ export default function Playing11Page() {
         console.warn('⚠️ No players found in KV storage at all!');
         console.warn('Please check if players exist in Workers KV storage.');
       } else if (playersByLeague.length === 0) {
-        console.warn(`⚠️ No players found for league: ${currentLeague}`);
+        console.warn(`⚠️ No players found for league: ${LEAGUE}`);
         const uniqueLeagues = Array.from(new Set(playersData.map(p => p.league || 'ipl')));
         console.warn('Players in KV have leagues:', uniqueLeagues);
       }
@@ -135,7 +132,7 @@ export default function Playing11Page() {
         setIsRefreshing(false);
       }
     }
-  }, [isAuthenticated, currentLeague]);
+  }, [isAuthenticated]);
 
   useEffect(() => {
     loadData();
@@ -156,7 +153,7 @@ export default function Playing11Page() {
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, [isAuthenticated, currentLeague, loadData]);
+  }, [isAuthenticated, loadData]);
 
   const selectedMatch = useMemo(
     () => matches.find((m) => m.id === selectedMatchId) || null,
@@ -542,7 +539,7 @@ export default function Playing11Page() {
       const team1SubsOverlap = team1SubsUnique.filter((id) => sanitizedTeam1Playing11.includes(id));
       const team2SubsOverlap = team2SubsUnique.filter((id) => sanitizedTeam2Playing11.includes(id));
 
-      const isIPL = currentLeague === 'ipl';
+      const isIPL = LEAGUE === 'ipl';
       if (isIPL) {
         if (team1SubsRaw.length !== team1SubsUnique.length || team2SubsRaw.length !== team2SubsUnique.length) {
           alert('Impact substitutes must be unique (no duplicates).');
@@ -711,8 +708,8 @@ export default function Playing11Page() {
     }
   };
 
-  const isWPL = currentLeague === 'wpl';
-  const isIPL = currentLeague === 'ipl';
+  const isWPL = false;
+  const isIPL = true;
   const canExport = !!selectedMatch && (
     team1Playing11.length > 0 ||
     team2Playing11.length > 0 ||
@@ -1010,7 +1007,7 @@ export default function Playing11Page() {
                       <AlertCircle className="w-12 h-12 mx-auto mb-3" style={{ color: isWPL ? WPLColors.pink : '#60A5FA' }} />
                       <p className="text-lg font-semibold text-white mb-2">No Players Found</p>
                       <p className="text-sm mb-4" style={{ color: isWPL ? WPLColors.textMuted : '#9CA3AF' }}>
-                        No players found for {selectedMatch.team1.name} in {currentLeague.toUpperCase()}.
+                        No players found for {selectedMatch.team1.name} in {LEAGUE.toUpperCase()}.
                       </p>
                       <p className="text-xs mb-4" style={{ color: isWPL ? WPLColors.textMuted : '#9CA3AF' }}>
                         Please add players in the <strong>Admin Players</strong> page and ensure they are assigned to this team.
@@ -1382,7 +1379,7 @@ export default function Playing11Page() {
                       <AlertCircle className="w-12 h-12 mx-auto mb-3" style={{ color: isWPL ? WPLColors.pink : '#60A5FA' }} />
                       <p className="text-lg font-semibold text-white mb-2">No Players Found</p>
                       <p className="text-sm mb-4" style={{ color: isWPL ? WPLColors.textMuted : '#9CA3AF' }}>
-                        No players found for {selectedMatch.team2.name} in {currentLeague.toUpperCase()}.
+                        No players found for {selectedMatch.team2.name} in {LEAGUE.toUpperCase()}.
                       </p>
                       <p className="text-xs mb-4" style={{ color: isWPL ? WPLColors.textMuted : '#9CA3AF' }}>
                         Please add players in the <strong>Admin Players</strong> page and ensure they are assigned to this team.

@@ -206,6 +206,325 @@ function isPlaceholderTeamId(value) {
   return normalizeTeamId(value).startsWith('tbd-');
 }
 
+function isPlaceholderTeam(team) {
+  if (!team) return true;
+
+  const teamId = normalizeTeamId(team.id);
+  if (teamId.startsWith('tbd-')) return true;
+
+  const haystack = `${team.name || ''} ${team.shortName || ''}`.toLowerCase();
+  return (
+    haystack.includes('tbd') ||
+    haystack.includes('place team') ||
+    haystack.includes('1st place') ||
+    haystack.includes('2nd place') ||
+    haystack.includes('3rd place') ||
+    haystack.includes('4th place') ||
+    haystack.includes('winner of') ||
+    haystack.includes('loser of')
+  );
+}
+
+function extractRunsFromScore(score) {
+  if (typeof score === 'number' && Number.isFinite(score)) return score;
+  if (typeof score !== 'string') return 0;
+
+  const match = score.trim().match(/^(\d+)/);
+  if (!match) return 0;
+
+  const parsed = Number(match[1]);
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
+function isNoResultMatch(match) {
+  const haystack = `${match?.resultType || ''} ${match?.resultReason || ''} ${match?.result || ''}`.toLowerCase();
+  return haystack.includes('no result') || haystack.includes('abandoned') || haystack.includes('washout');
+}
+
+function getFallbackTeam(teamId, league) {
+  return {
+    id: teamId,
+    shortName: `Team ${teamId}`,
+    name: `Team ${teamId}`,
+    logo: '',
+    league: league || 'ipl',
+    colors: { primary: '#6B7280', secondary: '#9CA3AF' },
+    players: [],
+  };
+}
+
+function getBaseTeamObject(match, key, teams) {
+  const existingTeam = match?.[key];
+  if (existingTeam && existingTeam.name && existingTeam.shortName) {
+    return {
+      ...existingTeam,
+      players: existingTeam.players || [],
+    };
+  }
+
+  const idKey = key === 'team1' ? 'team1Id' : 'team2Id';
+  const teamId = String(match?.[idKey] ?? existingTeam?.id ?? '').trim();
+  const team = getTeamById(teamId, teams);
+  if (team) {
+    return {
+      ...team,
+      players: team.players || [],
+    };
+  }
+
+  return getFallbackTeam(teamId, inferMatchLeague(match) || match?.league || 'ipl');
+}
+
+function sortStandingsRows(a, b) {
+  if (b.points !== a.points) return b.points - a.points;
+  if (b.wins !== a.wins) return b.wins - a.wins;
+  if (b.netRunRate !== a.netRunRate) return b.netRunRate - a.netRunRate;
+  return String(a.team?.name || '').localeCompare(String(b.team?.name || ''));
+}
+
+function createMatchResolutionContext(allMatches, teams) {
+  return {
+    allMatches: Array.isArray(allMatches) ? allMatches : [],
+    teams,
+    standingsBySeason: new Map(),
+    resolvedTeamsByMatchId: new Map(),
+    resolvingMatchIds: new Set(),
+  };
+}
+
+function buildIplSeasonStandings(matches, teams, seasonYear) {
+  const rowsById = new Map();
+
+  teams.forEach((team) => {
+    if ((team?.league || 'ipl') !== 'ipl') return;
+    if (isPlaceholderTeam(team)) return;
+
+    rowsById.set(String(team.id), {
+      team: {
+        ...team,
+        players: team.players || [],
+      },
+      matchesPlayed: 0,
+      wins: 0,
+      losses: 0,
+      noResult: 0,
+      points: 0,
+      netRunRate: 0,
+      totalRunsScored: 0,
+      totalRunsConceded: 0,
+      nrrMatches: 0,
+    });
+  });
+
+  const getResolvedTeamPair = (match) => {
+    const team1 = getBaseTeamObject(match, 'team1', teams);
+    const team2 = getBaseTeamObject(match, 'team2', teams);
+    return { team1, team2 };
+  };
+
+  matches.forEach((match) => {
+    if ((inferMatchLeague(match) || match?.league || 'ipl') !== 'ipl') return;
+    if (match?.playoffType) return;
+    if (match?.status !== 'completed') return;
+    if (getYearFromDateLike(match?.date) !== seasonYear) return;
+
+    const team1Id = normalizeTeamId(match?.team1Id ?? match?.team1?.id);
+    const team2Id = normalizeTeamId(match?.team2Id ?? match?.team2?.id);
+    if (!rowsById.has(team1Id) || !rowsById.has(team2Id)) return;
+
+    const row1 = rowsById.get(team1Id);
+    const row2 = rowsById.get(team2Id);
+    row1.matchesPlayed += 1;
+    row2.matchesPlayed += 1;
+
+    if (isNoResultMatch(match)) {
+      row1.noResult += 1;
+      row2.noResult += 1;
+      row1.points += 1;
+      row2.points += 1;
+    } else {
+      const { team1, team2 } = getResolvedTeamPair(match);
+      const team1Runs = match?.score?.team1?.runs;
+      const team2Runs = match?.score?.team2?.runs;
+
+      let winnerId = '';
+      if (typeof team1Runs === 'number' && typeof team2Runs === 'number' && team1Runs !== team2Runs) {
+        winnerId = team1Runs > team2Runs ? team1Id : team2Id;
+      } else {
+        const result = `${match?.result || ''}`.toLowerCase();
+        const team1Tokens = [team1?.name, team1?.shortName]
+          .filter(Boolean)
+          .map((value) => String(value).toLowerCase());
+        const team2Tokens = [team2?.name, team2?.shortName]
+          .filter(Boolean)
+          .map((value) => String(value).toLowerCase());
+
+        const team1Mentioned = team1Tokens.some((token) => result.includes(token));
+        const team2Mentioned = team2Tokens.some((token) => result.includes(token));
+
+        if (team1Mentioned && !team2Mentioned) winnerId = team1Id;
+        if (team2Mentioned && !team1Mentioned) winnerId = team2Id;
+      }
+
+      if (winnerId === team1Id) {
+        row1.wins += 1;
+        row1.points += 2;
+        row2.losses += 1;
+      } else if (winnerId === team2Id) {
+        row2.wins += 1;
+        row2.points += 2;
+        row1.losses += 1;
+      }
+    }
+
+    const team1RunsForNrr = extractRunsFromScore(match?.team1Score ?? match?.score?.team1?.runs);
+    const team2RunsForNrr = extractRunsFromScore(match?.team2Score ?? match?.score?.team2?.runs);
+    if (team1RunsForNrr > 0 || team2RunsForNrr > 0) {
+      row1.totalRunsScored += team1RunsForNrr;
+      row1.totalRunsConceded += team2RunsForNrr;
+      row1.nrrMatches += 1;
+
+      row2.totalRunsScored += team2RunsForNrr;
+      row2.totalRunsConceded += team1RunsForNrr;
+      row2.nrrMatches += 1;
+    }
+  });
+
+  const standings = Array.from(rowsById.values()).map((row) => ({
+    ...row,
+    netRunRate:
+      row.nrrMatches > 0
+        ? Number(((row.totalRunsScored - row.totalRunsConceded) / (row.nrrMatches * 20)).toFixed(2))
+        : 0,
+  }));
+
+  standings.sort(sortStandingsRows);
+  return standings;
+}
+
+function getIplSeasonStandings(context, seasonYear) {
+  if (!context.standingsBySeason.has(seasonYear)) {
+    context.standingsBySeason.set(
+      seasonYear,
+      buildIplSeasonStandings(context.allMatches, context.teams, seasonYear)
+    );
+  }
+  return context.standingsBySeason.get(seasonYear) || [];
+}
+
+function getPlayoffMatchForSeason(context, seasonYear, playoffType) {
+  return (
+    context.allMatches.find((candidate) => {
+      if ((inferMatchLeague(candidate) || candidate?.league || 'ipl') !== 'ipl') return false;
+      if (candidate?.playoffType !== playoffType) return false;
+      return getYearFromDateLike(candidate?.date) === seasonYear;
+    }) || null
+  );
+}
+
+function resolveWinningTeam(match, context) {
+  if (!match || match.status !== 'completed') return null;
+  if (isNoResultMatch(match)) return null;
+
+  const { team1, team2 } = getResolvedTeamPair(match, context);
+  if (!team1 || !team2) return null;
+
+  const team1Runs = match?.score?.team1?.runs;
+  const team2Runs = match?.score?.team2?.runs;
+  if (typeof team1Runs === 'number' && typeof team2Runs === 'number' && team1Runs !== team2Runs) {
+    return team1Runs > team2Runs ? team1 : team2;
+  }
+
+  const result = `${match?.result || ''}`.toLowerCase();
+  const team1Tokens = [team1.name, team1.shortName]
+    .filter(Boolean)
+    .map((value) => String(value).toLowerCase());
+  const team2Tokens = [team2.name, team2.shortName]
+    .filter(Boolean)
+    .map((value) => String(value).toLowerCase());
+
+  const team1Mentioned = team1Tokens.some((token) => result.includes(token));
+  const team2Mentioned = team2Tokens.some((token) => result.includes(token));
+
+  if (team1Mentioned && !team2Mentioned) return team1;
+  if (team2Mentioned && !team1Mentioned) return team2;
+  return null;
+}
+
+function resolveLosingTeam(match, context) {
+  if (!match) return null;
+  const winner = resolveWinningTeam(match, context);
+  if (!winner) return null;
+
+  const { team1, team2 } = getResolvedTeamPair(match, context);
+  if (!team1 || !team2) return null;
+  return String(winner.id) === String(team1.id) ? team2 : team1;
+}
+
+function getResolvedTeamPair(match, context) {
+  if (!match) return { team1: null, team2: null };
+
+  const cacheKey = String(match.id || '');
+  if (cacheKey && context.resolvedTeamsByMatchId.has(cacheKey)) {
+    return context.resolvedTeamsByMatchId.get(cacheKey);
+  }
+
+  const baseTeam1 = getBaseTeamObject(match, 'team1', context.teams);
+  const baseTeam2 = getBaseTeamObject(match, 'team2', context.teams);
+  const baseResolved = { team1: baseTeam1, team2: baseTeam2 };
+
+  if (!cacheKey) return baseResolved;
+  if (context.resolvingMatchIds.has(cacheKey)) return baseResolved;
+
+  context.resolvingMatchIds.add(cacheKey);
+
+  try {
+    let team1 = baseTeam1;
+    let team2 = baseTeam2;
+    const matchLeague = inferMatchLeague(match) || match?.league || 'ipl';
+    const hasPlaceholder =
+      isPlaceholderTeamId(match?.team1Id ?? baseTeam1?.id) ||
+      isPlaceholderTeamId(match?.team2Id ?? baseTeam2?.id) ||
+      isPlaceholderTeam(baseTeam1) ||
+      isPlaceholderTeam(baseTeam2);
+
+    if (matchLeague === 'ipl' && match?.playoffType && hasPlaceholder) {
+      const seasonYear = getYearFromDateLike(match?.date) || DEFAULT_SEASON_YEAR;
+      const standings = getIplSeasonStandings(context, seasonYear);
+
+      let derivedTeam1 = null;
+      let derivedTeam2 = null;
+
+      if (match.playoffType === 'qualifier1') {
+        derivedTeam1 = standings[0]?.team || null;
+        derivedTeam2 = standings[1]?.team || null;
+      } else if (match.playoffType === 'eliminator') {
+        derivedTeam1 = standings[2]?.team || null;
+        derivedTeam2 = standings[3]?.team || null;
+      } else if (match.playoffType === 'qualifier2') {
+        const qualifier1Match = getPlayoffMatchForSeason(context, seasonYear, 'qualifier1');
+        const eliminatorMatch = getPlayoffMatchForSeason(context, seasonYear, 'eliminator');
+        derivedTeam1 = resolveLosingTeam(qualifier1Match, context);
+        derivedTeam2 = resolveWinningTeam(eliminatorMatch, context);
+      } else if (match.playoffType === 'final') {
+        const qualifier1Match = getPlayoffMatchForSeason(context, seasonYear, 'qualifier1');
+        const qualifier2Match = getPlayoffMatchForSeason(context, seasonYear, 'qualifier2');
+        derivedTeam1 = resolveWinningTeam(qualifier1Match, context);
+        derivedTeam2 = resolveWinningTeam(qualifier2Match, context);
+      }
+
+      if (isPlaceholderTeam(baseTeam1) && derivedTeam1) team1 = derivedTeam1;
+      if (isPlaceholderTeam(baseTeam2) && derivedTeam2) team2 = derivedTeam2;
+    }
+
+    const resolved = { team1, team2 };
+    context.resolvedTeamsByMatchId.set(cacheKey, resolved);
+    return resolved;
+  } finally {
+    context.resolvingMatchIds.delete(cacheKey);
+  }
+}
+
 function isActiveSeasonMatch(match, seasonYear) {
   const matchLeague = inferMatchLeague(match) || match.league || 'ipl';
   const activeIds = matchLeague === 'wpl' ? ACTIVE_WPL_2026_TEAM_IDS : ACTIVE_IPL_2026_TEAM_IDS;
@@ -267,82 +586,21 @@ function getTeamById(teamId, teams) {
 }
 
 // Helper function to format match with full team objects
-function formatMatch(match, teams) {
-  // If match already has full team objects, use them (preserve logo property)
-  if (match.team1 && match.team1.name && match.team1.shortName) {
-    return {
-      id: match.id,
-      league: match.league || 'ipl',
-      date: match.date,
-      time: match.time,
-      venue: match.venue,
-      team1: match.team1, // Preserve full team object including logo
-      team2: match.team2, // Preserve full team object including logo
-      status: match.status,
-      result: match.result,
-      resultType: match.resultType,
-      resultReason: match.resultReason,
-      resultReasonDetail: match.resultReasonDetail,
-      statusNote: match.statusNote,
-      reducedOversTo: match.reducedOversTo,
-      dlsApplied: match.dlsApplied,
-      score: match.score,
-      team1Score: match.team1Score,
-      team2Score: match.team2Score,
-      matchNumber: match.matchNumber,
-      playoffType: match.playoffType,
-      playing11: match.playing11,
-      captains: match.captains,
-      impactPlayer: match.impactPlayer,
-      impactSubstitutes: match.impactSubstitutes,
-      toss: match.toss,
-      matchState: match.matchState,
-      _isMock: match._isMock
-    };
-  }
-  
-  // Otherwise, resolve team IDs to team objects
-  const team1 = getTeamById(match.team1Id, teams);
-  const team2 = getTeamById(match.team2Id, teams);
-  
-  // Log if teams are not found for debugging
-  if (!team1) {
-    console.warn(`Team not found for team1Id: ${match.team1Id}. Available teams:`, teams.map(t => ({ id: t.id, shortName: t.shortName })));
-  }
-  if (!team2) {
-    console.warn(`Team not found for team2Id: ${match.team2Id}. Available teams:`, teams.map(t => ({ id: t.id, shortName: t.shortName })));
-  }
-  
+function formatMatch(match, teams, allMatchesOrContext) {
+  const context =
+    allMatchesOrContext && Array.isArray(allMatchesOrContext.allMatches)
+      ? allMatchesOrContext
+      : createMatchResolutionContext(allMatchesOrContext, teams);
+  const { team1, team2 } = getResolvedTeamPair(match, context);
+
   return {
     id: match.id,
     league: match.league || 'ipl', // Ensure league property is included
     date: match.date,
     time: match.time,
     venue: match.venue,
-    team1: team1 ? {
-      ...team1, // Preserve all team properties including logo
-      players: team1.players || []
-    } : { 
-      id: match.team1Id, 
-      shortName: `Team ${match.team1Id}`, 
-      name: `Team ${match.team1Id}`, 
-      logo: '', 
-      league: match.league || 'ipl',
-      colors: { primary: '#6B7280', secondary: '#9CA3AF' },
-      players: []
-    },
-    team2: team2 ? {
-      ...team2, // Preserve all team properties including logo
-      players: team2.players || []
-    } : { 
-      id: match.team2Id, 
-      shortName: `Team ${match.team2Id}`, 
-      name: `Team ${match.team2Id}`, 
-      logo: '', 
-      league: match.league || 'ipl',
-      colors: { primary: '#6B7280', secondary: '#9CA3AF' },
-      players: []
-    },
+    team1: team1 || getFallbackTeam(match.team1Id, match.league || 'ipl'),
+    team2: team2 || getFallbackTeam(match.team2Id, match.league || 'ipl'),
     status: match.status,
     result: match.result,
     resultType: match.resultType,
@@ -443,7 +701,8 @@ async function handleGetRequest(context) {
     }
     
     // Format matches with team objects
-    const formattedMatches = matches.map(match => formatMatch(match, allTeams));
+    const resolutionContext = createMatchResolutionContext(matches, allTeams);
+    const formattedMatches = matches.map(match => formatMatch(match, allTeams, resolutionContext));
     
     // Sync results from scorecards for completed matches with missing results
     const shouldSyncScorecards = forceScorecardSync || (!disableScorecardSync && !matchId);
@@ -578,10 +837,11 @@ async function handleBulkPostRequest(context) {
 
     // Single atomic write
     await env.IPL_CACHE.put('matches', JSON.stringify(matches));
+    const resolutionContext = createMatchResolutionContext(matches, allTeams);
 
     return new Response(JSON.stringify({
       success: true,
-      created: created.map(m => formatMatch(m, allTeams)),
+      created: created.map(m => formatMatch(m, allTeams, resolutionContext)),
       count: created.length
     }), { status: 201, headers: { 'Content-Type': 'application/json' } });
   } catch (error) {
@@ -661,8 +921,9 @@ async function handlePostRequest(context) {
     if (!allTeams || allTeams.length === 0) {
       allTeams = mockTeams;
     }
+    const resolutionContext = createMatchResolutionContext(matches, allTeams);
     
-    return new Response(JSON.stringify(formatMatch(newMatch, allTeams)), {
+    return new Response(JSON.stringify(formatMatch(newMatch, allTeams, resolutionContext)), {
       status: 201,
       headers: { 'Content-Type': 'application/json' }
     });
@@ -782,8 +1043,9 @@ async function handlePutRequest(context) {
     if (!allTeams || allTeams.length === 0) {
       allTeams = mockTeams;
     }
+    const resolutionContext = createMatchResolutionContext(matches, allTeams);
     
-    return new Response(JSON.stringify(formatMatch(updatedMatch, allTeams)), {
+    return new Response(JSON.stringify(formatMatch(updatedMatch, allTeams, resolutionContext)), {
       status: 200,
       headers: { 'Content-Type': 'application/json' }
     });
