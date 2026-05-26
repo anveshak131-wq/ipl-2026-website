@@ -35,7 +35,15 @@ import {
   TrophyIcon
 } from '@/components/ui/CustomIcons';
 import { AchievementEntry, Team, Player, CoachingStaff, KeyPlayers, Match, Trophy } from '@/types';
-import { PlayerCardProps, KeyPlayersSectionProps, StatsTabProps, AboutTabProps } from '@/types/components';
+import {
+  PlayerCardProps,
+  KeyPlayersSectionProps,
+  StatsTabProps,
+  AboutTabProps,
+  PlayerPerformanceMetric,
+  PlayerStatsScope,
+  TeamPlayerStatRow,
+} from '@/types/components';
 import { sortPlayersByRoleAndAge } from '@/lib/playerSort';
 import { getAnimatedLogoPath, getLogoPath } from '@/lib/logoUtils';
 import { SEASON_YEAR } from '@/lib/season';
@@ -54,6 +62,100 @@ import { getMatchAdvisory } from '@/lib/matchAdvisory';
 interface TeamDetailClientProps {
   teamId: string;
   league?: 'ipl' | 'wpl';
+}
+
+function toStatNumber(value: unknown): number {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
+function sortPlayerStatRows(rows: TeamPlayerStatRow[]): TeamPlayerStatRow[] {
+  return [...rows].sort(
+    (a, b) => b.matches - a.matches || b.runs - a.runs || b.wickets - a.wickets
+  );
+}
+
+function buildSeasonPlayerRows(squad: Player[], playerStats: TeamPlayerStatRow[]): TeamPlayerStatRow[] {
+  const statsById = new Map<string, TeamPlayerStatRow>();
+  const statsByName = new Map<string, TeamPlayerStatRow>();
+
+  playerStats.forEach((stat) => {
+    if (stat.playerId) statsById.set(String(stat.playerId), stat);
+    if (stat.playerName) statsByName.set(String(stat.playerName).toLowerCase(), stat);
+  });
+
+  return sortPlayerStatRows(
+    squad.map((player) => {
+      const stat =
+        statsById.get(String(player.id)) ||
+        statsByName.get(String(player.name || '').toLowerCase());
+
+      return {
+        playerId: String(player.id),
+        playerName: player.name,
+        role: player.role,
+        matches: toStatNumber(stat?.matches),
+        innings: toStatNumber(stat?.innings),
+        runs: toStatNumber(stat?.runs),
+        ballsFaced: toStatNumber(stat?.ballsFaced),
+        average: toStatNumber(stat?.average),
+        strikeRate: toStatNumber(stat?.strikeRate),
+        highestScore: toStatNumber(stat?.highestScore),
+        fours: toStatNumber(stat?.fours),
+        sixes: toStatNumber(stat?.sixes),
+        fifties: toStatNumber(stat?.fifties),
+        hundreds: toStatNumber(stat?.hundreds),
+        notOuts: toStatNumber(stat?.notOuts),
+        wickets: toStatNumber(stat?.wickets),
+        bowlingAverage: toStatNumber(stat?.bowlingAverage),
+        economy: toStatNumber(stat?.economy),
+        bowlingStrikeRate: toStatNumber(stat?.bowlingStrikeRate),
+        ballsBowled: toStatNumber(stat?.ballsBowled),
+        oversBowled: toStatNumber(stat?.oversBowled),
+        maidens: toStatNumber(stat?.maidens),
+        bestBowling: stat?.bestBowling || '0/0',
+        fourWickets: toStatNumber(stat?.fourWickets),
+        fiveWickets: toStatNumber(stat?.fiveWickets),
+      };
+    })
+  );
+}
+
+function buildOverallPlayerRows(squad: Player[]): TeamPlayerStatRow[] {
+  return sortPlayerStatRows(
+    squad.map((player) => {
+      const stat = player.stats || {};
+      const ballsBowled = toStatNumber(stat.balls);
+
+      return {
+        playerId: String(player.id),
+        playerName: player.name,
+        role: player.role,
+        matches: toStatNumber(stat.matches),
+        innings: toStatNumber(stat.battingInnings),
+        runs: toStatNumber(stat.runs),
+        ballsFaced: toStatNumber(stat.ballsFaced),
+        average: toStatNumber(stat.average ?? stat.battingAverage),
+        strikeRate: toStatNumber(stat.strikeRate ?? stat.battingStrikeRate),
+        highestScore: toStatNumber(stat.highest ?? stat.highestScore),
+        fours: toStatNumber(stat.fours),
+        sixes: toStatNumber(stat.sixes),
+        fifties: toStatNumber(stat.fifties),
+        hundreds: toStatNumber(stat.hundreds),
+        notOuts: toStatNumber(stat.notOuts),
+        wickets: toStatNumber(stat.wickets),
+        bowlingAverage: toStatNumber(stat.bowlingAverage),
+        economy: toStatNumber(stat.economy),
+        bowlingStrikeRate: toStatNumber(stat.bowlingStrikeRate),
+        ballsBowled,
+        oversBowled: ballsBowled > 0 ? parseFloat((ballsBowled / 6).toFixed(1)) : 0,
+        maidens: toStatNumber(stat.maidens),
+        bestBowling: stat.bestBowling || '0/0',
+        fourWickets: toStatNumber(stat.fourWickets),
+        fiveWickets: toStatNumber(stat.fiveWickets),
+      };
+    })
+  );
 }
 
 const TeamFormationVisualizer = dynamic(() => import('@/components/teams/TeamFormationVisualizer'), {
@@ -191,8 +293,9 @@ export default function TeamDetailClient({ teamId, league }: TeamDetailClientPro
   const [lastMatch, setLastMatch] = useState<Match | null>(null);
   const [nextMatch, setNextMatch] = useState<Match | null>(null);
   const [allMatches, setAllMatches] = useState<Match[]>([]);
-  const [playerStats, setPlayerStats] = useState<any[]>([]);
+  const [playerStats, setPlayerStats] = useState<TeamPlayerStatRow[]>([]);
   const [seasonTeamStats, setSeasonTeamStats] = useState<any | null>(null);
+  const [statsScope, setStatsScope] = useState<PlayerStatsScope>('season');
   const [coachingStaff, setCoachingStaff] = useState<CoachingStaff | null>(null);
   const [keyPlayers, setKeyPlayers] = useState<KeyPlayers | null>(null);
   const [teamAchievements, setTeamAchievements] = useState<AchievementEntry[]>([]);
@@ -267,40 +370,49 @@ export default function TeamDetailClient({ teamId, league }: TeamDetailClientPro
       const bowlingStats = Array.isArray(statsData?.bowlingStats) ? statsData.bowlingStats : [];
       const teamStatsRows = Array.isArray(statsData?.teamStats) ? statsData.teamStats : [];
 
-      const mergedStatsMap = new Map<string, any>();
+      const mergedStatsMap = new Map<string, TeamPlayerStatRow>();
 
       battingStats.forEach((battingStat: any) => {
         const key = String(battingStat.playerId || battingStat.playerName || '');
         if (!key) return;
         mergedStatsMap.set(key, {
-          playerId: battingStat.playerId,
-          playerName: battingStat.playerName,
-          matches: battingStat.matches || 0,
-          innings: battingStat.innings || 0,
-          runs: battingStat.runs || 0,
-          ballsFaced: battingStat.ballsFaced || 0,
-          average: battingStat.average || 0,
-          strikeRate: battingStat.strikeRate || 0,
-          highestScore: battingStat.highestScore || 0,
-          fours: battingStat.fours || 0,
-          sixes: battingStat.sixes || 0,
-          fifties: battingStat.fifties || 0,
-          hundreds: battingStat.hundreds || 0,
-          notOuts: battingStat.notOuts || 0,
+          playerId: String(battingStat.playerId || ''),
+          playerName: battingStat.playerName || 'Unknown',
+          role: 'Batsman',
+          matches: toStatNumber(battingStat.matches),
+          innings: toStatNumber(battingStat.innings),
+          runs: toStatNumber(battingStat.runs),
+          ballsFaced: toStatNumber(battingStat.ballsFaced ?? battingStat.balls),
+          average: toStatNumber(battingStat.average),
+          strikeRate: toStatNumber(battingStat.strikeRate),
+          highestScore: toStatNumber(battingStat.highestScore),
+          fours: toStatNumber(battingStat.fours),
+          sixes: toStatNumber(battingStat.sixes),
+          fifties: toStatNumber(battingStat.fifties),
+          hundreds: toStatNumber(battingStat.hundreds),
+          notOuts: toStatNumber(battingStat.notOuts),
           wickets: 0,
           bowlingAverage: 0,
           economy: 0,
+          bowlingStrikeRate: 0,
+          ballsBowled: 0,
+          oversBowled: 0,
+          maidens: 0,
           bestBowling: '0/0',
+          fourWickets: 0,
+          fiveWickets: 0,
         });
       });
 
       bowlingStats.forEach((bowlingStat: any) => {
         const key = String(bowlingStat.playerId || bowlingStat.playerName || '');
         if (!key) return;
+        const ballsBowled = toStatNumber(bowlingStat.balls);
         const existing = mergedStatsMap.get(key) || {
-          playerId: bowlingStat.playerId,
-          playerName: bowlingStat.playerName,
-          matches: bowlingStat.matches || 0,
+          playerId: String(bowlingStat.playerId || ''),
+          playerName: bowlingStat.playerName || 'Unknown',
+          role: 'Bowler',
+          matches: toStatNumber(bowlingStat.matches),
           innings: 0,
           runs: 0,
           ballsFaced: 0,
@@ -312,15 +424,32 @@ export default function TeamDetailClient({ teamId, league }: TeamDetailClientPro
           fifties: 0,
           hundreds: 0,
           notOuts: 0,
+          wickets: 0,
+          bowlingAverage: 0,
+          economy: 0,
+          bowlingStrikeRate: 0,
+          ballsBowled: 0,
+          oversBowled: 0,
+          maidens: 0,
+          bestBowling: '0/0',
+          fourWickets: 0,
+          fiveWickets: 0,
         };
 
         mergedStatsMap.set(key, {
           ...existing,
-          matches: Math.max(existing.matches || 0, bowlingStat.matches || 0),
-          wickets: bowlingStat.wickets || 0,
-          bowlingAverage: bowlingStat.average || 0,
-          economy: bowlingStat.economy || 0,
+          matches: Math.max(existing.matches || 0, toStatNumber(bowlingStat.matches)),
+          wickets: toStatNumber(bowlingStat.wickets),
+          bowlingAverage: toStatNumber(bowlingStat.average),
+          economy: toStatNumber(bowlingStat.economy),
+          bowlingStrikeRate: toStatNumber(bowlingStat.strikeRate),
+          ballsBowled,
+          oversBowled:
+            ballsBowled > 0 ? parseFloat((ballsBowled / 6).toFixed(1)) : toStatNumber(bowlingStat.overs),
+          maidens: toStatNumber(bowlingStat.maidens),
           bestBowling: bowlingStat.bestBowling || '0/0',
+          fourWickets: toStatNumber(bowlingStat.fourWickets),
+          fiveWickets: toStatNumber(bowlingStat.fiveWickets),
         });
       });
 
@@ -845,6 +974,19 @@ export default function TeamDetailClient({ teamId, league }: TeamDetailClientPro
   const wicketkeepers = filteredPlayers.filter(p => p.role === 'Wicket-keeper');
   const allRounders = filteredPlayers.filter(p => p.role === 'All-rounder');
   const bowlers = filteredPlayers.filter(p => p.role === 'Bowler');
+  const seasonPlayerRows = buildSeasonPlayerRows(teamData.players || [], playerStats);
+  const overallPlayerRows = buildOverallPlayerRows(teamData.players || []);
+  const chartRows = statsScope === 'season' ? seasonPlayerRows : overallPlayerRows;
+  const chartScopeLabel = statsScope === 'season' ? `Season ${SEASON_YEAR}` : 'Overall career';
+  const chartSourceLabel = statsScope === 'season' ? 'Published scorecards' : 'Stored career stats';
+  const chartConfigs: Array<{ metric: PlayerPerformanceMetric; title: string; color: string }> = [
+    { metric: 'runs', title: 'Most Runs', color: primaryColor.solid },
+    { metric: 'wickets', title: 'Most Wickets', color: secondaryColor.solid },
+    { metric: 'sixes', title: 'Most Sixes', color: '#F97316' },
+    { metric: 'strikeRate', title: 'Best Batting Strike Rate', color: '#F59E0B' },
+    { metric: 'economy', title: 'Best Economy', color: '#10B981' },
+    { metric: 'bowlingStrikeRate', title: 'Best Bowling Strike Rate', color: '#38BDF8' },
+  ];
   
 
   return (
@@ -1601,62 +1743,45 @@ export default function TeamDetailClient({ teamId, league }: TeamDetailClientPro
                 wicketkeepers={wicketkeepers}
                 playerStats={playerStats}
                 seasonTeamStats={seasonTeamStats}
+                statsScope={statsScope}
+                onStatsScopeChange={setStatsScope}
               />
               
-              {/* Player Performance Charts */}
               {teamData && teamData.players && teamData.players.length > 0 && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-10">
-                  <div className="rounded-3xl backdrop-blur-xl p-8 border shadow-xl"
-                       style={{
-                         background: `linear-gradient(135deg, ${primaryColor.light}, ${secondaryColor.light})`,
-                         borderColor: primaryColor.medium,
-                         boxShadow: `0 10px 30px ${primaryColor.glow}15`,
-                       }}>
-                    <PlayerPerformanceChart
-                      players={teamData.players}
-                      metric="runs"
-                      title="Top Run Scorers"
-                      color={primaryColor.solid}
-                    />
+                <div className="space-y-6 mt-10">
+                  <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+                    <div>
+                      <h3 className="text-2xl font-black text-white">Player Leaderboards</h3>
+                      <p className="text-sm text-gray-300">
+                        Ranked batting and bowling charts aligned to common IPL stat categories.
+                      </p>
+                    </div>
+                    <p className="text-xs uppercase tracking-[0.18em] text-gray-400">
+                      {chartScopeLabel}
+                    </p>
                   </div>
-                  <div className="rounded-3xl backdrop-blur-xl p-8 border shadow-xl"
-                       style={{
-                         background: `linear-gradient(135deg, ${primaryColor.light}, ${secondaryColor.light})`,
-                         borderColor: primaryColor.medium,
-                         boxShadow: `0 10px 30px ${primaryColor.glow}15`,
-                       }}>
-                    <PlayerPerformanceChart
-                      players={teamData.players}
-                      metric="wickets"
-                      title="Top Wicket Takers"
-                      color={secondaryColor.solid}
-                    />
-                  </div>
-                  <div className="rounded-3xl backdrop-blur-xl p-8 border shadow-xl"
-                       style={{
-                         background: `linear-gradient(135deg, ${primaryColor.light}, ${secondaryColor.light})`,
-                         borderColor: primaryColor.medium,
-                         boxShadow: `0 10px 30px ${primaryColor.glow}15`,
-                       }}>
-                    <PlayerPerformanceChart
-                      players={teamData.players}
-                      metric="average"
-                      title="Best Batting Averages"
-                      color="#10B981"
-                    />
-                  </div>
-                  <div className="rounded-3xl backdrop-blur-xl p-8 border shadow-xl"
-                       style={{
-                         background: `linear-gradient(135deg, ${primaryColor.light}, ${secondaryColor.light})`,
-                         borderColor: primaryColor.medium,
-                         boxShadow: `0 10px 30px ${primaryColor.glow}15`,
-                       }}>
-                    <PlayerPerformanceChart
-                      players={teamData.players}
-                      metric="strikeRate"
-                      title="Best Strike Rates"
-                      color="#F59E0B"
-                    />
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+                    {chartConfigs.map((chart) => (
+                      <div
+                        key={chart.metric}
+                        className="rounded-3xl backdrop-blur-xl p-8 border shadow-xl"
+                        style={{
+                          background: `linear-gradient(135deg, ${primaryColor.light}, ${secondaryColor.light})`,
+                          borderColor: primaryColor.medium,
+                          boxShadow: `0 10px 30px ${primaryColor.glow}15`,
+                        }}
+                      >
+                        <PlayerPerformanceChart
+                          rows={chartRows}
+                          metric={chart.metric}
+                          title={chart.title}
+                          color={chart.color}
+                          scopeLabel={chartScopeLabel}
+                          sourceLabel={chartSourceLabel}
+                        />
+                      </div>
+                    ))}
                   </div>
                 </div>
               )}
@@ -2669,73 +2794,16 @@ function StatsTab({
   wicketkeepers,
   playerStats = [],
   seasonTeamStats = null,
+  statsScope = 'season',
+  onStatsScopeChange,
 }: StatsTabProps) {
-  const [playerStatsScope, setPlayerStatsScope] = useState<'season' | 'overall'>('season');
-
   if (!teamData) return null;
   const squad: Player[] = (teamData.players || []) as Player[];
 
-  const toNumber = (value: unknown) => {
-    const parsed = Number(value);
-    return Number.isFinite(parsed) ? parsed : 0;
-  };
+  const seasonPlayerRows = buildSeasonPlayerRows(squad, playerStats);
+  const overallPlayerRows = buildOverallPlayerRows(squad);
 
-  const findSeasonPlayerStat = (player: Player) =>
-    playerStats.find(
-      (stat) =>
-        String(stat.playerId || '') === String(player.id) ||
-        String(stat.playerName || '').toLowerCase() === String(player.name || '').toLowerCase()
-    );
-
-  const seasonPlayerRows = squad
-    .map((player) => {
-      const stat = findSeasonPlayerStat(player) || {};
-      return {
-        playerId: String(player.id),
-        playerName: player.name,
-        role: player.role,
-        matches: toNumber(stat.matches),
-        runs: toNumber(stat.runs),
-        average: toNumber(stat.average),
-        strikeRate: toNumber(stat.strikeRate),
-        highestScore: toNumber(stat.highestScore),
-        fours: toNumber(stat.fours),
-        sixes: toNumber(stat.sixes),
-        fifties: toNumber(stat.fifties),
-        hundreds: toNumber(stat.hundreds),
-        wickets: toNumber(stat.wickets),
-        bowlingAverage: toNumber(stat.bowlingAverage),
-        economy: toNumber(stat.economy),
-        bestBowling: stat.bestBowling || '0/0',
-      };
-    })
-    .sort((a, b) => b.matches - a.matches || b.runs - a.runs || b.wickets - a.wickets);
-
-  const overallPlayerRows = squad
-    .map((player) => {
-      const stat = player.stats || {};
-      return {
-        playerId: String(player.id),
-        playerName: player.name,
-        role: player.role,
-        matches: toNumber(stat.matches),
-        runs: toNumber(stat.runs),
-        average: toNumber(stat.average ?? stat.battingAverage),
-        strikeRate: toNumber(stat.strikeRate ?? stat.battingStrikeRate),
-        highestScore: toNumber(stat.highest ?? stat.highestScore),
-        fours: toNumber(stat.fours),
-        sixes: toNumber(stat.sixes),
-        fifties: toNumber(stat.fifties),
-        hundreds: toNumber(stat.hundreds),
-        wickets: toNumber(stat.wickets),
-        bowlingAverage: toNumber(stat.bowlingAverage),
-        economy: toNumber(stat.economy),
-        bestBowling: stat.bestBowling || '0/0',
-      };
-    })
-    .sort((a, b) => b.matches - a.matches || b.runs - a.runs || b.wickets - a.wickets);
-
-  const aggregateRows = (rows: typeof seasonPlayerRows) =>
+  const aggregateRows = (rows: TeamPlayerStatRow[]) =>
     rows.reduce(
       (acc, row) => {
         acc.matches += row.matches;
@@ -2753,7 +2821,7 @@ function StatsTab({
   const overallTotals = aggregateRows(overallPlayerRows);
   const totalFiftyPlus = overallTotals.fifties + overallTotals.hundreds;
 
-  const getLeader = (rows: typeof seasonPlayerRows, field: 'runs' | 'wickets') => {
+  const getLeader = (rows: TeamPlayerStatRow[], field: 'runs' | 'wickets') => {
     const sorted = [...rows].sort((a, b) => b[field] - a[field]);
     const leader = sorted[0];
     return leader && leader[field] > 0 ? leader : null;
@@ -2764,21 +2832,21 @@ function StatsTab({
   const overallTopRunScorer = getLeader(overallPlayerRows, 'runs');
   const overallTopWicketTaker = getLeader(overallPlayerRows, 'wickets');
 
-  const displayedPlayerRows = playerStatsScope === 'season' ? seasonPlayerRows : overallPlayerRows;
+  const displayedPlayerRows = statsScope === 'season' ? seasonPlayerRows : overallPlayerRows;
 
   const seasonSummary = {
-    matches: toNumber(seasonTeamStats?.matches ?? seasonTeamStats?.matchesPlayed),
-    wins: toNumber(seasonTeamStats?.wins),
-    losses: toNumber(seasonTeamStats?.losses),
-    noResult: toNumber(seasonTeamStats?.noResult ?? seasonTeamStats?.noResults),
-    points: toNumber(seasonTeamStats?.points),
-    netRunRate: toNumber(seasonTeamStats?.netRunRate),
-    runsScored: toNumber(seasonTeamStats?.runsScored),
-    runsConceded: toNumber(seasonTeamStats?.runsConceded),
-    wicketsTaken: toNumber(seasonTeamStats?.wicketsTaken),
-    wicketsLost: toNumber(seasonTeamStats?.wicketsLost),
-    oversPlayed: toNumber(seasonTeamStats?.oversPlayed ?? seasonTeamStats?.oversFaced),
-    oversBowled: toNumber(seasonTeamStats?.oversBowled),
+    matches: toStatNumber(seasonTeamStats?.matches ?? seasonTeamStats?.matchesPlayed),
+    wins: toStatNumber(seasonTeamStats?.wins),
+    losses: toStatNumber(seasonTeamStats?.losses),
+    noResult: toStatNumber(seasonTeamStats?.noResult ?? seasonTeamStats?.noResults),
+    points: toStatNumber(seasonTeamStats?.points),
+    netRunRate: toStatNumber(seasonTeamStats?.netRunRate),
+    runsScored: toStatNumber(seasonTeamStats?.runsScored),
+    runsConceded: toStatNumber(seasonTeamStats?.runsConceded),
+    wicketsTaken: toStatNumber(seasonTeamStats?.wicketsTaken),
+    wicketsLost: toStatNumber(seasonTeamStats?.wicketsLost),
+    oversPlayed: toStatNumber(seasonTeamStats?.oversPlayed ?? seasonTeamStats?.oversFaced),
+    oversBowled: toStatNumber(seasonTeamStats?.oversBowled),
   };
 
   return (
@@ -3010,7 +3078,7 @@ function StatsTab({
               Individual Player Stats
             </h3>
             <p className="text-sm text-gray-100/75 mt-1">
-              Switch between {SEASON_YEAR} scorecard stats and stored overall career stats.
+              Switch between {SEASON_YEAR} scorecard stats and stored overall career stats for the table and leaderboards.
             </p>
           </div>
           <div className="inline-flex rounded-full border border-white/15 bg-black/20 p-1">
@@ -3018,11 +3086,11 @@ function StatsTab({
               { key: 'season', label: `Season ${SEASON_YEAR}` },
               { key: 'overall', label: 'Overall' },
             ].map((option) => {
-              const active = playerStatsScope === option.key;
+              const active = statsScope === option.key;
               return (
                 <button
                   key={option.key}
-                  onClick={() => setPlayerStatsScope(option.key as 'season' | 'overall')}
+                  onClick={() => onStatsScopeChange?.(option.key as PlayerStatsScope)}
                   className={`rounded-full px-4 py-2 text-sm font-semibold transition-all ${
                     active ? 'text-white shadow-lg' : 'text-gray-300 hover:text-white'
                   }`}
@@ -3048,15 +3116,17 @@ function StatsTab({
                 <th className="py-3 pr-4 text-right">Avg</th>
                 <th className="py-3 pr-4 text-right">SR</th>
                 <th className="py-3 pr-4 text-right">HS</th>
+                <th className="py-3 pr-4 text-right">4s/6s</th>
                 <th className="py-3 pr-4 text-right">50/100</th>
                 <th className="py-3 pr-4 text-right">Wkts</th>
                 <th className="py-3 pr-4 text-right">Econ</th>
+                <th className="py-3 pr-4 text-right">Bowl SR</th>
                 <th className="py-3 text-right">Best</th>
               </tr>
             </thead>
             <tbody>
               {displayedPlayerRows.map((row) => (
-                <tr key={`${playerStatsScope}-${row.playerId}`} className="border-b border-white/5">
+                <tr key={`${statsScope}-${row.playerId}`} className="border-b border-white/5">
                   <td className="py-3 pr-4">
                     <div className="font-semibold text-white">{row.playerName}</div>
                   </td>
@@ -3067,10 +3137,14 @@ function StatsTab({
                   <td className="py-3 pr-4 text-right text-white">{row.strikeRate.toFixed(2)}</td>
                   <td className="py-3 pr-4 text-right text-white">{row.highestScore}</td>
                   <td className="py-3 pr-4 text-right text-white">
+                    {row.fours}/{row.sixes}
+                  </td>
+                  <td className="py-3 pr-4 text-right text-white">
                     {row.fifties}/{row.hundreds}
                   </td>
                   <td className="py-3 pr-4 text-right text-white">{row.wickets}</td>
                   <td className="py-3 pr-4 text-right text-white">{row.economy.toFixed(2)}</td>
+                  <td className="py-3 pr-4 text-right text-white">{row.bowlingStrikeRate.toFixed(2)}</td>
                   <td className="py-3 text-right text-white">{row.bestBowling}</td>
                 </tr>
               ))}

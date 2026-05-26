@@ -30,6 +30,44 @@ export interface KeyPlayersSectionProps {
   secondaryColor: ColorVariations;
 }
 
+export type PlayerStatsScope = 'season' | 'overall';
+
+export interface TeamPlayerStatRow {
+  playerId: string;
+  playerName: string;
+  role: Player['role'];
+  matches: number;
+  innings: number;
+  runs: number;
+  ballsFaced: number;
+  average: number;
+  strikeRate: number;
+  highestScore: number;
+  fours: number;
+  sixes: number;
+  fifties: number;
+  hundreds: number;
+  notOuts: number;
+  wickets: number;
+  bowlingAverage: number;
+  economy: number;
+  bowlingStrikeRate: number;
+  ballsBowled: number;
+  oversBowled: number;
+  maidens: number;
+  bestBowling: string;
+  fourWickets: number;
+  fiveWickets: number;
+}
+
+export type PlayerPerformanceMetric =
+  | 'runs'
+  | 'wickets'
+  | 'strikeRate'
+  | 'economy'
+  | 'sixes'
+  | 'bowlingStrikeRate';
+
 // Stats Tab Props
 export interface StatsTabProps {
   teamData: Team | null;
@@ -39,8 +77,10 @@ export interface StatsTabProps {
   bowlers: Player[];
   allRounders: Player[];
   wicketkeepers: Player[];
-  playerStats?: any[];
+  playerStats?: TeamPlayerStatRow[];
   seasonTeamStats?: any | null;
+  statsScope?: PlayerStatsScope;
+  onStatsScopeChange?: (scope: PlayerStatsScope) => void;
 }
 
 // About Tab Props
