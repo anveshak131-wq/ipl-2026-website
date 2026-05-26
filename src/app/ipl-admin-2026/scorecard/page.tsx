@@ -9,6 +9,7 @@ import {
   getPreferredSeasonYear,
   sortMatchesForAdmin,
 } from '@/lib/adminMatchSeason';
+import { ensureIplPlayoffMatchesForSeason } from '@/lib/iplAdminPlayoffSync';
 import { syncScorecardToPlayers } from '@/lib/scorecard-stats-sync';
 
 interface Match {
@@ -144,6 +145,7 @@ export default function ScorecardAdminPage() {
   const [activeInnings, setActiveInnings] = useState(0);
   const [saving, setSaving] = useState(false);
   const [seasonYear, setSeasonYear] = useState<number | null>(null);
+  const playoffSyncAttemptedRef = React.useRef<Record<number, boolean>>({});
 
   const availableSeasonYears = React.useMemo(() => {
     return getAvailableSeasonYears(matches, [DEFAULT_SEASON_YEAR]);
@@ -158,6 +160,30 @@ export default function ScorecardAdminPage() {
     fetchPlayers();
     fetchAllScorecards();
   }, []);
+
+  useEffect(() => {
+    if (seasonYear === null) return;
+    if (playoffSyncAttemptedRef.current[seasonYear]) return;
+    if (!matches.some((match) => getMatchSeasonYear(match) === seasonYear)) return;
+
+    playoffSyncAttemptedRef.current[seasonYear] = true;
+    let cancelled = false;
+
+    (async () => {
+      try {
+        const result = await ensureIplPlayoffMatchesForSeason(seasonYear, matches);
+        if (!cancelled && result.created > 0) {
+          setMatches((result.matches || []) as Match[]);
+        }
+      } catch (error) {
+        console.error('[Scorecard] Failed to auto-create IPL playoff matches:', error);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [matches, seasonYear]);
 
   // Sync activeInnings with activeTab
   useEffect(() => {

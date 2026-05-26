@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import AuroraBackground from '@/components/ui/AuroraBackground';
 import { Match, Player } from '@/types';
@@ -13,6 +13,7 @@ import {
   sortMatchesForAdmin,
 } from '@/lib/adminMatchSeason';
 import { api } from '@/lib/data';
+import { ensureIplPlayoffMatchesForSeason } from '@/lib/iplAdminPlayoffSync';
 import { LoadingSpinner } from '@/components/admin/animations';
 import { CheckCircle2, AlertCircle, Users, Save, RefreshCw, FileDown, FileText, FileSpreadsheet, Database } from 'lucide-react';
 import { WPLColors } from '@/lib/wplColors';
@@ -44,6 +45,7 @@ export default function Playing11Page() {
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
+  const playoffSyncAttemptedRef = useRef<Record<number, boolean>>({});
   const substitutionTimingOptions = useMemo(
     () => [
       'Before Start of Innings',
@@ -171,6 +173,31 @@ export default function Playing11Page() {
       return getPreferredMatch(visibleMatches)?.id || '';
     });
   }, [visibleMatches]);
+
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    if (seasonYear === null) return;
+    if (playoffSyncAttemptedRef.current[seasonYear]) return;
+    if (!matches.some((match) => getMatchSeasonYear(match) === seasonYear)) return;
+
+    playoffSyncAttemptedRef.current[seasonYear] = true;
+    let cancelled = false;
+
+    (async () => {
+      try {
+        const result = await ensureIplPlayoffMatchesForSeason(seasonYear, matches);
+        if (!cancelled && result.created > 0) {
+          setMatches(result.matches);
+        }
+      } catch (error) {
+        console.error('[Playing 11] Failed to auto-create IPL playoff matches:', error);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isAuthenticated, matches, seasonYear]);
 
   const selectedMatch = useMemo(
     () => matches.find((m) => m.id === selectedMatchId) || null,

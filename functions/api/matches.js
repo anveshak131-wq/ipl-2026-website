@@ -412,6 +412,15 @@ function getIplSeasonStandings(context, seasonYear) {
   return context.standingsBySeason.get(seasonYear) || [];
 }
 
+function findExistingPlayoffMatch(matches, league, playoffType, seasonYear) {
+  return matches.find((candidate) => {
+    const candidateLeague = inferMatchLeague(candidate) || candidate?.league || 'ipl';
+    if (candidateLeague !== league) return false;
+    if (candidate?.playoffType !== playoffType) return false;
+    return getYearFromDateLike(candidate?.date) === seasonYear;
+  }) || null;
+}
+
 function getPlayoffMatchForSeason(context, seasonYear, playoffType) {
   return (
     context.allMatches.find((candidate) => {
@@ -815,6 +824,14 @@ async function handleBulkPostRequest(context) {
     if (!allTeams || !allTeams.length) allTeams = mockTeams;
 
     const created = incoming.map(m => {
+      const seasonYear = getYearFromDateLike(m.date);
+      if (m.playoffType && seasonYear) {
+        const existingPlayoffMatch = findExistingPlayoffMatch(matches, m.league || 'ipl', m.playoffType, seasonYear);
+        if (existingPlayoffMatch) {
+          return existingPlayoffMatch;
+        }
+      }
+
       const newMatch = {
         id: String(nextId++),
         league: m.league || 'ipl',
@@ -888,6 +905,22 @@ async function handlePostRequest(context) {
       matches = [];
     } else {
       matches = matches || [];
+    }
+
+    const seasonYear = getYearFromDateLike(date);
+    if (body.playoffType && seasonYear) {
+      const existingPlayoffMatch = findExistingPlayoffMatch(matches, league || 'ipl', body.playoffType, seasonYear);
+      if (existingPlayoffMatch) {
+        let allTeams = await env.IPL_CACHE.get('teams', 'json');
+        if (!allTeams || allTeams.length === 0) {
+          allTeams = mockTeams;
+        }
+        const resolutionContext = createMatchResolutionContext(matches, allTeams);
+        return new Response(JSON.stringify(formatMatch(existingPlayoffMatch, allTeams, resolutionContext)), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' }
+        });
+      }
     }
     
     // Generate new ID

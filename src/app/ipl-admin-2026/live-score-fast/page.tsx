@@ -10,6 +10,7 @@ import {
   getMatchSeasonYear,
   sortMatchesForAdmin,
 } from '@/lib/adminMatchSeason';
+import { ensureIplPlayoffMatchesForSeason } from '@/lib/iplAdminPlayoffSync';
 import type { Match, Player } from '@/types';
 import { Activity, Download, FileText, Plus, RefreshCw, Save, Trash2, UploadCloud } from 'lucide-react';
 
@@ -268,6 +269,7 @@ export default function IPLAdminLiveScoreTablePage() {
   const [fastOverrideOver, setFastOverrideOver] = useState<string>('');
   const [fastOverrideBall, setFastOverrideBall] = useState<string>('');
   const [autoSwapStrike, setAutoSwapStrike] = useState(true);
+  const playoffSyncAttemptedRef = useRef<Record<number, boolean>>({});
 
   const selectedMatchFromList = useMemo(
     () => matches.find((m) => m.id === selectedMatchId) || null,
@@ -352,6 +354,30 @@ export default function IPLAdminLiveScoreTablePage() {
       return getPreferredMatch(visibleMatches)?.id || '';
     });
   }, [visibleMatches]);
+
+  useEffect(() => {
+    if (seasonYear === null) return;
+    if (playoffSyncAttemptedRef.current[seasonYear]) return;
+    if (!matches.some((match) => getMatchSeasonYear(match) === seasonYear)) return;
+
+    playoffSyncAttemptedRef.current[seasonYear] = true;
+    let cancelled = false;
+
+    (async () => {
+      try {
+        const result = await ensureIplPlayoffMatchesForSeason(seasonYear, matches);
+        if (!cancelled && result.created > 0) {
+          setMatches(result.matches);
+        }
+      } catch (error) {
+        console.error('[Live Score Fast] Failed to auto-create IPL playoff matches:', error);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [matches, seasonYear]);
 
   // Load match details + saved table state for the selected match
   useEffect(() => {
