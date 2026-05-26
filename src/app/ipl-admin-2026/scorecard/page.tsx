@@ -2,6 +2,13 @@
 
 import React, { useState, useEffect } from 'react';
 import { api } from '@/lib/data';
+import {
+  filterMatchesBySeason,
+  getAvailableSeasonYears,
+  getMatchSeasonYear,
+  getPreferredSeasonYear,
+  sortMatchesForAdmin,
+} from '@/lib/adminMatchSeason';
 import { syncScorecardToPlayers } from '@/lib/scorecard-stats-sync';
 
 interface Match {
@@ -99,14 +106,6 @@ function parseUpdatedAt(obj: { updatedAt?: string } | null): number {
   const t = new Date(obj.updatedAt).getTime();
   return isNaN(t) ? 0 : t;
 }
-function getSeasonYear(dateString: string | undefined | null): number | null {
-  if (!dateString) return null;
-  const parsed = new Date(dateString);
-  if (!isNaN(parsed.getTime())) return parsed.getFullYear();
-  const match = String(dateString).match(/(19|20)\d{2}/);
-  return match ? parseInt(match[0], 10) : null;
-}
-
 interface Scorecard {
   id?: string;
   matchId: string;
@@ -144,20 +143,14 @@ export default function ScorecardAdminPage() {
   const [activeTab, setActiveTab] = useState<'matchInfo' | 'innings1' | 'innings2'>('matchInfo');
   const [activeInnings, setActiveInnings] = useState(0);
   const [saving, setSaving] = useState(false);
-  const [seasonYear, setSeasonYear] = useState<number | null>(DEFAULT_SEASON_YEAR);
+  const [seasonYear, setSeasonYear] = useState<number | null>(null);
 
   const availableSeasonYears = React.useMemo(() => {
-    const years = new Set<number>([DEFAULT_SEASON_YEAR]);
-    for (const match of matches) {
-      const year = getSeasonYear(match.date);
-      if (year) years.add(year);
-    }
-    return Array.from(years).sort((a, b) => b - a);
+    return getAvailableSeasonYears(matches, [DEFAULT_SEASON_YEAR]);
   }, [matches]);
 
   const visibleMatches = React.useMemo(() => {
-    if (seasonYear === null) return matches;
-    return matches.filter((match) => getSeasonYear(match.date) === seasonYear);
+    return sortMatchesForAdmin(filterMatchesBySeason(matches, seasonYear));
   }, [matches, seasonYear]);
 
   useEffect(() => {
@@ -184,6 +177,12 @@ export default function ScorecardAdminPage() {
     try {
       const data = await api.getMatches('ipl', { includeAll: true });
       setMatches(data || []);
+      setSeasonYear((prev) => {
+        if (prev !== null && (data || []).some((match) => getMatchSeasonYear(match) === prev)) {
+          return prev;
+        }
+        return getPreferredSeasonYear((data || []) as Match[]) ?? DEFAULT_SEASON_YEAR;
+      });
       if (!data || data.length === 0) {
         setMessage('⚠ No IPL matches found. Please check Cloudflare KV data.');
       }

@@ -4,6 +4,14 @@ import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import AuroraBackground from '@/components/ui/AuroraBackground';
 import { Match, Player } from '@/types';
+import {
+  filterMatchesBySeason,
+  getAvailableSeasonYears,
+  getPreferredMatch,
+  getPreferredSeasonYear,
+  getMatchSeasonYear,
+  sortMatchesForAdmin,
+} from '@/lib/adminMatchSeason';
 import { api } from '@/lib/data';
 import { LoadingSpinner } from '@/components/admin/animations';
 import { CheckCircle2, AlertCircle, Users, Save, RefreshCw, FileDown, FileText, FileSpreadsheet, Database } from 'lucide-react';
@@ -19,6 +27,7 @@ export default function Playing11Page() {
   const [isLoading, setIsLoading] = useState(true);
   const [matches, setMatches] = useState<Match[]>([]);
   const [players, setPlayers] = useState<Player[]>([]);
+  const [seasonYear, setSeasonYear] = useState<number | null>(null);
   const [selectedMatchId, setSelectedMatchId] = useState<string>('');
   const [team1Playing11, setTeam1Playing11] = useState<string[]>([]);
   const [team2Playing11, setTeam2Playing11] = useState<string[]>([]);
@@ -76,6 +85,12 @@ export default function Playing11Page() {
               ]);
       setMatches(matchesData);
       setPlayers(playersData);
+      setSeasonYear((prev) => {
+        if (prev !== null && matchesData.some((match) => getMatchSeasonYear(match) === prev)) {
+          return prev;
+        }
+        return getPreferredSeasonYear(matchesData) ?? null;
+      });
       
       // Debug: Log players data from KV
       console.log('=== PLAYERS LOADED FROM KV (playing-11) ===');
@@ -111,20 +126,6 @@ export default function Playing11Page() {
         console.warn('Players in KV have leagues:', uniqueLeagues);
       }
 
-      // Auto-select first upcoming match if none selected (preserve current selection if it exists)
-      setSelectedMatchId(prev => {
-        if (prev && matchesData.find(m => m.id === prev)) {
-          return prev; // Keep current selection if it still exists
-        }
-        if (matchesData.length > 0) {
-          const preferred =
-            matchesData.find((m) => m.status === 'upcoming') ||
-            matchesData.find((m) => m.status === 'live') ||
-            matchesData[0];
-          return preferred?.id || '';
-        }
-        return prev;
-      });
     } catch (error) {
       console.error('Error loading data:', error);
     } finally {
@@ -154,6 +155,22 @@ export default function Playing11Page() {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, [isAuthenticated, loadData]);
+
+  const availableSeasonYears = useMemo(() => getAvailableSeasonYears(matches), [matches]);
+
+  const visibleMatches = useMemo(
+    () => sortMatchesForAdmin(filterMatchesBySeason(matches, seasonYear)),
+    [matches, seasonYear]
+  );
+
+  useEffect(() => {
+    setSelectedMatchId((prev) => {
+      if (prev && visibleMatches.some((match) => match.id === prev)) {
+        return prev;
+      }
+      return getPreferredMatch(visibleMatches)?.id || '';
+    });
+  }, [visibleMatches]);
 
   const selectedMatch = useMemo(
     () => matches.find((m) => m.id === selectedMatchId) || null,
@@ -810,38 +827,78 @@ export default function Playing11Page() {
                 borderColor: 'rgba(255, 255, 255, 0.1)',
               }}
             >
-              <label 
-                className="block text-sm font-semibold mb-2"
-                style={{ color: isWPL ? WPLColors.textMuted : '#9CA3AF' }}
-              >
-                Select Match
-              </label>
-              <select
-                value={selectedMatchId}
-                onChange={(e) => setSelectedMatchId(e.target.value)}
-                className="w-full md:w-96 px-4 py-3 rounded-lg text-white text-sm focus:outline-none transition-colors"
-                style={isWPL ? {
-                  background: WPLColors.purpleRGBA[20],
-                  border: `1px solid ${WPLColors.purpleRGBA[30]}`,
-                } : {
-                  background: '#0F172A',
-                  border: '1px solid rgba(255, 255, 255, 0.1)',
-                }}
-                onFocus={(e) => {
-                  e.target.style.borderColor = isWPL ? WPLColors.purpleRGBA[50] : '#3B82F6';
-                }}
-                onBlur={(e) => {
-                  e.target.style.borderColor = isWPL ? WPLColors.purpleRGBA[30] : 'rgba(255, 255, 255, 0.1)';
-                }}
-              >
-                <option value="">Select a match...</option>
-                {matches
-                  .map((match) => (
-                    <option key={match.id} value={match.id}>
-                      {match.team1.shortName} vs {match.team2.shortName} · {new Date(match.date).toLocaleDateString()} {match.time}
-                    </option>
-                  ))}
-              </select>
+              <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+                <div className="flex flex-col gap-4 md:flex-row md:items-end">
+                  <div>
+                    <label 
+                      className="block text-sm font-semibold mb-2"
+                      style={{ color: isWPL ? WPLColors.textMuted : '#9CA3AF' }}
+                    >
+                      Season
+                    </label>
+                    <select
+                      value={seasonYear === null ? 'all' : String(seasonYear)}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        setSeasonYear(value === 'all' ? null : parseInt(value, 10) || null);
+                      }}
+                      className="w-full md:w-44 px-4 py-3 rounded-lg text-white text-sm focus:outline-none transition-colors"
+                      style={isWPL ? {
+                        background: WPLColors.purpleRGBA[20],
+                        border: `1px solid ${WPLColors.purpleRGBA[30]}`,
+                      } : {
+                        background: '#0F172A',
+                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                      }}
+                    >
+                      {availableSeasonYears.map((year) => (
+                        <option key={year} value={String(year)}>
+                          {year}
+                        </option>
+                      ))}
+                      <option value="all">All seasons</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label 
+                      className="block text-sm font-semibold mb-2"
+                      style={{ color: isWPL ? WPLColors.textMuted : '#9CA3AF' }}
+                    >
+                      Select Match
+                    </label>
+                    <select
+                      value={selectedMatchId}
+                      onChange={(e) => setSelectedMatchId(e.target.value)}
+                      className="w-full md:w-96 px-4 py-3 rounded-lg text-white text-sm focus:outline-none transition-colors"
+                      style={isWPL ? {
+                        background: WPLColors.purpleRGBA[20],
+                        border: `1px solid ${WPLColors.purpleRGBA[30]}`,
+                      } : {
+                        background: '#0F172A',
+                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                      }}
+                      onFocus={(e) => {
+                        e.target.style.borderColor = isWPL ? WPLColors.purpleRGBA[50] : '#3B82F6';
+                      }}
+                      onBlur={(e) => {
+                        e.target.style.borderColor = isWPL ? WPLColors.purpleRGBA[30] : 'rgba(255, 255, 255, 0.1)';
+                      }}
+                    >
+                      <option value="">Select a match...</option>
+                      {visibleMatches.map((match) => (
+                        <option key={match.id} value={match.id}>
+                          {match.team1.shortName} vs {match.team2.shortName} · {new Date(match.date).toLocaleDateString()} {match.time}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                <div className="text-sm" style={{ color: isWPL ? WPLColors.textMuted : '#9CA3AF' }}>
+                  Showing {visibleMatches.length} match{visibleMatches.length === 1 ? '' : 'es'}
+                </div>
+              </div>
             </div>
 
             {selectedMatch && (

@@ -2,6 +2,14 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { api } from '@/lib/data';
+import {
+  filterMatchesBySeason,
+  getAvailableSeasonYears,
+  getPreferredMatch,
+  getPreferredSeasonYear,
+  getMatchSeasonYear,
+  sortMatchesForAdmin,
+} from '@/lib/adminMatchSeason';
 import type { Match, Player } from '@/types';
 import { Activity, Download, FileText, Plus, RefreshCw, Save, Trash2, UploadCloud } from 'lucide-react';
 
@@ -220,6 +228,7 @@ const formatPlayerOptionLabel = (
 export default function IPLAdminLiveScoreTablePage() {
   const [matches, setMatches] = useState<Match[]>([]);
   const [players, setPlayers] = useState<Player[]>([]);
+  const [seasonYear, setSeasonYear] = useState<number | null>(null);
   const [selectedMatchId, setSelectedMatchId] = useState<string>('');
   const [matchDetails, setMatchDetails] = useState<Match | null>(null);
 
@@ -265,6 +274,11 @@ export default function IPLAdminLiveScoreTablePage() {
     [matches, selectedMatchId]
   );
   const selectedMatch = matchDetails || selectedMatchFromList;
+  const availableSeasonYears = useMemo(() => getAvailableSeasonYears(matches), [matches]);
+  const visibleMatches = useMemo(
+    () => sortMatchesForAdmin(filterMatchesBySeason(matches, seasonYear)),
+    [matches, seasonYear]
+  );
 
   // Reset Impact Player forms when switching matches
   useEffect(() => {
@@ -320,20 +334,24 @@ export default function IPLAdminLiveScoreTablePage() {
         const nextMatches = (matchesData || []) as Match[];
         setMatches(nextMatches);
         setPlayers((playersData || []) as Player[]);
-
-        setSelectedMatchId((prev) => {
-          if (prev && nextMatches.find((m) => m.id === prev)) return prev;
-          const preferred =
-            nextMatches.find((m) => m.status === 'live') ||
-            nextMatches.find((m) => m.status === 'upcoming') ||
-            nextMatches[0];
-          return preferred?.id || '';
+        setSeasonYear((prev) => {
+          if (prev !== null && nextMatches.some((match) => getMatchSeasonYear(match) === prev)) {
+            return prev;
+          }
+          return getPreferredSeasonYear(nextMatches) ?? null;
         });
       } catch (error) {
         console.error('[IPL Live Score Table] Failed to load matches/players:', error);
       }
     })();
   }, []);
+
+  useEffect(() => {
+    setSelectedMatchId((prev) => {
+      if (prev && visibleMatches.some((match) => match.id === prev)) return prev;
+      return getPreferredMatch(visibleMatches)?.id || '';
+    });
+  }, [visibleMatches]);
 
   // Load match details + saved table state for the selected match
   useEffect(() => {
@@ -3267,20 +3285,48 @@ export default function IPLAdminLiveScoreTablePage() {
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 mb-6">
         <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-          <label className="block text-xs font-semibold text-white/70 mb-2">Select Match</label>
-          <select
-            value={selectedMatchId}
-            onChange={(e) => setSelectedMatchId(e.target.value)}
-            className="w-full border border-white/10 focus:border-purple-400 rounded-xl px-3 py-2 bg-slate-950 text-white"
-            disabled={!matches.length}
-          >
-            <option value="">Choose...</option>
-            {matches.map((m) => (
-              <option key={m.id} value={m.id}>
-                {m.team1?.shortName || m.team1?.name} vs {m.team2?.shortName || m.team2?.name}
-              </option>
-            ))}
-          </select>
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-[160px_minmax(0,1fr)]">
+            <div>
+              <label className="block text-xs font-semibold text-white/70 mb-2">Season</label>
+              <select
+                value={seasonYear === null ? 'all' : String(seasonYear)}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setSeasonYear(value === 'all' ? null : parseInt(value, 10) || null);
+                }}
+                className="w-full border border-white/10 focus:border-purple-400 rounded-xl px-3 py-2 bg-slate-950 text-white"
+                disabled={!matches.length}
+              >
+                {availableSeasonYears.map((year) => (
+                  <option key={year} value={String(year)}>
+                    {year}
+                  </option>
+                ))}
+                <option value="all">All seasons</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-white/70 mb-2">Select Match</label>
+              <select
+                value={selectedMatchId}
+                onChange={(e) => setSelectedMatchId(e.target.value)}
+                className="w-full border border-white/10 focus:border-purple-400 rounded-xl px-3 py-2 bg-slate-950 text-white"
+                disabled={!visibleMatches.length}
+              >
+                <option value="">Choose...</option>
+                {visibleMatches.map((m) => (
+                  <option key={m.id} value={m.id}>
+                    {m.team1?.shortName || m.team1?.name} vs {m.team2?.shortName || m.team2?.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <div className="mt-3 text-xs text-white/50">
+            Showing {visibleMatches.length} match{visibleMatches.length === 1 ? '' : 'es'}
+          </div>
 
           {selectedMatch && (
             <div className="mt-3 text-xs text-white/60 space-y-1">
