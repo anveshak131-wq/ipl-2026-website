@@ -303,7 +303,7 @@ export default function AdminMatches() {
                     await Promise.all(updatePromises);
                     
                     // Refresh matches
-                    const updatedMatches = await api.getMatches(currentLeague);
+                    const updatedMatches = await api.getMatches(currentLeague, { includeAll: true });
                     setMatches(updatedMatches);
                 } catch (error) {
                     console.error('Failed to update match statuses:', error);
@@ -1386,7 +1386,7 @@ export default function AdminMatches() {
         try {
             setIsLoading(true);
             const [matchesData, teamsData] = await Promise.all([
-                api.getMatches(currentLeague),
+                api.getMatches(currentLeague, { includeAll: true }),
                 api.getTeams(currentLeague)
             ]);
             // Recalculate match numbers based on date/time ordering
@@ -1721,7 +1721,7 @@ export default function AdminMatches() {
             
             // Refresh matches from API and recalculate match numbers
             try {
-                const updatedMatches = await api.getMatches(currentLeague);
+                const updatedMatches = await api.getMatches(currentLeague, { includeAll: true });
                 const matchesWithNumbers = recalculateMatchNumbers(updatedMatches);
                 setMatches(matchesWithNumbers);
             } catch (refreshError) {
@@ -1758,7 +1758,7 @@ export default function AdminMatches() {
             
             // Refresh matches to get current state
             try {
-                const updatedMatches = await api.getMatches(currentLeague);
+                const updatedMatches = await api.getMatches(currentLeague, { includeAll: true });
                 setMatches(updatedMatches);
             } catch (refreshError) {
                 console.error('Failed to refresh matches after error:', refreshError);
@@ -1905,7 +1905,7 @@ export default function AdminMatches() {
             await Promise.all(updatePromises);
             
             // Refresh matches
-            const updatedMatches = await api.getMatches(currentLeague);
+            const updatedMatches = await api.getMatches(currentLeague, { includeAll: true });
             setMatches(updatedMatches);
 
             showSuccess(`${selectedMatches.size} match(es) updated successfully`);
@@ -1960,7 +1960,7 @@ export default function AdminMatches() {
             await api.deleteMatch(matchId);
 
             // Always refresh from backend after delete to avoid stale client cache/state.
-            const refreshedMatches = await api.getMatches(currentLeague);
+            const refreshedMatches = await api.getMatches(currentLeague, { includeAll: true });
             const matchesWithNumbers = recalculateMatchNumbers(refreshedMatches);
             setMatches(matchesWithNumbers);
             matchesRef.current = matchesWithNumbers;
@@ -1979,7 +1979,7 @@ export default function AdminMatches() {
             
             // Refresh matches to get current state and recalculate match numbers
             try {
-                const refreshedMatches = await api.getMatches(currentLeague);
+                const refreshedMatches = await api.getMatches(currentLeague, { includeAll: true });
                 const matchesWithNumbers = recalculateMatchNumbers(refreshedMatches);
                 setMatches(matchesWithNumbers);
                 matchesRef.current = matchesWithNumbers;
@@ -2062,7 +2062,7 @@ export default function AdminMatches() {
             
             // Refresh matches from API to ensure consistency
             try {
-                const updatedMatches = await api.getMatches(currentLeague);
+                const updatedMatches = await api.getMatches(currentLeague, { includeAll: true });
                 setMatches(updatedMatches);
             } catch (refreshError) {
                 console.warn('Failed to refresh matches after deletion, but deletion was successful:', refreshError);
@@ -2083,7 +2083,7 @@ export default function AdminMatches() {
             
             // Refresh matches to get current state
             try {
-                const updatedMatches = await api.getMatches(currentLeague);
+                const updatedMatches = await api.getMatches(currentLeague, { includeAll: true });
                 setMatches(updatedMatches);
             } catch (refreshError) {
                 console.error('Failed to refresh matches after error:', refreshError);
@@ -2192,7 +2192,7 @@ export default function AdminMatches() {
                 league: match.league
             });
 
-            const updatedMatches = await api.getMatches(currentLeague);
+            const updatedMatches = await api.getMatches(currentLeague, { includeAll: true });
             const matchesWithNumbers = recalculateMatchNumbers(updatedMatches);
             setMatches(matchesWithNumbers);
             showSuccess('Match marked as completed');
@@ -2220,7 +2220,7 @@ export default function AdminMatches() {
                 league: match.league
             });
 
-            const updatedMatches = await api.getMatches(currentLeague);
+            const updatedMatches = await api.getMatches(currentLeague, { includeAll: true });
             setMatches(updatedMatches);
             showSuccess('Match marked as cancelled');
         } catch (error) {

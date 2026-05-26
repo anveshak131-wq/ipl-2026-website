@@ -43,7 +43,7 @@ export default function AdminIplLiveScorePage() {
     const loadData = async () => {
       try {
         const [matchesData, playersData] = await Promise.all([
-          api.getMatches(LEAGUE),
+          api.getMatches(LEAGUE, { includeAll: true }),
           api.getPlayers(undefined, LEAGUE),
         ]);
 
@@ -122,7 +122,7 @@ export default function AdminIplLiveScorePage() {
 
     const refreshMatchData = async () => {
       try {
-        const updatedMatches = await api.getMatches(LEAGUE);
+        const updatedMatches = await api.getMatches(LEAGUE, { includeAll: true });
         setMatches(updatedMatches || []);
       } catch (err) {
         console.error('[AdminIplLiveScore] Error refreshing match data:', err);

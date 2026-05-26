@@ -25,7 +25,7 @@ export default function IPLLiveScoreWithAIPage() {
   useEffect(() => {
     (async () => {
       try {
-        const data = await api.getMatches('ipl');
+        const data = await api.getMatches('ipl', { includeAll: true });
         if (data && data.length > 0) {
           setMatches(data);
           setSelectedMatch(data[0].id);

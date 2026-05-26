@@ -72,7 +72,7 @@ export default function Playing11Page() {
 
     try {
               const [matchesData, playersData, teamsData] = await Promise.all([
-                api.getMatches(currentLeague),
+                api.getMatches(currentLeague, { includeAll: true }),
                 api.getPlayers(undefined, currentLeague),
                 api.getTeams(currentLeague),
               ]);

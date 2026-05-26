@@ -236,7 +236,10 @@ function pickDefaultMatchId(matches: Match[], preferredMatchId?: string | null):
   const upcoming = sorted.filter((m) => m.status === 'upcoming' && (getMatchStartDate(m)?.getTime() ?? 0) >= now);
   if (upcoming.length > 0) return upcoming[0].id;
 
-  return sorted[0].id;
+  const completed = sorted.filter((m) => m.status === 'completed');
+  if (completed.length > 0) return completed[completed.length - 1].id;
+
+  return sorted[sorted.length - 1].id;
 }
 
 function getBattingTeamKeyForInnings(match: Match, innings: '1' | '2'): 'team1' | 'team2' {
@@ -1322,7 +1325,7 @@ export default function LiveScorePage() {
       try {
         const [matchesData, playersData] = await Promise.all([
           (async () => {
-            const resp = await fetch('/api/matches?league=ipl', { cache: 'no-store' });
+            const resp = await fetch('/api/matches?league=ipl&includeAll=true', { cache: 'no-store' });
             if (!resp.ok) return [];
             const data = await resp.json();
             return Array.isArray(data) ? (data as Match[]) : [];
@@ -1398,7 +1401,7 @@ export default function LiveScorePage() {
 
   const fetchMatchFresh = useCallback(async (matchId: string) => {
     const resp = await fetch(
-      `/api/matches?league=ipl&id=${encodeURIComponent(matchId)}&syncScorecards=0`,
+      `/api/matches?league=ipl&id=${encodeURIComponent(matchId)}&syncScorecards=0&includeAll=true`,
       { cache: 'no-store' },
     );
     if (!resp.ok) return null;
@@ -1670,7 +1673,19 @@ export default function LiveScorePage() {
   const matchCenterHref = useMemo(() => {
     if (!selectedMatch) return null;
     const encodedId = encodeURIComponent(selectedMatch.id);
-    const params = new URLSearchParams({ league: 'ipl', date: selectedMatch.date, team1Id: selectedMatch.team1.id, team2Id: selectedMatch.team2.id });
+    const params = new URLSearchParams({
+      league: 'ipl',
+      date: selectedMatch.date,
+      team1Id: selectedMatch.team1.id,
+      team2Id: selectedMatch.team2.id,
+    });
+    const parsedDate = new Date(selectedMatch.date);
+    const season = !Number.isNaN(parsedDate.getTime())
+      ? String(parsedDate.getFullYear())
+      : ((selectedMatch.date || '').match(/(20\d{2}|19\d{2})/) || [])[1] || '';
+    if (season) {
+      params.set('season', season);
+    }
     return `/matches/${encodedId}?${params.toString()}`;
   }, [selectedMatch]);
 

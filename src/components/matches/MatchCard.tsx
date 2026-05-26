@@ -32,12 +32,20 @@ export default function MatchCard({ match, index = 0, players, detailHref }: Mat
   const matchCenterHref = detailHref || `/matches/${match.id}`;
 
   const openMatchCenter = () => {
+    const parsedDate = new Date(match.date);
+    const season = !Number.isNaN(parsedDate.getTime())
+      ? String(parsedDate.getFullYear())
+      : ((match.date || '').match(/(20\d{2}|19\d{2})/) || [])[1] || '';
+
     const query = new URLSearchParams({
       league: match.league || 'ipl',
       date: match.date || '',
       team1Id: String(match.team1?.id || ''),
       team2Id: String(match.team2?.id || ''),
     });
+    if (season) {
+      query.set('season', season);
+    }
     const separator = matchCenterHref.includes('?') ? '&' : '?';
     router.push(`${matchCenterHref}${separator}${query.toString()}`);
   };

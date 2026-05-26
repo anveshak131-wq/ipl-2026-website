@@ -202,6 +202,10 @@ function normalizeTeamId(value) {
   return raw.replace(/^team/i, '');
 }
 
+function isPlaceholderTeamId(value) {
+  return normalizeTeamId(value).startsWith('tbd-');
+}
+
 function isActiveSeasonMatch(match, seasonYear) {
   const matchLeague = inferMatchLeague(match) || match.league || 'ipl';
   const activeIds = matchLeague === 'wpl' ? ACTIVE_WPL_2026_TEAM_IDS : ACTIVE_IPL_2026_TEAM_IDS;
@@ -211,7 +215,15 @@ function isActiveSeasonMatch(match, seasonYear) {
 
   const team1Id = normalizeTeamId(match?.team1Id ?? match?.team1?.id);
   const team2Id = normalizeTeamId(match?.team2Id ?? match?.team2?.id);
-  return activeIds.has(team1Id) && activeIds.has(team2Id);
+  const allowsPlaceholders = Boolean(match?.playoffType);
+
+  const isEligibleTeamId = (teamId) => {
+    if (!teamId) return false;
+    if (activeIds.has(teamId)) return true;
+    return allowsPlaceholders && isPlaceholderTeamId(teamId);
+  };
+
+  return isEligibleTeamId(team1Id) && isEligibleTeamId(team2Id);
 }
 
 function normalizeLeague(value) {

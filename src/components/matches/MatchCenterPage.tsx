@@ -74,8 +74,6 @@ const sectionAnimation = {
   visible: { opacity: 1, y: 0 },
 };
 
-const TARGET_CALENDAR_SEASON = 2026;
-
 function getMatchYear(dateString: string | undefined | null): number | null {
   if (!dateString) return null;
   const parsed = new Date(dateString);
@@ -138,15 +136,18 @@ export default function MatchCenterPage({ backHref = '/matches', preferredLeague
         const hintedDate = searchParams.get('date');
         const hintedTeam1Id = searchParams.get('team1Id');
         const hintedTeam2Id = searchParams.get('team2Id');
+        const hintedSeasonRaw = searchParams.get('season');
+        const hintedSeason = hintedSeasonRaw ? Number.parseInt(hintedSeasonRaw, 10) : Number.NaN;
 
         const leagues: League[] = preferredLeague
           ? [preferredLeague, preferredLeague === 'ipl' ? 'wpl' : 'ipl']
           : ['ipl', 'wpl'];
 
-        const leagueMatchLists = await Promise.all(leagues.map((league) => api.getMatches(league)));
+        const leagueMatchLists = await Promise.all(
+          leagues.map((league) => api.getMatches(league, { includeAll: true }))
+        );
         const allMatches = leagueMatchLists.flat();
-        const seasonMatches = allMatches.filter((item) => getMatchYear(item.date) === TARGET_CALENDAR_SEASON);
-        const sameIdMatches = seasonMatches.filter((item) => String(item.id) === matchId);
+        const sameIdMatches = allMatches.filter((item) => String(item.id) === matchId);
 
         const sortedByScore = (items: Match[]) => {
           return [...items].sort((a, b) => {
@@ -162,6 +163,9 @@ export default function MatchCenterPage({ backHref = '/matches', preferredLeague
                 }
                 if (hintedDate && item.date === hintedDate) {
                   value += 5_000;
+                }
+                if (Number.isFinite(hintedSeason) && itemYear === hintedSeason) {
+                  value += 4_000;
                 }
 
                 const itemTeam1 = String(item.team1?.id || '');
@@ -186,8 +190,12 @@ export default function MatchCenterPage({ backHref = '/matches', preferredLeague
         // Hint-first disambiguation: if URL contains date + team IDs, prefer that exact fixture
         // even when there are duplicate/legacy IDs in storage.
         if (hintedDate && hintedTeam1Id && hintedTeam2Id) {
-          const hintedMatches = seasonMatches.filter((item) => {
+          const hintedMatches = allMatches.filter((item) => {
             if (hintedLeague && item.league !== hintedLeague) {
+              return false;
+            }
+
+            if (Number.isFinite(hintedSeason) && getMatchYear(item.date) !== hintedSeason) {
               return false;
             }
 

@@ -182,7 +182,7 @@ export default function ScorecardAdminPage() {
 
   const fetchMatches = async () => {
     try {
-      const data = await api.getMatches('ipl');
+      const data = await api.getMatches('ipl', { includeAll: true });
       setMatches(data || []);
       if (!data || data.length === 0) {
         setMessage('⚠ No IPL matches found. Please check Cloudflare KV data.');
@@ -426,7 +426,7 @@ export default function ScorecardAdminPage() {
     if (published.draft !== false) return;
 
     try {
-      const matchesResponse = await fetch(`${base}/api/matches?id=${published.matchId}`, {
+      const matchesResponse = await fetch(`${base}/api/matches?league=ipl&id=${published.matchId}&includeAll=true`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 

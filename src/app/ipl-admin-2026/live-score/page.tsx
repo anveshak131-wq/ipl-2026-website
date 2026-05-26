@@ -248,7 +248,7 @@ export default function IPLAdminLiveScoreTablePage() {
     (async () => {
       try {
         const [matchesData, playersData] = await Promise.all([
-          api.getMatches(LEAGUE),
+          api.getMatches(LEAGUE, { includeAll: true }),
           api.getPlayers(undefined, LEAGUE),
         ]);
 
@@ -311,7 +311,7 @@ export default function IPLAdminLiveScoreTablePage() {
 
       // 3) Fetch authoritative match details (Playing XI + Impact Player + Toss)
       try {
-        const matchResp = await fetch(`/api/matches?id=${encodeURIComponent(selectedMatchId)}`);
+        const matchResp = await fetch(`/api/matches?league=${LEAGUE}&id=${encodeURIComponent(selectedMatchId)}&includeAll=true`);
         if (matchResp.ok) {
           const matchData = (await matchResp.json()) as Match;
           setMatchDetails(matchData);

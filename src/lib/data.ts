@@ -5,19 +5,40 @@ import { Team, Player, Match, News, Highlight, Content } from '@/types';
 import { sortPlayersByRoleAndAge } from '@/lib/playerSort';
 import { filterMatchesForSeason, filterNewsForSeason, filterTeamsForSeason, SEASON_YEAR } from '@/lib/season';
 
-const MATCH_CACHE_KEYS = ['matches_cache_all', 'matches_cache_ipl', 'matches_cache_wpl'] as const;
+const MATCH_CACHE_KEY_PREFIX = 'matches_cache_';
+
+type MatchFetchOptions = {
+  season?: number | 'all';
+  includeAll?: boolean;
+};
+
+function getMatchesCacheKey(league?: 'ipl' | 'wpl', options?: MatchFetchOptions): string {
+  const includeAll = options?.includeAll === true || options?.season === 'all';
+  const scope = includeAll
+    ? 'all-seasons'
+    : `season-${typeof options?.season === 'number' ? options.season : SEASON_YEAR}`;
+
+  return `${MATCH_CACHE_KEY_PREFIX}${league || 'all'}_${scope}`;
+}
 
 function clearMatchesClientCache(): void {
   if (typeof window === 'undefined') return;
 
-  for (const key of MATCH_CACHE_KEYS) {
+  const clearStorage = (storage: Storage) => {
     try {
-      sessionStorage.removeItem(key);
-      localStorage.removeItem(key);
+      for (let index = storage.length - 1; index >= 0; index -= 1) {
+        const key = storage.key(index);
+        if (key?.startsWith(MATCH_CACHE_KEY_PREFIX)) {
+          storage.removeItem(key);
+        }
+      }
     } catch (error) {
-      console.warn('API: Failed to clear matches cache key', key, error);
+      console.warn('API: Failed to clear matches cache', error);
     }
-  }
+  };
+
+  clearStorage(sessionStorage);
+  clearStorage(localStorage);
 }
 
 function getAdminAuthToken(): string | null {
@@ -589,18 +610,21 @@ export const api = {
     }
   },
 
-  getMatches: async (league?: 'ipl' | 'wpl'): Promise<Match[]> => {
+  getMatches: async (league?: 'ipl' | 'wpl', options: MatchFetchOptions = {}): Promise<Match[]> => {
     try {
+      const includeAll = options.includeAll === true || options.season === 'all';
+      const requestedSeason = typeof options.season === 'number' ? options.season : SEASON_YEAR;
+      const cacheKey = getMatchesCacheKey(league, options);
+
       // Browser-side cache to avoid refetching on every navigation
       if (typeof window !== 'undefined') {
-        const cacheKey = `matches_cache_${league || 'all'}`;
         const cachedRaw = sessionStorage.getItem(cacheKey) || localStorage.getItem(cacheKey);
         if (cachedRaw) {
           try {
             const cached = JSON.parse(cachedRaw) as { ts: number; data: Match[] };
             const maxAgeMs = 2 * 60 * 1000; // 2 minutes is enough for schedule data
             if (Date.now() - cached.ts < maxAgeMs && Array.isArray(cached.data)) {
-              return filterMatchesForSeason(cached.data, SEASON_YEAR);
+              return includeAll ? cached.data : filterMatchesForSeason(cached.data, requestedSeason);
             }
           } catch (err) {
             console.warn('API: Failed to parse cached matches, ignoring cache', err);
@@ -608,7 +632,15 @@ export const api = {
         }
       }
 
-      const url = league ? `/api/matches?league=${league}` : '/api/matches';
+      const params = new URLSearchParams();
+      if (league) params.set('league', league);
+      if (includeAll) {
+        params.set('includeAll', 'true');
+      } else if (typeof options.season === 'number') {
+        params.set('season', String(options.season));
+      }
+
+      const url = params.toString() ? `/api/matches?${params.toString()}` : '/api/matches';
       const response = await fetch(url);
       if (!response.ok) {
         throw new Error('Failed to fetch matches');
@@ -635,11 +667,10 @@ export const api = {
         });
       }
 
-      matches = filterMatchesForSeason(matches, SEASON_YEAR);
+      const finalMatches = includeAll ? matches : filterMatchesForSeason(matches, requestedSeason);
 
       if (typeof window !== 'undefined') {
-        const cacheKey = `matches_cache_${league || 'all'}`;
-        const payload = JSON.stringify({ ts: Date.now(), data: matches });
+        const payload = JSON.stringify({ ts: Date.now(), data: finalMatches });
         try {
           sessionStorage.setItem(cacheKey, payload);
           localStorage.setItem(cacheKey, payload);
@@ -648,7 +679,7 @@ export const api = {
         }
       }
       
-      return matches;
+      return finalMatches;
     } catch (error) {
       console.error('Error fetching matches:', error);
       // Return empty array if API fails (no fallback mock data)

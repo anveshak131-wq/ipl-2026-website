@@ -12,6 +12,10 @@ export function normalizeTeamId(value: unknown): string {
   return raw.replace(/^team/i, '');
 }
 
+function isPlaceholderTeamId(value: unknown): boolean {
+  return normalizeTeamId(value).startsWith('tbd-');
+}
+
 export function getSeasonActiveTeamIds(league: League, year: number = SEASON_YEAR): ReadonlySet<string> {
   void year;
   return league === 'wpl' ? ACTIVE_WPL_TEAM_IDS_2026 : ACTIVE_IPL_TEAM_IDS_2026;
@@ -50,15 +54,24 @@ export function filterTeamsForSeason(teams: Team[], year: number = SEASON_YEAR):
   return teams.filter((team) => isActiveTeamForSeason(team, year));
 }
 
-export function isActiveMatchForSeason(match: Pick<Match, 'league' | 'date' | 'team1' | 'team2'>, year: number = SEASON_YEAR): boolean {
+export function isActiveMatchForSeason(
+  match: Pick<Match, 'league' | 'date' | 'team1' | 'team2' | 'playoffType'>,
+  year: number = SEASON_YEAR
+): boolean {
   if (!isSeasonYear(match.date, year)) return false;
 
   const league = match.league === 'wpl' ? 'wpl' : 'ipl';
   const activeIds = getSeasonActiveTeamIds(league, year);
+  const allowsPlaceholders = Boolean(match.playoffType);
 
-  const team1Id = normalizeTeamId(match.team1?.id);
-  const team2Id = normalizeTeamId(match.team2?.id);
-  return activeIds.has(team1Id) && activeIds.has(team2Id);
+  const isEligibleTeamId = (teamId: unknown) => {
+    const normalized = normalizeTeamId(teamId);
+    if (!normalized) return false;
+    if (activeIds.has(normalized)) return true;
+    return allowsPlaceholders && isPlaceholderTeamId(normalized);
+  };
+
+  return isEligibleTeamId(match.team1?.id) && isEligibleTeamId(match.team2?.id);
 }
 
 export function filterMatchesForSeason(matches: Match[], year: number = SEASON_YEAR): Match[] {
