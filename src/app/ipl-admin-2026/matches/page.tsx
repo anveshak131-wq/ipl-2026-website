@@ -24,7 +24,8 @@ import {
 } from '@/lib/matchNumberUtils';
 import { PlayoffType } from '@/types';
 import { BulkEditValues } from '@/types/components';
-import { getTBDTeam, getPlayoffMatchDetails, getPlayoffTypes } from '@/lib/playoffUtils';
+import { getPlayoffMatchDetails, getPlayoffTypes } from '@/lib/playoffUtils';
+import { getIplSeasonTeamIds } from '@/lib/iplPointsTable';
 import { 
     exportToCSV, 
     exportToJSON, 
@@ -1576,6 +1577,17 @@ export default function AdminMatches() {
         return matrix;
     }, [matches, teams]);
 
+    const playoffTeamOptions = useMemo(() => {
+        const leagueTeams = teams.filter((team) => team.league === currentLeague && !team.id.startsWith('tbd-'));
+
+        if (currentLeague !== 'ipl') {
+            return leagueTeams;
+        }
+
+        const activeIplTeamIds = new Set(getIplSeasonTeamIds(selectedSeason));
+        return leagueTeams.filter((team) => activeIplTeamIds.has(team.id));
+    }, [teams, currentLeague, selectedSeason]);
+
     const resetForm = () => {
         setFormData({
             date: '',
@@ -2556,8 +2568,26 @@ export default function AdminMatches() {
                             <div className="flex items-center gap-2">
                             <button
                                     onClick={() => {
+                                        setFormData({
+                                            date: '',
+                                            time: '',
+                                            venue: '',
+                                            team1Id: '',
+                                            team2Id: '',
+                                            status: 'upcoming',
+                                            league: currentLeague,
+                                            playoffType: null,
+                                            statusNote: '',
+                                            reducedOversTo: '',
+                                            dlsApplied: false
+                                        });
+                                        setEditingId(null);
+                                        setSelectedPlayoffType(null);
+                                        setFormStep(1);
+                                        setError(null);
                                         setShowPlayoffForm(true);
                                         setShowForm(false);
+                                        setShowCsvUpload(false);
                                     }}
                                     className="flex items-center gap-2 px-4 py-2 rounded-xl bg-purple-600/80 hover:bg-purple-600 text-white text-sm font-semibold border border-purple-500/50 hover:border-purple-400/70 transition-all duration-200 shadow-md hover:shadow-purple-500/25"
                                     title="Create playoff match (Eliminator, Final, etc.)"
@@ -3593,6 +3623,16 @@ export default function AdminMatches() {
                                     return;
                                 }
 
+                                if (!formData.team1Id || !formData.team2Id) {
+                                    setError('Please select both playoff teams');
+                                    return;
+                                }
+
+                                if (formData.team1Id === formData.team2Id) {
+                                    setError('Please select two different teams');
+                                    return;
+                                }
+
                                 try {
                                     setIsSubmitting(true);
                                     setError(null);
@@ -3603,112 +3643,20 @@ export default function AdminMatches() {
                                         return;
                                     }
 
-                                    // Create TBD teams
-                                    const team1 = getTBDTeam(currentLeague, playoffDetails.team1Label);
-                                    const team2 = getTBDTeam(currentLeague, playoffDetails.team2Label);
-
-                                    // Create teams in the system if they don't exist
-                                    let team1Id = team1.id;
-                                    let team2Id = team2.id;
-
-                                    // Check if TBD teams already exist, if not create them
-                                    const existingTeam1 = teams.find(t => t.id === team1Id || (t.name === team1.name && t.league === currentLeague));
-                                    const existingTeam2 = teams.find(t => t.id === team2Id || (t.name === team2.name && t.league === currentLeague));
-
-                                    if (!existingTeam1) {
-                                        try {
-                                            const createdTeam1 = await api.createTeam({
-                                                league: currentLeague,
-                                                name: team1.name,
-                                                shortName: team1.shortName,
-                                                logo: team1.logo,
-                                                description: team1.description,
-                                                colors: team1.colors,
-                                                trophies: [],
-                                                homeGrounds: []
-                                            });
-                                            team1Id = createdTeam1.id;
-                                        } catch (err: any) {
-                                            console.warn('Team 1 may already exist or creation failed:', err);
-                                            // Try to find by name if creation failed
-                                            const foundTeam = teams.find(t => t.name === team1.name && t.league === currentLeague);
-                                            if (foundTeam) {
-                                                team1Id = foundTeam.id;
-                                            } else {
-                                                throw new Error(`Failed to create or find team 1: ${err?.message || 'Unknown error'}`);
-                                            }
-                                        }
-                                    } else {
-                                        team1Id = existingTeam1.id;
-                                        // Ensure existing TBD team has TBA logo
-                                        if (existingTeam1.logo !== team1.logo && existingTeam1.name.includes('Place Team')) {
-                                            try {
-                                                await api.updateTeam(existingTeam1.id, {
-                                                    ...existingTeam1,
-                                                    logo: team1.logo // Update to TBA logo
-                                                });
-                                            } catch (err) {
-                                                console.warn('Failed to update TBD team logo:', err);
-                                            }
-                                        }
-                                    }
-
-                                    if (!existingTeam2) {
-                                        try {
-                                            const createdTeam2 = await api.createTeam({
-                                                league: currentLeague,
-                                                name: team2.name,
-                                                shortName: team2.shortName,
-                                                logo: team2.logo,
-                                                description: team2.description,
-                                                colors: team2.colors,
-                                                trophies: [],
-                                                homeGrounds: []
-                                            });
-                                            team2Id = createdTeam2.id;
-                                        } catch (err: any) {
-                                            console.warn('Team 2 may already exist or creation failed:', err);
-                                            // Try to find by name if creation failed
-                                            const foundTeam = teams.find(t => t.name === team2.name && t.league === currentLeague);
-                                            if (foundTeam) {
-                                                team2Id = foundTeam.id;
-                                            } else {
-                                                throw new Error(`Failed to create or find team 2: ${err?.message || 'Unknown error'}`);
-                                            }
-                                        }
-                                    } else {
-                                        team2Id = existingTeam2.id;
-                                        // Ensure existing TBD team has TBA logo
-                                        if (existingTeam2.logo !== team2.logo && existingTeam2.name.includes('Place Team')) {
-                                            try {
-                                                await api.updateTeam(existingTeam2.id, {
-                                                    ...existingTeam2,
-                                                    logo: team2.logo // Update to TBA logo
-                                                });
-                                            } catch (err) {
-                                                console.warn('Failed to update TBD team logo:', err);
-                                            }
-                                        }
-                                    }
-
                                     // Create the playoff match (use formData values if set, otherwise use defaults)
                                     const matchData = {
                                         date: formData.date || playoffDetails.date,
                                         time: formData.time || playoffDetails.time,
                                         venue: formData.venue || playoffDetails.venue,
-                                        team1Id: team1Id,
-                                        team2Id: team2Id,
+                                        team1Id: formData.team1Id,
+                                        team2Id: formData.team2Id,
                                         status: 'upcoming' as const,
                                         league: currentLeague,
                                         playoffType: selectedPlayoffType
                                     };
 
                                     const newMatch = await api.createMatch(matchData);
-                                    
-                                    // Refresh teams list to get updated IDs
-                                    const updatedTeams = await api.getTeams(currentLeague);
-                                    setTeams(updatedTeams);
-                                    
+
                                     // Recalculate all match numbers after creation
                                     const allMatches = [...matches, newMatch];
                                     const matchesWithNumbers = recalculateMatchNumbers(allMatches);
@@ -3748,6 +3696,8 @@ export default function AdminMatches() {
                                                                 date: details.date,
                                                                 time: details.time,
                                                                 venue: details.venue,
+                                                                team1Id: '',
+                                                                team2Id: '',
                                                                 playoffType: playoffType
                                                             }));
                                                         }
@@ -3872,29 +3822,95 @@ export default function AdminMatches() {
                                                     </div>
                                                 </div>
 
-                                                {/* TBD Teams display */}
                                                 <div className="rounded-xl border border-blue-500/20 overflow-hidden" style={{ background: 'rgba(59,130,246,0.04)' }}>
                                                     <div className="px-4 py-3 border-b border-blue-500/15 flex items-center gap-2">
                                                         <Users className="w-4 h-4 text-blue-400" />
-                                                        <span className="text-sm font-semibold text-blue-300">Teams (To Be Determined)</span>
+                                                        <span className="text-sm font-semibold text-blue-300">Teams</span>
+                                                        <span className="ml-auto text-xs text-gray-500">
+                                                            {currentLeague === 'ipl' ? 'Select from 10 IPL teams' : 'Select playoff teams'}
+                                                        </span>
                                                     </div>
-                                                    <div className="px-4 py-4">
-                                                        <div className="flex items-center justify-center gap-4">
-                                                            <div className="flex-1 py-2.5 px-4 rounded-xl border border-white/8 text-center" style={{ background: 'rgba(255,255,255,0.03)' }}>
-                                                                <p className="text-xs text-gray-500 mb-1">Team 1</p>
-                                                                <p className="text-sm font-semibold text-white">{details.team1Label}</p>
+                                                    <div className="px-4 py-4 space-y-4">
+                                                        <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] gap-4 items-start">
+                                                            <div className="space-y-1.5">
+                                                                <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                                                                    Team 1
+                                                                </label>
+                                                                <div className="relative">
+                                                                    <Users className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
+                                                                    <select
+                                                                        value={formData.team1Id}
+                                                                        onChange={(e) => setFormData(prev => ({ ...prev, team1Id: e.target.value }))}
+                                                                        className="w-full pl-10 pr-4 py-3 rounded-xl border border-white/10 text-white text-sm focus:outline-none focus:border-blue-500/50 focus:ring-2 focus:ring-blue-500/15 transition-all appearance-none"
+                                                                        style={{ background: 'rgba(255,255,255,0.06)', colorScheme: 'dark' }}
+                                                                        required
+                                                                    >
+                                                                        <option value="">Select Team 1...</option>
+                                                                        {playoffTeamOptions.map(team => (
+                                                                            <option key={team.id} value={team.id} disabled={team.id === formData.team2Id} className="bg-gray-900">
+                                                                                {team.shortName} — {team.name}
+                                                                            </option>
+                                                                        ))}
+                                                                    </select>
+                                                                    <svg className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
+                                                                </div>
+                                                                <p className="text-xs text-gray-500 pl-1">Slot hint: {details.team1Label}</p>
+                                                                {formData.team1Id && (
+                                                                    <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-xs text-blue-400 pl-1">
+                                                                        ✓ {playoffTeamOptions.find(t => t.id === formData.team1Id)?.name}
+                                                                    </motion.p>
+                                                                )}
                                                             </div>
-                                                            <div className="px-3 py-1.5 rounded-full border border-white/10 text-xs font-extrabold text-gray-400 flex-shrink-0" style={{ background: 'rgba(255,255,255,0.04)' }}>VS</div>
-                                                            <div className="flex-1 py-2.5 px-4 rounded-xl border border-white/8 text-center" style={{ background: 'rgba(255,255,255,0.03)' }}>
-                                                                <p className="text-xs text-gray-500 mb-1">Team 2</p>
-                                                                <p className="text-sm font-semibold text-white">{details.team2Label}</p>
+                                                            <div className="self-center justify-self-center px-3 py-1.5 rounded-full border border-white/10 text-xs font-extrabold text-gray-400" style={{ background: 'rgba(255,255,255,0.04)' }}>
+                                                                VS
+                                                            </div>
+                                                            <div className="space-y-1.5">
+                                                                <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                                                                    Team 2
+                                                                </label>
+                                                                <div className="relative">
+                                                                    <Users className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
+                                                                    <select
+                                                                        value={formData.team2Id}
+                                                                        onChange={(e) => setFormData(prev => ({ ...prev, team2Id: e.target.value }))}
+                                                                        className="w-full pl-10 pr-4 py-3 rounded-xl border border-white/10 text-white text-sm focus:outline-none focus:border-rose-500/50 focus:ring-2 focus:ring-rose-500/15 transition-all appearance-none"
+                                                                        style={{ background: 'rgba(255,255,255,0.06)', colorScheme: 'dark' }}
+                                                                        required
+                                                                    >
+                                                                        <option value="">Select Team 2...</option>
+                                                                        {playoffTeamOptions.map(team => (
+                                                                            <option key={team.id} value={team.id} disabled={team.id === formData.team1Id} className="bg-gray-900">
+                                                                                {team.shortName} — {team.name}
+                                                                            </option>
+                                                                        ))}
+                                                                    </select>
+                                                                    <svg className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
+                                                                </div>
+                                                                <p className="text-xs text-gray-500 pl-1">Slot hint: {details.team2Label}</p>
+                                                                {formData.team2Id && (
+                                                                    <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-xs text-rose-400 pl-1">
+                                                                        ✓ {playoffTeamOptions.find(t => t.id === formData.team2Id)?.name}
+                                                                    </motion.p>
+                                                                )}
                                                             </div>
                                                         </div>
-                                                        <p className="text-xs text-gray-500 mt-3 text-center">
-                                                            {currentLeague === 'wpl'
-                                                                ? 'Placeholders — will update after league stage standings are confirmed'
-                                                                : 'Teams determined from league standings · can be updated later'}
-                                                        </p>
+                                                        {formData.team1Id && formData.team2Id && (
+                                                            <motion.div
+                                                                initial={{ opacity: 0, y: 6 }}
+                                                                animate={{ opacity: 1, y: 0 }}
+                                                                className="flex items-center justify-center gap-4 p-4 rounded-xl border border-white/10"
+                                                                style={{ background: 'rgba(255,255,255,0.03)' }}
+                                                            >
+                                                                <span className="text-sm font-bold text-blue-300">{playoffTeamOptions.find(t => t.id === formData.team1Id)?.shortName}</span>
+                                                                <div className="px-3 py-1 rounded-full bg-gradient-to-r from-white/5 to-white/10 border border-white/15 text-xs font-extrabold text-gray-300">VS</div>
+                                                                <span className="text-sm font-bold text-rose-300">{playoffTeamOptions.find(t => t.id === formData.team2Id)?.shortName}</span>
+                                                            </motion.div>
+                                                        )}
+                                                        {formData.team1Id === formData.team2Id && formData.team1Id && (
+                                                            <p className="text-xs text-red-400 flex items-center gap-1.5">
+                                                                <IconX className="w-3.5 h-3.5" /> Same team selected — please choose different teams
+                                                            </p>
+                                                        )}
                                                     </div>
                                                 </div>
                                             </motion.div>
@@ -3910,9 +3926,9 @@ export default function AdminMatches() {
                                         </motion.button>
                                         <motion.button
                                             type="submit"
-                                            disabled={isSubmitting || !selectedPlayoffType}
-                                            whileHover={{ scale: (isSubmitting || !selectedPlayoffType) ? 1 : 1.03 }}
-                                            whileTap={{ scale: (isSubmitting || !selectedPlayoffType) ? 1 : 0.97 }}
+                                            disabled={isSubmitting || !selectedPlayoffType || !formData.team1Id || !formData.team2Id || formData.team1Id === formData.team2Id}
+                                            whileHover={{ scale: (isSubmitting || !selectedPlayoffType || !formData.team1Id || !formData.team2Id || formData.team1Id === formData.team2Id) ? 1 : 1.03 }}
+                                            whileTap={{ scale: (isSubmitting || !selectedPlayoffType || !formData.team1Id || !formData.team2Id || formData.team1Id === formData.team2Id) ? 1 : 0.97 }}
                                             className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-fuchsia-600 text-white text-sm font-bold shadow-md hover:shadow-purple-500/30 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
                                         >
                                             {isSubmitting ? (
