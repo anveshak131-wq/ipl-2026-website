@@ -225,6 +225,95 @@ function isPlaceholderTeam(team) {
   );
 }
 
+function normalizeDateSlotValue(value) {
+  const str = String(value || '').trim();
+  if (!str) return '';
+  if (/^\d{4}-\d{2}-\d{2}/.test(str)) return str.slice(0, 10);
+
+  const parsed = Date.parse(str);
+  if (Number.isNaN(parsed)) return str.toLowerCase();
+  return new Date(parsed).toISOString().slice(0, 10);
+}
+
+function normalizeTimeSlotValue(value) {
+  const raw = String(value || '').trim().toUpperCase();
+  if (!raw) return '';
+
+  const meridiemMatch = raw.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/);
+  if (meridiemMatch) {
+    let hours = Number(meridiemMatch[1]) % 12;
+    const minutes = meridiemMatch[2];
+    if (meridiemMatch[3] === 'PM') hours += 12;
+    return `${String(hours).padStart(2, '0')}:${minutes}`;
+  }
+
+  const twentyFourHourMatch = raw.match(/^(\d{1,2}):(\d{2})$/);
+  if (twentyFourHourMatch) {
+    return `${String(Number(twentyFourHourMatch[1])).padStart(2, '0')}:${twentyFourHourMatch[2]}`;
+  }
+
+  return raw.replace(/\s+/g, '');
+}
+
+function normalizeVenueSlotValue(value) {
+  return String(value || '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim();
+}
+
+function matchHasPlaceholderTeams(match) {
+  return (
+    isPlaceholderTeamId(match?.team1Id ?? match?.team1?.id) ||
+    isPlaceholderTeamId(match?.team2Id ?? match?.team2?.id) ||
+    (match?.team1 ? isPlaceholderTeam(match.team1) : false) ||
+    (match?.team2 ? isPlaceholderTeam(match.team2) : false)
+  );
+}
+
+function hasSameTeamPair(match, team1Id, team2Id) {
+  const left = normalizeTeamId(team1Id);
+  const right = normalizeTeamId(team2Id);
+  if (!left || !right) return false;
+
+  const candidateLeft = normalizeTeamId(match?.team1Id ?? match?.team1?.id);
+  const candidateRight = normalizeTeamId(match?.team2Id ?? match?.team2?.id);
+  if (!candidateLeft || !candidateRight) return false;
+
+  return (
+    (candidateLeft === left && candidateRight === right) ||
+    (candidateLeft === right && candidateRight === left)
+  );
+}
+
+function isSamePlayoffSlot(match, slotDetails) {
+  if (!match || !slotDetails) return false;
+
+  const seasonYear = slotDetails.seasonYear ?? getYearFromDateLike(slotDetails.date);
+  if (seasonYear && getYearFromDateLike(match?.date) !== seasonYear) return false;
+
+  const sameDate =
+    normalizeDateSlotValue(match?.date) === normalizeDateSlotValue(slotDetails.date);
+  if (!sameDate) return false;
+
+  const candidateTime = normalizeTimeSlotValue(match?.time);
+  const expectedTime = normalizeTimeSlotValue(slotDetails.time);
+  const sameTime = Boolean(candidateTime && expectedTime && candidateTime === expectedTime);
+
+  const candidateVenue = normalizeVenueSlotValue(match?.venue);
+  const expectedVenue = normalizeVenueSlotValue(slotDetails.venue);
+  const sameVenue = Boolean(
+    candidateVenue &&
+      expectedVenue &&
+      (candidateVenue === expectedVenue ||
+        candidateVenue.includes(expectedVenue) ||
+        expectedVenue.includes(candidateVenue))
+  );
+
+  const sameTeams = hasSameTeamPair(match, slotDetails.team1Id, slotDetails.team2Id);
+  return sameTime || sameVenue || sameTeams;
+}
+
 function extractRunsFromScore(score) {
   if (typeof score === 'number' && Number.isFinite(score)) return score;
   if (typeof score !== 'string') return 0;
@@ -412,13 +501,33 @@ function getIplSeasonStandings(context, seasonYear) {
   return context.standingsBySeason.get(seasonYear) || [];
 }
 
-function findExistingPlayoffMatch(matches, league, playoffType, seasonYear) {
-  return matches.find((candidate) => {
+function findExistingPlayoffMatch(matches, league, playoffType, seasonYear, slotDetails = null, excludeId = null) {
+  const exactMatch = matches.find((candidate) => {
     const candidateLeague = inferMatchLeague(candidate) || candidate?.league || 'ipl';
     if (candidateLeague !== league) return false;
+    if (excludeId && String(candidate?.id) === String(excludeId)) return false;
     if (candidate?.playoffType !== playoffType) return false;
     return getYearFromDateLike(candidate?.date) === seasonYear;
   }) || null;
+
+  if (!slotDetails) return exactMatch;
+
+  const slotMatch = matches.find((candidate) => {
+    const candidateLeague = inferMatchLeague(candidate) || candidate?.league || 'ipl';
+    if (candidateLeague !== league) return false;
+    if (excludeId && String(candidate?.id) === String(excludeId)) return false;
+    if (candidate?.playoffType && candidate.playoffType !== playoffType) return false;
+    return isSamePlayoffSlot(candidate, { seasonYear, ...slotDetails });
+  }) || null;
+
+  if (!exactMatch) return slotMatch;
+  if (!slotMatch) return exactMatch;
+
+  if (matchHasPlaceholderTeams(exactMatch) && !matchHasPlaceholderTeams(slotMatch)) {
+    return slotMatch;
+  }
+
+  return exactMatch;
 }
 
 function getPlayoffMatchForSeason(context, seasonYear, playoffType) {
@@ -429,6 +538,106 @@ function getPlayoffMatchForSeason(context, seasonYear, playoffType) {
       return getYearFromDateLike(candidate?.date) === seasonYear;
     }) || null
   );
+}
+
+function shouldUpgradeExistingPlayoffMatch(existingMatch, incomingMatch) {
+  if (!existingMatch || !incomingMatch?.playoffType) return false;
+
+  const incomingHasPlaceholders =
+    isPlaceholderTeamId(incomingMatch?.team1Id) || isPlaceholderTeamId(incomingMatch?.team2Id);
+
+  if (!existingMatch.playoffType) return true;
+  return matchHasPlaceholderTeams(existingMatch) && !incomingHasPlaceholders;
+}
+
+function mergeIncomingPlayoffMatch(existingMatch, incomingMatch) {
+  const incomingHasPlaceholders =
+    isPlaceholderTeamId(incomingMatch?.team1Id) || isPlaceholderTeamId(incomingMatch?.team2Id);
+  const existingHasPlaceholders = matchHasPlaceholderTeams(existingMatch);
+  const preferIncomingTeams = !incomingHasPlaceholders || existingHasPlaceholders;
+
+  const mergedMatch = {
+    ...existingMatch,
+    ...(!incomingHasPlaceholders ? incomingMatch : {}),
+    id: existingMatch.id,
+    league: incomingMatch.league || existingMatch.league || 'ipl',
+    playoffType: incomingMatch.playoffType || existingMatch.playoffType,
+    date: incomingHasPlaceholders ? (existingMatch.date || incomingMatch.date) : (incomingMatch.date || existingMatch.date),
+    time: incomingHasPlaceholders ? (existingMatch.time || incomingMatch.time) : (incomingMatch.time || existingMatch.time),
+    venue: incomingHasPlaceholders ? (existingMatch.venue || incomingMatch.venue) : (incomingMatch.venue || existingMatch.venue),
+    team1Id: preferIncomingTeams ? (incomingMatch.team1Id || existingMatch.team1Id) : existingMatch.team1Id,
+    team2Id: preferIncomingTeams ? (incomingMatch.team2Id || existingMatch.team2Id) : existingMatch.team2Id,
+    status: incomingHasPlaceholders
+      ? (existingMatch.status || incomingMatch.status || 'upcoming')
+      : (incomingMatch.status || existingMatch.status || 'upcoming'),
+  };
+
+  if (incomingMatch.statusNote !== undefined) {
+    mergedMatch.statusNote =
+      incomingHasPlaceholders && existingMatch.statusNote
+        ? existingMatch.statusNote
+        : String(incomingMatch.statusNote).trim();
+  } else if (existingMatch.statusNote !== undefined) {
+    mergedMatch.statusNote = existingMatch.statusNote;
+  }
+
+  if (incomingMatch.reducedOversTo !== undefined) {
+    const reducedOvers = Number(incomingMatch.reducedOversTo);
+    if (Number.isFinite(reducedOvers) && reducedOvers > 0) {
+      mergedMatch.reducedOversTo = reducedOvers;
+    }
+  } else if (existingMatch.reducedOversTo !== undefined) {
+    mergedMatch.reducedOversTo = existingMatch.reducedOversTo;
+  }
+
+  if (typeof incomingMatch.dlsApplied === 'boolean') {
+    mergedMatch.dlsApplied = incomingMatch.dlsApplied;
+  } else if (typeof existingMatch.dlsApplied === 'boolean') {
+    mergedMatch.dlsApplied = existingMatch.dlsApplied;
+  }
+
+  return mergedMatch;
+}
+
+function filterDuplicatePlaceholderMatches(matches) {
+  return matches.filter((match, index, allMatches) => {
+    if (!matchHasPlaceholderTeams(match)) return true;
+
+    const matchId = String(match?.id || '');
+    const matchLeague = inferMatchLeague(match) || match?.league || 'ipl';
+    const seasonYear = getYearFromDateLike(match?.date);
+    if (!seasonYear) return true;
+
+    const betterMatch = allMatches.find((candidate) => {
+      if (String(candidate?.id || '') === matchId) return false;
+      const sameSlot = isSamePlayoffSlot(candidate, {
+        seasonYear,
+        date: match?.date,
+        time: match?.time,
+        venue: match?.venue,
+        team1Id: match?.team1Id ?? match?.team1?.id,
+        team2Id: match?.team2Id ?? match?.team2?.id,
+      });
+      if (!sameSlot) return false;
+
+      const candidateLeague = inferMatchLeague(candidate) || candidate?.league || 'ipl';
+      if (candidateLeague !== matchLeague) return false;
+
+      const candidateHasPlaceholderTeams = matchHasPlaceholderTeams(candidate);
+      if (!candidateHasPlaceholderTeams) return true;
+      if (candidate?.playoffType && !match?.playoffType) return true;
+
+      const candidateId = Number.parseInt(String(candidate?.id || ''), 10);
+      const currentId = Number.parseInt(matchId, 10);
+      if (Number.isFinite(candidateId) && Number.isFinite(currentId)) {
+        return candidateId < currentId;
+      }
+
+      return String(candidate?.id || '') < matchId;
+    });
+
+    return !betterMatch;
+  });
 }
 
 function resolveWinningTeam(match, context) {
@@ -701,6 +910,8 @@ async function handleGetRequest(context) {
     if (!includeAll) {
       matches = matches.filter((match) => isActiveSeasonMatch(match, resolvedSeasonYear));
     }
+
+    matches = filterDuplicatePlaceholderMatches(matches);
     
     // Fetch teams from KV storage to properly resolve team objects
     let allTeams = await env.IPL_CACHE.get('teams', 'json');
@@ -826,8 +1037,28 @@ async function handleBulkPostRequest(context) {
     const created = incoming.map(m => {
       const seasonYear = getYearFromDateLike(m.date);
       if (m.playoffType && seasonYear) {
-        const existingPlayoffMatch = findExistingPlayoffMatch(matches, m.league || 'ipl', m.playoffType, seasonYear);
+        const existingPlayoffMatch = findExistingPlayoffMatch(
+          matches,
+          m.league || 'ipl',
+          m.playoffType,
+          seasonYear,
+          {
+            date: m.date,
+            time: m.time,
+            venue: m.venue,
+            team1Id: m.team1Id,
+            team2Id: m.team2Id,
+          }
+        );
         if (existingPlayoffMatch) {
+          if (shouldUpgradeExistingPlayoffMatch(existingPlayoffMatch, m)) {
+            const existingIndex = matches.findIndex((candidate) => String(candidate?.id) === String(existingPlayoffMatch.id));
+            if (existingIndex !== -1) {
+              const upgradedMatch = mergeIncomingPlayoffMatch(matches[existingIndex], m);
+              matches[existingIndex] = upgradedMatch;
+              return upgradedMatch;
+            }
+          }
           return existingPlayoffMatch;
         }
       }
@@ -909,8 +1140,39 @@ async function handlePostRequest(context) {
 
     const seasonYear = getYearFromDateLike(date);
     if (body.playoffType && seasonYear) {
-      const existingPlayoffMatch = findExistingPlayoffMatch(matches, league || 'ipl', body.playoffType, seasonYear);
+      const existingPlayoffMatch = findExistingPlayoffMatch(
+        matches,
+        league || 'ipl',
+        body.playoffType,
+        seasonYear,
+        {
+          date,
+          time,
+          venue,
+          team1Id,
+          team2Id,
+        }
+      );
       if (existingPlayoffMatch) {
+        if (shouldUpgradeExistingPlayoffMatch(existingPlayoffMatch, body)) {
+          const existingIndex = matches.findIndex((candidate) => String(candidate?.id) === String(existingPlayoffMatch.id));
+          if (existingIndex !== -1) {
+            const upgradedMatch = mergeIncomingPlayoffMatch(matches[existingIndex], body);
+            matches[existingIndex] = upgradedMatch;
+            await env.IPL_CACHE.put('matches', JSON.stringify(matches));
+
+            let allTeams = await env.IPL_CACHE.get('teams', 'json');
+            if (!allTeams || allTeams.length === 0) {
+              allTeams = mockTeams;
+            }
+            const resolutionContext = createMatchResolutionContext(matches, allTeams);
+            return new Response(JSON.stringify(formatMatch(upgradedMatch, allTeams, resolutionContext)), {
+              status: 200,
+              headers: { 'Content-Type': 'application/json' }
+            });
+          }
+        }
+
         let allTeams = await env.IPL_CACHE.get('teams', 'json');
         if (!allTeams || allTeams.length === 0) {
           allTeams = mockTeams;
