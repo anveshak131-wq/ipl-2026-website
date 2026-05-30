@@ -82,7 +82,7 @@ export default function Playing11Page() {
 
     try {
               const [matchesData, playersData] = await Promise.all([
-                api.getMatches(LEAGUE, { includeAll: true }),
+                api.getMatches(LEAGUE, { includeAll: true, nocache: true }),
                 api.getPlayers(undefined, LEAGUE),
               ]);
       setMatches(matchesData);

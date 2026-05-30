@@ -223,7 +223,7 @@ export default function ScorecardAdminPage() {
 
   const fetchMatches = async () => {
     try {
-      const data = await api.getMatches('ipl', { includeAll: true });
+      const data = await api.getMatches('ipl', { includeAll: true, nocache: true });
       setMatches(data || []);
       setSeasonYear((prev) => {
         if (prev !== null && (data || []).some((match) => getMatchSeasonYear(match) === prev)) {
@@ -241,7 +241,12 @@ export default function ScorecardAdminPage() {
 
   const fetchAllScorecards = async () => {
     try {
-      const response = await fetch('/api/scorecards?league=ipl');
+      const response = await fetch('/api/scorecards?league=ipl&nocache=1', {
+        cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-cache'
+        }
+      });
       if (response.ok) {
         const data = await response.json();
         setScorecards(data || []);
@@ -282,7 +287,15 @@ export default function ScorecardAdminPage() {
       let remoteScorecard: Scorecard | null = null;
       try {
         const base = typeof window !== 'undefined' ? window.location.origin : '';
-        const response = await fetch(`${base}/api/scorecards?matchId=${encodeURIComponent(match.id)}&league=ipl`);
+        const response = await fetch(
+          `${base}/api/scorecards?matchId=${encodeURIComponent(match.id)}&league=ipl&nocache=1`,
+          {
+            cache: 'no-store',
+            headers: {
+              'Cache-Control': 'no-cache'
+            }
+          }
+        );
         if (response.ok) {
           const data = await response.json();
           if (Array.isArray(data) && data.length > 0) {

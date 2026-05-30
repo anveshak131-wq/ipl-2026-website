@@ -10,6 +10,7 @@ const MATCH_CACHE_KEY_PREFIX = 'matches_cache_';
 type MatchFetchOptions = {
   season?: number | 'all';
   includeAll?: boolean;
+  nocache?: boolean;
 };
 
 function getMatchesCacheKey(league?: 'ipl' | 'wpl', options?: MatchFetchOptions): string {
@@ -613,11 +614,12 @@ export const api = {
   getMatches: async (league?: 'ipl' | 'wpl', options: MatchFetchOptions = {}): Promise<Match[]> => {
     try {
       const includeAll = options.includeAll === true || options.season === 'all';
+      const bypassCache = options.nocache === true;
       const requestedSeason = typeof options.season === 'number' ? options.season : SEASON_YEAR;
       const cacheKey = getMatchesCacheKey(league, options);
 
       // Browser-side cache to avoid refetching on every navigation
-      if (typeof window !== 'undefined') {
+      if (!bypassCache && typeof window !== 'undefined') {
         const cachedRaw = sessionStorage.getItem(cacheKey) || localStorage.getItem(cacheKey);
         if (cachedRaw) {
           try {
@@ -639,9 +641,12 @@ export const api = {
       } else if (typeof options.season === 'number') {
         params.set('season', String(options.season));
       }
+      if (bypassCache) {
+        params.set('nocache', '1');
+      }
 
       const url = params.toString() ? `/api/matches?${params.toString()}` : '/api/matches';
-      const response = await fetch(url);
+      const response = await fetch(url, bypassCache ? { cache: 'no-store' } : undefined);
       if (!response.ok) {
         throw new Error('Failed to fetch matches');
       }
