@@ -226,6 +226,22 @@ const formatPlayerOptionLabel = (
   return parts.join(' ');
 };
 
+const normalizePlayerSelectionInput = (value: string, options: PlayerOption[]) => {
+  const cleaned = String(value || '').trim();
+  if (!cleaned) return '';
+  if (options.some((opt) => opt.id === cleaned)) return cleaned;
+
+  const normalized = cleaned.toLowerCase();
+  const exactMatches = options.filter((opt) => String(opt.name || '').trim().toLowerCase() === normalized);
+  return exactMatches.length === 1 ? exactMatches[0].id : cleaned;
+};
+
+const getTeamPlayerDatalistId = (matchId: string, teamKey: TeamKey) =>
+  `ipl-live-score-fast-${matchId || 'match'}-${teamKey}-players`;
+
+const getResultPlayerDatalistId = (matchId: string) =>
+  `ipl-live-score-fast-${matchId || 'match'}-result-players`;
+
 export default function IPLAdminLiveScoreTablePage() {
   const [matches, setMatches] = useState<Match[]>([]);
   const [players, setPlayers] = useState<Player[]>([]);
@@ -604,24 +620,41 @@ export default function IPLAdminLiveScoreTablePage() {
     return uniqueIds.map((id) => ({ id, name: resolvePlayerName(id) }));
   };
 
+  const resultPlayerNames = useMemo(
+    () => uniqStrings([...squads.team1.map((p) => p.name), ...squads.team2.map((p) => p.name)]),
+    [squads.team1, squads.team2]
+  );
+
   const fastBattingKey = getBattingTeamKeyForInnings(fastInnings);
   const fastBowlingKey = otherTeamKey(fastBattingKey);
   const fastBattingOptions = getTeamPlayerOptions(fastBattingKey);
   const fastBowlingOptions = getTeamPlayerOptions(fastBowlingKey);
-  const fastBattingCaptainId = matchCaptains[fastBattingKey].id;
-  const fastBowlingCaptainId = matchCaptains[fastBowlingKey].id;
-  const fastBattingImpact = fastBattingKey === 'team1' ? impactPlayerInfo.team1 : impactPlayerInfo.team2;
-  const fastBowlingImpact = fastBowlingKey === 'team1' ? impactPlayerInfo.team1 : impactPlayerInfo.team2;
 
   useEffect(() => {
     if (!selectedMatch) return;
     const battingIds = fastBattingOptions.map((opt) => opt.id);
     const bowlingIds = fastBowlingOptions.map((opt) => opt.id);
-    const nextStriker = battingIds.includes(fastStrikerId) ? fastStrikerId : battingIds[0] || '';
-    const nextNonStriker = battingIds.includes(fastNonStrikerId)
-      ? fastNonStrikerId
-      : battingIds[1] || battingIds[0] || '';
-    const nextBowler = bowlingIds.includes(fastBowlerId) ? fastBowlerId : bowlingIds[0] || '';
+    const nextStriker = !fastStrikerId
+      ? battingIds[0] || ''
+      : battingIds.includes(fastStrikerId)
+        ? fastStrikerId
+        : playerById.has(fastStrikerId)
+          ? battingIds[0] || ''
+          : fastStrikerId;
+    const nextNonStriker = !fastNonStrikerId
+      ? battingIds[1] || battingIds[0] || ''
+      : battingIds.includes(fastNonStrikerId)
+        ? fastNonStrikerId
+        : playerById.has(fastNonStrikerId)
+          ? battingIds[1] || battingIds[0] || ''
+          : fastNonStrikerId;
+    const nextBowler = !fastBowlerId
+      ? bowlingIds[0] || ''
+      : bowlingIds.includes(fastBowlerId)
+        ? fastBowlerId
+        : playerById.has(fastBowlerId)
+          ? bowlingIds[0] || ''
+          : fastBowlerId;
 
     if (nextStriker !== fastStrikerId) setFastStrikerId(nextStriker);
     if (nextNonStriker !== fastNonStrikerId) setFastNonStrikerId(nextNonStriker);
@@ -635,6 +668,7 @@ export default function IPLAdminLiveScoreTablePage() {
     fastStrikerId,
     fastNonStrikerId,
     fastBowlerId,
+    playerById,
   ]);
 
   const fastTotals = useMemo(
@@ -1063,6 +1097,18 @@ export default function IPLAdminLiveScoreTablePage() {
     setFastOverrideOver('');
     setFastOverrideBall('');
   };
+
+  useEffect(() => {
+    setFastStrikerId('');
+    setFastNonStrikerId('');
+    setFastBowlerId('');
+    setFastRuns(0);
+    setFastExtras({ ...DEFAULT_EXTRAS });
+    setFastWicket({ ...DEFAULT_WICKET });
+    setFastNotes('');
+    setFastOverrideOver('');
+    setFastOverrideBall('');
+  }, [selectedMatchId]);
 
   const toggleFastWide = () => {
     setFastExtras((prev) => {
@@ -2955,10 +3001,6 @@ export default function IPLAdminLiveScoreTablePage() {
 
     const battingOptions = getTeamPlayerOptions(battingKey);
     const bowlingOptions = getTeamPlayerOptions(bowlingKey);
-    const battingCaptainId = matchCaptains[battingKey].id;
-    const bowlingCaptainId = matchCaptains[bowlingKey].id;
-    const battingImpact = battingKey === 'team1' ? impactPlayerInfo.team1 : impactPlayerInfo.team2;
-    const bowlingImpact = bowlingKey === 'team1' ? impactPlayerInfo.team1 : impactPlayerInfo.team2;
 
     const ex = { ...DEFAULT_EXTRAS, ...(extrasData[rowIndex] || {}) };
     const wk = { ...DEFAULT_WICKET, ...(wicketData[rowIndex] || {}) };
@@ -2992,53 +3034,25 @@ export default function IPLAdminLiveScoreTablePage() {
       case 3:
       case 4: {
         const label = colIndex === 3 ? 'Striker' : 'Non-Striker';
-        const hasLegacyValue =
-          Boolean(cellValue) && !battingOptions.some((opt) => opt.id === cellValue);
         return (
-          <select
-            value={cellValue || ''}
-            onChange={(e) => updateCell(rowIndex, colIndex, e.target.value)}
-            className="w-full border border-white/10 focus:border-purple-400 rounded-lg px-2 py-1 bg-slate-950 text-white"
-          >
-            <option value="">{label}</option>
-            {hasLegacyValue && (
-              <option value={cellValue}>{String(cellValue)} (legacy)</option>
-            )}
-            {battingOptions.map((opt) => (
-              <option key={opt.id} value={opt.id}>
-                {formatPlayerOptionLabel(opt.name, {
-                  isCaptain: Boolean(battingCaptainId && opt.id === battingCaptainId),
-                  isImpactIn: Boolean(battingImpact.impactId && opt.id === battingImpact.impactId),
-                  isImpactOut: Boolean(battingImpact.originalId && opt.id === battingImpact.originalId),
-                })}
-              </option>
-            ))}
-          </select>
+          <input
+            value={resolvePlayerName(cellValue || '')}
+            onChange={(e) => updateCell(rowIndex, colIndex, normalizePlayerSelectionInput(e.target.value, battingOptions))}
+            list={getTeamPlayerDatalistId(selectedMatchId, battingKey)}
+            placeholder={`Type ${label.toLowerCase()} name`}
+            className="w-full border border-white/10 focus:border-purple-400 rounded-lg px-2 py-1 bg-white/5 text-white placeholder-white/30"
+          />
         );
       }
       case 5: {
-        const hasLegacyValue =
-          Boolean(cellValue) && !bowlingOptions.some((opt) => opt.id === cellValue);
         return (
-          <select
-            value={cellValue || ''}
-            onChange={(e) => updateCell(rowIndex, colIndex, e.target.value)}
-            className="w-full border border-white/10 focus:border-purple-400 rounded-lg px-2 py-1 bg-slate-950 text-white"
-          >
-            <option value="">Bowler</option>
-            {hasLegacyValue && (
-              <option value={cellValue}>{String(cellValue)} (legacy)</option>
-            )}
-            {bowlingOptions.map((opt) => (
-              <option key={opt.id} value={opt.id}>
-                {formatPlayerOptionLabel(opt.name, {
-                  isCaptain: Boolean(bowlingCaptainId && opt.id === bowlingCaptainId),
-                  isImpactIn: Boolean(bowlingImpact.impactId && opt.id === bowlingImpact.impactId),
-                  isImpactOut: Boolean(bowlingImpact.originalId && opt.id === bowlingImpact.originalId),
-                })}
-              </option>
-            ))}
-          </select>
+          <input
+            value={resolvePlayerName(cellValue || '')}
+            onChange={(e) => updateCell(rowIndex, colIndex, normalizePlayerSelectionInput(e.target.value, bowlingOptions))}
+            list={getTeamPlayerDatalistId(selectedMatchId, bowlingKey)}
+            placeholder="Type bowler name"
+            className="w-full border border-white/10 focus:border-purple-400 rounded-lg px-2 py-1 bg-white/5 text-white placeholder-white/30"
+          />
         );
       }
       case 6: {
@@ -3180,10 +3194,6 @@ export default function IPLAdminLiveScoreTablePage() {
 
         const showWicketAssistant = wk.wicketType === 'Run Out';
 
-        const wicketTakerLegacy =
-          Boolean(wk.wicketTaker) && !bowlingOptions.some((opt) => opt.id === wk.wicketTaker);
-        const wicketAssistantLegacy =
-          Boolean(wk.wicketAssistant) && !bowlingOptions.some((opt) => opt.id === wk.wicketAssistant);
         return (
           <div className="space-y-2">
             <div className="flex items-center gap-2">
@@ -3221,48 +3231,33 @@ export default function IPLAdminLiveScoreTablePage() {
                   </select>
                 )}
                 {showWicketTaker && (
-                  <select
-                    value={wk.wicketTaker || ''}
-                    onChange={(e) => onWicketChange(rowIndex, 'wicketTaker', e.target.value)}
-                    className="w-full border border-white/10 focus:border-purple-400 rounded-lg px-2 py-1 bg-slate-950 text-white text-xs"
-                  >
-                    <option value="">Fielder/Bowler</option>
-                    {wicketTakerLegacy && (
-                      <option value={wk.wicketTaker}>{String(wk.wicketTaker)} (legacy)</option>
-                    )}
-                    {bowlingOptions.map((opt) => (
-                      <option key={opt.id} value={opt.id}>
-                        {formatPlayerOptionLabel(opt.name, {
-                          isCaptain: Boolean(bowlingCaptainId && opt.id === bowlingCaptainId),
-                          isImpactIn: Boolean(bowlingImpact.impactId && opt.id === bowlingImpact.impactId),
-                          isImpactOut: Boolean(bowlingImpact.originalId && opt.id === bowlingImpact.originalId),
-                        })}
-                      </option>
-                    ))}
-                  </select>
+                  <input
+                    value={resolvePlayerName(wk.wicketTaker || '')}
+                    onChange={(e) =>
+                      onWicketChange(rowIndex, 'wicketTaker', normalizePlayerSelectionInput(e.target.value, bowlingOptions))
+                    }
+                    list={getTeamPlayerDatalistId(selectedMatchId, bowlingKey)}
+                    placeholder="Type fielder/bowler name"
+                    className="w-full border border-white/10 focus:border-purple-400 rounded-lg px-2 py-1 bg-white/5 text-white placeholder-white/30 text-xs"
+                  />
                 )}
                 {showWicketAssistant && (
-                  <select
-                    value={wk.wicketAssistant || ''}
-                    onChange={(e) => onWicketChange(rowIndex, 'wicketAssistant', e.target.value)}
-                    className="w-full border border-white/10 focus:border-purple-400 rounded-lg px-2 py-1 bg-slate-950 text-white text-xs"
-                  >
-                    <option value="">Assistant fielder (optional)</option>
-                    {wicketAssistantLegacy && (
-                      <option value={wk.wicketAssistant}>{String(wk.wicketAssistant)} (legacy)</option>
-                    )}
-                    {bowlingOptions
-                      .filter((opt) => !wk.wicketTaker || opt.id !== wk.wicketTaker)
-                      .map((opt) => (
-                        <option key={opt.id} value={opt.id}>
-                          {formatPlayerOptionLabel(opt.name, {
-                            isCaptain: Boolean(bowlingCaptainId && opt.id === bowlingCaptainId),
-                            isImpactIn: Boolean(bowlingImpact.impactId && opt.id === bowlingImpact.impactId),
-                            isImpactOut: Boolean(bowlingImpact.originalId && opt.id === bowlingImpact.originalId),
-                          })}
-                        </option>
-                      ))}
-                  </select>
+                  <input
+                    value={resolvePlayerName(wk.wicketAssistant || '')}
+                    onChange={(e) =>
+                      onWicketChange(
+                        rowIndex,
+                        'wicketAssistant',
+                        normalizePlayerSelectionInput(
+                          e.target.value,
+                          bowlingOptions.filter((opt) => !wk.wicketTaker || opt.id !== wk.wicketTaker)
+                        )
+                      )
+                    }
+                    list={getTeamPlayerDatalistId(selectedMatchId, bowlingKey)}
+                    placeholder="Type assistant fielder"
+                    className="w-full border border-white/10 focus:border-purple-400 rounded-lg px-2 py-1 bg-white/5 text-white placeholder-white/30 text-xs"
+                  />
                 )}
               </>
             )}
@@ -3299,13 +3294,40 @@ export default function IPLAdminLiveScoreTablePage() {
 
   return (
     <div className="rounded-3xl border border-white/10 bg-gradient-to-br from-slate-950 via-purple-950/40 to-slate-950 p-6 shadow-2xl">
+      {(['team1', 'team2'] as const).map((teamKey) => {
+        const options = getTeamPlayerOptions(teamKey);
+        const captainId = matchCaptains[teamKey].id;
+        const impact = teamKey === 'team1' ? impactPlayerInfo.team1 : impactPlayerInfo.team2;
+
+        return (
+          <datalist key={teamKey} id={getTeamPlayerDatalistId(selectedMatchId, teamKey)}>
+            {options.map((opt) => (
+              <option
+                key={opt.id}
+                value={opt.name}
+                label={formatPlayerOptionLabel(opt.name, {
+                  isCaptain: Boolean(captainId && opt.id === captainId),
+                  isImpactIn: Boolean(impact.impactId && opt.id === impact.impactId),
+                  isImpactOut: Boolean(impact.originalId && opt.id === impact.originalId),
+                })}
+              />
+            ))}
+          </datalist>
+        );
+      })}
+      <datalist id={getResultPlayerDatalistId(selectedMatchId)}>
+        {resultPlayerNames.map((name) => (
+          <option key={name} value={name} />
+        ))}
+      </datalist>
+
       <div className="flex flex-col gap-1 mb-6">
         <div className="flex items-center gap-3">
           <Activity className="w-7 h-7 text-purple-300" />
           <h1 className="text-3xl font-bold text-white">IPL Live Score (Fast)</h1>
         </div>
         <p className="text-sm text-white/60">
-          Fast scorer UI + full table • Uses IPL Playing XI + Impact substitutes (5 nominees)
+          Fast scorer UI + full table • Free-text player entry with optional squad suggestions
         </p>
       </div>
 
@@ -3812,60 +3834,35 @@ export default function IPLAdminLiveScoreTablePage() {
               </div>
               <div>
                 <div className="text-[11px] text-white/60">Striker</div>
-                <select
-                  value={fastStrikerId}
-                  onChange={(e) => setFastStrikerId(e.target.value)}
-                  className="mt-1 rounded-lg border border-white/10 bg-slate-950 px-3 py-2 text-xs"
-                >
-                  <option value="">Select...</option>
-                  {fastBattingOptions.map((opt) => (
-                    <option key={opt.id} value={opt.id}>
-                      {formatPlayerOptionLabel(opt.name, {
-                        isCaptain: Boolean(fastBattingCaptainId && opt.id === fastBattingCaptainId),
-                        isImpactIn: Boolean(fastBattingImpact.impactId && opt.id === fastBattingImpact.impactId),
-                        isImpactOut: Boolean(fastBattingImpact.originalId && opt.id === fastBattingImpact.originalId),
-                      })}
-                    </option>
-                  ))}
-                </select>
+                <input
+                  value={resolvePlayerName(fastStrikerId)}
+                  onChange={(e) => setFastStrikerId(normalizePlayerSelectionInput(e.target.value, fastBattingOptions))}
+                  list={getTeamPlayerDatalistId(selectedMatchId, fastBattingKey)}
+                  placeholder="Type striker name"
+                  className="mt-1 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs text-white placeholder-white/30"
+                />
               </div>
               <div>
                 <div className="text-[11px] text-white/60">Non-striker</div>
-                <select
-                  value={fastNonStrikerId}
-                  onChange={(e) => setFastNonStrikerId(e.target.value)}
-                  className="mt-1 rounded-lg border border-white/10 bg-slate-950 px-3 py-2 text-xs"
-                >
-                  <option value="">Select...</option>
-                  {fastBattingOptions.map((opt) => (
-                    <option key={opt.id} value={opt.id}>
-                      {formatPlayerOptionLabel(opt.name, {
-                        isCaptain: Boolean(fastBattingCaptainId && opt.id === fastBattingCaptainId),
-                        isImpactIn: Boolean(fastBattingImpact.impactId && opt.id === fastBattingImpact.impactId),
-                        isImpactOut: Boolean(fastBattingImpact.originalId && opt.id === fastBattingImpact.originalId),
-                      })}
-                    </option>
-                  ))}
-                </select>
+                <input
+                  value={resolvePlayerName(fastNonStrikerId)}
+                  onChange={(e) =>
+                    setFastNonStrikerId(normalizePlayerSelectionInput(e.target.value, fastBattingOptions))
+                  }
+                  list={getTeamPlayerDatalistId(selectedMatchId, fastBattingKey)}
+                  placeholder="Type non-striker name"
+                  className="mt-1 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs text-white placeholder-white/30"
+                />
               </div>
               <div>
                 <div className="text-[11px] text-white/60">Bowler</div>
-                <select
-                  value={fastBowlerId}
-                  onChange={(e) => setFastBowlerId(e.target.value)}
-                  className="mt-1 rounded-lg border border-white/10 bg-slate-950 px-3 py-2 text-xs"
-                >
-                  <option value="">Select...</option>
-                  {fastBowlingOptions.map((opt) => (
-                    <option key={opt.id} value={opt.id}>
-                      {formatPlayerOptionLabel(opt.name, {
-                        isCaptain: Boolean(fastBowlingCaptainId && opt.id === fastBowlingCaptainId),
-                        isImpactIn: Boolean(fastBowlingImpact.impactId && opt.id === fastBowlingImpact.impactId),
-                        isImpactOut: Boolean(fastBowlingImpact.originalId && opt.id === fastBowlingImpact.originalId),
-                      })}
-                    </option>
-                  ))}
-                </select>
+                <input
+                  value={resolvePlayerName(fastBowlerId)}
+                  onChange={(e) => setFastBowlerId(normalizePlayerSelectionInput(e.target.value, fastBowlingOptions))}
+                  list={getTeamPlayerDatalistId(selectedMatchId, fastBowlingKey)}
+                  placeholder="Type bowler name"
+                  className="mt-1 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs text-white placeholder-white/30"
+                />
               </div>
               <div>
                 <div className="text-[11px] text-white/60">Current Ball</div>
@@ -3979,6 +3976,9 @@ export default function IPLAdminLiveScoreTablePage() {
             <div className="text-[11px] text-white/50">
               Hotkeys: 0-6 runs, W wicket, D wide, N no-ball, B byes, L leg-byes, Enter add, U undo, S swap, C clear.
             </div>
+            <div className="text-[11px] text-emerald-200/80">
+              Player fields now accept free text. Squad suggestions are optional, so you can score even before Playing XI or impact lists are saved.
+            </div>
             <div className="text-[11px] text-white/60">
               Ball total: <span className="text-white">{fastTotals.totalRuns}</span> (bat {fastTotals.batRuns} + extras{' '}
               {fastTotals.extrasRuns})
@@ -4076,38 +4076,33 @@ export default function IPLAdminLiveScoreTablePage() {
                     <option value="striker">Out: Striker</option>
                     <option value="nonStriker">Out: Non-striker</option>
                   </select>
-                  <select
-                    value={fastWicket.wicketTaker}
-                    onChange={(e) => setFastWicket((prev) => ({ ...prev, wicketTaker: e.target.value }))}
-                    className="rounded-lg border border-white/10 bg-slate-950 px-2 py-1"
-                  >
-                    <option value="">Wicket taker...</option>
-                    {fastBowlingOptions.map((opt) => (
-                      <option key={opt.id} value={opt.id}>
-                        {formatPlayerOptionLabel(opt.name, {
-                          isCaptain: Boolean(fastBowlingCaptainId && opt.id === fastBowlingCaptainId),
-                          isImpactIn: Boolean(fastBowlingImpact.impactId && opt.id === fastBowlingImpact.impactId),
-                          isImpactOut: Boolean(fastBowlingImpact.originalId && opt.id === fastBowlingImpact.originalId),
-                        })}
-                      </option>
-                    ))}
-                  </select>
-                  <select
-                    value={fastWicket.wicketAssistant}
-                    onChange={(e) => setFastWicket((prev) => ({ ...prev, wicketAssistant: e.target.value }))}
-                    className="rounded-lg border border-white/10 bg-slate-950 px-2 py-1"
-                  >
-                    <option value="">Assistant (optional)</option>
-                    {fastBowlingOptions.map((opt) => (
-                      <option key={opt.id} value={opt.id}>
-                        {formatPlayerOptionLabel(opt.name, {
-                          isCaptain: Boolean(fastBowlingCaptainId && opt.id === fastBowlingCaptainId),
-                          isImpactIn: Boolean(fastBowlingImpact.impactId && opt.id === fastBowlingImpact.impactId),
-                          isImpactOut: Boolean(fastBowlingImpact.originalId && opt.id === fastBowlingImpact.originalId),
-                        })}
-                      </option>
-                    ))}
-                  </select>
+                  <input
+                    value={resolvePlayerName(fastWicket.wicketTaker)}
+                    onChange={(e) =>
+                      setFastWicket((prev) => ({
+                        ...prev,
+                        wicketTaker: normalizePlayerSelectionInput(e.target.value, fastBowlingOptions),
+                      }))
+                    }
+                    list={getTeamPlayerDatalistId(selectedMatchId, fastBowlingKey)}
+                    placeholder="Wicket taker..."
+                    className="rounded-lg border border-white/10 bg-white/5 px-2 py-1 text-white placeholder-white/30"
+                  />
+                  <input
+                    value={resolvePlayerName(fastWicket.wicketAssistant)}
+                    onChange={(e) =>
+                      setFastWicket((prev) => ({
+                        ...prev,
+                        wicketAssistant: normalizePlayerSelectionInput(
+                          e.target.value,
+                          fastBowlingOptions.filter((opt) => !prev.wicketTaker || opt.id !== prev.wicketTaker)
+                        ),
+                      }))
+                    }
+                    list={getTeamPlayerDatalistId(selectedMatchId, fastBowlingKey)}
+                    placeholder="Assistant (optional)"
+                    className="rounded-lg border border-white/10 bg-white/5 px-2 py-1 text-white placeholder-white/30"
+                  />
                 </>
               )}
               <input
@@ -4339,32 +4334,14 @@ export default function IPLAdminLiveScoreTablePage() {
 
             <div>
               <label className="block text-xs font-semibold text-white/70 mb-2">Man of the Match</label>
-              <select
+              <input
                 value={resultManOfTheMatch}
                 onChange={(e) => setResultManOfTheMatch(e.target.value)}
+                list={getResultPlayerDatalistId(selectedMatchId)}
                 disabled={!selectedMatchId}
-                className="w-full border border-white/10 focus:border-purple-400 rounded-xl px-3 py-2 bg-slate-950 text-white disabled:opacity-60"
-              >
-                <option value="">Select Player</option>
-                {selectedMatch && (
-                  <>
-                    <optgroup label={selectedMatch.team1?.name || 'Team 1'}>
-                      {squads.team1.map((p) => (
-                        <option key={p.id} value={p.name}>
-                          {p.name}
-                        </option>
-                      ))}
-                    </optgroup>
-                    <optgroup label={selectedMatch.team2?.name || 'Team 2'}>
-                      {squads.team2.map((p) => (
-                        <option key={p.id} value={p.name}>
-                          {p.name}
-                        </option>
-                      ))}
-                    </optgroup>
-                  </>
-                )}
-              </select>
+                placeholder="Type player name"
+                className="w-full border border-white/10 focus:border-purple-400 rounded-xl px-3 py-2 bg-white/5 text-white placeholder-white/30 disabled:opacity-60"
+              />
             </div>
           </div>
 
