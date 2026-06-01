@@ -3,6 +3,7 @@
 import Image from 'next/image';
 import { Team } from '@/types';
 import { useRouter } from 'next/navigation';
+import IplChampionHighlight from '@/components/champions/IplChampionHighlight';
 import { getAnimatedLogoPath, getLogoPath } from '@/lib/logoUtils';
 import RCBLottie from '@/components/ui/RCBLottie';
 import RCBLionLogo from '@/components/RCBLion/RCBLionLogo';
@@ -10,6 +11,7 @@ import { getOptimalTextColorForGradient } from '@/lib/colorUtils';
 import { motion } from 'framer-motion';
 import { CustomEmoji } from '@/components/emoji/Emoji';
 import { useState } from 'react';
+import { isIplReigningChampionTeam } from '@/lib/reigningChampion';
 
 interface EnhancedTeamCardProps {
   team: Team;
@@ -29,6 +31,7 @@ export default function EnhancedTeamCard({ team, onPlayerClick, isFavorite = fal
   const playerCount = team.players?.length || 0;
   const captain = team.players?.find(p => p.isCaptain);
   const overseasCount = team.players?.filter(p => p.nationality !== 'India').length || 0;
+  const isChampion = team.league === 'ipl' && isIplReigningChampionTeam(team);
 
   const handleViewFullSquad = () => {
     // Use team shortName for cleaner URLs (RCB, MI, CSK, etc.)
@@ -149,6 +152,9 @@ export default function EnhancedTeamCard({ team, onPlayerClick, isFavorite = fal
               </span>
             )}
           </div>
+          {isChampion && (
+            <IplChampionHighlight variant="pill" className="mb-2" />
+          )}
           <p className="text-sm font-medium text-gray-200">
             {team.name}
           </p>

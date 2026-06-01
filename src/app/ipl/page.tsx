@@ -15,6 +15,7 @@ import ModernStatsSection from '@/components/home/ModernStatsSection';
 import ModernFeatureShowcase from '@/components/home/ModernFeatureShowcase';
 import ConfettiAnimation from '@/components/effects/ConfettiAnimation';
 import FloatingBadge from '@/components/effects/FloatingBadge';
+import IplChampionHighlight from '@/components/champions/IplChampionHighlight';
 import AnimatedSection from '@/components/ui/AnimatedSection';
 import GradientText from '@/components/ui/GradientText';
 import BackToTop from '@/components/ui/BackToTop';
@@ -435,6 +436,15 @@ export default function IPLHomePage() {
                 >
                   The world's biggest T20 cricket league. Experience the thrill, passion, and glory of IPL 2026.
                 </motion.p>
+
+                <motion.div
+                  initial={{ opacity: 0, y: 24 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.75, delay: 0.9 }}
+                  className="max-w-2xl"
+                >
+                  <IplChampionHighlight variant="hero" />
+                </motion.div>
 
                 {/* Quick Stats */}
                 <motion.div

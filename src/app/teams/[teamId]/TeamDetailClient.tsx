@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
+import IplChampionHighlight from '@/components/champions/IplChampionHighlight';
 import PlayerModal from '@/components/teams/PlayerModal';
 import WPLPlayerCard from '@/components/teams/WPLPlayerCard';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
@@ -58,6 +59,7 @@ import TrophyCounter from '@/components/teams/TrophyCounter';
 import QualifiedBadge from '@/components/ui/QualifiedBadge';
 import { getMatchResult } from '@/lib/matchUtils';
 import { getMatchAdvisory } from '@/lib/matchAdvisory';
+import { isIplReigningChampionTeam } from '@/lib/reigningChampion';
 
 interface TeamDetailClientProps {
   teamId: string;
@@ -1076,6 +1078,17 @@ export default function TeamDetailClient({ teamId, league }: TeamDetailClientPro
                 >
                   {teamData.name}
                 </motion.h1>
+
+                {teamLeague === 'ipl' && isIplReigningChampionTeam(teamData) && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 18 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.16 }}
+                    className="max-w-xl"
+                  >
+                    <IplChampionHighlight variant="compact" showLinks={false} />
+                  </motion.div>
+                )}
                 
                 {/* Description */}
                 <motion.p 

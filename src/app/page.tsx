@@ -14,6 +14,7 @@ import ModernNewsSection from '@/components/home/ModernNewsSection';
 import ModernStatsSection from '@/components/home/ModernStatsSection';
 import BackToTop from '@/components/ui/BackToTop';
 import QuickActionBar from '@/components/home/QuickActionBar';
+import IplChampionHighlight from '@/components/champions/IplChampionHighlight';
 import { TeamsSkeleton, MatchesSkeleton, NewsSkeleton } from '@/components/home/HomePageSkeletons';
 import { api } from '@/lib/data';
 import { isPlaceholderTeam } from '@/lib/playoffUtils';
@@ -586,6 +587,18 @@ export default function Home() {
                   . Live scores, real-time stats, breaking news, and everything cricket.
                 </motion.p>
               </div>
+
+              <motion.div
+                initial={{ opacity: 0, y: 24 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.75, delay: 0.95 }}
+              >
+                <IplChampionHighlight
+                  variant="compact"
+                  align="center"
+                  className="mx-auto max-w-4xl"
+                />
+              </motion.div>
 
               {/* Live Match Badge */}
               {featuredLiveMatch && (

@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import AuroraBackground from '@/components/ui/AuroraBackground';
+import IplChampionHighlight from '@/components/champions/IplChampionHighlight';
 import { Trophy, ArrowRight, TrendingUp, TrendingDown, Star, Award, Users, Calendar, Clock, Search, X, Info } from 'lucide-react';
 import { api } from '@/lib/data';
 import { Team, Match } from '@/types';
@@ -14,6 +15,7 @@ import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import GradientText from '@/components/ui/GradientText';
 import { formatMatchTime } from '@/lib/timeUtils';
 import IplStatusPill from '@/components/points-table/IplStatusPill';
+import { IPL_REIGNING_CHAMPION, isIplReigningChampionTeam } from '@/lib/reigningChampion';
 import {
   buildComputedIplRow,
   formatNetRunRate,
@@ -233,6 +235,15 @@ export default function IPLPointsTablePage() {
               <span className="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-bold uppercase tracking-[0.28em] text-gray-300">
                 Admin markers stay visible for fans
               </span>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 24 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, delay: 0.5 }}
+              className="mx-auto mb-12 max-w-5xl"
+            >
+              <IplChampionHighlight variant="compact" align="center" showLinks={false} />
             </motion.div>
 
             {/* Quick Stats */}
@@ -504,23 +515,31 @@ export default function IPLPointsTablePage() {
                     const isFavorite = favorites.includes(team.id);
                     const rank = index + 1;
                     const isTop4 = rank <= 4;
+                    const isChampion =
+                      selectedYear === IPL_REIGNING_CHAMPION.season && isIplReigningChampionTeam(team);
                     const isQualified = Boolean(team.qualified);
                     const isEliminated = Boolean(team.eliminated);
-                    const rankTone = isQualified
+                    const rankTone = isChampion
+                      ? 'text-amber-200'
+                      : isQualified
                       ? 'text-emerald-300'
                       : isEliminated
                         ? 'text-rose-300'
                         : isTop4
                           ? 'text-yellow-300'
                           : 'text-white';
-                    const accentBar = isQualified
+                    const accentBar = isChampion
+                      ? 'from-amber-200 via-yellow-400 to-orange-500'
+                      : isQualified
                       ? 'from-emerald-300 to-lime-400'
                       : isEliminated
                         ? 'from-rose-300 to-orange-400'
                         : isTop4
                           ? 'from-yellow-300 to-amber-500'
                           : 'from-white/20 to-white/0';
-                    const surfaceTone = isQualified
+                    const surfaceTone = isChampion
+                      ? 'border-amber-300/35 bg-amber-500/[0.08]'
+                      : isQualified
                       ? 'border-emerald-400/30 bg-emerald-500/[0.07]'
                       : isEliminated
                         ? 'border-rose-400/30 bg-rose-500/[0.07]'
@@ -553,7 +572,7 @@ export default function IPLPointsTablePage() {
                           <div className="flex items-center justify-between xl:block">
                             <div className={`text-4xl font-black leading-none ${rankTone}`}>{rank}</div>
                             <div className="mt-2 inline-flex rounded-full border border-white/10 bg-black/20 px-3 py-1 text-[10px] font-black uppercase tracking-[0.22em] text-gray-300">
-                              {isQualified ? 'Locked' : isEliminated ? 'Out' : isTop4 ? 'Pace' : 'Race'}
+                              {isChampion ? 'Crown' : isQualified ? 'Locked' : isEliminated ? 'Out' : isTop4 ? 'Pace' : 'Race'}
                             </div>
                           </div>
 
@@ -577,9 +596,10 @@ export default function IPLPointsTablePage() {
                               <div className="min-w-0 flex-1">
                                 <div className="flex flex-wrap items-center gap-3">
                                   <span className="text-2xl font-black text-white">{team.shortName}</span>
+                                  {isChampion && <IplChampionHighlight variant="pill" />}
                                   {isQualified && <IplStatusPill status="qualified" compact />}
                                   {isEliminated && <IplStatusPill status="eliminated" compact />}
-                                  {!isQualified && !isEliminated && isTop4 && (
+                                  {!isChampion && !isQualified && !isEliminated && isTop4 && (
                                     <span className="inline-flex rounded-full border border-yellow-300/20 bg-yellow-400/10 px-3 py-1 text-[10px] font-black uppercase tracking-[0.22em] text-yellow-200">
                                       Playoff pace
                                     </span>
@@ -649,7 +669,9 @@ export default function IPLPointsTablePage() {
                         <div
                           className="pointer-events-none absolute inset-0 -z-10 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
                           style={{
-                            background: isQualified
+                            background: isChampion
+                              ? 'radial-gradient(circle at top right, rgba(250, 204, 21, 0.18), transparent 45%)'
+                              : isQualified
                               ? 'radial-gradient(circle at top right, rgba(52, 211, 153, 0.16), transparent 45%)'
                               : isEliminated
                                 ? 'radial-gradient(circle at top right, rgba(251, 113, 133, 0.18), transparent 45%)'

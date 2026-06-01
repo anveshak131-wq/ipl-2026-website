@@ -3,6 +3,7 @@
 import { useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { Calendar, Clock, MapPin, Sparkles, Trophy } from 'lucide-react';
+import IplChampionHighlight from '@/components/champions/IplChampionHighlight';
 import { getIplSeasonTeamIds, buildComputedIplRow } from '@/lib/iplPointsTable';
 import { getPlayoffMatchDetails, isPlaceholderTeam } from '@/lib/playoffUtils';
 import { League, Match, PlayoffType, Team } from '@/types';
@@ -286,6 +287,12 @@ export default function PublicPlayoffOverview({
             </div>
           </div>
         </div>
+
+        <IplChampionHighlight
+          variant="compact"
+          showLinks={false}
+          className="mb-6"
+        />
 
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
           {playoffCards.map((card, index) => (
