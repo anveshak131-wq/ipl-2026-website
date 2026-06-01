@@ -306,6 +306,20 @@ function buildRowsForInnings(inningsData) {
     const batRuns = isWide || isBye || isLegBye ? 0 : actualRuns;
     const outDesc = dismissalLookup.get(String(ball.OutBatsManID || '').trim()) || '';
     const wicket = parseDismissalRow(ball, outDesc);
+    const commentary = cleanCommentary(ball.Commentry || ball.NewCommentry || ball.Runs || '');
+
+    const isEmptyDelivery =
+      !strikerName &&
+      !nonStrikerName &&
+      !bowlerName &&
+      !commentary &&
+      batRuns === 0 &&
+      totalExtras === 0 &&
+      !wicket.hasWicket;
+
+    if (isEmptyDelivery) {
+      continue;
+    }
 
     row[0] = over;
     row[1] = ballNo;
@@ -319,7 +333,7 @@ function buildRowsForInnings(inningsData) {
     row[9] = extras.hasByes ? String(extras.byesRuns) : '';
     row[10] = extras.hasLB ? String(extras.lbRuns) : '';
     row[11] = generateWicketDescription(wicket);
-    row[12] = cleanCommentary(ball.Commentry || ball.NewCommentry || ball.Runs || '');
+    row[12] = commentary;
 
     const index = rows.length;
     rows.push(row);

@@ -11,6 +11,7 @@ const TARGET_MATCH_IDS = new Set(
     .filter(Boolean)
 );
 const INCLUDE_PUBLISHED = process.argv.includes('--include-published');
+const INCLUDE_UPCOMING = process.argv.includes('--include-upcoming');
 
 const IPL_SHORT_CODES = new Set(['RCB', 'MI', 'CSK', 'KKR', 'GT', 'SRH', 'RR', 'PBKS', 'DC', 'LSG']);
 
@@ -363,6 +364,7 @@ function buildMatchPatch(match, innings, officialItem, officialTeamIdToLocal) {
   const team2Innings = inningsByTeamId.get(String(match.team2.id));
 
   return {
+    status: 'completed',
     result: buildResultText(match, officialItem, officialTeamIdToLocal),
     team1Score: formatScoreSummary(team1Innings),
     team2Score: formatScoreSummary(team2Innings),
@@ -600,7 +602,13 @@ async function main() {
   const officialLookup = buildOfficialLookup(scheduleItems);
   const playerMaps = buildPlayerMaps(players);
 
-  const completedMatches = matches.filter((match) => match.league === 'ipl' && match.status === 'completed');
+  const eligibleMatches = matches.filter((match) => {
+    if (match.league !== 'ipl') return false;
+    if (match.status === 'completed') return true;
+    if (INCLUDE_UPCOMING) return true;
+    if (TARGET_MATCH_IDS.has(String(match.id))) return true;
+    return false;
+  });
   const scorecardsByMatch = new Map();
   for (const scorecard of scorecards.filter((row) => row.league === 'ipl')) {
     const key = String(scorecard.matchId);
@@ -608,12 +616,12 @@ async function main() {
     scorecardsByMatch.get(key).push(scorecard);
   }
 
-  const filteredCompletedMatches =
+  const filteredEligibleMatches =
     TARGET_MATCH_IDS.size > 0
-      ? completedMatches.filter((match) => TARGET_MATCH_IDS.has(String(match.id)))
-      : completedMatches;
+      ? eligibleMatches.filter((match) => TARGET_MATCH_IDS.has(String(match.id)))
+      : eligibleMatches;
 
-  const targetMatches = filteredCompletedMatches.filter((match) => {
+  const targetMatches = filteredEligibleMatches.filter((match) => {
     if (INCLUDE_PUBLISHED) return true;
     const rows = scorecardsByMatch.get(String(match.id)) || [];
     return !rows.some((row) => !row.draft);
@@ -692,8 +700,8 @@ async function main() {
 
   const uniqueUnmatched = Array.from(new Map(unmatched.map((row) => [`${row.teamId}|${row.normalized}`, row])).values());
 
-  console.log(`Completed IPL matches: ${completedMatches.length}`);
-  console.log(`Missing published scorecards: ${completedMatches.filter((match) => {
+  console.log(`Eligible IPL matches: ${eligibleMatches.length}`);
+  console.log(`Missing published scorecards: ${eligibleMatches.filter((match) => {
     const rows = scorecardsByMatch.get(String(match.id)) || [];
     return !rows.some((row) => !row.draft);
   }).length}`);
@@ -750,7 +758,7 @@ async function main() {
     if (!refreshedByMatch.has(key)) refreshedByMatch.set(key, []);
     refreshedByMatch.get(key).push(scorecard);
   }
-  const remainingMissing = completedMatches.filter((match) => {
+  const remainingMissing = eligibleMatches.filter((match) => {
     const rows = refreshedByMatch.get(String(match.id)) || [];
     return !rows.some((row) => !row.draft);
   });
