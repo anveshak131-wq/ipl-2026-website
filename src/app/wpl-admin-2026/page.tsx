@@ -18,9 +18,25 @@ export default function WPLAdminPage() {
     hasCheckedAuth.current = true;
 
     // Check authentication on client side only
-    const checkAuth = () => {
+    const checkAuth = async () => {
       try {
-        const token = localStorage.getItem('adminToken');
+        const sessionResponse = await fetch('/api/admin/session', {
+          credentials: 'include',
+          cache: 'no-store',
+        });
+
+        if (sessionResponse.ok) {
+          const data = await sessionResponse.json();
+          if (data.success && data.token) {
+            localStorage.setItem('adminToken', data.token);
+            localStorage.setItem('auth_token', data.token);
+            localStorage.setItem('authToken', data.token);
+            setIsAuthenticated(true);
+            return;
+          }
+        }
+
+        const token = localStorage.getItem('adminToken') || localStorage.getItem('auth_token');
         if (token) {
           setIsAuthenticated(true);
         }
@@ -40,6 +56,8 @@ export default function WPLAdminPage() {
     // Store token in localStorage
     try {
       localStorage.setItem('adminToken', token);
+      localStorage.setItem('auth_token', token);
+      localStorage.setItem('authToken', token);
     } catch (error) {
       console.log('localStorage not available');
     }

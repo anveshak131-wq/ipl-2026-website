@@ -19,17 +19,22 @@ id = "local-weather-cache"
 preview_id = "local-weather-cache-preview"
 
 # Environment configuration for email service
+# Admin route protection is enforced in functions/_middleware.ts with Google OAuth.
+# Set these secrets in Cloudflare Pages env vars:
+# GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, ADMIN_SESSION_SECRET
 [env.production]
 vars = { 
   ENVIRONMENT = "production",
-  OPENWEATHER_API_KEY = "4521f1357955496894b160548251012"
+  OPENWEATHER_API_KEY = "4521f1357955496894b160548251012",
+  ADMIN_ALLOWED_EMAILS = "anveshkoganti54@gmail.com"
 }
 
 # Development environment variables
 [env.development]
 vars = { 
   ENVIRONMENT = "development",
-  OPENWEATHER_API_KEY = "4521f1357955496894b160548251012"
+  OPENWEATHER_API_KEY = "4521f1357955496894b160548251012",
+  ADMIN_ALLOWED_EMAILS = "anveshkoganti54@gmail.com"
 }
 
 # Scheduled event for email reminders

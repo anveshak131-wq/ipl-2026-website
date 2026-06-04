@@ -23,8 +23,8 @@ export default function AdminLayout({
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const hasCheckedAuth = useRef(false);
 
-  const handleLogin = (token: string) => {
-    setIsAuthenticated(true);
+  const storeAdminToken = (token: string) => {
+    if (!token) return;
 
     try {
       localStorage.setItem('adminToken', token);
@@ -33,6 +33,11 @@ export default function AdminLayout({
     } catch {
       // localStorage not available
     }
+  };
+
+  const handleLogin = (token: string) => {
+    setIsAuthenticated(true);
+    storeAdminToken(token);
   };
 
   const handleLogout = async () => {
@@ -53,14 +58,14 @@ export default function AdminLayout({
 
     // Best-effort server logout (clears HttpOnly cookie + revokes token in KV when possible)
     try {
-      await fetch('/api/auth?action=signout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token }),
-      });
+      await fetch('/api/admin/logout', { method: 'POST' });
     } catch {
       try {
-        await fetch('/api/auth?action=logout', { method: 'POST' });
+        await fetch('/api/auth?action=signout', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ token }),
+        });
       } catch {
         // Network errors - continue with local cleanup
       }
@@ -85,6 +90,21 @@ export default function AdminLayout({
 
     const checkAuth = async () => {
       try {
+        const googleSessionResponse = await fetch('/api/admin/session', {
+          credentials: 'include',
+          cache: 'no-store',
+        });
+
+        if (googleSessionResponse.ok) {
+          const data = await googleSessionResponse.json();
+          if (data.success && data.token) {
+            storeAdminToken(data.token);
+            setIsAuthenticated(true);
+            setUserRole(data.user?.role || 'super_admin');
+            return;
+          }
+        }
+
         let token: string | null = null;
         try {
           token =

@@ -36,6 +36,18 @@ export default function AdminLayout({
     }
   };
 
+  const storeAdminToken = (token: string) => {
+    if (!token) return;
+
+    try {
+      localStorage.setItem('adminToken', token);
+      localStorage.setItem('auth_token', token);
+      localStorage.setItem('authToken', token);
+    } catch {
+      // localStorage not available
+    }
+  };
+
   const parseRoleFromToken = (token: string) => {
     try {
       const tokenPayload = JSON.parse(atob(token));
@@ -55,14 +67,14 @@ export default function AdminLayout({
 
     // Best-effort server logout (clears HttpOnly cookie + revokes token in KV when possible)
     try {
-      await fetch('/api/auth?action=signout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token }),
-      });
+      await fetch('/api/admin/logout', { method: 'POST' });
     } catch {
       try {
-        await fetch('/api/auth?action=logout', { method: 'POST' });
+        await fetch('/api/auth?action=signout', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ token }),
+        });
       } catch {
         // ignore
       }
@@ -85,6 +97,25 @@ export default function AdminLayout({
     hasCheckedAuth.current = true;
 
     const checkAuth = async () => {
+      try {
+        const googleSessionResponse = await fetch('/api/admin/session', {
+          credentials: 'include',
+          cache: 'no-store',
+        });
+
+        if (googleSessionResponse.ok) {
+          const data = await googleSessionResponse.json();
+          if (data.success && data.token) {
+            storeAdminToken(data.token);
+            setIsAuthenticated(true);
+            setUserRole(data.user?.role || 'super_admin');
+            return;
+          }
+        }
+      } catch {
+        // Fall back to the legacy token path for local development.
+      }
+
       const token = getStoredAdminToken();
 
       try {
@@ -143,13 +174,7 @@ export default function AdminLayout({
   const handleLogin = (token: string) => {
     setIsAuthenticated(true);
     setUserRole(parseRoleFromToken(token));
-    try {
-      localStorage.setItem('adminToken', token);
-      localStorage.setItem('auth_token', token);
-      localStorage.setItem('authToken', token);
-    } catch (error) {
-      console.log('localStorage not available');
-    }
+    storeAdminToken(token);
     setIsLoading(false);
   };
 

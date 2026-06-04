@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
+import { LogIn } from 'lucide-react';
 
 interface AdminLoginProps {
   onLogin?: (token: string) => void;
@@ -23,75 +24,14 @@ const getDefaultRedirect = (pathname: string, role?: string) => {
   return isPlayersAdmin ? '/admin/ipl/players' : '/admin/ipl';
 };
 
-export default function AdminLogin({ onLogin, onSuccess, redirectTo }: AdminLoginProps) {
-  const [credentials, setCredentials] = useState({
-    username: '',
-    password: '',
-    totp: ''
-  });
+export default function AdminLogin({ redirectTo }: AdminLoginProps) {
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
-  const router = useRouter();
   const pathname = usePathname();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const startGoogleSignIn = () => {
     setIsLoading(true);
-    setError('');
-
-    try {
-      const response = await fetch('/api/admin/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(credentials),
-      });
-
-      const responseType = response.headers.get('content-type') || '';
-      const data = responseType.includes('application/json')
-        ? await response.json()
-        : null;
-
-      if (!data) {
-        setError('Admin login endpoint returned an unexpected response.');
-        return;
-      }
-
-      if (response.ok && data.token) {
-        localStorage.setItem('adminToken', data.token);
-        // Also set the generic auth token key so admin pages that
-        // expect `auth_token` will recognize the session.
-        try {
-          localStorage.setItem('auth_token', data.token);
-          localStorage.setItem('authToken', data.token);
-        } catch (e) {
-          // ignore if localStorage isn't available
-        }
-
-        const loginHandler = onLogin ?? onSuccess;
-        loginHandler?.(data.token);
-
-        router.push(redirectTo || getDefaultRedirect(pathname, data.user?.role));
-      } else {
-        setError(data.error || 'Invalid credentials');
-      }
-    } catch (error) {
-      setError(
-        error instanceof Error && error.message
-          ? error.message
-          : 'Login failed. Please try again.'
-      );
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setCredentials({
-      ...credentials,
-      [e.target.name]: e.target.value
-    });
+    const returnTo = redirectTo || getDefaultRedirect(pathname);
+    window.location.assign(`/api/admin/google/login?return_to=${encodeURIComponent(returnTo)}`);
   };
 
   return (
@@ -105,79 +45,25 @@ export default function AdminLogin({ onLogin, onSuccess, redirectTo }: AdminLogi
             Admin Login
           </h2>
           <p className="text-gray-400">
-            Sign in to access the admin panel
+            Sign in with the allowlisted Google account
           </p>
         </div>
 
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          <div className="space-y-4">
-            <div>
-              <label htmlFor="username" className="block text-sm font-medium text-gray-300 mb-2">
-                Username
-              </label>
-              <input
-                id="username"
-                name="username"
-                type="text"
-                required
-                value={credentials.username}
-                onChange={handleChange}
-                className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-ipl-gold focus:border-transparent transition-all duration-200"
-                placeholder="Enter your username"
-              />
-            </div>
+        <div className="mt-8 space-y-4">
+          <button
+            type="button"
+            onClick={startGoogleSignIn}
+            disabled={isLoading}
+            className="w-full flex items-center justify-center gap-3 px-4 py-3 rounded-lg bg-white text-gray-950 font-semibold hover:bg-gray-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <span className="flex h-6 w-6 items-center justify-center rounded-full border border-gray-300 text-sm font-bold">
+              G
+            </span>
+            {isLoading ? 'Opening Google...' : 'Continue with Google'}
+            <LogIn size={18} />
+          </button>
 
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-300 mb-2">
-                Password
-              </label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                required
-                value={credentials.password}
-                onChange={handleChange}
-                className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-ipl-gold focus:border-transparent transition-all duration-200"
-                placeholder="Enter your password"
-              />
-            </div>
-
-            <div>
-              <label htmlFor="totp" className="block text-sm font-medium text-gray-300 mb-2">
-                2FA Code
-              </label>
-              <input
-                id="totp"
-                name="totp"
-                type="text"
-                inputMode="numeric"
-                pattern="[0-9]{6}"
-                maxLength={6}
-                value={credentials.totp}
-                onChange={handleChange}
-                className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-ipl-gold focus:border-transparent transition-all duration-200"
-                placeholder="Enter 6-digit code from your authenticator"
-              />
-            </div>
-          </div>
-
-          {error && (
-            <div className="bg-red-500/20 border border-red-500/30 rounded-lg p-3">
-              <p className="text-red-400 text-sm">{error}</p>
-            </div>
-          )}
-
-          <div>
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="w-full ipl-button disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isLoading ? 'Signing in...' : 'Sign In'}
-            </button>
-          </div>
-        </form>
+        </div>
       </div>
     </div>
   );
