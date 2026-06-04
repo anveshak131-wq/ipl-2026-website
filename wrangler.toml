@@ -18,24 +18,28 @@ binding = "WEATHER_CACHE"
 id = "local-weather-cache"
 preview_id = "local-weather-cache-preview"
 
-# Environment configuration for email service
+# Environment configuration
 # Admin route protection is enforced in functions/_middleware.ts with Google OAuth.
-# Set these secrets in Cloudflare Pages env vars:
-# GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, ADMIN_SESSION_SECRET
+#
+# Non-secret vars only (safe to commit):
 [env.production]
-vars = { 
+vars = {
   ENVIRONMENT = "production",
-  OPENWEATHER_API_KEY = "4521f1357955496894b160548251012",
   ADMIN_ALLOWED_EMAILS = "anveshkoganti54@gmail.com"
 }
 
-# Development environment variables
 [env.development]
-vars = { 
+vars = {
   ENVIRONMENT = "development",
-  OPENWEATHER_API_KEY = "4521f1357955496894b160548251012",
   ADMIN_ALLOWED_EMAILS = "anveshkoganti54@gmail.com"
 }
+
+# Encrypted secrets (never commit values). Set in Cloudflare Dashboard or CLI:
+#   npx wrangler pages secret put OPENWEATHER_API_KEY --project-name=ipl-2026-website
+#   npx wrangler pages secret put GOOGLE_CLIENT_ID --project-name=ipl-2026-website
+#   npx wrangler pages secret put GOOGLE_CLIENT_SECRET --project-name=ipl-2026-website
+#   npx wrangler pages secret put ADMIN_SESSION_SECRET --project-name=ipl-2026-website
+# Local wrangler dev: copy .dev.vars.example to .dev.vars (gitignored)
 
 # Scheduled event for email reminders
 # This cron job runs every 5 minutes to check for matches starting in 30 minutes

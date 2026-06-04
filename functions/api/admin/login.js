@@ -89,24 +89,6 @@ async function verifyTotpCode(secretBase32, code, window = 1) {
   return false;
 }
 
-// Mock admin users - matches src/lib/auth.ts
-const ADMIN_USERS = {
-  admin: {
-    id: '1',
-    username: 'admin',
-    email: 'admin@ipl2026.com',
-    role: 'super_admin',
-    password: 'admin123'
-  },
-  manager: {
-    id: '2',
-    username: 'manager',
-    email: 'manager@ipl2026.com',
-    role: 'admin',
-    password: 'manager123'
-  }
-};
-
 // Allowlist for admins who should only access players page
 const PLAYERS_ONLY_ADMINS = new Set([
   'sumanthvallam20@gmail.com'
@@ -183,105 +165,7 @@ export const onRequest = async (context) => {
 
     const totpSecret = env && env.ADMIN_TOTP_SECRET_BASE32;
 
-    // First check hardcoded admin users
-    const hardcodedUser = ADMIN_USERS[username];
-    if (hardcodedUser && hardcodedUser.password === password) {
-      // If TOTP is configured, require a valid 6-digit code
-      if (totpSecret) {
-        const ok2fa = await verifyTotpCode(totpSecret, totp);
-        if (!ok2fa) {
-          return new Response(
-            JSON.stringify({ error: 'Invalid 2FA code' }),
-            {
-              status: 401,
-              headers: {
-                'Content-Type': 'application/json',
-                ...corsHeaders,
-              },
-            }
-          );
-        }
-      }
-
-      const effectiveRole = PLAYERS_ONLY_ADMINS.has(hardcodedUser.email)
-        ? 'players_admin'
-        : hardcodedUser.role;
-
-      const token = generateToken({ ...hardcodedUser, role: effectiveRole });
-
-      // Sync hardcoded admin into KV so that /api/auth and KV-protected
-      // admin APIs (datasets, analytics, etc.) recognize this session.
-      if (env && env.SPORTS_KV) {
-        const email = hardcodedUser.email;
-        const nowIso = new Date().toISOString();
-        let existingUser = null;
-        try {
-          const raw = await env.SPORTS_KV.get(`user:${email}`);
-          if (raw) {
-            existingUser = JSON.parse(raw);
-          }
-        } catch {
-          existingUser = null;
-        }
-
-        const userRecord = {
-          id: existingUser?.id || hardcodedUser.id,
-          email,
-          name: existingUser?.name || hardcodedUser.username,
-          // Preserve any password fields/salt if they existed from setup,
-          // but override role, token, and lastLogin.
-          salt: existingUser?.salt,
-          hashedPassword: existingUser?.hashedPassword,
-          token,
-          role: effectiveRole,
-          isBlocked: existingUser?.isBlocked ?? false,
-          createdAt: existingUser?.createdAt || nowIso,
-          lastLogin: nowIso,
-        };
-
-        // Store/refresh user in KV (1 year TTL, like /api/auth signup)
-        await env.SPORTS_KV.put(`user:${email}`, JSON.stringify(userRecord), {
-          expirationTtl: 31536000,
-        });
-
-        // Map token -> email/role so /api/auth?action=verify and other
-        // KV-backed admin APIs can validate this session.
-        await env.SPORTS_KV.put(
-          `token:${token}`,
-          JSON.stringify({
-            userId: userRecord.id,
-            email,
-            role: userRecord.role,
-            createdAt: nowIso,
-          }),
-          {
-            expirationTtl: 2592000, // 30 days
-          }
-        );
-      }
-
-      return new Response(
-        JSON.stringify({
-          success: true,
-          token,
-          user: {
-            id: hardcodedUser.id,
-            username: hardcodedUser.username,
-            email: hardcodedUser.email,
-            role: effectiveRole
-          }
-        }),
-        {
-          status: 200,
-          headers: {
-            'Content-Type': 'application/json',
-            ...corsHeaders,
-          },
-        }
-      );
-    }
-
-    // Then check KV database (for email/password login from /admin/setup)
+    // Check KV database (for email/password login from /admin/setup)
     if (env && env.SPORTS_KV) {
       // Treat username as email for KV lookup
       const userData = await env.SPORTS_KV.get(`user:${username}`);

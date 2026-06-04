@@ -20,10 +20,6 @@ export async function onRequestGet(context) {
   // OpenWeatherMap API (you'll need to add your API key to environment variables)
   const WEATHER_API_KEY = context.env.OPENWEATHER_API_KEY || 'demo_key';
   
-  console.log('Weather API called for venue:', context.params.venueId);
-  console.log('API Key available:', !!context.env.OPENWEATHER_API_KEY);
-  console.log('Using API Key:', WEATHER_API_KEY === 'demo_key' ? 'demo_key' : 'real_key');
-  
   try {
     const { venueId } = context.params;
     

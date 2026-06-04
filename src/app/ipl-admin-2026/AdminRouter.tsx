@@ -17,7 +17,6 @@ import AdminPlaying11 from './playing-11/page';
 import AdminNews from './news/page';
 import AdminModeration from './moderation/page';
 import AdminCoaches from './coaches/page';
-import AdminDemo from './demo/page';
 import AdminMatchday from './components/AdminMatchday';
 import AdminStories from './components/AdminStories';
 import AdminPredictions from './predictions/page';
@@ -200,8 +199,6 @@ export default function AdminRouter() {
       return <AdminModeration />;
     } else if (pathname === '/ipl-admin-2026/coaches') {
       return <AdminCoaches />;
-    } else if (pathname === '/ipl-admin-2026/demo') {
-      return <AdminDemo />;
     } else if (pathname === '/ipl-admin-2026/matchday') {
       return <AdminMatchday />;
     } else if (pathname === '/ipl-admin-2026/stories') {

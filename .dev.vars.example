@@ -1,0 +1,4 @@
+# Copy to .dev.vars for `wrangler pages dev` (gitignored).
+# Do not commit .dev.vars.
+
+OPENWEATHER_API_KEY=your_openweather_api_key_here

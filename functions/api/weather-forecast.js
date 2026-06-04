@@ -41,7 +41,7 @@ export const onRequest = async (context) => {
 };
 
 async function fetchWeatherForecast(ground, env, days) {
-  const API_KEY = env.WEATHER_API_KEY;
+  const API_KEY = env.OPENWEATHER_API_KEY || env.WEATHER_API_KEY;
   
   try {
     const response = await fetch(

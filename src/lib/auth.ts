@@ -41,31 +41,3 @@ export const getTokenFromRequest = (request: Request): string | null => {
   }
   return null;
 };
-
-// Mock admin users - TODO: Replace with database authentication
-export const mockAdminUsers: AdminUser[] = [
-  {
-    id: '1',
-    username: 'admin',
-    email: 'admin@ipl2026.com',
-    role: 'super_admin'
-  },
-  {
-    id: '2',
-    username: 'manager',
-    email: 'manager@ipl2026.com',
-    role: 'admin'
-  }
-];
-
-// Mock password check - TODO: Replace with proper password hashing
-export const validateCredentials = (username: string, password: string): AdminUser | null => {
-  // In production, this would check against a database with hashed passwords
-  if (username === 'admin' && password === 'admin123') {
-    return mockAdminUsers[0];
-  }
-  if (username === 'manager' && password === 'manager123') {
-    return mockAdminUsers[1];
-  }
-  return null;
-};
