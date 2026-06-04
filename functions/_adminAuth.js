@@ -1,5 +1,6 @@
 const ADMIN_SESSION_COOKIE = 'sportsup_admin_session';
 const OAUTH_STATE_COOKIE = 'sportsup_admin_oauth_state';
+const ADMIN_CSRF_HEADER = 'X-CSRF-Token';
 const ADMIN_SESSION_MAX_AGE_SECONDS = 4 * 60 * 60;
 const OAUTH_STATE_MAX_AGE_SECONDS = 10 * 60;
 const DEFAULT_ADMIN_EMAIL = 'anveshkoganti54@gmail.com';
@@ -11,6 +12,7 @@ const decoder = new TextDecoder();
 export {
   ADMIN_SESSION_COOKIE,
   OAUTH_STATE_COOKIE,
+  ADMIN_CSRF_HEADER,
   ADMIN_SESSION_MAX_AGE_SECONDS,
   OAUTH_STATE_MAX_AGE_SECONDS,
 };
@@ -307,6 +309,29 @@ export async function verifyAdminSession(request, env) {
   }
 
   return session;
+}
+
+export async function createAdminCsrfToken(env, session) {
+  const secret = getSessionSecret(env);
+  const email = String(session?.email || '').toLowerCase();
+  const token = String(session?.token || '');
+  const issuedAt = String(session?.iat || '');
+
+  if (!secret || !email || !token) return '';
+
+  const signature = await hmacSha256(secret, `admin-csrf:${email}:${token}:${issuedAt}`);
+  return base64UrlEncode(signature);
+}
+
+export async function verifyAdminCsrfToken(request, env, session) {
+  const providedToken = request.headers.get(ADMIN_CSRF_HEADER) || request.headers.get('x-csrf-token') || '';
+  const expectedToken = await createAdminCsrfToken(env, session);
+
+  if (!providedToken || !expectedToken) {
+    return false;
+  }
+
+  return fixedTimeEqual(encoder.encode(providedToken), encoder.encode(expectedToken));
 }
 
 export async function exchangeGoogleCodeForTokens(request, env, code) {

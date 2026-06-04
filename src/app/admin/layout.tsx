@@ -9,6 +9,13 @@ import PlayersAdminSidebar from '@/components/admin/PlayersAdminSidebar';
 import GlobalSearch from '@/components/admin/GlobalSearch';
 import { LeagueProvider } from '@/contexts/LeagueContext';
 import { AdminDataProvider } from '@/contexts/AdminDataContext';
+import {
+  ADMIN_CSRF_HEADER,
+  clearAdminCsrfToken,
+  getAdminCsrfToken,
+  installAdminCsrfFetch,
+  setAdminCsrfToken,
+} from '@/lib/admin/csrf';
 
 export default function AdminLayout({
   children,
@@ -58,7 +65,11 @@ export default function AdminLayout({
 
     // Best-effort server logout (clears HttpOnly cookie + revokes token in KV when possible)
     try {
-      await fetch('/api/admin/logout', { method: 'POST' });
+      const csrfToken = getAdminCsrfToken();
+      await fetch('/api/admin/logout', {
+        method: 'POST',
+        headers: csrfToken ? { [ADMIN_CSRF_HEADER]: csrfToken } : undefined,
+      });
     } catch {
       try {
         await fetch('/api/auth?action=signout', {
@@ -70,6 +81,8 @@ export default function AdminLayout({
         // Network errors - continue with local cleanup
       }
     }
+
+    clearAdminCsrfToken();
 
     // Clear local storage
     try {
@@ -87,6 +100,7 @@ export default function AdminLayout({
   useEffect(() => {
     if (hasCheckedAuth.current) return;
     hasCheckedAuth.current = true;
+    installAdminCsrfFetch();
 
     const checkAuth = async () => {
       try {
@@ -99,6 +113,7 @@ export default function AdminLayout({
           const data = await googleSessionResponse.json();
           if (data.success && data.token) {
             storeAdminToken(data.token);
+            setAdminCsrfToken(data.csrfToken);
             setIsAuthenticated(true);
             setUserRole(data.user?.role || 'super_admin');
             setIsLoading(false);
@@ -130,6 +145,8 @@ export default function AdminLayout({
           setUserRole(data.user?.role || 'admin');
         } else {
           // Token invalid, clear it
+          clearAdminCsrfToken();
+
           try {
             localStorage.removeItem('adminToken');
             localStorage.removeItem('auth_token');

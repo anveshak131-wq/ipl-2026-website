@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import AdminLogin from '@/components/admin/AdminLogin';
+import { installAdminCsrfFetch, setAdminCsrfToken } from '@/lib/admin/csrf';
 import WPLAdminRouter from './WPLAdminRouter';
 
 export default function WPLAdminPage() {
@@ -16,6 +17,7 @@ export default function WPLAdminPage() {
     // Prevent multiple auth checks
     if (hasCheckedAuth.current) return;
     hasCheckedAuth.current = true;
+    installAdminCsrfFetch();
 
     // Check authentication on client side only
     const checkAuth = async () => {
@@ -31,6 +33,7 @@ export default function WPLAdminPage() {
             localStorage.setItem('adminToken', data.token);
             localStorage.setItem('auth_token', data.token);
             localStorage.setItem('authToken', data.token);
+            setAdminCsrfToken(data.csrfToken);
             setIsAuthenticated(true);
             return;
           }

@@ -1,4 +1,6 @@
 import {
+  ADMIN_CSRF_HEADER,
+  createAdminCsrfToken,
   jsonResponse,
   verifyAdminSession,
 } from '../../_adminAuth.js';
@@ -12,7 +14,7 @@ export const onRequest = async (context) => {
       headers: {
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Methods': 'GET, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+        'Access-Control-Allow-Headers': `Content-Type, Authorization, ${ADMIN_CSRF_HEADER}`,
       },
     });
   }
@@ -27,9 +29,12 @@ export const onRequest = async (context) => {
     return jsonResponse({ error: 'Google admin sign-in required' }, 401);
   }
 
+  const csrfToken = await createAdminCsrfToken(env || {}, session);
+
   return jsonResponse({
     success: true,
     token: session.token,
+    csrfToken,
     user: {
       email: session.email,
       name: session.name,

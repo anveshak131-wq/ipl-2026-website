@@ -1,10 +1,12 @@
 'use client';
 
 import { useEffect } from 'react';
+import { installAdminCsrfFetch, setAdminCsrfToken } from '@/lib/admin/csrf';
 
 export default function AdminSessionBootstrap() {
   useEffect(() => {
     let cancelled = false;
+    installAdminCsrfFetch();
 
     const syncSession = async () => {
       try {
@@ -21,6 +23,7 @@ export default function AdminSessionBootstrap() {
         localStorage.setItem('adminToken', data.token);
         localStorage.setItem('auth_token', data.token);
         localStorage.setItem('authToken', data.token);
+        setAdminCsrfToken(data.csrfToken);
       } catch {
         // Session bootstrap is best-effort; middleware still protects the route.
       }

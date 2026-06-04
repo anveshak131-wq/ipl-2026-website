@@ -1,6 +1,10 @@
 import {
+  ADMIN_CSRF_HEADER,
+  ADMIN_SESSION_COOKIE,
   getEnvString,
+  getCookieValue,
   sanitizeReturnTo,
+  verifyAdminCsrfToken,
   verifyAdminSession,
 } from './_adminAuth.js';
 
@@ -23,18 +27,20 @@ const PROTECTED_PREFIXES = [
   '/api/admin',
 ] as const;
 
-const PUBLIC_ADMIN_API_PATHS = [
+const PUBLIC_ADMIN_API_GET_PATHS = [
   '/api/admin/google/login',
   '/api/admin/google/callback',
   '/api/admin/logout',
 ] as const;
 
+const ADMIN_WRITE_METHODS = new Set(['POST', 'PUT', 'DELETE']);
+
 function isProtectedPath(pathname: string): boolean {
   return PROTECTED_PREFIXES.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`));
 }
 
-function isPublicAdminApiPath(pathname: string): boolean {
-  return PUBLIC_ADMIN_API_PATHS.some((path) => pathname === path);
+function isPublicAdminApiPath(pathname: string, method: string): boolean {
+  return method === 'GET' && PUBLIC_ADMIN_API_GET_PATHS.some((path) => pathname === path);
 }
 
 function isLocalHost(hostname: string): boolean {
@@ -80,6 +86,24 @@ function unauthorizedJson(message: string): Response {
   });
 }
 
+function forbiddenJson(message: string): Response {
+  return new Response(JSON.stringify({ error: message }), {
+    status: 403,
+    headers: {
+      'Content-Type': 'application/json',
+      'Cache-Control': 'no-store',
+    },
+  });
+}
+
+function isAdminWriteRequest(request: Request): boolean {
+  return ADMIN_WRITE_METHODS.has(request.method.toUpperCase());
+}
+
+function hasAdminSessionCookie(request: Request): boolean {
+  return Boolean(getCookieValue(request, ADMIN_SESSION_COOKIE));
+}
+
 function redirectToGoogleLogin(request: Request, url: URL): Response {
   const loginUrl = new URL('/api/admin/google/login', url.origin);
   loginUrl.searchParams.set('return_to', sanitizeReturnTo(`${url.pathname}${url.search}${url.hash}`));
@@ -104,10 +128,18 @@ export const onRequest = async (context: any) => {
   const safeEnv = env || {};
 
   if (!isProtectedPath(url.pathname)) {
+    if (isApiRequest(url) && isAdminWriteRequest(request) && hasAdminSessionCookie(request)) {
+      const session = await verifyAdminSession(request, safeEnv);
+
+      if (session && !(await verifyAdminCsrfToken(request, safeEnv, session))) {
+        return forbiddenJson(`Missing or invalid ${ADMIN_CSRF_HEADER}`);
+      }
+    }
+
     return context.next();
   }
 
-  if (isPublicAdminApiPath(url.pathname)) {
+  if (isPublicAdminApiPath(url.pathname, request.method)) {
     return context.next();
   }
 
@@ -123,6 +155,10 @@ export const onRequest = async (context: any) => {
     }
 
     return unauthorizedJson('Google admin sign-in required');
+  }
+
+  if (isApiRequest(url) && isAdminWriteRequest(request) && !(await verifyAdminCsrfToken(request, safeEnv, session))) {
+    return forbiddenJson(`Missing or invalid ${ADMIN_CSRF_HEADER}`);
   }
 
   if (isApiRequest(url)) {
