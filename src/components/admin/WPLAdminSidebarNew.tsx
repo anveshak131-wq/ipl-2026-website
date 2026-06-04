@@ -5,26 +5,52 @@ import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { 
   Home, Calendar, MapPin, FileText, Target, Activity, 
-  Users, Shield, BarChart3, TrendingUp, Menu, X, ChevronRight, Award 
+  Users, Shield, BarChart3, TrendingUp, Menu, X, ChevronRight, Award, Settings
 } from 'lucide-react';
 
-const menuItems = [
-  { href: '/wpl-admin-2026/dashboard', label: 'Dashboard', icon: Home },
-  { href: '/wpl-admin-2026/matches', label: 'Matches', icon: Calendar },
-  { href: '/wpl-admin-2026/teams', label: 'Teams', icon: Shield },
-  { href: '/wpl-admin-2026/players', label: 'Players', icon: Users },
-  { href: '/wpl-admin-2026/matchday', label: 'Match Day', icon: Activity },
-  { href: '/wpl-admin-2026/venues', label: 'Venues', icon: MapPin },
-  { href: '/wpl-admin-2026/stories', label: 'Stories', icon: FileText },
-  { href: '/wpl-admin-2026/predictions', label: 'Predictions', icon: Target },
-  { href: '/wpl-admin-2026/live-score-ai', label: 'Live Score', icon: Activity },
-  { href: '/wpl-admin-2026/live-score-csv', label: 'Live Score CSV', icon: FileText },
-  { href: '/wpl-admin-2026/playing-11', label: 'Playing 11', icon: Users },
-  { href: '/wpl-admin-2026/points-table', label: 'Points Table', icon: BarChart3 },
-  { href: '/wpl-admin-2026/batting-stats', label: 'Batting Stats', icon: TrendingUp },
-  { href: '/wpl-admin-2026/bowling-stats', label: 'Bowling Stats', icon: TrendingUp },
-  { href: '/wpl-admin-2026/scorecard', label: 'Scorecard', icon: FileText },
-  { href: '/wpl-admin-2026/statistics', label: 'Statistics', icon: Award },
+const menuSections = [
+  {
+    label: 'Overview',
+    items: [
+      { href: '/wpl-admin-2026/dashboard', label: 'Dashboard', icon: Home },
+      { href: '/wpl-admin-2026/statistics', label: 'Statistics', icon: Award },
+    ],
+  },
+  {
+    label: 'Live Ops',
+    items: [
+      { href: '/wpl-admin-2026/matches', label: 'Matches', icon: Calendar },
+      { href: '/wpl-admin-2026/live-score-ai', label: 'Live Score', icon: Activity },
+      { href: '/wpl-admin-2026/live-score-csv', label: 'Live Score CSV', icon: FileText },
+      { href: '/wpl-admin-2026/playing-11', label: 'Playing 11', icon: Users },
+      { href: '/wpl-admin-2026/scorecard', label: 'Scorecard', icon: FileText },
+      { href: '/wpl-admin-2026/matchday', label: 'Match Day', icon: Activity },
+      { href: '/wpl-admin-2026/points-table', label: 'Points Table', icon: BarChart3 },
+    ],
+  },
+  {
+    label: 'League Data',
+    items: [
+      { href: '/wpl-admin-2026/teams', label: 'Teams', icon: Shield },
+      { href: '/wpl-admin-2026/players', label: 'Players', icon: Users },
+      { href: '/wpl-admin-2026/batting-stats', label: 'Batting Stats', icon: TrendingUp },
+      { href: '/wpl-admin-2026/bowling-stats', label: 'Bowling Stats', icon: TrendingUp },
+      { href: '/wpl-admin-2026/venues', label: 'Venues', icon: MapPin },
+    ],
+  },
+  {
+    label: 'Content',
+    items: [
+      { href: '/wpl-admin-2026/stories', label: 'Stories', icon: FileText },
+      { href: '/wpl-admin-2026/predictions', label: 'Predictions', icon: Target },
+    ],
+  },
+  {
+    label: 'System',
+    items: [
+      { href: '/wpl-admin-2026/settings', label: 'Settings', icon: Settings },
+    ],
+  },
 ];
 
 export default function WPLAdminSidebarNew() {
@@ -96,27 +122,36 @@ export default function WPLAdminSidebarNew() {
               Navigation
             </p>
           </div>
-          <div className="space-y-1.5">
-            {menuItems.map((item) => {
-              const Icon = item.icon;
-              const active = isActive(item.href);
+          <div className="space-y-5">
+            {menuSections.map((section) => (
+              <div key={section.label} className="space-y-1.5">
+                {!collapsed && (
+                  <p className="px-2 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400/70">
+                    {section.label}
+                  </p>
+                )}
+                {section.items.map((item) => {
+                  const Icon = item.icon;
+                  const active = isActive(item.href);
 
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  onClick={() => setIsOpen(false)}
-                  className={`wpl-admin-nav-item ${active ? 'active' : ''} ${collapsed ? 'is-collapsed' : ''}`}
-                  aria-current={active ? 'page' : undefined}
-                  title={collapsed ? item.label : undefined}
-                >
-                  <Icon size={20} className="flex-shrink-0 text-slate-100/80" />
-                  {!collapsed && (
-                    <span className="font-medium tracking-tight">{item.label}</span>
-                  )}
-                </Link>
-              );
-            })}
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      onClick={() => setIsOpen(false)}
+                      className={`wpl-admin-nav-item ${active ? 'active' : ''} ${collapsed ? 'is-collapsed' : ''}`}
+                      aria-current={active ? 'page' : undefined}
+                      title={collapsed ? item.label : undefined}
+                    >
+                      <Icon size={20} className="flex-shrink-0 text-slate-100/80" />
+                      {!collapsed && (
+                        <span className="font-medium tracking-tight">{item.label}</span>
+                      )}
+                    </Link>
+                  );
+                })}
+              </div>
+            ))}
           </div>
         </nav>
 

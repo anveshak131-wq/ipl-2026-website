@@ -13,7 +13,7 @@ import ModernTeamLogo from '@/components/ui/ModernTeamLogo';
 import GradientText from '@/components/ui/GradientText';
 import { useLeague } from '@/contexts/LeagueContext';
 import { api } from '@/lib/data';
-import type { Match, Player } from '@/types';
+import type { League, Match, Player } from '@/types';
 
 type ExtrasRow = {
   hasWide: boolean;
@@ -1274,6 +1274,9 @@ function WormChart({
 export default function LiveScorePage() {
   const { setCurrentLeague } = useLeague();
   const searchParams = useSearchParams();
+  const searchKey = typeof searchParams?.toString === 'function' ? searchParams.toString() : '';
+  const selectedLeague: League = searchParams.get('league') === 'wpl' ? 'wpl' : 'ipl';
+  const leagueLabel = selectedLeague.toUpperCase();
   const prefersReducedMotion = useReducedMotion();
   const motionEnabled = !prefersReducedMotion;
 
@@ -1303,10 +1306,10 @@ export default function LiveScorePage() {
     [playerById],
   );
 
-  // Ensure IPL context on this route.
+  // Keep the shared league context aligned with the query-backed live score route.
   useEffect(() => {
-    setCurrentLeague('ipl');
-  }, [setCurrentLeague]);
+    setCurrentLeague(selectedLeague);
+  }, [selectedLeague, setCurrentLeague]);
 
   useEffect(() => {
     if (typeof document === 'undefined') return;
@@ -1325,12 +1328,12 @@ export default function LiveScorePage() {
       try {
         const [matchesData, playersData] = await Promise.all([
           (async () => {
-            const resp = await fetch('/api/matches?league=ipl&includeAll=true', { cache: 'no-store' });
+            const resp = await fetch(`/api/matches?league=${selectedLeague}&includeAll=true`, { cache: 'no-store' });
             if (!resp.ok) return [];
             const data = await resp.json();
             return Array.isArray(data) ? (data as Match[]) : [];
           })(),
-          api.getPlayers(undefined, 'ipl'),
+          api.getPlayers(undefined, selectedLeague),
         ]);
         if (cancelled) return;
 
@@ -1345,7 +1348,7 @@ export default function LiveScorePage() {
 
         setMatches(sorted);
         setPlayers((playersData || []) as Player[]);
-        setSelectedMatchId((prev) => prev || initialId);
+        setSelectedMatchId(initialId);
       } catch (e) {
         console.error('[Live Score] Failed to load matches:', e);
         setError('Failed to load matches.');
@@ -1357,8 +1360,7 @@ export default function LiveScorePage() {
     return () => {
       cancelled = true;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [searchKey, selectedLeague]);
 
   const selectedMatch = useMemo(
     () => matches.find((m) => m.id === selectedMatchId) || null,
@@ -1377,7 +1379,7 @@ export default function LiveScorePage() {
       matchId,
       withCommentary: withCommentary ? '1' : '0',
     });
-    const resp = await fetch(`/api/ipl-live-score/save?${params.toString()}`, {
+    const resp = await fetch(`/api/${selectedLeague}-live-score/save?${params.toString()}`, {
       cache: 'no-store',
     });
     if (!resp.ok) throw new Error(`Failed to fetch live score rows (${resp.status})`);
@@ -1397,41 +1399,44 @@ export default function LiveScorePage() {
     }
 
     return { rows: [], extrasData: {}, wicketData: {}, commentaryData: {} };
-  }, []);
+  }, [selectedLeague]);
 
   const fetchMatchFresh = useCallback(async (matchId: string) => {
     const resp = await fetch(
-      `/api/matches?league=ipl&id=${encodeURIComponent(matchId)}&syncScorecards=0&includeAll=true`,
+      `/api/matches?league=${selectedLeague}&id=${encodeURIComponent(matchId)}&syncScorecards=0&includeAll=true`,
       { cache: 'no-store' },
     );
     if (!resp.ok) return null;
     const data = await resp.json();
     return data && typeof data === 'object' ? (data as Match) : null;
-  }, []);
+  }, [selectedLeague]);
 
   const fetchScorecardsForMatch = useCallback(async (matchId: string) => {
-    const resp = await fetch(`/api/scorecards?matchId=${encodeURIComponent(matchId)}&league=ipl`, {
+    const resp = await fetch(`/api/scorecards?matchId=${encodeURIComponent(matchId)}&league=${selectedLeague}`, {
       cache: 'no-store',
     });
     if (!resp.ok) return [];
     const data = await resp.json();
     return Array.isArray(data) ? (data as ScorecardDoc[]) : [];
-  }, []);
+  }, [selectedLeague]);
 
   const pickBestScorecardResultInfo = useCallback((scorecards: ScorecardDoc[]) => {
     const list = Array.isArray(scorecards) ? scorecards : [];
-    const normalize = (sc: ScorecardDoc) => ({
-      ...sc,
-      draft: Boolean(sc?.draft),
-      result: {
-        winner: String(sc?.result?.winner || '').trim(),
-        margin: String(sc?.result?.margin || '').trim(),
-        manOfTheMatch: String(sc?.result?.manOfTheMatch || '').trim(),
-        resultType: inferResultType(sc?.result),
-        reason: String(sc?.result?.reason || '').trim(),
-        reasonDetail: String(sc?.result?.reasonDetail || '').trim(),
-      },
-    });
+    const normalize = (sc: ScorecardDoc) => {
+      const resultType = inferResultType(sc?.result) || undefined;
+      return {
+        ...sc,
+        draft: Boolean(sc?.draft),
+        result: {
+          winner: String(sc?.result?.winner || '').trim(),
+          margin: String(sc?.result?.margin || '').trim(),
+          manOfTheMatch: String(sc?.result?.manOfTheMatch || '').trim(),
+          resultType,
+          reason: String(sc?.result?.reason || '').trim(),
+          reasonDetail: String(sc?.result?.reasonDetail || '').trim(),
+        },
+      };
+    };
 
     const withResult = list.map(normalize).filter((sc) => Boolean(sc.result?.resultType || sc.result?.winner));
     if (withResult.length === 0) return null;
@@ -1674,7 +1679,7 @@ export default function LiveScorePage() {
     if (!selectedMatch) return null;
     const encodedId = encodeURIComponent(selectedMatch.id);
     const params = new URLSearchParams({
-      league: 'ipl',
+      league: selectedMatch.league,
       date: selectedMatch.date,
       team1Id: selectedMatch.team1.id,
       team2Id: selectedMatch.team2.id,
@@ -1686,7 +1691,8 @@ export default function LiveScorePage() {
     if (season) {
       params.set('season', season);
     }
-    return `/matches/${encodedId}?${params.toString()}`;
+    const basePath = selectedMatch.league === 'wpl' ? '/wpl/matches' : '/matches';
+    return `${basePath}/${encodedId}?${params.toString()}`;
   }, [selectedMatch]);
 
   return (
@@ -1750,7 +1756,7 @@ export default function LiveScorePage() {
           <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
             <div>
               <h1 className="text-3xl md:text-5xl font-black tracking-tight text-white">
-                IPL{' '}
+                {leagueLabel}{' '}
                 <GradientText gradient="from-cyan-300 via-purple-300 to-amber-300" animate={motionEnabled}>
                   Live Score
                 </GradientText>
@@ -1893,7 +1899,7 @@ export default function LiveScorePage() {
           </div>
         ) : matches.length === 0 ? (
           <div className="rounded-3xl p-6 bg-black/25 border border-white/10 text-white/80 backdrop-blur-xl shadow-[0_18px_55px_rgba(0,0,0,0.35)]">
-            No IPL matches found yet.
+            No {leagueLabel} matches found yet.
           </div>
         ) : (
           <>
@@ -2029,7 +2035,7 @@ export default function LiveScorePage() {
                             <ModernTeamLogo
                               teamId={selectedMatch.team1.id}
                               shortName={selectedMatch.team1.shortName}
-                              league="ipl"
+                              league={selectedMatch.league}
                               size={56}
                               showHover={false}
                             />
@@ -2100,7 +2106,7 @@ export default function LiveScorePage() {
                             <ModernTeamLogo
                               teamId={selectedMatch.team2.id}
                               shortName={selectedMatch.team2.shortName}
-                              league="ipl"
+                              league={selectedMatch.league}
                               size={56}
                               showHover={false}
                             />

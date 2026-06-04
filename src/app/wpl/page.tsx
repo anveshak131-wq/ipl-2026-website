@@ -46,6 +46,7 @@ import { WPLColors } from '@/lib/wplColors';
 import CountdownTimer from '@/components/ui/CountdownTimer';
 import { formatMatchTime } from '@/lib/timeUtils';
 import { getAnimatedLogoPath } from '@/lib/logoUtils';
+import PublicLiveMatchStrip from '@/components/live-score/PublicLiveMatchStrip';
 
 export default function WPLHomePage() {
   const router = useRouter();
@@ -279,6 +280,7 @@ export default function WPLHomePage() {
       <AuroraBackground />
       <WPLFloatingParticles />
       <Navbar />
+      <PublicLiveMatchStrip league="wpl" matches={matches} />
 
       {/* Terms Acceptance Modal */}
       {shouldShowModal && (
@@ -493,7 +495,7 @@ export default function WPLHomePage() {
                       whileHover={{ scale: 1.1, y: -5 }}
                       className="group relative overflow-hidden p-6 rounded-2xl backdrop-blur-xl border transition-all duration-300 cursor-pointer"
                       style={{
-                        background: WPLColors.purpleRGBA[5],
+                        background: WPLColors.purpleRGBA[10],
                         borderColor: WPLColors.purpleRGBA[30],
                       }}
                     >
@@ -673,19 +675,19 @@ export default function WPLHomePage() {
               className="w-8 h-14 rounded-full border-2 flex items-start justify-center p-2 backdrop-blur-md cursor-pointer transition-colors"
               style={{
                 borderColor: WPLColors.purpleRGBA[30],
-                background: WPLColors.purpleRGBA[5],
+                background: WPLColors.purpleRGBA[10],
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.background = WPLColors.purpleRGBA[10];
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.background = WPLColors.purpleRGBA[5];
+                e.currentTarget.style.background = WPLColors.purpleRGBA[10];
               }}
             >
               <motion.div
                 className="w-2 h-2 rounded-full"
                 style={{
-                  background: WPLColors.pinkRGBA[70] || WPLColors.pink,
+                  background: WPLColors.pink,
                 }}
                 animate={{ y: [0, 20, 0] }}
                 transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
@@ -772,7 +774,7 @@ export default function WPLHomePage() {
                         {formatMatchTime(featuredLiveMatch.time, featuredLiveMatch.date)}
                       </div>
                       {/* Display Toss Information */}
-                      {featuredLiveMatch.toss && (
+                      {featuredLiveMatch.matchState?.toss && (
                         <motion.div 
                           className="text-xs px-3 py-2 rounded-lg inline-block"
                           style={{
@@ -784,10 +786,10 @@ export default function WPLHomePage() {
                           transition={{ duration: 0.5, delay: 0.5 }}
                         >
                           <div className="font-semibold">
-                            {featuredLiveMatch.toss.winner === 'team1' ? featuredLiveMatch.team1.shortName : featuredLiveMatch.team2.shortName} won the toss
+                            {featuredLiveMatch.matchState.toss.winner === 'team1' ? featuredLiveMatch.team1.shortName : featuredLiveMatch.team2.shortName} won the toss
                           </div>
                           <div style={{ color: WPLColors.textSecondary }} className="text-xs">
-                            chose to {featuredLiveMatch.toss.decision === 'bat' ? 'bat' : 'bowl'}
+                            chose to {featuredLiveMatch.matchState.toss.decision === 'bat' ? 'bat' : 'bowl'}
                           </div>
                         </motion.div>
                       )}
@@ -1130,7 +1132,7 @@ export default function WPLHomePage() {
                       whileHover={{ scale: 1.05, y: -5 }}
                       className="p-6 rounded-2xl backdrop-blur-xl border transition-all"
                       style={{
-                        background: WPLColors.purpleRGBA[5],
+                        background: WPLColors.purpleRGBA[10],
                         borderColor: WPLColors.purpleRGBA[30],
                       }}
                       onMouseEnter={(e) => {
@@ -1138,7 +1140,7 @@ export default function WPLHomePage() {
                         e.currentTarget.style.borderColor = WPLColors.purpleRGBA[50];
                       }}
                       onMouseLeave={(e) => {
-                        e.currentTarget.style.background = WPLColors.purpleRGBA[5];
+                        e.currentTarget.style.background = WPLColors.purpleRGBA[10];
                         e.currentTarget.style.borderColor = WPLColors.purpleRGBA[30];
                       }}
                     >

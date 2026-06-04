@@ -47,8 +47,9 @@ export default function Navbar() {
 
   const isLinkActive = (href: string) => {
     if (!pathname) return false;
-    if (href === '/') return pathname === '/';
-    return pathname === href || pathname.startsWith(`${href}/`);
+    const hrefPath = href.split('?')[0] || href;
+    if (hrefPath === '/') return pathname === '/';
+    return pathname === hrefPath || pathname.startsWith(`${hrefPath}/`);
   };
 
   // Reorganized: Priority-based grouping
@@ -66,11 +67,12 @@ export default function Navbar() {
     return baseHref;
   };
 
+  const liveScoreHref = currentLeague === 'wpl' ? '/live-score?league=wpl' : '/live-score';
+
   const primaryNavItems: NavItem[] = [
     // Real-time & Core Features (Highest Priority)
-    ...(currentLeague === 'ipl'
-      ? [{ href: '/live-score', label: 'Live Score', emoji: 'lightning' as NavEmojiName }]
-      : []),
+    { href: liveScoreHref, label: 'Live Score', emoji: 'lightning' },
+    { href: '/feed', label: 'Feed', emoji: 'sparkles' },
     { href: getLeagueAwareHref('/matches'), label: 'Matches', emoji: 'cricket-bat' },
     // Explore & Discover
     { href: getLeagueAwareHref('/teams'), label: 'Teams', emoji: 'trophy' },

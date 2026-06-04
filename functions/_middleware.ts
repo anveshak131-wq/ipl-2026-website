@@ -3,6 +3,8 @@ import {
   ADMIN_SESSION_COOKIE,
   getEnvString,
   getCookieValue,
+  isLegacyAdminLoginAllowed,
+  isLegacyAdminSetupAllowed,
   sanitizeReturnTo,
   verifyAdminCsrfToken,
   verifyAdminSession,
@@ -41,6 +43,30 @@ function isProtectedPath(pathname: string): boolean {
 
 function isPublicAdminApiPath(pathname: string, method: string): boolean {
   return method === 'GET' && PUBLIC_ADMIN_API_GET_PATHS.some((path) => pathname === path);
+}
+
+function isLegacyAdminApiPostPath(pathname: string, method: string): boolean {
+  return method === 'POST' && (pathname === '/api/admin/login' || pathname === '/api/admin/setup');
+}
+
+function isAllowedLegacyAdminApiPath(pathname: string, env: Record<string, unknown>): boolean {
+  if (pathname === '/api/admin/login') {
+    return isLegacyAdminLoginAllowed(env);
+  }
+
+  if (pathname === '/api/admin/setup') {
+    return isLegacyAdminSetupAllowed(env);
+  }
+
+  return false;
+}
+
+function legacyAdminApiDisabledMessage(pathname: string): string {
+  if (pathname === '/api/admin/login') {
+    return 'Legacy admin password login is disabled in production. Use Google admin sign-in.';
+  }
+
+  return 'Legacy admin setup is disabled in production. Enable it explicitly only for a controlled setup window.';
 }
 
 function isLocalHost(hostname: string): boolean {
@@ -141,6 +167,14 @@ export const onRequest = async (context: any) => {
 
   if (isPublicAdminApiPath(url.pathname, request.method)) {
     return context.next();
+  }
+
+  if (isLegacyAdminApiPostPath(url.pathname, request.method)) {
+    if (isAllowedLegacyAdminApiPath(url.pathname, safeEnv)) {
+      return context.next();
+    }
+
+    return forbiddenJson(legacyAdminApiDisabledMessage(url.pathname));
   }
 
   if (shouldBypassAdminAuthForLocalDev(safeEnv, url)) {

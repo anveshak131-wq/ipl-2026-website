@@ -38,8 +38,7 @@ export default function AdminSidebar({ currentPage = '', onLogout }: AdminSideba
   const [adminName, setAdminName] = useState('Admin User');
   const [adminEmail, setAdminEmail] = useState('admin@ipl2026.com');
   const [searchQuery, setSearchQuery] = useState('');
-  // Only expand Dashboard and Management by default for cleaner look
-  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set(['Dashboard', 'Management']));
+  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set(['Overview', 'Live Ops', 'League Data']));
   const [recentPages, setRecentPages] = useState<RecentPage[]>([]);
   const [showShortcuts, setShowShortcuts] = useState(false);
   const [pendingCounts, setPendingCounts] = useState<{ [key: string]: number }>({});
@@ -333,8 +332,8 @@ export default function AdminSidebar({ currentPage = '', onLogout }: AdminSideba
     return () => clearInterval(interval);
   }, []);
 
-  // Consolidated menu groups for cleaner navigation
-  const menuGroups: { [key: string]: MenuItem[] } = useMemo(() => ({
+  // Base menu registry. The visible groups below reshape this into an operator-focused IA.
+  const baseMenuGroups: { [key: string]: MenuItem[] } = useMemo(() => ({
     Main: [
       {
         href: '/ipl-admin-2026/dashboard',
@@ -678,7 +677,63 @@ export default function AdminSidebar({ currentPage = '', onLogout }: AdminSideba
         group: 'Settings',
       },
     ],
-  }), [currentLeague]);
+  }), [currentLeague, pendingCounts.moderation]);
+
+  const menuGroups: { [key: string]: MenuItem[] } = useMemo(() => {
+    const allItems = Object.values(baseMenuGroups).flat();
+    const byHref = new Map(allItems.map((item) => [item.href, item]));
+    const pick = (hrefs: string[]) =>
+      hrefs
+        .map((href) => byHref.get(href))
+        .filter((item): item is MenuItem => Boolean(item));
+
+    return {
+      Overview: pick([
+        '/ipl-admin-2026/dashboard',
+        '/ipl-admin-2026/analytics',
+      ]),
+      'Live Ops': pick([
+        '/ipl-admin-2026/matches',
+        '/ipl-admin-2026/live-score',
+        '/ipl-admin-2026/live-score-fast',
+        '/ipl-admin-2026/playing-11',
+        '/ipl-admin-2026/scorecard',
+        '/ipl-admin-2026/matchday',
+        '/ipl-admin-2026/points-table',
+      ]),
+      'League Data': pick([
+        '/ipl-admin-2026/teams',
+        '/ipl-admin-2026/players',
+        '/ipl-admin-2026/batting-stats',
+        '/ipl-admin-2026/bowling-stats',
+        '/ipl-admin-2026/achievements',
+        '/ipl-admin-2026/coaches',
+      ]),
+      Content: pick([
+        '/ipl-admin-2026/content',
+        '/ipl-admin-2026/news',
+        '/ipl-admin-2026/stories',
+        '/ipl-admin-2026/predictions',
+        '/ipl-admin-2026/moderation',
+        '/ipl-admin-2026/engagement',
+        '/ipl-admin-2026/stats',
+      ]),
+      'Data & AI': pick([
+        '/ipl-admin-2026/players/upload',
+        '/ipl-admin-2026/dataset-manager',
+        '/ipl-admin-2026/datasets',
+        '/ipl-admin-2026/ml-lab',
+      ]),
+      Settings: pick([
+        '/ipl-admin-2026/settings',
+        '/ipl-admin-2026/email-notifications',
+        '/ipl-admin-2026/admins',
+        '/ipl-admin-2026/legal',
+        '/ipl-admin-2026/support',
+        '/ipl-admin-2026/setup',
+      ]),
+    };
+  }, [baseMenuGroups]);
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -867,6 +922,27 @@ export default function AdminSidebar({ currentPage = '', onLogout }: AdminSideba
         </div>
       )}
 
+      {!collapsed && (
+        <div className="px-4 py-3 border-b border-white/8">
+          <div className="rounded-xl border border-blue-400/20 bg-blue-500/10 px-3 py-2.5">
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <div className="text-xs font-black uppercase tracking-[0.18em] text-blue-200">
+                  Live Ops
+                </div>
+                <div className="mt-1 text-[11px] text-slate-400">
+                  Scores, playing XI, scorecards
+                </div>
+              </div>
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-400/30 bg-emerald-500/10 px-2 py-1 text-[10px] font-black uppercase tracking-wider text-emerald-200">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-300 shadow-[0_0_12px_rgba(110,231,183,0.85)] animate-pulse" />
+                Synced
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Recent Pages - Only show when searching or collapsed */}
      {!collapsed && recentPages.length > 0 && searchQuery && (
        <div className="px-4 py-2 border-b border-[#2A3440]">
@@ -913,8 +989,8 @@ export default function AdminSidebar({ currentPage = '', onLogout }: AdminSideba
               currentPage === item.href || (!!currentPage && currentPage.startsWith(item.href + '/'))
           );
 
-          // For "Main" group, always show items (no collapse)
-          if (groupName === 'Main') {
+          // Keep Overview visible as the dashboard anchor.
+          if (groupName === 'Overview') {
             return (
               <div key={groupName} className="space-y-1">
                 {items.map((item) => {

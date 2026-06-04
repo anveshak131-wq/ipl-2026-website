@@ -7,9 +7,25 @@
  */
 
 import crypto from 'node:crypto';
+import { isLegacyAdminSetupAllowed } from '../../_adminAuth.js';
 
 export async function onRequest(context) {
   const { request, env } = context;
+
+  if (!isLegacyAdminSetupAllowed(env || {})) {
+    return new Response(
+      JSON.stringify({
+        message: 'Legacy admin setup is disabled in production. Enable it explicitly only for a controlled setup window.',
+      }),
+      {
+        status: 403,
+        headers: {
+          'Content-Type': 'application/json',
+          'Cache-Control': 'no-store',
+        },
+      }
+    );
+  }
 
   // Only allow POST requests
   if (request.method !== 'POST') {

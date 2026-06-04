@@ -5,6 +5,7 @@ const ADMIN_SESSION_MAX_AGE_SECONDS = 4 * 60 * 60;
 const OAUTH_STATE_MAX_AGE_SECONDS = 10 * 60;
 const DEFAULT_ADMIN_EMAIL = 'anveshkoganti54@gmail.com';
 const GOOGLE_JWKS_URL = 'https://www.googleapis.com/oauth2/v3/certs';
+const TRUE_ENV_VALUES = new Set(['1', 'true', 'yes', 'on', 'enabled']);
 
 const encoder = new TextEncoder();
 const decoder = new TextDecoder();
@@ -25,6 +26,34 @@ export function getEnvString(env, keys) {
     }
   }
   return '';
+}
+
+export function isProductionEnvironment(env) {
+  return getEnvString(env, ['ENVIRONMENT', 'NODE_ENV']).toLowerCase() === 'production';
+}
+
+export function isEnvFlagEnabled(env, keys) {
+  return TRUE_ENV_VALUES.has(getEnvString(env, keys).toLowerCase());
+}
+
+export function isLegacyAdminLoginAllowed(env) {
+  if (!isProductionEnvironment(env)) return true;
+
+  return isEnvFlagEnabled(env, [
+    'ADMIN_LEGACY_LOGIN_ENABLED',
+    'ADMIN_PASSWORD_LOGIN_ENABLED',
+    'ADMIN_LEGACY_AUTH_ENABLED',
+  ]);
+}
+
+export function isLegacyAdminSetupAllowed(env) {
+  if (!isProductionEnvironment(env)) return true;
+
+  return isEnvFlagEnabled(env, [
+    'ADMIN_LEGACY_SETUP_ENABLED',
+    'ADMIN_SETUP_ENABLED',
+    'ADMIN_LEGACY_AUTH_ENABLED',
+  ]);
 }
 
 export function getAllowedAdminEmails(env) {

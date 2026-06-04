@@ -5,11 +5,26 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useParams, useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { ArrowLeft, FileText, Lock, Trophy, Users, AlertTriangle, CloudRain, Info } from 'lucide-react';
+import {
+  Activity,
+  ArrowLeft,
+  Cloud,
+  FileText,
+  Lock,
+  MessageSquare,
+  Newspaper,
+  Target,
+  Trophy,
+  Users,
+  AlertTriangle,
+  CloudRain,
+  Info,
+} from 'lucide-react';
 
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
+import PollCard from '@/components/predictions/PollCard';
 import { useLeague } from '@/contexts/LeagueContext';
 import { api } from '@/lib/data';
 import { getAnimatedLogoPath, getLogoPath } from '@/lib/logoUtils';
@@ -17,7 +32,7 @@ import { getMatchNumberDisplay } from '@/lib/matchNumberUtils';
 import { getMatchAdvisory } from '@/lib/matchAdvisory';
 import { getPlaying11VisibilityMessage, isPlaying11VisibleNow } from '@/lib/playing11Utils';
 import { formatMatchTime } from '@/lib/timeUtils';
-import { League, Match, Player } from '@/types';
+import { League, Match, News, Player, Poll } from '@/types';
 
 interface MatchCenterPageProps {
   backHref?: string;
@@ -65,9 +80,87 @@ interface PublishedScorecard {
   result?: {
     winner?: string;
     margin?: string;
+    manOfTheMatch?: string;
+    resultType?: string;
+    reason?: string;
+    reasonDetail?: string;
   };
   innings?: ScorecardInnings[];
 }
+
+type ExtrasRow = {
+  hasWide?: boolean;
+  wideExtraRuns?: number;
+  hasNoBall?: boolean;
+  hasByes?: boolean;
+  byesRuns?: number;
+  hasLB?: boolean;
+  lbRuns?: number;
+};
+
+type WicketRow = {
+  hasWicket?: boolean;
+  wicketType?: string;
+  wicketTaker?: string;
+  wicketAssistant?: string;
+  outBatter?: 'striker' | 'nonStriker';
+};
+
+type LiveScoreTableState = {
+  rows: string[][];
+  extrasData?: Record<number, ExtrasRow>;
+  wicketData?: Record<number, WicketRow>;
+  commentaryData?: Record<number, string>;
+};
+
+type LiveTotals = {
+  runs: number;
+  wickets: number;
+  overs: string;
+  runRate: string;
+};
+
+type CommentaryPreviewItem = {
+  id: string;
+  innings: string;
+  overBall: string;
+  label: string;
+  text: string;
+  kind: 'wicket' | 'boundary' | 'extra' | 'run';
+};
+
+type MatchWeatherData = {
+  venueId: string;
+  venueName?: string;
+  city?: string;
+  current?: {
+    temperature?: number;
+    feelsLike?: number;
+    humidity?: number;
+    windSpeed?: number;
+    condition?: string;
+    description?: string;
+    timestamp?: string;
+    aiPrediction?: {
+      matchImpact?: string;
+      pitchEffect?: string;
+      dewFactor?: number;
+      playingConditions?: string;
+      recommendations?: string[];
+      confidence?: number;
+    };
+  };
+  lastUpdated?: string;
+};
+
+const MAX_LEGAL_BALLS = 120;
+
+const EMPTY_LIVE_TOTALS: LiveTotals = {
+  runs: 0,
+  wickets: 0,
+  overs: '0.0',
+  runRate: '0.00',
+};
 
 const sectionAnimation = {
   hidden: { opacity: 0, y: 24 },
@@ -104,6 +197,213 @@ async function fetchPublishedScorecard(matchId: string, league?: League): Promis
   }
 }
 
+async function fetchLiveScoreRows(matchId: string, league: League): Promise<LiveScoreTableState> {
+  try {
+    const query = new URLSearchParams({
+      matchId,
+      withCommentary: '1',
+    });
+    const response = await fetch(`/api/${league}-live-score/save?${query.toString()}`, {
+      cache: 'no-store',
+    });
+    if (!response.ok) {
+      return { rows: [] };
+    }
+
+    const data = await response.json();
+    if (Array.isArray(data?.rows)) {
+      return {
+        rows: data.rows as string[][],
+        extrasData: (data.extrasData || {}) as Record<number, ExtrasRow>,
+        wicketData: (data.wicketData || {}) as Record<number, WicketRow>,
+        commentaryData: (data.commentaryData || {}) as Record<number, string>,
+      };
+    }
+
+    if (Array.isArray(data)) {
+      return { rows: data as string[][] };
+    }
+  } catch {
+    // Live rows are additive context; the match center can render without them.
+  }
+
+  return { rows: [] };
+}
+
+function resolveWeatherVenueId(venue: string, league: League): string | null {
+  const normalized = String(venue || '').toLowerCase();
+  if (!normalized) return null;
+
+  if (league === 'wpl') {
+    if (normalized.includes('dy patil') || normalized.includes('navi mumbai')) return 'wpl-dy-patil';
+    if (normalized.includes('bca') || normalized.includes('kotambi') || normalized.includes('vadodara')) {
+      return 'wpl-bca-stadium';
+    }
+  }
+
+  return null;
+}
+
+async function fetchMatchWeather(match: Match): Promise<MatchWeatherData | null> {
+  const venueId = resolveWeatherVenueId(match.venue, match.league);
+  if (!venueId) return null;
+
+  try {
+    const response = await fetch(`/api/weather/${venueId}`, { cache: 'no-store' });
+    if (!response.ok) return null;
+    return (await response.json()) as MatchWeatherData;
+  } catch {
+    return null;
+  }
+}
+
+function otherTeamKey(teamKey: 'team1' | 'team2'): 'team1' | 'team2' {
+  return teamKey === 'team1' ? 'team2' : 'team1';
+}
+
+function getBattingTeamKeyForInnings(match: Match, innings: '1' | '2'): 'team1' | 'team2' {
+  const innings1Batting = match.matchState?.innings1?.battingTeam;
+  if (innings1Batting === 'team1' || innings1Batting === 'team2') {
+    return innings === '1' ? innings1Batting : otherTeamKey(innings1Batting);
+  }
+
+  const toss = match.matchState?.toss;
+  if (!toss) return innings === '1' ? 'team1' : 'team2';
+
+  const winner = toss.winner;
+  if (toss.decision === 'bat') {
+    return innings === '1' ? winner : otherTeamKey(winner);
+  }
+
+  return innings === '1' ? otherTeamKey(winner) : winner;
+}
+
+function calculateLiveTotals(
+  rows: string[][],
+  extrasData: Record<number, ExtrasRow>,
+  wicketData: Record<number, WicketRow>,
+  innings: '1' | '2',
+): LiveTotals {
+  let runs = 0;
+  let wickets = 0;
+  let legalBalls = 0;
+
+  rows.forEach((row, idx) => {
+    if (String(row?.[2] || '') !== innings || legalBalls >= MAX_LEGAL_BALLS) return;
+
+    const extras = extrasData[idx] || {};
+    const wicket = wicketData[idx] || {};
+    const nonDeliveryWicket =
+      Boolean(wicket.hasWicket) &&
+      ['Mankad (Run out at non-striker end)', 'Timed Out', 'Retired Hurt', 'Retired Out'].includes(
+        String(wicket.wicketType || ''),
+      );
+
+    const batRuns = extras.hasWide ? 0 : Number.parseInt(String(row?.[6] || ''), 10) || 0;
+    let extraRuns = 0;
+    if (extras.hasWide) extraRuns += 1 + (Number(extras.wideExtraRuns) || 0);
+    if (extras.hasNoBall) extraRuns += 1;
+    if (extras.hasByes && !extras.hasWide) extraRuns += Number(extras.byesRuns) || 0;
+    if (extras.hasLB && !extras.hasWide) extraRuns += Number(extras.lbRuns) || 0;
+
+    if (!nonDeliveryWicket) {
+      runs += batRuns + extraRuns;
+    }
+
+    if (wicket.hasWicket && String(wicket.wicketType || '') !== 'Retired Hurt') {
+      wickets += 1;
+    }
+
+    if (!extras.hasWide && !extras.hasNoBall && !nonDeliveryWicket) {
+      legalBalls += 1;
+    }
+  });
+
+  const overs = `${Math.floor(legalBalls / 6)}.${legalBalls % 6}`;
+  const runRate = legalBalls > 0 ? ((runs / legalBalls) * 6).toFixed(2) : '0.00';
+  return { runs, wickets, overs, runRate };
+}
+
+function buildCommentaryPreview(
+  rows: string[][],
+  extrasData: Record<number, ExtrasRow>,
+  wicketData: Record<number, WicketRow>,
+  commentaryData: Record<number, string>,
+  resolvePlayerName: (value: string) => string,
+): CommentaryPreviewItem[] {
+  return rows
+    .map((row, idx) => {
+      const innings = String(row?.[2] || '');
+      if (innings !== '1' && innings !== '2') return null;
+
+      const over = String(row?.[0] || '0');
+      const ball = String(row?.[1] || '0');
+      const striker = resolvePlayerName(String(row?.[3] || '')) || 'Batter';
+      const bowler = resolvePlayerName(String(row?.[5] || '')) || 'Bowler';
+      const runs = Number.parseInt(String(row?.[6] || ''), 10) || 0;
+      const extras = extrasData[idx] || {};
+      const wicket = wicketData[idx] || {};
+      const apiText = String(commentaryData[idx] || '').trim();
+      const noteText = String(row?.[12] || '').trim();
+
+      let kind: CommentaryPreviewItem['kind'] = 'run';
+      if (wicket.hasWicket) kind = 'wicket';
+      else if (runs === 4 || runs === 6) kind = 'boundary';
+      else if (extras.hasWide || extras.hasNoBall || extras.hasByes || extras.hasLB) kind = 'extra';
+
+      const fallback = wicket.hasWicket
+        ? 'Wicket falls.'
+        : extras.hasWide
+          ? 'Wide called.'
+          : extras.hasNoBall
+            ? 'No-ball called.'
+            : runs === 0
+              ? 'Dot ball.'
+              : `${runs} ${runs === 1 ? 'run' : 'runs'} taken.`;
+
+      return {
+        id: `${idx}-${innings}-${over}.${ball}`,
+        innings,
+        overBall: `${over}.${ball}`,
+        label: `${bowler} to ${striker}`,
+        text: noteText || apiText || fallback,
+        kind,
+      } satisfies CommentaryPreviewItem;
+    })
+    .filter((item): item is CommentaryPreviewItem => Boolean(item))
+    .slice(-12)
+    .reverse();
+}
+
+function buildRelatedNews(match: Match, newsItems: News[]): News[] {
+  const teamIds = new Set([String(match.team1?.id || ''), String(match.team2?.id || '')].filter(Boolean));
+  const playingIds = new Set([
+    ...(Array.isArray(match.playing11?.team1) ? match.playing11!.team1 : []),
+    ...(Array.isArray(match.playing11?.team2) ? match.playing11!.team2 : []),
+  ].map(String));
+
+  return [...newsItems]
+    .map((item) => {
+      let score = 0;
+      if (String(item.linkedMatchId || '') === String(match.id)) score += 100;
+      if (Array.isArray(item.linkedTeamIds) && item.linkedTeamIds.some((id) => teamIds.has(String(id)))) score += 40;
+      if (Array.isArray(item.linkedPlayerIds) && item.linkedPlayerIds.some((id) => playingIds.has(String(id)))) {
+        score += 20;
+      }
+      if (item.league === match.league || item.league === 'both') score += 5;
+      return { item, score };
+    })
+    .filter(({ score }) => score > 0)
+    .sort((a, b) => {
+      if (b.score !== a.score) return b.score - a.score;
+      const aDate = new Date(a.item.publishedAt || a.item.createdAt || '').getTime() || 0;
+      const bDate = new Date(b.item.publishedAt || b.item.createdAt || '').getTime() || 0;
+      return bDate - aDate;
+    })
+    .slice(0, 4)
+    .map(({ item }) => item);
+}
+
 export default function MatchCenterPage({ backHref = '/matches', preferredLeague }: MatchCenterPageProps) {
   const params = useParams<{ matchId: string }>();
   const searchParams = useSearchParams();
@@ -115,6 +415,10 @@ export default function MatchCenterPage({ backHref = '/matches', preferredLeague
   const [match, setMatch] = useState<Match | null>(null);
   const [players, setPlayers] = useState<Player[]>([]);
   const [scorecard, setScorecard] = useState<PublishedScorecard | null>(null);
+  const [liveScoreState, setLiveScoreState] = useState<LiveScoreTableState>({ rows: [] });
+  const [poll, setPoll] = useState<Poll | null>(null);
+  const [relatedNews, setRelatedNews] = useState<News[]>([]);
+  const [weather, setWeather] = useState<MatchWeatherData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -221,15 +525,23 @@ export default function MatchCenterPage({ backHref = '/matches', preferredLeague
             setMatch(null);
             setPlayers([]);
             setScorecard(null);
+            setLiveScoreState({ rows: [] });
+            setPoll(null);
+            setRelatedNews([]);
+            setWeather(null);
             setError('Match not found.');
             setIsLoading(false);
           }
           return;
         }
 
-        const [leaguePlayers, publishedScorecard] = await Promise.all([
+        const [leaguePlayers, publishedScorecard, liveRows, pollData, newsItems, weatherData] = await Promise.all([
           api.getPlayers(undefined, selectedMatch.league),
           fetchPublishedScorecard(selectedMatch.id, selectedMatch.league),
+          fetchLiveScoreRows(selectedMatch.id, selectedMatch.league),
+          api.getPolls(selectedMatch.id).catch(() => null),
+          api.getNews().catch(() => []),
+          fetchMatchWeather(selectedMatch),
         ]);
 
         if (cancelled) {
@@ -240,6 +552,10 @@ export default function MatchCenterPage({ backHref = '/matches', preferredLeague
         setMatch(selectedMatch);
         setPlayers(leaguePlayers || []);
         setScorecard(publishedScorecard);
+        setLiveScoreState(liveRows);
+        setPoll((pollData || null) as Poll | null);
+        setRelatedNews(buildRelatedNews(selectedMatch, (newsItems || []) as News[]));
+        setWeather(weatherData);
       } catch (loadError) {
         if (!cancelled) {
           setError('Failed to load this match. Please try again.');
@@ -329,6 +645,103 @@ export default function MatchCenterPage({ backHref = '/matches', preferredLeague
       .filter((inning): inning is ScorecardInnings => Boolean(inning))
       .sort((a, b) => (a.inningsNumber ?? 0) - (b.inningsNumber ?? 0));
   }, [scorecard]);
+
+  const liveScoreSummary = useMemo(() => {
+    if (!match) {
+      return {
+        hasLiveRows: false,
+        team1: '',
+        team2: '',
+        source: 'Awaiting data',
+        team1Live: EMPTY_LIVE_TOTALS,
+        team2Live: EMPTY_LIVE_TOTALS,
+      };
+    }
+
+    const rows = Array.isArray(liveScoreState.rows) ? liveScoreState.rows : [];
+    const extrasData = liveScoreState.extrasData || {};
+    const wicketData = liveScoreState.wicketData || {};
+    const hasLiveRows = rows.length > 0;
+    const innings1Totals = calculateLiveTotals(rows, extrasData, wicketData, '1');
+    const innings2Totals = calculateLiveTotals(rows, extrasData, wicketData, '2');
+    const innings1BattingKey = getBattingTeamKeyForInnings(match, '1');
+    const team1Live = innings1BattingKey === 'team1' ? innings1Totals : innings2Totals;
+    const team2Live = innings1BattingKey === 'team1' ? innings2Totals : innings1Totals;
+
+    const scorecardForTeam = (teamId: string) => {
+      const inning = innings.find((item) => String(item.battingTeamId || '') === String(teamId));
+      if (!inning) return '';
+      return `${inning.totalRuns || 0}/${inning.totalWickets || 0} (${inning.totalOvers || 0} ov)`;
+    };
+
+    const structuredMatchScore = (teamKey: 'team1' | 'team2') => {
+      const score = match.score?.[teamKey];
+      if (!score) return '';
+      return `${score.runs}/${score.wickets} (${score.overs} ov)`;
+    };
+
+    const liveTeam1 = hasLiveRows ? `${team1Live.runs}/${team1Live.wickets} (${team1Live.overs} ov)` : '';
+    const liveTeam2 = hasLiveRows ? `${team2Live.runs}/${team2Live.wickets} (${team2Live.overs} ov)` : '';
+
+    return {
+      hasLiveRows,
+      team1: liveTeam1 || match.team1Score || structuredMatchScore('team1') || scorecardForTeam(match.team1?.id || ''),
+      team2: liveTeam2 || match.team2Score || structuredMatchScore('team2') || scorecardForTeam(match.team2?.id || ''),
+      source: hasLiveRows ? 'Live ball-by-ball' : scorecard ? 'Published scorecard' : 'Match record',
+      team1Live,
+      team2Live,
+    };
+  }, [innings, liveScoreState, match, scorecard]);
+
+  const commentaryPreview = useMemo(() => {
+    const rows = Array.isArray(liveScoreState.rows) ? liveScoreState.rows : [];
+    if (rows.length === 0) return [];
+    return buildCommentaryPreview(
+      rows,
+      liveScoreState.extrasData || {},
+      liveScoreState.wicketData || {},
+      liveScoreState.commentaryData || {},
+      (value) => playerMap.get(value)?.name || value,
+    );
+  }, [liveScoreState, playerMap]);
+
+  const resultSummary = useMemo(() => {
+    if (!match) return '';
+    if (match.result) return match.result;
+    if (scorecard?.result?.winner) {
+      const winner = scorecard.result.winner;
+      const margin = scorecard.result.margin ? ` by ${scorecard.result.margin}` : '';
+      return `${winner} won${margin}`;
+    }
+    return '';
+  }, [match, scorecard]);
+
+  const impactPlayerRows = useMemo(() => {
+    if (!match) return [];
+
+    const getName = (value?: string) => {
+      const id = String(value || '').trim();
+      if (!id) return '';
+      return playerMap.get(id)?.name || id;
+    };
+
+    return (['team1', 'team2'] as const).map((teamKey) => {
+      const team = match[teamKey];
+      const used = match.impactPlayer?.[teamKey];
+      const nominees = Array.isArray(match.impactSubstitutes?.[teamKey])
+        ? match.impactSubstitutes![teamKey].map(getName).filter(Boolean)
+        : [];
+
+      return {
+        teamKey,
+        teamName: team?.name || (teamKey === 'team1' ? 'Team 1' : 'Team 2'),
+        usedImpact: getName(used?.impact || used?.playerId),
+        replaced: getName(used?.original),
+        substitutedAt: used?.substitutedAt,
+        nominees,
+      };
+    });
+  }, [match, playerMap]);
 
   if (isLoading) {
     return (
@@ -505,7 +918,7 @@ export default function MatchCenterPage({ backHref = '/matches', preferredLeague
                 />
                 <p className="text-lg md:text-xl font-black">{team1ShortName}</p>
                 <p className="text-xs md:text-sm text-slate-300">{team1Name}</p>
-                {match.team1Score && <p className="text-sm font-semibold text-cyan-200">{match.team1Score}</p>}
+                {liveScoreSummary.team1 && <p className="text-sm font-semibold text-cyan-200">{liveScoreSummary.team1}</p>}
               </div>
 
               <div className="px-3 py-2 rounded-xl border border-white/20 bg-white/5 text-xs md:text-sm font-black tracking-[0.2em] text-slate-200">
@@ -525,7 +938,7 @@ export default function MatchCenterPage({ backHref = '/matches', preferredLeague
                 />
                 <p className="text-lg md:text-xl font-black">{team2ShortName}</p>
                 <p className="text-xs md:text-sm text-slate-300">{team2Name}</p>
-                {match.team2Score && <p className="text-sm font-semibold text-cyan-200">{match.team2Score}</p>}
+                {liveScoreSummary.team2 && <p className="text-sm font-semibold text-cyan-200">{liveScoreSummary.team2}</p>}
               </div>
             </div>
 
@@ -563,6 +976,86 @@ export default function MatchCenterPage({ backHref = '/matches', preferredLeague
             {!scorecard && !isPlaying11Visible && !tossMessage && (
               <div className="mt-6 rounded-2xl border border-slate-300/20 bg-slate-900/40 p-4 text-slate-200">
                 Match yet to start. Match data will unlock here once admin publishes scorecard, playing 11, and toss updates.
+              </div>
+            )}
+          </motion.section>
+
+          <motion.section
+            className="rounded-3xl border border-white/15 bg-black/25 p-6 md:p-8 backdrop-blur-xl"
+            initial="hidden"
+            animate="visible"
+            variants={sectionAnimation}
+            transition={{ duration: 0.45, delay: 0.08 }}
+          >
+            <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
+              <div className="flex items-center gap-2">
+                <Activity size={18} className="text-emerald-200" />
+                <h2 className="text-2xl font-black">Score Summary</h2>
+              </div>
+              <span className="rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs font-semibold text-slate-300">
+                {liveScoreSummary.source}
+              </span>
+            </div>
+
+            <div className="grid gap-4 md:grid-cols-2">
+              {[
+                {
+                  name: team1Name,
+                  shortName: team1ShortName,
+                  logo: team1Logo,
+                  fallbackId: team1Id,
+                  score: liveScoreSummary.team1 || 'Yet to bat',
+                  runRate: liveScoreSummary.team1Live.runRate,
+                  accent: 'cyan',
+                },
+                {
+                  name: team2Name,
+                  shortName: team2ShortName,
+                  logo: team2Logo,
+                  fallbackId: team2Id,
+                  score: liveScoreSummary.team2 || 'Yet to bat',
+                  runRate: liveScoreSummary.team2Live.runRate,
+                  accent: 'fuchsia',
+                },
+              ].map((team) => (
+                <div
+                  key={team.shortName}
+                  className={`rounded-2xl border p-4 ${
+                    team.accent === 'cyan'
+                      ? 'border-cyan-300/25 bg-cyan-500/10'
+                      : 'border-fuchsia-300/25 bg-fuchsia-500/10'
+                  }`}
+                >
+                  <div className="flex items-center gap-4">
+                    <Image
+                      src={team.logo}
+                      alt={`${team.shortName} logo`}
+                      width={52}
+                      height={52}
+                      className="rounded-xl object-contain"
+                      onError={(event) => {
+                        (event.target as HTMLImageElement).src = getLogoPath(team.fallbackId);
+                      }}
+                    />
+                    <div className="min-w-0">
+                      <p className="text-xs text-slate-300 truncate">{team.name}</p>
+                      <p className="text-2xl font-black text-white tabular-nums">{team.score}</p>
+                      {liveScoreSummary.hasLiveRows && (
+                        <p className="text-xs text-slate-300 mt-1">Run rate {team.runRate}</p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {resultSummary && (
+              <div className="mt-4 rounded-2xl border border-amber-300/30 bg-amber-500/10 p-4">
+                <p className="text-[11px] font-semibold uppercase tracking-wide text-amber-200">Result</p>
+                <p className="mt-1 text-sm md:text-base font-semibold text-amber-50">{resultSummary}</p>
+                {scorecard?.result?.manOfTheMatch && (
+                  <p className="mt-1 text-sm text-slate-300">Player of the Match: {scorecard.result.manOfTheMatch}</p>
+                )}
               </div>
             )}
           </motion.section>
@@ -640,7 +1133,204 @@ export default function MatchCenterPage({ backHref = '/matches', preferredLeague
             initial="hidden"
             animate="visible"
             variants={sectionAnimation}
+            transition={{ duration: 0.45, delay: 0.18 }}
+          >
+            <div className="flex items-center gap-2 mb-4">
+              <Activity size={18} className="text-violet-200" />
+              <h2 className="text-2xl font-black">Impact Player</h2>
+            </div>
+
+            <div className="grid gap-4 md:grid-cols-2">
+              {impactPlayerRows.map((row) => (
+                <div key={row.teamKey} className="rounded-2xl border border-white/10 bg-white/5 p-4">
+                  <h3 className="font-bold text-white mb-3">{row.teamName}</h3>
+                  {row.usedImpact ? (
+                    <div className="rounded-xl border border-violet-300/25 bg-violet-500/10 p-3">
+                      <p className="text-xs uppercase tracking-wide text-violet-200">Used</p>
+                      <p className="mt-1 font-semibold text-white">
+                        {row.usedImpact}
+                        {row.replaced ? <span className="text-slate-300"> for {row.replaced}</span> : null}
+                      </p>
+                      {typeof row.substitutedAt === 'number' && (
+                        <p className="mt-1 text-xs text-slate-400">Introduced around over {row.substitutedAt}</p>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="rounded-xl border border-slate-300/20 bg-slate-900/40 p-3 text-sm text-slate-300">
+                      No impact substitution recorded yet.
+                    </div>
+                  )}
+
+                  {row.nominees.length > 0 && (
+                    <div className="mt-3">
+                      <p className="text-xs uppercase tracking-wide text-slate-400 mb-2">Nominees</p>
+                      <div className="flex flex-wrap gap-2">
+                        {row.nominees.map((name) => (
+                          <span key={`${row.teamKey}-${name}`} className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-slate-200">
+                            {name}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </motion.section>
+
+          <motion.section
+            className="rounded-3xl border border-white/15 bg-black/25 p-6 md:p-8 backdrop-blur-xl"
+            initial="hidden"
+            animate="visible"
+            variants={sectionAnimation}
             transition={{ duration: 0.45, delay: 0.2 }}
+          >
+            <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+              <div className="flex items-center gap-2">
+                <MessageSquare size={18} className="text-sky-200" />
+                <h2 className="text-2xl font-black">Commentary</h2>
+              </div>
+              {commentaryPreview.length > 0 && (
+                <Link
+                  href={`/live-score?league=${match.league}&matchId=${encodeURIComponent(match.id)}`}
+                  className="text-sm font-semibold text-cyan-200 hover:text-cyan-100"
+                >
+                  Open live view
+                </Link>
+              )}
+            </div>
+
+            {commentaryPreview.length > 0 ? (
+              <ol className="space-y-3">
+                {commentaryPreview.map((item) => {
+                  const style =
+                    item.kind === 'wicket'
+                      ? 'border-red-300/25 bg-red-500/10 text-red-100'
+                      : item.kind === 'boundary'
+                        ? 'border-cyan-300/25 bg-cyan-500/10 text-cyan-100'
+                        : item.kind === 'extra'
+                          ? 'border-amber-300/25 bg-amber-500/10 text-amber-100'
+                          : 'border-white/10 bg-white/5 text-slate-100';
+
+                  return (
+                    <li key={item.id} className={`rounded-2xl border p-3 ${style}`}>
+                      <div className="flex items-start gap-3">
+                        <span className="mt-0.5 rounded-full border border-white/15 bg-black/20 px-2.5 py-1 text-xs font-black tabular-nums">
+                          {item.overBall}
+                        </span>
+                        <div>
+                          <p className="text-xs text-slate-300">{item.label} · Innings {item.innings}</p>
+                          <p className="mt-1 text-sm font-medium">{item.text}</p>
+                        </div>
+                      </div>
+                    </li>
+                  );
+                })}
+              </ol>
+            ) : (
+              <div className="rounded-2xl border border-slate-300/20 bg-slate-900/40 p-4 text-slate-300">
+                Ball-by-ball commentary will appear once live scoring rows are saved for this match.
+              </div>
+            )}
+          </motion.section>
+
+          <motion.section
+            className="rounded-3xl border border-white/15 bg-black/25 p-6 md:p-8 backdrop-blur-xl"
+            initial="hidden"
+            animate="visible"
+            variants={sectionAnimation}
+            transition={{ duration: 0.45, delay: 0.22 }}
+          >
+            <div className="grid gap-4 lg:grid-cols-3">
+              <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <Cloud size={18} className="text-blue-200" />
+                  <h2 className="text-xl font-black">Weather</h2>
+                </div>
+                {weather?.current ? (
+                  <div>
+                    <p className="text-xs uppercase tracking-wide text-slate-400">{weather.venueName || match.venue}</p>
+                    <div className="mt-2 flex items-end gap-2">
+                      <span className="text-4xl font-black text-white">{Math.round(Number(weather.current.temperature || 0))}°C</span>
+                      <span className="pb-1 text-sm capitalize text-slate-300">{weather.current.description || weather.current.condition}</span>
+                    </div>
+                    <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
+                      <div className="rounded-xl border border-white/10 bg-black/20 p-3">
+                        <p className="text-xs text-slate-400">Humidity</p>
+                        <p className="font-bold">{weather.current.humidity ?? '—'}%</p>
+                      </div>
+                      <div className="rounded-xl border border-white/10 bg-black/20 p-3">
+                        <p className="text-xs text-slate-400">Wind</p>
+                        <p className="font-bold">{weather.current.windSpeed ?? '—'} km/h</p>
+                      </div>
+                    </div>
+                    {weather.current.aiPrediction?.playingConditions && (
+                      <p className="mt-3 text-sm text-slate-300">{weather.current.aiPrediction.playingConditions}</p>
+                    )}
+                  </div>
+                ) : (
+                  <div className="rounded-xl border border-slate-300/20 bg-slate-900/40 p-3 text-sm text-slate-300">
+                    Weather feed is not connected for {match.venue}. Venue context remains available here.
+                  </div>
+                )}
+              </div>
+
+              <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <Target size={18} className="text-amber-200" />
+                  <h2 className="text-xl font-black">Prediction Poll</h2>
+                </div>
+                {poll?.isActive ? (
+                  <PollCard
+                    poll={poll}
+                    matchId={match.id}
+                    onVote={() => {
+                      api.getPolls(match.id).then((nextPoll) => setPoll((nextPoll || poll) as Poll));
+                    }}
+                  />
+                ) : (
+                  <div className="rounded-xl border border-slate-300/20 bg-slate-900/40 p-3 text-sm text-slate-300">
+                    No active poll for this match.
+                    <Link href="/predictions" className="mt-3 inline-flex text-cyan-200 hover:text-cyan-100 font-semibold">
+                      View predictions
+                    </Link>
+                  </div>
+                )}
+              </div>
+
+              <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <Newspaper size={18} className="text-emerald-200" />
+                  <h2 className="text-xl font-black">Related News</h2>
+                </div>
+                {relatedNews.length > 0 ? (
+                  <div className="space-y-3">
+                    {relatedNews.map((item) => (
+                      <Link
+                        key={item.id}
+                        href={`/news/${item.id}`}
+                        className="block rounded-xl border border-white/10 bg-black/20 p-3 transition-colors hover:bg-white/10"
+                      >
+                        <p className="text-sm font-semibold text-white line-clamp-2">{item.title}</p>
+                        {item.summary && <p className="mt-1 text-xs text-slate-400 line-clamp-2">{item.summary}</p>}
+                      </Link>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="rounded-xl border border-slate-300/20 bg-slate-900/40 p-3 text-sm text-slate-300">
+                    No linked news for this fixture yet.
+                  </div>
+                )}
+              </div>
+            </div>
+          </motion.section>
+
+          <motion.section
+            className="rounded-3xl border border-white/15 bg-black/25 p-6 md:p-8 backdrop-blur-xl"
+            initial="hidden"
+            animate="visible"
+            variants={sectionAnimation}
+            transition={{ duration: 0.45, delay: 0.24 }}
           >
             <div className="flex items-center gap-2 mb-4">
               <FileText size={18} className="text-emerald-200" />

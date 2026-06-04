@@ -4,6 +4,7 @@
  */
 
 import crypto from 'node:crypto';
+import { isLegacyAdminLoginAllowed } from '../../_adminAuth.js';
 
 // --- Optional TOTP-based 2FA helpers ---
 // Uses an environment-provided Base32 secret (ADMIN_TOTP_SECRET_BASE32)
@@ -130,6 +131,22 @@ export const onRequest = async (context) => {
       status: 204,
       headers: corsHeaders,
     });
+  }
+
+  if (!isLegacyAdminLoginAllowed(env || {})) {
+    return new Response(
+      JSON.stringify({
+        error: 'Legacy admin password login is disabled in production. Use Google admin sign-in.',
+      }),
+      {
+        status: 403,
+        headers: {
+          'Content-Type': 'application/json',
+          'Cache-Control': 'no-store',
+          ...corsHeaders,
+        },
+      }
+    );
   }
 
   // Handle POST requests

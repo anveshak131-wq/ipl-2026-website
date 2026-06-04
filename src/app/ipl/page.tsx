@@ -45,6 +45,7 @@ import {
 import CountdownTimer from '@/components/ui/CountdownTimer';
 import { formatMatchTime } from '@/lib/timeUtils';
 import { getAnimatedLogoPath } from '@/lib/logoUtils';
+import PublicLiveMatchStrip from '@/components/live-score/PublicLiveMatchStrip';
 
 export default function IPLHomePage() {
   const router = useRouter();
@@ -261,6 +262,7 @@ export default function IPLHomePage() {
     <div className="min-h-screen bg-gradient-to-b from-slate-950 via-blue-950/30 to-slate-950 overflow-x-hidden">
       <AuroraBackground />
       <Navbar />
+      <PublicLiveMatchStrip league="ipl" matches={matches} />
 
       {/* Terms Acceptance Modal */}
       {shouldShowModal && (
@@ -676,7 +678,7 @@ export default function IPLHomePage() {
                         {formatMatchTime(featuredLiveMatch.time, featuredLiveMatch.date)}
                       </div>
                       {/* Display Toss Information */}
-                      {featuredLiveMatch.toss && (
+                      {featuredLiveMatch.matchState?.toss && (
                         <motion.div 
                           className="text-xs px-3 py-2 rounded-lg inline-block"
                           style={{
@@ -688,10 +690,10 @@ export default function IPLHomePage() {
                           transition={{ duration: 0.5, delay: 0.5 }}
                         >
                           <div className="font-semibold">
-                            {featuredLiveMatch.toss.winner === 'team1' ? featuredLiveMatch.team1.shortName : featuredLiveMatch.team2.shortName} won the toss
+                            {featuredLiveMatch.matchState.toss.winner === 'team1' ? featuredLiveMatch.team1.shortName : featuredLiveMatch.team2.shortName} won the toss
                           </div>
                           <div className="text-xs text-gray-300">
-                            chose to {featuredLiveMatch.toss.decision === 'bat' ? 'bat' : 'bowl'}
+                            chose to {featuredLiveMatch.matchState.toss.decision === 'bat' ? 'bat' : 'bowl'}
                           </div>
                         </motion.div>
                       )}

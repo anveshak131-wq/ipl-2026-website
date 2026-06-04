@@ -69,6 +69,7 @@ Only **non-secret** configuration, for example:
 
 - `ENVIRONMENT`
 - `ADMIN_ALLOWED_EMAILS` (allowlist, not a credential)
+- `ADMIN_LEGACY_LOGIN_ENABLED`, `ADMIN_LEGACY_SETUP_ENABLED`, or `ADMIN_LEGACY_AUTH_ENABLED` only for a temporary controlled production fallback. Leave unset to keep legacy password login/setup disabled.
 - KV namespace bindings
 - Cron triggers
 
