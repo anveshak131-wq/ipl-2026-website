@@ -109,6 +109,7 @@ export default function AdminLayout({
             storeAdminToken(data.token);
             setIsAuthenticated(true);
             setUserRole(data.user?.role || 'super_admin');
+            setIsLoading(false);
             return;
           }
         }
