@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { Zap, BarChart3, Users, Shield, Smartphone, Sparkles } from 'lucide-react';
 import AnimatedCard from '@/components/ui/AnimatedCard';
 
@@ -17,39 +18,39 @@ export default function ModernFeatureShowcase() {
   const features: Feature[] = [
     {
       icon: <Zap className="w-8 h-8" />,
-      title: 'Real-time Updates',
-      description: 'Live scores, commentary, and match updates powered by WebSocket technology for instant notifications.',
+      title: 'Ball-by-ball Updates',
+      description: 'Follow every over with live scores, wickets, boundaries, toss notes, and innings breaks as the match moves.',
       color: 'from-yellow-500 to-orange-500',
     },
     {
       icon: <BarChart3 className="w-8 h-8" />,
-      title: 'Advanced Analytics',
-      description: 'Deep dive into player statistics, team performance metrics, and predictive analytics.',
-      color: 'from-blue-500 to-cyan-500',
+      title: 'Scorecard Analytics',
+      description: 'Track batting strike rates, bowling economy, partnerships, NRR, Orange Cap, and Purple Cap movement.',
+      color: 'from-teal-500 to-cyan-500',
     },
     {
       icon: <Users className="w-8 h-8" />,
-      title: 'Community Engagement',
-      description: 'Join live discussions, make predictions, and connect with fellow cricket enthusiasts.',
-      color: 'from-purple-500 to-pink-500',
+      title: 'Fan Predictions',
+      description: 'Pick winners, compare form, and follow leaderboard swings through the league stage and playoffs.',
+      color: 'from-violet-500 to-fuchsia-500',
     },
     {
       icon: <Shield className="w-8 h-8" />,
-      title: 'Secure Platform',
-      description: 'Enterprise-grade security with encrypted data and secure authentication protocols.',
+      title: 'Secure Accounts',
+      description: 'Keep profiles, preferences, notifications, and prediction history protected behind authenticated access.',
       color: 'from-green-500 to-emerald-500',
     },
     {
       icon: <Smartphone className="w-8 h-8" />,
-      title: 'Mobile Optimized',
-      description: 'Seamless experience across all devices with responsive design and touch-friendly interface.',
-      color: 'from-indigo-500 to-blue-500',
+      title: 'Matchday Mobile',
+      description: 'Use compact cards, touch-friendly filters, and fast score views from the stadium, sofa, or commute.',
+      color: 'from-sky-500 to-blue-500',
     },
     {
       icon: <Sparkles className="w-8 h-8" />,
-      title: 'AI-Powered Insights',
-      description: 'Intelligent recommendations and personalized content based on your preferences.',
-      color: 'from-rose-500 to-pink-500',
+      title: 'AI Match Notes',
+      description: 'Turn live moments into readable summaries for milestones, collapses, chase pressure, and title-race context.',
+      color: 'from-rose-500 to-orange-500',
     },
   ];
 
@@ -58,10 +59,10 @@ export default function ModernFeatureShowcase() {
       {/* Section Header */}
       <div className="text-center space-y-4">
         <h2 className="text-4xl md:text-5xl font-bold">
-          <span className="gradient-text">Powerful Features</span> for Cricket Fans
+          <span className="gradient-text-warm">Matchday Tools</span> for IPL Fans
         </h2>
         <p className="text-gray-400 text-lg max-w-2xl mx-auto">
-          Experience the next generation of cricket entertainment with cutting-edge technology and user-centric design.
+          Live scorecards, table context, alerts, and predictions built around the way T20 cricket changes ball by ball.
         </p>
       </div>
 
@@ -112,14 +113,14 @@ export default function ModernFeatureShowcase() {
 
       {/* CTA Section */}
       <div className="mt-16 text-center">
-        <p className="text-gray-400 mb-6">Ready to experience the future of cricket?</p>
-        <button className="group relative px-8 py-4 rounded-xl font-bold text-lg overflow-hidden">
+        <p className="text-gray-400 mb-6">Jump back into the live scorecard whenever the match is on.</p>
+        <Link href="/live-score?league=ipl" className="group relative inline-flex overflow-hidden rounded-xl px-8 py-4 text-lg font-bold">
           <div className="absolute inset-0 bg-gradient-to-r from-ipl-gold to-yellow-400 transition-transform duration-300 group-hover:scale-110" />
           <div className="relative text-black flex items-center justify-center gap-2">
             <Sparkles className="w-5 h-5" />
-            Get Started Now
+            Open Live Scorecard
           </div>
-        </button>
+        </Link>
       </div>
     </div>
   );
