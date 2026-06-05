@@ -37,43 +37,42 @@ export default function ModernStatsSection({
     const defaultMatches = isWPL ? 22 : 74;
     const defaultTeams = isWPL ? 5 : 10;
     const defaultPlayers = isWPL ? '100+' : '500+';
-    const defaultEngagement = isWPL ? '500K+' : '1M+';
     
     // Use props if provided, otherwise use defaults
     const matches = totalMatches ?? defaultMatches;
     const teams = totalTeams ?? defaultTeams;
     const players = activePlayers ?? defaultPlayers;
-    const engagement = fanEngagement ?? defaultEngagement;
+    const tableSignal = fanEngagement ?? 'NRR + form';
     
     if (isWPL) {
       // WPL-specific stats with purple/pink theme
       setStats([
         {
           icon: <Trophy className="w-6 h-6" />,
-          label: 'Total Matches',
+          label: 'Fixtures & Results',
           value: matches.toString(),
-          change: 'T20 format',
+          change: 'League stage and playoffs',
           color: 'from-purple-500 to-pink-500',
         },
         {
           icon: <Users className="w-6 h-6" />,
-          label: 'Active Players',
+          label: 'Squad Players',
           value: players,
           change: `Across ${teams} teams`,
           color: 'from-pink-500 to-rose-500',
         },
         {
           icon: <Zap className="w-6 h-6" />,
-          label: 'Live Updates',
-          value: 'Real-time',
-          change: 'Every second',
+          label: 'Live Scorecards',
+          value: 'Ball by ball',
+          change: 'Runs, wickets, and overs',
           color: 'from-rose-500 to-purple-500',
         },
         {
           icon: <TrendingUp className="w-6 h-6" />,
-          label: 'Fan Engagement',
-          value: engagement,
-          change: 'Growing daily',
+          label: 'Table Signals',
+          value: tableSignal,
+          change: 'Qualification and form guide',
           color: 'from-violet-500 to-fuchsia-500',
         },
       ]);
@@ -82,30 +81,30 @@ export default function ModernStatsSection({
     setStats([
       {
         icon: <Trophy className="w-6 h-6" />,
-        label: 'Total Matches',
+        label: 'Fixtures & Results',
           value: matches.toString(),
-        change: '+12 this season',
+        change: 'League stage and playoffs',
         color: 'from-yellow-500 to-orange-500',
       },
       {
         icon: <Users className="w-6 h-6" />,
-        label: 'Active Players',
+        label: 'Squad Players',
           value: players,
           change: `Across ${teams} teams`,
         color: 'from-blue-500 to-cyan-500',
       },
       {
         icon: <Zap className="w-6 h-6" />,
-        label: 'Live Updates',
-        value: 'Real-time',
-        change: 'Every second',
+        label: 'Live Scorecards',
+        value: 'Ball by ball',
+        change: 'Runs, wickets, and overs',
         color: 'from-purple-500 to-pink-500',
       },
       {
         icon: <TrendingUp className="w-6 h-6" />,
-        label: 'Fan Engagement',
-          value: engagement,
-        change: 'Growing daily',
+        label: 'Table Signals',
+          value: tableSignal,
+        change: 'NRR, qualification, and form',
         color: 'from-green-500 to-emerald-500',
       },
     ]);

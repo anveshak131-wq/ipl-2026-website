@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useMemo } from 'react';
-import { motion, AnimatePresence, useMotionValue, useSpring, useReducedMotion } from 'framer-motion';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
@@ -22,7 +22,6 @@ import { useLeague } from '@/contexts/LeagueContext';
 import type { Team, Match, News } from '@/types';
 import { 
   Trophy, 
-  Sparkles, 
   ArrowRight, 
   Play, 
   TrendingUp, 
@@ -42,6 +41,30 @@ import { formatMatchTime } from '@/lib/timeUtils';
 import { getAnimatedLogoPath } from '@/lib/logoUtils';
 
 const OIL_NOISE_BG = `url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`;
+const HERO_STADIUM_BG = '/images/cricket-oil-stadium-hero.png';
+
+type HeroLightStreak = {
+  top?: string;
+  bottom?: string;
+  left?: string;
+  right?: string;
+  width: string;
+  rotate: string;
+  delay: number;
+};
+
+const HERO_LIGHT_STREAKS: HeroLightStreak[] = [
+  { top: '16%', left: '-8%', width: '34rem', rotate: '-9deg', delay: 0 },
+  { top: '30%', right: '-10%', width: '30rem', rotate: '14deg', delay: 0.4 },
+  { bottom: '18%', left: '8%', width: '20rem', rotate: '4deg', delay: 0.8 },
+];
+
+const HERO_QUICK_LINKS = [
+  { label: 'Points Table', href: '/ipl/points-table' },
+  { label: 'Orange Cap', href: '/stats' },
+  { label: 'Purple Cap', href: '/stats' },
+  { label: 'Teams', href: '/teams' },
+] as const;
 
 const LEAGUE_OIL_THEMES = {
   ipl: {
@@ -107,11 +130,6 @@ export default function Home() {
   
   // Mouse tracking for parallax effects
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-  const mouseX = useMotionValue(0);
-  const mouseY = useMotionValue(0);
-  const springConfig = { damping: 50, stiffness: 100 };
-  const x = useSpring(mouseX, springConfig);
-  const y = useSpring(mouseY, springConfig);
   
   // IPL Data
   const [iplTeams, setIplTeams] = useState<Team[]>([]);
@@ -207,13 +225,11 @@ export default function Home() {
       const xPos = (clientX / innerWidth - 0.5) * 100;
       const yPos = (clientY / innerHeight - 0.5) * 100;
       setMousePosition({ x: xPos, y: yPos });
-      mouseX.set(xPos);
-      mouseY.set(yPos);
     };
 
     window.addEventListener('mousemove', handleMouseMove);
     return () => window.removeEventListener('mousemove', handleMouseMove);
-  }, [mouseX, mouseY]);
+  }, []);
 
   useEffect(() => {
     setIsHydrated(true);
@@ -358,22 +374,24 @@ export default function Home() {
   // Auto-rotate team logos carousel
   useEffect(() => {
     const iplFilteredTeams = iplTeams.filter(t => !isPlaceholderTeam(t));
-    if (iplFilteredTeams.length > 0) {
-      const interval = setInterval(() => {
-        setIplLogoIndex((prev) => (prev + 1) % Math.min(iplFilteredTeams.length, 5));
-      }, 3000);
-      return () => clearInterval(interval);
-    }
+    if (iplFilteredTeams.length === 0) return undefined;
+
+    const interval = setInterval(() => {
+      setIplLogoIndex((prev) => (prev + 1) % Math.min(iplFilteredTeams.length, 5));
+    }, 3000);
+
+    return () => clearInterval(interval);
   }, [iplTeams]);
 
   useEffect(() => {
     const wplFilteredTeams = wplTeams.filter(t => !isPlaceholderTeam(t));
-    if (wplFilteredTeams.length > 0) {
-      const interval = setInterval(() => {
-        setWplLogoIndex((prev) => (prev + 1) % Math.min(wplFilteredTeams.length, 5));
-      }, 3000);
-      return () => clearInterval(interval);
-    }
+    if (wplFilteredTeams.length === 0) return undefined;
+
+    const interval = setInterval(() => {
+      setWplLogoIndex((prev) => (prev + 1) % Math.min(wplFilteredTeams.length, 5));
+    }, 3000);
+
+    return () => clearInterval(interval);
   }, [wplTeams]);
 
   const handleAcceptTerms = () => {
@@ -408,36 +426,41 @@ export default function Home() {
       )}
 
       <main className="relative z-10">
-	        {/* Enhanced Hero Section with Mouse Parallax */}
-	        <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
-	          {/* Oil-canvas backdrop */}
+	        {/* Hero Section */}
+	        <section className="relative min-h-[calc(100svh-5rem)] flex items-center justify-center overflow-hidden">
 	          <div className="absolute inset-0 pointer-events-none" style={{ background: HOME_OIL_THEME.base }} />
-	          <div className="absolute inset-0 pointer-events-none" style={{ background: HOME_OIL_THEME.hazeA, mixBlendMode: 'screen' }} />
-	          <div className="absolute inset-0 pointer-events-none" style={{ background: HOME_OIL_THEME.hazeB, mixBlendMode: 'screen' }} />
-	          <div className="absolute inset-0 pointer-events-none opacity-[0.14]" style={{ background: HOME_OIL_THEME.conic, mixBlendMode: 'screen' }} />
+	          <Image
+	            src={HERO_STADIUM_BG}
+	            alt=""
+	            fill
+	            priority
+	            sizes="100vw"
+	            className="absolute inset-0 object-cover object-center opacity-85"
+	          />
+	          <div className="absolute inset-0 pointer-events-none bg-[linear-gradient(90deg,rgba(2,6,23,0.92)_0%,rgba(2,6,23,0.68)_42%,rgba(2,6,23,0.36)_74%,rgba(2,6,23,0.66)_100%)]" />
+	          <div className="absolute inset-0 pointer-events-none bg-[linear-gradient(180deg,rgba(2,6,23,0.40)_0%,rgba(2,6,23,0.10)_46%,rgba(2,6,23,0.90)_100%)]" />
+	          <div className="absolute inset-0 pointer-events-none opacity-[0.08]" style={{ backgroundImage: OIL_NOISE_BG, mixBlendMode: 'overlay' }} />
 
-	          <motion.div
-	            className="absolute -top-40 left-[-18%] w-[78%] h-[42%] rounded-[140px] blur-2xl opacity-80 pointer-events-none"
-	            style={{ background: HOME_OIL_THEME.brush, transform: 'rotate(-10deg)' }}
-	            animate={motionEnabled ? { x: [0, 12, 0], y: [0, -10, 0] } : { x: 0, y: 0 }}
-	            transition={motionEnabled ? { duration: 22, repeat: Infinity, ease: 'easeInOut' } : { duration: 0 }}
-	          />
-	          <motion.div
-	            className="absolute -bottom-40 right-[-18%] w-[76%] h-[40%] rounded-[140px] blur-2xl opacity-70 pointer-events-none"
-	            style={{ background: HOME_OIL_THEME.brush, transform: 'rotate(12deg)' }}
-	            animate={motionEnabled ? { x: [0, -12, 0], y: [0, 10, 0] } : { x: 0, y: 0 }}
-	            transition={motionEnabled ? { duration: 26, repeat: Infinity, ease: 'easeInOut', delay: 0.6 } : { duration: 0 }}
-	          />
-
-	          <div className="absolute inset-0 pointer-events-none opacity-[0.06]" style={{ backgroundImage: OIL_NOISE_BG, mixBlendMode: 'overlay' }} />
-	          <div
-	            className="absolute inset-0 pointer-events-none"
-	            style={{ background: 'radial-gradient(circle at 50% 42%, transparent 0%, rgba(2,6,23,0.32) 62%, rgba(2,6,23,0.82) 100%)' }}
-	          />
+	          {HERO_LIGHT_STREAKS.map((streak, idx) => (
+	            <motion.div
+	              key={`hero-streak-${idx}`}
+	              className="absolute hidden h-[2px] pointer-events-none bg-gradient-to-r from-transparent via-cyan-200/60 to-transparent md:block"
+	              style={{
+	                top: streak.top,
+	                bottom: streak.bottom,
+	                left: streak.left,
+	                right: streak.right,
+	                width: streak.width,
+	                transform: `rotate(${streak.rotate})`,
+	              }}
+	              animate={motionEnabled ? { opacity: [0.18, 0.56, 0.18], x: [0, 18, 0] } : { opacity: 0.26 }}
+	              transition={motionEnabled ? { duration: 6, delay: streak.delay, repeat: Infinity, ease: 'easeInOut' } : { duration: 0 }}
+	            />
+	          ))}
 
 	          {/* Animated Grid Background */}
 	          <div 
-	            className="absolute inset-0 opacity-[0.035] pointer-events-none"
+	            className="absolute inset-0 hidden opacity-[0.035] pointer-events-none md:block"
 	            style={{
 	              backgroundImage: `
 	                linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px),
@@ -449,88 +472,37 @@ export default function Home() {
 	            }}
 	          />
 
-	          {/* Dynamic Gradient Orbs with Mouse Parallax */}
-	          <motion.div
-	            className="absolute top-1/4 left-1/4 w-[640px] h-[640px] rounded-full blur-[120px] pointer-events-none"
-	            style={{
-	              background: HOME_OIL_THEME.orbA,
-	              x: useSpring(mouseX, { damping: 50, stiffness: 100 }),
-	              y: useSpring(mouseY, { damping: 50, stiffness: 100 }),
-	            }}
-	            animate={motionEnabled ? { scale: [1, 1.18, 1], opacity: [0.15, 0.32, 0.15] } : { opacity: 0.18 }}
-	            transition={motionEnabled ? { duration: 18, repeat: Infinity, ease: "easeInOut" } : { duration: 0 }}
-	          />
-	          <motion.div
-	            className="absolute bottom-1/4 right-1/4 w-[560px] h-[560px] rounded-full blur-[120px] pointer-events-none"
-	            style={{
-	              background: HOME_OIL_THEME.orbB,
-	              x: useSpring(mouseX, { damping: 50, stiffness: 100 }),
-	              y: useSpring(mouseY, { damping: 50, stiffness: 100 }),
-	            }}
-	            animate={motionEnabled ? { scale: [1, 1.22, 1], opacity: [0.14, 0.30, 0.14] } : { opacity: 0.16 }}
-	            transition={motionEnabled ? { duration: 22, repeat: Infinity, ease: "easeInOut", delay: 1.4 } : { duration: 0 }}
-	          />
-	          <motion.div
-	            className="absolute top-1/2 left-1/2 w-[420px] h-[420px] rounded-full blur-[110px] -translate-x-1/2 -translate-y-1/2 pointer-events-none"
-	            style={{ background: HOME_OIL_THEME.conic, opacity: 0.2 }}
-	            animate={motionEnabled ? { rotate: [0, 180, 360] } : { rotate: 0 }}
-	            transition={motionEnabled ? { duration: 38, repeat: Infinity, ease: "linear" } : { duration: 0 }}
-	          />
-
-	          {/* Floating Particles */}
-	          {motionEnabled && [...Array(18)].map((_, i) => (
-	            <motion.div
-	              key={i}
-	              className="absolute w-1 h-1 bg-white/30 rounded-full"
-	              initial={{
-	                x: Math.random() * window.innerWidth,
-	                y: Math.random() * window.innerHeight,
-	                opacity: 0,
-	              }}
-	              animate={{
-	                y: [null, -100],
-	                opacity: [0, 1, 0],
-	              }}
-	              transition={{
-	                duration: Math.random() * 3 + 2,
-	                repeat: Infinity,
-	                delay: Math.random() * 2,
-	                ease: "linear",
-	              }}
-	            />
-	          ))}
-
           {/* Content */}
-          <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-            <div className="text-center space-y-8">
+          <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-20">
+            <div className="max-w-5xl space-y-7 text-center md:text-left">
               {/* Premium Badge with Glow Effect */}
               <motion.div
                 initial={{ opacity: 0, y: 20, scale: 0.9 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 transition={{ duration: 0.8, type: "spring" }}
-                className="inline-flex items-center gap-3 px-8 py-4 rounded-full bg-gradient-to-r from-blue-500/30 via-purple-500/30 to-pink-500/30 backdrop-blur-2xl border border-white/20 shadow-2xl shadow-purple-500/20"
-              >
-                  <motion.div
-                  className="relative"
-                  animate={{ rotate: [0, 360] }}
-                  transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
-                >
-                  <Zap className="w-6 h-6 text-yellow-400" />
-                  <motion.div
-                    className="absolute inset-0 bg-yellow-400 rounded-full blur-xl opacity-50"
-                    animate={{ scale: [1, 1.5, 1], opacity: [0.5, 0.8, 0.5] }}
-                    transition={{ duration: 2, repeat: Infinity }}
-                  />
-                </motion.div>
-                <span className="text-sm font-bold text-white uppercase tracking-wider">
-                  Premier Cricket Leagues 2026
-                </span>
-                <motion.div
-                  className="absolute inset-0 rounded-full bg-gradient-to-r from-blue-500/0 via-purple-500/50 to-pink-500/0"
-                  animate={{ x: ['-100%', '200%'] }}
-                  transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
-                />
-              </motion.div>
+	                className="relative inline-flex items-center gap-3 overflow-hidden rounded-lg border border-cyan-200/25 bg-slate-950/35 px-5 py-3 shadow-2xl shadow-cyan-950/30 backdrop-blur-2xl"
+	              >
+	                  <motion.div
+	                  className="relative"
+	                  animate={motionEnabled ? { rotate: [0, 360] } : { rotate: 0 }}
+	                  transition={motionEnabled ? { duration: 6, repeat: Infinity, ease: "linear" } : { duration: 0 }}
+	                >
+	                  <Zap className="w-5 h-5 text-amber-300" />
+	                  <motion.div
+	                    className="absolute inset-0 rounded-full bg-amber-300 blur-xl opacity-35"
+	                    animate={motionEnabled ? { scale: [1, 1.5, 1], opacity: [0.3, 0.6, 0.3] } : { scale: 1, opacity: 0.35 }}
+	                    transition={motionEnabled ? { duration: 2.4, repeat: Infinity } : { duration: 0 }}
+	                  />
+	                </motion.div>
+	                <span className="text-xs font-black uppercase tracking-[0.2em] text-cyan-50">
+	                  IPL & WPL 2026 live cricket hub
+	                </span>
+	                <motion.div
+	                  className="absolute inset-y-0 w-16 bg-gradient-to-r from-transparent via-white/20 to-transparent"
+	                  animate={motionEnabled ? { x: ['-120%', '760%'] } : { x: '-120%' }}
+	                  transition={motionEnabled ? { duration: 4, repeat: Infinity, ease: "linear" } : { duration: 0 }}
+	                />
+	              </motion.div>
 
               {/* Main Heading with Staggered Animation */}
               <div className="space-y-6">
@@ -538,55 +510,54 @@ export default function Home() {
                   initial={{ opacity: 0, y: 50 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 1, delay: 0.2, type: "spring", stiffness: 100 }}
-                  className="text-7xl sm:text-8xl md:text-9xl lg:text-[12rem] font-black text-white leading-[0.85] tracking-tight"
-                >
-                  <motion.span
-                    className="block"
-                    initial={{ opacity: 0, x: -50 }}
-                    animate={{ opacity: 1, x: 0 }}
+	                  className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black text-white leading-[0.96] tracking-tight drop-shadow-2xl"
+	                >
+	                  <motion.span
+	                    className="block"
+                    initial={{ opacity: 0, y: 18 }}
+                    animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.8, delay: 0.4 }}
                   >
-                    Cricket
-                  </motion.span>
-                  <motion.span
-                    className="block bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent"
-                    initial={{ opacity: 0, x: 50 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.8, delay: 0.6 }}
-                  >
-                    Reimagined
-                  </motion.span>
-                </motion.h1>
+	                    IPL 2026
+	                  </motion.span>
+	                  <motion.span
+	                    className="block bg-gradient-to-r from-cyan-200 via-emerald-200 to-amber-200 bg-clip-text text-transparent"
+	                    initial={{ opacity: 0, y: 18 }}
+	                    animate={{ opacity: 1, y: 0 }}
+	                    transition={{ duration: 0.8, delay: 0.6 }}
+	                  >
+	                    Match Centre
+	                  </motion.span>
+	                </motion.h1>
                 
                 <motion.p
                   initial={{ opacity: 0, y: 30 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.8, delay: 0.8 }}
-                  className="text-xl md:text-2xl lg:text-3xl text-gray-300 max-w-4xl mx-auto leading-relaxed font-light"
-                >
-                  Your ultimate destination for{' '}
-                  <span className="text-blue-400 font-semibold relative">
-                    <span className="relative z-10">IPL</span>
-                    <motion.span
-                      className="absolute bottom-0 left-0 right-0 h-1 bg-blue-400/30"
-                      initial={{ scaleX: 0 }}
-                      animate={{ scaleX: 1 }}
-                      transition={{ duration: 0.8, delay: 1.2 }}
-                    />
-                  </span>
-                  {' '}and{' '}
-                  <span className="text-purple-400 font-semibold relative">
-                    <span className="relative z-10">WPL</span>
-                    <motion.span
-                      className="absolute bottom-0 left-0 right-0 h-1 bg-purple-400/30"
-                      initial={{ scaleX: 0 }}
-                      animate={{ scaleX: 1 }}
-                      transition={{ duration: 0.8, delay: 1.4 }}
-                    />
-                  </span>
-                  . Live scores, real-time stats, breaking news, and everything cricket.
-                </motion.p>
-              </div>
+	                  className="mx-auto max-w-3xl text-lg md:mx-0 md:text-xl lg:text-2xl text-slate-100/90 leading-relaxed font-medium"
+	                >
+	                  Follow every over with live scores, fixtures, results, points table movement, squads, match reports, and the{' '}
+	                  <span className="text-amber-200 font-black relative">
+	                    <span className="relative z-10">IPL</span>
+	                    <motion.span
+	                      className="absolute bottom-0 left-0 right-0 h-1 bg-amber-300/35"
+	                      initial={{ scaleX: 0 }}
+	                      animate={{ scaleX: 1 }}
+	                      transition={{ duration: 0.8, delay: 1.2 }}
+	                    />
+	                  </span>
+	                  {' '}Orange Cap and Purple Cap races.
+	                  <span className="ml-2 text-cyan-200 font-black relative">
+	                    <span className="relative z-10">WPL coverage included.</span>
+	                    <motion.span
+	                      className="absolute bottom-0 left-0 right-0 h-1 bg-cyan-300/30"
+	                      initial={{ scaleX: 0 }}
+	                      animate={{ scaleX: 1 }}
+	                      transition={{ duration: 0.8, delay: 1.4 }}
+	                    />
+	                  </span>
+	                </motion.p>
+	              </div>
 
               <motion.div
                 initial={{ opacity: 0, y: 24 }}
@@ -595,10 +566,10 @@ export default function Home() {
               >
                 <IplChampionHighlight
                   variant="compact"
-                  align="center"
-                  className="mx-auto max-w-4xl"
-                />
-              </motion.div>
+	                  align="left"
+	                  className="mx-auto max-w-4xl md:mx-0"
+	                />
+	              </motion.div>
 
               {/* Live Match Badge */}
               {featuredLiveMatch && (
@@ -606,7 +577,7 @@ export default function Home() {
                   initial={{ opacity: 0, scale: 0.8, y: 20 }}
                   animate={{ opacity: 1, scale: 1, y: 0 }}
                   transition={{ duration: 0.6, delay: 1, type: "spring" }}
-                  className="inline-flex items-center gap-4 px-8 py-4 rounded-2xl bg-gradient-to-r from-red-500/30 via-orange-500/30 to-red-500/30 backdrop-blur-2xl border-2 border-red-500/40 shadow-2xl shadow-red-500/20"
+	                  className="inline-flex flex-wrap items-center gap-3 rounded-lg border border-red-400/35 bg-red-950/35 px-5 py-3 shadow-2xl shadow-red-950/20 backdrop-blur-2xl"
                 >
                   <motion.div
                     className="w-4 h-4 bg-red-500 rounded-full"
@@ -623,26 +594,26 @@ export default function Home() {
                     href="/live-score"
                     className="ml-2 px-4 py-2 rounded-lg bg-red-500/20 hover:bg-red-500/30 border border-red-500/30 text-red-300 font-semibold transition-all hover:scale-105"
                   >
-                    Watch →
-                  </Link>
-                </motion.div>
-              )}
+	                    Open scorecard
+	                  </Link>
+	                </motion.div>
+	              )}
 
               {/* Enhanced CTA Buttons */}
               <motion.div
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 1.2 }}
-                className="flex flex-wrap justify-center gap-6 pt-8"
-              >
+	                className="flex flex-wrap justify-center gap-4 pt-3 md:justify-start"
+	              >
                 <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                 <Link
                   href="/live-score"
-                    className="group relative px-12 py-6 rounded-2xl bg-gradient-to-r from-blue-600 via-blue-500 to-cyan-500 text-white font-bold text-lg shadow-2xl shadow-blue-500/50 hover:shadow-blue-500/70 transition-all duration-300 overflow-hidden block"
+	                    className="group relative block overflow-hidden rounded-lg bg-gradient-to-r from-cyan-500 via-blue-500 to-emerald-500 px-7 py-4 text-base font-black text-white shadow-2xl shadow-cyan-950/40 transition-all duration-300 hover:shadow-cyan-700/35"
                 >
                   <span className="relative z-10 flex items-center gap-3">
                     <Play className="w-6 h-6" />
-                    Watch Live
+	                    Open Live Score
                   </span>
                   <motion.div
                     className="absolute inset-0 bg-gradient-to-r from-cyan-500 to-blue-600"
@@ -661,12 +632,30 @@ export default function Home() {
                 <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                 <Link
                   href="/matches"
-                    className="group px-12 py-6 rounded-2xl bg-white/10 backdrop-blur-2xl text-white font-bold text-lg border-2 border-white/20 hover:border-white/40 hover:bg-white/20 transition-all duration-300 flex items-center gap-3"
-                >
-                    View Matches
+	                    className="group flex items-center gap-3 rounded-lg border border-white/20 bg-white/10 px-7 py-4 text-base font-black text-white backdrop-blur-2xl transition-all duration-300 hover:border-white/40 hover:bg-white/20"
+	                >
+	                    View Fixtures
                     <ChevronRight className="w-5 h-5 group-hover:translate-x-2 transition-transform" />
                 </Link>
-                </motion.div>
+	              </motion.div>
+
+	              <motion.div
+	                initial={{ opacity: 0, y: 24 }}
+	                animate={{ opacity: 1, y: 0 }}
+	                transition={{ duration: 0.7, delay: 1.3 }}
+	                className="flex flex-wrap justify-center gap-3 md:justify-start"
+	              >
+	                {HERO_QUICK_LINKS.map((item) => (
+	                  <Link
+	                    key={item.label}
+	                    href={item.href}
+	                    className="inline-flex items-center gap-2 rounded-lg border border-white/15 bg-slate-950/35 px-4 py-2 text-sm font-bold text-slate-100 backdrop-blur-xl transition-colors hover:border-cyan-200/45 hover:bg-white/10"
+	                  >
+	                    {item.label}
+	                    <ChevronRight className="h-4 w-4 text-cyan-200" />
+	                  </Link>
+	                ))}
+	              </motion.div>
               </motion.div>
 
               {/* Enhanced Quick Stats with Hover Effects */}
@@ -674,39 +663,39 @@ export default function Home() {
                 initial={{ opacity: 0, y: 40 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 1.4 }}
-                className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-5xl mx-auto pt-12"
-              >
-                {[
-                  { icon: Trophy, label: 'Teams', value: iplTeams.length + wplTeams.length, color: 'from-blue-500 to-cyan-500', delay: 0 },
-                  { icon: Calendar, label: 'Matches', value: iplMatches.length + wplMatches.length, color: 'from-purple-500 to-pink-500', delay: 0.1 },
-                  { icon: Radio, label: 'Live', value: totalLiveMatches, color: 'from-red-500 to-orange-500', delay: 0.2 },
-                  { icon: TrendingUp, label: 'Leagues', value: 2, color: 'from-green-500 to-emerald-500', delay: 0.3 },
-                ].map((stat, idx) => (
+	                className="grid max-w-4xl grid-cols-2 gap-3 pt-4 md:grid-cols-4"
+	              >
+	                {[
+	                  { icon: Trophy, label: 'Franchises', value: iplTeams.length + wplTeams.length, color: 'from-cyan-500 to-blue-500', delay: 0 },
+	                  { icon: Calendar, label: 'Fixtures', value: iplMatches.length + wplMatches.length, color: 'from-emerald-500 to-cyan-500', delay: 0.1 },
+	                  { icon: Radio, label: 'Live Now', value: totalLiveMatches, color: 'from-red-500 to-orange-500', delay: 0.2 },
+	                  { icon: TrendingUp, label: 'League Hubs', value: 2, color: 'from-amber-500 to-pink-500', delay: 0.3 },
+	                ].map((stat, idx) => (
                   <motion.div
                     key={stat.label}
                     initial={{ opacity: 0, y: 30, scale: 0.9 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     transition={{ duration: 0.6, delay: 1.5 + stat.delay, type: "spring" }}
                     whileHover={{ scale: 1.05, y: -5 }}
-                    className="group relative overflow-hidden rounded-3xl bg-white/5 backdrop-blur-xl border border-white/10 p-8 text-center cursor-pointer hover:bg-white/10 transition-all duration-300"
-                  >
+	                    className="group relative overflow-hidden rounded-lg border border-white/10 bg-slate-950/35 p-4 text-left backdrop-blur-xl transition-all duration-300 hover:bg-white/10"
+	                  >
                     <div className={`absolute inset-0 bg-gradient-to-br ${stat.color} opacity-0 group-hover:opacity-20 transition-opacity duration-300`} />
                     <motion.div
                       className="relative z-10"
                       whileHover={{ rotate: [0, -10, 10, 0] }}
                       transition={{ duration: 0.5 }}
                     >
-                      <stat.icon className="w-8 h-8 mx-auto mb-4 text-gray-400 group-hover:text-white transition-colors" />
+	                      <stat.icon className="mb-3 h-5 w-5 text-cyan-100/80 transition-colors group-hover:text-white" />
                     </motion.div>
                     <motion.p
-                      className="text-5xl font-black text-white mb-2"
+	                      className="mb-1 text-3xl font-black text-white md:text-4xl"
                       initial={{ scale: 0 }}
                       animate={{ scale: 1 }}
                       transition={{ duration: 0.5, delay: 1.6 + stat.delay, type: "spring" }}
                     >
                       {stat.value}
                     </motion.p>
-                    <p className="text-xs text-gray-400 uppercase tracking-wider font-semibold">{stat.label}</p>
+	                    <p className="text-[11px] font-black uppercase tracking-[0.18em] text-slate-300">{stat.label}</p>
                     <motion.div
                       className={`absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r ${stat.color}`}
                       initial={{ scaleX: 0 }}
@@ -788,7 +777,7 @@ export default function Home() {
                       href="/live-score"
                       className="group flex items-center gap-2 px-6 py-3 rounded-xl bg-red-500/20 hover:bg-red-500/30 border border-red-500/40 text-red-300 font-semibold transition-all hover:scale-105"
                     >
-                      Watch Live
+                      Watch Live Score
                       <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                     </Link>
                   </div>
@@ -832,7 +821,7 @@ export default function Home() {
           </section>
         )}
 
-	        {/* League Selection Cards - Oil Canvas Design */}
+        {/* League Selection Cards - Oil Canvas Design */}
         <section className="relative py-24">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <motion.div
@@ -846,12 +835,12 @@ export default function Home() {
                 className="inline-flex items-center gap-2 mb-6 px-6 py-3 rounded-full bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-pink-500/20 border border-white/10 backdrop-blur-sm"
               >
                 <Target className="w-5 h-5 text-blue-400" />
-                <span className="text-sm font-bold text-white uppercase tracking-wider">Choose Your League</span>
+                <span className="text-sm font-bold text-white uppercase tracking-wider">Choose Your Competition</span>
               </motion.div>
               <h2 className="text-5xl md:text-7xl font-black text-white mb-6">
-                Experience <span className="bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">Both Worlds</span>
+                IPL and WPL <span className="bg-gradient-to-r from-cyan-300 via-emerald-300 to-amber-300 bg-clip-text text-transparent">Match Hubs</span>
               </h2>
-              <p className="text-gray-400 text-xl">The ultimate cricket experience awaits</p>
+              <p className="text-gray-300 text-xl">Jump into fixtures, squads, results, scorecards, and leaderboard races.</p>
             </motion.div>
 
 	            <div className="grid md:grid-cols-2 gap-10 max-w-6xl mx-auto">
@@ -862,7 +851,7 @@ export default function Home() {
 	                viewport={{ once: true, margin: "-100px" }}
 	                transition={{ duration: 0.8, type: "spring" }}
 	                whileHover={motionEnabled ? { y: -12, scale: 1.02, boxShadow: iplCardShadows.hover } : { y: -6 }}
-		                className="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-600/50 via-blue-500/40 to-cyan-500/50 backdrop-blur-2xl border-2 border-blue-500/40 p-10 cursor-pointer shadow-2xl shadow-blue-500/20 select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-300/40"
+		                className="group relative overflow-hidden rounded-lg bg-gradient-to-br from-blue-600/50 via-blue-500/40 to-cyan-500/50 backdrop-blur-2xl border-2 border-blue-500/40 p-8 md:p-10 cursor-pointer shadow-2xl shadow-blue-500/20 select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-300/40"
 	                onClick={() => openLeague('ipl')}
 	                onKeyDown={(event) => {
 	                  if (event.key === 'Enter' || event.key === ' ') {
@@ -978,7 +967,7 @@ export default function Home() {
 	                  </div>
 
 	                  <p className="text-slate-100/90 mb-9 leading-relaxed text-lg">
-	                    The world's biggest T20 cricket league. Experience the thrill, passion, and glory of the men's premier tournament.
+	                    Track the men&apos;s IPL season with live scores, fixtures, points table movement, NRR swings, squads, Orange Cap, Purple Cap, and match results.
 	                  </p>
 
 	                  <div className="grid grid-cols-3 gap-4 mb-8">
@@ -1146,7 +1135,7 @@ export default function Home() {
 	                    </div>
 	                  </div>
 
-	                  <div className="relative z-10 mt-8 inline-flex items-center gap-3 rounded-2xl border border-white/15 bg-white/5 px-5 py-3 text-sm font-black tracking-[0.22em] uppercase text-cyan-100/90 transition-colors group-hover:bg-white/10">
+	                  <div className="relative z-10 mt-8 inline-flex items-center gap-3 rounded-lg border border-white/15 bg-white/5 px-5 py-3 text-sm font-black tracking-[0.22em] uppercase text-cyan-100/90 transition-colors group-hover:bg-white/10">
 	                    <span>Explore IPL</span>
 	                    <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
 	                  </div>
@@ -1160,7 +1149,7 @@ export default function Home() {
 	                viewport={{ once: true, margin: "-100px" }}
 	                transition={{ duration: 0.8, type: "spring" }}
 	                whileHover={motionEnabled ? { y: -12, scale: 1.02, boxShadow: wplCardShadows.hover } : { y: -6 }}
-	                className="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-purple-600/50 via-pink-500/40 to-rose-500/50 backdrop-blur-2xl border-2 border-purple-500/40 p-10 cursor-pointer shadow-2xl shadow-purple-500/20 select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-300/40"
+	                className="group relative overflow-hidden rounded-lg bg-gradient-to-br from-purple-600/50 via-pink-500/40 to-rose-500/50 backdrop-blur-2xl border-2 border-purple-500/40 p-8 md:p-10 cursor-pointer shadow-2xl shadow-purple-500/20 select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-300/40"
 	                onClick={() => openLeague('wpl')}
 	                onKeyDown={(event) => {
 	                  if (event.key === 'Enter' || event.key === ' ') {
@@ -1276,7 +1265,7 @@ export default function Home() {
 	                  </div>
 
 	                  <p className="text-slate-100/90 mb-9 leading-relaxed text-lg">
-	                    The pinnacle of women's T20 cricket. Power, passion, and excellence in every match.
+	                    Follow women&apos;s T20 cricket with fixtures, live scores, squad depth, player leaderboards, result summaries, and title-race context.
 	                  </p>
 
 	                  <div className="grid grid-cols-3 gap-4 mb-8">
@@ -1444,7 +1433,7 @@ export default function Home() {
 	                    </div>
 	                  </div>
 
-	                  <div className="relative z-10 mt-8 inline-flex items-center gap-3 rounded-2xl border border-white/15 bg-white/5 px-5 py-3 text-sm font-black tracking-[0.22em] uppercase text-pink-100/90 transition-colors group-hover:bg-white/10">
+	                  <div className="relative z-10 mt-8 inline-flex items-center gap-3 rounded-lg border border-white/15 bg-white/5 px-5 py-3 text-sm font-black tracking-[0.22em] uppercase text-pink-100/90 transition-colors group-hover:bg-white/10">
 	                    <span>Explore WPL</span>
 	                    <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
 	                  </div>
@@ -1462,7 +1451,7 @@ export default function Home() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-100px" }}
               transition={{ duration: 0.8 }}
-              className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-yellow-500/20 via-orange-500/20 to-yellow-500/20 backdrop-blur-2xl border-2 border-yellow-500/40 p-10 shadow-2xl"
+              className="relative overflow-hidden rounded-lg bg-gradient-to-r from-amber-500/20 via-emerald-500/10 to-cyan-500/20 backdrop-blur-2xl border-2 border-amber-400/35 p-8 md:p-10 shadow-2xl"
             >
               <motion.div
                 className="absolute top-0 right-0 w-96 h-96 bg-yellow-500/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"
@@ -1485,25 +1474,25 @@ export default function Home() {
                     <span className="text-sm font-bold text-yellow-200 uppercase tracking-wider">Match Predictions</span>
                   </motion.div>
                   <h2 className="text-4xl md:text-5xl font-black text-white mb-4">
-                    Predict & <span className="bg-gradient-to-r from-yellow-400 via-orange-400 to-yellow-400 bg-clip-text text-transparent">Win</span>
+                    Read the Match <span className="bg-gradient-to-r from-amber-300 via-emerald-300 to-cyan-300 bg-clip-text text-transparent">Before It Turns</span>
                   </h2>
                   <p className="text-gray-200 text-lg mb-6 leading-relaxed">
-                    Test your cricket knowledge! Predict match outcomes, player performances, and compete on the leaderboard. Show off your expertise and climb the rankings.
+                    Make cricket calls on the toss, powerplay tempo, top scorer, strike bowler, and Player of the Match. Compare your picks with the leaderboard after every fixture.
                   </p>
                   <Link
                     href="/predictions"
                     className="group inline-flex items-center gap-3 px-8 py-4 rounded-xl bg-gradient-to-r from-yellow-500 to-orange-500 text-white font-bold text-lg shadow-2xl shadow-yellow-500/50 hover:shadow-yellow-500/70 transition-all hover:scale-105"
                   >
                     <Target className="w-6 h-6" />
-                    <span>Start Predicting</span>
+                    <span>Make Predictions</span>
                     <ArrowRight className="w-5 h-5 group-hover:translate-x-2 transition-transform" />
                   </Link>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   {[
                     { label: 'Match Winner', icon: Trophy, color: 'from-yellow-500 to-orange-500' },
-                    { label: 'Top Scorer', icon: Star, color: 'from-orange-500 to-red-500' },
-                    { label: 'Most Wickets', icon: Activity, color: 'from-red-500 to-pink-500' },
+                    { label: 'Powerplay Runs', icon: Zap, color: 'from-emerald-500 to-cyan-500' },
+                    { label: 'Top Wicket Taker', icon: Activity, color: 'from-red-500 to-pink-500' },
                     { label: 'Player of Match', icon: Target, color: 'from-pink-500 to-purple-500' },
                   ].map((feature, idx) => (
                     <motion.div
@@ -1542,17 +1531,17 @@ export default function Home() {
                   whileHover={{ scale: 1.05 }}
                 >
                   <Calendar className="w-5 h-5 text-blue-400" />
-                  <span className="text-xs font-bold text-blue-300 uppercase tracking-wider">Upcoming Matches</span>
+                  <span className="text-xs font-bold text-blue-300 uppercase tracking-wider">Fixtures & Results</span>
                 </motion.div>
                 <h2 className="text-5xl md:text-7xl font-black text-white">
-                  Featured <span className="bg-gradient-to-r from-blue-400 via-cyan-400 to-blue-400 bg-clip-text text-transparent">Matches</span>
+                  Matchday <span className="bg-gradient-to-r from-cyan-300 via-emerald-300 to-blue-300 bg-clip-text text-transparent">Fixtures</span>
               </h2>
             </div>
               <Link
                 href="/matches"
                 className="group flex items-center gap-2 px-8 py-4 rounded-xl bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/30 text-blue-400 hover:text-white transition-all duration-300 hover:scale-105"
               >
-                View All
+                View Schedule
                 <ArrowRight className="w-5 h-5 group-hover:translate-x-2 transition-transform" />
               </Link>
             </motion.div>
@@ -1578,7 +1567,7 @@ export default function Home() {
 	                        viewport={{ once: true, margin: "-50px" }}
 	                        transition={{ duration: 0.6, delay: idx * 0.1, type: "spring" }}
 	                        whileHover={motionEnabled ? { y: -10, scale: 1.03, boxShadow: matchShadows.hover } : { y: -6 }}
-	                        className="group relative overflow-hidden rounded-3xl border border-white/10 p-8 cursor-pointer shadow-xl transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/20"
+	                        className="group relative overflow-hidden rounded-lg border border-white/10 p-6 md:p-8 cursor-pointer shadow-xl transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/20"
 	                        onClick={() => router.push(match.league === 'wpl' ? '/wpl/matches' : '/matches')}
 	                        role="link"
 	                        tabIndex={0}
@@ -1611,7 +1600,7 @@ export default function Home() {
 
 	                        <div className="relative z-10">
 	                          <div className="flex items-center justify-between mb-6">
-	                            <span className="text-[11px] font-black px-4 py-2 rounded-full bg-black/25 text-white/90 border border-white/12 tracking-[0.18em] uppercase">
+	                            <span className="text-[11px] font-black px-4 py-2 rounded-full bg-black/25 text-white/90 border border-white/10 tracking-[0.18em] uppercase">
 	                              {leagueLabel}
 	                            </span>
 	                            {match.status === 'live' && (
@@ -1673,12 +1662,12 @@ export default function Home() {
                 whileHover={{ scale: 1.05 }}
               >
                 <Users className="w-5 h-5 text-purple-400" />
-                <span className="text-xs font-bold text-purple-300 uppercase tracking-wider">Featured Teams</span>
+                <span className="text-xs font-bold text-purple-300 uppercase tracking-wider">Franchise Hubs</span>
               </motion.div>
               <h2 className="text-5xl md:text-7xl font-black text-white mb-6">
-                Premier <span className="bg-gradient-to-r from-purple-400 via-pink-400 to-purple-400 bg-clip-text text-transparent">Teams</span>
+                Squads, Form, and <span className="bg-gradient-to-r from-purple-300 via-pink-300 to-amber-200 bg-clip-text text-transparent">Team News</span>
               </h2>
-              <p className="text-gray-400 text-xl">Meet the champions of both leagues</p>
+              <p className="text-gray-300 text-xl">Explore franchise rosters, home venues, recent form, and player depth.</p>
             </motion.div>
 
             {/* IPL Teams */}
@@ -1747,12 +1736,12 @@ export default function Home() {
                 whileHover={{ scale: 1.05 }}
               >
                 <Activity className="w-5 h-5 text-blue-400" />
-                <span className="text-xs font-bold text-white uppercase tracking-wider">League Statistics</span>
+                <span className="text-xs font-bold text-white uppercase tracking-wider">Score Intelligence</span>
               </motion.div>
               <h2 className="text-5xl md:text-7xl font-black text-white mb-6">
-                League <span className="bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">Statistics</span>
+                Numbers That <span className="bg-gradient-to-r from-cyan-300 via-emerald-300 to-amber-300 bg-clip-text text-transparent">Shape the Table</span>
               </h2>
-              <p className="text-gray-400 text-xl">Comprehensive insights from both premier leagues</p>
+              <p className="text-gray-300 text-xl">Track runs, wickets, NRR, team form, and live match momentum.</p>
             </motion.div>
             <ModernStatsSection 
               totalMatches={iplMatches.length + wplMatches.length}
@@ -1781,10 +1770,10 @@ export default function Home() {
                     whileHover={{ scale: 1.05 }}
                   >
                     <Flame className="w-5 h-5 text-pink-400" />
-                    <span className="text-xs font-bold text-pink-300 uppercase tracking-wider">Latest News</span>
+                    <span className="text-xs font-bold text-pink-300 uppercase tracking-wider">Match Reports & News</span>
                   </motion.div>
                   <h2 className="text-5xl md:text-7xl font-black text-white">
-                    Breaking <span className="bg-gradient-to-r from-pink-400 via-rose-400 to-pink-400 bg-clip-text text-transparent">News</span>
+                    Cricket <span className="bg-gradient-to-r from-pink-300 via-amber-200 to-cyan-300 bg-clip-text text-transparent">Storylines</span>
                   </h2>
                 </div>
                 <Link
@@ -1852,19 +1841,19 @@ export default function Home() {
                 >
                   <Star className="w-6 h-6 text-yellow-400" />
                 </motion.div>
-                <span className="text-sm font-bold text-white uppercase tracking-wider">Join The Action</span>
+                <span className="text-sm font-bold text-white uppercase tracking-wider">Stay Close to Every Over</span>
               </motion.div>
               
               <h2 className="text-6xl md:text-8xl lg:text-9xl font-black text-white leading-tight">
-                Ready to Experience
+                Follow Scores,
                 <br />
                 <span className="bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
-                  Cricket Excellence?
+                  Tables, and Form.
                 </span>
               </h2>
               
               <p className="text-gray-300 text-2xl md:text-3xl max-w-3xl mx-auto leading-relaxed">
-                Join millions of cricket fans following live scores, stats, and all the action from both premier leagues.
+                Keep IPL and WPL fixtures, live scorecards, player leaderboards, team news, and match reports in one cricket-first dashboard.
               </p>
               
               <div className="flex flex-col sm:flex-row gap-6 justify-center pt-8">
@@ -1875,7 +1864,7 @@ export default function Home() {
                 >
                     <span className="relative z-10 flex items-center justify-center gap-4">
                       <Play className="w-7 h-7" />
-                    Watch Live Scores
+                    Open Live Scores
                   </span>
                   <motion.div
                     className="absolute inset-0 bg-gradient-to-r from-cyan-500 to-blue-600"
@@ -1890,7 +1879,7 @@ export default function Home() {
                   href="/matches"
                     className="group px-12 py-6 rounded-2xl bg-white/10 backdrop-blur-xl text-white font-bold text-xl border-2 border-white/20 hover:border-white/40 hover:bg-white/20 transition-all duration-300 flex items-center justify-center gap-4"
                 >
-                    View All Matches
+                    View Fixtures
                     <ChevronRight className="w-6 h-6 group-hover:translate-x-2 transition-transform" />
                   </Link>
                 </motion.div>

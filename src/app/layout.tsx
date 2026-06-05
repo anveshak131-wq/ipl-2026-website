@@ -6,9 +6,9 @@ import { AdminLayoutWrapper } from "@/components/admin/AdminLayoutWrapper";
 import MatchNotificationManager from "@/components/notifications/MatchNotificationManager";
 
 export const metadata: Metadata = {
-  title: "SportsUP18 - Official Website",
-  description: "SportsUP18 is your IPL 2026 experience platform. Get live scores, match schedules, team information, player stats, and latest news.",
-  keywords: "SportsUP18, IPL 2026, cricket, T20, Indian Premier League, live scores, teams, players, schedule",
+  title: "SportsUP18 - IPL 2026 Live Scores, Fixtures & Stats",
+  description: "SportsUP18 brings IPL and WPL 2026 live scores, fixtures, points tables, squads, player stats, Orange Cap, Purple Cap, match reports, and cricket news into one match centre.",
+  keywords: "SportsUP18, IPL 2026, WPL 2026, cricket live scores, fixtures, points table, Orange Cap, Purple Cap, Indian Premier League, Women's Premier League, teams, players, scorecards",
   authors: [{ name: "SportsUP18" }],
   icons: {
     icon: "/favicon.svg",
@@ -16,8 +16,8 @@ export const metadata: Metadata = {
     apple: "/favicon.svg",
   },
   openGraph: {
-    title: "SportsUP18 - Official Website",
-    description: "SportsUP18 is your IPL 2026 experience platform.",
+    title: "SportsUP18 - IPL 2026 Match Centre",
+    description: "Live scores, fixtures, points tables, squads, player stats, match reports, and cricket news for IPL and WPL 2026.",
     type: "website",
     locale: "en_US",
     images: ["/favicon.svg"],
