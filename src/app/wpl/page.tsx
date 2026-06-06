@@ -1,9 +1,8 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
-import { motion, AnimatePresence, useMotionValue, useSpring } from 'framer-motion';
+import { useEffect, useMemo, useState } from 'react';
+import { motion, useMotionValue, useReducedMotion, useSpring } from 'framer-motion';
 import Link from 'next/link';
-import Image from 'next/image';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import AuroraBackground from '@/components/ui/AuroraBackground';
@@ -12,20 +11,16 @@ import ModernTeamsShowcase from '@/components/home/ModernTeamsShowcase';
 import ModernMatchesGrid from '@/components/home/ModernMatchesGrid';
 import ModernNewsSection from '@/components/home/ModernNewsSection';
 import ModernStatsSection from '@/components/home/ModernStatsSection';
-import ModernFeatureShowcase from '@/components/home/ModernFeatureShowcase';
 import ConfettiAnimation from '@/components/effects/ConfettiAnimation';
 import FloatingBadge from '@/components/effects/FloatingBadge';
-import AnimatedSection from '@/components/ui/AnimatedSection';
 import GradientText from '@/components/ui/GradientText';
 import BackToTop from '@/components/ui/BackToTop';
-import QuickStatsWidget from '@/components/home/QuickStatsWidget';
 import { TeamsSkeleton, MatchesSkeleton, NewsSkeleton } from '@/components/home/HomePageSkeletons';
 import { useRouter } from 'next/navigation';
 import { api } from '@/lib/data';
 import { useLeague } from '@/contexts/LeagueContext';
 import { isPlaceholderTeam } from '@/lib/playoffUtils';
 import type { Team, Match, News } from '@/types';
-import { useMemo } from 'react';
 import { 
   Trophy, 
   ArrowRight, 
@@ -34,24 +29,98 @@ import {
   TrendingUp, 
   Users, 
   Zap,
-  Clock,
   Star,
   Target,
   Activity,
-  Radio,
-  Sparkles
+  Sparkles,
+  MapPin,
+  BarChart3,
+  ShieldCheck,
+  Smartphone,
+  BellRing
 } from 'lucide-react';
 import WPLFloatingParticles from '@/components/animations/WPLFloatingParticles';
 import { WPLColors } from '@/lib/wplColors';
-import CountdownTimer from '@/components/ui/CountdownTimer';
 import { formatMatchTime } from '@/lib/timeUtils';
-import { getAnimatedLogoPath } from '@/lib/logoUtils';
 import PublicLiveMatchStrip from '@/components/live-score/PublicLiveMatchStrip';
+
+const TARGET_SEASON_YEAR = 2026;
+const HERO_BACKGROUND_IMAGE = '/images/wpl-oil-stadium-hero.webp';
+
+const SEASON_PULSE_CARDS = [
+  {
+    label: 'Season Window',
+    value: 'Jan 9 - Feb 5',
+    detail: 'A compact 28-day WPL season built for nightly T20 viewing.',
+    icon: Calendar,
+    accent: 'from-cyan-400 to-blue-500',
+  },
+  {
+    label: 'Host Cities',
+    value: 'Navi Mumbai + Vadodara',
+    detail: 'DY Patil hosted the opening leg; Vadodara carried the playoffs.',
+    icon: MapPin,
+    accent: 'from-emerald-400 to-teal-500',
+  },
+  {
+    label: 'Tournament Shape',
+    value: '22 Matches',
+    detail: 'League stage, Eliminator, and Final across five WPL franchises.',
+    icon: Trophy,
+    accent: 'from-amber-300 to-orange-500',
+  },
+  {
+    label: 'Final Story',
+    value: 'RCB-W 204/4',
+    detail: 'Royal Challengers Bengaluru chased Delhi Capitals 203/4 in Vadodara.',
+    icon: Star,
+    accent: 'from-pink-400 to-rose-500',
+  },
+] as const;
+
+const WPL_TOOLS = [
+  {
+    title: 'Over-by-over scorecards',
+    description: 'Follow runs, wickets, extras, partnerships, powerplay pressure, and death-over swings without losing the match context.',
+    icon: Zap,
+    accent: 'from-amber-300 to-orange-500',
+  },
+  {
+    title: 'Table and NRR signals',
+    description: 'Read form, points, net run rate, qualification pressure, and playoff movement in plain cricket language.',
+    icon: BarChart3,
+    accent: 'from-cyan-400 to-blue-500',
+  },
+  {
+    title: 'Squads and roles',
+    description: 'Move from franchise cards to player pages with batting roles, bowling styles, all-rounders, and wicketkeeper context.',
+    icon: Users,
+    accent: 'from-violet-400 to-fuchsia-500',
+  },
+  {
+    title: 'Prediction checks',
+    description: 'Use toss, venue, form, and innings tempo to predict winners, top run-scorers, wicket-takers, and Player of the Match.',
+    icon: Target,
+    accent: 'from-pink-400 to-rose-500',
+  },
+  {
+    title: 'Match alerts',
+    description: 'Keep track of live starts, innings breaks, milestones, collapses, and scorecard updates during busy match nights.',
+    icon: BellRing,
+    accent: 'from-emerald-400 to-teal-500',
+  },
+  {
+    title: 'Mobile matchday',
+    description: 'Use fast touch targets, compact score views, and readable cards whether you are at the ground or following on the move.',
+    icon: Smartphone,
+    accent: 'from-sky-400 to-indigo-500',
+  },
+] as const;
 
 export default function WPLHomePage() {
   const router = useRouter();
   const { currentLeague, setCurrentLeague } = useLeague();
-  const TARGET_SEASON_YEAR = 2026;
+  const prefersReducedMotion = useReducedMotion();
   const [showTermsModal, setShowTermsModal] = useState(false);
   const [lastAcceptanceDate, setLastAcceptanceDate] = useState<string | null>(null);
   const [needsReAcceptance, setNeedsReAcceptance] = useState(false);
@@ -63,11 +132,12 @@ export default function WPLHomePage() {
   const [showConfetti, setShowConfetti] = useState(false);
   const [hasLiveMatch, setHasLiveMatch] = useState(false);
   
-  // Mouse tracking for parallax effects
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  // Mouse tracking for subtle parallax effects.
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
   const springConfig = { damping: 50, stiffness: 100 };
+  const springX = useSpring(mouseX, springConfig);
+  const springY = useSpring(mouseY, springConfig);
 
   const getMatchYear = (dateString: string): number | null => {
     const parsed = new Date(dateString);
@@ -87,15 +157,17 @@ export default function WPLHomePage() {
   }, [currentLeague, setCurrentLeague]);
   
   // Calculate derived data
-  const liveMatchCount = useMemo(() => (matches?.filter(m => m.status === 'live')?.length || 0), [matches]);
-  const nextMatch = useMemo(() => {
-    if (!matches || !Array.isArray(matches)) return null;
-    const upcoming = matches
-      .filter(m => m.status === 'upcoming')
-      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-    return upcoming[0] || null;
-  }, [matches]);
-  
+  const upcomingMatchCount = useMemo(() => matches.filter((match) => match.status === 'upcoming').length, [matches]);
+  const completedMatchCount = useMemo(() => matches.filter((match) => match.status === 'completed').length, [matches]);
+  const matchGridInitialFilter = upcomingMatchCount > 0 ? 'upcoming' : completedMatchCount > 0 ? 'completed' : 'all';
+  const matchesSectionTitle = upcomingMatchCount > 0 ? 'Upcoming Matches' : completedMatchCount > 0 ? 'Season Results' : 'Match Schedule';
+  const matchesSectionKicker = upcomingMatchCount > 0 ? 'Upcoming Fixtures' : completedMatchCount > 0 ? 'Scorecards & Results' : 'Fixtures';
+  const matchesSectionCopy = upcomingMatchCount > 0
+    ? 'Follow upcoming toss times, venues, squad news, and live scorecard links for the next WPL fixtures.'
+    : completedMatchCount > 0
+    ? 'Review completed WPL 2026 fixtures with scorecards, results, venues, and match context.'
+    : 'WPL fixtures will appear here as soon as they are added to the schedule.';
+
   const featuredLiveMatch = useMemo(() => {
     return matches.find(m => m.status === 'live') || null;
   }, [matches]);
@@ -112,7 +184,6 @@ export default function WPLHomePage() {
       const { innerWidth, innerHeight } = window;
       const xPos = (clientX / innerWidth - 0.5) * 100;
       const yPos = (clientY / innerHeight - 0.5) * 100;
-      setMousePosition({ x: xPos, y: yPos });
       mouseX.set(xPos);
       mouseY.set(yPos);
     };
@@ -308,392 +379,171 @@ export default function WPLHomePage() {
       )}
 
       <main className="relative z-10">
-        {/* Enhanced Hero Section with Mouse Parallax */}
-        <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
-          {/* Animated Grid Background */}
-          <div 
-            className="absolute inset-0 opacity-[0.03]"
+        {/* WPL oil-paint hero */}
+        <section className="relative overflow-hidden pt-8 pb-8 md:pt-10 md:pb-10">
+          <motion.div
+            className="absolute inset-0 -z-30 bg-cover bg-center md:bg-[center_right]"
             style={{
-              backgroundImage: `
-                linear-gradient(rgba(147,51,234,0.1) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(147,51,234,0.1) 1px, transparent 1px)
-              `,
-              backgroundSize: '60px 60px',
-              transform: `translate(${(mousePosition?.x ?? 0) * 0.5}px, ${(mousePosition?.y ?? 0) * 0.5}px)`,
+              backgroundImage: `linear-gradient(90deg, rgba(5,8,22,0.98) 0%, rgba(5,8,22,0.82) 42%, rgba(5,8,22,0.36) 72%, rgba(5,8,22,0.78) 100%), url('${HERO_BACKGROUND_IMAGE}')`,
             }}
+            animate={prefersReducedMotion ? undefined : { scale: [1.02, 1.06, 1.02] }}
+            transition={{ duration: 40, repeat: Infinity, ease: 'easeInOut' }}
+          />
+          <div
+            className="absolute inset-0 -z-20 opacity-[0.16]"
+            style={{
+              backgroundImage:
+                'repeating-linear-gradient(0deg, rgba(255,255,255,0.08) 0px, rgba(255,255,255,0.08) 1px, transparent 1px, transparent 6px), repeating-linear-gradient(90deg, rgba(255,255,255,0.05) 0px, rgba(255,255,255,0.05) 1px, transparent 1px, transparent 7px)',
+              mixBlendMode: 'soft-light',
+            }}
+          />
+          <motion.div
+            className="absolute left-[-14%] top-[18%] -z-10 h-24 w-[78%] -rotate-6 blur-2xl"
+            style={{
+              x: springX,
+              y: springY,
+              background: 'linear-gradient(90deg, rgba(34,211,238,0.20), rgba(236,72,153,0.18), rgba(251,191,36,0.10), transparent)',
+            }}
+            animate={prefersReducedMotion ? undefined : { opacity: [0.35, 0.62, 0.35] }}
+            transition={{ duration: 14, repeat: Infinity, ease: 'easeInOut' }}
+          />
+          <motion.div
+            className="absolute right-[-20%] bottom-[10%] -z-10 h-32 w-[70%] rotate-[-10deg] blur-2xl"
+            style={{
+              background: 'linear-gradient(90deg, transparent, rgba(244,63,94,0.18), rgba(124,58,237,0.16), rgba(16,185,129,0.08))',
+            }}
+            animate={prefersReducedMotion ? undefined : { x: [0, -18, 0], opacity: [0.28, 0.58, 0.28] }}
+            transition={{ duration: 18, repeat: Infinity, ease: 'easeInOut' }}
           />
 
-          {/* Dynamic Gradient Orbs with Mouse Parallax */}
-          <motion.div
-            className="absolute top-1/4 left-1/4 w-[600px] h-[600px] rounded-full blur-[120px]"
-            style={{
-              x: useSpring(mouseX, springConfig),
-              y: useSpring(mouseY, springConfig),
-              background: `radial-gradient(circle, ${WPLColors.purpleRGBA[50]}, transparent)`,
-            }}
-            animate={{
-              scale: [1, 1.2, 1],
-              opacity: [0.2, 0.4, 0.2],
-            }}
-            transition={{
-              duration: 20,
-              repeat: Infinity,
-              ease: "easeInOut",
-            }}
-          />
-          <motion.div
-            className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] rounded-full blur-[120px]"
-            style={{
-              x: useSpring(mouseX, springConfig),
-              y: useSpring(mouseY, springConfig),
-              background: `radial-gradient(circle, ${WPLColors.pinkRGBA[50]}, transparent)`,
-            }}
-            animate={{
-              scale: [1, 1.3, 1],
-              opacity: [0.2, 0.4, 0.2],
-            }}
-            transition={{
-              duration: 25,
-              repeat: Infinity,
-              ease: "easeInOut",
-              delay: 2,
-            }}
-          />
-          <motion.div
-            className="absolute top-1/2 left-1/2 w-[400px] h-[400px] rounded-full blur-[100px] -translate-x-1/2 -translate-y-1/2"
-            style={{
-              background: `radial-gradient(circle, ${WPLColors.roseRGBA[50]}, transparent)`,
-            }}
-            animate={{
-              scale: [1, 1.5, 1],
-              opacity: [0.15, 0.3, 0.15],
-              rotate: [0, 180, 360],
-            }}
-            transition={{
-              duration: 30,
-              repeat: Infinity,
-              ease: "linear",
-            }}
-          />
-
-          {/* Floating Particles */}
-          {[...Array(15)].map((_, i) => (
-            <motion.div
-              key={i}
-              className="absolute w-1 h-1 rounded-full"
-              style={{
-                backgroundColor: [WPLColors.purple, WPLColors.pink, WPLColors.rose][i % 3],
-                opacity: 0.3,
-              }}
-              initial={{
-                x: Math.random() * (typeof window !== 'undefined' ? window.innerWidth : 1920),
-                y: Math.random() * (typeof window !== 'undefined' ? window.innerHeight : 1080),
-                opacity: 0,
-              }}
-              animate={{
-                y: [null, -100],
-                opacity: [0, 1, 0],
-              }}
-              transition={{
-                duration: Math.random() * 3 + 2,
-                repeat: Infinity,
-                delay: Math.random() * 2,
-                ease: "linear",
-              }}
-            />
-          ))}
-          
-          <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 w-full">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
-              
-              {/* Left Content */}
+          <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_380px] gap-8 lg:gap-12 items-center">
               <motion.div
-                initial={{ opacity: 0, x: -100 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.8, type: "spring" }}
-                className="space-y-8"
+                initial={{ opacity: 0, y: 26 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.75, type: 'spring', stiffness: 90 }}
+                className="max-w-3xl"
               >
-                {/* Premium Badge */}
                 <motion.div
-                  initial={{ opacity: 0, y: 20, scale: 0.9 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  transition={{ duration: 0.8, type: "spring" }}
-                  className="inline-flex items-center gap-3 px-8 py-4 rounded-full backdrop-blur-2xl border shadow-2xl"
-                  style={{
-                    background: `linear-gradient(135deg, ${WPLColors.purpleRGBA[30]}, ${WPLColors.pinkRGBA[30]}, ${WPLColors.roseRGBA[30]})`,
-                    borderColor: WPLColors.purpleRGBA[40],
-                    boxShadow: `0 10px 40px ${WPLColors.purpleRGBA[20]}`,
-                  }}
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.55, delay: 0.1 }}
+                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg border border-white/10 bg-white/[0.08] backdrop-blur-2xl shadow-[0_20px_80px_rgba(0,0,0,0.32)]"
                 >
-                  <motion.div
-                    animate={{ rotate: [0, 360] }}
-                    transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
-                  >
-                    <Sparkles className="w-6 h-6" style={{ color: WPLColors.pink }} />
-                  </motion.div>
-                  <span 
-                    className="text-sm font-bold uppercase tracking-wider"
-                    style={{ color: WPLColors.textPrimary }}
-                  >
-                    Women's Premier League
+                  <Sparkles className="w-5 h-5" style={{ color: WPLColors.pink }} />
+                  <span className="text-xs sm:text-sm font-black uppercase tracking-[0.2em] text-white">
+                    Women's Premier League Season Hub
                   </span>
                 </motion.div>
 
-                {/* Main Heading */}
                 <motion.h1
-                  initial={{ opacity: 0, y: 50 }}
+                  initial={{ opacity: 0, y: 24 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 1, delay: 0.2, type: "spring", stiffness: 100 }}
-                  className="text-7xl sm:text-8xl md:text-9xl lg:text-[12rem] font-black leading-[0.85] tracking-tight"
+                  transition={{ duration: 0.7, delay: 0.18, type: 'spring', stiffness: 90 }}
+                  className="mt-5 text-5xl sm:text-6xl md:text-7xl lg:text-7xl font-black leading-none tracking-normal"
                 >
-                  <motion.span
-                    className="block bg-gradient-to-r from-white via-purple-200 to-pink-200 bg-clip-text text-transparent"
-                    initial={{ opacity: 0, x: -50 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.8, delay: 0.4 }}
-                  >
+                  <span className="block bg-gradient-to-r from-white via-cyan-100 to-pink-100 bg-clip-text text-transparent">
                     WPL
-                  </motion.span>
-                  <motion.span
-                    className="block bg-gradient-to-r from-purple-400 via-pink-400 to-rose-400 bg-clip-text text-transparent"
-                    initial={{ opacity: 0, x: 50 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.8, delay: 0.6 }}
-                  >
+                  </span>
+                  <span className="block bg-gradient-to-r from-pink-300 via-violet-300 to-amber-200 bg-clip-text text-transparent">
                     2026
-                  </motion.span>
+                  </span>
                 </motion.h1>
 
-                {/* Subtitle */}
                 <motion.p
-                  initial={{ opacity: 0, y: 30 }}
+                  initial={{ opacity: 0, y: 18 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.8, delay: 0.8 }}
-                  className="text-xl md:text-2xl lg:text-3xl leading-relaxed max-w-xl"
-                  style={{ color: WPLColors.textSecondary }}
+                  transition={{ duration: 0.65, delay: 0.28 }}
+                  className="mt-5 max-w-2xl text-base md:text-lg leading-relaxed text-slate-100"
                 >
-                  The pinnacle of women's T20 cricket. Experience the power, passion, and excellence of WPL 2026.
+                  Follow the Women's Premier League with completed scorecards, squad stories, standings, predictions, and matchday context from the league stage to the final.
                 </motion.p>
 
-                {/* Quick Stats */}
                 <motion.div
-                  initial={{ opacity: 0, y: 30 }}
+                  initial={{ opacity: 0, y: 18 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.8, delay: 1 }}
-                  className="grid grid-cols-3 gap-4 pt-4"
+                  transition={{ duration: 0.65, delay: 0.62 }}
+                  className="mt-6 flex flex-wrap gap-3"
                 >
-                  {[
-                    { label: 'Teams', value: teams.length || '5', color: 'from-purple-500 to-pink-500', delay: 0 },
-                    { label: 'Matches', value: matches.length || '22', color: 'from-pink-500 to-rose-500', delay: 0.1 },
-                    { label: 'Players', value: totalPlayers > 0 ? totalPlayers : '100+', color: 'from-rose-500 to-purple-500', delay: 0.2 },
-                  ].map((stat, index) => (
-                    <motion.div
-                      key={stat.label}
-                      initial={{ opacity: 0, scale: 0.8, y: 20 }}
-                      animate={{ opacity: 1, scale: 1, y: 0 }}
-                      transition={{ duration: 0.6, delay: 1.2 + stat.delay, type: "spring" }}
-                      whileHover={{ scale: 1.1, y: -5 }}
-                      className="group relative overflow-hidden p-6 rounded-2xl backdrop-blur-xl border transition-all duration-300 cursor-pointer"
-                      style={{
-                        background: WPLColors.purpleRGBA[10],
-                        borderColor: WPLColors.purpleRGBA[30],
-                      }}
-                    >
-                      <div className={`absolute inset-0 bg-gradient-to-br ${stat.color} opacity-0 group-hover:opacity-20 transition-opacity duration-300`} />
-                      <div className={`text-4xl font-black mb-2 bg-gradient-to-r ${stat.color} bg-clip-text text-transparent`}>{stat.value}</div>
-                      <div className="text-xs font-semibold uppercase tracking-wider" style={{ color: WPLColors.textMuted }}>{stat.label}</div>
-                    </motion.div>
-                  ))}
-                </motion.div>
-
-                {/* CTA Buttons */}
-                <motion.div
-                  initial={{ opacity: 0, y: 30 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.8, delay: 1.4 }}
-                  className="flex flex-wrap gap-4 pt-4"
-                >
-                  <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                    <Link
-                      href="/wpl/matches"
-                      className="group relative px-10 py-5 rounded-xl text-white font-bold text-lg shadow-2xl transition-all duration-300 overflow-hidden block"
-                      style={{
-                        background: `linear-gradient(135deg, ${WPLColors.purple}, ${WPLColors.pink})`,
-                        boxShadow: `0 10px 40px ${WPLColors.purpleRGBA[50]}, 0 0 60px ${WPLColors.pinkRGBA[30]}`,
-                      }}
-                    >
-                      <span className="relative z-10 flex items-center gap-3">
-                        <Play className="w-6 h-6" />
-                        View Matches
-                      </span>
-                      <motion.div
-                        className="absolute inset-0"
-                        style={{
-                          background: `linear-gradient(135deg, ${WPLColors.pink}, ${WPLColors.purple})`,
-                        }}
-                        initial={{ x: '-100%' }}
-                        whileHover={{ x: 0 }}
-                        transition={{ duration: 0.3 }}
-                      />
-                    </Link>
-                  </motion.div>
-                  <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                    <Link
-                      href="/wpl/teams"
-                      className="px-10 py-5 rounded-xl backdrop-blur-xl text-white font-bold text-lg border-2 transition-all duration-300 block"
-                      style={{
-                        background: WPLColors.purpleRGBA[10],
-                        borderColor: WPLColors.purpleRGBA[30],
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.background = WPLColors.purpleRGBA[20];
-                        e.currentTarget.style.borderColor = WPLColors.purpleRGBA[50];
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.background = WPLColors.purpleRGBA[10];
-                        e.currentTarget.style.borderColor = WPLColors.purpleRGBA[30];
-                      }}
-                    >
-                      Explore Teams
-                    </Link>
-                  </motion.div>
-                  <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                    <Link
-                      href="/live-score"
-                      className="px-10 py-5 rounded-xl backdrop-blur-xl text-white font-bold text-lg border-2 transition-all duration-300 block"
-                      style={{
-                        background: WPLColors.pinkRGBA[10],
-                        borderColor: WPLColors.pinkRGBA[30],
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.background = WPLColors.pinkRGBA[20];
-                        e.currentTarget.style.borderColor = WPLColors.pinkRGBA[50];
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.background = WPLColors.pinkRGBA[10];
-                        e.currentTarget.style.borderColor = WPLColors.pinkRGBA[30];
-                      }}
-                    >
-                      Live Scores
-                    </Link>
-                  </motion.div>
+                  <Link
+                    href="/wpl/matches"
+                    className="group inline-flex items-center gap-2 rounded-lg px-5 py-3 text-sm font-black text-white shadow-[0_18px_60px_rgba(236,72,153,0.28)] transition-transform duration-300 hover:-translate-y-0.5"
+                    style={{ background: `linear-gradient(135deg, ${WPLColors.pink}, ${WPLColors.violet})` }}
+                  >
+                    <Play className="w-4 h-4" />
+                    View WPL Scorecards
+                    <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+                  </Link>
+                  <Link
+                    href="/wpl/teams"
+                    className="inline-flex items-center gap-2 rounded-lg border border-white/10 bg-white/[0.08] px-5 py-3 text-sm font-black text-white backdrop-blur-2xl transition-colors duration-300 hover:bg-white/[0.14]"
+                  >
+                    <Users className="w-4 h-4" />
+                    Explore Squads
+                  </Link>
+                  <Link
+                    href="/live-score?league=wpl"
+                    className="inline-flex items-center gap-2 rounded-lg border border-cyan-300/30 bg-cyan-300/[0.08] px-5 py-3 text-sm font-black text-cyan-50 backdrop-blur-2xl transition-colors duration-300 hover:bg-cyan-300/[0.14]"
+                  >
+                    <Activity className="w-4 h-4" />
+                    Live Center
+                  </Link>
                 </motion.div>
               </motion.div>
 
-              {/* Right Visual - Enhanced 3D Orb */}
               <motion.div
-                initial={{ opacity: 0, x: 100, rotateY: 20 }}
-                animate={{ opacity: 1, x: 0, rotateY: 0 }}
-                transition={{ duration: 0.8, delay: 0.2, type: "spring" }}
-                className="relative h-[500px] lg:h-[700px] flex items-center justify-center"
-                style={{ perspective: '1000px' }}
+                initial={{ opacity: 0, y: 28 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.75, delay: 0.22, type: 'spring', stiffness: 90 }}
+                className="relative hidden lg:block"
               >
-                {/* Central Orb */}
-                <motion.div
-                  animate={{
-                    scale: [1, 1.1, 1],
-                    rotate: [0, 360],
-                  }}
-                  transition={{
-                    scale: { duration: 4, repeat: Infinity, ease: "easeInOut" },
-                    rotate: { duration: 20, repeat: Infinity, ease: "linear" },
-                  }}
-                  className="relative w-80 h-80 lg:w-96 lg:h-96"
-                  whileHover={{ scale: 1.15 }}
-                >
-                  {/* Glow Ring */}
-                  <motion.div
-                    className="absolute inset-0 rounded-full blur-3xl"
-                    style={{
-                      background: `radial-gradient(circle, ${WPLColors.purpleRGBA[50]}, ${WPLColors.pinkRGBA[50]}, transparent)`,
-                    }}
-                    animate={{
-                      opacity: [0.4, 0.7, 0.4],
-                      scale: [1, 1.2, 1],
-                    }}
-                    transition={{
-                      duration: 3,
-                      repeat: Infinity,
-                      ease: "easeInOut",
-                    }}
-                  />
-                  
-                  {/* Main Circle */}
-                  <div 
-                    className="relative w-full h-full rounded-full backdrop-blur-2xl border-2 flex items-center justify-center shadow-2xl"
-                    style={{
-                      background: `linear-gradient(135deg, ${WPLColors.purpleRGBA[20]}, ${WPLColors.pinkRGBA[20]}, ${WPLColors.roseRGBA[20]})`,
-                      borderColor: WPLColors.purpleRGBA[40],
-                    }}
-                  >
-                    <div className="text-center space-y-6">
-                      <motion.div
-                        animate={{ rotate: [0, 360] }}
-                        transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
-                      >
-                        <Trophy className="w-28 h-28 mx-auto drop-shadow-2xl" style={{ color: WPLColors.pink }} />
-                      </motion.div>
-                      <div className="text-5xl font-black" style={{ color: WPLColors.textPrimary }}>WPL</div>
-                      <div className="text-3xl font-black bg-gradient-to-r from-purple-400 via-pink-400 to-rose-400 bg-clip-text text-transparent">2026</div>
+                <div className="absolute inset-0 translate-x-4 translate-y-4 rounded-lg bg-gradient-to-br from-pink-500/18 via-cyan-400/10 to-amber-300/10 blur-xl" />
+                <div className="relative overflow-hidden rounded-lg border border-white/10 bg-slate-950/58 p-5 sm:p-6 backdrop-blur-2xl shadow-[0_24px_90px_rgba(0,0,0,0.42)]">
+                  <div className="absolute inset-0 opacity-[0.10]" style={{ backgroundImage: `url('${HERO_BACKGROUND_IMAGE}')`, backgroundSize: 'cover', backgroundPosition: 'center right' }} />
+                  <div className="absolute inset-0 bg-gradient-to-b from-slate-950/40 via-slate-950/78 to-slate-950/95" />
+                  <div className="relative">
+                    <div className="flex items-center justify-between gap-4 border-b border-white/10 pb-4">
+                      <div>
+                        <p className="text-xs font-black uppercase tracking-[0.18em] text-pink-200">Season Snapshot</p>
+                        <h2 className="mt-2 text-2xl font-black text-white">WPL 2026 at a glance</h2>
+                      </div>
+                      <div className="flex h-12 w-12 items-center justify-center rounded-lg border border-white/10 bg-white/[0.08]">
+                        <Trophy className="h-6 w-6 text-amber-200" />
+                      </div>
+                    </div>
+
+                    <div className="mt-5 space-y-4">
+                      {SEASON_PULSE_CARDS.slice(0, 3).map((item) => {
+                        const Icon = item.icon;
+                        return (
+                          <div key={item.label} className="grid grid-cols-[44px_1fr] gap-3">
+                            <div className={`flex h-11 w-11 items-center justify-center rounded-lg bg-gradient-to-br ${item.accent} text-slate-950`}>
+                              <Icon className="h-5 w-5" />
+                            </div>
+                            <div>
+                              <p className="text-xs font-bold uppercase tracking-[0.16em] text-slate-400">{item.label}</p>
+                              <p className="mt-1 font-black text-white">{item.value}</p>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    <div className="mt-6 rounded-lg border border-pink-300/20 bg-pink-300/[0.08] p-4">
+                      <div className="flex items-center gap-2 text-pink-100">
+                        <Star className="h-4 w-4" />
+                        <p className="text-xs font-black uppercase tracking-[0.16em]">Final Storyline</p>
+                      </div>
+                      <p className="mt-3 text-2xl font-black text-white">RCB-W chased 204</p>
+                      <p className="mt-2 text-sm leading-relaxed text-slate-200">
+                        Bengaluru beat Delhi Capitals by six wickets in Vadodara, turning the final into a high-scoring chase.
+                      </p>
                     </div>
                   </div>
-
-                  {/* Floating Elements */}
-                  {[
-                    { top: '10%', right: '10%', text: teams.length || '5', label: 'Teams', delay: 0 },
-                    { bottom: '15%', left: '10%', text: matches.length || '22', label: 'Matches', delay: 0.5 },
-                    { top: '50%', right: '-5%', text: 'T20', label: 'Format', delay: 1 },
-                  ].map((item, index) => (
-                    <motion.div
-                      key={index}
-                      initial={{ opacity: 0, scale: 0, rotate: -180 }}
-                      animate={{ opacity: 1, scale: 1, rotate: 0 }}
-                      transition={{ duration: 0.6, delay: 1.5 + item.delay, type: "spring" }}
-                      whileHover={{ scale: 1.2, rotate: 5 }}
-                      className={`absolute ${item.top || ''} ${item.right || ''} ${item.bottom || ''} ${item.left || ''} p-5 rounded-2xl backdrop-blur-xl border shadow-xl text-center`}
-                      style={{
-                        background: WPLColors.purpleRGBA[10],
-                        borderColor: WPLColors.purpleRGBA[30],
-                      }}
-                    >
-                      <div className="text-3xl font-black" style={{ color: WPLColors.purple }}>{item.text}</div>
-                      <div className="text-xs font-semibold uppercase tracking-wider" style={{ color: WPLColors.textMuted }}>{item.label}</div>
-                    </motion.div>
-                  ))}
-                </motion.div>
+                </div>
               </motion.div>
             </div>
           </div>
-
-          {/* Enhanced Scroll Indicator */}
-          <motion.div
-            className="absolute bottom-12 left-1/2 -translate-x-1/2 z-10"
-            animate={{ y: [0, 15, 0] }}
-            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-          >
-            <div 
-              className="w-8 h-14 rounded-full border-2 flex items-start justify-center p-2 backdrop-blur-md cursor-pointer transition-colors"
-              style={{
-                borderColor: WPLColors.purpleRGBA[30],
-                background: WPLColors.purpleRGBA[10],
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = WPLColors.purpleRGBA[10];
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = WPLColors.purpleRGBA[10];
-              }}
-            >
-              <motion.div
-                className="w-2 h-2 rounded-full"
-                style={{
-                  background: WPLColors.pink,
-                }}
-                animate={{ y: [0, 20, 0] }}
-                transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-              />
-            </div>
-          </motion.div>
         </section>
         
         {/* Featured Live Match Section - Enhanced */}
@@ -705,19 +555,19 @@ export default function WPLHomePage() {
                 whileInView={{ opacity: 1, y: 0, scale: 1 }}
                 viewport={{ once: true, margin: "-100px" }}
                 transition={{ duration: 0.8, type: "spring" }}
-                className="relative overflow-hidden rounded-3xl backdrop-blur-2xl border-2 p-10 shadow-2xl"
+                className="relative overflow-hidden rounded-lg backdrop-blur-2xl border p-10 shadow-2xl"
                 style={{
                   background: `linear-gradient(135deg, ${WPLColors.roseRGBA[30]}, ${WPLColors.pinkRGBA[30]}, ${WPLColors.roseRGBA[30]})`,
                   borderColor: WPLColors.roseRGBA[40],
                 }}
               >
                 <motion.div
-                  className="absolute top-0 right-0 w-96 h-96 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"
+                  className="absolute -right-28 top-8 h-28 w-[70%] rotate-6 blur-2xl"
                   style={{
                     background: WPLColors.roseRGBA[20],
                   }}
                   animate={{
-                    scale: [1, 1.2, 1],
+                    x: [0, -16, 0],
                     opacity: [0.2, 0.4, 0.2],
                   }}
                   transition={{
@@ -740,7 +590,7 @@ export default function WPLHomePage() {
                       <span className="text-lg font-bold uppercase tracking-wider" style={{ color: WPLColors.textPrimary }}>Live Match</span>
                     </div>
                     <Link
-                      href="/live-score"
+                      href="/live-score?league=wpl"
                       className="group flex items-center gap-2 px-6 py-3 rounded-xl border text-white font-semibold transition-all hover:scale-105"
                       style={{
                         background: WPLColors.roseRGBA[20],
@@ -811,16 +661,39 @@ export default function WPLHomePage() {
           </section>
         )}
         
-        {/* Quick Stats Widget - Enhanced */}
-        {!isLoading && (
-          <section className="relative py-12 -mt-20">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <AnimatedSection direction="up" delay={0.5}>
-                <QuickStatsWidget matches={matches} />
-              </AnimatedSection>
+        {/* Season pulse */}
+        <section className="relative py-8 md:-mt-12 md:pt-8 md:pb-10">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {SEASON_PULSE_CARDS.map((item, index) => {
+                const Icon = item.icon;
+                return (
+                  <motion.div
+                    key={item.label}
+                    initial={{ opacity: 0, y: 18 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true, margin: '-80px' }}
+                    transition={{ duration: 0.5, delay: index * 0.05 }}
+                    whileHover={prefersReducedMotion ? undefined : { y: -4 }}
+                    className="relative overflow-hidden rounded-lg border border-white/10 bg-slate-950/50 p-5 backdrop-blur-2xl"
+                  >
+                    <div className={`absolute inset-x-0 top-0 h-1 bg-gradient-to-r ${item.accent}`} />
+                    <div className="flex items-start gap-4">
+                      <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br ${item.accent} text-slate-950`}>
+                        <Icon className="h-5 w-5" />
+                      </div>
+                      <div>
+                        <p className="text-xs font-black uppercase tracking-[0.16em] text-slate-400">{item.label}</p>
+                        <p className="mt-1 text-lg font-black text-white">{item.value}</p>
+                        <p className="mt-2 text-sm leading-relaxed text-slate-300">{item.detail}</p>
+                      </div>
+                    </div>
+                  </motion.div>
+                );
+              })}
             </div>
-          </section>
-        )}
+          </div>
+        </section>
 
         {/* Teams Showcase - Enhanced */}
         {isLoading ? (
@@ -837,7 +710,7 @@ export default function WPLHomePage() {
               >
                 <div>
                   <motion.div
-                    className="inline-flex items-center gap-2 mb-6 px-6 py-3 rounded-full backdrop-blur-sm"
+                    className="inline-flex items-center gap-2 mb-6 px-6 py-3 rounded-lg backdrop-blur-sm"
                     style={{
                       background: WPLColors.purpleRGBA[20],
                       border: `1px solid ${WPLColors.purpleRGBA[30]}`,
@@ -898,7 +771,7 @@ export default function WPLHomePage() {
               >
                 <div>
                   <motion.div
-                    className="inline-flex items-center gap-2 mb-6 px-6 py-3 rounded-full backdrop-blur-sm"
+                    className="inline-flex items-center gap-2 mb-6 px-6 py-3 rounded-lg backdrop-blur-sm"
                     style={{
                       background: WPLColors.pinkRGBA[20],
                       border: `1px solid ${WPLColors.pinkRGBA[30]}`,
@@ -906,11 +779,17 @@ export default function WPLHomePage() {
                     whileHover={{ scale: 1.05 }}
                   >
                     <Calendar className="w-5 h-5" style={{ color: WPLColors.pink }} />
-                    <span className="text-xs font-bold uppercase tracking-wider" style={{ color: WPLColors.textPrimary }}>Upcoming Fixtures</span>
+                    <span className="text-xs font-bold uppercase tracking-wider" style={{ color: WPLColors.textPrimary }}>{matchesSectionKicker}</span>
                   </motion.div>
-                  <h2 className="text-5xl md:text-7xl font-black" style={{ color: WPLColors.textPrimary }}>
-                    Upcoming <GradientText gradient="from-pink-400 to-rose-400" animate>Matches</GradientText>
+                  <h2 className="text-5xl md:text-7xl font-black leading-none" style={{ color: WPLColors.textPrimary }}>
+                    {matchesSectionTitle.split(' ')[0]}{' '}
+                    <GradientText gradient="from-pink-400 to-rose-400" animate>
+                      {matchesSectionTitle.split(' ').slice(1).join(' ') || 'Fixtures'}
+                    </GradientText>
                   </h2>
+                  <p className="mt-4 max-w-2xl text-base leading-relaxed text-slate-300">
+                    {matchesSectionCopy}
+                  </p>
                 </div>
                 <Link
                   href="/wpl/matches"
@@ -933,7 +812,7 @@ export default function WPLHomePage() {
                   <ArrowRight className="w-5 h-5 group-hover:translate-x-2 transition-transform" />
                 </Link>
               </motion.div>
-              <ModernMatchesGrid matches={matches} />
+              <ModernMatchesGrid matches={matches} initialFilter={matchGridInitialFilter} />
             </div>
           </section>
         )}
@@ -951,7 +830,7 @@ export default function WPLHomePage() {
               >
                 <div>
                   <motion.div
-                    className="inline-flex items-center gap-2 mb-6 px-6 py-3 rounded-full backdrop-blur-sm"
+                    className="inline-flex items-center gap-2 mb-6 px-6 py-3 rounded-lg backdrop-blur-sm"
                     style={{
                       background: WPLColors.roseRGBA[20],
                       border: `1px solid ${WPLColors.roseRGBA[30]}`,
@@ -1016,7 +895,7 @@ export default function WPLHomePage() {
               >
                 <div>
                   <motion.div
-                    className="inline-flex items-center gap-2 mb-6 px-6 py-3 rounded-full backdrop-blur-sm"
+                    className="inline-flex items-center gap-2 mb-6 px-6 py-3 rounded-lg backdrop-blur-sm"
                     style={{
                       background: WPLColors.purpleRGBA[20],
                       border: `1px solid ${WPLColors.purpleRGBA[30]}`,
@@ -1064,19 +943,19 @@ export default function WPLHomePage() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-100px" }}
               transition={{ duration: 0.8 }}
-              className="relative overflow-hidden rounded-3xl backdrop-blur-2xl border-2 p-10 shadow-2xl"
+              className="relative overflow-hidden rounded-lg backdrop-blur-2xl border p-10 shadow-2xl"
               style={{
                 background: `linear-gradient(135deg, ${WPLColors.pinkRGBA[20]}, ${WPLColors.roseRGBA[20]}, ${WPLColors.pinkRGBA[20]})`,
                 borderColor: WPLColors.pinkRGBA[40],
               }}
             >
               <motion.div
-                className="absolute top-0 right-0 w-96 h-96 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"
+                className="absolute -right-28 top-8 h-28 w-[70%] rotate-6 blur-2xl"
                 style={{
                   background: WPLColors.pinkRGBA[20],
                 }}
                 animate={{
-                  scale: [1, 1.2, 1],
+                  x: [0, -16, 0],
                   opacity: [0.2, 0.4, 0.2],
                 }}
                 transition={{
@@ -1088,7 +967,7 @@ export default function WPLHomePage() {
               <div className="relative z-10 grid md:grid-cols-2 gap-8 items-center">
                 <div>
                   <motion.div
-                    className="inline-flex items-center gap-2 mb-6 px-6 py-3 rounded-full backdrop-blur-sm"
+                    className="inline-flex items-center gap-2 mb-6 px-6 py-3 rounded-lg backdrop-blur-sm"
                     style={{
                       background: WPLColors.pinkRGBA[30],
                       border: `1px solid ${WPLColors.pinkRGBA[40]}`,
@@ -1101,7 +980,7 @@ export default function WPLHomePage() {
                     Predict & <GradientText gradient="from-pink-400 to-rose-400" animate>Win</GradientText>
                   </h2>
                   <p className="text-lg mb-6 leading-relaxed" style={{ color: WPLColors.textSecondary }}>
-                    Test your cricket knowledge! Predict match outcomes, player performances, and compete on the leaderboard. Show off your expertise and climb the rankings.
+                    Use toss calls, venue conditions, powerplay starts, death-over form, and player roles to make sharper WPL predictions and climb the leaderboard.
                   </p>
                   <Link
                     href="/predictions"
@@ -1119,9 +998,9 @@ export default function WPLHomePage() {
                 <div className="grid grid-cols-2 gap-4">
                   {[
                     { label: 'Match Winner', icon: Trophy, color: 'from-pink-500 to-rose-500' },
-                    { label: 'Top Scorer', icon: Star, color: 'from-rose-500 to-purple-500' },
+                    { label: 'Top Run-Scorer', icon: Star, color: 'from-rose-500 to-purple-500' },
                     { label: 'Most Wickets', icon: Activity, color: 'from-purple-500 to-pink-500' },
-                    { label: 'Player of Match', icon: Target, color: 'from-pink-500 to-rose-500' },
+                    { label: 'Player of the Match', icon: Target, color: 'from-pink-500 to-rose-500' },
                   ].map((feature, idx) => (
                     <motion.div
                       key={feature.label}
@@ -1130,7 +1009,7 @@ export default function WPLHomePage() {
                       viewport={{ once: true }}
                       transition={{ duration: 0.5, delay: idx * 0.1 }}
                       whileHover={{ scale: 1.05, y: -5 }}
-                      className="p-6 rounded-2xl backdrop-blur-xl border transition-all"
+                      className="p-6 rounded-lg backdrop-blur-xl border transition-all"
                       style={{
                         background: WPLColors.purpleRGBA[10],
                         borderColor: WPLColors.purpleRGBA[30],
@@ -1154,11 +1033,69 @@ export default function WPLHomePage() {
           </div>
         </section>
 
-        {/* Feature Showcase */}
+        {/* WPL tools showcase */}
         {!isLoading && (
           <section className="relative py-24">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <ModernFeatureShowcase />
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: '-100px' }}
+                transition={{ duration: 0.7 }}
+                className="mb-12 text-center"
+              >
+                <div
+                  className="mx-auto mb-5 inline-flex items-center gap-2 rounded-lg px-5 py-3"
+                  style={{
+                    background: WPLColors.blueRGBA[15],
+                    border: `1px solid ${WPLColors.blueRGBA[30]}`,
+                  }}
+                >
+                  <ShieldCheck className="h-5 w-5" style={{ color: WPLColors.active }} />
+                  <span className="text-xs font-black uppercase tracking-[0.18em] text-white">WPL Matchday Tools</span>
+                </div>
+                <h2 className="text-4xl md:text-5xl font-black text-white">
+                  Built for Women's <GradientText gradient="from-cyan-300 via-pink-300 to-amber-200" animate>T20 Cricket</GradientText>
+                </h2>
+                <p className="mx-auto mt-4 max-w-3xl text-lg leading-relaxed text-slate-300">
+                  Everything on this page is organized for the way WPL matches move: fast starts, middle-over matchups, death-over pressure, and table-changing results.
+                </p>
+              </motion.div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                {WPL_TOOLS.map((tool, index) => {
+                  const Icon = tool.icon;
+                  return (
+                    <motion.div
+                      key={tool.title}
+                      initial={{ opacity: 0, y: 18 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true, margin: '-80px' }}
+                      transition={{ duration: 0.5, delay: index * 0.05 }}
+                      whileHover={prefersReducedMotion ? undefined : { y: -5 }}
+                      className="group relative overflow-hidden rounded-lg border border-white/10 bg-slate-950/46 p-6 backdrop-blur-2xl"
+                    >
+                      <div className={`absolute inset-x-0 top-0 h-1 bg-gradient-to-r ${tool.accent}`} />
+                      <div className={`mb-5 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-to-br ${tool.accent} text-slate-950 transition-transform duration-300 group-hover:scale-105`}>
+                        <Icon className="h-6 w-6" />
+                      </div>
+                      <h3 className="text-xl font-black text-white">{tool.title}</h3>
+                      <p className="mt-3 text-sm leading-relaxed text-slate-300">{tool.description}</p>
+                    </motion.div>
+                  );
+                })}
+              </div>
+
+              <div className="mt-12 text-center">
+                <Link
+                  href="/live-score?league=wpl"
+                  className="group inline-flex items-center gap-3 rounded-lg px-7 py-4 text-base font-black text-slate-950 transition-transform duration-300 hover:-translate-y-0.5"
+                  style={{ background: `linear-gradient(135deg, ${WPLColors.active}, ${WPLColors.textAccent})` }}
+                >
+                  Open WPL Live Scorecard
+                  <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
+                </Link>
+              </div>
             </div>
           </section>
         )}

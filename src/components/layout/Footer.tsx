@@ -7,6 +7,19 @@ import { useLeague } from '@/contexts/LeagueContext';
 export default function Footer() {
   const { currentLeague } = useLeague();
   const isIPL = currentLeague === 'ipl';
+  const isWPL = currentLeague === 'wpl';
+  const quickLinks = isWPL
+    ? [
+        { href: '/wpl/matches', label: 'WPL Match Schedule' },
+        { href: '/wpl/teams', label: 'WPL Teams' },
+        { href: '/wpl/news', label: 'WPL News' },
+      ]
+    : [
+        { href: '/matches', label: 'Match Schedule' },
+        { href: '/teams', label: 'Teams' },
+        { href: '/news', label: 'News' },
+      ];
+
   return (
     <footer className="glass-effect border-t border-white/10 mt-20">
       <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
@@ -22,7 +35,9 @@ export default function Footer() {
               />
             </div>
             <p className="text-gray-300 text-sm leading-relaxed">
-              SportsUP18 is your IPL 2026 experience platform. Experience the excitement of the world's premier T20 cricket league.
+              {isWPL
+                ? "SportsUP18 brings WPL 2026 scorecards, squads, standings, predictions, and matchday context together for women's T20 cricket fans."
+                : "SportsUP18 is your IPL 2026 experience platform, built for live scores, fixtures, teams, news, and T20 cricket insights."}
             </p>
           </div>
 
@@ -30,21 +45,13 @@ export default function Footer() {
           <div>
             <h3 className="text-white font-semibold mb-4">Quick Links</h3>
             <ul className="space-y-2">
-              <li>
-                <Link href="/matches" className="text-gray-300 hover:text-white text-sm transition-colors">
-                  Match Schedule
-                </Link>
-              </li>
-              <li>
-                <Link href="/teams" className="text-gray-300 hover:text-white text-sm transition-colors">
-                  Teams
-                </Link>
-              </li>
-              <li>
-                <Link href="/news" className="text-gray-300 hover:text-white text-sm transition-colors">
-                  News
-                </Link>
-              </li>
+              {quickLinks.map((link) => (
+                <li key={link.href}>
+                  <Link href={link.href} className="text-gray-300 hover:text-white text-sm transition-colors">
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
 

@@ -12,6 +12,7 @@ import type { Match } from '@/types';
 interface ModernMatchesGridProps {
   matches: Match[];
   isLoading?: boolean;
+  initialFilter?: FilterKey;
 }
 
 type FilterKey = 'all' | 'upcoming' | 'live' | 'completed';
@@ -115,7 +116,7 @@ function getTeamLogoSrc(team: Match['team1']): string | null {
   return src;
 }
 
-export default function ModernMatchesGrid({ matches, isLoading = false }: ModernMatchesGridProps) {
+export default function ModernMatchesGrid({ matches, isLoading = false, initialFilter = 'upcoming' }: ModernMatchesGridProps) {
   const router = useRouter();
   const pathname = usePathname();
   const prefersReducedMotion = useReducedMotion();
@@ -153,7 +154,7 @@ export default function ModernMatchesGrid({ matches, isLoading = false }: Modern
 
   const viewAllHref = useMemo(() => getLeagueListHref(leagueHint), [leagueHint]);
 
-  const [selectedFilter, setSelectedFilter] = useState<FilterKey>('upcoming');
+  const [selectedFilter, setSelectedFilter] = useState<FilterKey>(initialFilter);
   const [filteredMatches, setFilteredMatches] = useState<Match[]>([]);
   const [displayCount, setDisplayCount] = useState(6);
   const [nowTick, setNowTick] = useState(0);
@@ -169,6 +170,10 @@ export default function ModernMatchesGrid({ matches, isLoading = false }: Modern
   useEffect(() => {
     setDisplayCount(itemsPerPage);
   }, [selectedFilter]);
+
+  useEffect(() => {
+    setSelectedFilter(initialFilter);
+  }, [initialFilter]);
 
   const filterCounts = useMemo(() => {
     const now = Date.now();
@@ -247,7 +252,7 @@ export default function ModernMatchesGrid({ matches, isLoading = false }: Modern
       {/* Oil-canvas accents */}
       <div className="absolute -inset-6 -z-10 overflow-hidden rounded-[32px]">
         <motion.div
-          className="absolute -top-24 -left-28 w-[520px] h-[520px] rounded-full blur-3xl opacity-90"
+          className="absolute -top-10 -left-36 h-32 w-[720px] -rotate-6 blur-2xl opacity-90"
           style={{ background: oilTheme.orbA }}
           animate={
             prefersReducedMotion
@@ -260,7 +265,7 @@ export default function ModernMatchesGrid({ matches, isLoading = false }: Modern
           transition={{ duration: 18, repeat: Infinity, ease: 'easeInOut' }}
         />
         <motion.div
-          className="absolute -bottom-28 -right-24 w-[520px] h-[520px] rounded-full blur-3xl opacity-80"
+          className="absolute -bottom-12 -right-36 h-32 w-[720px] rotate-6 blur-2xl opacity-80"
           style={{ background: oilTheme.orbB }}
           animate={
             prefersReducedMotion
@@ -285,7 +290,7 @@ export default function ModernMatchesGrid({ matches, isLoading = false }: Modern
       {/* Filter bar */}
       <div className="relative mx-auto w-full max-w-3xl">
         <div
-          className="relative p-1.5 rounded-2xl border border-white/10 bg-black/30 backdrop-blur-2xl shadow-[0_20px_60px_rgba(0,0,0,0.35)]"
+          className="relative p-1.5 rounded-lg border border-white/10 bg-black/30 backdrop-blur-2xl shadow-[0_20px_60px_rgba(0,0,0,0.35)]"
           style={{ boxShadow: `0 20px 60px rgba(0,0,0,0.35), 0 0 0 1px rgba(255,255,255,0.06) inset` }}
         >
           <div className="grid grid-cols-4 gap-1">
@@ -296,13 +301,13 @@ export default function ModernMatchesGrid({ matches, isLoading = false }: Modern
                 <button
                   key={filter.key}
                   onClick={() => setSelectedFilter(filter.key)}
-                  className="relative px-3 py-2.5 rounded-xl overflow-hidden transition-colors duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
+                  className="relative px-3 py-2.5 rounded-md overflow-hidden transition-colors duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
                   aria-pressed={isSelected}
                 >
                   {isSelected && (
                     <motion.div
                       layoutId="matches-filter-pill"
-                      className="absolute inset-0 rounded-xl"
+                      className="absolute inset-0 rounded-md"
                       style={{
                         background: oilTheme.accentSoft,
                         boxShadow: `0 10px 40px ${oilTheme.glow}`,
@@ -311,15 +316,15 @@ export default function ModernMatchesGrid({ matches, isLoading = false }: Modern
                     />
                   )}
                   <span className="relative z-10 flex items-center justify-center gap-2">
-                    <span className="inline-flex items-center justify-center w-9 h-9 rounded-xl bg-white/5 border border-white/10">
+                    <span className="inline-flex items-center justify-center w-9 h-9 rounded-md bg-white/5 border border-white/10">
                       <Icon
                         className={`w-4 h-4 ${isSelected ? 'text-white' : 'text-slate-300'}`}
                       />
                     </span>
-                    <span className={`hidden sm:inline text-sm font-black tracking-tight ${isSelected ? 'text-white' : 'text-slate-200'}`}>
+                    <span className={`hidden sm:inline text-sm font-black tracking-normal ${isSelected ? 'text-white' : 'text-slate-200'}`}>
                       {filter.label}
                     </span>
-                    <span className="text-[11px] font-black px-2 py-0.5 rounded-full bg-white/10 border border-white/10 text-slate-100 tabular-nums">
+                    <span className="text-[11px] font-black px-2 py-0.5 rounded-md bg-white/10 border border-white/10 text-slate-100 tabular-nums">
                       {filter.count}
                     </span>
                   </span>
@@ -339,7 +344,7 @@ export default function ModernMatchesGrid({ matches, isLoading = false }: Modern
           {[...Array(6)].map((_, i) => (
             <div
               key={i}
-              className="relative h-80 rounded-2xl border border-white/10 bg-gradient-to-br from-white/[0.06] to-white/[0.02] overflow-hidden"
+              className="relative h-80 rounded-lg border border-white/10 bg-gradient-to-br from-white/[0.06] to-white/[0.02] overflow-hidden"
             >
               <motion.div
                 className="absolute -inset-y-10 -inset-x-16 rotate-12"
@@ -351,14 +356,14 @@ export default function ModernMatchesGrid({ matches, isLoading = false }: Modern
           ))}
         </div>
       ) : filteredMatches.length === 0 ? (
-        <div className="relative text-center py-14 px-6 rounded-3xl border border-white/10 bg-black/25 backdrop-blur-2xl overflow-hidden">
+        <div className="relative text-center py-14 px-6 rounded-lg border border-white/10 bg-black/25 backdrop-blur-2xl overflow-hidden">
           <div className="absolute inset-0 opacity-70" style={{ background: oilTheme.accentSoft }} />
           <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/50 to-black/70" />
           <div className="relative z-10 max-w-xl mx-auto">
-            <div className="mx-auto mb-5 w-14 h-14 rounded-2xl border border-white/15 bg-white/5 backdrop-blur-xl flex items-center justify-center shadow-[0_14px_50px_rgba(0,0,0,0.35)]">
+            <div className="mx-auto mb-5 w-14 h-14 rounded-lg border border-white/10 bg-white/5 backdrop-blur-xl flex items-center justify-center shadow-[0_14px_50px_rgba(0,0,0,0.35)]">
               <Sparkles className="w-6 h-6 text-white" />
             </div>
-            <p className="text-xl md:text-2xl font-black text-white tracking-tight">
+            <p className="text-xl md:text-2xl font-black text-white tracking-normal">
               {selectedFilter === 'upcoming'
                 ? 'No upcoming fixtures right now'
                 : selectedFilter === 'live'
@@ -380,7 +385,7 @@ export default function ModernMatchesGrid({ matches, isLoading = false }: Modern
             <div className="mt-6 flex items-center justify-center gap-3">
               <Link
                 href={viewAllHref}
-                className="group inline-flex items-center gap-2 px-6 py-3 rounded-2xl border border-white/15 bg-white/5 hover:bg-white/10 text-white font-black tracking-tight transition-all duration-300"
+                className="group inline-flex items-center gap-2 px-6 py-3 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 text-white font-black tracking-normal transition-all duration-300"
               >
                 View full schedule
                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
@@ -434,7 +439,7 @@ export default function ModernMatchesGrid({ matches, isLoading = false }: Modern
                     <motion.div
                       whileHover={prefersReducedMotion ? undefined : { y: -6 }}
                       transition={{ type: 'spring', stiffness: 260, damping: 22 }}
-                      className="group relative h-full rounded-2xl p-[1px]"
+                      className="group relative h-full rounded-lg p-[1px]"
                       style={{ background: oilTheme.accentSoft }}
                       role="link"
                       tabIndex={0}
@@ -447,7 +452,7 @@ export default function ModernMatchesGrid({ matches, isLoading = false }: Modern
                         }
                       }}
                     >
-                      <div className="relative h-full rounded-2xl bg-[rgba(2,6,23,0.62)] backdrop-blur-2xl border border-white/10 p-6 overflow-hidden">
+                      <div className="relative h-full rounded-lg bg-[rgba(2,6,23,0.62)] backdrop-blur-2xl border border-white/10 p-6 overflow-hidden">
                         {/* Oil shine sweep */}
                         <div
                           className="absolute -inset-x-24 -top-28 h-40 rotate-12 opacity-0 group-hover:opacity-100 translate-x-[-140%] group-hover:translate-x-[140%] transition-all duration-1000"
@@ -469,7 +474,7 @@ export default function ModernMatchesGrid({ matches, isLoading = false }: Modern
                         {/* Top row: status + share */}
                         <div className="relative z-10 flex items-center justify-between gap-3">
                           <span
-                            className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-[11px] font-black uppercase tracking-wider border ${badgeClass}`}
+                            className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-md text-[11px] font-black uppercase tracking-wider border ${badgeClass}`}
                           >
                             {match.status === 'live' ? (
                               <span className="relative flex h-2 w-2">
@@ -510,7 +515,7 @@ export default function ModernMatchesGrid({ matches, isLoading = false }: Modern
                         <div className="relative z-10 mt-5 flex items-center justify-between gap-3">
                           <div className="flex items-center gap-3 min-w-0">
                             <div
-                              className="relative w-12 h-12 rounded-2xl border border-white/10 bg-white/5 overflow-hidden flex items-center justify-center"
+                              className="relative w-12 h-12 rounded-lg border border-white/10 bg-white/5 overflow-hidden flex items-center justify-center"
                               style={{ boxShadow: `0 14px 40px rgba(0,0,0,0.35)` }}
                             >
                               {team1Logo ? (
@@ -520,7 +525,7 @@ export default function ModernMatchesGrid({ matches, isLoading = false }: Modern
                               )}
                             </div>
                             <div className="min-w-0">
-                              <p className="text-white font-black text-lg tracking-tight truncate">
+                              <p className="text-white font-black text-lg tracking-normal truncate">
                                 {match.team1.shortName}
                               </p>
                               <p className="text-[11px] text-slate-400 truncate">{match.team1.name}</p>
@@ -528,7 +533,7 @@ export default function ModernMatchesGrid({ matches, isLoading = false }: Modern
                           </div>
 
                           <div className="flex flex-col items-center justify-center gap-1">
-                            <span className="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-[11px] font-black text-slate-200">
+                            <span className="px-3 py-1 rounded-md bg-white/5 border border-white/10 text-[11px] font-black text-slate-200">
                               VS
                             </span>
                             <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">
@@ -538,13 +543,13 @@ export default function ModernMatchesGrid({ matches, isLoading = false }: Modern
 
                           <div className="flex items-center gap-3 min-w-0 justify-end text-right">
                             <div className="min-w-0">
-                              <p className="text-white font-black text-lg tracking-tight truncate">
+                              <p className="text-white font-black text-lg tracking-normal truncate">
                                 {match.team2.shortName}
                               </p>
                               <p className="text-[11px] text-slate-400 truncate">{match.team2.name}</p>
                             </div>
                             <div
-                              className="relative w-12 h-12 rounded-2xl border border-white/10 bg-white/5 overflow-hidden flex items-center justify-center"
+                              className="relative w-12 h-12 rounded-lg border border-white/10 bg-white/5 overflow-hidden flex items-center justify-center"
                               style={{ boxShadow: `0 14px 40px rgba(0,0,0,0.35)` }}
                             >
                               {team2Logo ? (
@@ -596,7 +601,7 @@ export default function ModernMatchesGrid({ matches, isLoading = false }: Modern
                 onClick={() => setDisplayCount(displayCount + itemsPerPage)}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className="relative px-8 py-3 rounded-2xl text-white font-black tracking-tight border border-white/15 overflow-hidden"
+                className="relative px-8 py-3 rounded-lg text-white font-black tracking-normal border border-white/10 overflow-hidden"
                 style={{
                   background: oilTheme.accentSoft,
                   boxShadow: `0 20px 60px rgba(0,0,0,0.35), 0 12px 40px ${oilTheme.glow}`,
