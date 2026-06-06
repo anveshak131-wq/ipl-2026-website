@@ -361,7 +361,7 @@ const BowlingStatsPage = () => {
       const matchesSearch = player.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
                            String(player.teamId || '').toLowerCase().includes(searchQuery.toLowerCase());
       
-      // Handle the special "Not Selected This Season" filter
+      // Handle the special "Not Selected for This Season" filter
       if (selectedTeam === NOT_SELECTED_SEASON_FILTER) {
         return isIPL && matchesSearch && isInNotSelectedSeasonPool(player);
       }
@@ -524,7 +524,7 @@ const BowlingStatsPage = () => {
 
   const getSelectedTeamLabel = useCallback(() => {
     if (selectedTeam === 'all') return 'All Teams';
-    if (selectedTeam === NOT_SELECTED_SEASON_FILTER) return 'Not Selected This Season';
+    if (selectedTeam === NOT_SELECTED_SEASON_FILTER) return 'Not Selected for This Season';
     return teams.find((team) => String(team.id) === String(selectedTeam))?.name || 'Selected Team';
   }, [selectedTeam, teams]);
 
@@ -599,29 +599,35 @@ const BowlingStatsPage = () => {
 
   return (
     <>
-      <div className="flex-1 bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950 min-h-screen overflow-x-hidden">
+      <div className="flex-1 ipl-oil-admin-page min-h-screen overflow-x-hidden">
         {/* Hero Header */}
-        <div className="relative bg-gradient-to-r from-amber-600 via-orange-600 to-rose-600 p-8 shadow-2xl overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-shimmer pointer-events-none" />
+        <div className="relative oil-hero p-6 lg:p-8 shadow-2xl">
           <div className="max-w-7xl mx-auto relative z-10">
             <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-              <div className="animate-in slide-in-from-left duration-700">
-                <h1 className="text-4xl lg:text-5xl font-bold text-white mb-2 flex items-center gap-3">
-                  <div className="w-12 h-12 bg-white/20 backdrop-blur rounded-xl flex items-center justify-center transform group-hover:rotate-12 group-hover:scale-110 transition-all duration-300 shadow-lg shadow-white/20">
-                    <TrendingDown className="w-6 h-6 text-white" />
-                  </div>
-                  <span className="bg-gradient-to-r from-white via-amber-100 to-white bg-clip-text text-transparent">Bowling Statistics</span>
-                </h1>
-                <p className="text-amber-100 text-lg font-medium tracking-wide">Comprehensive bowling performance analytics</p>
-              </div>
-              <div className="flex flex-wrap gap-4 animate-in slide-in-from-right duration-700">
-                <div className="bg-white/10 backdrop-blur rounded-xl p-4 text-center min-w-[120px] border border-white/20 hover:bg-white/20 hover:scale-105 transition-all duration-300 cursor-pointer shadow-lg hover:shadow-2xl hover:shadow-amber-500/50">
-                  <div className="text-3xl font-bold text-white animate-in zoom-in duration-500">{summaryStats.activeBowlers}</div>
-                  <div className="text-amber-100 text-sm mt-1 font-semibold">Active Bowlers</div>
+              <div className="oil-rise">
+                <div className="oil-hero-kicker mb-3">
+                  <Gauge className="h-3.5 w-3.5" />
+                  IPL bowling desk
                 </div>
-                <div className="bg-white/10 backdrop-blur rounded-xl p-4 text-center min-w-[120px] border border-white/20 hover:bg-white/20 hover:scale-105 transition-all duration-300 cursor-pointer shadow-lg hover:shadow-2xl hover:shadow-indigo-500/50">
+                <h1 className="text-3xl font-bold text-white mb-2 flex items-center gap-3">
+                  <div className="w-12 h-12 bg-[#4cc39a]/15 backdrop-blur rounded-xl flex items-center justify-center transition-all duration-200 shadow-lg shadow-black/20 border border-[#4cc39a]/30">
+                    <TrendingDown className="w-6 h-6 text-[#9cf2c8]" />
+                  </div>
+                  <span>Bowling Stats Control Room</span>
+                </h1>
+                <p className="text-sm leading-6 text-white/70 max-w-3xl">
+                  Track IPL bowling spells by wickets, economy, strike rate, maidens, best figures, and export-ready
+                  bowler sheets.
+                </p>
+              </div>
+              <div className="flex flex-wrap gap-4 oil-rise">
+                <div className="oil-stat-card oil-stat-card--teal p-4 text-center min-w-[120px]">
+                  <div className="text-3xl font-bold text-white animate-in zoom-in duration-500">{summaryStats.activeBowlers}</div>
+                  <div className="text-[#9cf2c8] text-sm mt-1 font-semibold">Wicket Takers</div>
+                </div>
+                <div className="oil-stat-card oil-stat-card--gold p-4 text-center min-w-[120px]">
                   <div className="text-3xl font-bold text-white animate-in zoom-in duration-500 delay-100">{teams.length}</div>
-                  <div className="text-amber-100 text-sm mt-1 font-semibold">Teams</div>
+                  <div className="text-[#f2d39a] text-sm mt-1 font-semibold">IPL Teams</div>
                 </div>
               </div>
             </div>
@@ -631,85 +637,85 @@ const BowlingStatsPage = () => {
         <div className="max-w-7xl mx-auto p-6 lg:p-8">
           {/* Summary Cards */}
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 mb-8">
-            <div className="bg-gradient-to-br from-amber-600 via-amber-600 to-orange-700 rounded-2xl p-5 shadow-xl border border-amber-400/30 hover:border-amber-400/60 transition-all duration-300 hover:scale-105 hover:shadow-2xl cursor-pointer group">
+            <div className="oil-stat-card oil-stat-card--teal p-5 oil-rise group">
+              <div className="flex items-center justify-between mb-2">
+                <Target className="w-5 h-5 text-[#9cf2c8] group-hover:scale-110 transition-transform" />
+              </div>
+              <div className="text-2xl font-bold text-white group-hover:scale-105 transition-transform">{summaryStats.totalWickets.toLocaleString()}</div>
+              <div className="text-[#9cf2c8] text-xs mt-1 font-semibold uppercase tracking-wider">Wickets Taken</div>
+            </div>
+            <div className="oil-stat-card oil-stat-card--gold p-5 oil-rise group">
+              <div className="flex items-center justify-between mb-2">
+                <TrendingDown className="w-5 h-5 text-[#f2d39a] group-hover:scale-110 transition-transform" />
+              </div>
+              <div className="text-2xl font-bold text-white group-hover:scale-105 transition-transform">{summaryStats.bestEconomy}</div>
+              <div className="text-[#f2d39a] text-xs mt-1 font-semibold uppercase tracking-wider">Best Economy</div>
+            </div>
+            <div className="oil-stat-card oil-stat-card--rose p-5 oil-rise group">
+              <div className="flex items-center justify-between mb-2">
+                <Award className="w-5 h-5 text-[#ffaaa5] group-hover:scale-110 transition-transform" />
+              </div>
+              <div className="text-2xl font-bold text-white group-hover:scale-105 transition-transform">{summaryStats.totalFiveWickets}</div>
+              <div className="text-[#ffaaa5] text-xs mt-1 font-semibold uppercase tracking-wider">Five-Wicket Hauls</div>
+            </div>
+            <div className="oil-stat-card oil-stat-card--cyan p-5 oil-rise group">
+              <div className="flex items-center justify-between mb-2">
+                <Zap className="w-5 h-5 text-[#a8e9ef] group-hover:scale-110 transition-transform" />
+              </div>
+              <div className="text-2xl font-bold text-white group-hover:scale-105 transition-transform">{summaryStats.totalMaidens}</div>
+              <div className="text-[#a8e9ef] text-xs mt-1 font-semibold uppercase tracking-wider">Maiden Overs</div>
+            </div>
+            <div className="oil-stat-card oil-stat-card--copper p-5 oil-rise group">
               <div className="flex items-center justify-between mb-2">
                 <Target className="w-5 h-5 text-amber-100 group-hover:scale-110 transition-transform" />
               </div>
-              <div className="text-2xl font-bold text-white group-hover:scale-105 transition-transform">{summaryStats.totalWickets.toLocaleString()}</div>
-              <div className="text-amber-100 text-xs mt-1 font-semibold uppercase tracking-wider">Total Wickets</div>
-            </div>
-            <div className="bg-gradient-to-br from-orange-600 via-orange-600 to-rose-700 rounded-2xl p-5 shadow-xl border border-orange-400/30 hover:border-orange-400/60 transition-all duration-300 hover:scale-105 hover:shadow-2xl cursor-pointer group">
-              <div className="flex items-center justify-between mb-2">
-                <TrendingDown className="w-5 h-5 text-orange-100 group-hover:scale-110 transition-transform" />
-              </div>
-              <div className="text-2xl font-bold text-white group-hover:scale-105 transition-transform">{summaryStats.bestEconomy}</div>
-              <div className="text-orange-100 text-xs mt-1 font-semibold uppercase tracking-wider">Best Economy</div>
-            </div>
-            <div className="bg-gradient-to-br from-rose-600 via-rose-600 to-pink-700 rounded-2xl p-5 shadow-xl border border-rose-400/30 hover:border-rose-400/60 transition-all duration-300 hover:scale-105 hover:shadow-2xl cursor-pointer group">
-              <div className="flex items-center justify-between mb-2">
-                <Award className="w-5 h-5 text-rose-100 group-hover:scale-110 transition-transform" />
-              </div>
-              <div className="text-2xl font-bold text-white group-hover:scale-105 transition-transform">{summaryStats.totalFiveWickets}</div>
-              <div className="text-rose-100 text-xs mt-1 font-semibold uppercase tracking-wider">5-Wicket Hauls</div>
-            </div>
-            <div className="bg-gradient-to-br from-pink-600 via-pink-600 to-fuchsia-700 rounded-2xl p-5 shadow-xl border border-pink-400/30 hover:border-pink-400/60 transition-all duration-300 hover:scale-105 hover:shadow-2xl cursor-pointer group">
-              <div className="flex items-center justify-between mb-2">
-                <Zap className="w-5 h-5 text-pink-100 group-hover:scale-110 transition-transform" />
-              </div>
-              <div className="text-2xl font-bold text-white group-hover:scale-105 transition-transform">{summaryStats.totalMaidens}</div>
-              <div className="text-pink-100 text-xs mt-1 font-semibold uppercase tracking-wider">Maiden Overs</div>
-            </div>
-            <div className="bg-gradient-to-br from-purple-600 via-purple-600 to-indigo-700 rounded-2xl p-5 shadow-xl border border-purple-400/30 hover:border-purple-400/60 transition-all duration-300 hover:scale-105 hover:shadow-2xl cursor-pointer group">
-              <div className="flex items-center justify-between mb-2">
-                <Target className="w-5 h-5 text-purple-100 group-hover:scale-110 transition-transform" />
-              </div>
               <div className="text-2xl font-bold text-white group-hover:scale-105 transition-transform">{summaryStats.avgWickets}</div>
-              <div className="text-purple-100 text-xs mt-1 font-semibold uppercase tracking-wider">Avg Wickets/Bowler</div>
+              <div className="text-amber-100 text-xs mt-1 font-semibold uppercase tracking-wider">Wickets per Bowler</div>
             </div>
-            <div className="bg-gradient-to-br from-indigo-600 via-indigo-600 to-slate-700 rounded-2xl p-5 shadow-xl border border-indigo-400/30 hover:border-indigo-400/60 transition-all duration-300 hover:scale-105 hover:shadow-2xl cursor-pointer group">
+            <div className="oil-stat-card oil-stat-card--slate p-5 oil-rise group">
               <div className="flex items-center justify-between mb-2">
-                <Filter className="w-5 h-5 text-indigo-200 group-hover:scale-110 transition-transform" />
+                <Filter className="w-5 h-5 text-slate-200 group-hover:scale-110 transition-transform" />
               </div>
               <div className="text-2xl font-bold text-white group-hover:scale-105 transition-transform">{filteredAndSortedPlayers.length}</div>
-              <div className="text-indigo-100 text-xs mt-1 font-semibold uppercase tracking-wider">Filtered Players</div>
+              <div className="text-slate-200 text-xs mt-1 font-semibold uppercase tracking-wider">Filtered Bowlers</div>
             </div>
           </div>
 
           {/* Search and Filters */}
-          <div className="bg-gradient-to-r from-gray-800/60 via-gray-800/40 to-gray-800/60 backdrop-blur-md rounded-2xl p-6 mb-6 border border-gray-700/50 shadow-xl hover:shadow-2xl transition-all duration-300 animate-in fade-in-50 slide-in-from-bottom-4 duration-700">
+          <div className="oil-toolbar rounded-2xl p-6 mb-6 transition-all duration-200 oil-rise">
             <div className="flex flex-col md:flex-row gap-4">
               <div className="flex-1 relative group">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-amber-400 transition-colors" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-white/45 group-focus-within:text-[#9cf2c8] transition-colors" />
                 <input
                   type="text"
-                  placeholder="Search players..."
+                  placeholder="Search bowler, team, role, or nationality..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 bg-gray-900/60 border border-gray-700 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all hover:bg-gray-900/80"
+                  className="oil-field w-full pl-10 pr-4 py-2.5"
                 />
               </div>
               <div className="relative group">
-                <Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-orange-400 transition-colors" />
+                <Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-white/45 group-focus-within:text-[#f2d39a] transition-colors" />
                 <select
                   value={selectedTeam}
                   onChange={(e) => setSelectedTeam(e.target.value)}
-                  className="pl-10 pr-8 py-2.5 bg-gray-900/60 border border-gray-700 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all appearance-none cursor-pointer hover:bg-gray-900/80"
+                  className="oil-select pl-10 pr-8 py-2.5 appearance-none cursor-pointer"
                 >
                   <option value="all">All Teams</option>
                   <option value={NOT_SELECTED_SEASON_FILTER} className="bg-amber-950">
-                    Not Selected This Season ({getInactivePlayerCount()})
+                    Not Selected for This Season ({getInactivePlayerCount()})
                   </option>
                   {teams.map(team => (
                     <option key={team.id} value={String(team.id)}>{team.name}</option>
                   ))}
                 </select>
               </div>
-              <div className="flex gap-2 bg-gray-900/60 rounded-xl p-1 border border-gray-700">
+              <div className="oil-segmented">
                 <button
                   onClick={() => setViewMode('table')}
                   className={`px-4 py-2 rounded-lg transition-all flex items-center gap-2 ${
                     viewMode === 'table'
-                      ? 'bg-amber-600 text-white shadow-lg scale-105'
+                      ? 'bg-[#4cc39a]/20 text-white shadow-lg'
                       : 'text-gray-400 hover:text-white hover:bg-gray-800'
                   }`}
                 >
@@ -720,7 +726,7 @@ const BowlingStatsPage = () => {
                   onClick={() => setViewMode('teams')}
                   className={`px-4 py-2 rounded-lg transition-all flex items-center gap-2 ${
                     viewMode === 'teams'
-                      ? 'bg-amber-600 text-white shadow-lg scale-105'
+                      ? 'bg-[#4cc39a]/20 text-white shadow-lg'
                       : 'text-gray-400 hover:text-white hover:bg-gray-800'
                   }`}
                 >
@@ -731,7 +737,7 @@ const BowlingStatsPage = () => {
               <button
                 onClick={() => setShowExportModal(true)}
                 disabled={filteredAndSortedPlayers.length === 0}
-                className="px-4 py-2.5 bg-gradient-to-r from-lime-700 via-amber-700 to-rose-700 hover:from-lime-600 hover:via-amber-600 hover:to-rose-600 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl transition-all duration-300 flex items-center justify-center gap-2 shadow-lg hover:shadow-amber-500/30"
+                className="oil-btn-primary px-4 py-2.5 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <Download className="w-4 h-4" />
                 Export
@@ -741,18 +747,18 @@ const BowlingStatsPage = () => {
 
           {/* Players Table or Team Panels */}
           {filteredAndSortedPlayers.length === 0 ? (
-            <div className="bg-gray-800/30 backdrop-blur rounded-2xl p-16 text-center border border-gray-700/50">
-              <div className="w-20 h-20 bg-gray-700/50 rounded-full flex items-center justify-center mx-auto mb-6">
-                <Search className="w-10 h-10 text-gray-500" />
+            <div className="oil-panel rounded-2xl p-16 text-center oil-rise">
+              <div className="w-20 h-20 bg-[#4cc39a]/10 rounded-full flex items-center justify-center mx-auto mb-6 border border-[#4cc39a]/20">
+                <Search className="w-10 h-10 text-[#9cf2c8]" />
           </div>
-              <h3 className="text-2xl font-bold text-white mb-3">No Players Found</h3>
-              <p className="text-gray-400 text-lg mb-6">Try adjusting your search or filter criteria</p>
+              <h3 className="text-2xl font-bold text-white mb-3">No Bowlers Match These Filters</h3>
+              <p className="text-gray-400 text-lg mb-6">Try a different player name, team, or bowling metric.</p>
           </div>
           ) : viewMode === 'table' ? (
-            <div className="bg-gray-800/30 backdrop-blur rounded-2xl border border-gray-700/50 overflow-hidden shadow-xl">
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead className="bg-gray-900/50 border-b border-gray-700">
+            <div className="oil-table-shell rounded-2xl overflow-hidden shadow-xl oil-rise">
+              <div className="overflow-x-auto" tabIndex={0}>
+                <table className="oil-table">
+                  <thead className="border-b border-white/10">
                     <tr>
                       <th className="px-6 py-4 text-left">
                         <button
@@ -815,7 +821,7 @@ const BowlingStatsPage = () => {
                       <th className="px-6 py-4 text-center text-gray-300 font-semibold text-sm uppercase tracking-wider">Actions</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-700/50">
+                  <tbody className="divide-y divide-white/10">
                     {filteredAndSortedPlayers.map((player) => {
                       const team = teams.find(t => String(t.id) === String(player.teamId));
                       const wickets = player.stats?.wickets || 0;
@@ -826,14 +832,14 @@ const BowlingStatsPage = () => {
                       const oversDisplay = overs > 0 ? `${overs}.${balls}` : '0.0';
 
                       return (
-                        <tr key={player.id} className="hover:bg-gray-800/50 transition-colors group">
+                        <tr key={player.id} className="group">
                           <td className="px-6 py-4">
                             <div className="flex items-center gap-3">
-                              <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-teal-600 rounded-lg flex items-center justify-center text-white font-bold text-sm">
+                              <div className="w-10 h-10 bg-gradient-to-br from-[#4cc39a] to-[#126e89] rounded-lg flex items-center justify-center text-white font-bold text-sm group-hover:scale-105 transition-all duration-200">
                                 {player.name?.charAt(0) || '?'}
                   </div>
                   <div>
-                                <div className="font-semibold text-white">{player.name || 'Unknown'}</div>
+                                <div className="font-semibold text-white group-hover:text-[#9cf2c8] transition-colors">{player.name || 'Unknown Player'}</div>
                                 <div className="text-sm text-gray-400">{team?.shortName || 'No Team'}</div>
                               </div>
                             </div>
@@ -843,7 +849,7 @@ const BowlingStatsPage = () => {
                               <span className="font-bold text-white">{wickets}</span>
                               <div className="w-16 h-1.5 bg-gray-700 rounded-full overflow-hidden">
                                 <div 
-                                  className="h-full bg-gradient-to-r from-green-500 to-teal-500 transition-all"
+                                  className="h-full bg-gradient-to-r from-[#4cc39a] via-[#4fb6c4] to-[#d7a85b] transition-all"
                                   style={{ width: `${wicketsPercentage}%` }}
                                 />
                   </div>
@@ -926,10 +932,10 @@ const BowlingStatsPage = () => {
                           <td className="px-6 py-4">
                 <button
                               onClick={() => handleEditPlayer(player)}
-                              className="mx-auto flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors text-sm font-medium"
+                              className="oil-btn-primary mx-auto px-4 py-2 text-sm"
                             >
                               <Edit2 className="w-4 h-4" />
-                              Edit
+                              Edit Bowling
                 </button>
                           </td>
                         </tr>
@@ -954,29 +960,29 @@ const BowlingStatsPage = () => {
                   const teamMaidens = teamPlayers.reduce((sum, p) => sum + (p.stats?.maidens || 0), 0);
 
                   return (
-                    <div key={team.id} className="bg-gray-800/30 backdrop-blur rounded-2xl border border-gray-700/50 overflow-hidden shadow-xl">
+                    <div key={team.id} className="oil-panel rounded-2xl overflow-hidden shadow-xl oil-rise">
                       {/* Team Header */}
-                      <div className="bg-gradient-to-r from-green-600/20 via-emerald-600/20 to-teal-600/20 p-6 border-b border-gray-700/50">
+                      <div className="bg-gradient-to-r from-[#4cc39a]/15 via-[#4fb6c4]/10 to-[#d7a85b]/10 p-6 border-b border-white/10">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-4">
-                            <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-teal-600 rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg">
+                            <div className="w-16 h-16 bg-gradient-to-br from-[#4cc39a] to-[#126e89] rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg">
                               {team.shortName || team.name.charAt(0)}
                             </div>
                             <div>
                               <h2 className="text-2xl font-bold text-white">{team.name}</h2>
                               <p className="text-gray-400 text-sm mt-1">
-                                {teamPlayers.length} players • {teamPlayers.filter(p => p.stats?.bowlingInnings > 0).length} active bowlers
+                                {teamPlayers.length} players - {teamPlayers.filter(p => p.stats?.bowlingInnings > 0).length} wicket-taking bowlers
                               </p>
                             </div>
                           </div>
                           <div className="flex gap-4">
                             <div className="text-center">
                               <div className="text-2xl font-bold text-white">{teamWickets}</div>
-                              <div className="text-gray-400 text-xs">Total Wickets</div>
+                              <div className="text-gray-400 text-xs">Wickets</div>
                             </div>
                             <div className="text-center">
                               <div className="text-2xl font-bold text-teal-400">{teamFiveWickets}</div>
-                              <div className="text-gray-400 text-xs">5-Wicket Hauls</div>
+                              <div className="text-gray-400 text-xs">Five-Wicket Hauls</div>
                             </div>
                             <div className="text-center">
                               <div className="text-2xl font-bold text-cyan-400">{teamMaidens}</div>
@@ -1000,14 +1006,14 @@ const BowlingStatsPage = () => {
                             return (
                               <div
                                 key={player.id}
-                                className="bg-gradient-to-br from-gray-700/50 to-gray-800/50 rounded-xl p-5 border border-gray-600/50 hover:border-green-500/50 transition-all hover:shadow-lg group"
+                                className="oil-stat-card oil-stat-card--teal rounded-xl p-5 group"
                               >
                                 <div className="flex items-center gap-3 mb-4">
-                                  <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-teal-600 rounded-lg flex items-center justify-center text-white font-bold text-sm">
+                                  <div className="w-12 h-12 bg-gradient-to-br from-[#4cc39a] to-[#126e89] rounded-lg flex items-center justify-center text-white font-bold text-sm group-hover:scale-105 transition-all duration-200">
                                     {player.name?.charAt(0) || '?'}
                                   </div>
                                   <div className="flex-1 min-w-0">
-                                    <div className="font-semibold text-white truncate">{player.name || 'Unknown'}</div>
+                                    <div className="font-semibold text-white truncate group-hover:text-[#9cf2c8] transition-colors">{player.name || 'Unknown Player'}</div>
                                     <div className="text-xs text-gray-400">{player.role}</div>
                                   </div>
                                 </div>
@@ -1019,13 +1025,13 @@ const BowlingStatsPage = () => {
                                   </div>
                                   <div className="w-full h-1.5 bg-gray-700 rounded-full overflow-hidden">
                                     <div
-                                      className="h-full bg-gradient-to-r from-green-500 to-teal-500 transition-all"
+                                      className="h-full bg-gradient-to-r from-[#4cc39a] via-[#4fb6c4] to-[#d7a85b] transition-all"
                                       style={{ width: `${wicketsPercentage}%` }}
                                     />
                                   </div>
                                   <div className="grid grid-cols-2 gap-2 mt-3">
-                                    <div className="bg-gray-900/50 rounded-lg p-2 text-center">
-                                      <div className="text-green-400 font-semibold">
+                                    <div className="bg-[#07110f]/70 rounded-lg p-2 text-center border border-[#4cc39a]/20">
+                                      <div className="text-[#9cf2c8] font-semibold">
                                         {(() => {
                                           if (player.stats?.bowlingAverage && typeof player.stats.bowlingAverage === 'string' && player.stats.bowlingAverage !== '0' && player.stats.bowlingAverage !== '-') {
                                             return player.stats.bowlingAverage;
@@ -1041,10 +1047,10 @@ const BowlingStatsPage = () => {
                                           return '-';
                                         })()}
                                       </div>
-                                      <div className="text-xs text-gray-400">Avg</div>
+                                      <div className="text-xs text-gray-400">Average</div>
                                     </div>
-                                    <div className="bg-gray-900/50 rounded-lg p-2 text-center">
-                                      <div className="text-emerald-400 font-semibold">
+                                    <div className="bg-[#07110f]/70 rounded-lg p-2 text-center border border-[#d7a85b]/20">
+                                      <div className="text-[#f2d39a] font-semibold">
                                         {(() => {
                                           if (player.stats?.economy && typeof player.stats.economy === 'string' && player.stats.economy !== '0' && player.stats.economy !== '-') {
                                             return player.stats.economy;
@@ -1060,7 +1066,7 @@ const BowlingStatsPage = () => {
                                           return '-';
                                         })()}
                                       </div>
-                                      <div className="text-xs text-gray-400">Econ</div>
+                                      <div className="text-xs text-gray-400">Economy</div>
                                     </div>
                                   </div>
                                   <div className="flex items-center justify-between text-xs text-gray-400 mt-2">
@@ -1074,10 +1080,10 @@ const BowlingStatsPage = () => {
 
                                 <button
                                   onClick={() => handleEditPlayer(player)}
-                                  className="w-full bg-gradient-to-r from-green-600 to-teal-600 hover:from-green-700 hover:to-teal-700 text-white px-4 py-2 rounded-lg font-medium transition-all text-sm flex items-center justify-center gap-2 group-hover:scale-105"
+                                  className="oil-btn-primary w-full px-4 py-2 text-sm"
                                 >
                                   <Edit2 className="w-4 h-4" />
-                                  Edit Stats
+                                  Edit Bowling
                                 </button>
                               </div>
                             );
@@ -1410,8 +1416,8 @@ const BowlingStatsPage = () => {
                         className="w-full px-4 py-2.5 bg-gray-700/70 border border-blue-500/30 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
                 />
               </div>
-                    <div className="relative bg-gradient-to-br from-purple-500/10 to-purple-600/5 p-4 rounded-xl border border-purple-500/20">
-                      <label className="flex items-center gap-2 text-sm font-semibold text-purple-300 mb-2">
+                    <div className="relative bg-gradient-to-br from-[#d7a85b]/10 to-[#b77837]/5 p-4 rounded-xl border border-[#d7a85b]/20">
+                      <label className="flex items-center gap-2 text-sm font-semibold text-[#f2d39a] mb-2">
                         <ZapIcon className="w-4 h-4" />
                         Strike Rate
                       </label>
@@ -1420,7 +1426,7 @@ const BowlingStatsPage = () => {
                   value={editForm.stats.bowlingStrikeRate}
                   onChange={(e) => handleFormChange('stats.bowlingStrikeRate', e.target.value)}
                         placeholder="e.g., 18.5"
-                        className="w-full px-4 py-2.5 bg-gray-700/70 border border-purple-500/30 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all"
+                        className="w-full px-4 py-2.5 bg-gray-700/70 border border-[#d7a85b]/30 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#d7a85b]/40 focus:border-[#d7a85b] transition-all"
                 />
               </div>
                     <div className="relative bg-gradient-to-br from-orange-500/10 to-orange-600/5 p-4 rounded-xl border border-orange-500/20">

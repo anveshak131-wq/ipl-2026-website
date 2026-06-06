@@ -259,22 +259,31 @@ const getResultPlayerDatalistId = (matchId: string) =>
   `ipl-live-score-fast-${matchId || 'match'}-result-players`;
 
 const fieldClass =
-  'rounded-xl border border-white/10 bg-[#07110f]/75 px-3 py-2 text-white placeholder-white/40 outline-none transition focus:border-[#d7a85b] focus:ring-2 focus:ring-[#d7a85b]/20 disabled:opacity-60';
+  'oil-field px-3 py-2 text-sm disabled:opacity-60';
 
 const compactFieldClass =
-  'rounded-lg border border-white/10 bg-[#07110f]/75 px-2 py-1 text-white placeholder-white/40 outline-none transition focus:border-[#d7a85b] focus:ring-2 focus:ring-[#d7a85b]/20 disabled:opacity-60';
+  'oil-field rounded-lg px-2 py-1 disabled:opacity-60';
 
 const actionButtonClass =
-  'inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/10 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-0.5 hover:border-[#d7a85b]/40 hover:bg-white/15 disabled:translate-y-0 disabled:opacity-50';
+  'oil-btn-secondary px-4 py-2 text-sm disabled:opacity-50';
 
 const primaryButtonClass =
-  'inline-flex items-center gap-2 rounded-xl bg-[#0f7b6c] px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-[#0f7b6c]/20 transition hover:-translate-y-0.5 hover:bg-[#13927f] disabled:translate-y-0 disabled:opacity-50';
+  'oil-btn-primary px-4 py-2 text-sm disabled:opacity-50';
 
 const warmButtonClass =
-  'inline-flex items-center gap-2 rounded-xl bg-[#b7792f] px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-[#b7792f]/20 transition hover:-translate-y-0.5 hover:bg-[#cf8a38] disabled:translate-y-0 disabled:opacity-50';
+  'oil-btn-warm px-4 py-2 text-sm disabled:opacity-50';
 
 const dangerButtonClass =
-  'inline-flex items-center gap-2 rounded-xl bg-[#b94742] px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-[#b94742]/20 transition hover:-translate-y-0.5 hover:bg-[#cf514a] disabled:translate-y-0 disabled:opacity-50';
+  'oil-btn-danger px-4 py-2 text-sm disabled:opacity-50';
+
+const scoreTableInputClass =
+  'w-full rounded-lg border border-white/10 bg-white/5 px-2 py-1 text-white placeholder-white/30 transition focus:border-[#d7a85b] focus:outline-none focus:ring-2 focus:ring-[#d7a85b]/20';
+
+const scoreTableSelectClass =
+  'w-full rounded-lg border border-white/10 bg-[#07110f] px-2 py-1 text-white transition focus:border-[#d7a85b] focus:outline-none focus:ring-2 focus:ring-[#d7a85b]/20';
+
+const scoreTableCheckboxClass =
+  'rounded border-white/20 bg-[#07110f] text-[#d7a85b] focus:ring-[#d7a85b]/30';
 
 const getStatusText = (status: SaveStatus, idle = 'Ready') => {
   if (status === 'saving') return 'Saving...';
@@ -3073,7 +3082,7 @@ export default function IPLAdminLiveScoreTablePage() {
             onChange={(e) => updateCell(rowIndex, colIndex, e.target.value)}
             placeholder="Over"
             inputMode="numeric"
-            className="w-full border border-white/10 focus:border-purple-400 rounded-lg px-2 py-1 bg-white/5 text-white placeholder-white/30"
+            className={scoreTableInputClass}
           />
         );
       }
@@ -3084,7 +3093,7 @@ export default function IPLAdminLiveScoreTablePage() {
             onChange={(e) => updateCell(rowIndex, colIndex, e.target.value)}
             placeholder="Ball"
             inputMode="numeric"
-            className="w-full border border-white/10 focus:border-purple-400 rounded-lg px-2 py-1 bg-white/5 text-white placeholder-white/30"
+            className={scoreTableInputClass}
           />
         );
       }
@@ -3099,8 +3108,8 @@ export default function IPLAdminLiveScoreTablePage() {
             value={resolvePlayerName(cellValue || '')}
             onChange={(e) => updateCell(rowIndex, colIndex, normalizePlayerSelectionInput(e.target.value, battingOptions))}
             list={getTeamPlayerDatalistId(selectedMatchId, battingKey)}
-            placeholder={`Type ${label.toLowerCase()} name`}
-            className="w-full border border-white/10 focus:border-purple-400 rounded-lg px-2 py-1 bg-white/5 text-white placeholder-white/30"
+            placeholder={`Search ${label.toLowerCase()} or type name`}
+            className={scoreTableInputClass}
           />
         );
       }
@@ -3110,8 +3119,8 @@ export default function IPLAdminLiveScoreTablePage() {
             value={resolvePlayerName(cellValue || '')}
             onChange={(e) => updateCell(rowIndex, colIndex, normalizePlayerSelectionInput(e.target.value, bowlingOptions))}
             list={getTeamPlayerDatalistId(selectedMatchId, bowlingKey)}
-            placeholder="Type bowler name"
-            className="w-full border border-white/10 focus:border-purple-400 rounded-lg px-2 py-1 bg-white/5 text-white placeholder-white/30"
+            placeholder="Search bowler or type name"
+            className={scoreTableInputClass}
           />
         );
       }
@@ -3120,7 +3129,7 @@ export default function IPLAdminLiveScoreTablePage() {
           <select
             value={cellValue || ''}
             onChange={(e) => updateCell(rowIndex, colIndex, e.target.value)}
-            className="w-full border border-white/10 focus:border-purple-400 rounded-lg px-2 py-1 bg-slate-950 text-white"
+            className={scoreTableSelectClass}
           >
             <option value="">Runs</option>
             {Array.from({ length: 7 }, (_, i) => (
@@ -3139,7 +3148,7 @@ export default function IPLAdminLiveScoreTablePage() {
                 type="checkbox"
                 checked={ex.hasWide}
                 onChange={(e) => onExtrasChange(rowIndex, 'hasWide', e.target.checked)}
-                className="rounded border-white/20 bg-slate-950 text-purple-500 focus:ring-purple-400"
+                className={scoreTableCheckboxClass}
               />
               <span className="text-xs text-white/70">Wide</span>
             </div>
@@ -3147,7 +3156,7 @@ export default function IPLAdminLiveScoreTablePage() {
               <select
                 value={ex.wideExtraRuns}
                 onChange={(e) => onExtrasChange(rowIndex, 'wideExtraRuns', parseInt(e.target.value, 10) || 0)}
-                className="w-full border border-white/10 focus:border-purple-400 rounded-lg px-2 py-1 bg-slate-950 text-white text-xs"
+                className={`${scoreTableSelectClass} text-xs`}
               >
                 <option value={0}>+0 (1 total)</option>
                 <option value={1}>+1 (2 total)</option>
@@ -3166,7 +3175,7 @@ export default function IPLAdminLiveScoreTablePage() {
               type="checkbox"
               checked={ex.hasNoBall}
               onChange={(e) => onExtrasChange(rowIndex, 'hasNoBall', e.target.checked)}
-              className="rounded border-white/20 bg-slate-950 text-purple-500 focus:ring-purple-400"
+              className={scoreTableCheckboxClass}
             />
             <span className="text-xs text-white/70">No-ball (+1)</span>
           </div>
@@ -3180,7 +3189,7 @@ export default function IPLAdminLiveScoreTablePage() {
                 type="checkbox"
                 checked={ex.hasByes}
                 onChange={(e) => onExtrasChange(rowIndex, 'hasByes', e.target.checked)}
-                className="rounded border-white/20 bg-slate-950 text-purple-500 focus:ring-purple-400"
+                className={scoreTableCheckboxClass}
               />
               <span className="text-xs text-white/70">Byes</span>
             </div>
@@ -3188,7 +3197,7 @@ export default function IPLAdminLiveScoreTablePage() {
               <select
                 value={ex.byesRuns}
                 onChange={(e) => onExtrasChange(rowIndex, 'byesRuns', parseInt(e.target.value, 10) || 0)}
-                className="w-full border border-white/10 focus:border-purple-400 rounded-lg px-2 py-1 bg-slate-950 text-white text-xs"
+                className={`${scoreTableSelectClass} text-xs`}
               >
                 {Array.from({ length: 7 }, (_, i) => (
                   <option key={i} value={i}>
@@ -3208,7 +3217,7 @@ export default function IPLAdminLiveScoreTablePage() {
                 type="checkbox"
                 checked={ex.hasLB}
                 onChange={(e) => onExtrasChange(rowIndex, 'hasLB', e.target.checked)}
-                className="rounded border-white/20 bg-slate-950 text-purple-500 focus:ring-purple-400"
+                className={scoreTableCheckboxClass}
               />
               <span className="text-xs text-white/70">LB</span>
             </div>
@@ -3216,7 +3225,7 @@ export default function IPLAdminLiveScoreTablePage() {
               <select
                 value={ex.lbRuns}
                 onChange={(e) => onExtrasChange(rowIndex, 'lbRuns', parseInt(e.target.value, 10) || 0)}
-                className="w-full border border-white/10 focus:border-purple-400 rounded-lg px-2 py-1 bg-slate-950 text-white text-xs"
+                className={`${scoreTableSelectClass} text-xs`}
               >
                 {Array.from({ length: 7 }, (_, i) => (
                   <option key={i} value={i}>
@@ -3261,7 +3270,7 @@ export default function IPLAdminLiveScoreTablePage() {
                 type="checkbox"
                 checked={wk.hasWicket}
                 onChange={(e) => onWicketChange(rowIndex, 'hasWicket', e.target.checked)}
-                className="rounded border-white/20 bg-slate-950 text-purple-500 focus:ring-purple-400"
+                className={scoreTableCheckboxClass}
               />
               <span className="text-xs text-white/70">Wicket</span>
             </div>
@@ -3270,7 +3279,7 @@ export default function IPLAdminLiveScoreTablePage() {
                 <select
                   value={wk.wicketType}
                   onChange={(e) => onWicketChange(rowIndex, 'wicketType', e.target.value)}
-                  className="w-full border border-white/10 focus:border-purple-400 rounded-lg px-2 py-1 bg-slate-950 text-white text-xs"
+                  className={`${scoreTableSelectClass} text-xs`}
                 >
                   <option value="">Type...</option>
                   {allowedWicketTypes.map((t) => (
@@ -3284,7 +3293,7 @@ export default function IPLAdminLiveScoreTablePage() {
                     value={outBatterDisabled ? 'nonStriker' : wk.outBatter}
                     onChange={(e) => onWicketChange(rowIndex, 'outBatter', e.target.value)}
                     disabled={outBatterDisabled}
-                    className="w-full border border-white/10 focus:border-purple-400 rounded-lg px-2 py-1 bg-slate-950 text-white text-xs disabled:opacity-70"
+                    className={`${scoreTableSelectClass} text-xs disabled:opacity-70`}
                   >
                     <option value="striker">Out: Striker</option>
                     <option value="nonStriker">Out: Non-striker</option>
@@ -3297,8 +3306,8 @@ export default function IPLAdminLiveScoreTablePage() {
                       onWicketChange(rowIndex, 'wicketTaker', normalizePlayerSelectionInput(e.target.value, bowlingOptions))
                     }
                     list={getTeamPlayerDatalistId(selectedMatchId, bowlingKey)}
-                    placeholder="Type fielder/bowler name"
-                    className="w-full border border-white/10 focus:border-purple-400 rounded-lg px-2 py-1 bg-white/5 text-white placeholder-white/30 text-xs"
+                    placeholder="Search fielder or bowler"
+                    className={`${scoreTableInputClass} text-xs`}
                   />
                 )}
                 {showWicketAssistant && (
@@ -3315,8 +3324,8 @@ export default function IPLAdminLiveScoreTablePage() {
                       )
                     }
                     list={getTeamPlayerDatalistId(selectedMatchId, bowlingKey)}
-                    placeholder="Type assistant fielder"
-                    className="w-full border border-white/10 focus:border-purple-400 rounded-lg px-2 py-1 bg-white/5 text-white placeholder-white/30 text-xs"
+                    placeholder="Search assistant fielder"
+                    className={`${scoreTableInputClass} text-xs`}
                   />
                 )}
               </>
@@ -3330,7 +3339,7 @@ export default function IPLAdminLiveScoreTablePage() {
             value={cellValue || ''}
             onChange={(e) => updateCell(rowIndex, colIndex, e.target.value)}
             placeholder="Notes"
-            className="w-full border border-white/10 focus:border-purple-400 rounded-lg px-2 py-1 bg-white/5 text-white placeholder-white/30"
+            className={scoreTableInputClass}
           />
         );
       }
@@ -3379,7 +3388,7 @@ export default function IPLAdminLiveScoreTablePage() {
   const recentCommentary = buildCommentaryFromRows(fastInnings).slice(-5);
 
   return (
-    <div className="relative w-full min-w-0 max-w-[calc(100vw-2rem)] overflow-hidden rounded-[1.25rem] border border-[#d7a85b]/20 bg-[#07110f] p-4 text-white shadow-2xl lg:max-w-[calc(100vw-18rem)] sm:p-6">
+    <div className="oil-panel relative w-full min-w-0 max-w-[calc(100vw-2rem)] overflow-hidden p-4 text-white shadow-2xl lg:max-w-[calc(100vw-18rem)] sm:p-6">
       <style jsx global>{`
         @keyframes iplOilWash {
           0% {
@@ -3482,12 +3491,12 @@ export default function IPLAdminLiveScoreTablePage() {
           </div>
           <div className="flex items-center gap-3">
             <Activity className="h-7 w-7 text-[#d7a85b]" />
-            <h1 className="text-2xl font-bold text-white sm:text-3xl">Fast Live Score Desk</h1>
+            <h1 className="text-2xl font-bold text-white sm:text-3xl">IPL Fast Live Scoring Console</h1>
           </div>
           <div className="mt-1 text-sm font-medium text-[#f2d39a]">{matchTitle}</div>
           <p className="mt-2 text-sm leading-6 text-white/70">
-            Record every delivery, manage Impact Player updates, publish the live score, and keep the scorecard in sync
-            with cricket-ready wording.
+            Record legal balls, extras, wickets, Impact Player moves, match advisories, and scorecard sync from one
+            scorer-friendly desk.
           </p>
         </div>
         <div className="grid grid-cols-1 gap-2 text-xs sm:grid-cols-2 xl:grid-cols-4 2xl:min-w-[460px]">
@@ -3513,7 +3522,7 @@ export default function IPLAdminLiveScoreTablePage() {
       </header>
 
       <div className="mb-6 grid grid-cols-1 gap-4 xl:grid-cols-2 2xl:grid-cols-3">
-        <div className="rounded-2xl border border-white/10 bg-[#0a1815]/70 p-4 shadow-xl shadow-black/15 backdrop-blur">
+        <div className="oil-panel p-4 shadow-xl shadow-black/15">
           <div className="mb-4 flex items-center justify-between gap-3">
             <div>
               <div className="text-sm font-semibold text-white">Match Control</div>
@@ -3553,7 +3562,7 @@ export default function IPLAdminLiveScoreTablePage() {
                 className={`w-full ${fieldClass}`}
                 disabled={!visibleMatches.length}
               >
-                <option value="">Choose match...</option>
+                <option value="">Select match to score...</option>
                 {visibleMatches.map((m) => (
                   <option key={m.id} value={m.id}>
                     {m.team1?.shortName || m.team1?.name} vs {m.team2?.shortName || m.team2?.name}
@@ -3707,7 +3716,7 @@ export default function IPLAdminLiveScoreTablePage() {
           )}
         </div>
 
-        <div className="ipl-score-card rounded-2xl border border-white/10 bg-[#0a1815]/70 p-4 shadow-xl shadow-black/15 backdrop-blur">
+        <div className="ipl-score-card oil-stat-card oil-stat-card--gold p-4 shadow-xl shadow-black/15">
           <div className="flex items-center justify-between mb-2">
             <h3 className="text-sm font-semibold text-white/80">Innings 1</h3>
             <div className="rounded-full bg-[#d7a85b]/10 px-2 py-1 text-xs text-[#f2d39a]">{innings1BattingName || ''}</div>
@@ -3727,7 +3736,7 @@ export default function IPLAdminLiveScoreTablePage() {
           </div>
         </div>
 
-        <div className="ipl-score-card rounded-2xl border border-white/10 bg-[#0a1815]/70 p-4 shadow-xl shadow-black/15 backdrop-blur">
+        <div className="ipl-score-card oil-stat-card oil-stat-card--cyan p-4 shadow-xl shadow-black/15">
           <div className="flex items-center justify-between mb-2">
             <h3 className="text-sm font-semibold text-white/80">Innings 2</h3>
             <div className="rounded-full bg-[#4fb6c4]/10 px-2 py-1 text-xs text-[#a8e9ef]">{innings2BattingName || ''}</div>
@@ -3754,7 +3763,7 @@ export default function IPLAdminLiveScoreTablePage() {
       </div>
 
       {selectedMatch && (
-        <section className="mb-6 rounded-2xl border border-white/10 bg-[#0a1815]/70 p-4 shadow-xl shadow-black/15 backdrop-blur">
+        <section className="oil-panel mb-6 p-4 shadow-xl shadow-black/15">
           <div className="flex items-start justify-between gap-4">
             <div>
               <div className="flex items-center gap-2 text-sm font-semibold text-white">
@@ -3947,7 +3956,7 @@ export default function IPLAdminLiveScoreTablePage() {
         </section>
       )}
 
-      <div className="mb-5 flex flex-wrap items-center gap-3 rounded-2xl border border-white/10 bg-[#0a1815]/70 p-3 shadow-xl shadow-black/10 backdrop-blur">
+      <div className="oil-toolbar mb-5 flex flex-wrap items-center gap-3 rounded-2xl p-3 shadow-xl shadow-black/10">
         <button
           onClick={exportCSV}
           className={actionButtonClass}
@@ -3983,15 +3992,15 @@ export default function IPLAdminLiveScoreTablePage() {
               ? 'Scorecard Synced'
               : scorecardSyncStatus === 'error'
                 ? 'Sync Failed'
-                : 'Sync Scorecard'}
+                : 'Sync Scorecard Draft'}
         </button>
         <button
           onClick={publishNow}
           disabled={saveStatus === 'saving' || !selectedMatchId}
-          className="inline-flex items-center gap-2 rounded-xl bg-[#126e89] px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-[#126e89]/20 transition hover:-translate-y-0.5 hover:bg-[#1683a4] disabled:translate-y-0 disabled:opacity-50"
+          className={primaryButtonClass}
         >
           <UploadCloud className="w-4 h-4" />
-          Publish Live Score
+          Publish Scoreboard
         </button>
 
         <div className={`ml-auto rounded-full border px-3 py-1.5 text-xs ${getStatusClass(saveStatus)}`}>
@@ -3999,15 +4008,16 @@ export default function IPLAdminLiveScoreTablePage() {
         </div>
       </div>
 
-      <section className="mb-6 rounded-2xl border border-white/10 bg-[#0a1815]/70 p-5 shadow-xl shadow-black/15 backdrop-blur">
+      <section className="oil-panel mb-6 p-5 shadow-xl shadow-black/15">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
             <div className="flex items-center gap-2">
               <Radio className="h-5 w-5 text-[#4cc39a]" />
-              <h3 className="text-lg font-semibold text-white">Ball-by-Ball Scorer</h3>
+              <h3 className="text-lg font-semibold text-white">Ball-by-Ball Scoring Panel</h3>
             </div>
             <p className="mt-1 text-xs text-white/60">
-              Score the next delivery with automatic overs, strike rotation, extras, and wicket guardrails.
+              Score each delivery with automatic overs, strike rotation, extras, wicket checks, and current-innings
+              context.
             </p>
             <div className="mt-3 flex flex-wrap gap-2 text-xs">
               <span className="rounded-full border border-[#d7a85b]/30 bg-[#d7a85b]/10 px-3 py-1 text-[#f2d39a]">
@@ -4028,7 +4038,7 @@ export default function IPLAdminLiveScoreTablePage() {
               onChange={(e) => setAutoSwapStrike(e.target.checked)}
               className="rounded border-white/20 bg-[#07110f] text-[#d7a85b] focus:ring-[#d7a85b]/30"
             />
-            Auto swap strike on odd runs (skips wickets)
+            Auto swap strike after odd runs, except on wicket balls
           </label>
         </div>
 
@@ -4060,7 +4070,7 @@ export default function IPLAdminLiveScoreTablePage() {
                   value={resolvePlayerName(fastStrikerId)}
                   onChange={(e) => setFastStrikerId(normalizePlayerSelectionInput(e.target.value, fastBattingOptions))}
                   list={getTeamPlayerDatalistId(selectedMatchId, fastBattingKey)}
-                  placeholder="Type striker name"
+                  placeholder="Search striker or type name"
                   className={`mt-1 min-w-[150px] text-xs ${compactFieldClass}`}
                 />
               </div>
@@ -4072,7 +4082,7 @@ export default function IPLAdminLiveScoreTablePage() {
                     setFastNonStrikerId(normalizePlayerSelectionInput(e.target.value, fastBattingOptions))
                   }
                   list={getTeamPlayerDatalistId(selectedMatchId, fastBattingKey)}
-                  placeholder="Type non-striker name"
+                  placeholder="Search non-striker or type name"
                   className={`mt-1 min-w-[150px] text-xs ${compactFieldClass}`}
                 />
               </div>
@@ -4082,7 +4092,7 @@ export default function IPLAdminLiveScoreTablePage() {
                   value={resolvePlayerName(fastBowlerId)}
                   onChange={(e) => setFastBowlerId(normalizePlayerSelectionInput(e.target.value, fastBowlingOptions))}
                   list={getTeamPlayerDatalistId(selectedMatchId, fastBowlingKey)}
-                  placeholder="Type bowler name"
+                  placeholder="Search bowler or type name"
                   className={`mt-1 min-w-[150px] text-xs ${compactFieldClass}`}
                 />
               </div>
@@ -4209,7 +4219,8 @@ export default function IPLAdminLiveScoreTablePage() {
               Wide and no-ball are mutually exclusive. Byes/LB disable wide.
             </div>
             <div className="text-[11px] text-white/50">
-              Hotkeys: 0-6 runs, W wicket, D wide, N no-ball, B byes, L leg-byes, Enter record, U undo, S swap, C clear.
+              Use the result buttons for runs, extras, wicket events, and strike changes while the scorer stays in
+              delivery context.
             </div>
             <div className="text-[11px] text-[#9cf2c8]">
               Player fields accept free text. Squad suggestions are optional, so scoring can begin before Playing XI

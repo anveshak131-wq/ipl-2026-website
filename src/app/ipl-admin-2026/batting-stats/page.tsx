@@ -378,7 +378,7 @@ const BattingStatsPage = () => {
       const matchesSearch = player.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
                            String(player.teamId || '').toLowerCase().includes(searchQuery.toLowerCase());
       
-      // Handle the special "Not Selected This Season" filter
+      // Handle the special "Not Selected for This Season" filter
       if (selectedTeam === NOT_SELECTED_SEASON_FILTER) {
         return isIPL && matchesSearch && isInNotSelectedSeasonPool(player);
       }
@@ -528,7 +528,7 @@ const BattingStatsPage = () => {
 
   const getSelectedTeamLabel = useCallback(() => {
     if (selectedTeam === 'all') return 'All Teams';
-    if (selectedTeam === NOT_SELECTED_SEASON_FILTER) return 'Not Selected This Season';
+    if (selectedTeam === NOT_SELECTED_SEASON_FILTER) return 'Not Selected for This Season';
     return teams.find((team) => String(team.id) === String(selectedTeam))?.name || 'Selected Team';
   }, [selectedTeam, teams]);
 
@@ -603,33 +603,37 @@ const BattingStatsPage = () => {
 
   return (
     <>
-      <div className="flex-1 bg-gradient-to-br from-slate-950 via-indigo-950 to-slate-950 min-h-screen overflow-x-hidden relative">
-        {/* Animated background overlay */}
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-indigo-900/20 via-transparent to-purple-900/20 pointer-events-none animate-pulse" style={{ animationDuration: '8s' }}></div>
+      <div className="flex-1 ipl-oil-admin-page min-h-screen overflow-x-hidden">
+        <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent,rgba(215,168,91,0.06),transparent)] pointer-events-none" />
         
         {/* Hero Header */}
-        <div className="relative bg-gradient-to-r from-cyan-600 via-blue-600 to-indigo-700 p-8 shadow-2xl overflow-hidden">
-          {/* Animated gradient overlay */}
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-shimmer"></div>
+        <div className="relative oil-hero p-6 lg:p-8 shadow-2xl">
           <div className="max-w-7xl mx-auto relative z-10">
             <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-              <div className="animate-in slide-in-from-left duration-700">
-                <h1 className="text-4xl lg:text-5xl font-bold text-white mb-2 flex items-center gap-3 group">
-                  <div className="w-12 h-12 bg-white/20 backdrop-blur rounded-xl flex items-center justify-center transform group-hover:rotate-12 group-hover:scale-110 transition-all duration-300 shadow-lg shadow-white/20">
-                    <TrendingUp className="w-6 h-6 text-white" />
-                  </div>
-                  <span className="bg-gradient-to-r from-white via-cyan-100 to-white bg-clip-text text-transparent">Batting Statistics</span>
-                </h1>
-                <p className="text-cyan-100 text-lg font-medium tracking-wide">Comprehensive batting performance analytics</p>
-              </div>
-              <div className="flex flex-wrap gap-4 animate-in slide-in-from-right duration-700">
-                <div className="bg-white/10 backdrop-blur rounded-xl p-4 text-center min-w-[120px] border border-white/20 hover:bg-white/20 hover:scale-105 transition-all duration-300 cursor-pointer shadow-lg hover:shadow-2xl hover:shadow-cyan-500/50">
-                  <div className="text-3xl font-bold text-white animate-in zoom-in duration-500">{summaryStats.activeBatsmen}</div>
-                  <div className="text-cyan-100 text-sm mt-1 font-semibold">Active Batsmen</div>
+              <div className="oil-rise">
+                <div className="oil-hero-kicker mb-3">
+                  <Activity className="h-3.5 w-3.5" />
+                  IPL batting desk
                 </div>
-                <div className="bg-white/10 backdrop-blur rounded-xl p-4 text-center min-w-[120px] border border-white/20 hover:bg-white/20 hover:scale-105 transition-all duration-300 cursor-pointer shadow-lg hover:shadow-2xl hover:shadow-indigo-500/50">
+                <h1 className="text-3xl font-bold text-white mb-2 flex items-center gap-3 group">
+                  <div className="w-12 h-12 bg-[#d7a85b]/15 backdrop-blur rounded-xl flex items-center justify-center transition-all duration-200 shadow-lg shadow-black/20 border border-[#d7a85b]/30">
+                    <TrendingUp className="w-6 h-6 text-[#f2d39a]" />
+                  </div>
+                  <span>Batting Stats Control Room</span>
+                </h1>
+                <p className="text-sm leading-6 text-white/70 max-w-3xl">
+                  Review IPL batting records by runs, innings, strike rate, boundaries, milestones, and export-ready
+                  player sheets.
+                </p>
+              </div>
+              <div className="flex flex-wrap gap-4 oil-rise">
+                <div className="oil-stat-card oil-stat-card--gold p-4 text-center min-w-[120px]">
+                  <div className="text-3xl font-bold text-white animate-in zoom-in duration-500">{summaryStats.activeBatsmen}</div>
+                  <div className="text-[#f2d39a] text-sm mt-1 font-semibold">Scoring Batters</div>
+                </div>
+                <div className="oil-stat-card oil-stat-card--teal p-4 text-center min-w-[120px]">
                   <div className="text-3xl font-bold text-white animate-in zoom-in duration-500 delay-100">{teams.length}</div>
-                  <div className="text-cyan-100 text-sm mt-1 font-semibold">Teams</div>
+                  <div className="text-[#9cf2c8] text-sm mt-1 font-semibold">IPL Teams</div>
                 </div>
               </div>
             </div>
@@ -639,87 +643,87 @@ const BattingStatsPage = () => {
         <div className="max-w-7xl mx-auto p-6 lg:p-8 relative z-10">
           {/* Summary Cards */}
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 mb-8">
-            <div className="bg-gradient-to-br from-cyan-600 via-cyan-600 to-blue-700 rounded-2xl p-5 shadow-xl border border-cyan-400/30 hover:border-cyan-400/60 transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-cyan-500/50 cursor-pointer animate-in fade-in-50 slide-in-from-bottom-4 duration-500 group">
+            <div className="oil-stat-card oil-stat-card--gold p-5 oil-rise group">
               <div className="flex items-center justify-between mb-2">
-                <Target className="w-5 h-5 text-cyan-100 group-hover:scale-110 transition-transform" />
+                <Target className="w-5 h-5 text-[#f2d39a] group-hover:scale-110 transition-transform" />
               </div>
               <div className="text-2xl font-bold text-white group-hover:scale-105 transition-transform">{summaryStats.totalRuns.toLocaleString()}</div>
-              <div className="text-cyan-100 text-xs mt-1 font-semibold uppercase tracking-wider">Total Runs</div>
+              <div className="text-[#f2d39a] text-xs mt-1 font-semibold uppercase tracking-wider">Runs Scored</div>
             </div>
-            <div className="bg-gradient-to-br from-violet-600 via-purple-600 to-purple-700 rounded-2xl p-5 shadow-xl border border-violet-400/30 hover:border-violet-400/60 transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-violet-500/50 cursor-pointer animate-in fade-in-50 slide-in-from-bottom-4 duration-500 delay-75 group">
+            <div className="oil-stat-card oil-stat-card--cyan p-5 oil-rise group">
               <div className="flex items-center justify-between mb-2">
-                <Award className="w-5 h-5 text-violet-100 group-hover:scale-110 transition-transform" />
+                <Award className="w-5 h-5 text-[#a8e9ef] group-hover:scale-110 transition-transform" />
               </div>
               <div className="text-2xl font-bold text-white group-hover:scale-105 transition-transform">{summaryStats.highestScore}</div>
-              <div className="text-violet-100 text-xs mt-1 font-semibold uppercase tracking-wider">Highest Score</div>
+              <div className="text-[#a8e9ef] text-xs mt-1 font-semibold uppercase tracking-wider">Top Score</div>
             </div>
-            <div className="bg-gradient-to-br from-pink-600 via-rose-600 to-rose-700 rounded-2xl p-5 shadow-xl border border-pink-400/30 hover:border-pink-400/60 transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-pink-500/50 cursor-pointer animate-in fade-in-50 slide-in-from-bottom-4 duration-500 delay-150 group">
+            <div className="oil-stat-card oil-stat-card--rose p-5 oil-rise group">
               <div className="flex items-center justify-between mb-2">
-                <Award className="w-5 h-5 text-pink-100 group-hover:scale-110 transition-transform" />
+                <Award className="w-5 h-5 text-[#ffaaa5] group-hover:scale-110 transition-transform" />
               </div>
               <div className="text-2xl font-bold text-white group-hover:scale-105 transition-transform">{summaryStats.totalHundreds}</div>
               <div className="text-pink-100 text-xs mt-1 font-semibold uppercase tracking-wider">Centuries</div>
             </div>
-            <div className="bg-gradient-to-br from-amber-600 via-orange-600 to-orange-700 rounded-2xl p-5 shadow-xl border border-amber-400/30 hover:border-amber-400/60 transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-orange-500/50 cursor-pointer animate-in fade-in-50 slide-in-from-bottom-4 duration-500 delay-200 group">
+            <div className="oil-stat-card oil-stat-card--copper p-5 oil-rise group">
               <div className="flex items-center justify-between mb-2">
                 <Zap className="w-5 h-5 text-amber-100 group-hover:scale-110 transition-transform" />
               </div>
               <div className="text-2xl font-bold text-white group-hover:scale-105 transition-transform">{summaryStats.totalFifties}</div>
-              <div className="text-amber-100 text-xs mt-1 font-semibold uppercase tracking-wider">Half Centuries</div>
+              <div className="text-amber-100 text-xs mt-1 font-semibold uppercase tracking-wider">Fifties</div>
             </div>
-            <div className="bg-gradient-to-br from-emerald-600 via-teal-600 to-teal-700 rounded-2xl p-5 shadow-xl border border-emerald-400/30 hover:border-emerald-400/60 transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-emerald-500/50 cursor-pointer animate-in fade-in-50 slide-in-from-bottom-4 duration-500 delay-300 group">
+            <div className="oil-stat-card oil-stat-card--teal p-5 oil-rise group">
               <div className="flex items-center justify-between mb-2">
                 <TrendingUp className="w-5 h-5 text-emerald-100 group-hover:scale-110 transition-transform" />
               </div>
               <div className="text-2xl font-bold text-white group-hover:scale-105 transition-transform">{summaryStats.avgRuns}</div>
-              <div className="text-emerald-100 text-xs mt-1 font-semibold uppercase tracking-wider">Avg Runs/Player</div>
+              <div className="text-emerald-100 text-xs mt-1 font-semibold uppercase tracking-wider">Runs per Batter</div>
             </div>
-            <div className="bg-gradient-to-br from-sky-600 via-blue-600 to-indigo-700 rounded-2xl p-5 shadow-xl border border-sky-400/30 hover:border-sky-400/60 transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-sky-500/50 cursor-pointer animate-in fade-in-50 slide-in-from-bottom-4 duration-500 delay-[375ms] group">
+            <div className="oil-stat-card oil-stat-card--slate p-5 oil-rise group">
               <div className="flex items-center justify-between mb-2">
-                <Target className="w-5 h-5 text-sky-100 group-hover:scale-110 transition-transform" />
+                <Target className="w-5 h-5 text-slate-200 group-hover:scale-110 transition-transform" />
               </div>
               <div className="text-2xl font-bold text-white group-hover:scale-105 transition-transform">{filteredAndSortedPlayers.length}</div>
-              <div className="text-sky-100 text-xs mt-1 font-semibold uppercase tracking-wider">Filtered Players</div>
+              <div className="text-slate-200 text-xs mt-1 font-semibold uppercase tracking-wider">Filtered Batters</div>
             </div>
           </div>
 
           {/* Search and Filters */}
-          <div className="bg-gradient-to-r from-gray-800/60 via-gray-800/40 to-gray-800/60 backdrop-blur-md rounded-2xl p-6 mb-6 border border-gray-700/50 shadow-xl hover:shadow-2xl transition-all duration-300 animate-in fade-in-50 slide-in-from-bottom-4 duration-700">
+          <div className="oil-toolbar rounded-2xl p-6 mb-6 transition-all duration-200 oil-rise">
             <div className="flex flex-col md:flex-row gap-4">
               <div className="flex-1 relative group">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-cyan-400 transition-colors" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-white/45 group-focus-within:text-[#f2d39a] transition-colors" />
                 <input
                   type="text"
                   id="search-players"
                   name="searchPlayers"
-                  placeholder="Search players..."
+                  placeholder="Search batter, team, role, or nationality..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 bg-gray-900/60 border border-gray-700 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all hover:bg-gray-900/80"
+                  className="oil-field w-full pl-10 pr-4 py-2.5"
                 />
               </div>
               <div className="relative group">
-                <Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-indigo-400 transition-colors" />
+                <Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-white/45 group-focus-within:text-[#9cf2c8] transition-colors" />
                 <select
                   value={selectedTeam}
                   onChange={(e) => setSelectedTeam(e.target.value)}
-                  className="pl-10 pr-8 py-2.5 bg-gray-900/60 border border-gray-700 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all appearance-none cursor-pointer hover:bg-gray-900/80"
+                  className="oil-select pl-10 pr-8 py-2.5 appearance-none cursor-pointer"
                 >
                   <option value="all">All Teams</option>
                   <option value={NOT_SELECTED_SEASON_FILTER} className="bg-amber-950">
-                    Not Selected This Season ({getInactivePlayerCount()})
+                    Not Selected for This Season ({getInactivePlayerCount()})
                   </option>
                   {teams.map(team => (
                     <option key={team.id} value={String(team.id)}>{team.name}</option>
                   ))}
                 </select>
               </div>
-              <div className="flex gap-2 bg-gray-900/60 rounded-xl p-1 border border-gray-700">
+              <div className="oil-segmented">
                 <button
                   onClick={() => setViewMode('table')}
                   className={`px-4 py-2 rounded-lg transition-all flex items-center gap-2 ${
                     viewMode === 'table'
-                      ? 'bg-gradient-to-r from-cyan-600 to-blue-600 text-white shadow-lg scale-105'
+                      ? 'bg-[#d7a85b]/20 text-white shadow-lg'
                       : 'text-gray-400 hover:text-white hover:bg-gray-800'
                   }`}
                 >
@@ -730,7 +734,7 @@ const BattingStatsPage = () => {
                   onClick={() => setViewMode('teams')}
                   className={`px-4 py-2 rounded-lg transition-all flex items-center gap-2 ${
                     viewMode === 'teams'
-                      ? 'bg-gradient-to-r from-cyan-600 to-blue-600 text-white shadow-lg scale-105'
+                      ? 'bg-[#d7a85b]/20 text-white shadow-lg'
                       : 'text-gray-400 hover:text-white hover:bg-gray-800'
                   }`}
                 >
@@ -741,7 +745,7 @@ const BattingStatsPage = () => {
               <button
                 onClick={() => setShowExportModal(true)}
                 disabled={filteredAndSortedPlayers.length === 0}
-                className="px-4 py-2.5 bg-gradient-to-r from-amber-700 via-cyan-700 to-sky-700 hover:from-amber-600 hover:via-cyan-600 hover:to-sky-600 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl transition-all duration-300 flex items-center justify-center gap-2 shadow-lg hover:shadow-cyan-500/30"
+                className="oil-btn-warm px-4 py-2.5 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <Download className="w-4 h-4" />
                 Export
@@ -751,18 +755,18 @@ const BattingStatsPage = () => {
 
           {/* Players Table or Team Panels */}
           {filteredAndSortedPlayers.length === 0 ? (
-            <div className="bg-gradient-to-br from-gray-800/40 via-gray-800/30 to-gray-800/40 backdrop-blur-md rounded-3xl p-16 text-center border border-gray-700/50 shadow-xl animate-in fade-in-50 zoom-in-95 duration-500">
-              <div className="w-20 h-20 bg-gradient-to-br from-gray-700/60 to-gray-600/60 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
-                <Search className="w-10 h-10 text-gray-400" />
+            <div className="oil-panel rounded-2xl p-16 text-center oil-rise">
+              <div className="w-20 h-20 bg-[#d7a85b]/10 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg border border-[#d7a85b]/20">
+                <Search className="w-10 h-10 text-[#f2d39a]" />
               </div>
-              <h3 className="text-2xl font-bold text-white mb-3">No Players Found</h3>
-              <p className="text-gray-400 text-lg mb-6">Try adjusting your search or filter criteria</p>
+              <h3 className="text-2xl font-bold text-white mb-3">No Batters Match These Filters</h3>
+              <p className="text-gray-400 text-lg mb-6">Try a different player name, team, or batting metric.</p>
             </div>
           ) : viewMode === 'table' ? (
-            <div className="bg-gradient-to-br from-gray-800/40 via-gray-800/30 to-gray-800/40 backdrop-blur-md rounded-2xl border border-gray-700/50 overflow-hidden shadow-2xl animate-in fade-in-50 slide-in-from-bottom-8 duration-700">
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead className="bg-gradient-to-r from-gray-900/80 via-gray-900/60 to-gray-900/80 border-b border-gray-700">
+            <div className="oil-table-shell rounded-2xl overflow-hidden shadow-2xl oil-rise">
+              <div className="overflow-x-auto" tabIndex={0}>
+                <table className="oil-table">
+                  <thead className="border-b border-white/10">
                     <tr>
                       <th className="px-6 py-4 text-left">
                         <button
@@ -832,7 +836,7 @@ const BattingStatsPage = () => {
                       <th className="px-6 py-4 text-center text-gray-300 font-semibold text-sm uppercase tracking-wider">Actions</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-700/50">
+                  <tbody className="divide-y divide-white/10">
                     {filteredAndSortedPlayers.map((player, index) => {
                       const team = teams.find(t => String(t.id) === String(player.teamId));
                       const runs = player.stats?.runs || 0;
@@ -840,24 +844,24 @@ const BattingStatsPage = () => {
                       const runsPercentage = (runs / maxRuns) * 100;
 
                       return (
-                        <tr key={player.id} className="hover:bg-gradient-to-r hover:from-gray-800/60 hover:via-gray-800/40 hover:to-gray-800/60 transition-all duration-300 group border-l-4 border-transparent hover:border-l-cyan-500 hover:shadow-lg">
+                        <tr key={player.id} className="group">
                           <td className="px-6 py-4">
                             <div className="flex items-center gap-3">
-                              <div className="w-10 h-10 bg-gradient-to-br from-cyan-500 via-blue-600 to-indigo-600 rounded-xl flex items-center justify-center text-white font-bold text-sm shadow-lg group-hover:scale-110 group-hover:rotate-6 transition-all duration-300">
+                              <div className="w-10 h-10 bg-gradient-to-br from-[#d7a85b] to-[#126e89] rounded-xl flex items-center justify-center text-white font-bold text-sm shadow-lg group-hover:scale-105 transition-all duration-200">
                                 {player.name?.charAt(0) || '?'}
                   </div>
                   <div>
-                                <div className="font-semibold text-white group-hover:text-cyan-300 transition-colors">{player.name || 'Unknown'}</div>
+                                <div className="font-semibold text-white group-hover:text-[#f2d39a] transition-colors">{player.name || 'Unknown Player'}</div>
                                 <div className="text-sm text-gray-400 group-hover:text-gray-300 transition-colors">{team?.shortName || 'No Team'}</div>
                               </div>
                             </div>
                           </td>
                           <td className="px-6 py-4">
                             <div className="flex items-center gap-2">
-                              <span className="font-bold text-white group-hover:text-cyan-300 transition-colors">{runs.toLocaleString()}</span>
+                              <span className="font-bold text-white group-hover:text-[#f2d39a] transition-colors">{runs.toLocaleString()}</span>
                               <div className="w-16 h-2 bg-gray-700/50 rounded-full overflow-hidden shadow-inner">
                                 <div 
-                                  className="h-full bg-gradient-to-r from-cyan-500 via-blue-500 to-indigo-500 transition-all duration-700 shadow-lg shadow-cyan-500/50"
+                                  className="h-full bg-gradient-to-r from-[#d7a85b] via-[#4cc39a] to-[#4fb6c4] transition-all duration-700 shadow-lg shadow-[#d7a85b]/30"
                                   style={{ width: `${runsPercentage}%` }}
                                 />
                   </div>
@@ -927,10 +931,10 @@ const BattingStatsPage = () => {
                           <td className="px-6 py-4">
                 <button
                               onClick={() => handleEditPlayer(player)}
-                              className="mx-auto flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white rounded-xl transition-all duration-300 text-sm font-medium shadow-lg hover:shadow-xl hover:scale-105 group-hover:shadow-cyan-500/50"
+                              className="oil-btn-primary mx-auto px-4 py-2 text-sm"
                             >
                               <Edit2 className="w-4 h-4" />
-                              Edit
+                              Edit Batting
                 </button>
                           </td>
                         </tr>
@@ -955,19 +959,19 @@ const BattingStatsPage = () => {
                   const teamFifties = teamPlayers.reduce((sum, p) => sum + (p.stats?.fifties || 0), 0);
 
                   return (
-                    <div key={team.id} className="bg-gradient-to-br from-gray-800/50 via-gray-800/30 to-gray-800/50 backdrop-blur-md rounded-3xl border border-gray-700/50 overflow-hidden shadow-2xl hover:shadow-cyan-500/20 transition-all duration-500 animate-in fade-in-50 slide-in-from-bottom-8" style={{ animationDelay: `${teamIndex * 100}ms` }}>
+                    <div key={team.id} className="oil-panel rounded-2xl overflow-hidden shadow-2xl oil-rise" style={{ animationDelay: `${teamIndex * 100}ms` }}>
                       {/* Team Header */}
-                      <div className="bg-gradient-to-r from-cyan-600/20 via-blue-600/20 to-indigo-600/20 p-6 border-b border-gray-700/50 relative overflow-hidden group">
+                      <div className="bg-gradient-to-r from-[#d7a85b]/15 via-[#4cc39a]/10 to-[#4fb6c4]/10 p-6 border-b border-white/10 relative overflow-hidden group">
                         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
                         <div className="flex items-center justify-between relative z-10">
                           <div className="flex items-center gap-4">
-                            <div className="w-16 h-16 bg-gradient-to-br from-cyan-500 via-blue-600 to-indigo-600 rounded-2xl flex items-center justify-center text-white font-bold text-xl shadow-xl group-hover:scale-110 group-hover:rotate-6 transition-all duration-300">
+                            <div className="w-16 h-16 bg-gradient-to-br from-[#d7a85b] via-[#b7792f] to-[#126e89] rounded-2xl flex items-center justify-center text-white font-bold text-xl shadow-xl group-hover:scale-105 transition-all duration-200">
                               {team.shortName || team.name.charAt(0)}
                             </div>
                             <div>
-                              <h2 className="text-2xl font-bold text-white group-hover:text-cyan-300 transition-colors">{team.name}</h2>
+                              <h2 className="text-2xl font-bold text-white group-hover:text-[#f2d39a] transition-colors">{team.name}</h2>
                               <p className="text-gray-400 text-sm mt-1">
-                                {teamPlayers.length} players • {teamPlayers.filter(p => p.stats?.battingInnings > 0).length} active batsmen
+                                {teamPlayers.length} players - {teamPlayers.filter(p => p.stats?.battingInnings > 0).length} scoring batters
                               </p>
                             </div>
                           </div>
@@ -978,11 +982,11 @@ const BattingStatsPage = () => {
                             </div>
                             <div className="text-center bg-white/5 backdrop-blur rounded-xl px-4 py-2 border border-white/10 hover:bg-white/10 transition-all">
                               <div className="text-2xl font-bold text-pink-400">{teamHundreds}</div>
-                              <div className="text-gray-400 text-xs font-semibold">100s</div>
+                              <div className="text-gray-400 text-xs font-semibold">Centuries</div>
                             </div>
                             <div className="text-center bg-white/5 backdrop-blur rounded-xl px-4 py-2 border border-white/10 hover:bg-white/10 transition-all">
                               <div className="text-2xl font-bold text-orange-400">{teamFifties}</div>
-                              <div className="text-gray-400 text-xs font-semibold">50s</div>
+                              <div className="text-gray-400 text-xs font-semibold">Fifties</div>
                             </div>
                           </div>
                         </div>
@@ -999,15 +1003,15 @@ const BattingStatsPage = () => {
                             return (
                               <div
                                 key={player.id}
-                                className="bg-gradient-to-br from-gray-700/60 via-gray-800/60 to-gray-800/60 rounded-2xl p-5 border border-gray-600/50 hover:border-cyan-500/60 transition-all duration-300 hover:shadow-xl hover:shadow-cyan-500/30 group hover:scale-105 cursor-pointer animate-in fade-in-50 zoom-in-95"
+                                className="oil-stat-card oil-stat-card--gold rounded-2xl p-5 group cursor-pointer oil-rise"
                                 style={{ animationDelay: `${playerIndex * 50}ms` }}
                               >
                                 <div className="flex items-center gap-3 mb-4">
-                                  <div className="w-12 h-12 bg-gradient-to-br from-cyan-500 via-blue-600 to-indigo-600 rounded-xl flex items-center justify-center text-white font-bold text-sm shadow-lg group-hover:scale-110 group-hover:rotate-6 transition-all duration-300">
+                                  <div className="w-12 h-12 bg-gradient-to-br from-[#d7a85b] via-[#b7792f] to-[#126e89] rounded-xl flex items-center justify-center text-white font-bold text-sm shadow-lg group-hover:scale-105 transition-all duration-200">
                                     {player.name?.charAt(0) || '?'}
                                   </div>
                                   <div className="flex-1 min-w-0">
-                                    <div className="font-semibold text-white truncate group-hover:text-cyan-300 transition-colors">{player.name || 'Unknown'}</div>
+                                    <div className="font-semibold text-white truncate group-hover:text-[#f2d39a] transition-colors">{player.name || 'Unknown Player'}</div>
                                     <div className="text-xs text-gray-400 group-hover:text-gray-300 transition-colors">{player.role}</div>
                                   </div>
                                 </div>
@@ -1015,17 +1019,17 @@ const BattingStatsPage = () => {
                                 <div className="space-y-2 mb-4">
                                   <div className="flex items-center justify-between">
                                     <span className="text-gray-400 text-sm font-medium">Runs</span>
-                                    <span className="font-bold text-white group-hover:text-cyan-300 transition-colors">{runs.toLocaleString()}</span>
+                                    <span className="font-bold text-white group-hover:text-[#f2d39a] transition-colors">{runs.toLocaleString()}</span>
                                   </div>
                                   <div className="w-full h-2 bg-gray-900/60 rounded-full overflow-hidden shadow-inner">
                                     <div
-                                      className="h-full bg-gradient-to-r from-cyan-500 via-blue-500 to-indigo-500 transition-all duration-700 shadow-lg shadow-cyan-500/50"
+                                      className="h-full bg-gradient-to-r from-[#d7a85b] via-[#4cc39a] to-[#4fb6c4] transition-all duration-700 shadow-lg shadow-[#d7a85b]/30"
                                       style={{ width: `${runsPercentage}%` }}
                                     />
                                   </div>
                                   <div className="grid grid-cols-2 gap-2 mt-3">
-                                    <div className="bg-gray-900/60 rounded-xl p-2 text-center border border-cyan-500/20 hover:border-cyan-500/50 transition-all">
-                                      <div className="text-cyan-400 font-semibold">
+                                    <div className="bg-[#07110f]/70 rounded-xl p-2 text-center border border-[#d7a85b]/20 hover:border-[#d7a85b]/50 transition-all">
+                                      <div className="text-[#f2d39a] font-semibold">
                                         {(() => {
                                           if (player.stats?.battingAverage && player.stats.battingAverage !== '0' && player.stats.battingAverage !== '-') {
                                             return player.stats.battingAverage;
@@ -1043,10 +1047,10 @@ const BattingStatsPage = () => {
                                           return '-';
                                         })()}
                                       </div>
-                                      <div className="text-xs text-gray-400 font-semibold">Avg</div>
+                                      <div className="text-xs text-gray-400 font-semibold">Average</div>
                                     </div>
-                                    <div className="bg-gray-900/60 rounded-xl p-2 text-center border border-indigo-500/20 hover:border-indigo-500/50 transition-all">
-                                      <div className="text-indigo-400 font-semibold">
+                                    <div className="bg-[#07110f]/70 rounded-xl p-2 text-center border border-[#4fb6c4]/20 hover:border-[#4fb6c4]/50 transition-all">
+                                      <div className="text-[#a8e9ef] font-semibold">
                                         {(() => {
                                           if (player.stats?.battingStrikeRate && player.stats.battingStrikeRate !== '0' && player.stats.battingStrikeRate !== '-') {
                                             return player.stats.battingStrikeRate;
@@ -1062,21 +1066,21 @@ const BattingStatsPage = () => {
                                           return '-';
                                         })()}
                                       </div>
-                                      <div className="text-xs text-gray-400 font-semibold">SR</div>
+                                      <div className="text-xs text-gray-400 font-semibold">Strike Rate</div>
                                     </div>
                                   </div>
                                   <div className="flex items-center justify-between text-xs text-gray-400 mt-2 font-medium">
-                                    <span>HS: {player.stats?.highest || '-'}</span>
-                                    <span>{player.stats?.hundreds || 0}💯 / {player.stats?.fifties || 0} 50</span>
+                                    <span>High Score: {player.stats?.highest || '-'}</span>
+                                    <span>{player.stats?.hundreds || 0} 100s / {player.stats?.fifties || 0} 50s</span>
                                   </div>
                                 </div>
 
                                 <button
                                   onClick={() => handleEditPlayer(player)}
-                                  className="w-full bg-gradient-to-r from-cyan-600 via-blue-600 to-indigo-600 hover:from-cyan-500 hover:via-blue-500 hover:to-indigo-500 text-white px-4 py-2 rounded-xl font-medium transition-all duration-300 text-sm flex items-center justify-center gap-2 group-hover:scale-105 shadow-lg hover:shadow-xl hover:shadow-cyan-500/50"
+                                  className="oil-btn-primary w-full px-4 py-2 text-sm"
                                 >
                                   <Edit2 className="w-4 h-4" />
-                                  Edit Stats
+                                  Edit Batting
                                 </button>
                               </div>
                             );

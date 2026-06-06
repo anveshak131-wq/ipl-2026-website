@@ -499,7 +499,7 @@ export default function AdminPlayers() {
                 onClick={(e) => {
                   e.stopPropagation();
                 }}
-                className="flex-1 p-2.5 bg-purple-500/20 hover:bg-purple-500/40 text-purple-300 hover:text-purple-100 rounded-xl transition-all duration-300 border border-purple-500/30 hover:border-purple-400/60 hover:scale-105 shadow-lg hover:shadow-purple-500/20"
+                className="flex-1 p-2.5 bg-[#d7a85b]/15 hover:bg-[#d7a85b]/25 text-[#f2d39a] hover:text-white rounded-xl transition-all duration-300 border border-[#d7a85b]/30 hover:border-[#d7a85b]/60 hover:scale-105 shadow-lg hover:shadow-[#d7a85b]/20"
                 title="Copy Player Data"
               >
                 <Copy className="w-4 h-4 mx-auto" />
@@ -848,7 +848,7 @@ export default function AdminPlayers() {
 
   const getSelectedTeamLabel = () => {
     if (selectedTeam === 'all') return 'All Teams';
-    if (selectedTeam === NOT_SELECTED_SEASON_FILTER) return 'Not Selected This Season';
+    if (selectedTeam === NOT_SELECTED_SEASON_FILTER) return 'Not Selected for This Season';
     const team = teams.find(t => String(t.id) === String(selectedTeam));
     return team?.name || `Team ${selectedTeam}`;
   };
@@ -2693,7 +2693,7 @@ export default function AdminPlayers() {
   const handleExport = async (format: 'json' | 'csv' | 'excel' | 'pdf' | 'database') => {
     const playersToExport = searchFilteredPlayers;
     if (!playersToExport || playersToExport.length === 0) {
-      alert('No players found for the current filters.');
+      alert('No squad records match the current filters.');
       return;
     }
 
@@ -3718,12 +3718,12 @@ export default function AdminPlayers() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950">
+    <div className="ipl-oil-admin-page min-h-screen">
       <div className="flex-1 relative">
         <div className="p-6 lg:p-8 relative">
           {/* Enhanced Modern Header */}
           <div className="mb-8">
-            <div className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-blue-900/30 to-purple-900/30 rounded-3xl p-8 mb-8 border border-white/10 backdrop-blur-xl shadow-2xl">
+            <div className="oil-hero p-6 lg:p-8 mb-8 shadow-2xl">
               {/* Animated background pattern */}
               <div className="absolute inset-0 opacity-10 overflow-hidden">
                 <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,.1)_50%,transparent_75%,transparent_100%)] bg-[length:20px_20px]"></div>
@@ -3733,23 +3733,27 @@ export default function AdminPlayers() {
                 <div className="flex-1">
                   <div className="flex items-center gap-4 mb-4">
                     <div className="relative">
-                      <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 flex items-center justify-center shadow-2xl transform hover:scale-110 transition-transform duration-300">
-                        <Users className="w-10 h-10 text-white" />
+                      <div className="w-16 h-16 rounded-2xl bg-[#d7a85b]/15 border border-[#d7a85b]/30 flex items-center justify-center shadow-2xl transform hover:scale-105 transition-transform duration-200">
+                        <Users className="w-9 h-9 text-[#f2d39a]" />
                     </div>
-                      <div className="absolute -top-1 -right-1 w-6 h-6 bg-green-500 rounded-full border-4 border-slate-900 animate-pulse"></div>
+                      <div className="absolute -top-1 -right-1 w-5 h-5 bg-[#4cc39a] rounded-full border-4 border-[#07110f] animate-pulse"></div>
                     </div>
                     <div className="flex-1">
+                      <div className="oil-hero-kicker mb-3">
+                        <Activity className="h-3.5 w-3.5" />
+                        Squad operations
+                      </div>
                       <div className="flex items-center gap-3 mb-2">
-                        <h1 className="text-4xl lg:text-6xl font-extrabold bg-gradient-to-r from-white via-blue-200 to-purple-200 bg-clip-text text-transparent">
-                  Player Management
+                        <h1 className="text-3xl lg:text-4xl font-extrabold text-white">
+                  IPL Player Management
                 </h1>
-                        <span className="px-3 py-1 bg-blue-500/20 text-blue-300 rounded-full text-xs font-bold border border-blue-500/30">
+                        <span className="oil-chip">
                           {currentLeague === 'wpl' ? 'WPL' : 'IPL'}
                         </span>
                       </div>
-                      <p className="text-gray-300 text-lg flex items-center gap-2">
-                        <Activity className="w-5 h-5 text-blue-400 animate-pulse" />
-                        Manage and track all {currentLeague === 'wpl' ? 'WPL' : 'IPL'} players across {teams.length} teams
+                      <p className="text-gray-300 text-sm leading-6 flex items-center gap-2 max-w-3xl">
+                        Maintain squad lists, roles, jersey numbers, cricket profiles, auction status, and season stats
+                        across {teams.length} {currentLeague === 'wpl' ? 'WPL' : 'IPL'} teams.
                 </p>
               </div>
                   </div>
@@ -3763,7 +3767,7 @@ export default function AdminPlayers() {
                   {(userRole === 'admin' || userRole === 'super_admin' || userRole === 'players_admin') && (
                     <button
                       onClick={() => setShowExportModal(true)}
-                      className="p-2.5 rounded-lg bg-gradient-to-r from-green-600 to-emerald-600 text-white shadow-lg hover:shadow-green-500/25 transition-all duration-300 hover:scale-105 border border-green-500/30"
+                      className="oil-btn-primary p-2.5"
                       title="Export Players"
                     >
                       <Download className="w-5 h-5" />
@@ -3771,12 +3775,12 @@ export default function AdminPlayers() {
                   )}
                   
                   {/* View Toggle - Enhanced */}
-                  <div className="flex items-center gap-1 bg-gray-900/80 backdrop-blur-sm rounded-xl p-1.5 border border-white/10 shadow-lg">
+                  <div className="oil-segmented">
                     <button
                       onClick={() => setViewMode('grid')}
                       className={`p-2.5 rounded-lg transition-all duration-300 ${
                         viewMode === 'grid'
-                          ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg scale-105'
+                          ? 'bg-[#d7a85b]/20 text-white shadow-lg'
                           : 'text-gray-400 hover:text-white hover:bg-gray-800/50'
                       }`}
                       title="Grid View"
@@ -3787,7 +3791,7 @@ export default function AdminPlayers() {
                       onClick={() => setViewMode('list')}
                       className={`p-2.5 rounded-lg transition-all duration-300 ${
                         viewMode === 'list'
-                          ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg scale-105'
+                          ? 'bg-[#d7a85b]/20 text-white shadow-lg'
                           : 'text-gray-400 hover:text-white hover:bg-gray-800/50'
                       }`}
                       title="List View"
@@ -3798,7 +3802,7 @@ export default function AdminPlayers() {
                   
                   <button
                     onClick={handleOpenBackupModal}
-                    className="px-5 py-2.5 bg-gradient-to-r from-slate-700 to-slate-800 hover:from-slate-600 hover:to-slate-700 text-white rounded-xl transition-all duration-300 flex items-center gap-2 font-medium shadow-lg hover:shadow-xl border border-white/10 hover:border-white/20"
+                    className="oil-btn-secondary px-5 py-2.5"
                   >
                     <Download className="w-5 h-5" />
                     <span className="hidden sm:inline">Backups</span>
@@ -3806,7 +3810,7 @@ export default function AdminPlayers() {
                   
                   <button
                     onClick={handleDeleteAllPlayers}
-                    className="px-5 py-2.5 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white rounded-xl transition-all duration-300 flex items-center gap-2 font-medium shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed border border-red-500/30"
+                    className="oil-btn-danger px-5 py-2.5 disabled:opacity-50 disabled:cursor-not-allowed"
                     disabled={players.length === 0}
                   >
                     <Trash2 className="w-5 h-5" />
@@ -3815,7 +3819,7 @@ export default function AdminPlayers() {
                   
                 <button
                   onClick={handleAddPlayer}
-                    className="px-6 py-2.5 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 hover:from-blue-700 hover:via-purple-700 hover:to-pink-700 text-white rounded-xl transition-all duration-300 flex items-center gap-2 font-semibold shadow-lg hover:shadow-2xl hover:scale-105 border border-white/20"
+                    className="oil-btn-warm px-6 py-2.5"
                   >
                     <Plus className="w-5 h-5" />
                     Add Player
@@ -3837,37 +3841,37 @@ export default function AdminPlayers() {
             {/* Enhanced Statistics Cards with Progress Indicators */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 lg:gap-6">
               {/* Total Players - Enhanced */}
-              <div className="group relative bg-gradient-to-br from-blue-600/30 via-indigo-600/20 to-blue-700/30 rounded-2xl p-6 border border-blue-500/40 backdrop-blur-xl hover:border-blue-400/60 transition-all duration-500 shadow-xl hover:shadow-2xl overflow-hidden">
+              <div className="oil-stat-card oil-stat-card--gold group p-6">
                 {/* Animated background glow */}
                 <div className="absolute inset-0 bg-gradient-to-br from-blue-500/0 to-blue-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                 
                 <div className="relative z-10">
                 <div className="flex items-center justify-between mb-4">
                     <div className="relative">
-                      <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-2xl group-hover:scale-110 group-hover:rotate-6 transition-all duration-500">
+                      <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#d7a85b] to-[#b7792f] flex items-center justify-center shadow-2xl group-hover:scale-105 transition-all duration-200">
                         <Users className="w-8 h-8 text-white" />
                       </div>
-                      <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-400 rounded-full border-2 border-blue-600/30 animate-ping"></div>
+                      <div className="absolute -top-1 -right-1 w-4 h-4 bg-[#4cc39a] rounded-full border-2 border-[#07110f] animate-ping"></div>
                   </div>
                   <div className="text-right">
                       <p className="text-4xl font-extrabold text-white mb-1">{stats.total}</p>
-                      <p className="text-xs text-blue-200 font-semibold uppercase tracking-wider">Total Players</p>
+                      <p className="text-xs text-[#f2d39a] font-semibold uppercase tracking-wider">Squad Players</p>
                   </div>
                 </div>
                   
                   {/* Progress Bar */}
                   <div className="mb-3">
-                    <div className="h-1.5 bg-blue-900/50 rounded-full overflow-hidden">
+                    <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
                       <div 
-                        className="h-full bg-gradient-to-r from-blue-400 to-indigo-400 rounded-full transition-all duration-1000"
+                        className="h-full bg-gradient-to-r from-[#d7a85b] to-[#4cc39a] rounded-full transition-all duration-1000"
                         style={{ width: '100%' }}
                       ></div>
                     </div>
                   </div>
                   
-                  <div className="flex items-center justify-between pt-3 border-t border-blue-500/30">
-                    <span className="text-xs text-blue-100 font-medium">All Teams</span>
-                    <div className="px-3 py-1 bg-blue-500/40 rounded-full text-xs font-bold text-white border border-blue-400/50 backdrop-blur-sm">
+                  <div className="flex items-center justify-between pt-3 border-t border-white/10">
+                    <span className="text-xs text-[#f2d39a] font-medium">All Teams</span>
+                    <div className="px-3 py-1 bg-[#d7a85b]/20 rounded-full text-xs font-bold text-white border border-[#d7a85b]/30 backdrop-blur-sm">
                       {teams.length} Teams
                     </div>
                   </div>
@@ -3875,35 +3879,35 @@ export default function AdminPlayers() {
               </div>
 
               {/* Batsmen - Enhanced */}
-              <div className="group relative bg-gradient-to-br from-emerald-600/30 via-teal-600/20 to-emerald-700/30 rounded-2xl p-6 border border-emerald-500/40 backdrop-blur-xl hover:border-emerald-400/60 transition-all duration-500 shadow-xl hover:shadow-2xl overflow-hidden">
+              <div className="oil-stat-card oil-stat-card--teal group p-6">
                 <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/0 to-emerald-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                 
                 <div className="relative z-10">
                 <div className="flex items-center justify-between mb-4">
                     <div className="relative">
-                      <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-2xl group-hover:scale-110 group-hover:rotate-6 transition-all duration-500">
+                      <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#4cc39a] to-[#0f7b6c] flex items-center justify-center shadow-2xl group-hover:scale-105 transition-all duration-200">
                         <Target className="w-8 h-8 text-white" />
                       </div>
                   </div>
                   <div className="text-right">
                       <p className="text-4xl font-extrabold text-white mb-1">{stats.batsmen}</p>
-                      <p className="text-xs text-emerald-200 font-semibold uppercase tracking-wider">Batsmen</p>
+                      <p className="text-xs text-[#9cf2c8] font-semibold uppercase tracking-wider">Batters</p>
                   </div>
                 </div>
                   
                   {/* Progress Bar */}
                   <div className="mb-3">
-                    <div className="h-1.5 bg-emerald-900/50 rounded-full overflow-hidden">
+                    <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
                       <div 
-                        className="h-full bg-gradient-to-r from-emerald-400 to-teal-400 rounded-full transition-all duration-1000"
+                        className="h-full bg-gradient-to-r from-[#4cc39a] to-[#9cf2c8] rounded-full transition-all duration-1000"
                         style={{ width: `${stats.total > 0 ? (stats.batsmen / stats.total) * 100 : 0}%` }}
                       ></div>
                     </div>
                   </div>
                   
-                  <div className="flex items-center justify-between pt-3 border-t border-emerald-500/30">
-                    <span className="text-xs text-emerald-100 font-medium">Run Scorers</span>
-                    <div className="px-3 py-1 bg-emerald-500/40 rounded-full text-xs font-bold text-white border border-emerald-400/50 backdrop-blur-sm">
+                  <div className="flex items-center justify-between pt-3 border-t border-white/10">
+                    <span className="text-xs text-[#9cf2c8] font-medium">Run Scorers</span>
+                    <div className="px-3 py-1 bg-[#4cc39a]/20 rounded-full text-xs font-bold text-white border border-[#4cc39a]/30 backdrop-blur-sm">
                     {stats.total > 0 ? ((stats.batsmen / stats.total) * 100).toFixed(0) : 0}%
                     </div>
                   </div>
@@ -3911,34 +3915,34 @@ export default function AdminPlayers() {
               </div>
 
               {/* Bowlers - Enhanced */}
-              <div className="group relative bg-gradient-to-br from-cyan-600/30 via-blue-600/20 to-cyan-700/30 rounded-2xl p-6 border border-cyan-500/40 backdrop-blur-xl hover:border-cyan-400/60 transition-all duration-500 shadow-xl hover:shadow-2xl overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/0 to-cyan-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              <div className="oil-stat-card oil-stat-card--cyan group p-6">
+                <div className="absolute inset-0 bg-gradient-to-br from-[#4fb6c4]/0 to-[#4fb6c4]/15 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                 
                 <div className="relative z-10">
                 <div className="flex items-center justify-between mb-4">
                     <div className="relative">
-                      <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shadow-2xl group-hover:scale-110 group-hover:rotate-6 transition-all duration-500">
+                      <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#4fb6c4] to-[#126e89] flex items-center justify-center shadow-2xl group-hover:scale-105 transition-all duration-200">
                         <Zap className="w-8 h-8 text-white" />
                       </div>
                   </div>
                   <div className="text-right">
                       <p className="text-4xl font-extrabold text-white mb-1">{stats.bowlers}</p>
-                      <p className="text-xs text-cyan-200 font-semibold uppercase tracking-wider">Bowlers</p>
+                      <p className="text-xs text-[#a8e9ef] font-semibold uppercase tracking-wider">Bowlers</p>
                   </div>
                 </div>
                   
                   <div className="mb-3">
-                    <div className="h-1.5 bg-cyan-900/50 rounded-full overflow-hidden">
+                    <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
                       <div 
-                        className="h-full bg-gradient-to-r from-cyan-400 to-blue-400 rounded-full transition-all duration-1000"
+                        className="h-full bg-gradient-to-r from-[#4fb6c4] to-[#d7a85b] rounded-full transition-all duration-1000"
                         style={{ width: `${stats.total > 0 ? (stats.bowlers / stats.total) * 100 : 0}%` }}
                       ></div>
                     </div>
                   </div>
                   
-                  <div className="flex items-center justify-between pt-3 border-t border-cyan-500/30">
-                    <span className="text-xs text-cyan-100 font-medium">Wicket Takers</span>
-                    <div className="px-3 py-1 bg-cyan-500/40 rounded-full text-xs font-bold text-white border border-cyan-400/50 backdrop-blur-sm">
+                  <div className="flex items-center justify-between pt-3 border-t border-white/10">
+                    <span className="text-xs text-[#a8e9ef] font-medium">Wicket Takers</span>
+                    <div className="px-3 py-1 bg-[#4fb6c4]/20 rounded-full text-xs font-bold text-white border border-[#4fb6c4]/30 backdrop-blur-sm">
                     {stats.total > 0 ? ((stats.bowlers / stats.total) * 100).toFixed(0) : 0}%
                     </div>
                   </div>
@@ -3946,34 +3950,34 @@ export default function AdminPlayers() {
               </div>
 
               {/* All-rounders - Enhanced */}
-              <div className="group relative bg-gradient-to-br from-purple-600/30 via-pink-600/20 to-purple-700/30 rounded-2xl p-6 border border-purple-500/40 backdrop-blur-xl hover:border-purple-400/60 transition-all duration-500 shadow-xl hover:shadow-2xl overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-br from-purple-500/0 to-purple-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              <div className="oil-stat-card oil-stat-card--copper group p-6">
+                <div className="absolute inset-0 bg-gradient-to-br from-[#b7792f]/0 to-[#d7a85b]/12 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                 
                 <div className="relative z-10">
                 <div className="flex items-center justify-between mb-4">
                     <div className="relative">
-                      <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center shadow-2xl group-hover:scale-110 group-hover:rotate-6 transition-all duration-500">
+                      <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#b7792f] to-[#91682d] flex items-center justify-center shadow-2xl group-hover:scale-105 transition-all duration-200">
                         <Award className="w-8 h-8 text-white" />
                       </div>
                   </div>
                   <div className="text-right">
                       <p className="text-4xl font-extrabold text-white mb-1">{stats.allRounders}</p>
-                      <p className="text-xs text-purple-200 font-semibold uppercase tracking-wider">All-rounders</p>
+                      <p className="text-xs text-amber-100 font-semibold uppercase tracking-wider">All-rounders</p>
                   </div>
                 </div>
                   
                   <div className="mb-3">
-                    <div className="h-1.5 bg-purple-900/50 rounded-full overflow-hidden">
+                    <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
                       <div 
-                        className="h-full bg-gradient-to-r from-purple-400 to-pink-400 rounded-full transition-all duration-1000"
+                        className="h-full bg-gradient-to-r from-[#b7792f] to-[#d7a85b] rounded-full transition-all duration-1000"
                         style={{ width: `${stats.total > 0 ? (stats.allRounders / stats.total) * 100 : 0}%` }}
                       ></div>
                     </div>
                   </div>
                   
-                  <div className="flex items-center justify-between pt-3 border-t border-purple-500/30">
-                    <span className="text-xs text-purple-100 font-medium">Versatile</span>
-                    <div className="px-3 py-1 bg-purple-500/40 rounded-full text-xs font-bold text-white border border-purple-400/50 backdrop-blur-sm">
+                  <div className="flex items-center justify-between pt-3 border-t border-white/10">
+                    <span className="text-xs text-amber-100 font-medium">Dual Skill</span>
+                    <div className="px-3 py-1 bg-[#b7792f]/20 rounded-full text-xs font-bold text-white border border-[#b7792f]/30 backdrop-blur-sm">
                     {stats.total > 0 ? ((stats.allRounders / stats.total) * 100).toFixed(0) : 0}%
                     </div>
                   </div>
@@ -3981,34 +3985,34 @@ export default function AdminPlayers() {
               </div>
 
               {/* Wicket-keepers - Enhanced */}
-              <div className="group relative bg-gradient-to-br from-orange-600/30 via-red-600/20 to-orange-700/30 rounded-2xl p-6 border border-orange-500/40 backdrop-blur-xl hover:border-orange-400/60 transition-all duration-500 shadow-xl hover:shadow-2xl overflow-hidden">
+              <div className="oil-stat-card oil-stat-card--rose group p-6">
                 <div className="absolute inset-0 bg-gradient-to-br from-orange-500/0 to-orange-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                 
                 <div className="relative z-10">
                 <div className="flex items-center justify-between mb-4">
                     <div className="relative">
-                      <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center shadow-2xl group-hover:scale-110 group-hover:rotate-6 transition-all duration-500">
+                      <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#e5655f] to-[#b94742] flex items-center justify-center shadow-2xl group-hover:scale-105 transition-all duration-200">
                         <Shield className="w-8 h-8 text-white" />
                       </div>
                   </div>
                   <div className="text-right">
                       <p className="text-4xl font-extrabold text-white mb-1">{stats.wicketkeepers}</p>
-                      <p className="text-xs text-orange-200 font-semibold uppercase tracking-wider">Wicket-keepers</p>
+                      <p className="text-xs text-[#ffaaa5] font-semibold uppercase tracking-wider">Wicket-keepers</p>
                   </div>
                 </div>
                   
                   <div className="mb-3">
-                    <div className="h-1.5 bg-orange-900/50 rounded-full overflow-hidden">
+                    <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
                       <div 
-                        className="h-full bg-gradient-to-r from-orange-400 to-red-400 rounded-full transition-all duration-1000"
+                        className="h-full bg-gradient-to-r from-[#e5655f] to-[#d7a85b] rounded-full transition-all duration-1000"
                         style={{ width: `${stats.total > 0 ? (stats.wicketkeepers / stats.total) * 100 : 0}%` }}
                       ></div>
                     </div>
                   </div>
                   
-                  <div className="flex items-center justify-between pt-3 border-t border-orange-500/30">
-                    <span className="text-xs text-orange-100 font-medium">Behind Stumps</span>
-                    <div className="px-3 py-1 bg-orange-500/40 rounded-full text-xs font-bold text-white border border-orange-400/50 backdrop-blur-sm">
+                  <div className="flex items-center justify-between pt-3 border-t border-white/10">
+                    <span className="text-xs text-[#ffaaa5] font-medium">Behind Stumps</span>
+                    <div className="px-3 py-1 bg-[#e5655f]/20 rounded-full text-xs font-bold text-white border border-[#e5655f]/30 backdrop-blur-sm">
                     {stats.total > 0 ? ((stats.wicketkeepers / stats.total) * 100).toFixed(0) : 0}%
                     </div>
                   </div>
@@ -4019,20 +4023,20 @@ export default function AdminPlayers() {
 
           {/* Enhanced Search and Filter Section */}
           <div className="mb-8 relative z-50">
-            <div className="relative bg-gradient-to-br from-slate-800/80 via-gray-800/60 to-slate-900/80 rounded-2xl p-6 border border-white/10 backdrop-blur-xl shadow-2xl overflow-visible">
+            <div className="oil-toolbar rounded-2xl p-6 overflow-visible">
               {/* Subtle glow effect */}
-              <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 via-purple-500/5 to-pink-500/5 rounded-2xl opacity-0 hover:opacity-100 transition-opacity duration-500"></div>
+              <div className="absolute inset-0 bg-gradient-to-r from-[#d7a85b]/5 via-[#4cc39a]/5 to-[#4fb6c4]/5 rounded-2xl opacity-0 hover:opacity-100 transition-opacity duration-500"></div>
               
               <div className="relative z-10 flex gap-4 flex-col md:flex-row items-stretch">
                 {/* Enhanced Search Bar with Advanced Features */}
                 <div className="relative flex-1 group">
                   <div className="absolute left-4 top-1/2 -translate-y-1/2 z-10">
-                    <Search className={`w-5 h-5 transition-colors duration-300 ${searchQuery ? 'text-blue-400' : 'text-gray-400 group-hover:text-gray-300'}`} />
+                    <Search className={`w-5 h-5 transition-colors duration-300 ${searchQuery ? 'text-[#f2d39a]' : 'text-gray-400 group-hover:text-gray-300'}`} />
                   </div>
                   <div className="relative">
                     <input
                       type="text"
-                      placeholder="Search by player name, nationality..."
+                      placeholder="Search player, role, nationality, batting style, or bowling style..."
                       value={searchQuery}
                       onChange={(e) => handleSearchChange(e.target.value)}
                       onKeyDown={(e) => {
@@ -4041,7 +4045,7 @@ export default function AdminPlayers() {
                         }
                       }}
                       onFocus={() => searchQuery && setShowSuggestions(true)}
-                      className="w-full pl-12 pr-4 py-4 bg-gray-900/70 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-300 hover:border-white/20 shadow-lg"
+                      className="oil-field w-full pl-12 pr-4 py-4"
                     />
                     
                     {/* Search Suggestions Dropdown */}
@@ -4079,8 +4083,8 @@ export default function AdminPlayers() {
                     <button
                       onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
                       className={`p-1.5 rounded-lg transition-all ${
-                        hasActiveFilters() 
-                          ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' 
+                        hasActiveFilters()
+                          ? 'bg-[#d7a85b]/20 text-[#f2d39a] border border-[#d7a85b]/30'
                           : 'bg-gray-700/50 text-gray-400 hover:text-white'
                       }`}
                       title="Advanced filters"
@@ -4096,7 +4100,7 @@ export default function AdminPlayers() {
                       <Star className="w-4 h-4" />
                     </button>
                   </div>
-                </div>  
+                </div>
                 {/* Role Filter - Enhanced */}
               <div className="relative md:min-w-[200px] z-[100]" data-role-dropdown>
                 <button
@@ -4104,20 +4108,20 @@ export default function AdminPlayers() {
                     setShowRoleDropdown(!showRoleDropdown);
                     setIsDropdownOpen(false); // Close team dropdown when role filter opens
                   }}
-                  className={`w-full bg-gray-900/70 border px-6 py-4 rounded-xl text-white font-medium flex items-center space-x-3 transition-all duration-300 h-full shadow-lg ${
-                    selectedRole !== 'all' 
-                      ? 'border-purple-500/50 bg-purple-500/10 hover:border-purple-400/60' 
-                      : 'border-white/10 hover:border-white/20 hover:bg-gray-800/70'
+                  className={`w-full oil-field px-6 py-4 font-medium flex items-center space-x-3 h-full shadow-lg ${
+                    selectedRole !== 'all'
+                      ? 'border-[#d7a85b]/50 bg-[#d7a85b]/10 hover:border-[#d7a85b]/60'
+                      : 'hover:border-white/20 hover:bg-gray-800/70'
                   }`}
                 >
-                  <Award className={`w-5 h-5 flex-shrink-0 transition-colors ${selectedRole !== 'all' ? 'text-purple-400' : 'text-gray-400'}`} />
+                  <Award className={`w-5 h-5 flex-shrink-0 transition-colors ${selectedRole !== 'all' ? 'text-[#f2d39a]' : 'text-gray-400'}`} />
                   <span className="flex-1 text-left truncate">
                     {selectedRole === 'all' ? 'All Roles' : selectedRole}
                   </span>
-                  <ChevronDown className={`w-5 h-5 transition-all duration-300 flex-shrink-0 ${showRoleDropdown ? 'rotate-180 text-purple-400' : 'text-gray-400'}`} />
+                  <ChevronDown className={`w-5 h-5 transition-all duration-300 flex-shrink-0 ${showRoleDropdown ? 'rotate-180 text-[#f2d39a]' : 'text-gray-400'}`} />
                 </button>
                 {showRoleDropdown && (
-                  <div className="absolute left-0 right-0 top-full mt-2 bg-gray-800/95 backdrop-blur-xl rounded-xl shadow-2xl border border-white/10 overflow-hidden z-[9999]">
+                  <div className="absolute left-0 right-0 top-full mt-2 bg-[#07110f]/95 backdrop-blur-xl rounded-xl shadow-2xl border border-white/10 overflow-hidden z-[9999]">
                     <div className="py-2">
                       {['all', 'Batsman', 'Bowler', 'All-rounder', 'Wicket-keeper'].map((role) => (
                         <button
@@ -4126,13 +4130,13 @@ export default function AdminPlayers() {
                             setSelectedRole(role);
                             setShowRoleDropdown(false);
                           }}
-                          className={`w-full px-6 py-3 text-left hover:bg-purple-500/20 transition-all duration-200 flex items-center justify-between ${
-                            selectedRole === role ? 'bg-purple-500/30 text-purple-200' : 'text-white'
+                          className={`w-full px-6 py-3 text-left hover:bg-[#d7a85b]/15 transition-all duration-200 flex items-center justify-between ${
+                            selectedRole === role ? 'bg-[#d7a85b]/20 text-[#f2d39a]' : 'text-white'
                           }`}
                         >
                           <span>{role === 'all' ? 'All Roles' : role}</span>
                           {selectedRole === role && (
-                            <div className="w-5 h-5 rounded-full bg-purple-500 flex items-center justify-center">
+                            <div className="w-5 h-5 rounded-full bg-[#d7a85b] flex items-center justify-center">
                               <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
                                 <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                               </svg>
@@ -4152,41 +4156,41 @@ export default function AdminPlayers() {
                     setIsDropdownOpen(!isDropdownOpen);
                     setShowAdvancedFilters(false); // Close role filter when team dropdown opens
                   }}
-                    className={`w-full bg-gray-900/70 border px-6 py-4 rounded-xl text-white font-medium flex items-center space-x-3 transition-all duration-300 group h-full shadow-lg ${
+                    className={`w-full oil-field px-6 py-4 font-medium flex items-center space-x-3 group h-full shadow-lg ${
                       selectedTeam !== 'all'
-                        ? 'border-blue-500/50 bg-blue-500/10 hover:border-blue-400/60'
-                        : 'border-white/10 hover:border-white/20 hover:bg-gray-800/70'
+                        ? 'border-[#4cc39a]/50 bg-[#4cc39a]/10 hover:border-[#4cc39a]/60'
+                        : 'hover:border-white/20 hover:bg-gray-800/70'
                     }`}
                   >
-                    <Filter className={`w-5 h-5 flex-shrink-0 transition-colors ${selectedTeam !== 'all' ? 'text-blue-400' : 'text-gray-400'}`} />
+                    <Filter className={`w-5 h-5 flex-shrink-0 transition-colors ${selectedTeam !== 'all' ? 'text-[#9cf2c8]' : 'text-gray-400'}`} />
                   <span className="flex-1 text-left truncate flex items-center gap-2">
                     {selectedTeam === 'all' 
                         ? <>All Teams</>
                         : selectedTeam === NOT_SELECTED_SEASON_FILTER
-                          ? <>Not Selected This Season</>
+                          ? <>Not Selected for This Season</>
                         : <>{teams.find(t => t.id === selectedTeam)?.shortName || 'Select Team'}</>
                     }
                   </span>
-                    <ChevronDown className={`w-5 h-5 transition-all duration-300 flex-shrink-0 ${isDropdownOpen ? 'rotate-180 text-blue-400' : 'text-gray-400'}`} />
+                    <ChevronDown className={`w-5 h-5 transition-all duration-300 flex-shrink-0 ${isDropdownOpen ? 'rotate-180 text-[#9cf2c8]' : 'text-gray-400'}`} />
                 </button>
 
                   {/* Enhanced Dropdown Menu */}
                 {isDropdownOpen && (
                 <div 
-                    className="absolute left-0 right-0 top-full mt-2 bg-gray-800/95 backdrop-blur-xl rounded-xl shadow-2xl border border-white/10 overflow-hidden z-[9999]"
+                    className="absolute left-0 right-0 top-full mt-2 bg-[#07110f]/95 backdrop-blur-xl rounded-xl shadow-2xl border border-white/10 overflow-hidden z-[9999]"
                 >
-                    <div className="py-2 max-h-[480px] overflow-y-auto scrollbar-thin scrollbar-thumb-blue-500/50 scrollbar-track-gray-700/50">
+                    <div className="py-2 max-h-[480px] overflow-y-auto custom-scrollbar">
                     {/* All Teams Option */}
                     <button
                       onClick={() => {
                         setSelectedTeam('all');
                         setIsDropdownOpen(false);
                       }}
-                        className={`w-full px-6 py-3.5 text-left hover:bg-blue-500/20 transition-all duration-200 flex items-center space-x-3 group ${
-                          selectedTeam === 'all' ? 'bg-blue-500/30 text-blue-200' : 'text-white'
+                        className={`w-full px-6 py-3.5 text-left hover:bg-[#4cc39a]/15 transition-all duration-200 flex items-center space-x-3 group ${
+                          selectedTeam === 'all' ? 'bg-[#4cc39a]/20 text-[#9cf2c8]' : 'text-white'
                         }`}
                       >
-                        <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 shadow-lg">
+                        <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-[#d7a85b] to-[#126e89] shadow-lg">
                           <Users className="w-5 h-5 text-white" />
                       </div>
                       <div className="flex-1">
@@ -4194,7 +4198,7 @@ export default function AdminPlayers() {
                         <div className="text-xs text-gray-400">{players.length} total players</div>
                       </div>
                       {selectedTeam === 'all' && (
-                          <div className="w-5 h-5 rounded-full bg-blue-500 flex items-center justify-center">
+                          <div className="w-5 h-5 rounded-full bg-[#4cc39a] flex items-center justify-center">
                             <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
                           <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                         </svg>
@@ -4212,14 +4216,14 @@ export default function AdminPlayers() {
                           setIsDropdownOpen(false);
                         }}
                         className={`w-full px-6 py-3.5 text-left hover:bg-amber-500/20 transition-all duration-200 flex items-center space-x-3 group ${
-                          selectedTeam === NOT_SELECTED_SEASON_FILTER ? 'bg-amber-500/30 text-amber-200' : 'text-white'
+                          selectedTeam === NOT_SELECTED_SEASON_FILTER ? 'bg-[#d7a85b]/20 text-[#f2d39a]' : 'text-white'
                         }`}
                       >
                         <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 shadow-lg">
                           <DatabaseBackup className="w-5 h-5 text-white" />
                         </div>
                         <div className="flex-1">
-                          <div className="font-semibold">Not Selected This Season</div>
+                          <div className="font-semibold">Not Selected for This Season</div>
                           <div className="text-xs text-gray-400">
                             {
                               players.filter(
@@ -4229,7 +4233,7 @@ export default function AdminPlayers() {
                           </div>
                         </div>
                         {selectedTeam === NOT_SELECTED_SEASON_FILTER && (
-                          <div className="w-5 h-5 rounded-full bg-amber-500 flex items-center justify-center">
+                          <div className="w-5 h-5 rounded-full bg-[#d7a85b] flex items-center justify-center">
                             <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
                               <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                             </svg>
@@ -4255,8 +4259,8 @@ export default function AdminPlayers() {
                             setSelectedTeam(team.id);
                             setIsDropdownOpen(false);
                           }}
-                              className={`w-full px-6 py-3.5 text-left hover:bg-blue-500/20 transition-all duration-200 flex items-center space-x-3 group ${
-                                selectedTeam === team.id ? 'bg-blue-500/30 text-blue-200' : 'text-white'
+                              className={`w-full px-6 py-3.5 text-left hover:bg-[#4cc39a]/15 transition-all duration-200 flex items-center space-x-3 group ${
+                                selectedTeam === team.id ? 'bg-[#4cc39a]/20 text-[#9cf2c8]' : 'text-white'
                           }`}
                         >
                           <div 
@@ -4273,7 +4277,7 @@ export default function AdminPlayers() {
                             </div>
                           </div>
                           {selectedTeam === team.id && (
-                                <div className="w-5 h-5 rounded-full bg-blue-500 flex items-center justify-center">
+                                <div className="w-5 h-5 rounded-full bg-[#4cc39a] flex items-center justify-center">
                                   <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
                               <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                             </svg>
@@ -4292,18 +4296,18 @@ export default function AdminPlayers() {
               <div className="flex items-center justify-between flex-wrap gap-3 mt-4 pt-4 border-t border-white/10">
                 <div className="flex items-center gap-3 flex-wrap">
                 <div className="text-sm text-gray-300">
-                    Showing <span className="font-bold text-white text-base">{searchFilteredPlayers.length}</span> of <span className="font-bold text-white text-base">{filteredPlayers.length}</span> players
+                    Showing <span className="font-bold text-white text-base">{searchFilteredPlayers.length}</span> of <span className="font-bold text-white text-base">{filteredPlayers.length}</span> squad records
                   </div>
                 {selectedTeam !== 'all' && (
-                    <div className="flex items-center gap-2 px-3 py-1.5 bg-blue-500/20 border border-blue-500/30 rounded-lg">
-                      <Users className="w-3.5 h-3.5 text-blue-400" />
-                      <span className="text-xs text-blue-300 font-medium">{selectedTeam === NOT_SELECTED_SEASON_FILTER ? 'Not Selected This Season' : teams.find(t => t.id === selectedTeam)?.name}</span>
+                    <div className="flex items-center gap-2 px-3 py-1.5 bg-[#4cc39a]/10 border border-[#4cc39a]/30 rounded-lg">
+                      <Users className="w-3.5 h-3.5 text-[#9cf2c8]" />
+                      <span className="text-xs text-[#9cf2c8] font-medium">{selectedTeam === NOT_SELECTED_SEASON_FILTER ? 'Not Selected for This Season' : teams.find(t => t.id === selectedTeam)?.name}</span>
                     </div>
                   )}
                   {selectedRole !== 'all' && (
-                    <div className="flex items-center gap-2 px-3 py-1.5 bg-purple-500/20 border border-purple-500/30 rounded-lg">
-                      <Award className="w-3.5 h-3.5 text-purple-400" />
-                      <span className="text-xs text-purple-300 font-medium">{selectedRole}</span>
+                    <div className="flex items-center gap-2 px-3 py-1.5 bg-[#d7a85b]/10 border border-[#d7a85b]/30 rounded-lg">
+                      <Award className="w-3.5 h-3.5 text-[#f2d39a]" />
+                      <span className="text-xs text-[#f2d39a] font-medium">{selectedRole}</span>
               </div>
                   )}
                 </div>
@@ -4320,7 +4324,7 @@ export default function AdminPlayers() {
                   {selectedRole !== 'all' && (
                     <button
                       onClick={() => setSelectedRole('all')}
-                      className="text-xs px-4 py-2 rounded-lg bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 hover:text-purple-100 transition-all border border-purple-500/30 hover:border-purple-400/50 shadow-md hover:shadow-lg"
+                      className="text-xs px-4 py-2 rounded-lg bg-[#d7a85b]/10 hover:bg-[#d7a85b]/20 text-[#f2d39a] transition-all border border-[#d7a85b]/30 shadow-md hover:shadow-lg"
                     >
                       All Roles
                   </button>
@@ -4328,7 +4332,7 @@ export default function AdminPlayers() {
                 {selectedTeam !== 'all' && (
                   <button
                     onClick={() => setSelectedTeam('all')}
-                      className="text-xs px-4 py-2 rounded-lg bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 hover:text-blue-100 transition-all border border-blue-500/30 hover:border-blue-400/50 shadow-md hover:shadow-lg"
+                      className="text-xs px-4 py-2 rounded-lg bg-[#4cc39a]/10 hover:bg-[#4cc39a]/20 text-[#9cf2c8] transition-all border border-[#4cc39a]/30 shadow-md hover:shadow-lg"
                   >
                       All Teams
                   </button>
@@ -4526,7 +4530,7 @@ export default function AdminPlayers() {
                         <button
                           key={index}
                           onClick={() => loadSavedSearch(saved)}
-                          className="text-xs px-3 py-1.5 rounded-lg bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 hover:text-blue-100 transition-all border border-blue-500/30"
+                          className="text-xs px-3 py-1.5 rounded-lg bg-[#4cc39a]/10 hover:bg-[#4cc39a]/20 text-[#9cf2c8] transition-all border border-[#4cc39a]/30"
                         >
                           <Star className="w-3 h-3 inline mr-1" />
                           {saved.name}
@@ -4594,7 +4598,7 @@ export default function AdminPlayers() {
                     </div>
                     <button
                       onClick={() => setVirtualScrollEnabled(!virtualScrollEnabled)}
-                      className="text-xs px-3 py-1 bg-blue-600/20 hover:bg-blue-600/30 text-blue-300 rounded-lg transition-colors border border-blue-500/30"
+                      className="text-xs px-3 py-1 bg-[#4cc39a]/10 hover:bg-[#4cc39a]/20 text-[#9cf2c8] rounded-lg transition-colors border border-[#4cc39a]/30"
                     >
                       Enable Virtual Scroll
                     </button>
@@ -4877,8 +4881,8 @@ export default function AdminPlayers() {
                   <div className="w-20 h-20 rounded-full bg-gray-800/50 flex items-center justify-center mb-4 border border-white/10">
                     <Users className="w-10 h-10 text-gray-500" />
                   </div>
-                  <p className="text-gray-300 text-lg font-semibold mb-2">No players found</p>
-                  <p className="text-gray-500 text-sm">Try adjusting your search or filters</p>
+                  <p className="text-gray-300 text-lg font-semibold mb-2">No squad records found</p>
+                  <p className="text-gray-500 text-sm">Try a different player name, role, team, or cricket skill filter.</p>
                 </div>
               )}
                 </div>
@@ -5254,8 +5258,8 @@ export default function AdminPlayers() {
                           <div className="w-20 h-20 rounded-full bg-gray-800/50 flex items-center justify-center mb-4 border border-white/10">
                             <Users className="w-10 h-10 text-gray-500" />
                           </div>
-                          <p className="text-gray-300 text-lg font-semibold mb-2">No players found</p>
-                          <p className="text-gray-500 text-sm">Try adjusting your search or filters</p>
+                          <p className="text-gray-300 text-lg font-semibold mb-2">No squad records found</p>
+                          <p className="text-gray-500 text-sm">Try a different player name, role, team, or cricket skill filter.</p>
                         </div>
                       </td>
                     </tr>
@@ -5487,7 +5491,7 @@ export default function AdminPlayers() {
                             options={[
                               {
                                 value: NOT_SELECTED_SEASON_FILTER,
-                                label: 'Not Selected This Season (Admin only)',
+                                label: 'Not Selected for This Season (admin only)',
                               },
                               ...teams
                                 .filter(team => team.league === formData.league)
@@ -5508,22 +5512,22 @@ export default function AdminPlayers() {
                       </div>
 
                     {/* Personal Details Section */}
-                    <div className="relative overflow-hidden bg-gradient-to-br from-purple-500/10 via-pink-500/5 to-orange-500/10 rounded-2xl p-6 border border-white/10 backdrop-blur-sm">
+                    <div className="relative overflow-hidden bg-gradient-to-br from-[#d7a85b]/10 via-[#4cc39a]/5 to-[#b77837]/10 rounded-2xl p-6 border border-[#d7a85b]/20 backdrop-blur-sm">
                       <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,.05)_50%,transparent_75%,transparent_100%)] bg-[length:20px_20px] opacity-50"></div>
                       <div className="relative">
                         <div className="flex items-center gap-4 mb-6">
-                          <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-purple-500/20 to-pink-500/20 border border-purple-400/30 flex items-center justify-center shadow-lg">
-                            <Calendar className="w-7 h-7 text-purple-300" />
+                          <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-[#d7a85b]/20 to-[#4cc39a]/15 border border-[#d7a85b]/30 flex items-center justify-center shadow-lg">
+                            <Calendar className="w-7 h-7 text-[#f2d39a]" />
                           </div>
                           <div className="flex-1">
                             <h3 className="text-2xl font-bold text-white">Personal Details</h3>
-                            <p className="text-sm text-gray-300 mt-1">Player's age, date of birth, and nationality</p>
+                            <p className="text-sm text-gray-300 mt-1">Player age, date of birth, and nationality for squad records</p>
                           </div>
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                           <div className="group">
                             <label className="block text-sm font-semibold text-gray-200 mb-2.5 flex items-center gap-2">
-                              <Calendar className="w-4 h-4 text-purple-400" />
+                              <Calendar className="w-4 h-4 text-[#f2d39a]" />
                               Age
                               {(!formData.dateOfBirth || formData.dateOfBirth.trim() === '') && <span className="text-red-400">*</span>}
                         </label>
@@ -5540,7 +5544,7 @@ export default function AdminPlayers() {
                             }
                             setFormData({...formData, age: newValue});
                           }}
-                                className="w-full pl-12 pr-4 py-3.5 bg-gray-800/60 border-2 border-white/10 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all hover:border-white/20 group-hover:bg-gray-800/70"
+                                className="w-full pl-12 pr-4 py-3.5 bg-gray-800/60 border-2 border-white/10 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#d7a85b]/40 focus:border-[#d7a85b]/60 transition-all hover:border-[#d7a85b]/30 group-hover:bg-gray-800/70"
                                 placeholder="Enter age"
                           required={!formData.dateOfBirth || formData.dateOfBirth.trim() === ''}
                         />
@@ -5551,8 +5555,7 @@ export default function AdminPlayers() {
                             if (!formData.dateOfBirth || formData.dateOfBirth.trim() === '') {
                                   return (
                                     <>
-                                      <span className="text-gray-500">💡</span>
-                                      <span>Enter age manually or provide date of birth to auto-calculate</span>
+                                      <span>Enter age manually, or add date of birth to calculate it automatically.</span>
                                     </>
                                   );
                             }
