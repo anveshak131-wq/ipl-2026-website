@@ -1686,6 +1686,46 @@
     border-spacing: 0;
   }
 
+  .oil-table-shell {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .oil-table-shell--pro {
+    border-color: rgba(215, 168, 91, 0.2);
+    background:
+      linear-gradient(145deg, rgba(7, 17, 15, 0.9), rgba(10, 24, 21, 0.78) 44%, rgba(29, 22, 15, 0.82)),
+      repeating-linear-gradient(135deg, rgba(215, 168, 91, 0.045) 0 1px, transparent 1px 36px);
+    box-shadow: 0 26px 70px rgba(0, 0, 0, 0.34), inset 0 1px 0 rgba(255, 255, 255, 0.07);
+  }
+
+  .oil-table-scroll {
+    position: relative;
+    overflow-x: auto;
+    scrollbar-gutter: stable;
+  }
+
+  .oil-table-scroll::after {
+    content: 'Scroll for more stats';
+    position: sticky;
+    right: 0.75rem;
+    bottom: 0.75rem;
+    z-index: 8;
+    float: right;
+    margin-top: -2.25rem;
+    border: 1px solid rgba(215, 168, 91, 0.24);
+    border-radius: 999px;
+    background: rgba(7, 17, 15, 0.82);
+    color: rgba(242, 211, 154, 0.9);
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    padding: 0.45rem 0.7rem;
+    text-transform: uppercase;
+    pointer-events: none;
+    box-shadow: 0 12px 26px rgba(0, 0, 0, 0.28);
+  }
+
   .oil-table thead {
     background: rgba(7, 17, 15, 0.9);
   }
@@ -1710,21 +1750,74 @@
     min-width: 1080px;
   }
 
+  .oil-data-table--stats {
+    min-width: 1240px;
+  }
+
+  .oil-data-table--players {
+    min-width: 1480px;
+  }
+
   .oil-data-table th {
     position: sticky;
     top: 0;
-    z-index: 2;
-    background: rgba(7, 17, 15, 0.94);
-    color: rgba(226, 232, 240, 0.76);
+    z-index: 4;
+    background:
+      linear-gradient(180deg, rgba(10, 24, 21, 0.98), rgba(7, 17, 15, 0.96)),
+      linear-gradient(90deg, rgba(215, 168, 91, 0.08), rgba(76, 195, 154, 0.04));
+    color: rgba(226, 232, 240, 0.82);
     font-size: 0.72rem;
     font-weight: 800;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.1em;
     text-transform: uppercase;
     white-space: nowrap;
+    box-shadow: inset 0 -1px 0 rgba(215, 168, 91, 0.16);
   }
 
   .oil-data-table td {
     vertical-align: middle;
+  }
+
+  .oil-data-table tbody tr {
+    background:
+      linear-gradient(90deg, rgba(255, 255, 255, 0.018), transparent 36%),
+      rgba(7, 17, 15, 0.3);
+  }
+
+  .oil-data-table tbody tr:nth-child(even) {
+    background:
+      linear-gradient(90deg, rgba(76, 195, 154, 0.035), transparent 42%),
+      rgba(255, 255, 255, 0.025);
+  }
+
+  .oil-table-sticky-name,
+  .oil-table-sticky-action {
+    position: sticky;
+  }
+
+  .oil-table-sticky-name {
+    left: 0;
+    z-index: 3;
+    background:
+      linear-gradient(90deg, rgba(7, 17, 15, 0.98), rgba(11, 27, 24, 0.94));
+    box-shadow: 14px 0 26px rgba(0, 0, 0, 0.2);
+  }
+
+  thead .oil-table-sticky-name {
+    z-index: 6;
+  }
+
+  .oil-table-sticky-action {
+    right: 0;
+    z-index: 3;
+    min-width: 9.75rem;
+    background:
+      linear-gradient(270deg, rgba(7, 17, 15, 0.99), rgba(7, 17, 15, 0.93));
+    box-shadow: -16px 0 30px rgba(0, 0, 0, 0.3);
+  }
+
+  thead .oil-table-sticky-action {
+    z-index: 7;
   }
 
   .oil-table-sort {
@@ -1809,13 +1902,76 @@
   }
 
   .oil-table-action {
-    opacity: 0.9;
-    transition: opacity 160ms ease, transform 160ms ease;
+    opacity: 1;
+    transition: opacity 160ms ease, transform 160ms ease, box-shadow 160ms ease;
   }
 
   .oil-data-table tbody tr:hover .oil-table-action {
     opacity: 1;
     transform: translateY(-1px);
+  }
+
+  .oil-row-actions {
+    display: flex;
+    min-width: max-content;
+    align-items: center;
+    justify-content: center;
+    gap: 0.65rem;
+  }
+
+  .oil-row-action-button {
+    display: inline-flex;
+    min-height: 2.65rem;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 0.9rem;
+    padding: 0.65rem 0.95rem;
+    color: #ffffff;
+    font-size: 0.8rem;
+    font-weight: 850;
+    letter-spacing: 0.01em;
+    box-shadow: 0 12px 26px rgba(0, 0, 0, 0.22);
+    transition: transform 160ms ease, border-color 160ms ease, box-shadow 160ms ease, background-color 160ms ease;
+    white-space: nowrap;
+  }
+
+  .oil-row-action-button:hover {
+    transform: translateY(-1px);
+  }
+
+  .oil-row-action-button--gold {
+    border-color: rgba(215, 168, 91, 0.42);
+    background: linear-gradient(135deg, rgba(215, 168, 91, 0.28), rgba(183, 121, 47, 0.18));
+    color: #f2d39a;
+  }
+
+  .oil-row-action-button--gold:hover {
+    border-color: rgba(242, 211, 154, 0.72);
+    box-shadow: 0 18px 32px rgba(215, 168, 91, 0.16);
+  }
+
+  .oil-row-action-button--teal {
+    border-color: rgba(76, 195, 154, 0.42);
+    background: linear-gradient(135deg, rgba(76, 195, 154, 0.26), rgba(79, 182, 196, 0.16));
+    color: #9cf2c8;
+  }
+
+  .oil-row-action-button--teal:hover {
+    border-color: rgba(156, 242, 200, 0.72);
+    box-shadow: 0 18px 32px rgba(76, 195, 154, 0.16);
+  }
+
+  .oil-row-action-button--danger {
+    border-color: rgba(229, 101, 95, 0.44);
+    background: linear-gradient(135deg, rgba(229, 101, 95, 0.24), rgba(185, 28, 28, 0.15));
+    color: #ffaaa5;
+  }
+
+  .oil-row-action-button--danger:hover {
+    border-color: rgba(255, 170, 165, 0.72);
+    box-shadow: 0 18px 32px rgba(229, 101, 95, 0.15);
   }
 
   .oil-rise {
@@ -1971,8 +2127,30 @@
   }
 
   .oil-modal-footer {
+    position: sticky;
+    bottom: 0;
+    z-index: 4;
     border-top: 1px solid rgba(255, 255, 255, 0.12);
-    background: linear-gradient(135deg, rgba(7, 17, 15, 0.9), rgba(10, 24, 21, 0.78));
+    background:
+      linear-gradient(135deg, rgba(7, 17, 15, 0.98), rgba(10, 24, 21, 0.94)),
+      linear-gradient(90deg, rgba(215, 168, 91, 0.14), rgba(76, 195, 154, 0.08));
+    box-shadow: 0 -18px 40px rgba(0, 0, 0, 0.34), inset 0 1px 0 rgba(255, 255, 255, 0.07);
+    backdrop-filter: blur(18px) saturate(145%);
+    -webkit-backdrop-filter: blur(18px) saturate(145%);
+  }
+
+  .oil-modal-footer-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 0.75rem;
+  }
+
+  .oil-modal-footer-actions > button {
+    min-height: 2.85rem;
+    min-width: 9.5rem;
+    justify-content: center;
+    font-weight: 850;
   }
 }
 

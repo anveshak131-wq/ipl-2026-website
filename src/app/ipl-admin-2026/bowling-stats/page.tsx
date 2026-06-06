@@ -755,7 +755,7 @@ const BowlingStatsPage = () => {
               <p className="text-gray-400 text-lg mb-6">Try a different player name, team, or bowling metric.</p>
           </div>
           ) : viewMode === 'table' ? (
-            <div className="oil-table-shell rounded-2xl overflow-hidden shadow-xl oil-rise">
+            <div className="oil-table-shell oil-table-shell--pro rounded-2xl overflow-hidden shadow-xl oil-rise">
               <div className="oil-table-header p-5">
                 <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                   <div>
@@ -775,12 +775,12 @@ const BowlingStatsPage = () => {
                   </div>
                 </div>
               </div>
-              <div className="overflow-x-auto custom-scrollbar" tabIndex={0}>
-                <table className="oil-table oil-data-table">
+              <div className="oil-table-scroll custom-scrollbar" tabIndex={0}>
+                <table className="oil-table oil-data-table oil-data-table--stats">
                   <thead className="border-b border-white/10">
                     <tr>
                       <th className="px-5 py-4 text-left">Rank</th>
-                      <th className="px-6 py-4 text-left">
+                      <th className="oil-table-sticky-name px-6 py-4 text-left">
                         <button
                           onClick={() => handleSort('name')}
                           className="oil-table-sort group"
@@ -838,7 +838,7 @@ const BowlingStatsPage = () => {
                         </button>
                       </th>
                       <th className="px-6 py-4 text-left text-gray-300 font-semibold text-sm uppercase tracking-wider">Best</th>
-                      <th className="px-6 py-4 text-center text-gray-300 font-semibold text-sm uppercase tracking-wider">Actions</th>
+                      <th className="oil-table-sticky-action px-6 py-4 text-center text-gray-300 font-semibold text-sm uppercase tracking-wider">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-white/10">
@@ -884,7 +884,7 @@ const BowlingStatsPage = () => {
                           <td className="px-5 py-4">
                             <span className="oil-table-rank">#{index + 1}</span>
                           </td>
-                          <td className="px-6 py-4">
+                          <td className="oil-table-sticky-name px-6 py-4">
                             <div className="flex items-center gap-3">
                               <div className="oil-table-avatar bg-gradient-to-br from-[#4cc39a] to-[#126e89]">
                                 {player.name?.charAt(0) || '?'}
@@ -933,10 +933,10 @@ const BowlingStatsPage = () => {
                           <td className="px-6 py-4">
                             <span className="oil-table-stat-pill oil-table-stat-pill--gold">{player.stats?.bestBowling || '-'}</span>
                           </td>
-                          <td className="px-6 py-4">
+                          <td className="oil-table-sticky-action px-6 py-4">
                             <button
                               onClick={() => handleEditPlayer(player)}
-                              className="oil-btn-primary oil-table-action mx-auto px-4 py-2 text-sm"
+                              className="oil-row-action-button oil-row-action-button--teal oil-table-action mx-auto"
                               aria-label={`Edit bowling statistics for ${player.name || 'player'}`}
                             >
                               <Edit2 className="w-4 h-4" />
@@ -1464,11 +1464,11 @@ const BowlingStatsPage = () => {
               </div>
 
               <div className="oil-modal-footer flex flex-col-reverse gap-3 p-5 sm:flex-row sm:items-center sm:justify-between">
-                <p className="text-xs text-white/50">Changes update the IPL bowling table and export-ready player sheet.</p>
-                <div className="flex justify-end gap-3">
+                <p className="text-xs font-medium text-white/60">Changes update the IPL bowling table and export-ready player sheet.</p>
+                <div className="oil-modal-footer-actions">
                   <button onClick={handleCancelEdit} className="oil-btn-secondary px-5 py-2.5">
                     <X className="w-4 h-4" />
-                    Cancel
+                    Cancel Edit
                   </button>
                   <button onClick={handleSavePlayer} className="oil-btn-primary px-5 py-2.5">
                     <Edit2 className="w-4 h-4" />

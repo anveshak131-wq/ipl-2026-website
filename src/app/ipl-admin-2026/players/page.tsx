@@ -5078,15 +5078,35 @@ export default function AdminPlayers() {
             )
           ) : (
             /* List View - Enhanced Modern Players Table */
-            <div className="relative bg-gradient-to-br from-slate-800/80 via-gray-800/60 to-slate-900/80 rounded-2xl border border-white/10 backdrop-blur-xl shadow-2xl overflow-hidden">
+            <div className="oil-table-shell oil-table-shell--pro relative rounded-2xl border border-white/10 backdrop-blur-xl shadow-2xl overflow-hidden">
               {/* Subtle glow */}
               <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 via-purple-500/5 to-pink-500/5 opacity-0 hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
-              
-              <div className="relative overflow-x-auto">
-              <table className="w-full">
+
+              <div className="oil-table-header relative p-5">
+                <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                  <div>
+                    <div className="oil-hero-kicker mb-2">
+                      <Table2 className="h-3.5 w-3.5" />
+                      Squad register
+                    </div>
+                    <h2 className="text-xl font-bold text-white">Players Table</h2>
+                    <p className="mt-1 text-sm text-white/60">
+                      Scan squads, roles, team identity, and core cricket stats. Player and action columns stay visible while scrolling.
+                    </p>
+                  </div>
+                  <div className="flex flex-wrap gap-2 text-xs">
+                    <span className="oil-table-stat-pill oil-table-stat-pill--gold">{searchFilteredPlayers.length} players</span>
+                    <span className="oil-table-stat-pill oil-table-stat-pill--teal">{getSelectedTeamLabel()}</span>
+                    <span className="oil-table-stat-pill oil-table-stat-pill--cyan">{currentLeague.toUpperCase()} admin</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="oil-table-scroll custom-scrollbar">
+              <table className="oil-table oil-data-table oil-data-table--players">
                   <thead className="bg-gradient-to-r from-gray-900/90 via-slate-900/90 to-gray-900/90 border-b border-white/10 backdrop-blur-sm sticky top-0 z-10">
                   <tr>
-                    <th className="px-6 py-4 text-left">
+                    <th className="oil-table-sticky-name px-6 py-4 text-left">
                       <button
                         onClick={() => handleSort('name')}
                         className="flex items-center gap-2 text-xs font-semibold text-gray-300 uppercase tracking-wider hover:text-white transition-colors group"
@@ -5204,7 +5224,7 @@ export default function AdminPlayers() {
                         </th>
                       </>
                     )}
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-300 uppercase tracking-wider">
+                    <th className="oil-table-sticky-action px-6 py-4 text-left text-xs font-semibold text-gray-300 uppercase tracking-wider">
                       <div className="flex items-center gap-2">
                         <Edit2 className="w-4 h-4" />
                       Actions
@@ -5230,7 +5250,7 @@ export default function AdminPlayers() {
                     const team = teams.find(t => String(t.id) === String(player.teamId));
                     return (
                       <tr key={`${player.id}-${player.teamId}-${selectedTeam}-${idx}`} className="hover:bg-gradient-to-r hover:from-blue-500/10 hover:to-purple-500/10 transition-all duration-300 group border-b border-white/5">
-                        <td className="px-6 py-4 whitespace-nowrap text-sm">
+                        <td className="oil-table-sticky-name px-6 py-4 whitespace-nowrap text-sm">
                           <div className="flex items-center space-x-3">
                             <div className="w-8 h-8 rounded-full bg-gradient-to-br from-ipl-gold to-ipl-purple flex items-center justify-center text-white font-bold text-xs">
                               {idx + 1}
@@ -5418,18 +5438,18 @@ export default function AdminPlayers() {
                             </td>
                           </>
                         )}
-                        <td className="px-6 py-4 whitespace-nowrap text-sm">
-                          <div className="flex space-x-2">
+                        <td className="oil-table-sticky-action px-6 py-4 whitespace-nowrap text-sm">
+                          <div className="oil-row-actions">
                             <button 
                               onClick={() => handleEditPlayer(player)}
-                              className="px-4 py-2.5 bg-blue-500/20 hover:bg-blue-500/40 text-blue-300 hover:text-blue-100 rounded-xl transition-all duration-300 flex items-center gap-2 border border-blue-500/30 hover:border-blue-400/60 font-medium shadow-lg hover:shadow-blue-500/20 hover:scale-105 group/btn"
+                              className="oil-row-action-button oil-row-action-button--teal group/btn"
                             >
                               <Edit2 className="w-4 h-4 group-hover/btn:rotate-12 transition-transform duration-300" />
                               Edit
                             </button>
                             <button 
                               onClick={() => handleDeletePlayer(player.id, player.name)}
-                              className="px-4 py-2.5 bg-red-500/20 hover:bg-red-500/40 text-red-300 hover:text-red-100 rounded-xl transition-all duration-300 flex items-center gap-2 border border-red-500/30 hover:border-red-400/60 font-medium shadow-lg hover:shadow-red-500/20 hover:scale-105 group/btn"
+                              className="oil-row-action-button oil-row-action-button--danger group/btn"
                             >
                               <Trash2 className="w-4 h-4 group-hover/btn:rotate-12 transition-transform duration-300" />
                               Delete
