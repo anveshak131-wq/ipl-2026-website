@@ -15,7 +15,7 @@ import { CustomEmoji } from '@/components/emoji/Emoji';
 import FlagImage from '@/components/ui/FlagImage';
 import CustomSelect from '@/components/ui/CustomSelect';
 import { jsPDF, GState } from 'jspdf';
-import autoTable from 'jspdf-autotable';
+import autoTable, { type Styles } from 'jspdf-autotable';
 import * as ExcelJS from 'exceljs';
 import { Search, Filter, Edit2, X, Users, TrendingUp, Award, Target, Zap, ChevronDown, ChevronUp, SortAsc, SortDesc, User, Shirt, Calendar, BarChart3, Plus, Trash2, Download, Upload, Shield, Activity, Hash, Grid3x3, List, Eye, Star, Copy, History, FileSpreadsheet, FileText, FileDown, Database, DatabaseBackup } from 'lucide-react';
 import '@/styles/flags.css';
@@ -938,14 +938,14 @@ export default function AdminPlayers() {
     { key: 'id', label: 'ID' },
     { key: 'name', label: 'Name' },
     { key: 'role', label: 'Role' },
-    { key: 'allrounderType', label: 'Allrounder Type' },
+    { key: 'allrounderType', label: 'All-rounder Type' },
     { key: 'teamId', label: 'Team ID' },
     { key: 'teamName', label: 'Team Name' },
-    { key: 'teamShortName', label: 'Team Short Name' },
+    { key: 'teamShortName', label: 'Team Code' },
     { key: 'age', label: 'Age' },
     { key: 'dateOfBirth', label: 'Date of Birth' },
     { key: 'nationality', label: 'Nationality' },
-    { key: 'jerseyNumber', label: 'Jersey Number' },
+    { key: 'jerseyNumber', label: 'Jersey No.' },
     { key: 'isCaptain', label: 'Captain' },
     { key: 'battingStyle', label: 'Batting Style' },
     { key: 'bowlingStyle', label: 'Bowling Style' },
@@ -958,21 +958,21 @@ export default function AdminPlayers() {
     { key: 'bowlingAverage', label: 'Bowling Average' },
     { key: 'strikeRate', label: 'Strike Rate' },
     { key: 'economy', label: 'Economy' },
-    { key: 'highest', label: 'Highest' },
-    { key: 'fours', label: 'Fours' },
-    { key: 'sixes', label: 'Sixes' },
+    { key: 'highest', label: 'Highest Score' },
+    { key: 'fours', label: 'Fours (4s)' },
+    { key: 'sixes', label: 'Sixes (6s)' },
     { key: 'fifties', label: 'Fifties' },
     { key: 'hundreds', label: 'Hundreds' },
     { key: 'bestBowling', label: 'Best Bowling' },
     { key: 'maidens', label: 'Maidens' },
-    { key: 'fiveWickets', label: 'Five Wickets' },
-    { key: 'lastAuctionYear', label: 'Last Auction Year' },
-    { key: 'acquiredVia', label: 'Acquired Via' },
-    { key: 'transferable', label: 'Transferable' },
+    { key: 'fiveWickets', label: 'Five-Wicket Hauls' },
+    { key: 'lastAuctionYear', label: 'Auction Year' },
+    { key: 'acquiredVia', label: 'Acquisition' },
+    { key: 'transferable', label: 'Transfer Listed' },
     { key: 'transferFee', label: 'Transfer Fee' },
     { key: 'transferNotes', label: 'Transfer Notes' },
     { key: 'performanceGrade', label: 'Performance Grade' },
-    { key: 'performanceLabel', label: 'Performance Label' },
+    { key: 'performanceLabel', label: 'Performance Summary' },
     { key: 'performanceColor', label: 'Performance Color' }
   ] as const;
 
@@ -1616,6 +1616,10 @@ export default function AdminPlayers() {
     const doc = new jsPDF({ orientation: 'landscape', unit: 'pt', format: 'a4' });
     const pageWidth = doc.internal.pageSize.getWidth();
     const pageHeight = doc.internal.pageSize.getHeight();
+    const getPdfPageNumber = () => {
+      const internal = doc.internal as typeof doc.internal & { getCurrentPageInfo?: () => { pageNumber?: number } };
+      return internal.getCurrentPageInfo?.().pageNumber ?? doc.getNumberOfPages();
+    };
 
     const theme = {
       // Dark "oil paint" palette: deep canvas + rich pigments.
@@ -1630,10 +1634,11 @@ export default function AdminPlayers() {
       cardBackground: [14, 21, 34],
       cardBorder: [42, 58, 90],
 
-      tableHeader: [18, 26, 42],
-      tableRow: [14, 21, 34],
-      tableAltRow: [18, 27, 44],
-      gridLine: [56, 74, 108],
+      tableHeader: [22, 32, 49],
+      tableRow: [13, 22, 33],
+      tableAltRow: [18, 30, 42],
+      tableFocusRow: [29, 43, 56],
+      gridLine: [68, 90, 126],
 
       oilEmber: [217, 107, 59],
       oilGold: [240, 199, 74],
@@ -1642,7 +1647,8 @@ export default function AdminPlayers() {
       oilPlum: [182, 90, 214]
     } as const;
 
-    const headerTitle = `${currentLeague.toUpperCase()} Players Export`;
+    const headerTitle = `${currentLeague.toUpperCase()} 2026 Squad Intelligence Report`;
+    const reportSubtitle = 'Player export for squad review, auction planning, and cricket operations.';
     const filterParts = [`Team: ${getSelectedTeamLabel()}`];
     if (selectedRole !== 'all') filterParts.push(`Role: ${selectedRole}`);
     if (searchQuery.trim().length > 0) filterParts.push(`Search: "${searchQuery.trim()}"`);
@@ -1650,12 +1656,12 @@ export default function AdminPlayers() {
     const filterLine = filterParts.join(' • ');
     const generatedAt = new Date().toLocaleString();
 
-    const summaryCards = [
+    const summaryCards: Array<{ label: string; value: number; color: readonly [number, number, number] }> = [
       { label: 'Total Players', value: playersToExport.length, color: theme.oilGold },
-      { label: 'Batsmen', value: playersToExport.filter(p => p.role === 'Batsman').length, color: theme.oilCobalt },
+      { label: 'Batters', value: playersToExport.filter(p => p.role === 'Batsman').length, color: theme.oilCobalt },
       { label: 'Bowlers', value: playersToExport.filter(p => p.role === 'Bowler').length, color: theme.oilEmber },
       { label: 'All-rounders', value: playersToExport.filter(p => p.role === 'All-rounder').length, color: theme.oilPlum },
-      { label: 'Wicket-keepers', value: playersToExport.filter(p => p.role === 'Wicket-keeper').length, color: theme.oilTeal }
+      { label: 'Keepers', value: playersToExport.filter(p => p.role === 'Wicket-keeper').length, color: theme.oilTeal }
     ];
 
     const withOpacity = (opacity: number, draw: () => void) => {
@@ -1681,6 +1687,9 @@ export default function AdminPlayers() {
         Math.round(a[2] + (b[2] - a[2]) * tt)
       ] as const;
     };
+
+    const pdfColor = (color: readonly [number, number, number]) =>
+      [color[0], color[1], color[2]] as [number, number, number];
 
     const luminance = (color: readonly [number, number, number]) =>
       0.2126 * color[0] + 0.7152 * color[1] + 0.0722 * color[2];
@@ -1737,7 +1746,7 @@ export default function AdminPlayers() {
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(9);
       doc.setTextColor(...theme.mutedText);
-      doc.text(filterLine, 40, 55, { maxWidth: pageWidth - 260 });
+      doc.text(filterLine, 40, 53, { maxWidth: pageWidth - 260 });
       doc.text(generatedAt, pageWidth - 40, 38, { align: 'right' });
 
       doc.setFontSize(9);
@@ -1746,7 +1755,7 @@ export default function AdminPlayers() {
 
     const drawSummary = () => {
       const cardY = 78;
-      const cardHeight = 36;
+      const cardHeight = 42;
       const gap = 10;
       const totalWidth = pageWidth - 80;
       const cardWidth = (totalWidth - gap * (summaryCards.length - 1)) / summaryCards.length;
@@ -1757,22 +1766,22 @@ export default function AdminPlayers() {
         doc.setDrawColor(...theme.cardBorder);
         doc.roundedRect(x, cardY, cardWidth, cardHeight, 8, 8, 'FD');
         withOpacity(0.24, () => {
-          doc.setFillColor(...card.color);
+          doc.setFillColor(...pdfColor(card.color));
           doc.ellipse(x + cardWidth - 22, cardY + 12, 26, 10, 'F');
           doc.ellipse(x + cardWidth - 10, cardY + 24, 20, 14, 'F');
         });
         withOpacity(0.85, () => {
-          doc.setFillColor(...card.color);
+          doc.setFillColor(...pdfColor(card.color));
           doc.rect(x, cardY, cardWidth, 2, 'F');
         });
         doc.setFont('helvetica', 'bold');
-        doc.setFontSize(12);
-        doc.setTextColor(...card.color);
-        doc.text(String(card.value), x + 12, cardY + 21);
+        doc.setFontSize(14);
+        doc.setTextColor(...pdfColor(card.color));
+        doc.text(String(card.value), x + 12, cardY + 24);
         doc.setFont('helvetica', 'normal');
         doc.setFontSize(8);
         doc.setTextColor(...theme.mutedText);
-        doc.text(card.label, x + 12, cardY + 32, { maxWidth: cardWidth - 20 });
+        doc.text(card.label, x + 12, cardY + 35, { maxWidth: cardWidth - 20 });
       });
     };
 
@@ -1791,10 +1800,18 @@ export default function AdminPlayers() {
 
     const roleColors = new Map<string, readonly [number, number, number]>([
       ['Batsman', theme.oilCobalt],
+      ['Batter', theme.oilCobalt],
       ['Bowler', theme.oilEmber],
       ['All-rounder', theme.oilPlum],
       ['Wicket-keeper', theme.oilTeal]
     ]);
+    const roleDisplayLabel = (role: string) => {
+      if (role === 'Batsman' || role === 'Batter') return 'Batters';
+      if (role === 'Bowler') return 'Bowlers';
+      if (role === 'Wicket-keeper') return 'Keepers';
+      return role || 'Role';
+    };
+    const roleColorKey = (role: string) => role === 'Batter' ? 'Batsman' : role;
 
     const drawCard = (title: string, x: number, y: number, w: number, h: number, draw: (plotX: number, plotY: number, plotW: number, plotH: number) => void) => {
       doc.setFillColor(...theme.cardBackground);
@@ -2088,7 +2105,7 @@ export default function AdminPlayers() {
             doc.rect(x + tIdx * cellW, y + rIdx * cellH, cellW, cellH, 'S');
           });
           doc.setFontSize(7);
-          doc.setTextColor(...textColorForFill(fill));
+          doc.setTextColor(...pdfColor(textColorForFill(fill)));
           doc.text(String(count), x + tIdx * cellW + cellW / 2, y + rIdx * cellH + cellH / 2 + 2, { align: 'center' });
         });
         doc.setFontSize(7);
@@ -2147,7 +2164,7 @@ export default function AdminPlayers() {
             doc.rect(x + j * cellW, y + i * cellH, cellW, cellH, 'S');
           });
           doc.setFontSize(7);
-          doc.setTextColor(...textColorForFill(fill));
+          doc.setTextColor(...pdfColor(textColorForFill(fill)));
           doc.text(corr.toFixed(1), x + j * cellW + cellW / 2, y + i * cellH + cellH / 2 + 2, { align: 'center' });
         });
         doc.setFontSize(7);
@@ -2161,7 +2178,16 @@ export default function AdminPlayers() {
       drawPageFrame(1);
       drawSummary();
 
-      const chartTop = 130;
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(11);
+      doc.setTextColor(...theme.text);
+      doc.text('Squad dashboard', 40, 134);
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8);
+      doc.setTextColor(...theme.mutedText);
+      doc.text(reportSubtitle, 142, 134, { maxWidth: pageWidth - 182 });
+
+      const chartTop = 144;
       const chartBottom = pageHeight - 70;
       const chartHeight = chartBottom - chartTop;
       const cols = 2;
@@ -2193,13 +2219,13 @@ export default function AdminPlayers() {
     };
 
     const drawChartNotesPage = () => {
-      const pageNumber = doc.internal.getCurrentPageInfo().pageNumber;
+      const pageNumber = getPdfPageNumber();
       drawPageFrame(pageNumber);
 
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(14);
       doc.setTextColor(...theme.text);
-      doc.text('Chart Explanations', 40, 92);
+      doc.text('How to Read This Player Report', 40, 92);
       withOpacity(0.85, () => {
         doc.setFillColor(...theme.oilGold);
         doc.rect(40, 98, 138, 2, 'F');
@@ -2207,7 +2233,12 @@ export default function AdminPlayers() {
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(9);
       doc.setTextColor(...theme.mutedText);
-      doc.text('Each chart includes the data basis and why this chart type was chosen.', 40, 108);
+      doc.text(
+        'Charts summarize squad balance and cricket output. Team tables then split the player list into readable sheets with repeated identity columns.',
+        40,
+        108,
+        { maxWidth: pageWidth - 80 }
+      );
 
       const topScorers = [...rows]
         .map(r => ({ name: shortName(r.name), runs: toNumber(r.runs) }))
@@ -2432,14 +2463,21 @@ export default function AdminPlayers() {
       'lastAuctionYear',
       'transferFee'
     ]);
+    const keyBattingMetricFields = new Set(['runs', 'highest', 'fours', 'sixes', 'fifties', 'hundreds']);
+    const keyBowlingMetricFields = new Set(['wickets', 'maidens', 'fiveWickets']);
+    const rateMetricFields = new Set(['average', 'strikeRate', 'economy', 'bowlingAverage']);
+    const compactTextFields = new Set(['photoUrl', 'transferNotes', 'performanceColor']);
 
     const formatPdfCell = (columnKey: string, value: unknown) => {
       if (typeof value === 'boolean') return value ? 'Yes' : 'No';
+      if (columnKey === 'role' && value === 'Batsman') return 'Batter';
       if (typeof value === 'number' && Number.isFinite(value)) {
         return decimalFields.has(columnKey) ? value.toFixed(2) : value.toString();
       }
       if (value === null || value === undefined || value === '') return '';
-      return String(value);
+      const text = String(value).replace(/\s+/g, ' ').trim();
+      const maxLength = compactTextFields.has(columnKey) ? 42 : columnKey === 'teamName' ? 28 : 72;
+      return text.length > maxLength ? `${text.slice(0, maxLength - 3)}...` : text;
     };
 
     // Identity columns that repeat on each column-part page
@@ -2448,9 +2486,8 @@ export default function AdminPlayers() {
     // All non-identity columns for the remaining data parts
     const dataColumns = exportColumns.filter(col => !identityColumns.includes(col.key));
 
-    // Estimate columns per page (landscape a4, accounting for width constraints)
-    // Typically ~8-10 columns fit comfortably
-    const columnsPerPage = 9;
+    // Keep each PDF sheet readable by repeating identity columns and adding only a few cricket stats per part.
+    const columnsPerPage = 6;
 
     // Split data columns into parts
     const columnParts: Array<Array<(typeof exportColumns)[number]>> = [];
@@ -2459,7 +2496,7 @@ export default function AdminPlayers() {
       columnParts.push(part);
     }
 
-    // Group players by team, then by batches of 10 per team
+    // Group players by team, then by readable batches per team
     const playersByTeam = rows.reduce((acc, row) => {
       const team = row.teamName as string || 'Unknown';
       if (!acc[team]) acc[team] = [];
@@ -2510,11 +2547,11 @@ export default function AdminPlayers() {
 
       return String(a).localeCompare(String(b));
     });
-    const teamBatches: Array<{ team: string; batch: typeof rows[]; batchIndex: number; totalBatches: number }> = [];
+    const teamBatches: Array<{ team: string; batch: typeof rows; batchIndex: number; totalBatches: number }> = [];
 
     teamsInOrder.forEach(team => {
       const teamPlayers = playersByTeam[team];
-      const playersPerBatch = 10;
+      const playersPerBatch = 8;
       const totalBatches = Math.ceil(teamPlayers.length / playersPerBatch);
 
       for (let batchIndex = 0; batchIndex < totalBatches; batchIndex += 1) {
@@ -2530,11 +2567,53 @@ export default function AdminPlayers() {
       }
     });
 
+    const columnWidthByKey: Record<string, number> = {
+      id: 34,
+      name: 94,
+      role: 68,
+      teamShortName: 44,
+      allrounderType: 72,
+      teamId: 42,
+      teamName: 86,
+      age: 34,
+      dateOfBirth: 62,
+      nationality: 66,
+      jerseyNumber: 42,
+      isCaptain: 48,
+      battingStyle: 74,
+      bowlingStyle: 74,
+      league: 42,
+      photoUrl: 86,
+      matches: 42,
+      runs: 46,
+      wickets: 46,
+      average: 52,
+      bowlingAverage: 52,
+      strikeRate: 50,
+      economy: 48,
+      highest: 50,
+      fours: 42,
+      sixes: 42,
+      fifties: 42,
+      hundreds: 44,
+      bestBowling: 58,
+      maidens: 44,
+      fiveWickets: 58,
+      lastAuctionYear: 48,
+      acquiredVia: 70,
+      transferable: 52,
+      transferFee: 58,
+      transferNotes: 90,
+      performanceGrade: 58,
+      performanceLabel: 88,
+      performanceColor: 58
+    };
+
     // Render each team batch with all columns split across multiple pages
     teamBatches.forEach(({ team, batch, batchIndex, totalBatches }) => {
       columnParts.forEach((columnPart, partIndex) => {
         doc.addPage();
-        const tableStartY = 120;
+        const tableStartY = 146;
 
         // Combine identity columns with current data part
         const displayColumns = [
@@ -2548,64 +2627,173 @@ export default function AdminPlayers() {
         const playerMeta = `${firstPlayerName} to ${lastPlayerName}`;
         const partLabel = `Data Part ${partIndex + 1} of ${columnParts.length}`;
         const columnLabels = displayColumns.map(column => column.label).join(' • ');
+        const batchRuns = batch.reduce((sum, row) => sum + toNumber(row.runs), 0);
+        const batchWickets = batch.reduce((sum, row) => sum + toNumber(row.wickets), 0);
+        const batchRoleLine = ['Batsman', 'Bowler', 'All-rounder', 'Wicket-keeper']
+          .map(role => `${roleDisplayLabel(role)} ${batch.filter(row => row.role === role).length}`)
+          .join('  |  ');
 
         const pdfRows = batch.map(row =>
           displayColumns.map(column => formatPdfCell(column.key, (row as any)[column.key]))
         );
 
         const columnStyles = displayColumns.reduce((acc, column, index) => {
+          const style: Partial<Styles> = {};
+          const customWidth = columnWidthByKey[column.key];
+          if (customWidth) {
+            style.cellWidth = customWidth;
+          }
+
           if (numericFields.has(column.key) || decimalFields.has(column.key)) {
-            acc[index] = { halign: 'right' };
+            style.halign = 'right';
+            style.cellWidth = customWidth ?? 48;
           } else if (column.key === 'isCaptain' || column.key === 'transferable') {
-            acc[index] = { halign: 'center' };
+            style.halign = 'center';
+          } else if (column.key === 'role' || column.key === 'teamShortName' || column.key === 'performanceGrade') {
+            style.halign = 'center';
+          }
+
+          if (Object.keys(style).length > 0) {
+            acc[index] = style;
           }
           return acc;
-        }, {} as Record<number, { halign: 'right' | 'center' }>);
+        }, {} as Record<number, Partial<Styles>>);
 
         autoTable(doc, {
           head: [displayColumns.map(column => column.label)],
           body: pdfRows,
           startY: tableStartY,
-          margin: { top: 90, left: 40, right: 40, bottom: 50 },
+          margin: { top: 136, left: 40, right: 40, bottom: 54 },
           theme: 'striped',
+          showHead: 'everyPage',
+          pageBreak: 'auto',
+          rowPageBreak: 'avoid',
+          tableLineColor: pdfColor(theme.cardBorder),
+          tableLineWidth: 0.25,
           styles: {
-            fontSize: 7.5,
-            cellPadding: 3,
+            fontSize: 7.8,
+            cellPadding: { top: 4, right: 3.5, bottom: 4, left: 3.5 },
             overflow: 'linebreak',
-            textColor: theme.text,
-            fillColor: theme.tableRow,
-            lineColor: theme.cardBorder,
-            lineWidth: 0.2
+            textColor: pdfColor(theme.text),
+            fillColor: pdfColor(theme.tableRow),
+            lineColor: pdfColor(theme.gridLine),
+            lineWidth: 0.22,
+            valign: 'middle',
+            minCellHeight: 18
           },
           headStyles: {
-            fillColor: theme.tableHeader,
-            textColor: theme.headerText,
+            fillColor: pdfColor(theme.tableHeader),
+            textColor: pdfColor(theme.headerText),
             fontStyle: 'bold',
-            halign: 'center'
+            halign: 'center',
+            fontSize: 7.4,
+            minCellHeight: 22
           },
           bodyStyles: {
-            fillColor: theme.tableRow,
-            textColor: theme.text
+            fillColor: pdfColor(theme.tableRow),
+            textColor: pdfColor(theme.text)
           },
           alternateRowStyles: {
-            fillColor: theme.tableAltRow
+            fillColor: pdfColor(theme.tableAltRow)
           },
           columnStyles,
+          didParseCell: (data) => {
+            if (data.section === 'head') {
+              data.cell.styles.fillColor = pdfColor(theme.tableHeader);
+              data.cell.styles.textColor = pdfColor(theme.headerText);
+              data.cell.styles.lineColor = pdfColor(theme.gridLine);
+              return;
+            }
+
+            if (data.section !== 'body') return;
+            const column = displayColumns[data.column.index];
+            if (!column) return;
+            const cellText = String(data.cell.raw ?? '');
+
+            if (column.key === 'name') {
+              data.cell.styles.fontStyle = 'bold';
+              data.cell.styles.textColor = pdfColor(theme.headerText);
+              data.cell.styles.fillColor = pdfColor(theme.tableFocusRow);
+            }
+
+            if (column.key === 'role') {
+              const roleColor = roleColors.get(roleColorKey(cellText)) || theme.oilGold;
+              data.cell.styles.fillColor = pdfColor(mixColor(theme.tableRow, roleColor, 0.24));
+              data.cell.styles.textColor = pdfColor(roleColor);
+              data.cell.styles.fontStyle = 'bold';
+              data.cell.styles.halign = 'center';
+            }
+
+            if (column.key === 'teamShortName') {
+              data.cell.styles.fillColor = pdfColor(mixColor(theme.tableRow, theme.oilGold, 0.2));
+              data.cell.styles.textColor = pdfColor(theme.oilGold);
+              data.cell.styles.fontStyle = 'bold';
+              data.cell.styles.halign = 'center';
+            }
+
+            if (column.key === 'isCaptain' && cellText === 'Yes') {
+              data.cell.styles.fillColor = pdfColor(mixColor(theme.tableRow, theme.oilGold, 0.32));
+              data.cell.styles.textColor = pdfColor(theme.oilGold);
+              data.cell.styles.fontStyle = 'bold';
+            }
+
+            if (keyBattingMetricFields.has(column.key)) {
+              data.cell.styles.textColor = pdfColor(theme.oilGold);
+              data.cell.styles.fontStyle = 'bold';
+            } else if (keyBowlingMetricFields.has(column.key)) {
+              data.cell.styles.textColor = pdfColor(theme.oilEmber);
+              data.cell.styles.fontStyle = 'bold';
+            } else if (rateMetricFields.has(column.key)) {
+              data.cell.styles.textColor = pdfColor(theme.oilTeal);
+              data.cell.styles.fontStyle = 'bold';
+            }
+
+            if (column.key === 'performanceGrade' || column.key === 'performanceLabel') {
+              data.cell.styles.textColor = pdfColor(theme.oilTeal);
+              data.cell.styles.fontStyle = 'bold';
+            }
+          },
           willDrawPage: () => {
-            const pageNumber = doc.internal.getCurrentPageInfo().pageNumber;
+            const pageNumber = getPdfPageNumber();
             drawPageFrame(pageNumber);
+
+            const panelY = 80;
+            const panelHeight = 56;
+            doc.setFillColor(...theme.cardBackground);
+            doc.setDrawColor(...theme.cardBorder);
+            doc.roundedRect(40, panelY, pageWidth - 80, panelHeight, 10, 10, 'FD');
+            withOpacity(0.22, () => {
+              doc.setFillColor(...theme.oilTeal);
+              doc.ellipse(pageWidth - 220, panelY + 12, 94, 22, 'F');
+              doc.setFillColor(...theme.oilGold);
+              doc.ellipse(pageWidth - 110, panelY + 34, 140, 30, 'F');
+            });
+            withOpacity(0.95, () => {
+              doc.setFillColor(...theme.oilEmber);
+              doc.rect(40, panelY, pageWidth - 80, 2, 'F');
+            });
 
             doc.setFont('helvetica', 'bold');
             doc.setFontSize(13);
             doc.setTextColor(...theme.text);
-            doc.text(batchTitle, 40, 92);
+            doc.text(batchTitle, 54, panelY + 20);
 
             doc.setFont('helvetica', 'normal');
             doc.setFontSize(8);
             doc.setTextColor(...theme.mutedText);
-            doc.text(playerMeta, 40, 104, { maxWidth: pageWidth - 80 });
-            doc.text(partLabel, 40, 110);
-            doc.text(columnLabels, 40, 116, { maxWidth: pageWidth - 80 });
+            doc.text(`Players: ${playerMeta}`, 54, panelY + 34, { maxWidth: pageWidth - 270 });
+            doc.text(`Columns: ${columnLabels}`, 54, panelY + 48, { maxWidth: pageWidth - 270 });
+
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(9);
+            doc.setTextColor(...theme.oilGold);
+            doc.text(partLabel, pageWidth - 54, panelY + 20, { align: 'right' });
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(8);
+            doc.setTextColor(...theme.mutedText);
+            doc.text(batchRoleLine, pageWidth - 54, panelY + 34, { align: 'right', maxWidth: 220 });
+            doc.setTextColor(...theme.oilTeal);
+            doc.text(`Batch totals: ${formatNumber(batchRuns)} runs | ${formatNumber(batchWickets)} wickets`, pageWidth - 54, panelY + 48, { align: 'right' });
           }
         });
       });
@@ -6519,60 +6707,108 @@ export default function AdminPlayers() {
       <ModernDialog
         isOpen={showExportModal}
         onClose={() => setShowExportModal(false)}
-        title="Export Players"
-        description="Export player data in your preferred format"
+        title="Export Player Report"
+        description="Create a designed cricket PDF or a data-ready file from the current filters."
         variant="default"
-        size="lg"
+        size="2xl"
         icon={
-          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center shadow-lg">
-            <Download className="w-6 h-6 text-white" />
+          <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-[#d7a85b]/40 bg-[linear-gradient(135deg,rgba(215,168,91,0.32),rgba(76,195,154,0.18))] shadow-lg shadow-[#d7a85b]/10">
+            <Download className="h-6 w-6 text-[#f2d39a]" />
           </div>
         }
       >
         <div className="space-y-6">
-          <div className="p-4 bg-gray-800/40 border border-white/10 rounded-xl">
-            <p className="text-sm text-gray-200">
-              Export scope: {currentLeague.toUpperCase()} • {getSelectedTeamLabel()} • {searchFilteredPlayers.length} players
-            </p>
-            <p className="text-xs text-gray-400 mt-1">
-              Exports follow current filters, search, and advanced filters.
-            </p>
+          <div className="oil-modal-section relative overflow-hidden p-5">
+            <div className="absolute inset-y-0 right-0 w-56 bg-[radial-gradient(circle_at_top_right,rgba(215,168,91,0.24),transparent_62%)]" />
+            <div className="relative flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+              <div>
+                <p className="text-xs font-bold uppercase tracking-[0.24em] text-[#f2d39a]">Current export scope</p>
+                <h4 className="mt-2 text-xl font-bold text-white">{currentLeague.toUpperCase()} player report</h4>
+                <p className="mt-1 text-sm text-gray-300">
+                  {getSelectedTeamLabel()} | {searchFilteredPlayers.length} players | Current search and advanced filters included.
+                </p>
+              </div>
+              <div className="grid grid-cols-2 gap-2 text-sm">
+                <div className="rounded-xl border border-white/10 bg-white/5 px-4 py-3">
+                  <p className="text-xs uppercase tracking-[0.18em] text-gray-400">League</p>
+                  <p className="mt-1 font-bold text-[#f2d39a]">{currentLeague.toUpperCase()}</p>
+                </div>
+                <div className="rounded-xl border border-white/10 bg-white/5 px-4 py-3">
+                  <p className="text-xs uppercase tracking-[0.18em] text-gray-400">Records</p>
+                  <p className="mt-1 font-bold text-[#9cf2c8]">{searchFilteredPlayers.length}</p>
+                </div>
+              </div>
+            </div>
           </div>
 
           {/* Format Selection */}
           <div>
-            <h4 className="text-lg font-semibold text-white mb-4">Choose Export Format</h4>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {/* PDF Format */}
+            <div className="mb-4 flex items-center justify-between gap-3">
+              <div>
+                <h4 className="text-lg font-semibold text-white">Choose export format</h4>
+                <p className="text-sm text-gray-400">Use PDF for a cricket report. Use the other formats for data work.</p>
+              </div>
+            </div>
+
+            <div className="space-y-4">
               <button
                 onClick={() => handleExport('pdf')}
                 disabled={isExporting}
-                className="p-4 bg-gray-800/50 hover:bg-gray-700/50 border border-white/10 rounded-xl transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed group"
+                className="group relative w-full overflow-hidden rounded-2xl border border-[#d7a85b]/40 bg-[linear-gradient(135deg,rgba(15,31,27,0.96),rgba(41,34,22,0.94))] p-5 text-left shadow-2xl shadow-black/20 transition-all duration-500 hover:-translate-y-1 hover:border-[#f2d39a]/70 hover:shadow-[#d7a85b]/20 disabled:cursor-not-allowed disabled:opacity-50"
               >
-                <div className="flex flex-col items-center gap-3">
-                  <div className="w-12 h-12 rounded-lg bg-red-500/20 flex items-center justify-center group-hover:bg-red-500/30 transition-colors">
-                    <FileDown className="w-6 h-6 text-red-400" />
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(76,195,154,0.22),transparent_36%),radial-gradient(circle_at_bottom_right,rgba(229,101,95,0.2),transparent_38%)] opacity-80 transition-transform duration-700 group-hover:scale-110" />
+                <div className="relative flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
+                  <div className="flex items-start gap-4">
+                    <div className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-2xl border border-[#f2d39a]/40 bg-[#d7a85b]/20 shadow-lg shadow-[#d7a85b]/10">
+                      <FileDown className="h-7 w-7 text-[#f2d39a]" />
+                    </div>
+                    <div>
+                      <div className="flex flex-wrap items-center gap-3">
+                        <p className="text-xl font-bold text-white">Designed PDF Report</p>
+                        <span className="rounded-full border border-[#d7a85b]/40 bg-[#d7a85b]/15 px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] text-[#f2d39a]">
+                          Recommended
+                        </span>
+                      </div>
+                      <p className="mt-2 max-w-2xl text-sm leading-6 text-gray-300">
+                        Creates a polished squad intelligence PDF with dashboard charts, cricket role summaries, team-batched player sheets, repeated headers, page numbers, and highlighted batting and bowling metrics.
+                      </p>
+                      <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-3">
+                        <div className="rounded-xl border border-white/10 bg-white/5 px-3 py-2">
+                          <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#9cf2c8]">Dashboard</p>
+                          <p className="text-xs text-gray-300">Runs, roles, age mix</p>
+                        </div>
+                        <div className="rounded-xl border border-white/10 bg-white/5 px-3 py-2">
+                          <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#f2d39a]">Team sheets</p>
+                          <p className="text-xs text-gray-300">Readable stat chunks</p>
+                        </div>
+                        <div className="rounded-xl border border-white/10 bg-white/5 px-3 py-2">
+                          <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#ffaaa5]">Admin ready</p>
+                          <p className="text-xs text-gray-300">Filtered and timestamped</p>
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                  <div className="text-center">
-                    <p className="text-white font-medium">PDF</p>
-                    <p className="text-xs text-gray-400">Printable report</p>
+                  <div className="flex items-center gap-2 rounded-xl border border-[#f2d39a]/30 bg-[#f2d39a]/10 px-4 py-3 text-sm font-bold text-[#f2d39a] transition-transform duration-300 group-hover:translate-x-1">
+                    <Download className="h-4 w-4" />
+                    Export PDF
                   </div>
                 </div>
               </button>
 
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               {/* CSV Format */}
               <button
                 onClick={() => handleExport('csv')}
                 disabled={isExporting}
-                className="p-4 bg-gray-800/50 hover:bg-gray-700/50 border border-white/10 rounded-xl transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed group"
+                className="group rounded-2xl border border-white/10 bg-white/[0.04] p-4 text-left transition-all duration-300 hover:-translate-y-0.5 hover:border-[#4cc39a]/40 hover:bg-[#4cc39a]/10 disabled:cursor-not-allowed disabled:opacity-50"
               >
-                <div className="flex flex-col items-center gap-3">
-                  <div className="w-12 h-12 rounded-lg bg-green-500/20 flex items-center justify-center group-hover:bg-green-500/30 transition-colors">
-                    <FileText className="w-6 h-6 text-green-400" />
+                <div className="flex items-center gap-3">
+                  <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#4cc39a]/15 transition-colors group-hover:bg-[#4cc39a]/25">
+                    <FileText className="h-5 w-5 text-[#9cf2c8]" />
                   </div>
-                  <div className="text-center">
-                    <p className="text-white font-medium">CSV</p>
-                    <p className="text-xs text-gray-400">Excel/Sheets friendly</p>
+                  <div>
+                    <p className="font-semibold text-white">CSV Data File</p>
+                    <p className="text-xs text-gray-400">Lightweight rows for Excel or Google Sheets.</p>
                   </div>
                 </div>
               </button>
@@ -6581,15 +6817,15 @@ export default function AdminPlayers() {
               <button
                 onClick={() => handleExport('excel')}
                 disabled={isExporting}
-                className="p-4 bg-gray-800/50 hover:bg-gray-700/50 border border-white/10 rounded-xl transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed group"
+                className="group rounded-2xl border border-white/10 bg-white/[0.04] p-4 text-left transition-all duration-300 hover:-translate-y-0.5 hover:border-[#4fb6c4]/40 hover:bg-[#4fb6c4]/10 disabled:cursor-not-allowed disabled:opacity-50"
               >
-                <div className="flex flex-col items-center gap-3">
-                  <div className="w-12 h-12 rounded-lg bg-purple-500/20 flex items-center justify-center group-hover:bg-purple-500/30 transition-colors">
-                    <FileSpreadsheet className="w-6 h-6 text-purple-400" />
+                <div className="flex items-center gap-3">
+                  <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#4fb6c4]/15 transition-colors group-hover:bg-[#4fb6c4]/25">
+                    <FileSpreadsheet className="h-5 w-5 text-[#a8e9ef]" />
                   </div>
-                  <div className="text-center">
-                    <p className="text-white font-medium">Excel</p>
-                    <p className="text-xs text-gray-400">.XLSX spreadsheet</p>
+                  <div>
+                    <p className="font-semibold text-white">Excel Workbook</p>
+                    <p className="text-xs text-gray-400">Formatted .xlsx sheets with summaries and charts.</p>
                   </div>
                 </div>
               </button>
@@ -6598,15 +6834,15 @@ export default function AdminPlayers() {
               <button
                 onClick={() => handleExport('database')}
                 disabled={isExporting}
-                className="p-4 bg-gray-800/50 hover:bg-gray-700/50 border border-white/10 rounded-xl transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed group"
+                className="group rounded-2xl border border-white/10 bg-white/[0.04] p-4 text-left transition-all duration-300 hover:-translate-y-0.5 hover:border-[#d7a85b]/40 hover:bg-[#d7a85b]/10 disabled:cursor-not-allowed disabled:opacity-50"
               >
-                <div className="flex flex-col items-center gap-3">
-                  <div className="w-12 h-12 rounded-lg bg-amber-500/20 flex items-center justify-center group-hover:bg-amber-500/30 transition-colors">
-                    <Database className="w-6 h-6 text-amber-400" />
+                <div className="flex items-center gap-3">
+                  <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#d7a85b]/15 transition-colors group-hover:bg-[#d7a85b]/25">
+                    <Database className="h-5 w-5 text-[#f2d39a]" />
                   </div>
-                  <div className="text-center">
-                    <p className="text-white font-medium">Database (SQL)</p>
-                    <p className="text-xs text-gray-400">Import-ready dump</p>
+                  <div>
+                    <p className="font-semibold text-white">Database SQL</p>
+                    <p className="text-xs text-gray-400">Import-ready statements for database work.</p>
                   </div>
                 </div>
               </button>
@@ -6615,45 +6851,53 @@ export default function AdminPlayers() {
               <button
                 onClick={() => handleExport('json')}
                 disabled={isExporting}
-                className="p-4 bg-gray-800/50 hover:bg-gray-700/50 border border-white/10 rounded-xl transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed group"
+                className="group rounded-2xl border border-white/10 bg-white/[0.04] p-4 text-left transition-all duration-300 hover:-translate-y-0.5 hover:border-[#e5655f]/40 hover:bg-[#e5655f]/10 disabled:cursor-not-allowed disabled:opacity-50"
               >
-                <div className="flex flex-col items-center gap-3">
-                  <div className="w-12 h-12 rounded-lg bg-blue-500/20 flex items-center justify-center group-hover:bg-blue-500/30 transition-colors">
-                    <DatabaseBackup className="w-6 h-6 text-blue-400" />
+                <div className="flex items-center gap-3">
+                  <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#e5655f]/15 transition-colors group-hover:bg-[#e5655f]/25">
+                    <DatabaseBackup className="h-5 w-5 text-[#ffaaa5]" />
                   </div>
-                  <div className="text-center">
-                    <p className="text-white font-medium">JSON Backup</p>
-                    <p className="text-xs text-gray-400">Full data export</p>
+                  <div>
+                    <p className="font-semibold text-white">JSON Backup</p>
+                    <p className="text-xs text-gray-400">Full structured player data for restore workflows.</p>
                   </div>
                 </div>
               </button>
+              </div>
             </div>
           </div>
 
           {/* Export Status */}
           {isExporting && (
-            <div className="p-4 bg-blue-500/10 border border-blue-500/30 rounded-xl">
+            <div className="rounded-2xl border border-[#4fb6c4]/30 bg-[#4fb6c4]/10 p-4">
               <div className="flex items-center gap-3">
-                <div className="w-6 h-6 border-2 border-blue-400 border-t-transparent rounded-full animate-spin"></div>
-                <p className="text-blue-300">Exporting players...</p>
+                <div className="h-6 w-6 rounded-full border-2 border-[#a8e9ef] border-t-transparent animate-spin"></div>
+                <p className="font-medium text-[#a8e9ef]">Building the player export...</p>
               </div>
             </div>
           )}
 
           {/* Export Tips */}
-          <div className="p-4 bg-amber-500/10 border border-amber-500/30 rounded-xl">
+          <div className="oil-modal-section p-4">
             <div className="flex items-start gap-3">
-              <div className="w-6 h-6 rounded-full bg-amber-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-                <span className="text-amber-400 text-xs font-bold">!</span>
+              <div className="mt-0.5 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl border border-[#d7a85b]/30 bg-[#d7a85b]/15">
+                <Award className="h-4 w-4 text-[#f2d39a]" />
               </div>
-              <div className="text-sm text-amber-300">
-                <p className="font-medium mb-1">Export Tips:</p>
-                <ul className="text-xs space-y-1 text-amber-200">
-                  <li>• Exports respect current filters, search, and advanced filters</li>
-                  <li>• PDF is best for sharing or printing</li>
-                  <li>• Excel (.xlsx) and CSV work with Excel and Google Sheets</li>
-                  <li>• Database (SQL) can be imported into MySQL/SQLite/Postgres</li>
-                  <li>• Files are named with league, team, and date for easy tracking</li>
+              <div className="text-sm">
+                <p className="font-semibold text-[#f2d39a]">Export guidance</p>
+                <ul className="mt-2 space-y-2 text-xs text-gray-300">
+                  <li className="flex gap-2">
+                    <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-[#f2d39a]" />
+                    <span>PDF is best for sharing squad reports with coaches, analysts, and cricket operations teams.</span>
+                  </li>
+                  <li className="flex gap-2">
+                    <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-[#9cf2c8]" />
+                    <span>Excel and CSV are best when you need formulas, sorting, and custom analysis.</span>
+                  </li>
+                  <li className="flex gap-2">
+                    <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-[#ffaaa5]" />
+                    <span>Every export respects the current team, search, role, and advanced filter selections.</span>
+                  </li>
                 </ul>
               </div>
             </div>
