@@ -21,6 +21,8 @@ import { Search, Filter, Edit2, X, Users, TrendingUp, Award, Target, Zap, Chevro
 import AdminPlayersTable from '@/components/admin/players/AdminPlayersTable';
 import AdminPlayerDetailsModal from '@/components/admin/players/AdminPlayerDetailsModal';
 import AdminPlayersGridPanel from '@/components/admin/players/AdminPlayersGridPanel';
+import AdminPlayerBasicInfoSection from '@/components/admin/players/AdminPlayerBasicInfoSection';
+import AdminPlayerFormProgress from '@/components/admin/players/AdminPlayerFormProgress';
 import '@/styles/flags.css';
 
 // Data Integrity Helper Functions
@@ -4746,7 +4748,7 @@ export default function AdminPlayers() {
           {viewMode === 'grid' ? (
             /* Grid View - Virtual Scrolling for Performance */
             searchFilteredPlayers.length > VIRTUAL_SCROLL_THRESHOLD && virtualScrollEnabled ? (
-              <div className="relative">
+              <div className="oil-modal-input-wrap">
                 <div className="mb-4 flex items-center justify-between">
                   <div className="text-sm text-gray-400">
                     Virtual scrolling enabled for {searchFilteredPlayers.length} players
@@ -4865,237 +4867,108 @@ export default function AdminPlayers() {
             </div>
           </div>
 
-          {/* Enhanced Player Form Modal */}
-          <ModernDialog
-            isOpen={showForm}
-            onClose={() => setShowForm(false)}
-            title={editingPlayer ? 'Edit Player' : 'Add New Player'}
-            description={editingPlayer ? 'Update player information and statistics' : 'Add a new player to the database'}
-            variant="info"
-            size="xl"
-            icon={<CustomEmoji type="cricket-stumps" size={24} />}
-            contentClassName="max-h-[80vh] overflow-y-auto scrollbar-thin scrollbar-thumb-blue-500/50 scrollbar-track-gray-700/50"
-            footer={
-              <div className="flex gap-4">
-                <button
-                  type="submit"
-                  form="player-form"
-                  className="flex-1 bg-gradient-to-r from-blue-500 via-blue-600 to-purple-600 hover:from-blue-600 hover:via-purple-600 hover:to-purple-700 text-white font-semibold py-3.5 px-8 rounded-xl hover:shadow-2xl hover:shadow-blue-500/25 hover:scale-[1.02] transition-all duration-300 flex items-center justify-center gap-2.5 group"
-                >
-                  {editingPlayer ? (
-                    <>
-                      <Edit2 className="w-5 h-5 group-hover:rotate-12 transition-transform duration-300" />
-                      <span>Update Player</span>
-                    </>
-                  ) : (
-                    <>
-                      <Plus className="w-5 h-5 group-hover:rotate-90 transition-transform duration-300" />
-                      <span>Add Player</span>
-                    </>
-                  )}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setShowForm(false)}
-                  className="flex-1 border-2 border-white/20 bg-slate-800/80 hover:bg-slate-700/90 hover:border-white/30 text-white font-semibold py-3.5 px-8 rounded-xl transition-all duration-300 hover:scale-[1.02] flex items-center justify-center gap-2"
-                >
-                  <X className="w-4 h-4" />
-                  <span>Cancel</span>
-                </button>
-              </div>
-            }
-          >
-            <form id="player-form" onSubmit={handleSubmit} className="space-y-6">
-                    {/* Section Header - Enhanced */}
-                    <div className="relative overflow-hidden bg-gradient-to-br from-blue-500/10 via-purple-500/5 to-pink-500/10 rounded-2xl p-6 border border-white/10 backdrop-blur-sm">
-                      <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,.05)_50%,transparent_75%,transparent_100%)] bg-[length:20px_20px] opacity-50"></div>
-                      <div className="relative flex items-center gap-4">
-                        <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-blue-500/20 to-purple-500/20 border border-blue-400/30 flex items-center justify-center shadow-lg">
-                          <User className="w-7 h-7 text-blue-300" />
+          {/* Enhanced Player Form Modal — Oil glass desk */}
+          {showForm && (
+            <div className="oil-modal-backdrop fixed inset-0 z-[9999] flex items-center justify-center p-4">
+              <div className="oil-modal-shell w-full max-w-5xl max-h-[95vh] overflow-hidden text-white">
+                <div className="oil-modal-header p-6">
+                  <div className="relative z-10 flex items-start justify-between gap-5">
+                    <div className="flex items-start gap-4">
+                      <div className="oil-modal-icon">
+                        <CustomEmoji type="cricket-stumps" size={24} />
+                      </div>
+                      <div>
+                        <div className="oil-hero-kicker mb-2">
+                          <User className="h-3.5 w-3.5" />
+                          Squad operations desk
                         </div>
-                        <div className="flex-1">
-                          <h3 className="text-2xl font-bold text-white flex items-center gap-2">
-                            Basic Information
-                          </h3>
-                          <p className="text-sm text-gray-300 mt-1">Enter player's personal details and team assignment</p>
-                        </div>
+                        <h2 className="text-2xl font-black tracking-tight text-white">
+                          {editingPlayer ? 'Edit Player Profile' : 'Add New Player'}
+                        </h2>
+                        <p className="mt-1 max-w-2xl text-sm leading-6 text-white/65">
+                          {editingPlayer
+                            ? 'Update identity, squad assignment, transfer context, and season statistics.'
+                            : 'Register a new squad member with league, team, and cricket profile details.'}
+                        </p>
                       </div>
                     </div>
+                    <button
+                      type="button"
+                      onClick={() => setShowForm(false)}
+                      className="oil-modal-close flex-shrink-0"
+                      aria-label="Close player form"
+                    >
+                      <X className="w-5 h-5" />
+                    </button>
+                  </div>
+                </div>
 
-                    {/* Basic Info - Enhanced Card Layout */}
-                    <div className="bg-gradient-to-br from-gray-800/40 to-gray-900/40 rounded-2xl p-6 border border-white/10 backdrop-blur-sm">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div className="group">
-                          <label className="block text-sm font-semibold text-gray-200 mb-2.5 flex items-center gap-2">
-                            <User className="w-4 h-4 text-blue-400" />
-                          Player Name
-                            <span className="text-red-400">*</span>
-                        </label>
-                          <div className="relative">
-                        <input
-                          type="text"
-                          value={formData.name}
-                          onChange={(e) => setFormData({...formData, name: e.target.value})}
-                              className="w-full pl-12 pr-4 py-3.5 bg-gray-800/60 border-2 border-white/10 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all hover:border-white/20 group-hover:bg-gray-800/70"
-                          placeholder="Enter player name"
-                          required
-                        />
-                            <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+                <div className="oil-modal-body custom-scrollbar overflow-y-auto max-h-[calc(95vh-176px)]">
+                  <div className="oil-modal-strip border-b border-white/10 px-6 py-4">
+                    <AdminPlayerFormProgress showStatsStep={formData.league !== 'wpl'} />
+                  </div>
+                  <form id="player-form" onSubmit={handleSubmit} className="space-y-6 p-6">
+                    <AdminPlayerBasicInfoSection
+                      formData={{
+                        name: formData.name,
+                        role: formData.role,
+                        allrounderType: formData.allrounderType,
+                        teamId: formData.teamId,
+                        league: formData.league,
+                        isActiveInSquad: formData.isActiveInSquad,
+                      }}
+                      teams={teams}
+                      editingPlayerId={editingPlayer?.id}
+                      onChange={(patch) => setFormData({ ...formData, ...patch })}
+                      onAllrounderTypeChange={(value) =>
+                        setFormData((prev) => ({ ...prev, allrounderType: value as typeof prev.allrounderType }))
+                      }
+                      onTeamSelect={(value) => {
+                        if (value === NOT_SELECTED_SEASON_FILTER) {
+                          setFormData({
+                            ...formData,
+                            teamId: '',
+                            isActiveInSquad: false,
+                            squadExitReason: formData.squadExitReason || 'released',
+                            squadExitDate: formData.squadExitDate || new Date().toISOString().slice(0, 10),
+                          });
+                          return;
+                        }
+                        setFormData({
+                          ...formData,
+                          teamId: value,
+                          isActiveInSquad: true,
+                          squadExitReason: '',
+                          squadExitDate: '',
+                        });
+                      }}
+                    />
+
+                    <section className="oil-modal-section p-5 oil-rise" id="player-form-personal">
+                      <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
+                        <div className="flex items-start gap-4">
+                          <div className="oil-modal-icon !h-14 !w-14">
+                            <Calendar className="h-7 w-7" />
                           </div>
-                      </div>
-
-                        <div className="group">
-                          <label className="block text-sm font-semibold text-gray-200 mb-2.5 flex items-center gap-2">
-                            <Award className="w-4 h-4 text-purple-400" />
-                          Role
-                            <span className="text-red-400">*</span>
-                        </label>
-                          <CustomSelect
-                          value={formData.role}
-                            onChange={(newRole) => {
-                            console.log('Role changed to:', newRole, 'Current allrounderType:', formData.allrounderType);
-                            setFormData({
-                              ...formData, 
-                                role: newRole as any,
-                              // Reset allrounderType if role is not All-rounder, otherwise keep it
-                              allrounderType: newRole === 'All-rounder' ? (formData.allrounderType || '') : ''
-                            });
-                          }}
-                            options={[
-                              { value: 'Batsman', label: 'Batsman' },
-                              { value: 'Bowler', label: 'Bowler' },
-                              { value: 'All-rounder', label: 'All-rounder' },
-                              { value: 'Wicket-keeper', label: 'Wicket-keeper' },
-                            ]}
-                            placeholder="Select role"
-                            icon={<Award className="w-5 h-5" />}
-                            iconColor="text-purple-400"
-                            required
-                          />
-                      </div>
-
-                      {formData.role === 'All-rounder' && (
-                          <div className="group md:col-span-2">
-                            <label className="block text-sm font-semibold text-gray-200 mb-2.5 flex items-center gap-2">
-                              <Target className="w-4 h-4 text-orange-400" />
-                            All-rounder Type
-                              <span className="text-red-400">*</span>
-                          </label>
-                            <CustomSelect
-                            key={`allrounder-type-${editingPlayer?.id || 'new'}-${formData.allrounderType}`}
-                            value={formData.allrounderType || ''}
-                              onChange={(value) => {
-                                console.log('All-rounder type changed to:', value, 'Current formData:', formData);
-                                setFormData(prev => {
-                                  const updated = {...prev, allrounderType: value as any};
-                                  console.log('Updated formData:', updated);
-                                  return updated;
-                                });
-                              }}
-                              options={[
-                                { value: 'Batting All-rounder', label: 'Batting All-rounder' },
-                                { value: 'Bowling All-rounder', label: 'Bowling All-rounder' },
-                              ]}
-                              placeholder="Select type"
-                              icon={<Target className="w-5 h-5" />}
-                              iconColor="text-orange-400"
-                            required
-                            />
-                        </div>
-                      )}
-
-                        <div className="group">
-                          <label className="block text-sm font-semibold text-gray-200 mb-2.5 flex items-center gap-2">
-                            <Shield className="w-4 h-4 text-emerald-400" />
-                          League
-                            <span className="text-red-400">*</span>
-                        </label>
-                          <CustomSelect
-                          value={formData.league}
-                            onChange={(value) => setFormData({...formData, league: value as 'ipl' | 'wpl'})}
-                            options={[
-                              { value: 'ipl', label: 'IPL (Indian Premier League)' },
-                              { value: 'wpl', label: 'WPL (Women\'s Premier League)' },
-                            ]}
-                            placeholder="Select league"
-                            icon={<Shield className="w-5 h-5" />}
-                            iconColor="text-emerald-400"
-                          required
-                          />
-                      </div>
-
-                        <div className="group">
-                          <label className="block text-sm font-semibold text-gray-200 mb-2.5 flex items-center gap-2">
-                            <Users className="w-4 h-4 text-cyan-400" />
-                          Team
-                            <span className="text-red-400">*</span>
-                        </label>
-                          <CustomSelect
-                          value={formData.isActiveInSquad ? formData.teamId : NOT_SELECTED_SEASON_FILTER}
-                            onChange={(value) => {
-                              if (value === NOT_SELECTED_SEASON_FILTER) {
-                                setFormData({
-                                  ...formData,
-                                  teamId: '',
-                                  isActiveInSquad: false,
-                                  squadExitReason: formData.squadExitReason || 'released',
-                                  squadExitDate: formData.squadExitDate || new Date().toISOString().slice(0, 10),
-                                });
-                                return;
-                              }
-
-                              setFormData({
-                                ...formData,
-                                teamId: value,
-                                isActiveInSquad: true,
-                                squadExitReason: '',
-                                squadExitDate: '',
-                              });
-                            }}
-                            options={[
-                              {
-                                value: NOT_SELECTED_SEASON_FILTER,
-                                label: 'Not Selected for This Season (admin only)',
-                              },
-                              ...teams
-                                .filter(team => team.league === formData.league)
-                                .map(team => ({
-                                  value: team.id,
-                                  label: team.name,
-                                }))
-                            ]}
-                            placeholder="Select a team"
-                            icon={<Users className="w-5 h-5" />}
-                            iconColor="text-cyan-400"
-                          required={formData.isActiveInSquad}
-                            disabled={!formData.isActiveInSquad}
-                            searchable
-                          />
-                        </div>
-                      </div>
-                      </div>
-
-                    {/* Personal Details Section */}
-                    <div className="relative overflow-hidden bg-gradient-to-br from-[#d7a85b]/10 via-[#4cc39a]/5 to-[#b77837]/10 rounded-2xl p-6 border border-[#d7a85b]/20 backdrop-blur-sm">
-                      <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,.05)_50%,transparent_75%,transparent_100%)] bg-[length:20px_20px] opacity-50"></div>
-                      <div className="relative">
-                        <div className="flex items-center gap-4 mb-6">
-                          <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-[#d7a85b]/20 to-[#4cc39a]/15 border border-[#d7a85b]/30 flex items-center justify-center shadow-lg">
-                            <Calendar className="w-7 h-7 text-[#f2d39a]" />
-                          </div>
-                          <div className="flex-1">
-                            <h3 className="text-2xl font-bold text-white">Personal Details</h3>
-                            <p className="text-sm text-gray-300 mt-1">Player age, date of birth, and nationality for squad records</p>
+                          <div>
+                            <div className="oil-hero-kicker mb-2">
+                              <Calendar className="h-3.5 w-3.5" />
+                              Identity records
+                            </div>
+                            <h3 className="text-xl font-black tracking-tight text-white">Personal Details</h3>
+                            <p className="mt-1 text-sm text-white/60">Player age, date of birth, and nationality for squad records.</p>
                           </div>
                         </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <span className="oil-chip">Step 2</span>
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <div className="group">
                             <label className="block text-sm font-semibold text-gray-200 mb-2.5 flex items-center gap-2">
                               <Calendar className="w-4 h-4 text-[#f2d39a]" />
                               Age
                               {(!formData.dateOfBirth || formData.dateOfBirth.trim() === '') && <span className="text-red-400">*</span>}
                         </label>
-                            <div className="relative">
+                            <div className="oil-modal-input-wrap">
                         <input
                           type="number"
                           value={formData.age === '0' || formData.age === 0 ? '' : formData.age}
@@ -5108,11 +4981,11 @@ export default function AdminPlayers() {
                             }
                             setFormData({...formData, age: newValue});
                           }}
-                                className="w-full pl-12 pr-4 py-3.5 bg-gray-800/60 border-2 border-white/10 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#d7a85b]/40 focus:border-[#d7a85b]/60 transition-all hover:border-[#d7a85b]/30 group-hover:bg-gray-800/70"
+                                className="oil-modal-input oil-modal-input--icon w-full"
                                 placeholder="Enter age"
                           required={!formData.dateOfBirth || formData.dateOfBirth.trim() === ''}
                         />
-                              <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+                              <Calendar className="oil-modal-input-icon text-white/40" />
                             </div>
                             <p className="text-xs text-gray-400 mt-2 flex items-center gap-1.5">
                           {(() => {
@@ -5181,17 +5054,17 @@ export default function AdminPlayers() {
                               Date of Birth
                               <span className="text-xs text-gray-400 font-normal">(Month DD, YYYY)</span>
                         </label>
-                            <div className="relative">
+                            <div className="oil-modal-input-wrap">
                         <input
                           type="text"
                           value={formData.dateOfBirth}
                           onChange={(e) => {
                             setFormData({...formData, dateOfBirth: e.target.value});
                           }}
-                                className="w-full pl-12 pr-4 py-3.5 bg-gray-800/60 border-2 border-white/10 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-pink-500/50 focus:border-pink-500/50 transition-all hover:border-white/20 group-hover:bg-gray-800/70"
+                                className="oil-modal-input oil-modal-input--icon w-full"
                           placeholder="December 25, 1994 (optional)"
                         />
-                              <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+                              <Calendar className="oil-modal-input-icon text-white/40" />
                             </div>
                             <p className="text-xs text-gray-400 mt-2 flex items-center gap-1.5">
                           {(() => {
@@ -5276,23 +5149,26 @@ export default function AdminPlayers() {
                             />
                           </div>
                         </div>
-                      </div>
-                      </div>
+                    </section>
 
-                    {/* Player Details Section */}
-                    <div className="relative overflow-hidden bg-gradient-to-br from-cyan-500/10 via-blue-500/5 to-indigo-500/10 rounded-2xl p-6 border border-white/10 backdrop-blur-sm">
-                      <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,.05)_50%,transparent_75%,transparent_100%)] bg-[length:20px_20px] opacity-50"></div>
-                      <div className="relative">
-                        <div className="flex items-center gap-4 mb-6">
-                          <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-cyan-500/20 to-blue-500/20 border border-cyan-400/30 flex items-center justify-center shadow-lg">
-                            <Shirt className="w-7 h-7 text-cyan-300" />
+                    <section className="oil-modal-section p-5 oil-rise" id="player-form-profile">
+                      <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
+                        <div className="flex items-start gap-4">
+                          <div className="oil-modal-icon !h-14 !w-14">
+                            <Shirt className="h-7 w-7" />
                           </div>
-                          <div className="flex-1">
-                            <h3 className="text-2xl font-bold text-white">Player Details</h3>
-                            <p className="text-sm text-gray-300 mt-1">Jersey number, playing styles, and captain status</p>
+                          <div>
+                            <div className="oil-hero-kicker mb-2">
+                              <Shirt className="h-3.5 w-3.5" />
+                              Playing profile
+                            </div>
+                            <h3 className="text-xl font-black tracking-tight text-white">Player Details</h3>
+                            <p className="mt-1 text-sm text-white/60">Jersey number, playing styles, and captain status.</p>
                           </div>
                         </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <span className="oil-chip">Step 3</span>
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <div className="group">
                             <label className="block text-sm font-semibold text-gray-200 mb-2.5 flex items-center gap-2">
                               <Hash className="w-4 h-4 text-cyan-400" />
@@ -5304,10 +5180,10 @@ export default function AdminPlayers() {
                             type="number"
                             value={formData.jerseyNumber}
                             onChange={(e) => setFormData({ ...formData, jerseyNumber: e.target.value })}
-                                  className="w-full pl-12 pr-4 py-3.5 bg-gray-800/60 border-2 border-white/10 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50 transition-all hover:border-white/20 group-hover:bg-gray-800/70"
+                                  className="oil-modal-input oil-modal-input--icon w-full"
                                   placeholder="Enter jersey number"
                           />
-                                <Hash className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+                                <Hash className="oil-modal-input-icon text-white/40" />
                               </div>
                           <button
                             type="button"
@@ -5349,10 +5225,10 @@ export default function AdminPlayers() {
                           type="text"
                           value={formData.customBowlingStyle}
                           onChange={(e) => setFormData({ ...formData, customBowlingStyle: e.target.value })}
-                                className="w-full pl-12 pr-4 py-3 bg-gray-800/60 border-2 border-white/10 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all hover:border-white/20"
+                                className="oil-modal-input oil-modal-input--icon w-full"
                           placeholder="Custom bowling style (optional)"
                         />
-                              <Zap className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+                              <Zap className="oil-modal-input-icon text-white/40" />
                             </div>
                       </div>
 
@@ -5391,22 +5267,25 @@ export default function AdminPlayers() {
                             </div>
                           </div>
                         </div>
-                      </div>
-                      </div>
+                    </section>
 
-                    {/* Transfer / Auction Info Section */}
-                    <div className="relative overflow-hidden bg-gradient-to-br from-amber-500/10 via-yellow-500/5 to-orange-500/10 rounded-2xl p-6 border border-white/10 backdrop-blur-sm">
-                      <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,.05)_50%,transparent_75%,transparent_100%)] bg-[length:20px_20px] opacity-50"></div>
-                      <div className="relative">
-                        <div className="flex items-center gap-4 mb-6">
-                          <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-amber-500/20 to-yellow-500/20 border border-amber-400/30 flex items-center justify-center shadow-lg">
-                            <TrendingUp className="w-7 h-7 text-amber-300" />
+                    <section className="oil-modal-section p-5 oil-rise" id="player-form-transfer">
+                      <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
+                        <div className="flex items-start gap-4">
+                          <div className="oil-modal-icon !h-14 !w-14">
+                            <TrendingUp className="h-7 w-7" />
                           </div>
-                          <div className="flex-1">
-                            <h3 className="text-2xl font-bold text-white">Transfer / Auction Info</h3>
-                            <p className="text-sm text-gray-300 mt-1">Player acquisition details and transfer information</p>
+                          <div>
+                            <div className="oil-hero-kicker mb-2">
+                              <TrendingUp className="h-3.5 w-3.5" />
+                              Auction desk
+                            </div>
+                            <h3 className="text-xl font-black tracking-tight text-white">Transfer / Auction Info</h3>
+                            <p className="mt-1 text-sm text-white/60">Player acquisition details and transfer information.</p>
                           </div>
                         </div>
+                        <span className="oil-chip">Step 4</span>
+                      </div>
                         {/* Determine if player is auction-locked for CURRENT_SEASON */}
                         {(() => {
                           const isAuctionLocked = typeof formData.lastAuctionYear !== 'undefined' &&
@@ -5427,15 +5306,15 @@ export default function AdminPlayers() {
                                     <Calendar className="w-4 h-4 text-amber-400" />
                                     Last Auction Year
                                   </label>
-                                  <div className="relative">
+                                  <div className="oil-modal-input-wrap">
                                   <input
                                     type="number"
                                     value={formData.lastAuctionYear ?? ''}
                                     onChange={(e) => setFormData({ ...formData, lastAuctionYear: e.target.value ? Number(e.target.value) : undefined })}
-                                      className="w-full pl-12 pr-4 py-3.5 bg-gray-800/60 border-2 border-white/10 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500/50 transition-all hover:border-white/20 group-hover:bg-gray-800/70"
+                                      className="oil-modal-input oil-modal-input--icon w-full"
                                     placeholder="e.g., 2026"
                                   />
-                                    <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+                                    <Calendar className="oil-modal-input-icon text-white/40" />
                                 </div>
                                 </div>
                                 <div className="group">
@@ -5528,14 +5407,14 @@ export default function AdminPlayers() {
                                         <Calendar className="w-4 h-4 text-red-400" />
                                         Exit Date
                                       </label>
-                                      <div className="relative">
+                                      <div className="oil-modal-input-wrap">
                                         <input
                                           type="date"
                                           value={formData.squadExitDate || ''}
                                           onChange={(e) => setFormData({ ...formData, squadExitDate: e.target.value })}
-                                          className="w-full pl-12 pr-4 py-3.5 bg-gray-800/60 border-2 border-white/10 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500/50 focus:border-red-500/50 transition-all hover:border-white/20 group-hover:bg-gray-800/70"
+                                          className="oil-modal-input oil-modal-input--icon w-full"
                                         />
-                                        <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+                                        <Calendar className="oil-modal-input-icon text-white/40" />
                                       </div>
                                     </div>
                                   </>
@@ -5545,15 +5424,15 @@ export default function AdminPlayers() {
                                     <TrendingUp className="w-4 h-4 text-amber-400" />
                                     Transfer Fee
                                   </label>
-                                  <div className="relative">
+                                  <div className="oil-modal-input-wrap">
                                   <input
                                     type="text"
                                     value={formData.transferFee ?? ''}
                                     onChange={(e) => setFormData({ ...formData, transferFee: e.target.value })}
-                                      className="w-full pl-12 pr-4 py-3.5 bg-gray-800/60 border-2 border-white/10 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500/50 transition-all hover:border-white/20 group-hover:bg-gray-800/70"
+                                      className="oil-modal-input oil-modal-input--icon w-full"
                                     placeholder="Optional cash deal value"
                                   />
-                                    <TrendingUp className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+                                    <TrendingUp className="oil-modal-input-icon text-white/40" />
                                 </div>
                                 </div>
                                 <div className="group md:col-span-3">
@@ -5561,53 +5440,57 @@ export default function AdminPlayers() {
                                     <BarChart3 className="w-4 h-4 text-yellow-400" />
                                     Notes
                                   </label>
-                                  <div className="relative">
+                                  <div className="oil-modal-input-wrap">
                                   <input
                                     type="text"
                                     value={formData.transferNotes ?? ''}
                                     onChange={(e) => setFormData({ ...formData, transferNotes: e.target.value })}
-                                      className="w-full pl-12 pr-4 py-3.5 bg-gray-800/60 border-2 border-white/10 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-500/50 focus:border-yellow-500/50 transition-all hover:border-white/20 group-hover:bg-gray-800/70"
+                                      className="oil-modal-input oil-modal-input--icon w-full"
                                     placeholder="E.g., Confirmed trade, cash deal details"
                                   />
-                                    <BarChart3 className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+                                    <BarChart3 className="oil-modal-input-icon text-white/40" />
                                   </div>
                                 </div>
                               </div>
                             </>
                           );
                         })()}
-                      </div>
-                    </div>
+                    </section>
 
                     {/* Stats - Only show for IPL */}
                     {formData.league !== 'wpl' && (
-                      <div className="relative overflow-hidden bg-gradient-to-br from-emerald-500/10 via-teal-500/5 to-cyan-500/10 rounded-2xl p-6 border border-white/10 backdrop-blur-sm">
-                        <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,.05)_50%,transparent_75%,transparent_100%)] bg-[length:20px_20px] opacity-50"></div>
-                        <div className="relative">
-                          <div className="flex items-center gap-4 mb-6">
-                            <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-emerald-500/20 to-teal-500/20 border border-emerald-400/30 flex items-center justify-center shadow-lg">
-                              <BarChart3 className="w-7 h-7 text-emerald-300" />
+                      <section className="oil-modal-section p-5 oil-rise" id="player-form-stats">
+                        <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
+                          <div className="flex items-start gap-4">
+                            <div className="oil-modal-icon !h-14 !w-14">
+                              <BarChart3 className="h-7 w-7" />
                             </div>
-                            <div className="flex-1">
-                              <h3 className="text-2xl font-bold text-white">Player Statistics</h3>
-                              <p className="text-sm text-gray-300 mt-1">Performance metrics and career statistics</p>
+                            <div>
+                              <div className="oil-hero-kicker mb-2">
+                                <BarChart3 className="h-3.5 w-3.5" />
+                                Season output
+                              </div>
+                              <h3 className="text-xl font-black tracking-tight text-white">Player Statistics</h3>
+                              <p className="mt-1 text-sm text-white/60">Performance metrics and career statistics.</p>
                             </div>
                           </div>
+                          <span className="oil-chip">Step 5</span>
+                        </div>
                         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                             <div className="group">
                               <label className="block text-sm font-semibold text-gray-200 mb-2.5 flex items-center gap-2">
                                 <BarChart3 className="w-4 h-4 text-emerald-400" />
                             Matches
                           </label>
-                              <div className="relative">
+                              <div className="oil-modal-input-wrap">
                           <input
                             type="number"
                             value={formData.stats.matches}
                             onChange={(e) => setFormData({...formData, stats: {...formData.stats, matches: e.target.value}})}
-                                  className="w-full pl-12 pr-4 py-3.5 bg-gray-800/60 border-2 border-white/10 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all hover:border-white/20 group-hover:bg-gray-800/70"
+                                  className="oil-modal-input oil-modal-input--icon w-full"
                             placeholder="Matches"
                           />
-                                <BarChart3 className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+                                <BarChart3 className="oil-modal-input-icon text-white/40" />
                         </div>
                         </div>
                             <div className="group">
@@ -5615,15 +5498,15 @@ export default function AdminPlayers() {
                                 <TrendingUp className="w-4 h-4 text-emerald-400" />
                             Runs
                           </label>
-                              <div className="relative">
+                              <div className="oil-modal-input-wrap">
                           <input
                             type="number"
                             value={formData.stats.runs}
                             onChange={(e) => setFormData({...formData, stats: {...formData.stats, runs: e.target.value}})}
-                                  className="w-full pl-12 pr-4 py-3.5 bg-gray-800/60 border-2 border-white/10 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all hover:border-white/20 group-hover:bg-gray-800/70"
+                                  className="oil-modal-input oil-modal-input--icon w-full"
                             placeholder="Runs"
                           />
-                                <TrendingUp className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+                                <TrendingUp className="oil-modal-input-icon text-white/40" />
                         </div>
                             </div>
                             <div className="group">
@@ -5631,15 +5514,15 @@ export default function AdminPlayers() {
                                 <Target className="w-4 h-4 text-teal-400" />
                             Wickets
                           </label>
-                              <div className="relative">
+                              <div className="oil-modal-input-wrap">
                           <input
                             type="number"
                             value={formData.stats.wickets}
                             onChange={(e) => setFormData({...formData, stats: {...formData.stats, wickets: e.target.value}})}
-                                  className="w-full pl-12 pr-4 py-3.5 bg-gray-800/60 border-2 border-white/10 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-500/50 focus:border-teal-500/50 transition-all hover:border-white/20 group-hover:bg-gray-800/70"
+                                  className="oil-modal-input oil-modal-input--icon w-full"
                             placeholder="Wickets"
                           />
-                                <Target className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+                                <Target className="oil-modal-input-icon text-white/40" />
                         </div>
                             </div>
                             <div className="group">
@@ -5647,16 +5530,16 @@ export default function AdminPlayers() {
                                 <BarChart3 className="w-4 h-4 text-cyan-400" />
                             Batting Average
                           </label>
-                              <div className="relative">
+                              <div className="oil-modal-input-wrap">
                           <input
                             type="number"
                             step="0.01"
                             value={formData.stats.average}
                             onChange={(e) => setFormData({...formData, stats: {...formData.stats, average: e.target.value}})}
-                                  className="w-full pl-12 pr-4 py-3.5 bg-gray-800/60 border-2 border-white/10 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50 transition-all hover:border-white/20 group-hover:bg-gray-800/70"
+                                  className="oil-modal-input oil-modal-input--icon w-full"
                             placeholder="e.g., 45.67"
                           />
-                                <BarChart3 className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+                                <BarChart3 className="oil-modal-input-icon text-white/40" />
                         </div>
                             </div>
                             <div className="group">
@@ -5664,16 +5547,16 @@ export default function AdminPlayers() {
                                 <Target className="w-4 h-4 text-teal-400" />
                             Bowling Average
                           </label>
-                              <div className="relative">
+                              <div className="oil-modal-input-wrap">
                           <input
                             type="number"
                             step="0.01"
                             value={formData.stats.bowlingAverage}
                             onChange={(e) => setFormData({...formData, stats: {...formData.stats, bowlingAverage: e.target.value}})}
-                                  className="w-full pl-12 pr-4 py-3.5 bg-gray-800/60 border-2 border-white/10 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-500/50 focus:border-teal-500/50 transition-all hover:border-white/20 group-hover:bg-gray-800/70"
+                                  className="oil-modal-input oil-modal-input--icon w-full"
                             placeholder="e.g., 25.50"
                           />
-                                <Target className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+                                <Target className="oil-modal-input-icon text-white/40" />
                         </div>
                               <p className="text-xs text-gray-400 mt-2">Runs conceded per wicket</p>
                             </div>
@@ -5682,16 +5565,16 @@ export default function AdminPlayers() {
                                 <Zap className="w-4 h-4 text-cyan-400" />
                             Strike Rate
                           </label>
-                              <div className="relative">
+                              <div className="oil-modal-input-wrap">
                           <input
                             type="number"
                             step="0.01"
                             value={formData.stats.strikeRate}
                             onChange={(e) => setFormData({...formData, stats: {...formData.stats, strikeRate: e.target.value}})}
-                                  className="w-full pl-12 pr-4 py-3.5 bg-gray-800/60 border-2 border-white/10 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50 transition-all hover:border-white/20 group-hover:bg-gray-800/70"
+                                  className="oil-modal-input oil-modal-input--icon w-full"
                             placeholder="e.g., 145.50"
                           />
-                                <Zap className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+                                <Zap className="oil-modal-input-icon text-white/40" />
                         </div>
                             </div>
                             <div className="group">
@@ -5699,16 +5582,16 @@ export default function AdminPlayers() {
                                 <Activity className="w-4 h-4 text-teal-400" />
                             Economy
                           </label>
-                              <div className="relative">
+                              <div className="oil-modal-input-wrap">
                           <input
                             type="number"
                             step="0.01"
                             value={formData.stats.economy}
                             onChange={(e) => setFormData({...formData, stats: {...formData.stats, economy: e.target.value}})}
-                                  className="w-full pl-12 pr-4 py-3.5 bg-gray-800/60 border-2 border-white/10 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-500/50 focus:border-teal-500/50 transition-all hover:border-white/20 group-hover:bg-gray-800/70"
+                                  className="oil-modal-input oil-modal-input--icon w-full"
                             placeholder="e.g., 8.50"
                           />
-                                <Activity className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+                                <Activity className="oil-modal-input-icon text-white/40" />
                         </div>
                             </div>
                             <div className="group">
@@ -5716,15 +5599,15 @@ export default function AdminPlayers() {
                                 <Award className="w-4 h-4 text-emerald-400" />
                             Highest Score
                           </label>
-                              <div className="relative">
+                              <div className="oil-modal-input-wrap">
                           <input
                             type="number"
                             value={formData.stats.highest}
                             onChange={(e) => setFormData({...formData, stats: {...formData.stats, highest: e.target.value}})}
-                                  className="w-full pl-12 pr-4 py-3.5 bg-gray-800/60 border-2 border-white/10 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all hover:border-white/20 group-hover:bg-gray-800/70"
+                                  className="oil-modal-input oil-modal-input--icon w-full"
                             placeholder="Highest Score"
                           />
-                                <Award className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+                                <Award className="oil-modal-input-icon text-white/40" />
                         </div>
                             </div>
                             <div className="group">
@@ -5732,15 +5615,15 @@ export default function AdminPlayers() {
                                 <BarChart3 className="w-4 h-4 text-cyan-400" />
                             Fours
                           </label>
-                              <div className="relative">
+                              <div className="oil-modal-input-wrap">
                           <input
                             type="number"
                             value={formData.stats.fours}
                             onChange={(e) => setFormData({...formData, stats: {...formData.stats, fours: e.target.value}})}
-                                  className="w-full pl-12 pr-4 py-3.5 bg-gray-800/60 border-2 border-white/10 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50 transition-all hover:border-white/20 group-hover:bg-gray-800/70"
+                                  className="oil-modal-input oil-modal-input--icon w-full"
                             placeholder="Fours"
                           />
-                                <BarChart3 className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+                                <BarChart3 className="oil-modal-input-icon text-white/40" />
                         </div>
                             </div>
                             <div className="group">
@@ -5748,15 +5631,15 @@ export default function AdminPlayers() {
                                 <Zap className="w-4 h-4 text-teal-400" />
                             Sixes
                           </label>
-                              <div className="relative">
+                              <div className="oil-modal-input-wrap">
                           <input
                             type="number"
                             value={formData.stats.sixes}
                             onChange={(e) => setFormData({...formData, stats: {...formData.stats, sixes: e.target.value}})}
-                                  className="w-full pl-12 pr-4 py-3.5 bg-gray-800/60 border-2 border-white/10 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-500/50 focus:border-teal-500/50 transition-all hover:border-white/20 group-hover:bg-gray-800/70"
+                                  className="oil-modal-input oil-modal-input--icon w-full"
                             placeholder="Sixes"
                           />
-                                <Zap className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+                                <Zap className="oil-modal-input-icon text-white/40" />
                         </div>
                             </div>
                             <div className="group">
@@ -5764,15 +5647,15 @@ export default function AdminPlayers() {
                                 <Award className="w-4 h-4 text-emerald-400" />
                             Fifties (50s)
                           </label>
-                              <div className="relative">
+                              <div className="oil-modal-input-wrap">
                           <input
                             type="number"
                             value={formData.stats.fifties}
                             onChange={(e) => setFormData({...formData, stats: {...formData.stats, fifties: e.target.value}})}
-                                  className="w-full pl-12 pr-4 py-3.5 bg-gray-800/60 border-2 border-white/10 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all hover:border-white/20 group-hover:bg-gray-800/70"
+                                  className="oil-modal-input oil-modal-input--icon w-full"
                             placeholder="Fifties"
                           />
-                                <Award className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+                                <Award className="oil-modal-input-icon text-white/40" />
                         </div>
                             </div>
                             <div className="group">
@@ -5780,15 +5663,15 @@ export default function AdminPlayers() {
                                 <Star className="w-4 h-4 text-cyan-400" />
                             Hundreds (100s)
                           </label>
-                              <div className="relative">
+                              <div className="oil-modal-input-wrap">
                           <input
                             type="number"
                             value={formData.stats.hundreds}
                             onChange={(e) => setFormData({...formData, stats: {...formData.stats, hundreds: e.target.value}})}
-                                  className="w-full pl-12 pr-4 py-3.5 bg-gray-800/60 border-2 border-white/10 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50 transition-all hover:border-white/20 group-hover:bg-gray-800/70"
+                                  className="oil-modal-input oil-modal-input--icon w-full"
                             placeholder="Hundreds"
                           />
-                                <Star className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+                                <Star className="oil-modal-input-icon text-white/40" />
                         </div>
                             </div>
                             <div className="group md:col-span-2">
@@ -5796,23 +5679,51 @@ export default function AdminPlayers() {
                                 <Target className="w-4 h-4 text-teal-400" />
                             Best Bowling (BBM)
                           </label>
-                              <div className="relative">
+                              <div className="oil-modal-input-wrap">
                           <input
                             type="text"
                             value={formData.stats.bestBowling}
                             onChange={(e) => setFormData({...formData, stats: {...formData.stats, bestBowling: e.target.value}})}
-                                  className="w-full pl-12 pr-4 py-3.5 bg-gray-800/60 border-2 border-white/10 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-500/50 focus:border-teal-500/50 transition-all hover:border-white/20 group-hover:bg-gray-800/70"
+                                  className="oil-modal-input oil-modal-input--icon w-full"
                             placeholder="e.g., 4/21 or 3/45"
                           />
-                                <Target className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+                                <Target className="oil-modal-input-icon text-white/40" />
                               </div>
                             </div>
                         </div>
-                      </div>
-                    </div>
+                      </section>
                     )}
-            </form>
-          </ModernDialog>
+                  </form>
+                </div>
+
+                <div className="oil-modal-footer p-5">
+                  <div className="oil-modal-footer-actions w-full">
+                    <button
+                      type="button"
+                      onClick={() => setShowForm(false)}
+                      className="oil-btn-secondary px-6 py-3"
+                    >
+                      <X className="w-4 h-4" />
+                      Cancel
+                    </button>
+                    <button type="submit" form="player-form" className="oil-btn-warm px-8 py-3">
+                      {editingPlayer ? (
+                        <>
+                          <Edit2 className="w-5 h-5" />
+                          Update Player
+                        </>
+                      ) : (
+                        <>
+                          <Plus className="w-5 h-5" />
+                          Add Player
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 

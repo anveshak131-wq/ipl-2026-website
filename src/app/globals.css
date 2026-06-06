@@ -2184,6 +2184,148 @@
     justify-content: center;
     font-weight: 850;
   }
+
+  .oil-modal-input-wrap {
+    position: relative;
+  }
+
+  .oil-modal-input-icon {
+    position: absolute;
+    left: 0.9rem;
+    top: 50%;
+    z-index: 1;
+    width: 1.15rem;
+    height: 1.15rem;
+    transform: translateY(-50%);
+    pointer-events: none;
+  }
+
+  .oil-modal-input--icon {
+    padding-left: 2.75rem;
+    padding-right: 1rem;
+    padding-top: 0.82rem;
+    padding-bottom: 0.82rem;
+  }
+
+  .oil-form-label {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    font-size: 0.82rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.72);
+  }
+
+  .oil-form-hint {
+    font-size: 0.72rem;
+    line-height: 1.45;
+    color: rgba(255, 255, 255, 0.45);
+  }
+
+  .oil-form-progress {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.35rem 0;
+    padding: 0.15rem 0;
+  }
+
+  .oil-form-progress__item {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding-right: 1.35rem;
+  }
+
+  .oil-form-progress__node {
+    display: inline-flex;
+    height: 1.85rem;
+    width: 1.85rem;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(215, 168, 91, 0.34);
+    border-radius: 999px;
+    background: rgba(215, 168, 91, 0.12);
+    color: #f2d39a;
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.22);
+  }
+
+  .oil-form-progress__label {
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.55);
+  }
+
+  .oil-form-progress__line {
+    position: absolute;
+    right: 0.2rem;
+    top: 50%;
+    width: 0.85rem;
+    height: 1px;
+    background: linear-gradient(90deg, rgba(215, 168, 91, 0.5), rgba(76, 195, 154, 0.35));
+    transform: translateY(-50%);
+  }
+
+  .oil-form-preview-shell {
+    border: 1px solid rgba(215, 168, 91, 0.22);
+    background:
+      linear-gradient(145deg, rgba(7, 17, 15, 0.92), rgba(12, 31, 27, 0.78)),
+      repeating-linear-gradient(135deg, rgba(215, 168, 91, 0.04) 0 1px, transparent 1px 34px);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 16px 40px rgba(0, 0, 0, 0.24);
+  }
+
+  .oil-form-preview-header {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    background: linear-gradient(90deg, rgba(215, 168, 91, 0.12), rgba(76, 195, 154, 0.06));
+  }
+
+  .oil-form-preview-table {
+    min-width: 100%;
+  }
+
+  .oil-form-preview-table thead th {
+    background: rgba(7, 17, 15, 0.88);
+    border-bottom: 1px solid rgba(215, 168, 91, 0.14);
+  }
+
+  .oil-form-preview-table tbody tr {
+    background: rgba(255, 255, 255, 0.02);
+  }
+
+  .oil-form-preview-cell {
+    padding: 0.85rem 1rem;
+    border-right: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  .oil-form-preview-cell:last-child {
+    border-right: none;
+  }
+
+  .oil-form-preview-cell__label {
+    display: block;
+    font-size: 0.62rem;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.42);
+  }
+
+  .oil-form-preview-cell__value {
+    display: block;
+    margin-top: 0.25rem;
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.88);
+  }
+
+  .oil-form-preview-cell__value--gold {
+    color: #f2d39a;
+  }
 }
 
 @keyframes ipl-oil-fade {
