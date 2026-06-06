@@ -12,7 +12,23 @@ import {
 } from '@/lib/adminMatchSeason';
 import { ensureIplPlayoffMatchesForSeason } from '@/lib/iplAdminPlayoffSync';
 import type { Match, Player } from '@/types';
-import { Activity, Download, FileText, Plus, RefreshCw, Save, Trash2, UploadCloud } from 'lucide-react';
+import {
+  Activity,
+  Clock3,
+  Download,
+  FileText,
+  Gauge,
+  Plus,
+  Radio,
+  RefreshCw,
+  RotateCcw,
+  Save,
+  ShieldCheck,
+  Trash2,
+  Trophy,
+  UploadCloud,
+  Zap,
+} from 'lucide-react';
 
 const LEAGUE = 'ipl' as const;
 const MAX_OVERS = 20;
@@ -241,6 +257,50 @@ const getTeamPlayerDatalistId = (matchId: string, teamKey: TeamKey) =>
 
 const getResultPlayerDatalistId = (matchId: string) =>
   `ipl-live-score-fast-${matchId || 'match'}-result-players`;
+
+const fieldClass =
+  'rounded-xl border border-white/10 bg-[#07110f]/75 px-3 py-2 text-white placeholder-white/40 outline-none transition focus:border-[#d7a85b] focus:ring-2 focus:ring-[#d7a85b]/20 disabled:opacity-60';
+
+const compactFieldClass =
+  'rounded-lg border border-white/10 bg-[#07110f]/75 px-2 py-1 text-white placeholder-white/40 outline-none transition focus:border-[#d7a85b] focus:ring-2 focus:ring-[#d7a85b]/20 disabled:opacity-60';
+
+const actionButtonClass =
+  'inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/10 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-0.5 hover:border-[#d7a85b]/40 hover:bg-white/15 disabled:translate-y-0 disabled:opacity-50';
+
+const primaryButtonClass =
+  'inline-flex items-center gap-2 rounded-xl bg-[#0f7b6c] px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-[#0f7b6c]/20 transition hover:-translate-y-0.5 hover:bg-[#13927f] disabled:translate-y-0 disabled:opacity-50';
+
+const warmButtonClass =
+  'inline-flex items-center gap-2 rounded-xl bg-[#b7792f] px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-[#b7792f]/20 transition hover:-translate-y-0.5 hover:bg-[#cf8a38] disabled:translate-y-0 disabled:opacity-50';
+
+const dangerButtonClass =
+  'inline-flex items-center gap-2 rounded-xl bg-[#b94742] px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-[#b94742]/20 transition hover:-translate-y-0.5 hover:bg-[#cf514a] disabled:translate-y-0 disabled:opacity-50';
+
+const getStatusText = (status: SaveStatus, idle = 'Ready') => {
+  if (status === 'saving') return 'Saving...';
+  if (status === 'success') return 'Saved';
+  if (status === 'error') return 'Needs attention';
+  return idle;
+};
+
+const getStatusClass = (status: SaveStatus) => {
+  if (status === 'saving') return 'border-[#d7a85b]/40 bg-[#d7a85b]/10 text-[#ffd58d]';
+  if (status === 'success') return 'border-[#4cc39a]/40 bg-[#4cc39a]/10 text-[#9cf2c8]';
+  if (status === 'error') return 'border-[#e5655f]/40 bg-[#e5655f]/10 text-[#ffaaa5]';
+  return 'border-white/10 bg-white/10 text-white/60';
+};
+
+const formatRunRate = (totalRuns: number, legalBalls: number) =>
+  legalBalls > 0 ? (totalRuns / (legalBalls / 6)).toFixed(2) : '0.00';
+
+const formatBallCount = (legalBalls: number) => `${Math.min(MAX_LEGAL_BALLS, legalBalls)}/${MAX_LEGAL_BALLS} balls`;
+
+const getInningsPhase = (legalBalls: number, complete: boolean) => {
+  if (complete || legalBalls >= MAX_LEGAL_BALLS) return 'Innings complete';
+  if (legalBalls < 36) return 'Powerplay';
+  if (legalBalls < 90) return 'Middle overs';
+  return 'Death overs';
+};
 
 export default function IPLAdminLiveScoreTablePage() {
   const [matches, setMatches] = useState<Match[]>([]);
@@ -2314,7 +2374,7 @@ export default function IPLAdminLiveScoreTablePage() {
         if (normalized.includes(advisoryReason.toLowerCase())) return trimmedNote;
         return `${trimmedNote} ${reasonText}`;
       })();
-      const reducedOversValue = advisoryOvers ? Number(advisoryOvers) : undefined;
+      const reducedOversValue = advisoryOvers ? Number(advisoryOvers) : NaN;
 
       const payload: Partial<Match> & { id: string } = {
         id: selectedMatch.id,
@@ -3291,9 +3351,102 @@ export default function IPLAdminLiveScoreTablePage() {
 
   const inn1 = calculateInningsTotals('1');
   const inn2 = calculateInningsTotals('2');
+  const matchTitle = selectedMatch
+    ? `${selectedMatch.team1?.shortName || selectedMatch.team1?.name || 'Team 1'} vs ${
+        selectedMatch.team2?.shortName || selectedMatch.team2?.name || 'Team 2'
+      }`
+    : 'Select an IPL match';
+  const matchDateLine = selectedMatch
+    ? [selectedMatch.date?.split('T')[0] || '', selectedMatch.time || ''].filter(Boolean).join(' ')
+    : '';
+  const tossDisplay =
+    selectedMatch && matchToss
+      ? `${matchToss.winner === 'team1' ? selectedMatch.team1?.shortName : selectedMatch.team2?.shortName} chose ${
+          matchToss.decision
+        }`
+      : 'Toss not set';
+  const currentTotals = fastInnings === '1' ? inn1 : inn2;
+  const currentBattingName = fastInnings === '1' ? innings1BattingName : innings2BattingName;
+  const currentPhase = getInningsPhase(currentTotals.legalBalls, fastInningsComplete);
+  const currentRunRate = formatRunRate(currentTotals.teamTotal, currentTotals.legalBalls);
+  const chaseTarget = inn1.teamTotal > 0 ? inn1.teamTotal + 1 : 0;
+  const chaseRunsNeeded = Math.max(0, chaseTarget - inn2.teamTotal);
+  const chaseBallsLeft = Math.max(0, MAX_LEGAL_BALLS - inn2.legalBalls);
+  const requiredRunRate =
+    fastInnings === '2' && chaseTarget > 0 && chaseRunsNeeded > 0 && chaseBallsLeft > 0
+      ? (chaseRunsNeeded / (chaseBallsLeft / 6)).toFixed(2)
+      : null;
+  const recentCommentary = buildCommentaryFromRows(fastInnings).slice(-5);
 
   return (
-    <div className="rounded-3xl border border-white/10 bg-gradient-to-br from-slate-950 via-purple-950/40 to-slate-950 p-6 shadow-2xl">
+    <div className="relative w-full min-w-0 max-w-[calc(100vw-2rem)] overflow-hidden rounded-[1.25rem] border border-[#d7a85b]/20 bg-[#07110f] p-4 text-white shadow-2xl lg:max-w-[calc(100vw-18rem)] sm:p-6">
+      <style jsx global>{`
+        @keyframes iplOilWash {
+          0% {
+            background-position: 45% 42%;
+            transform: scale(1);
+          }
+          100% {
+            background-position: 58% 50%;
+            transform: scale(1.04);
+          }
+        }
+
+        @keyframes iplScorePulse {
+          0%,
+          100% {
+            opacity: 0.62;
+            transform: scale(1);
+          }
+          50% {
+            opacity: 1;
+            transform: scale(1.22);
+          }
+        }
+
+        .ipl-oil-wash {
+          animation: iplOilWash 18s ease-in-out infinite alternate;
+        }
+
+        .ipl-live-pulse {
+          animation: iplScorePulse 2.4s ease-in-out infinite;
+        }
+
+        .ipl-score-card {
+          transition: transform 180ms ease, border-color 180ms ease, background-color 180ms ease;
+        }
+
+        .ipl-score-card:hover {
+          transform: translateY(-2px);
+          border-color: rgba(215, 168, 91, 0.34);
+          background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .ipl-oil-wash,
+          .ipl-live-pulse {
+            animation: none;
+          }
+
+          .ipl-score-card,
+          .ipl-score-card:hover {
+            transform: none;
+          }
+        }
+      `}</style>
+      <div
+        aria-hidden="true"
+        className="ipl-oil-wash pointer-events-none absolute inset-0 bg-[url('/images/cricket-oil-stadium-hero.png')] bg-cover bg-center opacity-20 saturate-125"
+      />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 bg-[linear-gradient(135deg,rgba(7,17,15,0.95)_0%,rgba(20,49,43,0.86)_38%,rgba(58,38,21,0.78)_68%,rgba(7,17,15,0.96)_100%)]"
+      />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 bg-[linear-gradient(90deg,transparent_0%,rgba(215,168,91,0.08)_52%,transparent_100%)]"
+      />
+      <div className="relative z-10">
       {(['team1', 'team2'] as const).map((teamKey) => {
         const options = getTeamPlayerOptions(teamKey);
         const captainId = matchCaptains[teamKey].id;
@@ -3321,18 +3474,56 @@ export default function IPLAdminLiveScoreTablePage() {
         ))}
       </datalist>
 
-      <div className="flex flex-col gap-1 mb-6">
-        <div className="flex items-center gap-3">
-          <Activity className="w-7 h-7 text-purple-300" />
-          <h1 className="text-3xl font-bold text-white">IPL Live Score (Fast)</h1>
+      <header className="mb-6 flex flex-col gap-5 2xl:flex-row 2xl:items-end 2xl:justify-between">
+        <div className="max-w-3xl">
+          <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-[#d7a85b]/30 bg-[#d7a85b]/10 px-3 py-1 text-xs font-semibold text-[#f2d39a]">
+            <span className="ipl-live-pulse h-2 w-2 rounded-full bg-[#4cc39a]" />
+            IPL 2026 scoring console
+          </div>
+          <div className="flex items-center gap-3">
+            <Activity className="h-7 w-7 text-[#d7a85b]" />
+            <h1 className="text-2xl font-bold text-white sm:text-3xl">Fast Live Score Desk</h1>
+          </div>
+          <div className="mt-1 text-sm font-medium text-[#f2d39a]">{matchTitle}</div>
+          <p className="mt-2 text-sm leading-6 text-white/70">
+            Record every delivery, manage Impact Player updates, publish the live score, and keep the scorecard in sync
+            with cricket-ready wording.
+          </p>
         </div>
-        <p className="text-sm text-white/60">
-          Fast scorer UI + full table • Free-text player entry with optional squad suggestions
-        </p>
-      </div>
+        <div className="grid grid-cols-1 gap-2 text-xs sm:grid-cols-2 xl:grid-cols-4 2xl:min-w-[460px]">
+          <div className="rounded-2xl border border-white/10 bg-white/10 px-3 py-2">
+            <div className="text-white/50">Next ball</div>
+            <div className="mt-1 font-semibold text-white">
+              {fastInningsComplete ? `${MAX_OVERS}.0 done` : `${fastNextBall.over}.${fastNextBall.ball}`}
+            </div>
+          </div>
+          <div className="rounded-2xl border border-white/10 bg-white/10 px-3 py-2">
+            <div className="text-white/50">Phase</div>
+            <div className="mt-1 font-semibold text-[#f2d39a]">{currentPhase}</div>
+          </div>
+          <div className="rounded-2xl border border-white/10 bg-white/10 px-3 py-2">
+            <div className="text-white/50">Run rate</div>
+            <div className="mt-1 font-semibold text-white">{currentRunRate}</div>
+          </div>
+          <div className="rounded-2xl border border-white/10 bg-white/10 px-3 py-2">
+            <div className="text-white/50">Save state</div>
+            <div className="mt-1 font-semibold text-[#9cf2c8]">{getStatusText(saveStatus, 'Draft')}</div>
+          </div>
+        </div>
+      </header>
 
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 mb-6">
-        <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+      <div className="mb-6 grid grid-cols-1 gap-4 xl:grid-cols-2 2xl:grid-cols-3">
+        <div className="rounded-2xl border border-white/10 bg-[#0a1815]/70 p-4 shadow-xl shadow-black/15 backdrop-blur">
+          <div className="mb-4 flex items-center justify-between gap-3">
+            <div>
+              <div className="text-sm font-semibold text-white">Match Control</div>
+              <div className="text-xs text-white/50">Choose the fixture before scoring or publishing.</div>
+            </div>
+            <span className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/10 px-2.5 py-1 text-[11px] text-white/60">
+              <Clock3 className="h-3.5 w-3.5" />
+              {matchDateLine || 'Fixture pending'}
+            </span>
+          </div>
           <div className="grid grid-cols-1 gap-3 md:grid-cols-[160px_minmax(0,1fr)]">
             <div>
               <label className="block text-xs font-semibold text-white/70 mb-2">Season</label>
@@ -3342,7 +3533,7 @@ export default function IPLAdminLiveScoreTablePage() {
                   const value = e.target.value;
                   setSeasonYear(value === 'all' ? null : parseInt(value, 10) || null);
                 }}
-                className="w-full border border-white/10 focus:border-purple-400 rounded-xl px-3 py-2 bg-slate-950 text-white"
+                className={`w-full ${fieldClass}`}
                 disabled={!matches.length}
               >
                 {availableSeasonYears.map((year) => (
@@ -3355,14 +3546,14 @@ export default function IPLAdminLiveScoreTablePage() {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-white/70 mb-2">Select Match</label>
+              <label className="block text-xs font-semibold text-white/70 mb-2">Match</label>
               <select
                 value={selectedMatchId}
                 onChange={(e) => setSelectedMatchId(e.target.value)}
-                className="w-full border border-white/10 focus:border-purple-400 rounded-xl px-3 py-2 bg-slate-950 text-white"
+                className={`w-full ${fieldClass}`}
                 disabled={!visibleMatches.length}
               >
-                <option value="">Choose...</option>
+                <option value="">Choose match...</option>
                 {visibleMatches.map((m) => (
                   <option key={m.id} value={m.id}>
                     {m.team1?.shortName || m.team1?.name} vs {m.team2?.shortName || m.team2?.name}
@@ -3373,39 +3564,40 @@ export default function IPLAdminLiveScoreTablePage() {
           </div>
 
           <div className="mt-3 text-xs text-white/50">
-            Showing {visibleMatches.length} match{visibleMatches.length === 1 ? '' : 'es'}
+            Showing {visibleMatches.length} IPL fixture{visibleMatches.length === 1 ? '' : 's'}
           </div>
 
           {selectedMatch && (
-            <div className="mt-3 text-xs text-white/60 space-y-1">
-              <div>
-                <span className="text-white/80">Venue:</span> {selectedMatch.venue || '-'}
+            <div className="mt-4 grid gap-2 text-xs text-white/60 sm:grid-cols-2">
+              <div className="rounded-xl border border-white/10 bg-white/5 px-3 py-2">
+                <span className="block text-white/40">Venue</span>
+                <span className="font-medium text-white">{selectedMatch.venue || 'Not set'}</span>
               </div>
-              <div>
-                <span className="text-white/80">Date:</span> {selectedMatch.date?.split('T')[0] || '-'}{' '}
-                {selectedMatch.time || ''}
+              <div className="rounded-xl border border-white/10 bg-white/5 px-3 py-2">
+                <span className="block text-white/40">Toss</span>
+                <span className="font-medium text-white">{tossDisplay}</span>
               </div>
-              <div>
-                <span className="text-white/80">Toss:</span>{' '}
-                {matchToss
-                  ? `${matchToss.winner === 'team1' ? selectedMatch.team1?.shortName : selectedMatch.team2?.shortName} chose ${matchToss.decision}`
-                  : 'Not set'}
+              <div className="rounded-xl border border-white/10 bg-white/5 px-3 py-2">
+                <span className="block text-white/40">Captains</span>
+                <span className="font-medium text-white">
+                  {(matchCaptains.team1.name || matchCaptains.team2.name)
+                    ? `${matchCaptains.team1.name || '-'} / ${matchCaptains.team2.name || '-'}`
+                    : 'Not set'}
+                </span>
               </div>
-              <div>
-                <span className="text-white/80">Captains:</span>{' '}
-                {(matchCaptains.team1.name || matchCaptains.team2.name)
-                  ? `${matchCaptains.team1.name || '-'} / ${matchCaptains.team2.name || '-'}`
-                  : 'Not set'}
+              <div className="rounded-xl border border-white/10 bg-white/5 px-3 py-2">
+                <span className="block text-white/40">Playing XI</span>
+                <span className="font-medium text-white">
+                  {hasPlaying11 ? 'Confirmed' : 'Not set - full squad suggestions enabled'}
+                </span>
               </div>
-              <div>
-                <span className="text-white/80">Playing XI:</span>{' '}
-                {hasPlaying11 ? 'Set' : 'Not set (dropdown will use full squad)'}
-              </div>
-              <div>
-                <span className="text-white/80">Impact Players:</span>{' '}
-                {(impactPlayerInfo.team1.impactName || impactPlayerInfo.team2.impactName)
-                  ? `${impactPlayerInfo.team1.impactName || '-'} / ${impactPlayerInfo.team2.impactName || '-'}`
-                  : 'Not set'}
+              <div className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 sm:col-span-2">
+                <span className="block text-white/40">Impact Player</span>
+                <span className="font-medium text-white">
+                  {(impactPlayerInfo.team1.impactName || impactPlayerInfo.team2.impactName)
+                    ? `${impactPlayerInfo.team1.impactName || '-'} / ${impactPlayerInfo.team2.impactName || '-'}`
+                    : 'Not used yet'}
+                </span>
               </div>
             </div>
           )}
@@ -3413,37 +3605,34 @@ export default function IPLAdminLiveScoreTablePage() {
           {selectedMatch && (
             <div className="mt-4 border-t border-white/10 pt-4">
               <div className="flex items-center justify-between">
-                <div className="text-xs font-semibold uppercase tracking-wide text-white/70">Match Advisory</div>
-                <div className="text-[11px] text-white/50">
-                  {advisoryStatus === 'idle' && '—'}
-                  {advisoryStatus === 'saving' && 'Saving…'}
-                  {advisoryStatus === 'success' && 'Saved'}
-                  {advisoryStatus === 'error' && 'Error'}
+                <div className="text-xs font-semibold uppercase tracking-wide text-[#f2d39a]">Match Advisory</div>
+                <div className={`rounded-full border px-2 py-1 text-[11px] ${getStatusClass(advisoryStatus)}`}>
+                  {getStatusText(advisoryStatus, 'No advisory')}
                 </div>
               </div>
-              <p className="text-[11px] text-white/40 mt-1">
-                Use this for abandoned/reduced-overs updates. Shows on match cards and match center.
+              <p className="text-[11px] text-white/50 mt-1">
+                Post rain, bad-light, DLS, abandoned, or reduced-over notes to the match cards and match center.
               </p>
 
               <div className="mt-3 flex flex-wrap gap-2">
                 <button
                   type="button"
                   onClick={() => applyAdvisoryPreset('abandoned')}
-                  className="px-3 py-1.5 rounded-full border border-red-400/40 text-[11px] text-red-200 hover:bg-red-500/10"
+                  className="rounded-full border border-[#e5655f]/40 px-3 py-1.5 text-[11px] text-[#ffaaa5] transition hover:bg-[#e5655f]/10"
                 >
                   Abandoned
                 </button>
                 <button
                   type="button"
                   onClick={() => applyAdvisoryPreset('no-result')}
-                  className="px-3 py-1.5 rounded-full border border-amber-400/40 text-[11px] text-amber-200 hover:bg-amber-500/10"
+                  className="rounded-full border border-[#d7a85b]/40 px-3 py-1.5 text-[11px] text-[#f2d39a] transition hover:bg-[#d7a85b]/10"
                 >
                   No Result
                 </button>
                 <button
                   type="button"
                   onClick={() => applyAdvisoryPreset('reduced-overs')}
-                  className="px-3 py-1.5 rounded-full border border-blue-400/40 text-[11px] text-blue-200 hover:bg-blue-500/10"
+                  className="rounded-full border border-[#4fb6c4]/40 px-3 py-1.5 text-[11px] text-[#a8e9ef] transition hover:bg-[#4fb6c4]/10"
                 >
                   Reduced Overs
                 </button>
@@ -3453,8 +3642,8 @@ export default function IPLAdminLiveScoreTablePage() {
                 value={advisoryNote}
                 onChange={(e) => setAdvisoryNote(e.target.value)}
                 rows={3}
-                placeholder="Example: Start delayed due to rain. Overs reduced to 8 per side."
-                className="mt-3 w-full border border-white/10 focus:border-purple-400 rounded-xl px-3 py-2 bg-slate-950 text-white text-xs"
+                placeholder="Example: Start delayed because of rain. Overs reduced to 8 per side under DLS."
+                className={`mt-3 w-full text-xs ${fieldClass}`}
               />
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3">
@@ -3465,9 +3654,9 @@ export default function IPLAdminLiveScoreTablePage() {
                   <select
                     value={advisoryReason}
                     onChange={(e) => setAdvisoryReason(e.target.value)}
-                    className="mb-3 w-full border border-white/10 focus:border-purple-400 rounded-xl px-3 py-2 bg-slate-950 text-white text-xs"
+                    className={`mb-3 w-full text-xs ${fieldClass}`}
                   >
-                    <option value="">Select reason…</option>
+                    <option value="">Select reason...</option>
                     {ADVISORY_REASONS.map((reason) => (
                       <option key={reason} value={reason}>
                         {reason}
@@ -3485,7 +3674,7 @@ export default function IPLAdminLiveScoreTablePage() {
                     value={advisoryOvers}
                     onChange={(e) => setAdvisoryOvers(e.target.value)}
                     placeholder="e.g., 8"
-                    className="w-full border border-white/10 focus:border-purple-400 rounded-xl px-3 py-2 bg-slate-950 text-white text-xs"
+                    className={`w-full text-xs ${fieldClass}`}
                   />
                 </div>
                 <div className="flex items-center">
@@ -3494,7 +3683,7 @@ export default function IPLAdminLiveScoreTablePage() {
                       type="checkbox"
                       checked={advisoryDls}
                       onChange={(e) => setAdvisoryDls(e.target.checked)}
-                      className="h-4 w-4 rounded border-white/20 text-purple-400 focus:ring-purple-400/30"
+                      className="h-4 w-4 rounded border-white/20 bg-[#07110f] text-[#d7a85b] focus:ring-[#d7a85b]/30"
                     />
                     DLS method applied
                   </label>
@@ -3506,9 +3695,9 @@ export default function IPLAdminLiveScoreTablePage() {
                   type="button"
                   onClick={saveMatchAdvisory}
                   disabled={advisoryStatus === 'saving' || !selectedMatchId}
-                  className="px-4 py-2 rounded-xl bg-purple-600 text-white text-xs font-semibold hover:bg-purple-500 disabled:opacity-50"
+                  className={`${warmButtonClass} px-3 py-2 text-xs`}
                 >
-                  Save advisory
+                  Save Advisory
                 </button>
                 {advisoryStatus === 'error' && (
                   <span className="text-xs text-red-300">Failed to save. Try again.</span>
@@ -3518,42 +3707,63 @@ export default function IPLAdminLiveScoreTablePage() {
           )}
         </div>
 
-        <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+        <div className="ipl-score-card rounded-2xl border border-white/10 bg-[#0a1815]/70 p-4 shadow-xl shadow-black/15 backdrop-blur">
           <div className="flex items-center justify-between mb-2">
             <h3 className="text-sm font-semibold text-white/80">Innings 1</h3>
-            <div className="text-xs text-white/60">{innings1BattingName || ''}</div>
+            <div className="rounded-full bg-[#d7a85b]/10 px-2 py-1 text-xs text-[#f2d39a]">{innings1BattingName || ''}</div>
           </div>
-          <div className="text-3xl font-bold text-white">
+          <div className="text-4xl font-bold text-white">
             {inn1.teamTotal}/{inn1.wickets}
           </div>
-          <div className="text-xs text-white/60 mt-1">
-            Overs {inn1.overs} • Extras {inn1.extras} • W {inn1.wides} • NB {inn1.noBalls}
-            {innings1Complete ? ` • Innings complete (${MAX_OVERS} ov)` : ''}
+          <div className="mt-2 grid grid-cols-2 gap-2 text-xs text-white/60">
+            <span>Overs {inn1.overs}</span>
+            <span>RR {formatRunRate(inn1.teamTotal, inn1.legalBalls)}</span>
+            <span>Extras {inn1.extras}</span>
+            <span>{formatBallCount(inn1.legalBalls)}</span>
+          </div>
+          <div className="mt-3 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs text-white/60">
+            {getInningsPhase(inn1.legalBalls, innings1Complete)}
+            {innings1Complete ? ` (${MAX_OVERS} ov)` : ` - wides ${inn1.wides}, no-balls ${inn1.noBalls}`}
           </div>
         </div>
 
-        <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+        <div className="ipl-score-card rounded-2xl border border-white/10 bg-[#0a1815]/70 p-4 shadow-xl shadow-black/15 backdrop-blur">
           <div className="flex items-center justify-between mb-2">
             <h3 className="text-sm font-semibold text-white/80">Innings 2</h3>
-            <div className="text-xs text-white/60">{innings2BattingName || ''}</div>
+            <div className="rounded-full bg-[#4fb6c4]/10 px-2 py-1 text-xs text-[#a8e9ef]">{innings2BattingName || ''}</div>
           </div>
-          <div className="text-3xl font-bold text-white">
+          <div className="text-4xl font-bold text-white">
             {inn2.teamTotal}/{inn2.wickets}
           </div>
-          <div className="text-xs text-white/60 mt-1">
-            Overs {inn2.overs} • Extras {inn2.extras} • W {inn2.wides} • NB {inn2.noBalls}
-            {innings2Complete ? ` • Innings complete (${MAX_OVERS} ov)` : ''}
+          <div className="mt-2 grid grid-cols-2 gap-2 text-xs text-white/60">
+            <span>Overs {inn2.overs}</span>
+            <span>RR {formatRunRate(inn2.teamTotal, inn2.legalBalls)}</span>
+            <span>Extras {inn2.extras}</span>
+            <span>{formatBallCount(inn2.legalBalls)}</span>
+          </div>
+          <div className="mt-3 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs text-white/60">
+            {fastInnings === '2' && requiredRunRate
+              ? `${chaseRunsNeeded} runs needed from ${chaseBallsLeft} balls. RRR ${requiredRunRate}`
+              : innings2Complete
+                ? `Innings complete (${MAX_OVERS} ov)`
+                : `${getInningsPhase(inn2.legalBalls, innings2Complete)} - target ${
+                    chaseTarget ? chaseTarget : 'not set'
+                  }`}
           </div>
         </div>
       </div>
 
       {selectedMatch && (
-        <div className="rounded-2xl border border-white/10 bg-white/5 p-4 mb-6">
+        <section className="mb-6 rounded-2xl border border-white/10 bg-[#0a1815]/70 p-4 shadow-xl shadow-black/15 backdrop-blur">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <div className="text-sm font-semibold text-white/80">Impact Player (IPL)</div>
-              <div className="text-xs text-white/60 mt-1">
-                Impact IN must be from the 5 nominated substitutes (set in Playing 11). Player OUT must be from the Playing XI.
+              <div className="flex items-center gap-2 text-sm font-semibold text-white">
+                <ShieldCheck className="h-4 w-4 text-[#d7a85b]" />
+                Impact Player Register
+              </div>
+              <div className="mt-1 text-xs text-white/60">
+                Select the Impact IN player from the five nominated substitutes, then choose the Player OUT from
+                the confirmed Playing XI.
               </div>
             </div>
           </div>
@@ -3595,17 +3805,17 @@ export default function IPLAdminLiveScoreTablePage() {
                 .join(', ');
 
               return (
-                <div key={teamKey} className="rounded-xl border border-white/10 bg-slate-950/30 p-4">
+                <div key={teamKey} className="rounded-2xl border border-white/10 bg-white/5 p-4 transition hover:border-[#d7a85b]/30 hover:bg-white/10">
                   <div className="flex items-center justify-between gap-3 mb-3">
                     <div className="text-sm font-semibold text-white">
                       {team?.shortName || team?.name || teamKey.toUpperCase()}
                     </div>
                     {impact.impactId ? (
-                      <span className="text-[10px] px-2 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/25 text-emerald-200">
+                      <span className="rounded-full border border-[#4cc39a]/30 bg-[#4cc39a]/10 px-2 py-1 text-[10px] text-[#9cf2c8]">
                         Used
                       </span>
                     ) : (
-                      <span className="text-[10px] px-2 py-1 rounded-full bg-white/5 border border-white/10 text-white/60">
+                      <span className="rounded-full border border-white/10 bg-white/5 px-2 py-1 text-[10px] text-white/60">
                         Not used
                       </span>
                     )}
@@ -3637,16 +3847,16 @@ export default function IPLAdminLiveScoreTablePage() {
                         value={form.inId || ''}
                         onChange={(e) => updateImpactForm(teamKey, { inId: e.target.value })}
                         disabled={!nominees.length}
-                        className="w-full border border-white/10 focus:border-purple-400 rounded-lg px-2 py-2 bg-slate-950 text-white text-sm disabled:opacity-60"
+                        className={`w-full text-sm ${compactFieldClass}`}
                       >
-                        <option value="">{nominees.length ? 'Select nominee...' : 'Set nominees first'}</option>
+                        <option value="">{nominees.length ? 'Select Impact nominee...' : 'Set nominees first'}</option>
                         {nominees.map((id) => {
                           const p = playerById.get(String(id));
                           const label = p?.name || String(id);
-                          const globe = p?.nationality && !isIndianNationality(p.nationality) ? ' 🌍' : '';
+                          const overseasTag = p?.nationality && !isIndianNationality(p.nationality) ? ' (OS)' : '';
                           return (
                             <option key={String(id)} value={String(id)}>
-                              {label}{globe}
+                              {label}{overseasTag}
                             </option>
                           );
                         })}
@@ -3659,9 +3869,9 @@ export default function IPLAdminLiveScoreTablePage() {
                         value={form.outId || ''}
                         onChange={(e) => updateImpactForm(teamKey, { outId: e.target.value })}
                         disabled={!xi.length}
-                        className="w-full border border-white/10 focus:border-purple-400 rounded-lg px-2 py-2 bg-slate-950 text-white text-sm disabled:opacity-60"
+                        className={`w-full text-sm ${compactFieldClass}`}
                       >
-                        <option value="">{xi.length ? 'Select from XI...' : 'Set Playing XI first'}</option>
+                        <option value="">{xi.length ? 'Select player leaving the XI...' : 'Set Playing XI first'}</option>
                         {xi.map((id) => {
                           const p = playerById.get(String(id));
                           const label = p?.name || String(id);
@@ -3679,7 +3889,7 @@ export default function IPLAdminLiveScoreTablePage() {
                       <select
                         value={form.moment || DEFAULT_IMPACT_FORM.moment}
                         onChange={(e) => updateImpactForm(teamKey, { moment: e.target.value })}
-                        className="w-full border border-white/10 focus:border-purple-400 rounded-lg px-2 py-2 bg-slate-950 text-white text-sm"
+                        className={`w-full text-sm ${compactFieldClass}`}
                       >
                         {IMPACT_MOMENTS.map((m) => (
                           <option key={m} value={m}>
@@ -3695,7 +3905,7 @@ export default function IPLAdminLiveScoreTablePage() {
                         value={form.overBall || ''}
                         onChange={(e) => updateImpactForm(teamKey, { overBall: e.target.value })}
                         placeholder="e.g. 14.0"
-                        className="w-full border border-white/10 focus:border-purple-400 rounded-lg px-2 py-2 bg-white/5 text-white placeholder-white/30 text-sm"
+                        className={`w-full text-sm ${compactFieldClass}`}
                       />
                     </div>
                   </div>
@@ -3703,16 +3913,18 @@ export default function IPLAdminLiveScoreTablePage() {
                   <div className="mt-3 space-y-2">
                     {overseasInXI >= 4 && selectedInIsOverseas && (
                       <div className="text-xs text-red-200 bg-red-500/10 border border-red-500/25 rounded-lg px-3 py-2">
-                        Overseas warning: starting XI already has {overseasInXI} overseas players — Impact Player should be Indian.
+                        Overseas warning: the starting XI already has {overseasInXI} overseas players. Use an Indian
+                        Impact Player to stay within the IPL combination rule.
                       </div>
                     )}
                     {String(form.moment || '').toLowerCase().includes('mid-over') && (
                       <div className="text-xs text-yellow-200 bg-yellow-500/10 border border-yellow-500/25 rounded-lg px-3 py-2">
-                        Mid-over note: if the bowling side uses an Impact Player during an over, that player cannot bowl the remaining balls of that over.
+                        Mid-over note: if the bowling side uses an Impact Player during an over, the substitute cannot
+                        bowl the remaining balls of that over.
                       </div>
                     )}
                     <div className="text-xs text-white/60">
-                      Once saved, the Impact IN/OUT players are tagged in the batter/bowler dropdowns (IP / OUT).
+                      After saving, the batter and bowler suggestions show IP and OUT tags for quick scoring.
                     </div>
                   </div>
 
@@ -3720,28 +3932,25 @@ export default function IPLAdminLiveScoreTablePage() {
                     <button
                       onClick={() => saveImpactPlayer(teamKey)}
                       disabled={status === 'saving' || !selectedMatchId}
-                      className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 disabled:opacity-60 text-white text-sm font-semibold"
+                      className={`${warmButtonClass} px-3 py-2`}
                     >
-                      {impact.impactId ? 'Update Impact' : 'Use Impact'}
+                      {impact.impactId ? 'Update Impact Player' : 'Use Impact Player'}
                     </button>
-                    <div className="text-xs">
-                      {status === 'idle' && <span className="text-white/40">—</span>}
-                      {status === 'saving' && <span className="text-yellow-300">Saving…</span>}
-                      {status === 'success' && <span className="text-emerald-300">Saved</span>}
-                      {status === 'error' && <span className="text-red-300">Error</span>}
+                    <div className={`rounded-full border px-2 py-1 text-xs ${getStatusClass(status)}`}>
+                      {getStatusText(status, 'Ready')}
                     </div>
                   </div>
                 </div>
               );
             })}
           </div>
-        </div>
+        </section>
       )}
 
-      <div className="flex flex-wrap gap-3 items-center mb-5">
+      <div className="mb-5 flex flex-wrap items-center gap-3 rounded-2xl border border-white/10 bg-[#0a1815]/70 p-3 shadow-xl shadow-black/10 backdrop-blur">
         <button
           onClick={exportCSV}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/10 hover:bg-white/15 border border-white/10 text-white text-sm font-semibold"
+          className={actionButtonClass}
         >
           <Download className="w-4 h-4" />
           Export CSV
@@ -3749,27 +3958,27 @@ export default function IPLAdminLiveScoreTablePage() {
         <button
           onClick={exportPDF}
           disabled={pdfGenerating || !selectedMatchId}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/10 hover:bg-white/15 border border-white/10 disabled:opacity-60 text-white text-sm font-semibold"
+          className={actionButtonClass}
         >
           <FileText className="w-4 h-4" />
-          {pdfGenerating ? 'Exporting…' : 'Export PDF'}
+          {pdfGenerating ? 'Exporting...' : 'Export PDF'}
         </button>
         <button
           onClick={saveRows}
           disabled={saveStatus === 'saving' || !selectedMatchId}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 disabled:opacity-60 text-white text-sm font-semibold"
+          className={primaryButtonClass}
         >
           <Save className="w-4 h-4" />
-          Save Rows
+          Save Deliveries
         </button>
         <button
           onClick={syncScorecardFromTable}
           disabled={scorecardSyncStatus === 'saving' || !selectedMatchId}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-60 text-white text-sm font-semibold"
+          className={warmButtonClass}
         >
           <RefreshCw className="w-4 h-4" />
           {scorecardSyncStatus === 'saving'
-            ? 'Syncing Scorecard…'
+            ? 'Syncing Scorecard...'
             : scorecardSyncStatus === 'success'
               ? 'Scorecard Synced'
               : scorecardSyncStatus === 'error'
@@ -3779,42 +3988,53 @@ export default function IPLAdminLiveScoreTablePage() {
         <button
           onClick={publishNow}
           disabled={saveStatus === 'saving' || !selectedMatchId}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-cyan-600 hover:bg-cyan-700 disabled:opacity-60 text-white text-sm font-semibold"
+          className="inline-flex items-center gap-2 rounded-xl bg-[#126e89] px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-[#126e89]/20 transition hover:-translate-y-0.5 hover:bg-[#1683a4] disabled:translate-y-0 disabled:opacity-50"
         >
           <UploadCloud className="w-4 h-4" />
           Publish Live Score
         </button>
 
-        <div className="ml-auto text-xs">
-          {saveStatus === 'idle' && <span className="text-white/50">Not saved</span>}
-          {saveStatus === 'saving' && <span className="text-yellow-300">Saving…</span>}
-          {saveStatus === 'success' && <span className="text-emerald-300">Saved</span>}
-          {saveStatus === 'error' && <span className="text-red-300">Error</span>}
+        <div className={`ml-auto rounded-full border px-3 py-1.5 text-xs ${getStatusClass(saveStatus)}`}>
+          {getStatusText(saveStatus, 'Unsaved deliveries')}
         </div>
       </div>
 
-      <div className="rounded-2xl border border-white/10 bg-white/5 p-5 mb-6">
+      <section className="mb-6 rounded-2xl border border-white/10 bg-[#0a1815]/70 p-5 shadow-xl shadow-black/15 backdrop-blur">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
-            <h3 className="text-lg font-semibold text-white">Fast Scorer</h3>
-            <p className="text-xs text-white/60">
-              Per-ball entry with auto overs, strike swap, and wicket/extras guardrails.
+            <div className="flex items-center gap-2">
+              <Radio className="h-5 w-5 text-[#4cc39a]" />
+              <h3 className="text-lg font-semibold text-white">Ball-by-Ball Scorer</h3>
+            </div>
+            <p className="mt-1 text-xs text-white/60">
+              Score the next delivery with automatic overs, strike rotation, extras, and wicket guardrails.
             </p>
+            <div className="mt-3 flex flex-wrap gap-2 text-xs">
+              <span className="rounded-full border border-[#d7a85b]/30 bg-[#d7a85b]/10 px-3 py-1 text-[#f2d39a]">
+                {currentBattingName || 'Batting team'} {currentTotals.teamTotal}/{currentTotals.wickets}
+              </span>
+              <span className="rounded-full border border-white/10 bg-white/10 px-3 py-1 text-white/60">
+                {currentTotals.overs} overs
+              </span>
+              <span className="rounded-full border border-[#4fb6c4]/30 bg-[#4fb6c4]/10 px-3 py-1 text-[#a8e9ef]">
+                {currentPhase}
+              </span>
+            </div>
           </div>
           <label className="flex items-center gap-2 text-xs text-white/60">
             <input
               type="checkbox"
               checked={autoSwapStrike}
               onChange={(e) => setAutoSwapStrike(e.target.checked)}
-              className="rounded border-white/20 bg-slate-950"
+              className="rounded border-white/20 bg-[#07110f] text-[#d7a85b] focus:ring-[#d7a85b]/30"
             />
             Auto swap strike on odd runs (skips wickets)
           </label>
         </div>
 
-        <div className="mt-4 grid gap-4 lg:grid-cols-[1.4fr,1fr,1fr]">
-          <div className="space-y-3">
-            <div className="text-xs uppercase text-white/40">Context</div>
+        <div className="mt-5 grid gap-4 2xl:grid-cols-[minmax(0,1.35fr)_minmax(280px,1fr)_minmax(260px,0.85fr)]">
+          <div className="min-w-0 space-y-3">
+            <div className="text-xs font-semibold uppercase tracking-wide text-[#f2d39a]">Delivery Context</div>
             <div className="flex flex-wrap gap-3">
               <div>
                 <div className="text-[11px] text-white/60">Innings</div>
@@ -3823,11 +4043,13 @@ export default function IPLAdminLiveScoreTablePage() {
                     <button
                       key={val}
                       onClick={() => setFastInnings(val)}
-                      className={`rounded-full px-3 py-1 text-xs ${
-                        fastInnings === val ? 'bg-purple-500 text-white' : 'bg-white/10 text-white/70'
+                      className={`rounded-full border px-3 py-1 text-xs font-semibold transition ${
+                        fastInnings === val
+                          ? 'border-[#d7a85b]/40 bg-[#d7a85b]/20 text-white'
+                          : 'border-white/10 bg-white/10 text-white/70 hover:bg-white/15'
                       }`}
                     >
-                      {val}
+                      Innings {val}
                     </button>
                   ))}
                 </div>
@@ -3839,7 +4061,7 @@ export default function IPLAdminLiveScoreTablePage() {
                   onChange={(e) => setFastStrikerId(normalizePlayerSelectionInput(e.target.value, fastBattingOptions))}
                   list={getTeamPlayerDatalistId(selectedMatchId, fastBattingKey)}
                   placeholder="Type striker name"
-                  className="mt-1 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs text-white placeholder-white/30"
+                  className={`mt-1 min-w-[150px] text-xs ${compactFieldClass}`}
                 />
               </div>
               <div>
@@ -3851,7 +4073,7 @@ export default function IPLAdminLiveScoreTablePage() {
                   }
                   list={getTeamPlayerDatalistId(selectedMatchId, fastBattingKey)}
                   placeholder="Type non-striker name"
-                  className="mt-1 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs text-white placeholder-white/30"
+                  className={`mt-1 min-w-[150px] text-xs ${compactFieldClass}`}
                 />
               </div>
               <div>
@@ -3861,35 +4083,35 @@ export default function IPLAdminLiveScoreTablePage() {
                   onChange={(e) => setFastBowlerId(normalizePlayerSelectionInput(e.target.value, fastBowlingOptions))}
                   list={getTeamPlayerDatalistId(selectedMatchId, fastBowlingKey)}
                   placeholder="Type bowler name"
-                  className="mt-1 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs text-white placeholder-white/30"
+                  className={`mt-1 min-w-[150px] text-xs ${compactFieldClass}`}
                 />
               </div>
               <div>
-                <div className="text-[11px] text-white/60">Current Ball</div>
-                <div className="mt-1 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs text-white/80">
+                <div className="text-[11px] text-white/60">Next delivery</div>
+                <div className="mt-1 rounded-lg border border-[#4cc39a]/30 bg-[#4cc39a]/10 px-3 py-2 text-xs font-semibold text-[#9cf2c8]">
                   {fastInningsComplete ? `Innings complete (${MAX_OVERS} ov)` : `Over ${fastNextBall.over}.${fastNextBall.ball}`}
                 </div>
               </div>
               <div>
-                <div className="text-[11px] text-white/60">Set Over (optional)</div>
+                <div className="text-[11px] text-white/60">Override over</div>
                 <input
                   value={fastOverrideOver}
                   onChange={(e) => setFastOverrideOver(sanitizeOverBallInput(e.target.value))}
                   placeholder={fastNextBall.over}
                   inputMode="numeric"
                   disabled={fastInningsComplete}
-                  className="mt-1 w-20 rounded-lg border border-white/10 bg-slate-950 px-3 py-2 text-xs disabled:opacity-60"
+                  className={`mt-1 w-24 text-xs ${compactFieldClass}`}
                 />
               </div>
               <div>
-                <div className="text-[11px] text-white/60">Set Ball (optional)</div>
+                <div className="text-[11px] text-white/60">Override ball</div>
                 <input
                   value={fastOverrideBall}
                   onChange={(e) => setFastOverrideBall(sanitizeOverBallInput(e.target.value))}
                   placeholder={fastNextBall.ball}
                   inputMode="numeric"
                   disabled={fastInningsComplete}
-                  className="mt-1 w-20 rounded-lg border border-white/10 bg-slate-950 px-3 py-2 text-xs disabled:opacity-60"
+                  className={`mt-1 w-24 text-xs ${compactFieldClass}`}
                 />
               </div>
               <button
@@ -3897,15 +4119,18 @@ export default function IPLAdminLiveScoreTablePage() {
                   setFastStrikerId(fastNonStrikerId);
                   setFastNonStrikerId(fastStrikerId);
                 }}
-                className="mt-5 inline-flex items-center gap-2 rounded-lg border border-white/10 bg-white/10 px-3 py-2 text-xs"
+                className={`${actionButtonClass} mt-5 px-3 py-2 text-xs`}
               >
                 Swap Strike
               </button>
             </div>
           </div>
 
-          <div className="space-y-3">
-            <div className="text-xs uppercase text-white/40">Scorer Bar</div>
+          <div className="min-w-0 space-y-3">
+            <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-[#f2d39a]">
+              <Zap className="h-3.5 w-3.5" />
+              Delivery Result
+            </div>
             <div className="flex flex-wrap gap-2">
               {[0, 1, 2, 3, 4, 6].map((run) => (
                 <button
@@ -3919,7 +4144,7 @@ export default function IPLAdminLiveScoreTablePage() {
                     })
                   }
                   disabled={fastInningsComplete}
-                  className="h-9 w-9 rounded-xl bg-white/10 text-xs font-semibold text-white hover:bg-purple-600 disabled:opacity-60"
+                  className="h-11 w-11 rounded-xl border border-white/10 bg-white/10 text-sm font-bold text-white transition hover:-translate-y-0.5 hover:border-[#d7a85b]/40 hover:bg-[#d7a85b]/20 disabled:translate-y-0 disabled:opacity-50"
                 >
                   {run}
                 </button>
@@ -3927,45 +4152,55 @@ export default function IPLAdminLiveScoreTablePage() {
               <button
                 onClick={toggleFastWicket}
                 disabled={fastInningsComplete}
-                className={`h-9 rounded-xl px-3 text-xs font-semibold ${
-                  fastWicket.hasWicket ? 'bg-red-500' : 'bg-white/10'
-                } disabled:opacity-60`}
+                className={`h-11 rounded-xl border px-3 text-xs font-semibold transition hover:-translate-y-0.5 disabled:translate-y-0 disabled:opacity-50 ${
+                  fastWicket.hasWicket
+                    ? 'border-[#e5655f]/40 bg-[#e5655f] text-white'
+                    : 'border-white/10 bg-white/10 text-white hover:border-[#e5655f]/40 hover:bg-[#e5655f]/20'
+                }`}
               >
                 W
               </button>
               <button
                 onClick={toggleFastWide}
                 disabled={fastInningsComplete}
-                className={`h-9 rounded-xl px-3 text-xs font-semibold ${
-                  fastExtras.hasWide ? 'bg-amber-500' : 'bg-white/10'
-                } disabled:opacity-60`}
+                className={`h-11 rounded-xl border px-3 text-xs font-semibold transition hover:-translate-y-0.5 disabled:translate-y-0 disabled:opacity-50 ${
+                  fastExtras.hasWide
+                    ? 'border-[#d7a85b]/40 bg-[#d7a85b] text-[#07110f]'
+                    : 'border-white/10 bg-white/10 text-white hover:border-[#d7a85b]/40 hover:bg-[#d7a85b]/20'
+                }`}
               >
                 WD
               </button>
               <button
                 onClick={toggleFastNoBall}
                 disabled={fastInningsComplete}
-                className={`h-9 rounded-xl px-3 text-xs font-semibold ${
-                  fastExtras.hasNoBall ? 'bg-amber-500' : 'bg-white/10'
-                } disabled:opacity-60`}
+                className={`h-11 rounded-xl border px-3 text-xs font-semibold transition hover:-translate-y-0.5 disabled:translate-y-0 disabled:opacity-50 ${
+                  fastExtras.hasNoBall
+                    ? 'border-[#d7a85b]/40 bg-[#d7a85b] text-[#07110f]'
+                    : 'border-white/10 bg-white/10 text-white hover:border-[#d7a85b]/40 hover:bg-[#d7a85b]/20'
+                }`}
               >
                 NB
               </button>
               <button
                 onClick={toggleFastByes}
                 disabled={fastInningsComplete}
-                className={`h-9 rounded-xl px-3 text-xs font-semibold ${
-                  fastExtras.hasByes ? 'bg-sky-500' : 'bg-white/10'
-                } disabled:opacity-60`}
+                className={`h-11 rounded-xl border px-3 text-xs font-semibold transition hover:-translate-y-0.5 disabled:translate-y-0 disabled:opacity-50 ${
+                  fastExtras.hasByes
+                    ? 'border-[#4fb6c4]/40 bg-[#4fb6c4] text-[#07110f]'
+                    : 'border-white/10 bg-white/10 text-white hover:border-[#4fb6c4]/40 hover:bg-[#4fb6c4]/20'
+                }`}
               >
                 B
               </button>
               <button
                 onClick={toggleFastLegByes}
                 disabled={fastInningsComplete}
-                className={`h-9 rounded-xl px-3 text-xs font-semibold ${
-                  fastExtras.hasLB ? 'bg-sky-500' : 'bg-white/10'
-                } disabled:opacity-60`}
+                className={`h-11 rounded-xl border px-3 text-xs font-semibold transition hover:-translate-y-0.5 disabled:translate-y-0 disabled:opacity-50 ${
+                  fastExtras.hasLB
+                    ? 'border-[#4fb6c4]/40 bg-[#4fb6c4] text-[#07110f]'
+                    : 'border-white/10 bg-white/10 text-white hover:border-[#4fb6c4]/40 hover:bg-[#4fb6c4]/20'
+                }`}
               >
                 LB
               </button>
@@ -3974,38 +4209,52 @@ export default function IPLAdminLiveScoreTablePage() {
               Wide and no-ball are mutually exclusive. Byes/LB disable wide.
             </div>
             <div className="text-[11px] text-white/50">
-              Hotkeys: 0-6 runs, W wicket, D wide, N no-ball, B byes, L leg-byes, Enter add, U undo, S swap, C clear.
+              Hotkeys: 0-6 runs, W wicket, D wide, N no-ball, B byes, L leg-byes, Enter record, U undo, S swap, C clear.
             </div>
-            <div className="text-[11px] text-emerald-200/80">
-              Player fields now accept free text. Squad suggestions are optional, so you can score even before Playing XI or impact lists are saved.
+            <div className="text-[11px] text-[#9cf2c8]">
+              Player fields accept free text. Squad suggestions are optional, so scoring can begin before Playing XI
+              and Impact lists are saved.
             </div>
             <div className="text-[11px] text-white/60">
               Ball total: <span className="text-white">{fastTotals.totalRuns}</span> (bat {fastTotals.batRuns} + extras{' '}
               {fastTotals.extrasRuns})
             </div>
+            {recentCommentary.length > 0 && (
+              <div className="space-y-2 rounded-xl border border-white/10 bg-white/5 p-3">
+                <div className="text-[11px] font-semibold uppercase tracking-wide text-white/50">Recent balls</div>
+                {recentCommentary.map((line, idx) => (
+                  <div key={`${line}-${idx}`} className="rounded-lg bg-[#07110f]/70 px-3 py-2 text-[11px] text-white/70">
+                    {line}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
-          <div className="space-y-3">
-            <div className="text-xs uppercase text-white/40">Details</div>
+          <div className="min-w-0 space-y-3">
+            <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-[#f2d39a]">
+              <Gauge className="h-3.5 w-3.5" />
+              Delivery Details
+            </div>
             <div className="grid gap-2 text-xs">
               <label className="flex items-center justify-between gap-2">
-                Runs
+                Runs off bat
                 <input
                   type="number"
                   min={0}
                   max={6}
                   value={fastRuns}
                   onChange={(e) => setFastRuns(Math.max(0, Math.min(6, Number(e.target.value) || 0)))}
-                  className="w-20 rounded-lg border border-white/10 bg-slate-950 px-2 py-1"
+                  className={`w-24 text-xs ${compactFieldClass}`}
                 />
               </label>
               {fastExtras.hasWide && (
                 <label className="flex items-center justify-between gap-2">
-                  Wide extra
+                  Additional wide runs
                   <select
                     value={fastExtras.wideExtraRuns}
                     onChange={(e) => setFastExtras((prev) => ({ ...prev, wideExtraRuns: Number(e.target.value) }))}
-                    className="rounded-lg border border-white/10 bg-slate-950 px-2 py-1"
+                    className={`text-xs ${compactFieldClass}`}
                   >
                     {[0, 1, 2, 3, 4].map((v) => (
                       <option key={v} value={v}>
@@ -4021,7 +4270,7 @@ export default function IPLAdminLiveScoreTablePage() {
                   <select
                     value={fastExtras.byesRuns}
                     onChange={(e) => setFastExtras((prev) => ({ ...prev, byesRuns: Number(e.target.value) }))}
-                    className="rounded-lg border border-white/10 bg-slate-950 px-2 py-1"
+                    className={`text-xs ${compactFieldClass}`}
                   >
                     {[0, 1, 2, 3, 4, 5, 6].map((v) => (
                       <option key={v} value={v}>
@@ -4037,7 +4286,7 @@ export default function IPLAdminLiveScoreTablePage() {
                   <select
                     value={fastExtras.lbRuns}
                     onChange={(e) => setFastExtras((prev) => ({ ...prev, lbRuns: Number(e.target.value) }))}
-                    className="rounded-lg border border-white/10 bg-slate-950 px-2 py-1"
+                    className={`text-xs ${compactFieldClass}`}
                   >
                     {[0, 1, 2, 3, 4, 5, 6].map((v) => (
                       <option key={v} value={v}>
@@ -4052,7 +4301,7 @@ export default function IPLAdminLiveScoreTablePage() {
                   <select
                     value={fastWicket.wicketType}
                     onChange={(e) => applyFastWicketType(e.target.value)}
-                    className="rounded-lg border border-white/10 bg-slate-950 px-2 py-1"
+                    className={`text-xs ${compactFieldClass}`}
                   >
                     <option value="">Wicket type...</option>
                     {getAllowedWicketTypesForExtras(fastExtras).map((t) => (
@@ -4071,7 +4320,7 @@ export default function IPLAdminLiveScoreTablePage() {
                     onChange={(e) =>
                       setFastWicket((prev) => ({ ...prev, outBatter: e.target.value as WicketOutBatter }))
                     }
-                    className="rounded-lg border border-white/10 bg-slate-950 px-2 py-1"
+                    className={`text-xs ${compactFieldClass}`}
                   >
                     <option value="striker">Out: Striker</option>
                     <option value="nonStriker">Out: Non-striker</option>
@@ -4086,7 +4335,7 @@ export default function IPLAdminLiveScoreTablePage() {
                     }
                     list={getTeamPlayerDatalistId(selectedMatchId, fastBowlingKey)}
                     placeholder="Wicket taker..."
-                    className="rounded-lg border border-white/10 bg-white/5 px-2 py-1 text-white placeholder-white/30"
+                    className={`text-xs ${compactFieldClass}`}
                   />
                   <input
                     value={resolvePlayerName(fastWicket.wicketAssistant)}
@@ -4101,58 +4350,59 @@ export default function IPLAdminLiveScoreTablePage() {
                     }
                     list={getTeamPlayerDatalistId(selectedMatchId, fastBowlingKey)}
                     placeholder="Assistant (optional)"
-                    className="rounded-lg border border-white/10 bg-white/5 px-2 py-1 text-white placeholder-white/30"
+                    className={`text-xs ${compactFieldClass}`}
                   />
                 </>
               )}
               <input
                 value={fastNotes}
                 onChange={(e) => setFastNotes(e.target.value)}
-                placeholder="Notes"
-                className="rounded-lg border border-white/10 bg-slate-950 px-2 py-1 text-xs"
+                placeholder="Commentary note (optional)"
+                className={`text-xs ${compactFieldClass}`}
               />
               <div className="flex flex-wrap gap-2 pt-1">
                 <button
-                  onClick={appendFastBall}
-                  className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-3 py-2 text-xs font-semibold text-white disabled:opacity-60"
+                  onClick={() => appendFastBall()}
+                  className={`${primaryButtonClass} px-3 py-2 text-xs`}
                   disabled={fastInningsComplete || !fastStrikerId || !fastNonStrikerId || !fastBowlerId}
                 >
-                  Add Ball
+                  Record Delivery
                 </button>
                 <button
                   onClick={undoLastBall}
                   disabled={!rows.length}
-                  className="inline-flex items-center gap-2 rounded-lg border border-white/10 px-3 py-2 text-xs text-white/70 hover:bg-white/10 disabled:opacity-50"
+                  className={`${actionButtonClass} px-3 py-2 text-xs`}
                 >
-                  Undo Last
+                  <RotateCcw className="h-3.5 w-3.5" />
+                  Undo Last Ball
                 </button>
                 <button
                   onClick={resetFastInputs}
-                  className="inline-flex items-center gap-2 rounded-lg border border-white/10 px-3 py-2 text-xs text-white/70"
+                  className={`${actionButtonClass} px-3 py-2 text-xs`}
                 >
-                  Clear
+                  Clear Entry
                 </button>
               </div>
             </div>
           </div>
         </div>
-      </div>
+      </section>
 
       <div className="space-y-6">
         {/* Innings 1 */}
-        <section className="rounded-2xl border border-white/10 bg-white/5 overflow-hidden">
-          <div className="px-4 py-3 border-b border-white/10 flex items-center justify-between">
-            <div className="text-sm font-semibold text-white">Innings 1 Table</div>
-            <div className="text-xs text-white/60">{innings1BattingName || ''}</div>
+        <section className="overflow-hidden rounded-2xl border border-white/10 bg-[#0a1815]/70 shadow-xl shadow-black/15 backdrop-blur">
+          <div className="flex items-center justify-between border-b border-white/10 bg-white/5 px-4 py-3">
+            <div className="text-sm font-semibold text-white">Innings 1 Ball-by-Ball</div>
+            <div className="rounded-full bg-[#d7a85b]/10 px-2 py-1 text-xs text-[#f2d39a]">{innings1BattingName || ''}</div>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full min-w-[1400px] text-sm">
-              <thead className="bg-white/5 border-b border-white/10">
+              <thead className="sticky top-0 z-10 border-b border-white/10 bg-[#0e2420]">
                 <tr>
                   {HEADERS.map((h) => (
                     <th
                       key={h}
-                      className="px-3 py-3 text-left text-[11px] uppercase tracking-wide font-semibold text-white/70 border-r border-white/5"
+                      className="border-r border-white/5 px-3 py-3 text-left text-[11px] font-semibold uppercase tracking-wide text-white/70"
                     >
                       {h}
                     </th>
@@ -4187,46 +4437,46 @@ export default function IPLAdminLiveScoreTablePage() {
                 {!rows.some((r) => String(r?.[2] || '') === '1') && (
                   <tr>
                     <td colSpan={HEADERS.length + 1} className="px-4 py-6 text-center text-white/50">
-                      No deliveries yet. Click “Add Ball” below.
+                      No deliveries recorded yet. Use Record Delivery or Add Manual Ball.
                     </td>
                   </tr>
                 )}
               </tbody>
             </table>
           </div>
-          <div className="px-4 py-3 border-t border-white/10 flex items-center justify-end gap-3">
+          <div className="flex items-center justify-end gap-3 border-t border-white/10 px-4 py-3">
             <button
               onClick={saveRows}
               disabled={saveStatus === 'saving' || !selectedMatchId}
-              className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 disabled:opacity-60 text-white text-sm font-semibold"
+              className={`${primaryButtonClass} px-3 py-2`}
             >
               <Save className="w-4 h-4" />
-              Save Rows
+              Save Deliveries
             </button>
             <button
               onClick={() => addRowToInnings(1)}
               disabled={innings1Complete}
-              className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 disabled:opacity-60 text-white text-sm font-semibold"
+              className={`${warmButtonClass} px-3 py-2`}
             >
-              <Plus className="w-4 h-4" /> Add Ball
+              <Plus className="w-4 h-4" /> Add Manual Ball
             </button>
           </div>
         </section>
 
         {/* Innings 2 */}
-        <section className="rounded-2xl border border-white/10 bg-white/5 overflow-hidden">
-          <div className="px-4 py-3 border-b border-white/10 flex items-center justify-between">
-            <div className="text-sm font-semibold text-white">Innings 2 Table</div>
-            <div className="text-xs text-white/60">{innings2BattingName || ''}</div>
+        <section className="overflow-hidden rounded-2xl border border-white/10 bg-[#0a1815]/70 shadow-xl shadow-black/15 backdrop-blur">
+          <div className="flex items-center justify-between border-b border-white/10 bg-white/5 px-4 py-3">
+            <div className="text-sm font-semibold text-white">Innings 2 Ball-by-Ball</div>
+            <div className="rounded-full bg-[#4fb6c4]/10 px-2 py-1 text-xs text-[#a8e9ef]">{innings2BattingName || ''}</div>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full min-w-[1400px] text-sm">
-              <thead className="bg-white/5 border-b border-white/10">
+              <thead className="sticky top-0 z-10 border-b border-white/10 bg-[#0e2420]">
                 <tr>
                   {HEADERS.map((h) => (
                     <th
                       key={h}
-                      className="px-3 py-3 text-left text-[11px] uppercase tracking-wide font-semibold text-white/70 border-r border-white/5"
+                      className="border-r border-white/5 px-3 py-3 text-left text-[11px] font-semibold uppercase tracking-wide text-white/70"
                     >
                       {h}
                     </th>
@@ -4261,41 +4511,46 @@ export default function IPLAdminLiveScoreTablePage() {
                 {!rows.some((r) => String(r?.[2] || '') === '2') && (
                   <tr>
                     <td colSpan={HEADERS.length + 1} className="px-4 py-6 text-center text-white/50">
-                      No deliveries yet. Click “Add Ball” below.
+                      No deliveries recorded yet. Use Record Delivery or Add Manual Ball.
                     </td>
                   </tr>
                 )}
               </tbody>
             </table>
           </div>
-          <div className="px-4 py-3 border-t border-white/10 flex items-center justify-end gap-3">
+          <div className="flex items-center justify-end gap-3 border-t border-white/10 px-4 py-3">
             <button
               onClick={saveRows}
               disabled={saveStatus === 'saving' || !selectedMatchId}
-              className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 disabled:opacity-60 text-white text-sm font-semibold"
+              className={`${primaryButtonClass} px-3 py-2`}
             >
               <Save className="w-4 h-4" />
-              Save Rows
+              Save Deliveries
             </button>
             <button
               onClick={() => addRowToInnings(2)}
               disabled={innings2Complete}
-              className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-fuchsia-600 hover:bg-fuchsia-700 disabled:opacity-60 text-white text-sm font-semibold"
+              className={`${warmButtonClass} px-3 py-2`}
             >
-              <Plus className="w-4 h-4" /> Add Ball
+              <Plus className="w-4 h-4" /> Add Manual Ball
             </button>
           </div>
         </section>
 
         {/* Match Result (saved in Scorecards) */}
-        <section className="rounded-2xl border border-white/10 bg-white/5 p-4">
+        <section className="rounded-2xl border border-white/10 bg-[#0a1815]/70 p-4 shadow-xl shadow-black/15 backdrop-blur">
           <div className="flex items-start justify-between gap-3">
             <div>
-              <div className="text-sm font-semibold text-white">Match Result</div>
-              <div className="text-xs text-white/50">Saved in scorecard (draft by default)</div>
+              <div className="flex items-center gap-2 text-sm font-semibold text-white">
+                <Trophy className="h-4 w-4 text-[#d7a85b]" />
+                Match Result
+              </div>
+              <div className="mt-1 text-xs text-white/50">
+                Records the winner, margin, and Player of the Match in the scorecard draft.
+              </div>
             </div>
             <div className="text-xs text-white/50">
-              {resultLoading ? 'Loading…' : scorecardId ? `Scorecard: ${scorecardId}` : 'No scorecard yet'}
+              {resultLoading ? 'Loading...' : scorecardId ? `Scorecard: ${scorecardId}` : 'No scorecard yet'}
             </div>
           </div>
 
@@ -4306,9 +4561,9 @@ export default function IPLAdminLiveScoreTablePage() {
                 value={resultWinner}
                 onChange={(e) => setResultWinner(e.target.value)}
                 disabled={!selectedMatchId}
-                className="w-full border border-white/10 focus:border-purple-400 rounded-xl px-3 py-2 bg-slate-950 text-white disabled:opacity-60"
+                className={`w-full ${fieldClass}`}
               >
-                <option value="">Select Winning Team</option>
+                <option value="">Select winning team</option>
                 {selectedMatch && (
                   <>
                     <option value={selectedMatch.team1?.name}>{selectedMatch.team1?.name}</option>
@@ -4327,20 +4582,20 @@ export default function IPLAdminLiveScoreTablePage() {
                 onChange={(e) => setResultMargin(e.target.value)}
                 disabled={!selectedMatchId}
                 placeholder="e.g., 3 wickets, 25 runs, Super Over"
-                className="w-full border border-white/10 focus:border-purple-400 rounded-xl px-3 py-2 bg-white/5 text-white placeholder-white/30 disabled:opacity-60"
+                className={`w-full ${fieldClass}`}
               />
-              <p className="text-[11px] text-white/50 mt-2">Enter the margin of victory (e.g., 3 wickets, 25 runs)</p>
+              <p className="text-[11px] text-white/50 mt-2">Examples: 3 wickets, 25 runs, won in Super Over.</p>
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-white/70 mb-2">Man of the Match</label>
+              <label className="block text-xs font-semibold text-white/70 mb-2">Player of the Match</label>
               <input
                 value={resultManOfTheMatch}
                 onChange={(e) => setResultManOfTheMatch(e.target.value)}
                 list={getResultPlayerDatalistId(selectedMatchId)}
                 disabled={!selectedMatchId}
                 placeholder="Type player name"
-                className="w-full border border-white/10 focus:border-purple-400 rounded-xl px-3 py-2 bg-white/5 text-white placeholder-white/30 disabled:opacity-60"
+                className={`w-full ${fieldClass}`}
               />
             </div>
           </div>
@@ -4349,20 +4604,18 @@ export default function IPLAdminLiveScoreTablePage() {
             <button
               onClick={saveMatchResult}
               disabled={!selectedMatchId || resultStatus === 'saving' || resultLoading}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white text-sm font-semibold"
+              className={warmButtonClass}
             >
               <Save className="w-4 h-4" />
               Save Match Result
             </button>
-            <div className="text-xs">
-              {resultStatus === 'idle' && <span className="text-white/50">—</span>}
-              {resultStatus === 'saving' && <span className="text-yellow-300">Saving…</span>}
-              {resultStatus === 'success' && <span className="text-emerald-300">Saved</span>}
-              {resultStatus === 'error' && <span className="text-red-300">Error</span>}
+            <div className={`rounded-full border px-2 py-1 text-xs ${getStatusClass(resultStatus)}`}>
+              {getStatusText(resultStatus, 'Ready')}
             </div>
           </div>
         </section>
       </div>
+    </div>
     </div>
   );
 }
