@@ -1911,6 +1911,38 @@
     transform: translateY(-1px);
   }
 
+  .oil-player-detail-table {
+    min-width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+  }
+
+  .oil-player-detail-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: rgba(7, 17, 15, 0.96);
+    border-bottom: 1px solid rgba(215, 168, 91, 0.18);
+  }
+
+  .oil-player-detail-table tbody tr {
+    transition: background-color 160ms ease;
+  }
+
+  .oil-player-detail-table tbody tr:hover {
+    background: rgba(215, 168, 91, 0.06);
+  }
+
+  .oil-player-detail-table td,
+  .oil-player-detail-table th {
+    border-right: 1px solid rgba(255, 255, 255, 0.04);
+  }
+
+  .oil-player-detail-table td:last-child,
+  .oil-player-detail-table th:last-child {
+    border-right: none;
+  }
+
   .oil-row-actions {
     display: flex;
     min-width: max-content;
