@@ -764,14 +764,34 @@ const BattingStatsPage = () => {
             </div>
           ) : viewMode === 'table' ? (
             <div className="oil-table-shell rounded-2xl overflow-hidden shadow-2xl oil-rise">
-              <div className="overflow-x-auto" tabIndex={0}>
-                <table className="oil-table">
+              <div className="oil-table-header p-5">
+                <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                  <div>
+                    <div className="oil-hero-kicker mb-2">
+                      <Table2 className="h-3.5 w-3.5" />
+                      Batting leaderboard
+                    </div>
+                    <h2 className="text-xl font-bold text-white">Batters Ranked by Current Filters</h2>
+                    <p className="mt-1 text-sm text-white/60">
+                      Review scoring form, boundary impact, innings volume, and milestones in one table.
+                    </p>
+                  </div>
+                  <div className="flex flex-wrap gap-2 text-xs">
+                    <span className="oil-table-stat-pill oil-table-stat-pill--gold">{filteredAndSortedPlayers.length} batters</span>
+                    <span className="oil-table-stat-pill oil-table-stat-pill--teal">{getSelectedTeamLabel()}</span>
+                    <span className="oil-table-stat-pill oil-table-stat-pill--cyan">Sorted by {sortField}</span>
+                  </div>
+                </div>
+              </div>
+              <div className="overflow-x-auto custom-scrollbar" tabIndex={0}>
+                <table className="oil-table oil-data-table">
                   <thead className="border-b border-white/10">
                     <tr>
+                      <th className="px-5 py-4 text-left">Rank</th>
                       <th className="px-6 py-4 text-left">
                         <button
                           onClick={() => handleSort('name')}
-                          className="flex items-center gap-2 text-gray-300 hover:text-white font-semibold text-sm uppercase tracking-wider group"
+                          className="oil-table-sort group"
                         >
                           Player
                           <SortIcon field="name" />
@@ -780,7 +800,7 @@ const BattingStatsPage = () => {
                       <th className="px-6 py-4 text-left">
                         <button
                           onClick={() => handleSort('runs')}
-                          className="flex items-center gap-2 text-gray-300 hover:text-white font-semibold text-sm uppercase tracking-wider group"
+                          className="oil-table-sort group"
                         >
                           Runs
                           <SortIcon field="runs" />
@@ -789,7 +809,7 @@ const BattingStatsPage = () => {
                       <th className="px-6 py-4 text-left">
                         <button
                           onClick={() => handleSort('average')}
-                          className="flex items-center gap-2 text-gray-300 hover:text-white font-semibold text-sm uppercase tracking-wider group"
+                          className="oil-table-sort group"
                         >
                           Avg
                           <SortIcon field="average" />
@@ -798,7 +818,7 @@ const BattingStatsPage = () => {
                       <th className="px-6 py-4 text-left">
                         <button
                           onClick={() => handleSort('strikeRate')}
-                          className="flex items-center gap-2 text-gray-300 hover:text-white font-semibold text-sm uppercase tracking-wider group"
+                          className="oil-table-sort group"
                         >
                           SR
                           <SortIcon field="strikeRate" />
@@ -807,7 +827,7 @@ const BattingStatsPage = () => {
                       <th className="px-6 py-4 text-left">
                         <button
                           onClick={() => handleSort('highest')}
-                          className="flex items-center gap-2 text-gray-300 hover:text-white font-semibold text-sm uppercase tracking-wider group"
+                          className="oil-table-sort group"
                         >
                           HS
                           <SortIcon field="highest" />
@@ -817,7 +837,7 @@ const BattingStatsPage = () => {
                       <th className="px-6 py-4 text-left">
                         <button
                           onClick={() => handleSort('hundreds')}
-                          className="flex items-center gap-2 text-gray-300 hover:text-white font-semibold text-sm uppercase tracking-wider group"
+                          className="oil-table-sort group"
                         >
                           100s
                           <SortIcon field="hundreds" />
@@ -826,7 +846,7 @@ const BattingStatsPage = () => {
                       <th className="px-6 py-4 text-left">
                         <button
                           onClick={() => handleSort('fifties')}
-                          className="flex items-center gap-2 text-gray-300 hover:text-white font-semibold text-sm uppercase tracking-wider group"
+                          className="oil-table-sort group"
                         >
                           50s
                           <SortIcon field="fifties" />
@@ -842,100 +862,94 @@ const BattingStatsPage = () => {
                       const runs = player.stats?.runs || 0;
                       const maxRuns = Math.max(...filteredAndSortedPlayers.map(p => p.stats?.runs || 0), 1);
                       const runsPercentage = (runs / maxRuns) * 100;
+                      const battingAverage = (() => {
+                        if (player.stats?.battingAverage && player.stats.battingAverage !== '0' && player.stats.battingAverage !== '-') {
+                          return player.stats.battingAverage;
+                        }
+                        if (player.stats?.average && player.stats.average > 0) {
+                          return player.stats.average.toFixed(2);
+                        }
+                        const totalRuns = player.stats?.runs || 0;
+                        const innings = player.stats?.battingInnings || 0;
+                        const notOuts = player.stats?.notOuts || 0;
+                        const dismissals = innings - notOuts;
+                        return dismissals > 0 && totalRuns > 0 ? (totalRuns / dismissals).toFixed(2) : '-';
+                      })();
+                      const battingStrikeRate = (() => {
+                        if (player.stats?.battingStrikeRate && player.stats.battingStrikeRate !== '0' && player.stats.battingStrikeRate !== '-') {
+                          return player.stats.battingStrikeRate;
+                        }
+                        if (player.stats?.strikeRate && player.stats.strikeRate > 0) {
+                          return player.stats.strikeRate.toFixed(1);
+                        }
+                        const totalRuns = player.stats?.runs || 0;
+                        const ballsFaced = player.stats?.ballsFaced || 0;
+                        return ballsFaced > 0 && totalRuns > 0 ? ((totalRuns * 100) / ballsFaced).toFixed(1) : '-';
+                      })();
 
                       return (
                         <tr key={player.id} className="group">
+                          <td className="px-5 py-4">
+                            <span className="oil-table-rank">#{index + 1}</span>
+                          </td>
                           <td className="px-6 py-4">
                             <div className="flex items-center gap-3">
-                              <div className="w-10 h-10 bg-gradient-to-br from-[#d7a85b] to-[#126e89] rounded-xl flex items-center justify-center text-white font-bold text-sm shadow-lg group-hover:scale-105 transition-all duration-200">
+                              <div className="oil-table-avatar bg-gradient-to-br from-[#d7a85b] to-[#126e89]">
                                 {player.name?.charAt(0) || '?'}
-                  </div>
-                  <div>
+                              </div>
+                              <div className="min-w-[180px]">
                                 <div className="font-semibold text-white group-hover:text-[#f2d39a] transition-colors">{player.name || 'Unknown Player'}</div>
-                                <div className="text-sm text-gray-400 group-hover:text-gray-300 transition-colors">{team?.shortName || 'No Team'}</div>
+                                <div className="mt-1 flex flex-wrap gap-1.5">
+                                  <span className="oil-table-stat-pill">{team?.shortName || 'No Team'}</span>
+                                  <span className="oil-table-stat-pill oil-table-stat-pill--gold">{player.role || 'Player'}</span>
+                                </div>
                               </div>
                             </div>
                           </td>
                           <td className="px-6 py-4">
-                            <div className="flex items-center gap-2">
-                              <span className="font-bold text-white group-hover:text-[#f2d39a] transition-colors">{runs.toLocaleString()}</span>
-                              <div className="w-16 h-2 bg-gray-700/50 rounded-full overflow-hidden shadow-inner">
-                                <div 
-                                  className="h-full bg-gradient-to-r from-[#d7a85b] via-[#4cc39a] to-[#4fb6c4] transition-all duration-700 shadow-lg shadow-[#d7a85b]/30"
+                            <div className="space-y-2">
+                              <span className="text-lg font-extrabold text-white group-hover:text-[#f2d39a] transition-colors">{runs.toLocaleString()}</span>
+                              <div className="oil-table-progress">
+                                <span
+                                  className="bg-gradient-to-r from-[#d7a85b] via-[#4cc39a] to-[#4fb6c4]"
                                   style={{ width: `${runsPercentage}%` }}
                                 />
-                  </div>
-                </div>
+                              </div>
+                            </div>
                           </td>
                           <td className="px-6 py-4">
-                            <span className="text-white font-medium">
-                              {(() => {
-                                // Try string field first
-                                if (player.stats?.battingAverage && player.stats.battingAverage !== '0' && player.stats.battingAverage !== '-') {
-                                  return player.stats.battingAverage;
-                                }
-                                // Try numeric field
-                                if (player.stats?.average && player.stats.average > 0) {
-                                  return player.stats.average.toFixed(2);
-                                }
-                                // Calculate from base stats
-                                const runs = player.stats?.runs || 0;
-                                const battingInnings = player.stats?.battingInnings || 0;
-                                const notOuts = player.stats?.notOuts || 0;
-                                const dismissals = battingInnings - notOuts;
-                                if (dismissals > 0 && runs > 0) {
-                                  return (runs / dismissals).toFixed(2);
-                                }
-                                return '-';
-                              })()}
-                            </span>
+                            <span className="oil-table-stat-pill oil-table-stat-pill--teal">{battingAverage}</span>
                           </td>
                           <td className="px-6 py-4">
-                            <span className="text-white font-medium">
-                              {(() => {
-                                // Try string field first
-                                if (player.stats?.battingStrikeRate && player.stats.battingStrikeRate !== '0' && player.stats.battingStrikeRate !== '-') {
-                                  return player.stats.battingStrikeRate;
-                                }
-                                // Try numeric field
-                                if (player.stats?.strikeRate && player.stats.strikeRate > 0) {
-                                  return player.stats.strikeRate.toFixed(1);
-                                }
-                                // Calculate from base stats
-                                const runs = player.stats?.runs || 0;
-                                const ballsFaced = player.stats?.ballsFaced || 0;
-                                if (ballsFaced > 0 && runs > 0) {
-                                  return ((runs * 100) / ballsFaced).toFixed(1);
-                                }
-                                return '-';
-                              })()}
-                            </span>
+                            <span className="oil-table-stat-pill oil-table-stat-pill--cyan">{battingStrikeRate}</span>
                           </td>
                           <td className="px-6 py-4">
-                            <span className="text-white font-semibold">{player.stats?.highest || '-'}</span>
+                            <span className="oil-table-stat-pill oil-table-stat-pill--gold">{player.stats?.highest || '-'}</span>
                           </td>
                           <td className="px-6 py-4">
-                            <span className="text-gray-300">{player.stats?.battingInnings || 0}</span>
+                            <span className="oil-table-stat-pill">{player.stats?.battingInnings || 0} inn</span>
                           </td>
                           <td className="px-6 py-4">
-                            <span className="text-pink-400 font-semibold">{player.stats?.hundreds || 0}</span>
+                            <span className="oil-table-stat-pill oil-table-stat-pill--rose">{player.stats?.hundreds || 0}</span>
                           </td>
                           <td className="px-6 py-4">
-                            <span className="text-orange-400 font-semibold">{player.stats?.fifties || 0}</span>
+                            <span className="oil-table-stat-pill oil-table-stat-pill--gold">{player.stats?.fifties || 0}</span>
                           </td>
                           <td className="px-6 py-4">
-                            <span className="text-gray-300">
-                              {player.stats?.fours || 0}/{player.stats?.sixes || 0}
-                            </span>
+                            <div className="flex gap-2">
+                              <span className="oil-table-stat-pill oil-table-stat-pill--cyan">4s {player.stats?.fours || 0}</span>
+                              <span className="oil-table-stat-pill oil-table-stat-pill--rose">6s {player.stats?.sixes || 0}</span>
+                            </div>
                           </td>
                           <td className="px-6 py-4">
-                <button
+                            <button
                               onClick={() => handleEditPlayer(player)}
-                              className="oil-btn-primary mx-auto px-4 py-2 text-sm"
+                              className="oil-btn-primary oil-table-action mx-auto px-4 py-2 text-sm"
+                              aria-label={`Edit batting statistics for ${player.name || 'player'}`}
                             >
                               <Edit2 className="w-4 h-4" />
-                              Edit Batting
-                </button>
+                              Edit Stats
+                            </button>
                           </td>
                         </tr>
                       );

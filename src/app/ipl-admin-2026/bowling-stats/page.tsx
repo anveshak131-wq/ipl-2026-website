@@ -756,14 +756,34 @@ const BowlingStatsPage = () => {
           </div>
           ) : viewMode === 'table' ? (
             <div className="oil-table-shell rounded-2xl overflow-hidden shadow-xl oil-rise">
-              <div className="overflow-x-auto" tabIndex={0}>
-                <table className="oil-table">
+              <div className="oil-table-header p-5">
+                <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                  <div>
+                    <div className="oil-hero-kicker mb-2">
+                      <Table2 className="h-3.5 w-3.5" />
+                      Bowling leaderboard
+                    </div>
+                    <h2 className="text-xl font-bold text-white">Bowlers Ranked by Current Filters</h2>
+                    <p className="mt-1 text-sm text-white/60">
+                      Compare wicket impact, control, economy, strike rate, and best spells in one table.
+                    </p>
+                  </div>
+                  <div className="flex flex-wrap gap-2 text-xs">
+                    <span className="oil-table-stat-pill oil-table-stat-pill--teal">{filteredAndSortedPlayers.length} bowlers</span>
+                    <span className="oil-table-stat-pill oil-table-stat-pill--gold">{getSelectedTeamLabel()}</span>
+                    <span className="oil-table-stat-pill oil-table-stat-pill--cyan">Sorted by {sortField}</span>
+                  </div>
+                </div>
+              </div>
+              <div className="overflow-x-auto custom-scrollbar" tabIndex={0}>
+                <table className="oil-table oil-data-table">
                   <thead className="border-b border-white/10">
                     <tr>
+                      <th className="px-5 py-4 text-left">Rank</th>
                       <th className="px-6 py-4 text-left">
                         <button
                           onClick={() => handleSort('name')}
-                          className="flex items-center gap-2 text-gray-300 hover:text-white font-semibold text-sm uppercase tracking-wider group"
+                          className="oil-table-sort group"
                         >
                           Player
                           <SortIcon field="name" />
@@ -772,7 +792,7 @@ const BowlingStatsPage = () => {
                       <th className="px-6 py-4 text-left">
                         <button
                           onClick={() => handleSort('wickets')}
-                          className="flex items-center gap-2 text-gray-300 hover:text-white font-semibold text-sm uppercase tracking-wider group"
+                          className="oil-table-sort group"
                         >
                           Wickets
                           <SortIcon field="wickets" />
@@ -781,7 +801,7 @@ const BowlingStatsPage = () => {
                       <th className="px-6 py-4 text-left">
                         <button
                           onClick={() => handleSort('average')}
-                          className="flex items-center gap-2 text-gray-300 hover:text-white font-semibold text-sm uppercase tracking-wider group"
+                          className="oil-table-sort group"
                         >
                           Avg
                           <SortIcon field="average" />
@@ -790,7 +810,7 @@ const BowlingStatsPage = () => {
                       <th className="px-6 py-4 text-left">
                         <button
                           onClick={() => handleSort('economy')}
-                          className="flex items-center gap-2 text-gray-300 hover:text-white font-semibold text-sm uppercase tracking-wider group"
+                          className="oil-table-sort group"
                         >
                           Economy
                           <SortIcon field="economy" />
@@ -799,7 +819,7 @@ const BowlingStatsPage = () => {
                       <th className="px-6 py-4 text-left">
                         <button
                           onClick={() => handleSort('strikeRate')}
-                          className="flex items-center gap-2 text-gray-300 hover:text-white font-semibold text-sm uppercase tracking-wider group"
+                          className="oil-table-sort group"
                         >
                           SR
                           <SortIcon field="strikeRate" />
@@ -811,7 +831,7 @@ const BowlingStatsPage = () => {
                       <th className="px-6 py-4 text-left">
                         <button
                           onClick={() => handleSort('fiveWickets')}
-                          className="flex items-center gap-2 text-gray-300 hover:text-white font-semibold text-sm uppercase tracking-wider group"
+                          className="oil-table-sort group"
                         >
                           5W
                           <SortIcon field="fiveWickets" />
@@ -822,7 +842,7 @@ const BowlingStatsPage = () => {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-white/10">
-                    {filteredAndSortedPlayers.map((player) => {
+                    {filteredAndSortedPlayers.map((player, index) => {
                       const team = teams.find(t => String(t.id) === String(player.teamId));
                       const wickets = player.stats?.wickets || 0;
                       const maxWickets = Math.max(...filteredAndSortedPlayers.map(p => p.stats?.wickets || 0), 1);
@@ -830,113 +850,98 @@ const BowlingStatsPage = () => {
                       const overs = player.stats?.balls ? Math.floor(player.stats.balls / 6) : 0;
                       const balls = player.stats?.balls ? player.stats.balls % 6 : 0;
                       const oversDisplay = overs > 0 ? `${overs}.${balls}` : '0.0';
+                      const bowlingAverage = (() => {
+                        if (player.stats?.bowlingAverage && typeof player.stats.bowlingAverage === 'string' && player.stats.bowlingAverage !== '0' && player.stats.bowlingAverage !== '-') {
+                          return player.stats.bowlingAverage;
+                        }
+                        if (player.stats?.bowlingAverage && typeof player.stats.bowlingAverage === 'number' && player.stats.bowlingAverage > 0) {
+                          return player.stats.bowlingAverage.toFixed(2);
+                        }
+                        const runsConceded = player.stats?.runsConceded || 0;
+                        return wickets > 0 && runsConceded >= 0 ? (runsConceded / wickets).toFixed(2) : '-';
+                      })();
+                      const economy = (() => {
+                        if (player.stats?.economy && typeof player.stats.economy === 'string' && player.stats.economy !== '0' && player.stats.economy !== '-') {
+                          return player.stats.economy;
+                        }
+                        if (player.stats?.economy && typeof player.stats.economy === 'number' && player.stats.economy > 0) {
+                          return player.stats.economy.toFixed(2);
+                        }
+                        const totalBalls = player.stats?.balls || 0;
+                        const runsConceded = player.stats?.runsConceded || 0;
+                        return totalBalls > 0 && runsConceded >= 0 ? ((runsConceded * 6) / totalBalls).toFixed(2) : '-';
+                      })();
+                      const bowlingStrikeRate = (() => {
+                        if (player.stats?.bowlingStrikeRate && player.stats.bowlingStrikeRate !== '0' && player.stats.bowlingStrikeRate !== '-') {
+                          return player.stats.bowlingStrikeRate;
+                        }
+                        const totalBalls = player.stats?.balls || 0;
+                        return wickets > 0 && totalBalls > 0 ? (totalBalls / wickets).toFixed(1) : '-';
+                      })();
 
                       return (
                         <tr key={player.id} className="group">
+                          <td className="px-5 py-4">
+                            <span className="oil-table-rank">#{index + 1}</span>
+                          </td>
                           <td className="px-6 py-4">
                             <div className="flex items-center gap-3">
-                              <div className="w-10 h-10 bg-gradient-to-br from-[#4cc39a] to-[#126e89] rounded-lg flex items-center justify-center text-white font-bold text-sm group-hover:scale-105 transition-all duration-200">
+                              <div className="oil-table-avatar bg-gradient-to-br from-[#4cc39a] to-[#126e89]">
                                 {player.name?.charAt(0) || '?'}
-                  </div>
-                  <div>
+                              </div>
+                              <div className="min-w-[180px]">
                                 <div className="font-semibold text-white group-hover:text-[#9cf2c8] transition-colors">{player.name || 'Unknown Player'}</div>
-                                <div className="text-sm text-gray-400">{team?.shortName || 'No Team'}</div>
+                                <div className="mt-1 flex flex-wrap gap-1.5">
+                                  <span className="oil-table-stat-pill">{team?.shortName || 'No Team'}</span>
+                                  <span className="oil-table-stat-pill oil-table-stat-pill--teal">{player.role || 'Player'}</span>
+                                </div>
                               </div>
                             </div>
                           </td>
                           <td className="px-6 py-4">
-                            <div className="flex items-center gap-2">
-                              <span className="font-bold text-white">{wickets}</span>
-                              <div className="w-16 h-1.5 bg-gray-700 rounded-full overflow-hidden">
-                                <div 
-                                  className="h-full bg-gradient-to-r from-[#4cc39a] via-[#4fb6c4] to-[#d7a85b] transition-all"
+                            <div className="space-y-2">
+                              <span className="text-lg font-extrabold text-white group-hover:text-[#9cf2c8] transition-colors">{wickets}</span>
+                              <div className="oil-table-progress">
+                                <span
+                                  className="bg-gradient-to-r from-[#4cc39a] via-[#4fb6c4] to-[#d7a85b]"
                                   style={{ width: `${wicketsPercentage}%` }}
                                 />
-                  </div>
-                </div>
+                              </div>
+                            </div>
                           </td>
                           <td className="px-6 py-4">
-                            <span className="text-white font-medium">
-                              {(() => {
-                                // Try string field first
-                                if (player.stats?.bowlingAverage && typeof player.stats.bowlingAverage === 'string' && player.stats.bowlingAverage !== '0' && player.stats.bowlingAverage !== '-') {
-                                  return player.stats.bowlingAverage;
-                                }
-                                // Try numeric field
-                                if (player.stats?.bowlingAverage && typeof player.stats.bowlingAverage === 'number' && player.stats.bowlingAverage > 0) {
-                                  return player.stats.bowlingAverage.toFixed(2);
-                                }
-                                // Calculate from base stats
-                                const wickets = player.stats?.wickets || 0;
-                                const runsConceded = player.stats?.runsConceded || 0;
-                                if (wickets > 0 && runsConceded >= 0) {
-                                  return (runsConceded / wickets).toFixed(2);
-                                }
-                                return '-';
-                              })()}
-                            </span>
+                            <span className="oil-table-stat-pill oil-table-stat-pill--teal">{bowlingAverage}</span>
                           </td>
                           <td className="px-6 py-4">
-                            <span className="text-white font-medium">
-                              {(() => {
-                                // Try string field first
-                                if (player.stats?.economy && typeof player.stats.economy === 'string' && player.stats.economy !== '0' && player.stats.economy !== '-') {
-                                  return player.stats.economy;
-                                }
-                                // Try numeric field
-                                if (player.stats?.economy && typeof player.stats.economy === 'number' && player.stats.economy > 0) {
-                                  return player.stats.economy.toFixed(2);
-                                }
-                                // Calculate from base stats
-                                const balls = player.stats?.balls || 0;
-                                const runsConceded = player.stats?.runsConceded || 0;
-                                if (balls > 0 && runsConceded >= 0) {
-                                  return ((runsConceded * 6) / balls).toFixed(2);
-                                }
-                                return '-';
-                              })()}
-                            </span>
+                            <span className="oil-table-stat-pill oil-table-stat-pill--gold">{economy}</span>
                           </td>
                           <td className="px-6 py-4">
-                            <span className="text-white font-medium">
-                              {(() => {
-                                // Try string field first
-                                if (player.stats?.bowlingStrikeRate && player.stats.bowlingStrikeRate !== '0' && player.stats.bowlingStrikeRate !== '-') {
-                                  return player.stats.bowlingStrikeRate;
-                                }
-                                // Calculate from base stats
-                                const wickets = player.stats?.wickets || 0;
-                                const balls = player.stats?.balls || 0;
-                                if (wickets > 0 && balls > 0) {
-                                  return (balls / wickets).toFixed(1);
-                                }
-                                return '-';
-                              })()}
-                            </span>
+                            <span className="oil-table-stat-pill oil-table-stat-pill--cyan">{bowlingStrikeRate}</span>
                           </td>
                           <td className="px-6 py-4">
-                            <span className="text-gray-300">{player.stats?.bowlingInnings || 0}</span>
+                            <span className="oil-table-stat-pill">{player.stats?.bowlingInnings || 0} inn</span>
                           </td>
                           <td className="px-6 py-4">
-                            <span className="text-gray-300">{oversDisplay}</span>
+                            <span className="oil-table-stat-pill">{oversDisplay} ov</span>
                           </td>
                           <td className="px-6 py-4">
-                            <span className="text-cyan-400 font-semibold">{player.stats?.maidens || 0}</span>
+                            <span className="oil-table-stat-pill oil-table-stat-pill--cyan">{player.stats?.maidens || 0}</span>
                           </td>
                           <td className="px-6 py-4">
-                            <span className="text-teal-400 font-semibold">{player.stats?.fiveWickets || 0}</span>
+                            <span className="oil-table-stat-pill oil-table-stat-pill--teal">{player.stats?.fiveWickets || 0}</span>
                           </td>
                           <td className="px-6 py-4">
-                            <span className="text-white font-semibold">{player.stats?.bestBowling || '-'}</span>
+                            <span className="oil-table-stat-pill oil-table-stat-pill--gold">{player.stats?.bestBowling || '-'}</span>
                           </td>
                           <td className="px-6 py-4">
-                <button
+                            <button
                               onClick={() => handleEditPlayer(player)}
-                              className="oil-btn-primary mx-auto px-4 py-2 text-sm"
+                              className="oil-btn-primary oil-table-action mx-auto px-4 py-2 text-sm"
+                              aria-label={`Edit bowling statistics for ${player.name || 'player'}`}
                             >
                               <Edit2 className="w-4 h-4" />
-                              Edit Bowling
-                </button>
+                              Edit Stats
+                            </button>
                           </td>
                         </tr>
                       );
