@@ -6,7 +6,7 @@ import { useAdminData } from '@/contexts/AdminDataContext';
 import { useLeague } from '@/contexts/LeagueContext';
 import ModernDialog from '@/components/admin/ModernDialog';
 import { exportStatsData } from '@/lib/admin/statsExportUtils';
-import { Search, Filter, Edit2, X, TrendingUp, Award, Target, Zap, ChevronDown, ChevronUp, SortAsc, SortDesc, User, Shirt, Calendar, BarChart3, Target as TargetIcon, Award as AwardIcon, Zap as ZapIcon, Hash, Activity, LayoutGrid, Table2, Download, FileDown, FileText, Database, DatabaseBackup } from 'lucide-react';
+import { Search, Filter, Edit2, X, TrendingUp, Award, Target, Zap, ChevronDown, ChevronUp, SortAsc, SortDesc, User, Shirt, Calendar, BarChart3, Target as TargetIcon, Award as AwardIcon, Zap as ZapIcon, Hash, Activity, ShieldCheck, LayoutGrid, Table2, Download, FileDown, FileText, Database, DatabaseBackup } from 'lucide-react';
 
 const NOT_SELECTED_SEASON_FILTER = '__not_selected_season__';
 
@@ -1180,346 +1180,334 @@ const BattingStatsPage = () => {
 
         {/* Edit Modal */}
         {showEditModal && (
-          <div className="fixed inset-0 bg-black/80 backdrop-blur-lg flex items-center justify-center z-[9999] p-4 animate-in fade-in duration-300">
-            <div className="bg-gradient-to-br from-gray-800 via-gray-900 to-gray-800 rounded-3xl shadow-2xl w-full max-w-5xl max-h-[95vh] overflow-hidden border border-gray-700/50 animate-in zoom-in-95 duration-300">
-              {/* Header */}
-              <div className="bg-gradient-to-r from-cyan-600 via-blue-600 to-indigo-700 p-6 border-b border-gray-700/50 relative overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-shimmer"></div>
-                <div className="flex items-center justify-between relative z-10">
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-white/20 backdrop-blur rounded-xl flex items-center justify-center shadow-lg">
-                      <Edit2 className="w-6 h-6 text-white" />
+          <div className="oil-modal-backdrop fixed inset-0 z-[9999] flex items-center justify-center p-4">
+            <div className="oil-modal-shell w-full max-w-5xl max-h-[95vh] overflow-hidden text-white">
+              <div className="oil-modal-header p-6">
+                <div className="relative z-10 flex items-start justify-between gap-5">
+                  <div className="flex items-start gap-4">
+                    <div className="oil-modal-icon">
+                      <TrendingUp className="w-6 h-6" />
                     </div>
                     <div>
+                      <div className="oil-hero-kicker mb-2">
+                        <Target className="h-3.5 w-3.5" />
+                        Batter record editor
+                      </div>
                       <h2 className="text-2xl font-bold text-white">Edit Batting Statistics</h2>
-                      <p className="text-cyan-100 text-sm mt-0.5 font-medium">{editForm.name || 'Player'}</p>
+                      <p className="mt-1 text-sm leading-5 text-white/70">
+                        Update innings, scoring, boundaries, milestones, average, and strike-rate details for {editForm.name || 'this player'}.
+                      </p>
                     </div>
                   </div>
                   <button
                     onClick={handleCancelEdit}
-                    className="text-white hover:text-gray-200 transition-all bg-white/10 hover:bg-white/20 rounded-xl w-10 h-10 flex items-center justify-center hover:scale-110 hover:rotate-90 duration-300"
+                    className="oil-modal-close flex-shrink-0"
+                    aria-label="Close batting statistics editor"
                   >
                     <X className="w-5 h-5" />
                   </button>
                 </div>
               </div>
 
-              <div className="overflow-y-auto max-h-[calc(95vh-180px)]">
-                {/* Player Info Section */}
-                <div className="p-6 bg-gradient-to-r from-gray-800/60 via-gray-900/60 to-gray-800/60 border-b border-gray-700/50">
+              <div className="oil-modal-body custom-scrollbar overflow-y-auto max-h-[calc(95vh-176px)]">
+                <div className="oil-modal-strip p-6 border-b border-white/10">
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {/* Player Name - Read-only with premium design */}
-                    <div className="relative group">
-                      <label className="flex items-center gap-2 text-xs font-semibold text-gray-400 mb-2 uppercase tracking-wide">
-                        <User className="w-3.5 h-3.5 text-cyan-400" />
+                    <div className="oil-modal-readonly-card p-4">
+                      <label className="flex items-center gap-2 text-xs font-semibold text-[#f2d39a] mb-2 uppercase tracking-wide">
+                        <User className="w-3.5 h-3.5" />
                         Player Name
                       </label>
-                      <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-gray-800/90 to-gray-900/90 border border-cyan-500/30 shadow-lg hover:shadow-cyan-500/20 transition-all">
-                        <div className="flex items-center gap-3 px-4 py-3.5">
-                          <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-gradient-to-br from-cyan-500/20 to-blue-600/20 border border-cyan-500/30 flex items-center justify-center">
-                            <User className="w-5 h-5 text-cyan-400" />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="text-white font-semibold text-base truncate">
-                              {editForm.name || editingPlayer?.name || 'N/A'}
-                            </div>
-                            <div className="text-xs text-gray-400 mt-0.5">Read-only</div>
-                          </div>
-                          <div className="flex-shrink-0">
-                            <div className="w-2 h-2 rounded-full bg-cyan-500/50 animate-pulse"></div>
-                          </div>
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-lg bg-[#d7a85b]/15 border border-[#d7a85b]/30 flex items-center justify-center">
+                          <User className="w-5 h-5 text-[#f2d39a]" />
                         </div>
-                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-cyan-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                        <div className="min-w-0">
+                          <div className="truncate text-base font-semibold text-white">{editForm.name || editingPlayer?.name || 'N/A'}</div>
+                          <div className="text-xs text-white/45">Locked squad identity</div>
+                        </div>
                       </div>
                     </div>
 
-                    {/* Role - Read-only with badge design */}
-                    <div className="relative group">
-                      <label className="flex items-center gap-2 text-xs font-semibold text-gray-400 mb-2 uppercase tracking-wide">
-                        <Activity className="w-3.5 h-3.5 text-violet-400" />
+                    <div className="oil-modal-readonly-card p-4">
+                      <label className="flex items-center gap-2 text-xs font-semibold text-[#9cf2c8] mb-2 uppercase tracking-wide">
+                        <Activity className="w-3.5 h-3.5" />
                         Role
                       </label>
-                      <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-gray-800/90 to-gray-900/90 border border-violet-500/30 shadow-lg hover:shadow-violet-500/20 transition-all">
-                        <div className="flex items-center gap-3 px-4 py-3.5">
-                          <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-gradient-to-br from-violet-500/20 to-purple-600/20 border border-violet-500/30 flex items-center justify-center">
-                            <Activity className="w-5 h-5 text-violet-400" />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="inline-flex items-center gap-2">
-                              <span className="px-3 py-1 rounded-lg bg-gradient-to-r from-violet-500/20 to-purple-500/20 border border-violet-500/40 text-violet-200 font-semibold text-sm">
-                                {editForm.role || editingPlayer?.role || 'N/A'}
-                              </span>
-                            </div>
-                            <div className="text-xs text-gray-400 mt-1.5">Read-only</div>
-                          </div>
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-lg bg-[#4cc39a]/15 border border-[#4cc39a]/30 flex items-center justify-center">
+                          <Activity className="w-5 h-5 text-[#9cf2c8]" />
                         </div>
-                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-violet-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                        <div className="min-w-0">
+                          <span className="inline-flex rounded-full border border-[#4cc39a]/30 bg-[#4cc39a]/10 px-3 py-1 text-sm font-semibold text-[#9cf2c8]">
+                            {editForm.role || editingPlayer?.role || 'N/A'}
+                          </span>
+                          <div className="mt-1 text-xs text-white/45">Role is managed in player profile</div>
+                        </div>
                       </div>
                     </div>
 
-                    {/* Jersey Number - Read-only with premium design */}
-                    <div className="relative group">
-                      <label className="flex items-center gap-2 text-xs font-semibold text-gray-400 mb-2 uppercase tracking-wide">
-                        <Shirt className="w-3.5 h-3.5 text-rose-400" />
+                    <div className="oil-modal-readonly-card p-4">
+                      <label className="flex items-center gap-2 text-xs font-semibold text-[#a8e9ef] mb-2 uppercase tracking-wide">
+                        <Shirt className="w-3.5 h-3.5" />
                         Jersey Number
                       </label>
-                      <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-gray-800/90 to-gray-900/90 border border-rose-500/30 shadow-lg hover:shadow-rose-500/20 transition-all">
-                        <div className="flex items-center gap-3 px-4 py-3.5">
-                          <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-gradient-to-br from-rose-500/20 to-pink-600/20 border border-rose-500/30 flex items-center justify-center">
-                            <Hash className="w-5 h-5 text-rose-400" />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2">
-                              <span className="text-white font-bold text-lg">
-                                {editForm.jerseyNumber || editingPlayer?.jerseyNumber || 'N/A'}
-                              </span>
-                              {editForm.jerseyNumber && (
-                                <span className="text-xs text-gray-400">#{editForm.jerseyNumber}</span>
-                              )}
-                            </div>
-                            <div className="text-xs text-gray-400 mt-0.5">Read-only</div>
-                          </div>
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-lg bg-[#4fb6c4]/15 border border-[#4fb6c4]/30 flex items-center justify-center">
+                          <Hash className="w-5 h-5 text-[#a8e9ef]" />
                         </div>
-                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-rose-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                        <div>
+                          <div className="text-lg font-bold text-white">{editForm.jerseyNumber || editingPlayer?.jerseyNumber || 'N/A'}</div>
+                          <div className="text-xs text-white/45">Match-sheet number</div>
+                        </div>
                       </div>
                     </div>
                   </div>
-              </div>
-              
-                {/* Main Statistics Section */}
-                <div className="p-6">
-                  <div className="mb-6">
-                    <h3 className="text-lg font-bold text-white mb-1 flex items-center gap-2">
-                      <BarChart3 className="w-5 h-5 text-cyan-400" />
-                      Match Statistics
-                    </h3>
-                    <p className="text-gray-400 text-sm">Basic match and innings information</p>
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
-                    <div className="relative group">
-                      <label className="flex items-center gap-2 text-sm font-medium text-gray-300 mb-2">
-                        <Calendar className="w-4 h-4 text-cyan-400" />
-                        Matches
-                      </label>
-                <input
-                  type="number"
-                  id="edit-stats-matches"
-                  name="statsMatches"
-                  value={editForm.stats.matches}
-                  onChange={(e) => handleFormChange('stats.matches', e.target.value === '' ? '' : parseInt(e.target.value) || '')}
-                        className="w-full px-4 py-2.5 bg-gray-700/70 border border-gray-600/50 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all hover:bg-gray-700/90 hover:border-cyan-500/30"
-                        placeholder="Matches"
-                />
-              </div>
-                    <div className="relative group">
-                      <label className="flex items-center gap-2 text-sm font-medium text-gray-300 mb-2">
-                        <TargetIcon className="w-4 h-4 text-indigo-400" />
-                        Batting Innings
-                      </label>
-                <input
-                  type="number"
-                  id="edit-stats-batting-innings"
-                  name="statsBattingInnings"
-                  value={editForm.stats.battingInnings}
-                  onChange={(e) => handleFormChange('stats.battingInnings', e.target.value === '' ? '' : parseInt(e.target.value) || '')}
-                        className="w-full px-4 py-2.5 bg-gray-700/70 border border-gray-600/50 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all hover:bg-gray-700/90 hover:border-indigo-500/30"
-                        placeholder="Batting Innings"
-                />
-              </div>
-                    <div className="relative group">
-                      <label className="flex items-center gap-2 text-sm font-medium text-gray-300 mb-2">
-                        <ZapIcon className="w-4 h-4 text-violet-400" />
-                        Not Outs
-                      </label>
-                <input
-                  type="number"
-                  id="edit-stats-not-outs"
-                  name="statsNotOuts"
-                  value={editForm.stats.notOuts}
-                  onChange={(e) => handleFormChange('stats.notOuts', e.target.value === '' ? '' : parseInt(e.target.value) || '')}
-                        className="w-full px-4 py-2.5 bg-gray-700/70 border border-gray-600/50 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500 transition-all hover:bg-gray-700/90 hover:border-violet-500/30"
-                        placeholder="Not Outs"
-                />
-                    </div>
-              </div>
-              
-                  <div className="mb-6">
-                    <h3 className="text-lg font-bold text-white mb-1 flex items-center gap-2">
-                      <TrendingUp className="w-5 h-5 text-emerald-400" />
-                      Batting Performance
-                    </h3>
-                    <p className="text-gray-400 text-sm">Runs, boundaries, and scoring statistics</p>
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
-                    <div className="relative bg-gradient-to-br from-cyan-500/10 to-cyan-600/5 p-4 rounded-xl border border-cyan-500/20 hover:border-cyan-500/40 transition-all group">
-                      <label className="flex items-center gap-2 text-sm font-semibold text-cyan-300 mb-2">
-                        <TargetIcon className="w-4 h-4" />
-                        Runs
-                      </label>
-                <input
-                  type="number"
-                  id="edit-stats-runs"
-                  name="statsRuns"
-                  value={editForm.stats.runs}
-                  onChange={(e) => handleFormChange('stats.runs', e.target.value === '' ? '' : parseInt(e.target.value) || '')}
-                        className="w-full px-4 py-2.5 bg-gray-700/70 border border-cyan-500/30 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all hover:bg-gray-700/90"
-                        placeholder="Runs"
-                      />
-                    </div>
-                    <div className="relative bg-gradient-to-br from-indigo-500/10 to-indigo-600/5 p-4 rounded-xl border border-indigo-500/20 hover:border-indigo-500/40 transition-all group">
-                      <label className="flex items-center gap-2 text-sm font-semibold text-indigo-300 mb-2">
-                        <TargetIcon className="w-4 h-4" />
-                        Highest Score
-                      </label>
-                      <input
-                        type="number"
-                        id="edit-stats-highest"
-                        name="statsHighest"
-                        value={editForm.stats.highest}
-                        onChange={(e) => handleFormChange('stats.highest', e.target.value === '' ? '' : parseInt(e.target.value) || '')}
-                        className="w-full px-4 py-2.5 bg-gray-700/70 border border-indigo-500/30 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all hover:bg-gray-700/90"
-                        placeholder="Highest Score"
-                />
-              </div>
-                    <div className="relative bg-gradient-to-br from-violet-500/10 to-violet-600/5 p-4 rounded-xl border border-violet-500/20 hover:border-violet-500/40 transition-all group">
-                      <label className="flex items-center gap-2 text-sm font-semibold text-violet-300 mb-2">
-                        <ZapIcon className="w-4 h-4" />
-                        Balls Faced
-                      </label>
-                <input
-                  type="number"
-                  id="edit-stats-balls-faced"
-                  name="statsBallsFaced"
-                  value={editForm.stats.ballsFaced}
-                  onChange={(e) => handleFormChange('stats.ballsFaced', e.target.value === '' ? '' : parseInt(e.target.value) || '')}
-                        className="w-full px-4 py-2.5 bg-gray-700/70 border border-violet-500/30 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500 transition-all hover:bg-gray-700/90"
-                        placeholder="Balls Faced"
-                />
-              </div>
-                    <div className="relative group">
-                      <label className="flex items-center gap-2 text-sm font-medium text-gray-300 mb-2">
-                        <Hash className="w-4 h-4 text-cyan-400" />
-                        Fours
-                      </label>
-                <input
-                  type="number"
-                  id="edit-stats-fours"
-                  name="statsFours"
-                  value={editForm.stats.fours}
-                  onChange={(e) => handleFormChange('stats.fours', e.target.value === '' ? '' : parseInt(e.target.value) || '')}
-                        className="w-full px-4 py-2.5 bg-gray-700/70 border border-gray-600/50 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all hover:bg-gray-700/90 hover:border-cyan-500/30"
-                        placeholder="Fours"
-                />
-              </div>
-                    <div className="relative group">
-                      <label className="flex items-center gap-2 text-sm font-medium text-gray-300 mb-2">
-                        <ZapIcon className="w-4 h-4 text-amber-400" />
-                        Sixes
-                      </label>
-                <input
-                  type="number"
-                  id="edit-stats-sixes"
-                  name="statsSixes"
-                  value={editForm.stats.sixes}
-                  onChange={(e) => handleFormChange('stats.sixes', e.target.value === '' ? '' : parseInt(e.target.value) || '')}
-                        className="w-full px-4 py-2.5 bg-gray-700/70 border border-gray-600/50 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all hover:bg-gray-700/90 hover:border-amber-500/30"
-                        placeholder="Sixes"
-                />
-                    </div>
-              </div>
-              
-                  <div className="mb-6">
-                    <h3 className="text-lg font-bold text-white mb-1 flex items-center gap-2">
-                      <AwardIcon className="w-5 h-5 text-amber-400" />
-                      Milestones & Averages
-                    </h3>
-                    <p className="text-gray-400 text-sm">Half-centuries, centuries, and calculated averages</p>
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    <div className="relative bg-gradient-to-br from-amber-500/10 to-amber-600/5 p-4 rounded-xl border border-amber-500/20 hover:border-amber-500/40 transition-all group">
-                      <label className="flex items-center gap-2 text-sm font-semibold text-amber-300 mb-2">
-                        <AwardIcon className="w-4 h-4" />
-                        Fifties
-                      </label>
-                <input
-                  type="number"
-                  id="edit-stats-fifties"
-                  name="statsFifties"
-                  value={editForm.stats.fifties}
-                  onChange={(e) => handleFormChange('stats.fifties', e.target.value === '' ? '' : parseInt(e.target.value) || '')}
-                        className="w-full px-4 py-2.5 bg-gray-700/70 border border-amber-500/30 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all hover:bg-gray-700/90"
-                        placeholder="Fifties"
-                />
-              </div>
-                    <div className="relative bg-gradient-to-br from-rose-500/10 to-rose-600/5 p-4 rounded-xl border border-rose-500/20 hover:border-rose-500/40 transition-all group">
-                      <label className="flex items-center gap-2 text-sm font-semibold text-rose-300 mb-2">
-                        <AwardIcon className="w-4 h-4" />
-                        Hundreds
-                      </label>
-                <input
-                  type="number"
-                  id="edit-stats-hundreds"
-                  name="statsHundreds"
-                  value={editForm.stats.hundreds}
-                  onChange={(e) => handleFormChange('stats.hundreds', e.target.value === '' ? '' : parseInt(e.target.value) || '')}
-                        className="w-full px-4 py-2.5 bg-gray-700/70 border border-rose-500/30 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-rose-500 transition-all hover:bg-gray-700/90"
-                        placeholder="Hundreds"
-                />
-              </div>
-                    <div className="relative bg-gradient-to-br from-emerald-500/10 to-emerald-600/5 p-4 rounded-xl border border-emerald-500/20 hover:border-emerald-500/40 transition-all group">
-                      <label className="flex items-center gap-2 text-sm font-semibold text-emerald-300 mb-2">
-                        <BarChart3 className="w-4 h-4" />
-                        Batting Average
-                      </label>
-                <input
-                  type="text"
-                  id="edit-stats-batting-average"
-                  name="statsBattingAverage"
-                  value={editForm.stats.battingAverage}
-                  onChange={(e) => handleFormChange('stats.battingAverage', e.target.value)}
-                        placeholder="e.g., 45.67"
-                        className="w-full px-4 py-2.5 bg-gray-700/70 border border-emerald-500/30 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all hover:bg-gray-700/90"
-                />
-              </div>
-                    <div className="relative bg-gradient-to-br from-teal-500/10 to-teal-600/5 p-4 rounded-xl border border-teal-500/20 hover:border-teal-500/40 transition-all group">
-                      <label className="flex items-center gap-2 text-sm font-semibold text-teal-300 mb-2">
-                        <ZapIcon className="w-4 h-4" />
-                        Strike Rate
-                      </label>
-                <input
-                  type="text"
-                  id="edit-stats-batting-strike-rate"
-                  name="statsBattingStrikeRate"
-                  value={editForm.stats.battingStrikeRate}
-                  onChange={(e) => handleFormChange('stats.battingStrikeRate', e.target.value)}
-                        placeholder="e.g., 145.50"
-                        className="w-full px-4 py-2.5 bg-gray-700/70 border border-teal-500/30 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-all hover:bg-gray-700/90"
-                />
-                    </div>
-                  </div>
-              </div>
-            </div>
-            
-              {/* Footer */}
-              <div className="bg-gradient-to-r from-gray-800/80 to-gray-900/80 p-6 border-t border-gray-700/50 flex justify-end gap-4 backdrop-blur-sm">
-              <button
-                onClick={handleCancelEdit}
-                  className="px-6 py-3 bg-gray-700/80 hover:bg-gray-600 text-white rounded-xl transition-all duration-300 font-medium flex items-center gap-2 hover:scale-105 shadow-lg"
-              >
-                  <X className="w-4 h-4" />
-                Cancel
-              </button>
-              <button
-                onClick={handleSavePlayer}
-                  className="px-6 py-3 bg-gradient-to-r from-cyan-600 via-blue-600 to-indigo-600 hover:from-cyan-500 hover:via-blue-500 hover:to-indigo-500 text-white rounded-xl transition-all duration-300 font-medium flex items-center gap-2 shadow-xl hover:shadow-2xl hover:scale-105 hover:shadow-cyan-500/50"
-                >
-                  <Edit2 className="w-4 h-4" />
-                  Save Changes
-                </button>
-              </div>
-            </div>
                 </div>
-              )}
+
+                <div className="space-y-6 p-6">
+                  <section className="oil-modal-section p-5">
+                    <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
+                      <div>
+                        <h3 className="flex items-center gap-2 text-lg font-bold text-white">
+                          <BarChart3 className="w-5 h-5 text-[#f2d39a]" />
+                          Match Context
+                        </h3>
+                        <p className="mt-1 text-sm text-white/55">Appearances, batting innings, and not-out count.</p>
+                      </div>
+                      <span className="oil-chip">Innings setup</span>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className="oil-modal-field-card oil-modal-field-card--gold p-4">
+                        <label className="flex items-center gap-2 text-sm font-semibold text-[#f2d39a] mb-2">
+                          <Calendar className="w-4 h-4" />
+                          Matches
+                        </label>
+                        <input
+                          type="number"
+                          id="edit-stats-matches"
+                          name="statsMatches"
+                          value={editForm.stats.matches}
+                          onChange={(e) => handleFormChange('stats.matches', e.target.value === '' ? '' : parseInt(e.target.value) || '')}
+                          className="oil-modal-input"
+                          placeholder="Matches played"
+                        />
+                      </div>
+                      <div className="oil-modal-field-card oil-modal-field-card--teal p-4">
+                        <label className="flex items-center gap-2 text-sm font-semibold text-[#9cf2c8] mb-2">
+                          <TargetIcon className="w-4 h-4" />
+                          Batting Innings
+                        </label>
+                        <input
+                          type="number"
+                          id="edit-stats-batting-innings"
+                          name="statsBattingInnings"
+                          value={editForm.stats.battingInnings}
+                          onChange={(e) => handleFormChange('stats.battingInnings', e.target.value === '' ? '' : parseInt(e.target.value) || '')}
+                          className="oil-modal-input"
+                          placeholder="Innings batted"
+                        />
+                      </div>
+                      <div className="oil-modal-field-card oil-modal-field-card--cyan p-4">
+                        <label className="flex items-center gap-2 text-sm font-semibold text-[#a8e9ef] mb-2">
+                          <ShieldCheck className="w-4 h-4" />
+                          Not Outs
+                        </label>
+                        <input
+                          type="number"
+                          id="edit-stats-not-outs"
+                          name="statsNotOuts"
+                          value={editForm.stats.notOuts}
+                          onChange={(e) => handleFormChange('stats.notOuts', e.target.value === '' ? '' : parseInt(e.target.value) || '')}
+                          className="oil-modal-input"
+                          placeholder="Not-out innings"
+                        />
+                      </div>
+                    </div>
+                  </section>
+
+                  <section className="oil-modal-section p-5">
+                    <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
+                      <div>
+                        <h3 className="flex items-center gap-2 text-lg font-bold text-white">
+                          <TrendingUp className="w-5 h-5 text-[#9cf2c8]" />
+                          Scoring Performance
+                        </h3>
+                        <p className="mt-1 text-sm text-white/55">Runs, top score, balls faced, and boundary hitting.</p>
+                      </div>
+                      <span className="oil-chip">Batting output</span>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      <div className="oil-modal-field-card oil-modal-field-card--gold p-4">
+                        <label className="flex items-center gap-2 text-sm font-semibold text-[#f2d39a] mb-2">
+                          <TargetIcon className="w-4 h-4" />
+                          Runs
+                        </label>
+                        <input
+                          type="number"
+                          id="edit-stats-runs"
+                          name="statsRuns"
+                          value={editForm.stats.runs}
+                          onChange={(e) => handleFormChange('stats.runs', e.target.value === '' ? '' : parseInt(e.target.value) || '')}
+                          className="oil-modal-input"
+                          placeholder="Total runs"
+                        />
+                      </div>
+                      <div className="oil-modal-field-card oil-modal-field-card--cyan p-4">
+                        <label className="flex items-center gap-2 text-sm font-semibold text-[#a8e9ef] mb-2">
+                          <Award className="w-4 h-4" />
+                          Top Score
+                        </label>
+                        <input
+                          type="number"
+                          id="edit-stats-highest"
+                          name="statsHighest"
+                          value={editForm.stats.highest}
+                          onChange={(e) => handleFormChange('stats.highest', e.target.value === '' ? '' : parseInt(e.target.value) || '')}
+                          className="oil-modal-input"
+                          placeholder="Highest score"
+                        />
+                      </div>
+                      <div className="oil-modal-field-card oil-modal-field-card--teal p-4">
+                        <label className="flex items-center gap-2 text-sm font-semibold text-[#9cf2c8] mb-2">
+                          <ZapIcon className="w-4 h-4" />
+                          Balls Faced
+                        </label>
+                        <input
+                          type="number"
+                          id="edit-stats-balls-faced"
+                          name="statsBallsFaced"
+                          value={editForm.stats.ballsFaced}
+                          onChange={(e) => handleFormChange('stats.ballsFaced', e.target.value === '' ? '' : parseInt(e.target.value) || '')}
+                          className="oil-modal-input"
+                          placeholder="Balls faced"
+                        />
+                      </div>
+                      <div className="oil-modal-field-card oil-modal-field-card--copper p-4">
+                        <label className="flex items-center gap-2 text-sm font-semibold text-amber-100 mb-2">
+                          <Hash className="w-4 h-4" />
+                          Fours
+                        </label>
+                        <input
+                          type="number"
+                          id="edit-stats-fours"
+                          name="statsFours"
+                          value={editForm.stats.fours}
+                          onChange={(e) => handleFormChange('stats.fours', e.target.value === '' ? '' : parseInt(e.target.value) || '')}
+                          className="oil-modal-input"
+                          placeholder="Boundary fours"
+                        />
+                      </div>
+                      <div className="oil-modal-field-card oil-modal-field-card--rose p-4">
+                        <label className="flex items-center gap-2 text-sm font-semibold text-[#ffaaa5] mb-2">
+                          <ZapIcon className="w-4 h-4" />
+                          Sixes
+                        </label>
+                        <input
+                          type="number"
+                          id="edit-stats-sixes"
+                          name="statsSixes"
+                          value={editForm.stats.sixes}
+                          onChange={(e) => handleFormChange('stats.sixes', e.target.value === '' ? '' : parseInt(e.target.value) || '')}
+                          className="oil-modal-input"
+                          placeholder="Boundary sixes"
+                        />
+                      </div>
+                    </div>
+                  </section>
+
+                  <section className="oil-modal-section p-5">
+                    <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
+                      <div>
+                        <h3 className="flex items-center gap-2 text-lg font-bold text-white">
+                          <AwardIcon className="w-5 h-5 text-[#f2d39a]" />
+                          Milestones and Rates
+                        </h3>
+                        <p className="mt-1 text-sm text-white/55">Fifties, centuries, batting average, and strike rate.</p>
+                      </div>
+                      <span className="oil-chip">Scorecard metrics</span>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      <div className="oil-modal-field-card oil-modal-field-card--copper p-4">
+                        <label className="flex items-center gap-2 text-sm font-semibold text-amber-100 mb-2">
+                          <AwardIcon className="w-4 h-4" />
+                          Fifties
+                        </label>
+                        <input
+                          type="number"
+                          id="edit-stats-fifties"
+                          name="statsFifties"
+                          value={editForm.stats.fifties}
+                          onChange={(e) => handleFormChange('stats.fifties', e.target.value === '' ? '' : parseInt(e.target.value) || '')}
+                          className="oil-modal-input"
+                          placeholder="50+ scores"
+                        />
+                      </div>
+                      <div className="oil-modal-field-card oil-modal-field-card--rose p-4">
+                        <label className="flex items-center gap-2 text-sm font-semibold text-[#ffaaa5] mb-2">
+                          <AwardIcon className="w-4 h-4" />
+                          Centuries
+                        </label>
+                        <input
+                          type="number"
+                          id="edit-stats-hundreds"
+                          name="statsHundreds"
+                          value={editForm.stats.hundreds}
+                          onChange={(e) => handleFormChange('stats.hundreds', e.target.value === '' ? '' : parseInt(e.target.value) || '')}
+                          className="oil-modal-input"
+                          placeholder="100+ scores"
+                        />
+                      </div>
+                      <div className="oil-modal-field-card oil-modal-field-card--teal p-4">
+                        <label className="flex items-center gap-2 text-sm font-semibold text-[#9cf2c8] mb-2">
+                          <BarChart3 className="w-4 h-4" />
+                          Batting Average
+                        </label>
+                        <input
+                          type="text"
+                          id="edit-stats-batting-average"
+                          name="statsBattingAverage"
+                          value={editForm.stats.battingAverage}
+                          onChange={(e) => handleFormChange('stats.battingAverage', e.target.value)}
+                          className="oil-modal-input"
+                          placeholder="e.g., 45.67"
+                        />
+                      </div>
+                      <div className="oil-modal-field-card oil-modal-field-card--gold p-4">
+                        <label className="flex items-center gap-2 text-sm font-semibold text-[#f2d39a] mb-2">
+                          <ZapIcon className="w-4 h-4" />
+                          Strike Rate
+                        </label>
+                        <input
+                          type="text"
+                          id="edit-stats-batting-strike-rate"
+                          name="statsBattingStrikeRate"
+                          value={editForm.stats.battingStrikeRate}
+                          onChange={(e) => handleFormChange('stats.battingStrikeRate', e.target.value)}
+                          className="oil-modal-input"
+                          placeholder="e.g., 145.50"
+                        />
+                      </div>
+                    </div>
+                  </section>
+                </div>
+              </div>
+
+              <div className="oil-modal-footer flex flex-col-reverse gap-3 p-5 sm:flex-row sm:items-center sm:justify-between">
+                <p className="text-xs text-white/50">Changes update the IPL batting table and export-ready player sheet.</p>
+                <div className="flex justify-end gap-3">
+                  <button onClick={handleCancelEdit} className="oil-btn-secondary px-5 py-2.5">
+                    <X className="w-4 h-4" />
+                    Cancel
+                  </button>
+                  <button onClick={handleSavePlayer} className="oil-btn-warm px-5 py-2.5">
+                    <Edit2 className="w-4 h-4" />
+                    Save Batting Stats
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
             </div>
     </>
   );
