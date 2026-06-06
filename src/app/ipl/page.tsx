@@ -3,7 +3,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { motion, useMotionValue, useReducedMotion, useSpring } from 'framer-motion';
 import Link from 'next/link';
-import Image from 'next/image';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import TermsAcceptanceModal from '@/components/legal/TermsAcceptanceModal';
@@ -357,24 +356,33 @@ export default function IPLHomePage() {
       <Navbar />
       <PublicLiveMatchStrip league="ipl" matches={matches} />
 
-      <div aria-hidden="true" className="fixed inset-0 -z-10 overflow-hidden bg-[#050607]">
-        <Image
-          src="/images/cricket-oil-stadium-hero.png"
-          alt=""
-          fill
-          priority
-          sizes="100vw"
-          className="object-cover object-center opacity-60 saturate-[1.18] contrast-[1.08]"
-        />
-        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(5,6,7,0.08)_0%,rgba(5,6,7,0.58)_52%,#050607_100%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(70%_45%_at_18%_20%,rgba(230,111,45,0.20),transparent_62%),radial-gradient(62%_42%_at_82%_16%,rgba(54,168,166,0.18),transparent_64%),linear-gradient(120deg,rgba(70,25,92,0.28),transparent_48%)]" />
+      <div aria-hidden="true" className="fixed inset-0 -z-10 overflow-hidden bg-[#030706]">
+        <div className="absolute inset-0 bg-[linear-gradient(180deg,#030716_0%,#092017_44%,#030706_100%)]" />
+        <div className="absolute inset-x-[-8%] top-[86px] h-16 rotate-[-1deg] bg-[linear-gradient(90deg,transparent,rgba(245,158,11,0.34),rgba(34,197,94,0.30),rgba(14,165,233,0.26),rgba(190,24,93,0.22),transparent)] blur-sm" />
+        <div className="absolute inset-x-[-12%] top-[132px] h-px bg-[linear-gradient(90deg,transparent,rgba(251,191,36,0.92),rgba(45,212,191,0.86),rgba(129,140,248,0.70),transparent)]" />
+        <div className="absolute inset-x-[-18%] bottom-[13%] h-20 rotate-[1.5deg] bg-[linear-gradient(90deg,transparent,rgba(20,184,166,0.26),rgba(245,158,11,0.26),rgba(225,29,72,0.18),transparent)] blur-xl" />
+        <div className="absolute left-1/2 top-[18%] h-[66vh] w-[116vw] -translate-x-1/2 rounded-[50%] border border-emerald-200/20 bg-[radial-gradient(ellipse_at_center,rgba(38,140,79,0.42)_0%,rgba(16,103,66,0.36)_36%,rgba(8,62,43,0.20)_68%,transparent_100%)] shadow-[inset_0_0_120px_rgba(52,211,153,0.18),0_0_90px_rgba(16,185,129,0.10)] [mask-image:linear-gradient(180deg,transparent_0%,black_12%,black_82%,transparent_100%)]" />
+        <div className="absolute left-1/2 top-[36%] h-[230px] w-[min(820px,78vw)] -translate-x-1/2 -rotate-2 rounded-[34px] border border-amber-100/25 bg-[linear-gradient(90deg,rgba(126,78,28,0.42),rgba(241,200,107,0.52)_48%,rgba(104,68,24,0.40))] shadow-[0_0_90px_rgba(245,158,11,0.18)]" />
+        <div className="absolute left-1/2 top-[36%] h-[230px] w-[min(820px,78vw)] -translate-x-1/2 -rotate-2 bg-[repeating-linear-gradient(90deg,rgba(255,255,255,0.16)_0px,rgba(255,255,255,0.16)_1px,transparent_1px,transparent_54px)] opacity-50" />
+        <div className="absolute left-1/2 top-[39%] h-[300px] w-[min(1120px,94vw)] -translate-x-1/2 rounded-[50%] border-t border-emerald-100/25" />
+        <div className="absolute left-[8%] top-[24%] h-[1px] w-[24%] bg-[linear-gradient(90deg,transparent,rgba(251,191,36,0.34),transparent)]" />
+        <div className="absolute right-[8%] top-[29%] h-[1px] w-[26%] bg-[linear-gradient(90deg,transparent,rgba(45,212,191,0.34),transparent)]" />
         <div
-          className="absolute inset-0 opacity-[0.08] mix-blend-overlay"
+          className="absolute inset-0 opacity-[0.045]"
           style={{
             backgroundImage:
-              'url("data:image/svg+xml,%3Csvg viewBox=%270 0 400 400%27 xmlns=%27http://www.w3.org/2000/svg%27%3E%3Cfilter id=%27n%27%3E%3CfeTurbulence type=%27fractalNoise%27 baseFrequency=%270.75%27 numOctaves=%273%27 stitchTiles=%27stitch%27/%3E%3C/filter%3E%3Crect width=%27100%25%27 height=%27100%25%27 filter=%27url(%23n)%27/%3E%3C/svg%3E")',
+              'linear-gradient(rgba(255,255,255,0.18) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.14) 1px, transparent 1px)',
+            backgroundSize: '96px 96px',
           }}
         />
+        <div
+          className="absolute inset-0 opacity-[0.07] mix-blend-soft-light"
+          style={{
+            backgroundImage:
+              'url("data:image/svg+xml,%3Csvg viewBox=%270 0 400 400%27 xmlns=%27http://www.w3.org/2000/svg%27%3E%3Cfilter id=%27n%27%3E%3CfeTurbulence type=%27fractalNoise%27 baseFrequency=%270.8%27 numOctaves=%273%27 stitchTiles=%27stitch%27/%3E%3C/filter%3E%3Crect width=%27100%25%27 height=%27100%25%27 filter=%27url(%23n)%27/%3E%3C/svg%3E")',
+          }}
+        />
+        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(3,7,6,0.10)_0%,rgba(3,7,6,0.18)_46%,#030706_100%)]" />
       </div>
 
       {/* Terms Acceptance Modal */}
@@ -404,6 +412,13 @@ export default function IPLHomePage() {
 
       <main className="relative z-10">
         <section className="relative overflow-hidden pt-12 pb-12 sm:pt-14 lg:pt-16 lg:pb-16">
+          <div aria-hidden="true" className="absolute inset-0 overflow-hidden">
+            <div className="absolute left-[52%] top-[8%] h-[520px] w-[980px] -translate-x-1/2 -rotate-3 rounded-[50%] border border-emerald-100/20 bg-[radial-gradient(ellipse_at_center,rgba(36,145,82,0.42)_0%,rgba(15,93,62,0.32)_44%,rgba(4,28,23,0.10)_72%,transparent_100%)] shadow-[inset_0_0_120px_rgba(110,231,183,0.16),0_0_80px_rgba(34,197,94,0.10)] [mask-image:linear-gradient(90deg,transparent_0%,black_14%,black_86%,transparent_100%)]" />
+            <div className="absolute left-[52%] top-[38%] h-32 w-[540px] -translate-x-1/2 -rotate-3 rounded-[28px] border border-amber-100/25 bg-[linear-gradient(90deg,rgba(113,63,18,0.55),rgba(251,191,36,0.48)_50%,rgba(120,53,15,0.50))] shadow-[0_0_70px_rgba(245,158,11,0.18)]" />
+            <div className="absolute left-[52%] top-[38%] h-32 w-[540px] -translate-x-1/2 -rotate-3 bg-[repeating-linear-gradient(90deg,rgba(255,255,255,0.18)_0px,rgba(255,255,255,0.18)_1px,transparent_1px,transparent_48px)] opacity-50" />
+            <div className="absolute left-[52%] top-[47%] h-[220px] w-[760px] -translate-x-1/2 rounded-[50%] border-t border-emerald-100/25" />
+            <div className="absolute right-[2%] top-[4%] h-[420px] w-[360px] bg-[linear-gradient(120deg,rgba(125,211,252,0.18),rgba(45,212,191,0.10)_45%,transparent_70%)] [clip-path:polygon(52%_0,100%_0,62%_100%,0_100%)]" />
+          </div>
           <div
             aria-hidden="true"
             className="absolute inset-0 opacity-[0.08]"
