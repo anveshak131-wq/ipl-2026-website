@@ -1,8 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Trophy, TrendingUp, Target, Zap, BarChart3, Award } from 'lucide-react';
-import GradientText from '@/components/ui/GradientText';
+import { BarChart3, Target, TrendingUp, Trophy, Zap } from 'lucide-react';
 
 interface StatsHeroSectionProps {
   totalPlayers: number;
@@ -18,121 +17,141 @@ export default function StatsHeroSection({
   totalWickets,
 }: StatsHeroSectionProps) {
   const stats = [
-    { icon: Trophy, label: 'Players', value: totalPlayers, color: 'from-yellow-400 to-orange-500' },
-    { icon: Target, label: 'Teams', value: totalTeams, color: 'from-purple-400 to-pink-500' },
-    { icon: TrendingUp, label: 'Total Runs', value: totalRuns.toLocaleString(), color: 'from-blue-400 to-cyan-500' },
-    { icon: Zap, label: 'Wickets', value: totalWickets.toLocaleString(), color: 'from-emerald-400 to-teal-500' },
+    { icon: Trophy, label: 'Registered players', value: totalPlayers, color: 'from-amber-300 to-orange-500' },
+    { icon: Target, label: 'IPL franchises', value: totalTeams, color: 'from-fuchsia-400 to-violet-500' },
+    { icon: TrendingUp, label: 'Runs recorded', value: totalRuns.toLocaleString(), color: 'from-sky-300 to-cyan-500' },
+    { icon: Zap, label: 'Wickets taken', value: totalWickets.toLocaleString(), color: 'from-emerald-300 to-lime-500' },
   ];
 
   return (
-    <div className="relative overflow-hidden">
-      {/* Animated background gradient */}
-      <div className="absolute inset-0 bg-gradient-to-br from-purple-900/20 via-blue-900/20 to-orange-900/20" />
-      
-      {/* Floating particles */}
-      {[...Array(20)].map((_, i) => (
-        <motion.div
-          key={i}
-          className="absolute w-2 h-2 bg-white/10 rounded-full"
-          style={{
-            left: `${Math.random() * 100}%`,
-            top: `${Math.random() * 100}%`,
-          }}
-          animate={{
-            y: [0, -30, 0],
-            x: [0, Math.random() * 20 - 10, 0],
-            opacity: [0.3, 0.8, 0.3],
-            scale: [1, 1.5, 1],
-          }}
-          transition={{
-            duration: 3 + Math.random() * 2,
-            repeat: Infinity,
-            delay: Math.random() * 2,
-            ease: 'easeInOut',
-          }}
-        />
-      ))}
+    <section className="relative overflow-hidden">
+      <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(8,10,18,0.28)_0%,rgba(8,10,18,0.78)_82%)]" />
+      <motion.div
+        className="absolute bottom-0 left-0 right-0 h-28 opacity-30"
+        style={{
+          backgroundImage:
+            'repeating-linear-gradient(90deg, transparent 0 42px, rgba(252, 211, 77, 0.28) 43px 45px, transparent 46px 88px)',
+        }}
+        animate={{ backgroundPositionX: ['0px', '88px'] }}
+        transition={{ duration: 18, repeat: Infinity, ease: 'linear' }}
+      />
+      <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-amber-300/50 to-transparent" />
+      <div className="absolute left-0 top-16 h-px w-full bg-gradient-to-r from-transparent via-cyan-300/20 to-transparent" />
+      <div className="absolute bottom-20 left-1/2 h-40 w-[min(90vw,720px)] -translate-x-1/2 rounded-[50%] border border-emerald-300/10" />
 
-      <div className="relative z-10 py-16 md:py-24">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Badge */}
+      <div className="relative z-10 py-16 md:py-20">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 14 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-500/30 mb-6"
+            transition={{ duration: 0.55 }}
+            className="mb-6 inline-flex items-center gap-2 rounded-md border border-amber-300/30 bg-amber-300/10 px-3 py-2"
           >
-            <BarChart3 className="w-4 h-4 text-purple-400" />
-            <span className="text-sm font-semibold text-purple-300">IPL 2026 STATISTICS</span>
+            <BarChart3 className="h-4 w-4 text-amber-200" />
+            <span className="text-sm font-semibold uppercase text-amber-100 tracking-[0]">IPL 2026 stats desk</span>
           </motion.div>
 
-          {/* Main Title */}
-          <motion.h1
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-            className="text-5xl md:text-7xl font-black mb-6"
-          >
-            <span className="block text-white mb-2">Cricket</span>
-            <GradientText gradient="from-orange-400 via-yellow-400 to-orange-500" animate>
-              Statistics Hub
-            </GradientText>
-          </motion.h1>
+          <div className="grid items-end gap-8 lg:grid-cols-[minmax(0,1fr)_360px]">
+            <div>
+              <motion.h1
+                initial={{ opacity: 0, y: 22 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.7, delay: 0.1 }}
+                className="max-w-4xl text-4xl font-black leading-tight text-white md:text-6xl"
+              >
+                IPL 2026 Stats Centre
+              </motion.h1>
 
-          {/* Subtitle */}
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.4 }}
-            className="text-xl md:text-2xl text-gray-300 mb-12 max-w-3xl"
-          >
-            Dive deep into player performances, team analytics, and championship insights. 
-            Track Orange Cap, Purple Cap, and all the numbers that matter.
-          </motion.p>
+              <motion.p
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.7, delay: 0.22 }}
+                className="mt-5 max-w-3xl text-base leading-7 text-slate-200 md:text-lg"
+              >
+                Follow the Orange Cap, Purple Cap, strike rate, economy rate, points table and
+                team form from every published IPL scorecard.
+              </motion.p>
 
-          {/* Quick Stats Grid */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+              <motion.div
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.7, delay: 0.34 }}
+                className="mt-6 grid max-w-2xl grid-cols-1 gap-3 text-sm text-slate-200 sm:grid-cols-3"
+              >
+                {['Batting leaders', 'Bowling leaders', 'Team standings'].map((item) => (
+                  <div key={item} className="rounded-md border border-white/10 bg-black/25 px-3 py-2">
+                    {item}
+                  </div>
+                ))}
+              </motion.div>
+            </div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 24 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, delay: 0.26 }}
+              className="hidden rounded-lg border border-white/[0.15] bg-black/40 p-4 shadow-2xl backdrop-blur-xl lg:block"
+            >
+              <div className="mb-3 flex items-center justify-between">
+                <span className="text-xs font-semibold uppercase text-slate-400 tracking-[0]">Match data</span>
+                <span className="rounded-md bg-emerald-400/[0.12] px-2 py-1 text-xs font-semibold text-emerald-200">
+                  Live view
+                </span>
+              </div>
+              <div className="space-y-3">
+                {[
+                  ['Orange Cap race', totalRuns.toLocaleString(), 'runs tracked'],
+                  ['Purple Cap race', totalWickets.toLocaleString(), 'wickets tracked'],
+                  ['Franchise view', totalTeams.toString(), 'teams compared'],
+                ].map(([label, value, helper], index) => (
+                  <motion.div
+                    key={label}
+                    initial={{ opacity: 0, x: 16 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.45, delay: 0.45 + index * 0.08 }}
+                    className="rounded-md border border-white/10 bg-white/[0.06] p-3"
+                  >
+                    <div className="flex items-baseline justify-between gap-3">
+                      <span className="text-sm font-semibold text-white">{label}</span>
+                      <span className="text-lg font-black text-amber-200">{value}</span>
+                    </div>
+                    <p className="mt-1 text-xs text-slate-400">{helper}</p>
+                  </motion.div>
+                ))}
+              </div>
+            </motion.div>
+          </div>
+
+          <div className="mt-10 grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-4">
             {stats.map((stat, index) => (
               <motion.div
                 key={stat.label}
-                initial={{ opacity: 0, scale: 0.8, rotateY: -15 }}
-                animate={{ opacity: 1, scale: 1, rotateY: 0 }}
-                transition={{ 
-                  duration: 0.6, 
-                  delay: 0.6 + index * 0.1,
+                initial={{ opacity: 0, y: 18 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{
+                  duration: 0.45,
+                  delay: 0.45 + index * 0.07,
                   type: 'spring',
-                  stiffness: 100
+                  stiffness: 120,
+                  damping: 18,
                 }}
-                whileHover={{ scale: 1.05, y: -5 }}
-                className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl border border-white/20 p-6"
+                whileHover={{ y: -4 }}
+                className="group relative overflow-hidden rounded-lg border border-white/[0.15] bg-black/[0.35] p-4 backdrop-blur-xl transition-colors duration-300 hover:border-white/30 md:p-5"
               >
-                {/* Animated gradient background */}
+                <div className={`absolute inset-x-0 top-0 h-1 bg-gradient-to-r ${stat.color}`} />
                 <motion.div
-                  className={`absolute inset-0 bg-gradient-to-br ${stat.color} opacity-0 group-hover:opacity-20 transition-opacity duration-500`}
+                  className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent opacity-0 group-hover:opacity-100"
+                  animate={{ x: ['-120%', '120%'] }}
+                  transition={{ duration: 2.4, repeat: Infinity, repeatDelay: 1.5, ease: 'linear' }}
                 />
-                
-                {/* Shimmer effect */}
-                <motion.div
-                  className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
-                  animate={{
-                    x: ['-100%', '200%'],
-                  }}
-                  transition={{
-                    duration: 3,
-                    repeat: Infinity,
-                    repeatDelay: 2,
-                    ease: 'linear',
-                  }}
-                />
-
                 <div className="relative z-10">
-                  <div className={`inline-flex p-3 rounded-xl bg-gradient-to-br ${stat.color} mb-4 shadow-lg`}>
-                    <stat.icon className="w-6 h-6 text-white" />
+                  <div className={`mb-4 inline-flex rounded-md bg-gradient-to-br ${stat.color} p-2.5 shadow-lg`}>
+                    <stat.icon className="h-5 w-5 text-white" />
                   </div>
-                  <div className="text-3xl md:text-4xl font-black text-white mb-1">
+                  <div className="text-2xl font-black text-white md:text-3xl">
                     {stat.value}
                   </div>
-                  <div className="text-sm text-gray-400 font-medium">
+                  <div className="mt-1 text-xs font-medium text-slate-300 md:text-sm">
                     {stat.label}
                   </div>
                 </div>
@@ -141,7 +160,6 @@ export default function StatsHeroSection({
           </div>
         </div>
       </div>
-    </div>
+    </section>
   );
 }
-

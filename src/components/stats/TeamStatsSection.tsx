@@ -177,28 +177,28 @@ export default function TeamStatsSection({
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
-        className="rounded-3xl bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl border border-white/20 p-6 md:p-8"
+        className="rounded-lg border border-white/[0.15] bg-black/[0.42] p-5 shadow-2xl backdrop-blur-xl md:p-6"
       >
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
           <div className="flex items-center gap-4">
-            <div className="p-4 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-500 shadow-lg">
+            <div className="rounded-md bg-gradient-to-br from-amber-400 to-emerald-500 p-3 shadow-lg">
               <Users className="w-8 h-8 text-white" />
             </div>
             <div>
-              <h2 className="text-2xl md:text-3xl font-black text-white">Team Statistics</h2>
+              <h2 className="text-2xl font-black text-white md:text-3xl">Team Form & Totals</h2>
               <p className="text-sm text-gray-400 mt-1">
-                Aggregates are computed from published match scorecards stored in Workers KV.
+                Team totals combine published scorecards with player records when scorecards are still being completed.
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 backdrop-blur-xl border border-white/10">
+          <div className="flex items-center gap-2 rounded-md border border-white/10 bg-white/[0.06] px-3 py-2 backdrop-blur-xl">
             <BarChart3 className="w-4 h-4 text-gray-400" />
             <span className="text-sm text-gray-400 mr-1">Sort:</span>
             <select
               value={sortKey}
               onChange={(e) => setSortKey(e.target.value as TeamSortKey)}
-              className="px-3 py-1.5 rounded-lg bg-black/60 border border-white/20 text-sm text-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-400/40"
+              className="rounded-md border border-white/20 bg-black/60 px-3 py-1.5 text-sm text-gray-100 focus:outline-none focus:ring-2 focus:ring-amber-300/40"
             >
               <option value="runs">Total runs</option>
               <option value="wickets">Total wickets</option>
@@ -209,21 +209,21 @@ export default function TeamStatsSection({
         </div>
 
         {!hasAnyData ? (
-          <div className="rounded-2xl bg-black/30 border border-white/10 p-6 text-gray-300">
+          <div className="rounded-lg border border-white/10 bg-black/30 p-6 text-gray-300">
             <p className="text-sm">
-              No team stats yet. Add players (with stats) in the admin panel and they’ll appear here automatically.
+              Team numbers will appear after scorecards or player stats are published.
             </p>
           </div>
         ) : (
-          <div className="overflow-x-auto rounded-2xl bg-black/30 border border-white/10">
+          <div className="overflow-x-auto rounded-lg border border-white/10 bg-black/30">
             <table className="min-w-full text-sm text-left">
               <thead className="text-xs uppercase tracking-wider text-gray-400 border-b border-white/10">
                 <tr>
                   <th className="py-3 px-4">#</th>
                   <th className="py-3 px-4">Team</th>
                   <th className="py-3 px-4 text-right">Runs</th>
-                  <th className="py-3 px-4 text-right">Wkts</th>
-                  <th className="py-3 px-4 text-right">Avg SR</th>
+                  <th className="py-3 px-4 text-right">Wickets</th>
+                  <th className="py-3 px-4 text-right">Avg Strike Rate</th>
                   <th className="py-3 px-4 text-right">Runs/Match</th>
                 </tr>
               </thead>
@@ -292,16 +292,16 @@ export default function TeamStatsSection({
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 0.1 }}
-          className="rounded-3xl bg-black/40 border border-white/15 backdrop-blur-xl p-6 md:p-8"
+          className="rounded-lg border border-white/[0.15] bg-black/[0.42] p-5 shadow-2xl backdrop-blur-xl md:p-6"
         >
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
             <div className="flex items-center gap-3">
-              <div className="p-3 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-500 shadow-lg">
+              <div className="rounded-md bg-gradient-to-br from-emerald-400 to-cyan-500 p-3 shadow-lg">
                 <Scale className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h3 className="text-xl md:text-2xl font-black text-white">Team Comparison</h3>
-                <p className="text-xs text-gray-400 mt-1">Pick two teams to compare aggregate performance.</p>
+                <h3 className="text-xl font-black text-white md:text-2xl">Head-to-head comparison</h3>
+                <p className="text-xs text-gray-400 mt-1">Compare two teams by scoring rate and wicket-taking output.</p>
               </div>
             </div>
 
@@ -309,7 +309,7 @@ export default function TeamStatsSection({
               <select
                 value={selectedTeam1Id}
                 onChange={(e) => setSelectedTeam1Id(e.target.value)}
-                className="px-3 py-2 rounded-xl bg-black/60 border border-white/20 text-sm text-gray-100 focus:outline-none focus:ring-2 focus:ring-emerald-400/40"
+                className="rounded-md border border-white/20 bg-black/60 px-3 py-2 text-sm text-gray-100 focus:outline-none focus:ring-2 focus:ring-emerald-300/40"
               >
                 {teamAggregates.map((agg) => (
                   <option key={agg.team?.id || agg.team?.name} value={agg.team?.id || ''}>
@@ -320,7 +320,7 @@ export default function TeamStatsSection({
               <select
                 value={selectedTeam2Id}
                 onChange={(e) => setSelectedTeam2Id(e.target.value)}
-                className="px-3 py-2 rounded-xl bg-black/60 border border-white/20 text-sm text-gray-100 focus:outline-none focus:ring-2 focus:ring-emerald-400/40"
+                className="rounded-md border border-white/20 bg-black/60 px-3 py-2 text-sm text-gray-100 focus:outline-none focus:ring-2 focus:ring-emerald-300/40"
               >
                 {teamAggregates.map((agg) => (
                   <option key={agg.team?.id || agg.team?.name} value={agg.team?.id || ''}>
@@ -334,7 +334,7 @@ export default function TeamStatsSection({
           {selectedTeam1 && selectedTeam2 ? (
             <div className="space-y-4">
               {compareRows.map((row) => (
-                <div key={row.key} className="rounded-2xl bg-black/30 border border-white/10 p-4">
+                <div key={row.key} className="rounded-lg border border-white/10 bg-black/30 p-4">
                   <div className="flex items-center justify-between gap-3 mb-3">
                     <span className="text-xs font-semibold text-gray-300 uppercase tracking-wider">
                       {row.label}

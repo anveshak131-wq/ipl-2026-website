@@ -208,7 +208,7 @@ export default function StatsVisualization({
                   </span>
                 </div>
                 <p className="text-xs text-gray-400 mt-1">
-                  Relative score: {Math.round(percentage)}%
+                  Comparison index: {Math.round(percentage)}%
                 </p>
               </div>
             </motion.div>
@@ -310,4 +310,3 @@ export default function StatsVisualization({
     </div>
   );
 }
-

@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
-import AuroraBackground from '@/components/ui/AuroraBackground';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import { api } from '@/lib/data';
 import { useLeague } from '@/contexts/LeagueContext';
@@ -467,46 +466,31 @@ export default function StatsPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-ipl-dark">
-      <Navbar />
+    <div className="relative min-h-screen flex flex-col bg-[#070a12]">
+      <div className="fixed inset-0 z-0 bg-[#070a12]" aria-hidden="true" />
+      <div className="relative z-20">
+        <Navbar />
+      </div>
 
-      <main className="relative flex-1 overflow-hidden">
-        <AuroraBackground />
-        
-        {/* Animated background orbs */}
-        <motion.div 
-          className="fixed top-20 right-10 w-96 h-96 rounded-full blur-3xl pointer-events-none"
-          style={{ 
-            background: 'radial-gradient(circle, rgba(251, 191, 36, 0.15), rgba(139, 92, 246, 0.1), transparent)',
-          }}
-          animate={{
-            y: [0, -30, 0],
-            x: [0, 20, 0],
-            scale: [1, 1.1, 1],
-          }}
-          transition={{
-            duration: 8,
-            repeat: Infinity,
-            ease: "easeInOut"
-          }}
-        />
-        <motion.div 
-          className="fixed bottom-20 left-10 w-80 h-80 rounded-full blur-3xl pointer-events-none"
-          style={{ 
-            background: 'radial-gradient(circle, rgba(236, 72, 153, 0.15), rgba(99, 102, 241, 0.1), transparent)',
-          }}
-          animate={{
-            y: [0, 30, 0],
-            x: [0, -20, 0],
-            scale: [1, 1.15, 1],
-          }}
-          transition={{
-            duration: 10,
-            repeat: Infinity,
-            ease: "easeInOut",
-            delay: 1
-          }}
-        />
+      <main className="relative z-10 flex-1 overflow-hidden bg-[#070a12]">
+        <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
+          <motion.div
+            className="absolute inset-0 bg-cover bg-center"
+            style={{ backgroundImage: "url('/images/cricket-oil-stadium-hero.png')" }}
+            animate={{ scale: [1, 1.025, 1], opacity: [0.36, 0.44, 0.36] }}
+            transition={{ duration: 24, repeat: Infinity, ease: 'easeInOut' }}
+          />
+          <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(7,10,18,0.62)_0%,rgba(7,10,18,0.88)_44%,rgba(7,10,18,0.96)_100%)]" />
+          <div className="absolute inset-0 bg-[linear-gradient(115deg,rgba(245,158,11,0.12),transparent_28%,rgba(16,185,129,0.10)_54%,transparent_75%,rgba(168,85,247,0.12))]" />
+          <div
+            className="absolute inset-0 opacity-[0.08]"
+            style={{
+              backgroundImage:
+                'linear-gradient(rgba(255,255,255,0.18) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.18) 1px, transparent 1px)',
+              backgroundSize: '72px 72px',
+            }}
+          />
+        </div>
 
         <div className="relative z-10">
           {/* Hero Section */}
@@ -537,25 +521,25 @@ export default function StatsPage() {
               className="flex flex-wrap items-center justify-between gap-4 mb-8"
             >
               {activeTab !== 'teams' && (
-                <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 backdrop-blur-xl border border-white/10">
-                  <Filter className="w-4 h-4 text-gray-400" />
-                  <span className="text-sm text-gray-400 mr-2">Show:</span>
+                <div className="flex items-center gap-2 rounded-lg border border-white/[0.12] bg-black/[0.38] px-3 py-2 backdrop-blur-xl">
+                  <Filter className="w-4 h-4 text-amber-200" />
+                  <span className="mr-1 text-sm text-slate-300">Leaderboard size</span>
                   <button
                       onClick={() => setLeadersLimit(10)}
-                    className={`px-4 py-1.5 rounded-lg font-semibold text-sm transition-all ${
+                    className={`rounded-md px-3 py-1.5 text-sm font-semibold transition-all ${
                         leadersLimit === 10
-                        ? 'bg-gradient-to-r from-orange-500 to-yellow-500 text-white shadow-lg'
-                          : 'text-gray-300 hover:text-white hover:bg-white/10'
+                        ? 'bg-amber-300 text-slate-950 shadow-lg shadow-amber-500/20'
+                          : 'text-slate-300 hover:bg-white/10 hover:text-white'
                       }`}
                     >
                       Top 10
                     </button>
-                    <button
+                  <button
                       onClick={() => setLeadersLimit(50)}
-                    className={`px-4 py-1.5 rounded-lg font-semibold text-sm transition-all ${
+                    className={`rounded-md px-3 py-1.5 text-sm font-semibold transition-all ${
                         leadersLimit === 50
-                        ? 'bg-gradient-to-r from-orange-500 to-yellow-500 text-white shadow-lg'
-                          : 'text-gray-300 hover:text-white hover:bg-white/10'
+                        ? 'bg-amber-300 text-slate-950 shadow-lg shadow-amber-500/20'
+                          : 'text-slate-300 hover:bg-white/10 hover:text-white'
                       }`}
                     >
                       Top 50
@@ -564,10 +548,10 @@ export default function StatsPage() {
               )}
 
               {publishedStats?.lastUpdated && (
-                <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 backdrop-blur-xl border border-white/10">
-                  <Sparkles className="w-4 h-4 text-yellow-400" />
-                  <span className="text-xs text-gray-400">
-                    Updated {new Date(publishedStats.lastUpdated).toLocaleDateString()}
+                <div className="flex items-center gap-2 rounded-lg border border-white/[0.12] bg-black/[0.38] px-3 py-2 backdrop-blur-xl">
+                  <Sparkles className="w-4 h-4 text-amber-200" />
+                  <span className="text-xs text-slate-400">
+                    Stats refreshed {new Date(publishedStats.lastUpdated).toLocaleDateString()}
                   </span>
               </div>
               )}
@@ -590,16 +574,16 @@ export default function StatsPage() {
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.5, delay: 0.2 }}
-                      className="rounded-3xl bg-black/40 border border-white/15 backdrop-blur-xl p-6 md:p-8"
+                      className="rounded-lg border border-white/[0.15] bg-black/[0.42] p-5 shadow-2xl backdrop-blur-xl md:p-6"
                     >
                       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
                         <div>
-                          <h2 className="text-xl md:text-2xl font-black text-white flex items-center gap-2">
+                          <h2 className="flex items-center gap-2 text-xl font-black text-white md:text-2xl">
                             <Trophy className="w-5 h-5 text-ipl-gold" />
                             IPL {pointsYear} Points Table
                           </h2>
                           <p className="text-xs text-gray-400 mt-1">
-                            Read-only snapshot using the same admin points data (including any manual edits).
+                            Standings snapshot sorted by points and net run rate.
                           </p>
                           <div className="mt-3 flex flex-wrap items-center gap-2">
                             <IplStatusPill status="qualified" compact />
@@ -613,7 +597,7 @@ export default function StatsPage() {
                           <select
                             value={pointsYear}
                             onChange={(e) => setPointsYear(parseInt(e.target.value, 10))}
-                            className="px-3 py-1.5 rounded-lg bg-black/60 border border-white/20 text-xs text-gray-100 focus:outline-none focus:ring-2 focus:ring-ipl-gold/40"
+                            className="rounded-md border border-white/20 bg-black/60 px-3 py-1.5 text-xs text-gray-100 focus:outline-none focus:ring-2 focus:ring-ipl-gold/40"
                           >
                             {availablePointsYears.map((year) => (
                               <option key={year} value={year}>
@@ -663,7 +647,7 @@ export default function StatsPage() {
                                   </td>
                                   <td className="py-2 pr-4">
                                     <div className="flex items-center gap-2">
-                                      <div className="relative inline-flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-ipl-gold/40 to-ipl-purple/40 text-xs font-black text-white overflow-hidden">
+                                      <div className="relative inline-flex h-7 w-7 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-ipl-gold/40 to-ipl-purple/40 text-xs font-black text-white">
                                         <img 
                                           src={team.logo} 
                                           alt={team.shortName || team.name}
@@ -744,7 +728,7 @@ export default function StatsPage() {
                         type="batting"
                         metric="runs"
                         qualificationText={getQualificationDescription('orangeCap', currentLeague)}
-                        color="from-orange-500/20 to-yellow-500/20"
+                        color="from-orange-500 to-yellow-400"
                         expandedPlayerId={expandedPlayerId}
                         onPlayerExpand={setExpandedPlayerId}
                         leadersLimit={leadersLimit}
@@ -761,7 +745,7 @@ export default function StatsPage() {
                         type="bowling"
                         metric="wickets"
                         qualificationText={getQualificationDescription('purpleCap', currentLeague)}
-                        color="from-purple-500/20 to-pink-500/20"
+                        color="from-violet-500 to-fuchsia-500"
                         expandedPlayerId={expandedPlayerId}
                         onPlayerExpand={setExpandedPlayerId}
                         leadersLimit={leadersLimit}
@@ -791,7 +775,7 @@ export default function StatsPage() {
                       type="batting"
                       metric="runs"
                       qualificationText={getQualificationDescription('orangeCap', currentLeague)}
-                      color="from-orange-500/20 to-yellow-500/20"
+                      color="from-orange-500 to-yellow-400"
                       expandedPlayerId={expandedPlayerId}
                       onPlayerExpand={setExpandedPlayerId}
                       leadersLimit={leadersLimit}
@@ -809,7 +793,7 @@ export default function StatsPage() {
                       type="batting"
                       metric="strikeRate"
                       qualificationText={getQualificationDescription('bestStrikeRate', currentLeague)}
-                      color="from-blue-500/20 to-cyan-500/20"
+                      color="from-cyan-400 to-sky-500"
                       expandedPlayerId={expandedPlayerId}
                       onPlayerExpand={setExpandedPlayerId}
                       leadersLimit={leadersLimit}
@@ -838,7 +822,7 @@ export default function StatsPage() {
                       type="bowling"
                       metric="wickets"
                       qualificationText={getQualificationDescription('purpleCap', currentLeague)}
-                      color="from-purple-500/20 to-pink-500/20"
+                      color="from-violet-500 to-fuchsia-500"
                       expandedPlayerId={expandedPlayerId}
                       onPlayerExpand={setExpandedPlayerId}
                       leadersLimit={leadersLimit}
@@ -856,7 +840,7 @@ export default function StatsPage() {
                       type="bowling"
                       metric="economy"
                       qualificationText={getQualificationDescription('bestEconomy', currentLeague)}
-                      color="from-emerald-500/20 to-teal-500/20"
+                      color="from-emerald-400 to-teal-500"
                       expandedPlayerId={expandedPlayerId}
                       onPlayerExpand={setExpandedPlayerId}
                       leadersLimit={leadersLimit}
@@ -888,7 +872,9 @@ export default function StatsPage() {
         </div>
       </main>
 
-      <Footer />
+      <div className="relative z-10">
+        <Footer />
+      </div>
     </div>
   );
 }
