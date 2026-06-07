@@ -20,7 +20,7 @@ import {
  * - GOOGLE_CLIENT_SECRET
  * - ADMIN_SESSION_SECRET
  * - ADMIN_ALLOWED_EMAILS=anveshkoganti54@gmail.com
- * - ADMIN_PLAYERS_ADMIN_EMAILS=sumanthvallam20@gmail.com
+ * - ADMIN_PLAYERS_ADMIN_EMAILS=anvesh.ak.131@gmail.com
  */
 
 const PROTECTED_PREFIXES = [

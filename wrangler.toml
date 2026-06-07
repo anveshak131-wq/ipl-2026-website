@@ -26,14 +26,14 @@ preview_id = "local-weather-cache-preview"
 vars = {
   ENVIRONMENT = "production",
   ADMIN_ALLOWED_EMAILS = "anveshkoganti54@gmail.com",
-  ADMIN_PLAYERS_ADMIN_EMAILS = "sumanthvallam20@gmail.com"
+  ADMIN_PLAYERS_ADMIN_EMAILS = "anvesh.ak.131@gmail.com"
 }
 
 [env.development]
 vars = {
   ENVIRONMENT = "development",
   ADMIN_ALLOWED_EMAILS = "anveshkoganti54@gmail.com",
-  ADMIN_PLAYERS_ADMIN_EMAILS = "sumanthvallam20@gmail.com"
+  ADMIN_PLAYERS_ADMIN_EMAILS = "anvesh.ak.131@gmail.com"
 }
 
 # Encrypted secrets (never commit values). Set in Cloudflare Dashboard or CLI:
