@@ -3,6 +3,8 @@
  * Handles player CRUD operations
  */
 
+import { isPlayersAdminEmail } from '../_adminAuth.js';
+
 // Unified Cloudflare Pages Function for /api/players
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -10,13 +12,53 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'Content-Type, Authorization',
 };
 
-// Helper: basic admin token check (presence of Bearer token)
-function verifyAdminToken(request) {
+// Helper: verify admin token for player write operations
+async function verifyAdminToken(request, env) {
   const authHeader = request.headers.get('authorization');
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     return false;
   }
-  return true;
+
+  if (!env?.SPORTS_KV) {
+    return false;
+  }
+
+  const token = authHeader.slice('Bearer '.length).trim();
+  if (!token) {
+    return false;
+  }
+
+  const tokenValue = await env.SPORTS_KV.get(`token:${token}`);
+  if (!tokenValue) {
+    return false;
+  }
+
+  let tokenData = { email: tokenValue, role: null, provider: null };
+
+  if (typeof tokenValue === 'string' && tokenValue.trim().startsWith('{')) {
+    try {
+      const parsed = JSON.parse(tokenValue);
+      tokenData = {
+        email: parsed.email || '',
+        role: parsed.role || null,
+        provider: parsed.provider || null,
+      };
+    } catch {
+      return false;
+    }
+  }
+
+  const email = String(tokenData.email || '').toLowerCase();
+  if (!email) {
+    return false;
+  }
+
+  if (isPlayersAdminEmail(env, email) && tokenData.provider !== 'google') {
+    return false;
+  }
+
+  const role = isPlayersAdminEmail(env, email) ? 'players_admin' : tokenData.role;
+  return role === 'admin' || role === 'super_admin' || role === 'players_admin';
 }
 
 // Helper: get team name by team ID
@@ -431,7 +473,7 @@ export const onRequest = async (context) => {
         }
       }
       
-      if (!verifyAdminToken(request)) {
+      if (!(await verifyAdminToken(request, env))) {
         return new Response(JSON.stringify({ error: 'Unauthorized' }), {
           status: 401,
           headers: { 'Content-Type': 'application/json', ...corsHeaders },
@@ -590,7 +632,7 @@ export const onRequest = async (context) => {
         }
       }
       
-      if (!verifyAdminToken(request)) {
+      if (!(await verifyAdminToken(request, env))) {
         return new Response(JSON.stringify({ error: 'Unauthorized' }), {
           status: 401,
           headers: { 'Content-Type': 'application/json', ...corsHeaders },
@@ -844,7 +886,7 @@ export const onRequest = async (context) => {
     }
 
     if (request.method === 'DELETE') {
-      if (!verifyAdminToken(request)) {
+      if (!(await verifyAdminToken(request, env))) {
         return new Response(JSON.stringify({ error: 'Unauthorized' }), {
           status: 401,
           headers: { 'Content-Type': 'application/json', ...corsHeaders },

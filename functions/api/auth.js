@@ -267,12 +267,14 @@ export const onRequest = async (context) => {
 
       let email = null;
       let role = null;
+      let tokenProvider = null;
       let tokenSource = 'unknown';
 
       // Known super admin token mapping
       if (token === 'eyJpZCI6IjEiLCJ1c2VybmFtZSI6ImFkbWluIiwiZW1haWwiOiJhZG1pbkBpcGwyMDI2LmNvbSIsInJvbGUiOiJzdXBlcl9hZG1pbiIsImV4cCI6MTc2Njk2MTgzOTg4MX0=') {
         email = 'admin@ipl2026.com';
         role = 'super_admin';
+        tokenProvider = 'legacy';
         tokenSource = 'known-jwt';
       } else {
         // First, try to find token in KV storage (for legacy tokens)
@@ -287,6 +289,7 @@ export const onRequest = async (context) => {
               if (parsed && typeof parsed.email === 'string') {
                 email = parsed.email;
                 role = parsed.role; // Extract role from token if available
+                tokenProvider = typeof parsed.provider === 'string' ? parsed.provider : null;
               }
             } catch {
               // fall back to using tokenValue directly
@@ -311,8 +314,16 @@ export const onRequest = async (context) => {
       }
 
       const user = JSON.parse(userData);
+      const requiresGoogleAdminToken = isPlayersAdminEmail(env, email);
 
-      const normalizedRole = isPlayersAdminEmail(env, email)
+      if (requiresGoogleAdminToken && tokenProvider !== 'google') {
+        return new Response(
+          JSON.stringify({ error: 'Use Google admin sign-in for this account.' }),
+          { status: 403, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
+        );
+      }
+
+      const normalizedRole = requiresGoogleAdminToken
         ? 'players_admin'
         : ADMIN_ROLES.has(role)
           ? role

@@ -4,7 +4,7 @@
  */
 
 import crypto from 'node:crypto';
-import { getAdminRoleForEmail, isLegacyAdminLoginAllowed } from '../../_adminAuth.js';
+import { isLegacyAdminLoginAllowed, isPlayersAdminEmail } from '../../_adminAuth.js';
 
 // --- Optional TOTP-based 2FA helpers ---
 // Uses an environment-provided Base32 secret (ADMIN_TOTP_SECRET_BASE32)
@@ -183,6 +183,20 @@ export const onRequest = async (context) => {
       const userData = await env.SPORTS_KV.get(`user:${username}`);
       if (userData) {
         const user = JSON.parse(userData);
+        const userEmail = String(user.email || username || '').toLowerCase();
+
+        if (isPlayersAdminEmail(env, userEmail)) {
+          return new Response(
+            JSON.stringify({ error: 'Use Google admin sign-in for this account.' }),
+            {
+              status: 403,
+              headers: {
+                'Content-Type': 'application/json',
+                ...corsHeaders,
+              },
+            }
+          );
+        }
         
         // Only allow admin role users
         if ((user.role === 'admin' || user.role === 'super_admin' || user.role === 'players_admin') && verifyPassword(password, user.salt, user.hashedPassword)) {
@@ -215,13 +229,11 @@ export const onRequest = async (context) => {
             token = tokenBuffer.toString('hex');
           }
 
-          const allowListedRole = getAdminRoleForEmail(env, user.email, user.role);
-
           const updatedUser = {
             ...user,
             token,
             lastLogin: nowIso,
-            role: allowListedRole,
+            role: user.role,
           };
 
           // Store/refresh user in KV with 1 year TTL
