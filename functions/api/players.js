@@ -579,6 +579,7 @@ export const onRequest = async (context) => {
         squadExitReason: !newPlayerIsActive ? (newPlayer.squadExitReason || 'other') : undefined,
         squadExitDate: !newPlayerIsActive ? (newPlayer.squadExitDate || new Date().toISOString().slice(0, 10)) : undefined,
         seasonTeamHistory: Array.isArray(newPlayer.seasonTeamHistory) ? newPlayer.seasonTeamHistory : [],
+        statsAudit: newPlayer.statsAudit || undefined,
         transferInfo: newPlayer.transferInfo ? {
           lastAuctionYear: newPlayer.transferInfo.lastAuctionYear,
           acquiredVia: newPlayer.transferInfo.acquiredVia,
@@ -801,6 +802,7 @@ export const onRequest = async (context) => {
         squadExitReason: nextIsActive ? undefined : (updatedPlayer.squadExitReason || 'other'),
         squadExitDate: nextIsActive ? undefined : (updatedPlayer.squadExitDate || new Date().toISOString().slice(0, 10)),
         seasonTeamHistory,
+        statsAudit: updatedPlayer.statsAudit || previousPlayer.statsAudit,
         transferInfo: updatedPlayer.transferInfo
           ? {
               lastAuctionYear: updatedPlayer.transferInfo.lastAuctionYear,

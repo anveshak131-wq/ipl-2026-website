@@ -11,6 +11,16 @@ interface Player {
   age: string;
   jerseyNumber: string;
   teamId: string;
+  statsAudit?: Record<string, {
+    updatedBy?: string;
+    updatedAt?: string;
+    changes?: Array<{
+      field: string;
+      label?: string;
+      previousValue?: string | number;
+      newValue?: string | number;
+    }>;
+  }>;
   stats?: {
     matches?: number;
     runs?: number;

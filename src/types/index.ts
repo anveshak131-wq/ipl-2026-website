@@ -39,6 +39,16 @@ export interface Player {
   bowlingStyle: string;
   battingStyle: string;
   photoUrl?: string; // Optional player photo URL
+  statsAudit?: Record<string, {
+    updatedBy?: string;
+    updatedAt?: string;
+    changes?: Array<{
+      field: string;
+      label?: string;
+      previousValue?: string | number;
+      newValue?: string | number;
+    }>;
+  }>;
   stats: {
     // Batting stats
     matches: number;

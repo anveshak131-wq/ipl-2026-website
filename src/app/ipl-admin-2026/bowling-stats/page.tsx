@@ -14,14 +14,68 @@ const isInNotSelectedSeasonPool = (player: any) => {
   return player.isActiveInSquad === false || player.squadStatus === 'inactive';
 };
 
+const bowlingAuditLabels: Record<string, string> = {
+  matches: 'Matches',
+  bowlingInnings: 'Bowling Innings',
+  balls: 'Balls',
+  maidens: 'Maiden Overs',
+  wickets: 'Wickets',
+  runsConceded: 'Runs Conceded',
+  bowlingAverage: 'Bowling Average',
+  bowlingStrikeRate: 'Strike Rate',
+  economy: 'Economy',
+  bestBowling: 'Best Bowling',
+  fourWickets: 'Four-Wicket Hauls',
+  fiveWickets: 'Five-Wicket Hauls'
+};
+
+const normalizeAuditValue = (value: any) => {
+  if (value === undefined || value === null || value === '') return '';
+  return String(value).trim();
+};
+
+const displayAuditValue = (value: any) => {
+  const normalized = normalizeAuditValue(value);
+  return normalized === '' ? '0' : normalized;
+};
+
+const getChangedStatFields = (originalForm: any, currentForm: any, labels: Record<string, string>) => {
+  if (!originalForm?.stats || !currentForm?.stats) return [];
+
+  return Object.entries(labels).reduce((changes: any[], [field, label]) => {
+    const previousValue = normalizeAuditValue(originalForm.stats[field]);
+    const newValue = normalizeAuditValue(currentForm.stats[field]);
+
+    if (previousValue !== newValue) {
+      changes.push({
+        field,
+        label,
+        previousValue: displayAuditValue(previousValue),
+        newValue: displayAuditValue(newValue)
+      });
+    }
+
+    return changes;
+  }, []);
+};
+
+const formatAuditDate = (value?: string) => {
+  if (!value) return 'Not recorded';
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return 'Not recorded';
+  return parsed.toLocaleString();
+};
+
 const BowlingStatsPage = () => {
   const router = useRouter();
   const { currentLeague } = useLeague();
   const { players, teams, loading, error, updatePlayer, refreshData, lastUpdated } = useAdminData();
   const [userRole, setUserRole] = useState<string | null>(null);
+  const [currentAdminEmail, setCurrentAdminEmail] = useState('');
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const [editingPlayer, setEditingPlayer] = useState(null);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [originalEditForm, setOriginalEditForm] = useState<any | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTeam, setSelectedTeam] = useState('all');
   const [sortField, setSortField] = useState<string>('wickets');
@@ -78,6 +132,7 @@ const BowlingStatsPage = () => {
         const role = data.user?.role;
         console.log('Bowling Stats: User role:', role);
         setUserRole(role);
+        setCurrentAdminEmail(data.user?.email || data.user?.name || 'Unknown admin');
 
         if (role !== 'admin' && role !== 'user' && role !== 'super_admin' && role !== 'players_admin') {
           console.log('Bowling Stats: Role not allowed, redirecting to dashboard');
@@ -100,6 +155,7 @@ const BowlingStatsPage = () => {
   const handleCancelEdit = useCallback(() => {
     setShowEditModal(false);
     setEditingPlayer(null);
+    setOriginalEditForm(null);
   }, []);
 
   useEffect(() => {
@@ -148,7 +204,7 @@ const BowlingStatsPage = () => {
 
   const handleEditPlayer = (player) => {
     setEditingPlayer(player);
-    setEditForm({
+    const nextEditForm = {
       name: player.name || '',
       role: player.role || '',
       age: player.age || '',
@@ -167,12 +223,26 @@ const BowlingStatsPage = () => {
         fourWickets: player.stats?.fourWickets > 0 ? player.stats.fourWickets : '',
         fiveWickets: player.stats?.fiveWickets > 0 ? player.stats.fiveWickets : ''
       }
-    });
+    };
+
+    setEditForm(nextEditForm);
+    setOriginalEditForm(nextEditForm);
     setShowEditModal(true);
   };
 
+  const changedFields = useMemo(
+    () => getChangedStatFields(originalEditForm, editForm, bowlingAuditLabels),
+    [editForm, originalEditForm]
+  );
+  const hasUnsavedChanges = changedFields.length > 0;
+  const lastStatsAudit = (editingPlayer as any)?.statsAudit?.bowling;
+
   const handleSavePlayer = async () => {
     try {
+      if (!editingPlayer || !hasUnsavedChanges) {
+        return;
+      }
+
       // Extract numeric values for calculations
       const wickets = editForm.stats.wickets === '' ? (editingPlayer.stats?.wickets || 0) : (typeof editForm.stats.wickets === 'number' ? editForm.stats.wickets : parseInt(editForm.stats.wickets) || 0);
       const runsConceded = editForm.stats.runsConceded === '' ? (editingPlayer.stats?.runsConceded || 0) : (typeof editForm.stats.runsConceded === 'number' ? editForm.stats.runsConceded : parseInt(editForm.stats.runsConceded) || 0);
@@ -269,6 +339,8 @@ const BowlingStatsPage = () => {
 
       // CRITICAL: Use editingPlayer values for read-only fields (name, role, jerseyNumber)
       // These fields are now read-only in the UI, so we must use the original player data
+      const auditTimestamp = new Date().toISOString();
+
       const updatedPlayer = {
         ...editingPlayer, // Preserve ALL existing player fields FIRST
         id: editingPlayer.id,
@@ -289,6 +361,14 @@ const BowlingStatsPage = () => {
         isCaptain: editingPlayer.isCaptain,
         allrounderType: editingPlayer.allrounderType,
         transferInfo: editingPlayer.transferInfo,
+        statsAudit: {
+          ...(editingPlayer.statsAudit || {}),
+          bowling: {
+            updatedBy: currentAdminEmail || 'Unknown admin',
+            updatedAt: auditTimestamp,
+            changes: changedFields
+          }
+        },
         stats: {
           // CRITICAL: Preserve ALL existing stats first
           ...editingPlayer.stats,
@@ -323,6 +403,7 @@ const BowlingStatsPage = () => {
       
       setShowEditModal(false);
       setEditingPlayer(null);
+      setOriginalEditForm(null);
     } catch (error) {
       console.error('Failed to update player:', error);
       alert(`Failed to update player: ${error instanceof Error ? error.message : 'Unknown error'}. Please try again.`);
@@ -1467,6 +1548,14 @@ const BowlingStatsPage = () => {
                           Rates and Milestones
                         </h3>
                         <p className="mt-1 text-sm text-white/55">Economy, average, strike rate, best figures, and four- and five-wicket hauls.</p>
+                        <div className="mt-3 flex flex-wrap gap-2 text-xs text-white/65">
+                          <span className="rounded-full border border-[#a8e9ef]/25 bg-[#4fb6c4]/10 px-3 py-1">
+                            4W = exactly 4 wickets in an innings
+                          </span>
+                          <span className="rounded-full border border-[#ffaaa5]/25 bg-[#ffaaa5]/10 px-3 py-1">
+                            5W = 5 or more wickets in an innings
+                          </span>
+                        </div>
                       </div>
                       <span className="oil-chip">Scorecard metrics</span>
                     </div>
@@ -1551,17 +1640,87 @@ const BowlingStatsPage = () => {
                       </div>
                     </div>
                   </section>
+                  <section className="oil-modal-section oil-editor-section p-5">
+                    <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
+                      <div>
+                        <h3 className="flex items-center gap-2 text-lg font-bold text-white">
+                          <DatabaseBackup className="w-5 h-5 text-[#a8e9ef]" />
+                          Change Review
+                        </h3>
+                        <p className="mt-1 text-sm text-white/55">
+                          Save is enabled only after a stat value changes. Review the previous and new values before saving.
+                        </p>
+                      </div>
+                      <span className={`oil-chip ${hasUnsavedChanges ? 'border-[#f2d39a]/40 text-[#f2d39a]' : ''}`}>
+                        {changedFields.length} unsaved {changedFields.length === 1 ? 'change' : 'changes'}
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1fr_0.9fr]">
+                      <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4">
+                        {hasUnsavedChanges ? (
+                          <div className="space-y-2">
+                            {changedFields.map((change) => (
+                              <div key={change.field} className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-black/20 px-3 py-2">
+                                <span className="text-sm font-semibold text-white">{change.label}</span>
+                                <span className="text-xs text-white/65">
+                                  <span className="text-[#ffaaa5]">{change.previousValue}</span>
+                                  <span className="px-2 text-white/35">to</span>
+                                  <span className="text-[#9cf2c8]">{change.newValue}</span>
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <p className="text-sm text-white/55">No stat values have changed in this edit session.</p>
+                        )}
+                      </div>
+
+                      <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4">
+                        <div className="grid gap-3 text-sm">
+                          <div>
+                            <p className="text-xs font-bold uppercase tracking-[0.16em] text-white/40">Last edited by</p>
+                            <p className="mt-1 text-white">{lastStatsAudit?.updatedBy || 'Not recorded'}</p>
+                          </div>
+                          <div>
+                            <p className="text-xs font-bold uppercase tracking-[0.16em] text-white/40">Last edited time</p>
+                            <p className="mt-1 text-white">{formatAuditDate(lastStatsAudit?.updatedAt)}</p>
+                          </div>
+                          {lastStatsAudit?.changes?.length > 0 && (
+                            <div>
+                              <p className="text-xs font-bold uppercase tracking-[0.16em] text-white/40">Previous saved values</p>
+                              <div className="mt-2 space-y-1">
+                                {lastStatsAudit.changes.slice(0, 3).map((change: any) => (
+                                  <p key={`${change.field}-${change.previousValue}-${change.newValue}`} className="text-xs text-white/60">
+                                    {change.label}: {change.previousValue} to {change.newValue}
+                                  </p>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </section>
                 </div>
               </div>
 
               <div className="oil-modal-footer oil-editor-footer flex flex-col-reverse gap-3 p-5 sm:flex-row sm:items-center sm:justify-between">
-                <p className="text-xs font-medium text-white/60">Changes update the IPL bowling table and export-ready player sheet.</p>
+                <p className="text-xs font-medium text-white/60">
+                  {hasUnsavedChanges
+                    ? `${changedFields.length} bowling ${changedFields.length === 1 ? 'field is' : 'fields are'} ready to save.`
+                    : 'No bowling stat changes to save.'}
+                </p>
                 <div className="oil-modal-footer-actions">
                   <button onClick={handleCancelEdit} className="oil-btn-secondary px-5 py-2.5">
                     <X className="w-4 h-4" />
                     Cancel Edit
                   </button>
-                  <button onClick={handleSavePlayer} className="oil-btn-primary px-5 py-2.5">
+                  <button
+                    onClick={handleSavePlayer}
+                    disabled={!hasUnsavedChanges}
+                    className="oil-btn-primary px-5 py-2.5 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
                     <Edit2 className="w-4 h-4" />
                     Save Bowling Stats
                   </button>
