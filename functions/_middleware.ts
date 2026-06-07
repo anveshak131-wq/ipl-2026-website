@@ -20,6 +20,7 @@ import {
  * - GOOGLE_CLIENT_SECRET
  * - ADMIN_SESSION_SECRET
  * - ADMIN_ALLOWED_EMAILS=anveshkoganti54@gmail.com
+ * - ADMIN_PLAYERS_ADMIN_EMAILS=sumanthvallam20@gmail.com
  */
 
 const PROTECTED_PREFIXES = [
@@ -36,6 +37,15 @@ const PUBLIC_ADMIN_API_GET_PATHS = [
 ] as const;
 
 const ADMIN_WRITE_METHODS = new Set(['POST', 'PUT', 'DELETE']);
+const PLAYERS_ADMIN_ALLOWED_PAGE_PATHS = new Set([
+  '/ipl-admin-2026/players',
+  '/ipl-admin-2026/batting-stats',
+  '/ipl-admin-2026/bowling-stats',
+]);
+const PLAYERS_ADMIN_ALLOWED_API_PATHS = new Set([
+  '/api/admin/session',
+  '/api/admin/logout',
+]);
 
 function isProtectedPath(pathname: string): boolean {
   return PROTECTED_PREFIXES.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`));
@@ -148,6 +158,23 @@ function requestWithAdminHeaders(request: Request, session: any): Request {
   return new Request(request, { headers });
 }
 
+function isPlayersAdminSession(session: any): boolean {
+  return session?.role === 'players_admin';
+}
+
+function isAllowedPlayersAdminPath(pathname: string): boolean {
+  return PLAYERS_ADMIN_ALLOWED_PAGE_PATHS.has(pathname);
+}
+
+function isAllowedPlayersAdminApiPath(pathname: string): boolean {
+  return PLAYERS_ADMIN_ALLOWED_API_PATHS.has(pathname);
+}
+
+function redirectPlayersAdminToAllowedPage(url: URL): Response {
+  const allowedUrl = new URL('/ipl-admin-2026/players', url.origin);
+  return Response.redirect(allowedUrl.toString(), 302);
+}
+
 export const onRequest = async (context: any) => {
   const { env, request } = context;
   const url = new URL(request.url);
@@ -193,6 +220,20 @@ export const onRequest = async (context: any) => {
 
   if (isApiRequest(url) && isAdminWriteRequest(request) && !(await verifyAdminCsrfToken(request, safeEnv, session))) {
     return forbiddenJson(`Missing or invalid ${ADMIN_CSRF_HEADER}`);
+  }
+
+  if (isPlayersAdminSession(session)) {
+    if (isApiRequest(url)) {
+      if (!isAllowedPlayersAdminApiPath(url.pathname)) {
+        return forbiddenJson('This admin account can only access IPL Players, Batting Stats, and Bowling Stats.');
+      }
+    } else if (!isAllowedPlayersAdminPath(url.pathname)) {
+      if (wantsHtml(request)) {
+        return redirectPlayersAdminToAllowedPage(url);
+      }
+
+      return forbiddenJson('This admin account can only access IPL Players, Batting Stats, and Bowling Stats.');
+    }
   }
 
   if (isApiRequest(url)) {

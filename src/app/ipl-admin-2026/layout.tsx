@@ -17,6 +17,15 @@ import {
   setAdminCsrfToken,
 } from '@/lib/admin/csrf';
 
+const PLAYERS_ADMIN_PATHS = [
+  '/ipl-admin-2026/players',
+  '/ipl-admin-2026/batting-stats',
+  '/ipl-admin-2026/bowling-stats',
+];
+
+const isPlayersAdminPath = (path: string | null) =>
+  Boolean(path && PLAYERS_ADMIN_PATHS.includes(path));
+
 export default function AdminLayout({
   children,
 }: {
@@ -185,9 +194,15 @@ export default function AdminLayout({
 
   useEffect(() => {
     if (!isLoading && isAuthenticated && isIndexRoute) {
-      router.replace('/ipl-admin-2026/dashboard');
+      router.replace(userRole === 'players_admin' ? '/ipl-admin-2026/players' : '/ipl-admin-2026/dashboard');
     }
-  }, [isAuthenticated, isIndexRoute, isLoading, router]);
+  }, [isAuthenticated, isIndexRoute, isLoading, router, userRole]);
+
+  useEffect(() => {
+    if (!isLoading && isAuthenticated && userRole === 'players_admin' && !isPlayersAdminPath(pathname)) {
+      router.replace('/ipl-admin-2026/players');
+    }
+  }, [isAuthenticated, isLoading, pathname, router, userRole]);
 
   const handleLogin = (token: string) => {
     setIsAuthenticated(true);
@@ -215,7 +230,7 @@ export default function AdminLayout({
     return (
       <div className="min-h-screen bg-gray-950">
         <div className="flex-1 flex items-center justify-center">
-          <div className="text-white">Redirecting to dashboard...</div>
+          <div className="text-white">Redirecting...</div>
         </div>
       </div>
     );
@@ -226,29 +241,31 @@ export default function AdminLayout({
     <LeagueProvider>
       <AdminDataProvider>
         <div className="flex min-h-screen bg-ipl-dark">
-          {/* Single sidebar - show PlayersAdminSidebar for players_admin on players pages, else AdminSidebar */}
-          {userRole === 'players_admin' && ['/ipl-admin-2026/players', '/ipl-admin-2026/batting-stats', '/ipl-admin-2026/bowling-stats', '/ipl-admin-2026/players/upload'].includes(pathname) ? (
+          {/* Single sidebar - show PlayersAdminSidebar for players_admin, else AdminSidebar */}
+          {userRole === 'players_admin' ? (
             <PlayersAdminSidebar currentPage={pathname} onLogout={handleLogout} />
           ) : (
             <AdminSidebar currentPage={pathname} onLogout={handleLogout} />
           )}
           
           <div className="flex-1 flex flex-col">
-            <div className="sticky top-0 z-10 bg-slate-900/95 backdrop-blur-sm border-b border-white/10">
-              <div className="px-6 py-3">
-                <div className="flex items-center justify-between">
-                  <div className="w-full max-w-md">
-                    <button
-                      onClick={() => setIsSearchOpen(true)}
-                      className="w-full flex items-center gap-3 px-4 py-2 bg-slate-800 border border-slate-600 rounded-lg text-gray-300 hover:bg-slate-700 transition-colors"
-                    >
-                      <Search size={18} />
-                      <span className="text-sm">Search (⌘K)</span>
-                    </button>
+            {userRole !== 'players_admin' && (
+              <div className="sticky top-0 z-10 bg-slate-900/95 backdrop-blur-sm border-b border-white/10">
+                <div className="px-6 py-3">
+                  <div className="flex items-center justify-between">
+                    <div className="w-full max-w-md">
+                      <button
+                        onClick={() => setIsSearchOpen(true)}
+                        className="w-full flex items-center gap-3 px-4 py-2 bg-slate-800 border border-slate-600 rounded-lg text-gray-300 hover:bg-slate-700 transition-colors"
+                      >
+                        <Search size={18} />
+                        <span className="text-sm">Search (⌘K)</span>
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
+            )}
             <main className="p-6 overflow-y-auto flex-1">
               {children}
             </main>

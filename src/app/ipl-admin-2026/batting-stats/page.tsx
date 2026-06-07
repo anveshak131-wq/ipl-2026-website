@@ -79,7 +79,7 @@ const BattingStatsPage = () => {
         console.log('Batting Stats: User role:', role);
         setUserRole(role);
 
-        if (role !== 'admin' && role !== 'user' && role !== 'super_admin') {
+        if (role !== 'admin' && role !== 'user' && role !== 'super_admin' && role !== 'players_admin') {
           console.log('Batting Stats: Role not allowed, redirecting to dashboard');
           alert('Access denied. Admin privileges required.');
           router.push('/ipl-admin-2026');

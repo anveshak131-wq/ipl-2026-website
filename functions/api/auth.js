@@ -1,4 +1,7 @@
 import crypto from 'node:crypto';
+import { isPlayersAdminEmail } from '../_adminAuth.js';
+
+const ADMIN_ROLES = new Set(['admin', 'super_admin', 'players_admin']);
 
 // Encrypt/Decrypt utilities for secure storage
 const encryptPassword = (password, salt) => {
@@ -309,11 +312,18 @@ export const onRequest = async (context) => {
 
       const user = JSON.parse(userData);
 
-      // Update user role if token has a role and it's different from stored role
-      if (role && user.role !== role) {
-        user.role = role;
+      const normalizedRole = isPlayersAdminEmail(env, email)
+        ? 'players_admin'
+        : ADMIN_ROLES.has(role)
+          ? role
+          : user.role;
+
+      // Update user role if token/allowlist has a role and it's different from stored role
+      if (normalizedRole && user.role !== normalizedRole) {
+        const previousRole = user.role;
+        user.role = normalizedRole;
         await env.SPORTS_KV.put(`user:${email}`, JSON.stringify(user));
-        console.log(`Updated user role for ${email} from ${user.role} to ${role} (source: ${tokenSource})`);
+        console.log(`Updated user role for ${email} from ${previousRole} to ${normalizedRole} (source: ${tokenSource})`);
       }
 
       if (user.isBlocked) {
@@ -330,7 +340,7 @@ export const onRequest = async (context) => {
             id: user.id, 
             email: user.email, 
             name: user.name,
-            role: user.role || 'user' // Include role field
+            role: normalizedRole || 'user' // Include role field
           },
         }),
         { status: 200, headers: { 'Content-Type': 'application/json', ...corsHeaders } }

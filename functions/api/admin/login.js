@@ -4,7 +4,7 @@
  */
 
 import crypto from 'node:crypto';
-import { isLegacyAdminLoginAllowed } from '../../_adminAuth.js';
+import { getAdminRoleForEmail, isLegacyAdminLoginAllowed } from '../../_adminAuth.js';
 
 // --- Optional TOTP-based 2FA helpers ---
 // Uses an environment-provided Base32 secret (ADMIN_TOTP_SECRET_BASE32)
@@ -89,11 +89,6 @@ async function verifyTotpCode(secretBase32, code, window = 1) {
 
   return false;
 }
-
-// Allowlist for admins who should only access players page
-const PLAYERS_ONLY_ADMINS = new Set([
-  'sumanthvallam20@gmail.com'
-]);
 
 // Password verification for KV users
 const verifyPassword = (password, salt, hashedPassword) => {
@@ -220,15 +215,13 @@ export const onRequest = async (context) => {
             token = tokenBuffer.toString('hex');
           }
 
-          const allowListedRole = PLAYERS_ONLY_ADMINS.has(user.email) ? 'players_admin' : user.role;
+          const allowListedRole = getAdminRoleForEmail(env, user.email, user.role);
 
           const updatedUser = {
             ...user,
             token,
             lastLogin: nowIso,
-            role: ['admin', 'super_admin', 'players_admin'].includes(user.role)
-              ? user.role
-              : allowListedRole,
+            role: allowListedRole,
           };
 
           // Store/refresh user in KV with 1 year TTL

@@ -4,8 +4,10 @@ const ADMIN_CSRF_HEADER = 'X-CSRF-Token';
 const ADMIN_SESSION_MAX_AGE_SECONDS = 4 * 60 * 60;
 const OAUTH_STATE_MAX_AGE_SECONDS = 10 * 60;
 const DEFAULT_ADMIN_EMAIL = 'anveshkoganti54@gmail.com';
+const DEFAULT_PLAYERS_ADMIN_EMAIL = 'sumanthvallam20@gmail.com';
 const GOOGLE_JWKS_URL = 'https://www.googleapis.com/oauth2/v3/certs';
 const TRUE_ENV_VALUES = new Set(['1', 'true', 'yes', 'on', 'enabled']);
+const ADMIN_ROLES = new Set(['super_admin', 'admin', 'players_admin']);
 
 const encoder = new TextEncoder();
 const decoder = new TextDecoder();
@@ -58,18 +60,41 @@ export function isLegacyAdminSetupAllowed(env) {
 
 export function getAllowedAdminEmails(env) {
   const raw = getEnvString(env, ['ADMIN_ALLOWED_EMAILS', 'GOOGLE_ADMIN_ALLOWED_EMAILS']) || DEFAULT_ADMIN_EMAIL;
+  const emails = new Set(parseEmailList(raw));
 
-  return new Set(
-    raw
-      .split(/[,\s]+/)
-      .map((email) => email.trim().toLowerCase())
-      .filter(Boolean),
-  );
+  for (const email of getPlayersAdminEmails(env)) {
+    emails.add(email);
+  }
+
+  return emails;
 }
 
 export function isAllowedAdminEmail(env, email) {
   if (!email) return false;
   return getAllowedAdminEmails(env).has(String(email).toLowerCase());
+}
+
+function parseEmailList(raw) {
+  return String(raw || '')
+    .split(/[,\s]+/)
+    .map((email) => email.trim().toLowerCase())
+    .filter(Boolean);
+}
+
+export function getPlayersAdminEmails(env) {
+  const raw =
+    getEnvString(env, [
+      'ADMIN_PLAYERS_ADMIN_EMAILS',
+      'GOOGLE_PLAYERS_ADMIN_EMAILS',
+      'PLAYERS_ADMIN_EMAILS',
+    ]) || DEFAULT_PLAYERS_ADMIN_EMAIL;
+
+  return new Set(parseEmailList(raw));
+}
+
+export function isPlayersAdminEmail(env, email) {
+  if (!email) return false;
+  return getPlayersAdminEmails(env).has(String(email).toLowerCase());
 }
 
 export function getSessionSecret(env) {
@@ -86,7 +111,15 @@ export function getGoogleOAuthConfig(env) {
 
 export function getAdminRole(env) {
   const configured = getEnvString(env, ['ADMIN_DEFAULT_ROLE', 'GOOGLE_ADMIN_ROLE']);
-  return ['super_admin', 'admin', 'players_admin'].includes(configured) ? configured : 'super_admin';
+  return ADMIN_ROLES.has(configured) ? configured : 'super_admin';
+}
+
+export function getAdminRoleForEmail(env, email, existingRole) {
+  if (isPlayersAdminEmail(env, email)) {
+    return 'players_admin';
+  }
+
+  return ADMIN_ROLES.has(existingRole) ? existingRole : getAdminRole(env);
 }
 
 export function getCookieValue(request, name) {
@@ -304,7 +337,7 @@ export async function createAdminSessionCookie(env, sessionInput) {
     email: String(sessionInput.email || '').toLowerCase(),
     name: sessionInput.name || '',
     picture: sessionInput.picture || '',
-    role: sessionInput.role || getAdminRole(env),
+    role: getAdminRoleForEmail(env, sessionInput.email, sessionInput.role),
     token: sessionInput.token,
     iat: now,
     exp: now + ADMIN_SESSION_MAX_AGE_SECONDS,
@@ -337,7 +370,10 @@ export async function verifyAdminSession(request, env) {
     return null;
   }
 
-  return session;
+  return {
+    ...session,
+    role: getAdminRoleForEmail(env, session.email, session.role),
+  };
 }
 
 export async function createAdminCsrfToken(env, session) {
@@ -487,9 +523,7 @@ export async function upsertGoogleAdminUser(env, googleUser) {
     throw new Error('This admin account is blocked');
   }
 
-  const role = ['super_admin', 'admin', 'players_admin'].includes(existingUser.role)
-    ? existingUser.role
-    : getAdminRole(env);
+  const role = getAdminRoleForEmail(env, email, existingUser.role);
 
   const user = {
     ...existingUser,
