@@ -21,6 +21,8 @@ interface Player {
     economy?: string;
     fifties?: number;
     hundreds?: number;
+    ducks?: number;
+    fourWickets?: number;
     fiveWickets?: number;
     bestBowling?: string;
   };

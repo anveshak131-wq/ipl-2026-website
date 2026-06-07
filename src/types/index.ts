@@ -55,6 +55,7 @@ export interface Player {
     sixes: number;
     fifties: number;
     hundreds: number;
+    ducks?: number;
     
     // Bowling stats
     bowlingInnings?: number;
@@ -66,6 +67,7 @@ export interface Player {
     bowlingStrikeRate?: number | string; // Bowling strike rate (balls per wicket)
     economy: number;
     bestBowling: string; // Format: "wickets/runs" e.g., "4/21", "3/45"
+    fourWickets?: number; // Number of 4-wicket hauls
     fiveWickets?: number; // Number of 5-wicket hauls
   };
   // Transfer and auction metadata (optional)

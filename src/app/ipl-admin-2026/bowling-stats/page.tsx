@@ -45,6 +45,7 @@ const BowlingStatsPage = () => {
       bowlingStrikeRate: '',
       economy: '',
       bestBowling: '',
+      fourWickets: '',
       fiveWickets: ''
     }
   });
@@ -163,6 +164,7 @@ const BowlingStatsPage = () => {
         bowlingStrikeRate: player.stats?.bowlingStrikeRate || '',
         economy: player.stats?.economy || '',
         bestBowling: player.stats?.bestBowling || '',
+        fourWickets: player.stats?.fourWickets > 0 ? player.stats.fourWickets : '',
         fiveWickets: player.stats?.fiveWickets > 0 ? player.stats.fiveWickets : ''
       }
     });
@@ -261,6 +263,7 @@ const BowlingStatsPage = () => {
         bowlingStrikeRate: bowlingStrikeRateStr,
         economy: economyStr,
         bestBowling: editForm.stats.bestBowling === '' ? (editingPlayer.stats?.bestBowling || '') : (editForm.stats.bestBowling || ''),
+        fourWickets: editForm.stats.fourWickets === '' ? (editingPlayer.stats?.fourWickets || 0) : (typeof editForm.stats.fourWickets === 'number' ? editForm.stats.fourWickets : parseInt(editForm.stats.fourWickets) || 0),
         fiveWickets: editForm.stats.fiveWickets === '' ? (editingPlayer.stats?.fiveWickets || 0) : (typeof editForm.stats.fiveWickets === 'number' ? editForm.stats.fiveWickets : parseInt(editForm.stats.fiveWickets) || 0)
       };
 
@@ -438,6 +441,10 @@ const BowlingStatsPage = () => {
           aVal = parseFloat(a.stats?.bowlingStrikeRate) || Infinity;
           bVal = parseFloat(b.stats?.bowlingStrikeRate) || Infinity;
           break;
+        case 'fourWickets':
+          aVal = a.stats?.fourWickets || 0;
+          bVal = b.stats?.fourWickets || 0;
+          break;
         case 'fiveWickets':
           aVal = a.stats?.fiveWickets || 0;
           bVal = b.stats?.fiveWickets || 0;
@@ -476,12 +483,13 @@ const BowlingStatsPage = () => {
     // If search query is active, show individual player stats instead of aggregated
     if (searchQuery.trim() !== '') {
       if (activeBowlers.length === 0) {
-        return { activeBowlers: 0, totalWickets: 0, totalFiveWickets: 0, totalMaidens: 0, bestEconomy: '0.00', avgWickets: 0 };
+        return { activeBowlers: 0, totalWickets: 0, totalFourWickets: 0, totalFiveWickets: 0, totalMaidens: 0, bestEconomy: '0.00', avgWickets: 0 };
       }
       // For search results, show individual stats (not aggregated)
       // If multiple players match, show stats for each individually in the table, but summary shows first match
       const player = activeBowlers[0];
       const wickets = player.stats?.wickets || 0;
+      const fourWickets = player.stats?.fourWickets || 0;
       const fiveWickets = player.stats?.fiveWickets || 0;
       const maidens = player.stats?.maidens || 0;
       const economy = parseFloat(player.stats?.economy) || 0;
@@ -490,6 +498,7 @@ const BowlingStatsPage = () => {
       return { 
         activeBowlers: activeBowlers.length, 
         totalWickets: wickets, 
+        totalFourWickets: fourWickets,
         totalFiveWickets: fiveWickets, 
         totalMaidens: maidens, 
         bestEconomy: economy.toFixed(2),
@@ -499,6 +508,7 @@ const BowlingStatsPage = () => {
     
     // Normal aggregated stats for team filter only (no search)
     const totalWickets = activeBowlers.reduce((sum, p) => sum + (p.stats?.wickets || 0), 0);
+    const totalFourWickets = activeBowlers.reduce((sum, p) => sum + (p.stats?.fourWickets || 0), 0);
     const totalFiveWickets = activeBowlers.reduce((sum, p) => sum + (p.stats?.fiveWickets || 0), 0);
     const totalMaidens = activeBowlers.reduce((sum, p) => sum + (p.stats?.maidens || 0), 0);
     const economies = activeBowlers
@@ -510,6 +520,7 @@ const BowlingStatsPage = () => {
     return { 
       activeBowlers: activeBowlers.length, 
       totalWickets, 
+      totalFourWickets,
       totalFiveWickets, 
       totalMaidens, 
       bestEconomy: bestEconomy.toFixed(2),
@@ -636,7 +647,7 @@ const BowlingStatsPage = () => {
 
         <div className="max-w-7xl mx-auto p-6 lg:p-8">
           {/* Summary Cards */}
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 mb-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-7 gap-4 mb-8">
             <div className="oil-stat-card oil-stat-card--teal p-5 oil-rise group">
               <div className="flex items-center justify-between mb-2">
                 <Target className="w-5 h-5 text-[#9cf2c8] group-hover:scale-110 transition-transform" />
@@ -655,8 +666,15 @@ const BowlingStatsPage = () => {
               <div className="flex items-center justify-between mb-2">
                 <Award className="w-5 h-5 text-[#ffaaa5] group-hover:scale-110 transition-transform" />
               </div>
+              <div className="text-2xl font-bold text-white group-hover:scale-105 transition-transform">{summaryStats.totalFourWickets}</div>
+              <div className="text-[#ffaaa5] text-xs mt-1 font-semibold uppercase tracking-wider">Four-Wicket Hauls</div>
+            </div>
+            <div className="oil-stat-card oil-stat-card--copper p-5 oil-rise group">
+              <div className="flex items-center justify-between mb-2">
+                <Award className="w-5 h-5 text-amber-100 group-hover:scale-110 transition-transform" />
+              </div>
               <div className="text-2xl font-bold text-white group-hover:scale-105 transition-transform">{summaryStats.totalFiveWickets}</div>
-              <div className="text-[#ffaaa5] text-xs mt-1 font-semibold uppercase tracking-wider">Five-Wicket Hauls</div>
+              <div className="text-amber-100 text-xs mt-1 font-semibold uppercase tracking-wider">Five-Wicket Hauls</div>
             </div>
             <div className="oil-stat-card oil-stat-card--cyan p-5 oil-rise group">
               <div className="flex items-center justify-between mb-2">
@@ -830,6 +848,15 @@ const BowlingStatsPage = () => {
                       <th className="px-6 py-4 text-left text-gray-300 font-semibold text-sm uppercase tracking-wider">Maidens</th>
                       <th className="px-6 py-4 text-left">
                         <button
+                          onClick={() => handleSort('fourWickets')}
+                          className="oil-table-sort group"
+                        >
+                          4W
+                          <SortIcon field="fourWickets" />
+                        </button>
+                      </th>
+                      <th className="px-6 py-4 text-left">
+                        <button
                           onClick={() => handleSort('fiveWickets')}
                           className="oil-table-sort group"
                         >
@@ -928,6 +955,9 @@ const BowlingStatsPage = () => {
                             <span className="oil-table-stat-pill oil-table-stat-pill--cyan">{player.stats?.maidens || 0}</span>
                           </td>
                           <td className="px-6 py-4">
+                            <span className="oil-table-stat-pill oil-table-stat-pill--rose">{player.stats?.fourWickets || 0}</span>
+                          </td>
+                          <td className="px-6 py-4">
                             <span className="oil-table-stat-pill oil-table-stat-pill--teal">{player.stats?.fiveWickets || 0}</span>
                           </td>
                           <td className="px-6 py-4">
@@ -961,6 +991,7 @@ const BowlingStatsPage = () => {
                 .map(team => {
                   const teamPlayers = filteredAndSortedPlayers.filter(p => String(p.teamId) === String(team.id));
                   const teamWickets = teamPlayers.reduce((sum, p) => sum + (p.stats?.wickets || 0), 0);
+                  const teamFourWickets = teamPlayers.reduce((sum, p) => sum + (p.stats?.fourWickets || 0), 0);
                   const teamFiveWickets = teamPlayers.reduce((sum, p) => sum + (p.stats?.fiveWickets || 0), 0);
                   const teamMaidens = teamPlayers.reduce((sum, p) => sum + (p.stats?.maidens || 0), 0);
 
@@ -980,10 +1011,14 @@ const BowlingStatsPage = () => {
                               </p>
                             </div>
                           </div>
-                          <div className="flex gap-4">
+                          <div className="flex flex-wrap justify-end gap-4">
                             <div className="text-center">
                               <div className="text-2xl font-bold text-white">{teamWickets}</div>
                               <div className="text-gray-400 text-xs">Wickets</div>
+                            </div>
+                            <div className="text-center">
+                              <div className="text-2xl font-bold text-rose-400">{teamFourWickets}</div>
+                              <div className="text-gray-400 text-xs">Four-Wicket Hauls</div>
                             </div>
                             <div className="text-center">
                               <div className="text-2xl font-bold text-teal-400">{teamFiveWickets}</div>
@@ -1076,7 +1111,7 @@ const BowlingStatsPage = () => {
                                   </div>
                                   <div className="flex items-center justify-between text-xs text-gray-400 mt-2">
                                     <span>Best: {player.stats?.bestBowling || '-'}</span>
-                                    <span>{player.stats?.fiveWickets || 0} 5W</span>
+                                    <span>{player.stats?.fourWickets || 0} 4W / {player.stats?.fiveWickets || 0} 5W</span>
                                   </div>
                                   <div className="text-xs text-gray-500 text-center mt-1">
                                     {oversDisplay} overs • {player.stats?.maidens || 0} maidens
@@ -1303,6 +1338,10 @@ const BowlingStatsPage = () => {
                           <p className="text-lg font-black text-[#a8e9ef]">{editForm.stats.maidens || 0}</p>
                         </div>
                         <div className="rounded-xl bg-white/5 px-3 py-2">
+                          <p className="text-[10px] uppercase tracking-[0.14em] text-white/45">4W</p>
+                          <p className="text-lg font-black text-[#f2d39a]">{editForm.stats.fourWickets || 0}</p>
+                        </div>
+                        <div className="rounded-xl bg-white/5 px-3 py-2">
                           <p className="text-[10px] uppercase tracking-[0.14em] text-white/45">5W</p>
                           <p className="text-lg font-black text-[#ffaaa5]">{editForm.stats.fiveWickets || 0}</p>
                         </div>
@@ -1427,7 +1466,7 @@ const BowlingStatsPage = () => {
                           <Gauge className="w-5 h-5 text-[#f2d39a]" />
                           Rates and Milestones
                         </h3>
-                        <p className="mt-1 text-sm text-white/55">Economy, average, strike rate, best figures, and five-wicket hauls.</p>
+                        <p className="mt-1 text-sm text-white/55">Economy, average, strike rate, best figures, and four- and five-wicket hauls.</p>
                       </div>
                       <span className="oil-chip">Scorecard metrics</span>
                     </div>
@@ -1482,6 +1521,19 @@ const BowlingStatsPage = () => {
                           onChange={(e) => handleFormChange('stats.bestBowling', e.target.value)}
                           className="oil-modal-input oil-editor-input"
                           placeholder="e.g., 5/25"
+                        />
+                      </div>
+                      <div className="oil-modal-field-card oil-editor-field-card oil-modal-field-card--cyan p-4">
+                        <label className="flex items-center gap-2 text-sm font-semibold text-[#a8e9ef] mb-2">
+                          <AwardIcon className="w-4 h-4" />
+                          Four-Wicket Hauls
+                        </label>
+                        <input
+                          type="number"
+                          value={editForm.stats.fourWickets}
+                          onChange={(e) => handleFormChange('stats.fourWickets', e.target.value === '' ? '' : parseInt(e.target.value) || '')}
+                          className="oil-modal-input oil-editor-input"
+                          placeholder="4-wicket hauls"
                         />
                       </div>
                       <div className="oil-modal-field-card oil-editor-field-card oil-modal-field-card--rose p-4">

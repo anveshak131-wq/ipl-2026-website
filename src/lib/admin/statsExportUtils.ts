@@ -69,6 +69,7 @@ interface ExportRow {
   sixes: number;
   fifties: number;
   hundreds: number;
+  ducks: number;
   bowlingInnings: number;
   balls: number;
   overs: string;
@@ -79,6 +80,7 @@ interface ExportRow {
   bowlingStrikeRate: string;
   economy: string;
   bestBowling: string;
+  fourWickets: number;
   fiveWickets: number;
   transferAcquiredVia: string;
   transferFee: number | string;
@@ -183,6 +185,7 @@ const buildExportRows = (players: ExportPlayer[], teams: ExportTeam[]): ExportRo
       sixes: Number(player.stats?.sixes) || 0,
       fifties: Number(player.stats?.fifties) || 0,
       hundreds: Number(player.stats?.hundreds) || 0,
+      ducks: Number(player.stats?.ducks) || 0,
       bowlingInnings: Number(player.stats?.bowlingInnings) || 0,
       balls: Number(player.stats?.balls) || 0,
       overs: toOvers(player.stats?.balls),
@@ -193,6 +196,7 @@ const buildExportRows = (players: ExportPlayer[], teams: ExportTeam[]): ExportRo
       bowlingStrikeRate: getBowlingStrikeRate(player),
       economy: getEconomy(player),
       bestBowling: String(player.stats?.bestBowling || ''),
+      fourWickets: Number(player.stats?.fourWickets) || 0,
       fiveWickets: Number(player.stats?.fiveWickets) || 0,
       transferAcquiredVia: String(transferInfo.acquiredVia || ''),
       transferFee: transferInfo.transferFee ?? '',
@@ -229,6 +233,7 @@ const battingColumns: readonly Column[] = [
   ['Sixes', 'sixes'],
   ['Fifties', 'fifties'],
   ['Hundreds', 'hundreds'],
+  ['Ducks', 'ducks'],
   ['Transfer Acquired Via', 'transferAcquiredVia'],
   ['Transfer Fee', 'transferFee'],
   ['Transfer Notes', 'transferNotes'],
@@ -262,6 +267,7 @@ const bowlingColumns: readonly Column[] = [
   ['Bowling Strike Rate', 'bowlingStrikeRate'],
   ['Economy', 'economy'],
   ['Best Bowling', 'bestBowling'],
+  ['Four Wickets', 'fourWickets'],
   ['Five Wickets', 'fiveWickets'],
   ['Transfer Acquired Via', 'transferAcquiredVia'],
   ['Transfer Fee', 'transferFee'],

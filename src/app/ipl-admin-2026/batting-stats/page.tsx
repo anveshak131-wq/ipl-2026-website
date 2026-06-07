@@ -45,6 +45,7 @@ const BattingStatsPage = () => {
       sixes: '',
       fifties: '',
       hundreds: '',
+      ducks: '',
       battingAverage: '',
       battingStrikeRate: ''
     }
@@ -192,6 +193,7 @@ const BattingStatsPage = () => {
         sixes: player.stats?.sixes > 0 ? player.stats.sixes : '',
         fifties: player.stats?.fifties > 0 ? player.stats.fifties : '',
         hundreds: player.stats?.hundreds > 0 ? player.stats.hundreds : '',
+        ducks: player.stats?.ducks > 0 ? player.stats.ducks : '',
         battingAverage: displayAvg,
         battingStrikeRate: displaySR
       }
@@ -269,6 +271,7 @@ const BattingStatsPage = () => {
         sixes: editForm.stats.sixes === '' ? (editingPlayer.stats?.sixes || 0) : (typeof editForm.stats.sixes === 'number' ? editForm.stats.sixes : parseInt(editForm.stats.sixes) || 0),
         fifties: editForm.stats.fifties === '' ? (editingPlayer.stats?.fifties || 0) : (typeof editForm.stats.fifties === 'number' ? editForm.stats.fifties : parseInt(editForm.stats.fifties) || 0),
         hundreds: editForm.stats.hundreds === '' ? (editingPlayer.stats?.hundreds || 0) : (typeof editForm.stats.hundreds === 'number' ? editForm.stats.hundreds : parseInt(editForm.stats.hundreds) || 0),
+        ducks: editForm.stats.ducks === '' ? (editingPlayer.stats?.ducks || 0) : (typeof editForm.stats.ducks === 'number' ? editForm.stats.ducks : parseInt(editForm.stats.ducks) || 0),
         // String versions for admin display
         battingAverage: battingAverageStr,
         battingStrikeRate: battingStrikeRateStr,
@@ -1475,7 +1478,7 @@ const BattingStatsPage = () => {
                           <AwardIcon className="w-5 h-5 text-[#f2d39a]" />
                           Milestones and Rates
                         </h3>
-                        <p className="mt-1 text-sm text-white/55">Fifties, centuries, batting average, and strike rate.</p>
+                        <p className="mt-1 text-sm text-white/55">Fifties, centuries, ducks, batting average, and strike rate.</p>
                       </div>
                       <span className="oil-chip">Scorecard metrics</span>
                     </div>
@@ -1508,6 +1511,21 @@ const BattingStatsPage = () => {
                           onChange={(e) => handleFormChange('stats.hundreds', e.target.value === '' ? '' : parseInt(e.target.value) || '')}
                           className="oil-modal-input oil-editor-input"
                           placeholder="100+ scores"
+                        />
+                      </div>
+                      <div className="oil-modal-field-card oil-editor-field-card oil-modal-field-card--cyan p-4">
+                        <label className="flex items-center gap-2 text-sm font-semibold text-[#a8e9ef] mb-2">
+                          <Hash className="w-4 h-4" />
+                          Ducks
+                        </label>
+                        <input
+                          type="number"
+                          id="edit-stats-ducks"
+                          name="statsDucks"
+                          value={editForm.stats.ducks}
+                          onChange={(e) => handleFormChange('stats.ducks', e.target.value === '' ? '' : parseInt(e.target.value) || '')}
+                          className="oil-modal-input oil-editor-input"
+                          placeholder="Zero scores"
                         />
                       </div>
                       <div className="oil-modal-field-card oil-editor-field-card oil-modal-field-card--teal p-4">

@@ -181,6 +181,10 @@ function calculatePlayerStatsUpdates(currentStats, scorecardStats) {
       updates.notOuts = (updates.notOuts || 0) + 1;
     }
 
+    if (batting.runs === 0 && scorecardStats.batting.dismissalType && scorecardStats.batting.dismissalType !== 'not-out') {
+      updates.ducks = (updates.ducks || 0) + 1;
+    }
+
     updates.ballsFaced = (updates.ballsFaced || 0) + batting.balls;
     updates.fours = (updates.fours || 0) + batting.fours;
     updates.sixes = (updates.sixes || 0) + batting.sixes;
@@ -227,6 +231,8 @@ function calculatePlayerStatsUpdates(currentStats, scorecardStats) {
 
     if (bowling.wickets >= 5) {
       updates.fiveWickets = (updates.fiveWickets || 0) + 1;
+    } else if (bowling.wickets >= 4) {
+      updates.fourWickets = (updates.fourWickets || 0) + 1;
     }
 
     const currentBest = updates.bestBowling || '0/0';

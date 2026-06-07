@@ -117,6 +117,10 @@ export function calculatePlayerStatsUpdates(
       updates.notOuts = (updates.notOuts || 0) + 1;
     }
 
+    if (batting.runs === 0 && scorecardStats.batting.dismissalType && scorecardStats.batting.dismissalType !== 'not-out') {
+      updates.ducks = (updates.ducks || 0) + 1;
+    }
+
     // Track balls faced
     updates.ballsFaced = (updates.ballsFaced || 0) + batting.balls;
 
@@ -172,9 +176,11 @@ export function calculatePlayerStatsUpdates(
     updates.wides = (updates.wides || 0) + (bowling.wides || 0);
     updates.noBalls = (updates.noBalls || 0) + (bowling.noBalls || 0);
 
-    // Track bowling milestones (5+ wickets)
+    // Track bowling milestones separately.
     if (bowling.wickets >= 5) {
       updates.fiveWickets = (updates.fiveWickets || 0) + 1;
+    } else if (bowling.wickets >= 4) {
+      updates.fourWickets = (updates.fourWickets || 0) + 1;
     }
 
     // Update best bowling figures

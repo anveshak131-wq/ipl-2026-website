@@ -598,7 +598,10 @@ export const onRequest = async (context) => {
           sixes: parseInt(newPlayer.stats?.sixes) || 0,
           fifties: parseInt(newPlayer.stats?.fifties) || 0,
           hundreds: parseInt(newPlayer.stats?.hundreds) || 0,
+          ducks: parseInt(newPlayer.stats?.ducks) || 0,
           bestBowling: newPlayer.stats?.bestBowling || '-',
+          fourWickets: parseInt(newPlayer.stats?.fourWickets) || 0,
+          fiveWickets: parseInt(newPlayer.stats?.fiveWickets) || 0,
         },
       };
 
@@ -823,6 +826,7 @@ export const onRequest = async (context) => {
           sixes: updatedPlayer.stats?.sixes !== undefined ? (parseInt(updatedPlayer.stats.sixes) || 0) : (previousPlayer.stats?.sixes || 0),
           fifties: updatedPlayer.stats?.fifties !== undefined ? (parseInt(updatedPlayer.stats.fifties) || 0) : (previousPlayer.stats?.fifties || 0),
           hundreds: updatedPlayer.stats?.hundreds !== undefined ? (parseInt(updatedPlayer.stats.hundreds) || 0) : (previousPlayer.stats?.hundreds || 0),
+          ducks: updatedPlayer.stats?.ducks !== undefined ? (parseInt(updatedPlayer.stats.ducks) || 0) : (previousPlayer.stats?.ducks || 0),
           bestBowling: updatedPlayer.stats?.bestBowling !== undefined ? (updatedPlayer.stats.bestBowling || '-') : (previousPlayer.stats?.bestBowling || '-'),
           // Batting-specific stats - update if provided
           battingInnings: updatedPlayer.stats?.battingInnings !== undefined ? (parseInt(updatedPlayer.stats.battingInnings) || 0) : (previousPlayer.stats?.battingInnings || 0),
@@ -854,6 +858,7 @@ export const onRequest = async (context) => {
             return previousPlayer.stats?.bowlingAverage || 0;
           })(),
           bowlingStrikeRate: updatedPlayer.stats?.bowlingStrikeRate !== undefined ? (updatedPlayer.stats.bowlingStrikeRate || '') : (previousPlayer.stats?.bowlingStrikeRate || ''),
+          fourWickets: updatedPlayer.stats?.fourWickets !== undefined ? (parseInt(updatedPlayer.stats.fourWickets) || 0) : (previousPlayer.stats?.fourWickets || 0),
           fiveWickets: updatedPlayer.stats?.fiveWickets !== undefined ? (parseInt(updatedPlayer.stats.fiveWickets) || 0) : (previousPlayer.stats?.fiveWickets || 0),
         },
       };
