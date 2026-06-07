@@ -1195,8 +1195,8 @@ const BattingStatsPage = () => {
         {/* Edit Modal */}
         {showEditModal && (
           <div className="oil-modal-backdrop fixed inset-0 z-[9999] flex items-center justify-center p-4">
-            <div className="oil-modal-shell w-full max-w-5xl max-h-[95vh] overflow-hidden text-white">
-              <div className="oil-modal-header p-6">
+            <div className="oil-modal-shell oil-editor-shell w-full max-w-6xl max-h-[96vh] overflow-hidden text-white">
+              <div className="oil-modal-header oil-editor-header p-6">
                 <div className="relative z-10 flex items-start justify-between gap-5">
                   <div className="flex items-start gap-4">
                     <div className="oil-modal-icon">
@@ -1213,6 +1213,20 @@ const BattingStatsPage = () => {
                       </p>
                     </div>
                   </div>
+                  <div className="hidden lg:grid grid-cols-3 gap-2 text-right">
+                    <div className="rounded-2xl border border-[#d7a85b]/25 bg-[#d7a85b]/10 px-4 py-3">
+                      <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#f2d39a]">Runs</p>
+                      <p className="mt-1 text-xl font-black text-white">{editForm.stats.runs || 0}</p>
+                    </div>
+                    <div className="rounded-2xl border border-[#4cc39a]/25 bg-[#4cc39a]/10 px-4 py-3">
+                      <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#9cf2c8]">Avg</p>
+                      <p className="mt-1 text-xl font-black text-white">{editForm.stats.battingAverage || '-'}</p>
+                    </div>
+                    <div className="rounded-2xl border border-[#4fb6c4]/25 bg-[#4fb6c4]/10 px-4 py-3">
+                      <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#a8e9ef]">SR</p>
+                      <p className="mt-1 text-xl font-black text-white">{editForm.stats.battingStrikeRate || '-'}</p>
+                    </div>
+                  </div>
                   <button
                     onClick={handleCancelEdit}
                     className="oil-modal-close flex-shrink-0"
@@ -1223,10 +1237,10 @@ const BattingStatsPage = () => {
                 </div>
               </div>
 
-              <div className="oil-modal-body custom-scrollbar overflow-y-auto max-h-[calc(95vh-176px)]">
-                <div className="oil-modal-strip p-6 border-b border-white/10">
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="oil-modal-readonly-card p-4">
+              <div className="oil-modal-body oil-editor-body custom-scrollbar overflow-y-auto max-h-[calc(95vh-176px)]">
+                <div className="oil-modal-strip oil-editor-strip p-6 border-b border-white/10">
+                  <div className="grid grid-cols-1 lg:grid-cols-[1.15fr_0.85fr_0.85fr_1fr] gap-4">
+                    <div className="oil-modal-readonly-card oil-editor-identity-card p-4">
                       <label className="flex items-center gap-2 text-xs font-semibold text-[#f2d39a] mb-2 uppercase tracking-wide">
                         <User className="w-3.5 h-3.5" />
                         Player Name
@@ -1242,7 +1256,7 @@ const BattingStatsPage = () => {
                       </div>
                     </div>
 
-                    <div className="oil-modal-readonly-card p-4">
+                    <div className="oil-modal-readonly-card oil-editor-identity-card p-4">
                       <label className="flex items-center gap-2 text-xs font-semibold text-[#9cf2c8] mb-2 uppercase tracking-wide">
                         <Activity className="w-3.5 h-3.5" />
                         Role
@@ -1260,7 +1274,7 @@ const BattingStatsPage = () => {
                       </div>
                     </div>
 
-                    <div className="oil-modal-readonly-card p-4">
+                    <div className="oil-modal-readonly-card oil-editor-identity-card p-4">
                       <label className="flex items-center gap-2 text-xs font-semibold text-[#a8e9ef] mb-2 uppercase tracking-wide">
                         <Shirt className="w-3.5 h-3.5" />
                         Jersey Number
@@ -1275,11 +1289,36 @@ const BattingStatsPage = () => {
                         </div>
                       </div>
                     </div>
+
+                    <div className="oil-modal-readonly-card oil-editor-score-card p-4">
+                      <label className="flex items-center gap-2 text-xs font-semibold text-[#ffaaa5] mb-3 uppercase tracking-wide">
+                        <BarChart3 className="w-3.5 h-3.5" />
+                        Batting Snapshot
+                      </label>
+                      <div className="grid grid-cols-2 gap-2">
+                        <div className="rounded-xl bg-white/5 px-3 py-2">
+                          <p className="text-[10px] uppercase tracking-[0.14em] text-white/45">Top Score</p>
+                          <p className="text-lg font-black text-[#f2d39a]">{editForm.stats.highest || '-'}</p>
+                        </div>
+                        <div className="rounded-xl bg-white/5 px-3 py-2">
+                          <p className="text-[10px] uppercase tracking-[0.14em] text-white/45">Balls</p>
+                          <p className="text-lg font-black text-[#9cf2c8]">{editForm.stats.ballsFaced || 0}</p>
+                        </div>
+                        <div className="rounded-xl bg-white/5 px-3 py-2">
+                          <p className="text-[10px] uppercase tracking-[0.14em] text-white/45">4s</p>
+                          <p className="text-lg font-black text-[#a8e9ef]">{editForm.stats.fours || 0}</p>
+                        </div>
+                        <div className="rounded-xl bg-white/5 px-3 py-2">
+                          <p className="text-[10px] uppercase tracking-[0.14em] text-white/45">6s</p>
+                          <p className="text-lg font-black text-[#ffaaa5]">{editForm.stats.sixes || 0}</p>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
 
                 <div className="space-y-6 p-6">
-                  <section className="oil-modal-section p-5">
+                  <section className="oil-modal-section oil-editor-section p-5">
                     <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
                       <div>
                         <h3 className="flex items-center gap-2 text-lg font-bold text-white">
@@ -1291,7 +1330,7 @@ const BattingStatsPage = () => {
                       <span className="oil-chip">Innings setup</span>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <div className="oil-modal-field-card oil-modal-field-card--gold p-4">
+                      <div className="oil-modal-field-card oil-editor-field-card oil-modal-field-card--gold p-4">
                         <label className="flex items-center gap-2 text-sm font-semibold text-[#f2d39a] mb-2">
                           <Calendar className="w-4 h-4" />
                           Matches
@@ -1302,11 +1341,11 @@ const BattingStatsPage = () => {
                           name="statsMatches"
                           value={editForm.stats.matches}
                           onChange={(e) => handleFormChange('stats.matches', e.target.value === '' ? '' : parseInt(e.target.value) || '')}
-                          className="oil-modal-input"
+                          className="oil-modal-input oil-editor-input"
                           placeholder="Matches played"
                         />
                       </div>
-                      <div className="oil-modal-field-card oil-modal-field-card--teal p-4">
+                      <div className="oil-modal-field-card oil-editor-field-card oil-modal-field-card--teal p-4">
                         <label className="flex items-center gap-2 text-sm font-semibold text-[#9cf2c8] mb-2">
                           <TargetIcon className="w-4 h-4" />
                           Batting Innings
@@ -1317,11 +1356,11 @@ const BattingStatsPage = () => {
                           name="statsBattingInnings"
                           value={editForm.stats.battingInnings}
                           onChange={(e) => handleFormChange('stats.battingInnings', e.target.value === '' ? '' : parseInt(e.target.value) || '')}
-                          className="oil-modal-input"
+                          className="oil-modal-input oil-editor-input"
                           placeholder="Innings batted"
                         />
                       </div>
-                      <div className="oil-modal-field-card oil-modal-field-card--cyan p-4">
+                      <div className="oil-modal-field-card oil-editor-field-card oil-modal-field-card--cyan p-4">
                         <label className="flex items-center gap-2 text-sm font-semibold text-[#a8e9ef] mb-2">
                           <ShieldCheck className="w-4 h-4" />
                           Not Outs
@@ -1332,14 +1371,14 @@ const BattingStatsPage = () => {
                           name="statsNotOuts"
                           value={editForm.stats.notOuts}
                           onChange={(e) => handleFormChange('stats.notOuts', e.target.value === '' ? '' : parseInt(e.target.value) || '')}
-                          className="oil-modal-input"
+                          className="oil-modal-input oil-editor-input"
                           placeholder="Not-out innings"
                         />
                       </div>
                     </div>
                   </section>
 
-                  <section className="oil-modal-section p-5">
+                  <section className="oil-modal-section oil-editor-section p-5">
                     <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
                       <div>
                         <h3 className="flex items-center gap-2 text-lg font-bold text-white">
@@ -1351,7 +1390,7 @@ const BattingStatsPage = () => {
                       <span className="oil-chip">Batting output</span>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                      <div className="oil-modal-field-card oil-modal-field-card--gold p-4">
+                      <div className="oil-modal-field-card oil-editor-field-card oil-modal-field-card--gold p-4">
                         <label className="flex items-center gap-2 text-sm font-semibold text-[#f2d39a] mb-2">
                           <TargetIcon className="w-4 h-4" />
                           Runs
@@ -1362,11 +1401,11 @@ const BattingStatsPage = () => {
                           name="statsRuns"
                           value={editForm.stats.runs}
                           onChange={(e) => handleFormChange('stats.runs', e.target.value === '' ? '' : parseInt(e.target.value) || '')}
-                          className="oil-modal-input"
+                          className="oil-modal-input oil-editor-input"
                           placeholder="Total runs"
                         />
                       </div>
-                      <div className="oil-modal-field-card oil-modal-field-card--cyan p-4">
+                      <div className="oil-modal-field-card oil-editor-field-card oil-modal-field-card--cyan p-4">
                         <label className="flex items-center gap-2 text-sm font-semibold text-[#a8e9ef] mb-2">
                           <Award className="w-4 h-4" />
                           Top Score
@@ -1377,11 +1416,11 @@ const BattingStatsPage = () => {
                           name="statsHighest"
                           value={editForm.stats.highest}
                           onChange={(e) => handleFormChange('stats.highest', e.target.value === '' ? '' : parseInt(e.target.value) || '')}
-                          className="oil-modal-input"
+                          className="oil-modal-input oil-editor-input"
                           placeholder="Highest score"
                         />
                       </div>
-                      <div className="oil-modal-field-card oil-modal-field-card--teal p-4">
+                      <div className="oil-modal-field-card oil-editor-field-card oil-modal-field-card--teal p-4">
                         <label className="flex items-center gap-2 text-sm font-semibold text-[#9cf2c8] mb-2">
                           <ZapIcon className="w-4 h-4" />
                           Balls Faced
@@ -1392,11 +1431,11 @@ const BattingStatsPage = () => {
                           name="statsBallsFaced"
                           value={editForm.stats.ballsFaced}
                           onChange={(e) => handleFormChange('stats.ballsFaced', e.target.value === '' ? '' : parseInt(e.target.value) || '')}
-                          className="oil-modal-input"
+                          className="oil-modal-input oil-editor-input"
                           placeholder="Balls faced"
                         />
                       </div>
-                      <div className="oil-modal-field-card oil-modal-field-card--copper p-4">
+                      <div className="oil-modal-field-card oil-editor-field-card oil-modal-field-card--copper p-4">
                         <label className="flex items-center gap-2 text-sm font-semibold text-amber-100 mb-2">
                           <Hash className="w-4 h-4" />
                           Fours
@@ -1407,11 +1446,11 @@ const BattingStatsPage = () => {
                           name="statsFours"
                           value={editForm.stats.fours}
                           onChange={(e) => handleFormChange('stats.fours', e.target.value === '' ? '' : parseInt(e.target.value) || '')}
-                          className="oil-modal-input"
+                          className="oil-modal-input oil-editor-input"
                           placeholder="Boundary fours"
                         />
                       </div>
-                      <div className="oil-modal-field-card oil-modal-field-card--rose p-4">
+                      <div className="oil-modal-field-card oil-editor-field-card oil-modal-field-card--rose p-4">
                         <label className="flex items-center gap-2 text-sm font-semibold text-[#ffaaa5] mb-2">
                           <ZapIcon className="w-4 h-4" />
                           Sixes
@@ -1422,14 +1461,14 @@ const BattingStatsPage = () => {
                           name="statsSixes"
                           value={editForm.stats.sixes}
                           onChange={(e) => handleFormChange('stats.sixes', e.target.value === '' ? '' : parseInt(e.target.value) || '')}
-                          className="oil-modal-input"
+                          className="oil-modal-input oil-editor-input"
                           placeholder="Boundary sixes"
                         />
                       </div>
                     </div>
                   </section>
 
-                  <section className="oil-modal-section p-5">
+                  <section className="oil-modal-section oil-editor-section p-5">
                     <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
                       <div>
                         <h3 className="flex items-center gap-2 text-lg font-bold text-white">
@@ -1441,7 +1480,7 @@ const BattingStatsPage = () => {
                       <span className="oil-chip">Scorecard metrics</span>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                      <div className="oil-modal-field-card oil-modal-field-card--copper p-4">
+                      <div className="oil-modal-field-card oil-editor-field-card oil-modal-field-card--copper p-4">
                         <label className="flex items-center gap-2 text-sm font-semibold text-amber-100 mb-2">
                           <AwardIcon className="w-4 h-4" />
                           Fifties
@@ -1452,11 +1491,11 @@ const BattingStatsPage = () => {
                           name="statsFifties"
                           value={editForm.stats.fifties}
                           onChange={(e) => handleFormChange('stats.fifties', e.target.value === '' ? '' : parseInt(e.target.value) || '')}
-                          className="oil-modal-input"
+                          className="oil-modal-input oil-editor-input"
                           placeholder="50+ scores"
                         />
                       </div>
-                      <div className="oil-modal-field-card oil-modal-field-card--rose p-4">
+                      <div className="oil-modal-field-card oil-editor-field-card oil-modal-field-card--rose p-4">
                         <label className="flex items-center gap-2 text-sm font-semibold text-[#ffaaa5] mb-2">
                           <AwardIcon className="w-4 h-4" />
                           Centuries
@@ -1467,11 +1506,11 @@ const BattingStatsPage = () => {
                           name="statsHundreds"
                           value={editForm.stats.hundreds}
                           onChange={(e) => handleFormChange('stats.hundreds', e.target.value === '' ? '' : parseInt(e.target.value) || '')}
-                          className="oil-modal-input"
+                          className="oil-modal-input oil-editor-input"
                           placeholder="100+ scores"
                         />
                       </div>
-                      <div className="oil-modal-field-card oil-modal-field-card--teal p-4">
+                      <div className="oil-modal-field-card oil-editor-field-card oil-modal-field-card--teal p-4">
                         <label className="flex items-center gap-2 text-sm font-semibold text-[#9cf2c8] mb-2">
                           <BarChart3 className="w-4 h-4" />
                           Batting Average
@@ -1482,11 +1521,11 @@ const BattingStatsPage = () => {
                           name="statsBattingAverage"
                           value={editForm.stats.battingAverage}
                           onChange={(e) => handleFormChange('stats.battingAverage', e.target.value)}
-                          className="oil-modal-input"
+                          className="oil-modal-input oil-editor-input"
                           placeholder="e.g., 45.67"
                         />
                       </div>
-                      <div className="oil-modal-field-card oil-modal-field-card--gold p-4">
+                      <div className="oil-modal-field-card oil-editor-field-card oil-modal-field-card--gold p-4">
                         <label className="flex items-center gap-2 text-sm font-semibold text-[#f2d39a] mb-2">
                           <ZapIcon className="w-4 h-4" />
                           Strike Rate
@@ -1497,7 +1536,7 @@ const BattingStatsPage = () => {
                           name="statsBattingStrikeRate"
                           value={editForm.stats.battingStrikeRate}
                           onChange={(e) => handleFormChange('stats.battingStrikeRate', e.target.value)}
-                          className="oil-modal-input"
+                          className="oil-modal-input oil-editor-input"
                           placeholder="e.g., 145.50"
                         />
                       </div>
@@ -1506,7 +1545,7 @@ const BattingStatsPage = () => {
                 </div>
               </div>
 
-              <div className="oil-modal-footer flex flex-col-reverse gap-3 p-5 sm:flex-row sm:items-center sm:justify-between">
+              <div className="oil-modal-footer oil-editor-footer flex flex-col-reverse gap-3 p-5 sm:flex-row sm:items-center sm:justify-between">
                 <p className="text-xs font-medium text-white/60">Changes update the IPL batting table and export-ready player sheet.</p>
                 <div className="oil-modal-footer-actions">
                   <button onClick={handleCancelEdit} className="oil-btn-secondary px-5 py-2.5">

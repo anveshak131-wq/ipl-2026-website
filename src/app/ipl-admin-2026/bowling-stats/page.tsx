@@ -1189,8 +1189,8 @@ const BowlingStatsPage = () => {
         {/* Edit Modal */}
         {showEditModal && (
           <div className="oil-modal-backdrop fixed inset-0 z-[9999] flex items-center justify-center p-4">
-            <div className="oil-modal-shell w-full max-w-5xl max-h-[95vh] overflow-hidden text-white">
-              <div className="oil-modal-header p-6">
+            <div className="oil-modal-shell oil-editor-shell w-full max-w-6xl max-h-[96vh] overflow-hidden text-white">
+              <div className="oil-modal-header oil-editor-header p-6">
                 <div className="relative z-10 flex items-start justify-between gap-5">
                   <div className="flex items-start gap-4">
                     <div className="oil-modal-icon">
@@ -1207,6 +1207,20 @@ const BowlingStatsPage = () => {
                       </p>
                     </div>
                   </div>
+                  <div className="hidden lg:grid grid-cols-3 gap-2 text-right">
+                    <div className="rounded-2xl border border-[#4cc39a]/25 bg-[#4cc39a]/10 px-4 py-3">
+                      <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#9cf2c8]">Wickets</p>
+                      <p className="mt-1 text-xl font-black text-white">{editForm.stats.wickets || 0}</p>
+                    </div>
+                    <div className="rounded-2xl border border-[#d7a85b]/25 bg-[#d7a85b]/10 px-4 py-3">
+                      <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#f2d39a]">Econ</p>
+                      <p className="mt-1 text-xl font-black text-white">{editForm.stats.economy || '-'}</p>
+                    </div>
+                    <div className="rounded-2xl border border-[#4fb6c4]/25 bg-[#4fb6c4]/10 px-4 py-3">
+                      <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#a8e9ef]">SR</p>
+                      <p className="mt-1 text-xl font-black text-white">{editForm.stats.bowlingStrikeRate || '-'}</p>
+                    </div>
+                  </div>
                   <button
                     onClick={handleCancelEdit}
                     className="oil-modal-close flex-shrink-0"
@@ -1217,10 +1231,10 @@ const BowlingStatsPage = () => {
                 </div>
               </div>
 
-              <div className="oil-modal-body custom-scrollbar overflow-y-auto max-h-[calc(95vh-176px)]">
-                <div className="oil-modal-strip p-6 border-b border-white/10">
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="oil-modal-readonly-card p-4">
+              <div className="oil-modal-body oil-editor-body custom-scrollbar overflow-y-auto max-h-[calc(95vh-176px)]">
+                <div className="oil-modal-strip oil-editor-strip p-6 border-b border-white/10">
+                  <div className="grid grid-cols-1 lg:grid-cols-[1.15fr_0.85fr_0.85fr_1fr] gap-4">
+                    <div className="oil-modal-readonly-card oil-editor-identity-card p-4">
                       <label className="flex items-center gap-2 text-xs font-semibold text-[#f2d39a] mb-2 uppercase tracking-wide">
                         <User className="w-3.5 h-3.5" />
                         Player Name
@@ -1236,7 +1250,7 @@ const BowlingStatsPage = () => {
                       </div>
                     </div>
 
-                    <div className="oil-modal-readonly-card p-4">
+                    <div className="oil-modal-readonly-card oil-editor-identity-card p-4">
                       <label className="flex items-center gap-2 text-xs font-semibold text-[#9cf2c8] mb-2 uppercase tracking-wide">
                         <Activity className="w-3.5 h-3.5" />
                         Role
@@ -1254,7 +1268,7 @@ const BowlingStatsPage = () => {
                       </div>
                     </div>
 
-                    <div className="oil-modal-readonly-card p-4">
+                    <div className="oil-modal-readonly-card oil-editor-identity-card p-4">
                       <label className="flex items-center gap-2 text-xs font-semibold text-[#a8e9ef] mb-2 uppercase tracking-wide">
                         <Shirt className="w-3.5 h-3.5" />
                         Jersey Number
@@ -1269,11 +1283,36 @@ const BowlingStatsPage = () => {
                         </div>
                       </div>
                     </div>
+
+                    <div className="oil-modal-readonly-card oil-editor-score-card p-4">
+                      <label className="flex items-center gap-2 text-xs font-semibold text-[#ffaaa5] mb-3 uppercase tracking-wide">
+                        <Gauge className="w-3.5 h-3.5" />
+                        Bowling Snapshot
+                      </label>
+                      <div className="grid grid-cols-2 gap-2">
+                        <div className="rounded-xl bg-white/5 px-3 py-2">
+                          <p className="text-[10px] uppercase tracking-[0.14em] text-white/45">Best</p>
+                          <p className="text-lg font-black text-[#f2d39a]">{editForm.stats.bestBowling || '-'}</p>
+                        </div>
+                        <div className="rounded-xl bg-white/5 px-3 py-2">
+                          <p className="text-[10px] uppercase tracking-[0.14em] text-white/45">Balls</p>
+                          <p className="text-lg font-black text-[#9cf2c8]">{editForm.stats.balls || 0}</p>
+                        </div>
+                        <div className="rounded-xl bg-white/5 px-3 py-2">
+                          <p className="text-[10px] uppercase tracking-[0.14em] text-white/45">Maidens</p>
+                          <p className="text-lg font-black text-[#a8e9ef]">{editForm.stats.maidens || 0}</p>
+                        </div>
+                        <div className="rounded-xl bg-white/5 px-3 py-2">
+                          <p className="text-[10px] uppercase tracking-[0.14em] text-white/45">5W</p>
+                          <p className="text-lg font-black text-[#ffaaa5]">{editForm.stats.fiveWickets || 0}</p>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
 
                 <div className="space-y-6 p-6">
-                  <section className="oil-modal-section p-5">
+                  <section className="oil-modal-section oil-editor-section p-5">
                     <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
                       <div>
                         <h3 className="flex items-center gap-2 text-lg font-bold text-white">
@@ -1285,7 +1324,7 @@ const BowlingStatsPage = () => {
                       <span className="oil-chip">Spell setup</span>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <div className="oil-modal-field-card oil-modal-field-card--gold p-4">
+                      <div className="oil-modal-field-card oil-editor-field-card oil-modal-field-card--gold p-4">
                         <label className="flex items-center gap-2 text-sm font-semibold text-[#f2d39a] mb-2">
                           <Calendar className="w-4 h-4" />
                           Matches
@@ -1294,11 +1333,11 @@ const BowlingStatsPage = () => {
                           type="number"
                           value={editForm.stats.matches}
                           onChange={(e) => handleFormChange('stats.matches', e.target.value === '' ? '' : parseInt(e.target.value) || '')}
-                          className="oil-modal-input"
+                          className="oil-modal-input oil-editor-input"
                           placeholder="Matches played"
                         />
                       </div>
-                      <div className="oil-modal-field-card oil-modal-field-card--teal p-4">
+                      <div className="oil-modal-field-card oil-editor-field-card oil-modal-field-card--teal p-4">
                         <label className="flex items-center gap-2 text-sm font-semibold text-[#9cf2c8] mb-2">
                           <TargetIcon className="w-4 h-4" />
                           Bowling Innings
@@ -1307,11 +1346,11 @@ const BowlingStatsPage = () => {
                           type="number"
                           value={editForm.stats.bowlingInnings}
                           onChange={(e) => handleFormChange('stats.bowlingInnings', e.target.value === '' ? '' : parseInt(e.target.value) || '')}
-                          className="oil-modal-input"
+                          className="oil-modal-input oil-editor-input"
                           placeholder="Innings bowled"
                         />
                       </div>
-                      <div className="oil-modal-field-card oil-modal-field-card--cyan p-4">
+                      <div className="oil-modal-field-card oil-editor-field-card oil-modal-field-card--cyan p-4">
                         <label className="flex items-center gap-2 text-sm font-semibold text-[#a8e9ef] mb-2">
                           <ZapIcon className="w-4 h-4" />
                           Balls
@@ -1320,14 +1359,14 @@ const BowlingStatsPage = () => {
                           type="number"
                           value={editForm.stats.balls}
                           onChange={(e) => handleFormChange('stats.balls', e.target.value === '' ? '' : parseInt(e.target.value) || '')}
-                          className="oil-modal-input"
+                          className="oil-modal-input oil-editor-input"
                           placeholder="Legal balls"
                         />
                       </div>
                     </div>
                   </section>
 
-                  <section className="oil-modal-section p-5">
+                  <section className="oil-modal-section oil-editor-section p-5">
                     <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
                       <div>
                         <h3 className="flex items-center gap-2 text-lg font-bold text-white">
@@ -1339,7 +1378,7 @@ const BowlingStatsPage = () => {
                       <span className="oil-chip">Wicket output</span>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                      <div className="oil-modal-field-card oil-modal-field-card--teal p-4">
+                      <div className="oil-modal-field-card oil-editor-field-card oil-modal-field-card--teal p-4">
                         <label className="flex items-center gap-2 text-sm font-semibold text-[#9cf2c8] mb-2">
                           <TargetIcon className="w-4 h-4" />
                           Wickets
@@ -1348,11 +1387,11 @@ const BowlingStatsPage = () => {
                           type="number"
                           value={editForm.stats.wickets}
                           onChange={(e) => handleFormChange('stats.wickets', e.target.value === '' ? '' : parseInt(e.target.value) || '')}
-                          className="oil-modal-input"
+                          className="oil-modal-input oil-editor-input"
                           placeholder="Wickets taken"
                         />
                       </div>
-                      <div className="oil-modal-field-card oil-modal-field-card--cyan p-4">
+                      <div className="oil-modal-field-card oil-editor-field-card oil-modal-field-card--cyan p-4">
                         <label className="flex items-center gap-2 text-sm font-semibold text-[#a8e9ef] mb-2">
                           <ShieldCheck className="w-4 h-4" />
                           Maiden Overs
@@ -1361,11 +1400,11 @@ const BowlingStatsPage = () => {
                           type="number"
                           value={editForm.stats.maidens}
                           onChange={(e) => handleFormChange('stats.maidens', e.target.value === '' ? '' : parseInt(e.target.value) || '')}
-                          className="oil-modal-input"
+                          className="oil-modal-input oil-editor-input"
                           placeholder="Maidens"
                         />
                       </div>
-                      <div className="oil-modal-field-card oil-modal-field-card--copper p-4">
+                      <div className="oil-modal-field-card oil-editor-field-card oil-modal-field-card--copper p-4">
                         <label className="flex items-center gap-2 text-sm font-semibold text-amber-100 mb-2">
                           <BarChart3 className="w-4 h-4" />
                           Runs Conceded
@@ -1374,14 +1413,14 @@ const BowlingStatsPage = () => {
                           type="number"
                           value={editForm.stats.runsConceded}
                           onChange={(e) => handleFormChange('stats.runsConceded', e.target.value === '' ? '' : parseInt(e.target.value) || '')}
-                          className="oil-modal-input"
+                          className="oil-modal-input oil-editor-input"
                           placeholder="Runs conceded"
                         />
                       </div>
                     </div>
                   </section>
 
-                  <section className="oil-modal-section p-5">
+                  <section className="oil-modal-section oil-editor-section p-5">
                     <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
                       <div>
                         <h3 className="flex items-center gap-2 text-lg font-bold text-white">
@@ -1393,7 +1432,7 @@ const BowlingStatsPage = () => {
                       <span className="oil-chip">Scorecard metrics</span>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                      <div className="oil-modal-field-card oil-modal-field-card--teal p-4">
+                      <div className="oil-modal-field-card oil-editor-field-card oil-modal-field-card--teal p-4">
                         <label className="flex items-center gap-2 text-sm font-semibold text-[#9cf2c8] mb-2">
                           <Gauge className="w-4 h-4" />
                           Economy
@@ -1402,11 +1441,11 @@ const BowlingStatsPage = () => {
                           type="text"
                           value={editForm.stats.economy}
                           onChange={(e) => handleFormChange('stats.economy', e.target.value)}
-                          className="oil-modal-input"
+                          className="oil-modal-input oil-editor-input"
                           placeholder="e.g., 8.25"
                         />
                       </div>
-                      <div className="oil-modal-field-card oil-modal-field-card--cyan p-4">
+                      <div className="oil-modal-field-card oil-editor-field-card oil-modal-field-card--cyan p-4">
                         <label className="flex items-center gap-2 text-sm font-semibold text-[#a8e9ef] mb-2">
                           <BarChart3 className="w-4 h-4" />
                           Bowling Average
@@ -1415,11 +1454,11 @@ const BowlingStatsPage = () => {
                           type="text"
                           value={editForm.stats.bowlingAverage}
                           onChange={(e) => handleFormChange('stats.bowlingAverage', e.target.value)}
-                          className="oil-modal-input"
+                          className="oil-modal-input oil-editor-input"
                           placeholder="e.g., 25.50"
                         />
                       </div>
-                      <div className="oil-modal-field-card oil-modal-field-card--gold p-4">
+                      <div className="oil-modal-field-card oil-editor-field-card oil-modal-field-card--gold p-4">
                         <label className="flex items-center gap-2 text-sm font-semibold text-[#f2d39a] mb-2">
                           <ZapIcon className="w-4 h-4" />
                           Strike Rate
@@ -1428,11 +1467,11 @@ const BowlingStatsPage = () => {
                           type="text"
                           value={editForm.stats.bowlingStrikeRate}
                           onChange={(e) => handleFormChange('stats.bowlingStrikeRate', e.target.value)}
-                          className="oil-modal-input"
+                          className="oil-modal-input oil-editor-input"
                           placeholder="e.g., 18.5"
                         />
                       </div>
-                      <div className="oil-modal-field-card oil-modal-field-card--copper p-4">
+                      <div className="oil-modal-field-card oil-editor-field-card oil-modal-field-card--copper p-4">
                         <label className="flex items-center gap-2 text-sm font-semibold text-amber-100 mb-2">
                           <AwardIcon className="w-4 h-4" />
                           Best Bowling
@@ -1441,11 +1480,11 @@ const BowlingStatsPage = () => {
                           type="text"
                           value={editForm.stats.bestBowling}
                           onChange={(e) => handleFormChange('stats.bestBowling', e.target.value)}
-                          className="oil-modal-input"
+                          className="oil-modal-input oil-editor-input"
                           placeholder="e.g., 5/25"
                         />
                       </div>
-                      <div className="oil-modal-field-card oil-modal-field-card--rose p-4">
+                      <div className="oil-modal-field-card oil-editor-field-card oil-modal-field-card--rose p-4">
                         <label className="flex items-center gap-2 text-sm font-semibold text-[#ffaaa5] mb-2">
                           <AwardIcon className="w-4 h-4" />
                           Five-Wicket Hauls
@@ -1454,7 +1493,7 @@ const BowlingStatsPage = () => {
                           type="number"
                           value={editForm.stats.fiveWickets}
                           onChange={(e) => handleFormChange('stats.fiveWickets', e.target.value === '' ? '' : parseInt(e.target.value) || '')}
-                          className="oil-modal-input"
+                          className="oil-modal-input oil-editor-input"
                           placeholder="5-wicket hauls"
                         />
                       </div>
@@ -1463,7 +1502,7 @@ const BowlingStatsPage = () => {
                 </div>
               </div>
 
-              <div className="oil-modal-footer flex flex-col-reverse gap-3 p-5 sm:flex-row sm:items-center sm:justify-between">
+              <div className="oil-modal-footer oil-editor-footer flex flex-col-reverse gap-3 p-5 sm:flex-row sm:items-center sm:justify-between">
                 <p className="text-xs font-medium text-white/60">Changes update the IPL bowling table and export-ready player sheet.</p>
                 <div className="oil-modal-footer-actions">
                   <button onClick={handleCancelEdit} className="oil-btn-secondary px-5 py-2.5">
