@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useLeague } from '@/contexts/LeagueContext';
 import ModernDialog from '@/components/admin/ModernDialog';
 import LeagueSwitch from '@/components/admin/LeagueSwitch';
+import PlayersStatsSubNav from '@/components/admin/PlayersStatsSubNav';
 import WPLTeamsManager from '@/components/admin/WPLTeamsManager';
 import { Player, Team } from '@/types';
 import { api } from '@/lib/data';
@@ -23,6 +24,7 @@ import AdminPlayerDetailsModal from '@/components/admin/players/AdminPlayerDetai
 import AdminPlayersGridPanel from '@/components/admin/players/AdminPlayersGridPanel';
 import AdminPlayerBasicInfoSection from '@/components/admin/players/AdminPlayerBasicInfoSection';
 import AdminPlayerFormProgress from '@/components/admin/players/AdminPlayerFormProgress';
+import { getQuickFilterCounts, PLAYER_QUICK_FILTERS, playerMatchesQuickFilter, PlayerQuickFilterId } from '@/lib/admin/playerQuickFilters';
 import '@/styles/flags.css';
 
 // Data Integrity Helper Functions
@@ -188,6 +190,7 @@ export default function AdminPlayers() {
   const [showForm, setShowForm] = useState(false);
   const [editingPlayer, setEditingPlayer] = useState<Player | null>(null);
   const [selectedTeam, setSelectedTeam] = useState<string>('all');
+  const [quickFilter, setQuickFilter] = useState<PlayerQuickFilterId>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [sortField, setSortField] = useState<string | null>(null);
@@ -884,6 +887,7 @@ export default function AdminPlayers() {
   const isFilteredExport = () => {
     return (
       selectedTeam !== 'all' ||
+      quickFilter !== 'all' ||
       selectedRole !== 'all' ||
       searchQuery.trim().length > 0 ||
       hasAdvancedFiltersActive()
@@ -3906,6 +3910,12 @@ export default function AdminPlayers() {
     });
   }
 
+  const quickFilterCounts = getQuickFilterCounts(searchFilteredPlayers, 'players');
+
+  if (quickFilter !== 'all') {
+    searchFilteredPlayers = searchFilteredPlayers.filter(player => playerMatchesQuickFilter(player, quickFilter, 'players'));
+  }
+
   // Auth handled by layout, no need for auth check
 
   if (isLoading) {
@@ -3922,6 +3932,8 @@ export default function AdminPlayers() {
     <div className="ipl-oil-admin-page min-h-screen">
       <div className="flex-1 relative">
         <div className="p-6 lg:p-8 relative">
+          <PlayersStatsSubNav />
+
           {/* Enhanced Modern Header */}
           <div className="mb-8">
             <div className="oil-hero p-6 lg:p-8 mb-8 shadow-2xl">
@@ -4493,11 +4505,35 @@ export default function AdminPlayers() {
               </div>
             </div>
 
+            <div className="relative z-10 mt-4 flex flex-wrap items-center gap-2 border-t border-white/10 pt-4">
+              {PLAYER_QUICK_FILTERS.map((filter) => {
+                const isActive = quickFilter === filter.id;
+
+                return (
+                  <button
+                    key={filter.id}
+                    type="button"
+                    onClick={() => setQuickFilter(filter.id)}
+                    className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-semibold transition-all ${
+                      isActive
+                        ? 'border-[#d7a85b]/45 bg-[#d7a85b]/20 text-white shadow-lg shadow-[#d7a85b]/10'
+                        : 'border-white/10 bg-white/[0.04] text-white/70 hover:border-white/20 hover:bg-white/[0.08] hover:text-white'
+                    }`}
+                  >
+                    <span>{filter.label}</span>
+                    <span className={`rounded-full px-2 py-0.5 text-[11px] ${isActive ? 'bg-black/25 text-white' : 'bg-white/10 text-white/55'}`}>
+                      {quickFilterCounts[filter.id]}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+
             {/* Enhanced Results Info and Quick Actions */}
               <div className="flex items-center justify-between flex-wrap gap-3 mt-4 pt-4 border-t border-white/10">
                 <div className="flex items-center gap-3 flex-wrap">
                 <div className="text-sm text-gray-300">
-                    Showing <span className="font-bold text-white text-base">{searchFilteredPlayers.length}</span> of <span className="font-bold text-white text-base">{filteredPlayers.length}</span> squad records
+                    Showing <span className="font-bold text-white text-base">{searchFilteredPlayers.length}</span> of <span className="font-bold text-white text-base">{quickFilterCounts.all}</span> squad records
                   </div>
                 {selectedTeam !== 'all' && (
                     <div className="flex items-center gap-2 px-3 py-1.5 bg-[#4cc39a]/10 border border-[#4cc39a]/30 rounded-lg">
@@ -4510,6 +4546,14 @@ export default function AdminPlayers() {
                       <Award className="w-3.5 h-3.5 text-[#f2d39a]" />
                       <span className="text-xs text-[#f2d39a] font-medium">{selectedRole}</span>
               </div>
+                  )}
+                  {quickFilter !== 'all' && (
+                    <div className="flex items-center gap-2 px-3 py-1.5 bg-[#d7a85b]/10 border border-[#d7a85b]/30 rounded-lg">
+                      <Filter className="w-3.5 h-3.5 text-[#f2d39a]" />
+                      <span className="text-xs text-[#f2d39a] font-medium">
+                        {PLAYER_QUICK_FILTERS.find(filter => filter.id === quickFilter)?.label}
+                      </span>
+                    </div>
                   )}
                 </div>
                 <div className="flex gap-2 flex-wrap">
@@ -4528,6 +4572,14 @@ export default function AdminPlayers() {
                       className="text-xs px-4 py-2 rounded-lg bg-[#d7a85b]/10 hover:bg-[#d7a85b]/20 text-[#f2d39a] transition-all border border-[#d7a85b]/30 shadow-md hover:shadow-lg"
                     >
                       All Roles
+                  </button>
+                )}
+                {quickFilter !== 'all' && (
+                  <button
+                    onClick={() => setQuickFilter('all')}
+                    className="text-xs px-4 py-2 rounded-lg bg-[#d7a85b]/10 hover:bg-[#d7a85b]/20 text-[#f2d39a] transition-all border border-[#d7a85b]/30 shadow-md hover:shadow-lg"
+                  >
+                    All Players
                   </button>
                 )}
                 {selectedTeam !== 'all' && (
@@ -5696,7 +5748,7 @@ export default function AdminPlayers() {
                   </form>
                 </div>
 
-                <div className="oil-modal-footer p-5">
+                <div className="oil-modal-footer shrink-0 p-5">
                   <div className="oil-modal-footer-actions w-full">
                     <button
                       type="button"

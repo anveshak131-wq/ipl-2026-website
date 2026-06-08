@@ -5,7 +5,9 @@ import { useRouter } from 'next/navigation';
 import { useAdminData } from '@/contexts/AdminDataContext';
 import { useLeague } from '@/contexts/LeagueContext';
 import ModernDialog from '@/components/admin/ModernDialog';
+import PlayersStatsSubNav from '@/components/admin/PlayersStatsSubNav';
 import { exportStatsData } from '@/lib/admin/statsExportUtils';
+import { getQuickFilterCounts, PLAYER_QUICK_FILTERS, playerMatchesQuickFilter, PlayerQuickFilterId } from '@/lib/admin/playerQuickFilters';
 import { Search, Filter, Edit2, X, TrendingUp, Award, Target, Zap, ChevronDown, ChevronUp, SortAsc, SortDesc, User, Shirt, Calendar, BarChart3, Target as TargetIcon, Award as AwardIcon, Zap as ZapIcon, Hash, Activity, ShieldCheck, LayoutGrid, Table2, Download, FileDown, FileText, Database, DatabaseBackup } from 'lucide-react';
 
 const NOT_SELECTED_SEASON_FILTER = '__not_selected_season__';
@@ -79,6 +81,7 @@ const BattingStatsPage = () => {
   const [originalEditForm, setOriginalEditForm] = useState<any | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTeam, setSelectedTeam] = useState('all');
+  const [quickFilter, setQuickFilter] = useState<PlayerQuickFilterId>('all');
   const [sortField, setSortField] = useState<string>('runs');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
   const [viewMode, setViewMode] = useState<'table' | 'teams'>('table');
@@ -455,23 +458,29 @@ const BattingStatsPage = () => {
     }
   };
 
-  // Filter and sort players - Only show IPL players (WPL doesn't need stats)
-  const filteredAndSortedPlayers = useMemo(() => {
-    let filtered = players.filter(player => {
-      // Only show IPL players
+  const baseFilteredPlayers = useMemo(() => {
+    return players.filter(player => {
       const isIPL = (player.league || 'ipl') === 'ipl';
       const matchesSearch = player.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
                            String(player.teamId || '').toLowerCase().includes(searchQuery.toLowerCase());
-      
-      // Handle the special "Not Selected for This Season" filter
+
       if (selectedTeam === NOT_SELECTED_SEASON_FILTER) {
         return isIPL && matchesSearch && isInNotSelectedSeasonPool(player);
       }
-      
+
       const matchesTeam = selectedTeam === 'all' || String(player.teamId || '') === String(selectedTeam);
-      // Show all players, not just those with existing stats
       return isIPL && matchesSearch && matchesTeam;
     });
+  }, [players, searchQuery, selectedTeam]);
+
+  const quickFilterCounts = useMemo(
+    () => getQuickFilterCounts(baseFilteredPlayers, 'batting'),
+    [baseFilteredPlayers]
+  );
+
+  // Filter and sort players - Only show IPL players (WPL doesn't need stats)
+  const filteredAndSortedPlayers = useMemo(() => {
+    let filtered = baseFilteredPlayers.filter(player => playerMatchesQuickFilter(player, quickFilter, 'batting'));
 
     filtered.sort((a, b) => {
       // First, sort by role/type priority
@@ -560,22 +569,12 @@ const BattingStatsPage = () => {
     });
 
     return filtered;
-  }, [players, searchQuery, selectedTeam, sortField, sortDirection]);
+  }, [baseFilteredPlayers, quickFilter, sortField, sortDirection]);
 
   // Calculate summary stats
   const summaryStats = useMemo(() => {
     // Filter players based on team selection and search query first
-    const playersForStats = players.filter(player => {
-      // Only show IPL players
-      const isIPL = (player.league || 'ipl') === 'ipl';
-      const matchesSearch = player.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                           String(player.teamId || '').toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesTeam =
-        selectedTeam === NOT_SELECTED_SEASON_FILTER
-          ? isInNotSelectedSeasonPool(player)
-          : selectedTeam === 'all' || String(player.teamId || '') === String(selectedTeam);
-      return isIPL && matchesSearch && matchesTeam;
-    });
+    const playersForStats = baseFilteredPlayers.filter(player => playerMatchesQuickFilter(player, quickFilter, 'batting'));
     
     const activeBatsmen = playersForStats.filter(p => p.stats?.battingInnings > 0 || p.stats?.runs > 0);
     
@@ -604,7 +603,7 @@ const BattingStatsPage = () => {
     const avgRuns = activeBatsmen.length > 0 ? Math.round(totalRuns / activeBatsmen.length) : 0;
 
     return { activeBatsmen: activeBatsmen.length, totalRuns, totalHundreds, totalFifties, highestScore, avgRuns };
-  }, [players, selectedTeam, searchQuery]);
+  }, [baseFilteredPlayers, quickFilter, searchQuery]);
 
   const SortIcon = ({ field }: { field: string }) => {
     if (sortField !== field) return <SortAsc className="w-4 h-4 text-gray-500 opacity-0 group-hover:opacity-100" />;
@@ -726,6 +725,8 @@ const BattingStatsPage = () => {
         </div>
 
         <div className="max-w-7xl mx-auto p-6 lg:p-8 relative z-10">
+          <PlayersStatsSubNav />
+
           {/* Summary Cards */}
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 mb-8">
             <div className="oil-stat-card oil-stat-card--gold p-5 oil-rise group">
@@ -835,6 +836,29 @@ const BattingStatsPage = () => {
                 <Download className="w-4 h-4" />
                 Export
               </button>
+            </div>
+            <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-white/10 pt-4">
+              {PLAYER_QUICK_FILTERS.map((filter) => {
+                const isActive = quickFilter === filter.id;
+
+                return (
+                  <button
+                    key={filter.id}
+                    type="button"
+                    onClick={() => setQuickFilter(filter.id)}
+                    className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-semibold transition-all ${
+                      isActive
+                        ? 'border-[#d7a85b]/45 bg-[#d7a85b]/20 text-white shadow-lg shadow-[#d7a85b]/10'
+                        : 'border-white/10 bg-white/[0.04] text-white/65 hover:border-white/20 hover:bg-white/[0.08] hover:text-white'
+                    }`}
+                  >
+                    <span>{filter.label}</span>
+                    <span className={`rounded-full px-2 py-0.5 text-[11px] ${isActive ? 'bg-black/25 text-white' : 'bg-white/10 text-white/55'}`}>
+                      {quickFilterCounts[filter.id]}
+                    </span>
+                  </button>
+                );
+              })}
             </div>
           </div>
 
@@ -1320,6 +1344,25 @@ const BattingStatsPage = () => {
                     <X className="w-5 h-5" />
                   </button>
                 </div>
+                <div className="relative z-10 mt-5 flex flex-wrap gap-2">
+                  {[
+                    { label: 'Runs', value: editForm.stats.runs || 0 },
+                    { label: 'Innings', value: editForm.stats.battingInnings || 0 },
+                    { label: 'Avg', value: editForm.stats.battingAverage || '-' },
+                    { label: 'SR', value: editForm.stats.battingStrikeRate || '-' },
+                    { label: '100s', value: editForm.stats.hundreds || 0 },
+                    { label: '50s', value: editForm.stats.fifties || 0 },
+                    { label: 'Ducks', value: editForm.stats.ducks || 0 }
+                  ].map((chip) => (
+                    <div
+                      key={chip.label}
+                      className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.06] px-3 py-1.5 text-xs shadow-sm"
+                    >
+                      <span className="font-bold uppercase tracking-wide text-white/45">{chip.label}</span>
+                      <span className="font-black text-white">{chip.value}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
 
               <div className="oil-modal-body oil-editor-body custom-scrollbar overflow-y-auto max-h-[calc(95vh-176px)]">
@@ -1707,7 +1750,7 @@ const BattingStatsPage = () => {
                 </div>
               </div>
 
-              <div className="oil-modal-footer oil-editor-footer flex flex-col-reverse gap-3 p-5 sm:flex-row sm:items-center sm:justify-between">
+              <div className="oil-modal-footer oil-editor-footer flex shrink-0 flex-col-reverse gap-3 p-5 sm:flex-row sm:items-center sm:justify-between">
                 <p className="text-xs font-medium text-white/60">
                   {hasUnsavedChanges
                     ? `${changedFields.length} batting ${changedFields.length === 1 ? 'field is' : 'fields are'} ready to save.`
