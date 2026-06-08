@@ -7,6 +7,11 @@ import { useLeague } from '@/contexts/LeagueContext';
 import ModernDialog from '@/components/admin/ModernDialog';
 import PlayersStatsSubNav from '@/components/admin/PlayersStatsSubNav';
 import { exportStatsData } from '@/lib/admin/statsExportUtils';
+import {
+  calculateBattingDerivedStats,
+  formatBattingDerivedStats,
+  parseBattingStatNumber,
+} from '@/lib/admin/battingStatsUtils';
 import { getQuickFilterCounts, PLAYER_QUICK_FILTERS, playerMatchesQuickFilter, PlayerQuickFilterId } from '@/lib/admin/playerQuickFilters';
 import { Search, Filter, Edit2, X, TrendingUp, Award, Target, Zap, ChevronDown, ChevronUp, SortAsc, SortDesc, User, Shirt, Calendar, BarChart3, Target as TargetIcon, Award as AwardIcon, Zap as ZapIcon, Hash, Activity, ShieldCheck, LayoutGrid, Table2, Download, FileDown, FileText, Database, DatabaseBackup } from 'lucide-react';
 
@@ -67,6 +72,23 @@ const formatAuditDate = (value?: string) => {
   const parsed = new Date(value);
   if (Number.isNaN(parsed.getTime())) return 'Not recorded';
   return parsed.toLocaleString();
+};
+
+const BATTING_AVERAGE_INPUT_FIELDS = new Set(['battingInnings', 'notOuts', 'runs']);
+const BATTING_STRIKE_RATE_INPUT_FIELDS = new Set(['runs', 'ballsFaced']);
+
+const getDerivedBattingStatsFromForm = (stats: {
+  battingInnings: string | number;
+  notOuts: string | number;
+  runs: string | number;
+  ballsFaced: string | number;
+}) => {
+  const battingInnings = parseBattingStatNumber(stats.battingInnings);
+  const notOuts = parseBattingStatNumber(stats.notOuts);
+  const runs = parseBattingStatNumber(stats.runs);
+  const ballsFaced = parseBattingStatNumber(stats.ballsFaced);
+  const derived = calculateBattingDerivedStats({ battingInnings, notOuts, runs, ballsFaced });
+  return formatBattingDerivedStats(derived, battingInnings, notOuts, ballsFaced);
 };
 
 const BattingStatsPage = () => {
@@ -209,34 +231,15 @@ const BattingStatsPage = () => {
 
   const handleEditPlayer = (player) => {
     setEditingPlayer(player);
-    
-    // Calculate average and strike rate from existing stats if available
-    const runs = player.stats?.runs || 0;
-    const battingInnings = player.stats?.battingInnings || 0;
-    const notOuts = player.stats?.notOuts || 0;
-    const ballsFaced = player.stats?.ballsFaced || 0;
-    
-    // Calculate from base stats
-    const dismissals = battingInnings - notOuts;
-    let calculatedAvg = 0;
-    if (dismissals > 0 && runs > 0) {
-      calculatedAvg = runs / dismissals;
-    }
-    
-    let calculatedSR = 0;
-    if (ballsFaced > 0 && runs > 0) {
-      calculatedSR = (runs * 100) / ballsFaced;
-    }
-    
-    // Prefer string versions for display, fallback to calculated from numeric, then to numeric directly
-    const displayAvg = player.stats?.battingAverage && player.stats.battingAverage !== '0' && player.stats.battingAverage !== '-'
-      ? player.stats.battingAverage
-      : (calculatedAvg > 0 ? calculatedAvg.toFixed(2) : (player.stats?.average > 0 ? player.stats.average.toFixed(2) : ''));
-    
-    const displaySR = player.stats?.battingStrikeRate && player.stats.battingStrikeRate !== '0' && player.stats.battingStrikeRate !== '-'
-      ? player.stats.battingStrikeRate
-      : (calculatedSR > 0 ? calculatedSR.toFixed(1) : (player.stats?.strikeRate > 0 ? player.stats.strikeRate.toFixed(1) : ''));
-    
+
+    const baseStats = {
+      battingInnings: player.stats?.battingInnings > 0 ? player.stats.battingInnings : '',
+      notOuts: player.stats?.notOuts > 0 ? player.stats.notOuts : '',
+      runs: player.stats?.runs > 0 ? player.stats.runs : '',
+      ballsFaced: player.stats?.ballsFaced > 0 ? player.stats.ballsFaced : '',
+    };
+    const derivedStats = getDerivedBattingStatsFromForm(baseStats);
+
     const nextEditForm = {
       name: player.name || '',
       role: player.role || '',
@@ -244,18 +247,18 @@ const BattingStatsPage = () => {
       jerseyNumber: player.jerseyNumber || '',
       stats: {
         matches: player.stats?.matches > 0 ? player.stats.matches : '',
-        battingInnings: battingInnings > 0 ? battingInnings : '',
-        notOuts: notOuts > 0 ? notOuts : '',
-        runs: runs > 0 ? runs : '',
-        ballsFaced: ballsFaced > 0 ? ballsFaced : '',
+        battingInnings: baseStats.battingInnings,
+        notOuts: baseStats.notOuts,
+        runs: baseStats.runs,
+        ballsFaced: baseStats.ballsFaced,
         highest: player.stats?.highest > 0 ? player.stats.highest : '',
         fours: player.stats?.fours > 0 ? player.stats.fours : '',
         sixes: player.stats?.sixes > 0 ? player.stats.sixes : '',
         fifties: player.stats?.fifties > 0 ? player.stats.fifties : '',
         hundreds: player.stats?.hundreds > 0 ? player.stats.hundreds : '',
         ducks: player.stats?.ducks > 0 ? player.stats.ducks : '',
-        battingAverage: displayAvg,
-        battingStrikeRate: displaySR
+        battingAverage: derivedStats.battingAverage,
+        battingStrikeRate: derivedStats.battingStrikeRate,
       }
     };
 
@@ -277,59 +280,22 @@ const BattingStatsPage = () => {
         return;
       }
 
-      // Extract numeric values for calculations
-      const runs = editForm.stats.runs === '' ? (editingPlayer.stats?.runs || 0) : (typeof editForm.stats.runs === 'number' ? editForm.stats.runs : parseInt(editForm.stats.runs) || 0);
-      const battingInnings = editForm.stats.battingInnings === '' ? (editingPlayer.stats?.battingInnings || 0) : (typeof editForm.stats.battingInnings === 'number' ? editForm.stats.battingInnings : parseInt(editForm.stats.battingInnings) || 0);
-      const notOuts = editForm.stats.notOuts === '' ? (editingPlayer.stats?.notOuts || 0) : (typeof editForm.stats.notOuts === 'number' ? editForm.stats.notOuts : parseInt(editForm.stats.notOuts) || 0);
-      const ballsFaced = editForm.stats.ballsFaced === '' ? (editingPlayer.stats?.ballsFaced || 0) : (typeof editForm.stats.ballsFaced === 'number' ? editForm.stats.ballsFaced : parseInt(editForm.stats.ballsFaced) || 0);
+      const runs = parseBattingStatNumber(editForm.stats.runs, editingPlayer.stats?.runs || 0);
+      const battingInnings = parseBattingStatNumber(
+        editForm.stats.battingInnings,
+        editingPlayer.stats?.battingInnings || 0,
+      );
+      const notOuts = parseBattingStatNumber(editForm.stats.notOuts, editingPlayer.stats?.notOuts || 0);
+      const ballsFaced = parseBattingStatNumber(
+        editForm.stats.ballsFaced,
+        editingPlayer.stats?.ballsFaced || 0,
+      );
 
-      // User wants to manually enter values - prioritize manual input
-      // Parse manual input values if provided
-      let averageNum = 0;
-      let strikeRateNum = 0;
-      
-      // If user manually entered batting average, use it
-      if (editForm.stats.battingAverage !== '' && editForm.stats.battingAverage !== '0' && editForm.stats.battingAverage !== '-') {
-        const parsed = parseFloat(editForm.stats.battingAverage);
-        if (!isNaN(parsed)) {
-          averageNum = parsed;
-        }
-      }
-      
-      // If user manually entered strike rate, use it
-      if (editForm.stats.battingStrikeRate !== '' && editForm.stats.battingStrikeRate !== '0' && editForm.stats.battingStrikeRate !== '-') {
-        const parsed = parseFloat(editForm.stats.battingStrikeRate);
-        if (!isNaN(parsed)) {
-          strikeRateNum = parsed;
-        }
-      }
-      
-      // Only calculate if user didn't provide manual values
-      if (averageNum === 0) {
-        const dismissals = battingInnings - notOuts;
-        if (dismissals > 0 && runs > 0) {
-          averageNum = runs / dismissals;
-        } else {
-          averageNum = editingPlayer.stats?.average || 0;
-        }
-      }
-      
-      if (strikeRateNum === 0) {
-        if (ballsFaced > 0 && runs > 0) {
-          strikeRateNum = (runs * 100) / ballsFaced;
-        } else {
-          strikeRateNum = editingPlayer.stats?.strikeRate || 0;
-        }
-      }
-
-      // For string display fields - use manual input if provided, otherwise format the numeric value
-      const battingAverageStr = editForm.stats.battingAverage !== '' 
-        ? editForm.stats.battingAverage 
-        : (averageNum > 0 ? averageNum.toFixed(2) : (editingPlayer.stats?.battingAverage || ''));
-      
-      const battingStrikeRateStr = editForm.stats.battingStrikeRate !== '' 
-        ? editForm.stats.battingStrikeRate 
-        : (strikeRateNum > 0 ? strikeRateNum.toFixed(1) : (editingPlayer.stats?.battingStrikeRate || ''));
+      const derived = calculateBattingDerivedStats({ battingInnings, notOuts, runs, ballsFaced });
+      const { battingAverage: battingAverageStr, battingStrikeRate: battingStrikeRateStr } =
+        formatBattingDerivedStats(derived, battingInnings, notOuts, ballsFaced);
+      const averageNum = derived.battingAverage;
+      const strikeRateNum = derived.strikeRate;
 
       // Prepare stats object with proper type conversions
       // IMPORTANT: Set average and strikeRate AFTER spreading to ensure they override any old values
@@ -434,19 +400,33 @@ const BattingStatsPage = () => {
   const handleFormChange = (field, value) => {
     if (field.startsWith('stats.')) {
       const statField = field.replace('stats.', '');
-      setEditForm(prev => ({
-        ...prev,
-        stats: {
+      setEditForm((prev) => {
+        const nextStats = {
           ...prev.stats,
-          [statField]: value
+          [statField]: value,
+        };
+
+        if (
+          BATTING_AVERAGE_INPUT_FIELDS.has(statField) ||
+          BATTING_STRIKE_RATE_INPUT_FIELDS.has(statField)
+        ) {
+          const derivedStats = getDerivedBattingStatsFromForm(nextStats);
+          nextStats.battingAverage = derivedStats.battingAverage;
+          nextStats.battingStrikeRate = derivedStats.battingStrikeRate;
         }
-      }));
-    } else {
-      setEditForm(prev => ({
-        ...prev,
-        [field]: value
-      }));
+
+        return {
+          ...prev,
+          stats: nextStats,
+        };
+      });
+      return;
     }
+
+    setEditForm((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
   };
 
   const handleSort = (field: string) => {
@@ -1603,7 +1583,9 @@ const BattingStatsPage = () => {
                           <AwardIcon className="w-5 h-5 text-[#f2d39a]" />
                           Milestones and Rates
                         </h3>
-                        <p className="mt-1 text-sm text-white/55">Fifties, centuries, ducks, batting average, and strike rate.</p>
+                        <p className="mt-1 text-sm text-white/55">
+                          Average is auto-calculated from innings, not outs, and runs. Strike rate is auto-calculated from runs and balls faced. Ducks are recorded separately.
+                        </p>
                       </div>
                       <span className="oil-chip">Scorecard metrics</span>
                     </div>
@@ -1657,30 +1639,32 @@ const BattingStatsPage = () => {
                         <label className="flex items-center gap-2 text-sm font-semibold text-[#9cf2c8] mb-2">
                           <BarChart3 className="w-4 h-4" />
                           Batting Average
+                          <span className="text-[10px] font-bold uppercase tracking-wide text-white/35">Auto</span>
                         </label>
                         <input
                           type="text"
                           id="edit-stats-batting-average"
                           name="statsBattingAverage"
+                          readOnly
                           value={editForm.stats.battingAverage}
-                          onChange={(e) => handleFormChange('stats.battingAverage', e.target.value)}
-                          className="oil-modal-input oil-editor-input"
-                          placeholder="e.g., 45.67"
+                          className="oil-modal-input oil-editor-input cursor-default bg-white/[0.03] text-white/80"
+                          placeholder="Runs ÷ dismissals"
                         />
                       </div>
                       <div className="oil-modal-field-card oil-editor-field-card oil-modal-field-card--gold p-4">
                         <label className="flex items-center gap-2 text-sm font-semibold text-[#f2d39a] mb-2">
                           <ZapIcon className="w-4 h-4" />
                           Strike Rate
+                          <span className="text-[10px] font-bold uppercase tracking-wide text-white/35">Auto</span>
                         </label>
                         <input
                           type="text"
                           id="edit-stats-batting-strike-rate"
                           name="statsBattingStrikeRate"
+                          readOnly
                           value={editForm.stats.battingStrikeRate}
-                          onChange={(e) => handleFormChange('stats.battingStrikeRate', e.target.value)}
-                          className="oil-modal-input oil-editor-input"
-                          placeholder="e.g., 145.50"
+                          className="oil-modal-input oil-editor-input cursor-default bg-white/[0.03] text-white/80"
+                          placeholder="(Runs × 100) ÷ balls"
                         />
                       </div>
                     </div>
