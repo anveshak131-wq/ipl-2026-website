@@ -1,4 +1,13 @@
 import type { Player, Team } from '@/types';
+import {
+  getBattingAverageDisplayFromStats,
+  getBattingStrikeRateDisplayFromStats,
+} from '@/lib/admin/battingStatsUtils';
+import {
+  getBowlingAverageDisplayFromStats,
+  getBowlingEconomyDisplayFromStats,
+  getBowlingStrikeRateDisplayFromStats,
+} from '@/lib/admin/bowlingStatsUtils';
 import { computeRoleRawScore, applyReliability, gradeFromPercentile } from '@/lib/playerRanking';
 import { formatDateMonthDDYYYY } from '@/lib/dateUtils';
 
@@ -130,36 +139,26 @@ export function resolveTeam(player: Player, teams: Team[]): Team | undefined {
 }
 
 export function getBattingAverage(player: Player): string {
-  const stats = player.stats;
-  if (stats.battingAverage && stats.battingAverage !== '0' && stats.battingAverage !== '-') {
-    return String(stats.battingAverage);
-  }
-  if (stats.average && stats.average > 0) return stats.average.toFixed(2);
-  const runs = stats.runs || 0;
-  const innings = stats.battingInnings || 0;
-  const notOuts = stats.notOuts || 0;
-  const dismissals = innings - notOuts;
-  return dismissals > 0 && runs > 0 ? (runs / dismissals).toFixed(2) : '—';
+  const display = getBattingAverageDisplayFromStats(player.stats || {});
+  return display === '-' ? '—' : display;
 }
 
 export function getBattingStrikeRate(player: Player): string {
-  const stats = player.stats;
-  if (stats.battingStrikeRate && stats.battingStrikeRate !== '0' && stats.battingStrikeRate !== '-') {
-    return String(stats.battingStrikeRate);
-  }
-  if (stats.strikeRate && stats.strikeRate > 0) return stats.strikeRate.toFixed(1);
-  const runs = stats.runs || 0;
-  const balls = stats.ballsFaced || 0;
-  return balls > 0 && runs > 0 ? ((runs * 100) / balls).toFixed(1) : '—';
+  const display = getBattingStrikeRateDisplayFromStats(player.stats || {});
+  return display === '-' ? '—' : display;
 }
 
 export function getBowlingAverageDisplay(player: Player): string {
-  const stats = player.stats;
-  if (stats.bowlingAverage && stats.bowlingAverage !== '0' && stats.bowlingAverage !== '-') {
-    return String(stats.bowlingAverage);
-  }
-  if (stats.wickets > 0) {
-    return calculateBowlingAverage(stats.economy, stats.wickets, stats.matches).toFixed(2);
-  }
-  return '—';
+  const display = getBowlingAverageDisplayFromStats(player.stats || {});
+  return display === '-' ? '—' : display;
+}
+
+export function getBowlingEconomyDisplay(player: Player): string {
+  const display = getBowlingEconomyDisplayFromStats(player.stats || {});
+  return display === '-' ? '—' : display;
+}
+
+export function getBowlingStrikeRateDisplay(player: Player): string {
+  const display = getBowlingStrikeRateDisplayFromStats(player.stats || {});
+  return display === '-' ? '—' : display;
 }

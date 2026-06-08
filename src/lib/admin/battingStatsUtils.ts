@@ -44,6 +44,52 @@ export function formatBattingStrikeRate(value: number, ballsFaced: number): stri
   return value.toFixed(1);
 }
 
+export function getBattingAverageDisplayFromStats(stats: {
+  runs?: number;
+  battingInnings?: number;
+  notOuts?: number;
+}): string {
+  const runs = stats.runs ?? 0;
+  const dismissals = getBattingDismissals(stats.battingInnings ?? 0, stats.notOuts ?? 0);
+  if (dismissals <= 0) return '-';
+  return (runs / dismissals).toFixed(2);
+}
+
+export function getBattingStrikeRateDisplayFromStats(stats: {
+  runs?: number;
+  ballsFaced?: number;
+}): string {
+  const runs = stats.runs ?? 0;
+  const ballsFaced = stats.ballsFaced ?? 0;
+  if (ballsFaced <= 0) return '-';
+  return ((runs * 100) / ballsFaced).toFixed(1);
+}
+
+export function getBattingAverageSortValue(stats: {
+  runs?: number;
+  battingInnings?: number;
+  notOuts?: number;
+}): number {
+  const runs = stats.runs ?? 0;
+  const dismissals = getBattingDismissals(stats.battingInnings ?? 0, stats.notOuts ?? 0);
+  return dismissals > 0 ? runs / dismissals : 0;
+}
+
+export function getBattingStrikeRateSortValue(stats: {
+  runs?: number;
+  ballsFaced?: number;
+}): number {
+  const runs = stats.runs ?? 0;
+  const ballsFaced = stats.ballsFaced ?? 0;
+  return ballsFaced > 0 ? (runs * 100) / ballsFaced : 0;
+}
+
+export function parseBattingStatInput(value: string): number | '' {
+  if (value === '') return '';
+  const parsed = parseInt(value, 10);
+  return Number.isNaN(parsed) ? '' : parsed;
+}
+
 export function formatBattingDerivedStats(
   derived: BattingDerivedStats,
   battingInnings: number,

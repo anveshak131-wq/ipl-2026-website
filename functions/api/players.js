@@ -724,58 +724,22 @@ export const onRequest = async (context) => {
       const battingInnings = updatedPlayer.stats?.battingInnings !== undefined ? (parseInt(updatedPlayer.stats.battingInnings) || 0) : (players[index].stats?.battingInnings || 0);
       const notOuts = updatedPlayer.stats?.notOuts !== undefined ? (parseInt(updatedPlayer.stats.notOuts) || 0) : (players[index].stats?.notOuts || 0);
       const ballsFaced = updatedPlayer.stats?.ballsFaced !== undefined ? (parseInt(updatedPlayer.stats.ballsFaced) || 0) : (players[index].stats?.ballsFaced || 0);
-      
-      // PRIORITIZE manual input values if provided
-      // User wants to manually enter values, so respect their input
-      let finalAverage = 0;
-      let finalStrikeRate = 0;
-      
-      // Check if user provided manual average value
-      if (updatedPlayer.stats?.average !== undefined && updatedPlayer.stats?.average !== null && updatedPlayer.stats?.average !== '') {
-        const provided = typeof updatedPlayer.stats.average === 'number' ? updatedPlayer.stats.average : parseFloat(updatedPlayer.stats.average);
-        if (!isNaN(provided)) {
-          finalAverage = provided;
-        }
-      }
-      
-      // Check if user provided manual strike rate value
-      if (updatedPlayer.stats?.strikeRate !== undefined && updatedPlayer.stats?.strikeRate !== null && updatedPlayer.stats?.strikeRate !== '') {
-        const provided = typeof updatedPlayer.stats.strikeRate === 'number' ? updatedPlayer.stats.strikeRate : parseFloat(updatedPlayer.stats.strikeRate);
-        if (!isNaN(provided)) {
-          finalStrikeRate = provided;
-        }
-      }
-      
-      // Only calculate if user didn't provide manual values
-      if (finalAverage === 0) {
-        const dismissals = battingInnings - notOuts;
-        if (dismissals > 0 && runs > 0) {
-          finalAverage = runs / dismissals;
-        } else {
-          finalAverage = players[index].stats?.average || 0;
-        }
-      }
-      
-      if (finalStrikeRate === 0) {
-        if (ballsFaced > 0 && runs > 0) {
-          finalStrikeRate = (runs * 100) / ballsFaced;
-        } else {
-          finalStrikeRate = players[index].stats?.strikeRate || 0;
-        }
-      }
-      
-      // Log the calculation for debugging
-      console.log('API PUT: Stats calculation for player', updatedPlayer.id || updatedPlayer.name, {
-        providedAverage: updatedPlayer.stats?.average,
-        providedStrikeRate: updatedPlayer.stats?.strikeRate,
-        finalAverage,
-        finalStrikeRate,
-        runs,
-        battingInnings,
-        notOuts,
-        ballsFaced,
-        usingManualInput: (updatedPlayer.stats?.average !== undefined && updatedPlayer.stats?.average !== null && updatedPlayer.stats?.average !== '') || (updatedPlayer.stats?.strikeRate !== undefined && updatedPlayer.stats?.strikeRate !== null && updatedPlayer.stats?.strikeRate !== '')
-      });
+      const wickets = updatedPlayer.stats?.wickets !== undefined ? (parseInt(updatedPlayer.stats.wickets) || 0) : (players[index].stats?.wickets || 0);
+      const balls = updatedPlayer.stats?.balls !== undefined ? (parseInt(updatedPlayer.stats.balls) || 0) : (players[index].stats?.balls || 0);
+      const runsConceded = updatedPlayer.stats?.runsConceded !== undefined ? (parseInt(updatedPlayer.stats.runsConceded) || 0) : (players[index].stats?.runsConceded || 0);
+
+      const dismissals = Math.max(battingInnings - notOuts, 0);
+      const finalAverage = dismissals > 0 ? runs / dismissals : 0;
+      const finalStrikeRate = ballsFaced > 0 ? (runs * 100) / ballsFaced : 0;
+      const battingAverageStr = dismissals > 0 ? finalAverage.toFixed(2) : '';
+      const battingStrikeRateStr = ballsFaced > 0 ? finalStrikeRate.toFixed(1) : '';
+
+      const finalBowlingAverage = wickets > 0 ? runsConceded / wickets : 0;
+      const finalEconomy = balls > 0 ? (runsConceded * 6) / balls : 0;
+      const finalBowlingStrikeRate = wickets > 0 && balls > 0 ? balls / wickets : 0;
+      const bowlingAverageStr = wickets > 0 ? finalBowlingAverage.toFixed(2) : '';
+      const economyStr = balls > 0 ? finalEconomy.toFixed(2) : '';
+      const bowlingStrikeRateStr = wickets > 0 && balls > 0 ? finalBowlingStrikeRate.toFixed(1) : '';
 
       players[index] = {
         ...previousPlayer, // Preserve existing properties
@@ -818,11 +782,10 @@ export const onRequest = async (context) => {
           // Standard stats - update if provided
           matches: updatedPlayer.stats?.matches !== undefined ? (parseInt(updatedPlayer.stats.matches) || 0) : (previousPlayer.stats?.matches || 0),
           runs: runs,
-          wickets: updatedPlayer.stats?.wickets !== undefined ? (parseInt(updatedPlayer.stats.wickets) || 0) : (previousPlayer.stats?.wickets || 0),
-          // CRITICAL: Always set average and strikeRate explicitly
+          wickets: wickets,
           average: finalAverage,
           strikeRate: finalStrikeRate,
-          economy: updatedPlayer.stats?.economy !== undefined ? (typeof updatedPlayer.stats.economy === 'string' ? (updatedPlayer.stats.economy || '') : (parseFloat(updatedPlayer.stats.economy) || 0)) : (previousPlayer.stats?.economy || 0),
+          economy: finalEconomy,
           highest: updatedPlayer.stats?.highest !== undefined ? (parseInt(updatedPlayer.stats.highest) || 0) : (previousPlayer.stats?.highest || 0),
           fours: updatedPlayer.stats?.fours !== undefined ? (parseInt(updatedPlayer.stats.fours) || 0) : (previousPlayer.stats?.fours || 0),
           sixes: updatedPlayer.stats?.sixes !== undefined ? (parseInt(updatedPlayer.stats.sixes) || 0) : (previousPlayer.stats?.sixes || 0),
@@ -834,32 +797,15 @@ export const onRequest = async (context) => {
           battingInnings: updatedPlayer.stats?.battingInnings !== undefined ? (parseInt(updatedPlayer.stats.battingInnings) || 0) : (previousPlayer.stats?.battingInnings || 0),
           notOuts: updatedPlayer.stats?.notOuts !== undefined ? (parseInt(updatedPlayer.stats.notOuts) || 0) : (previousPlayer.stats?.notOuts || 0),
           ballsFaced: updatedPlayer.stats?.ballsFaced !== undefined ? (parseInt(updatedPlayer.stats.ballsFaced) || 0) : (previousPlayer.stats?.ballsFaced || 0),
-          battingAverage: updatedPlayer.stats?.battingAverage !== undefined ? (updatedPlayer.stats.battingAverage || '') : (previousPlayer.stats?.battingAverage || ''),
-          battingStrikeRate: updatedPlayer.stats?.battingStrikeRate !== undefined ? (updatedPlayer.stats.battingStrikeRate || '') : (previousPlayer.stats?.battingStrikeRate || ''),
+          battingAverage: battingAverageStr,
+          battingStrikeRate: battingStrikeRateStr,
           // Bowling-specific stats - update if provided
           bowlingInnings: updatedPlayer.stats?.bowlingInnings !== undefined ? (parseInt(updatedPlayer.stats.bowlingInnings) || 0) : (previousPlayer.stats?.bowlingInnings || 0),
-          balls: updatedPlayer.stats?.balls !== undefined ? (parseInt(updatedPlayer.stats.balls) || 0) : (previousPlayer.stats?.balls || 0),
+          balls: balls,
           maidens: updatedPlayer.stats?.maidens !== undefined ? (parseInt(updatedPlayer.stats.maidens) || 0) : (previousPlayer.stats?.maidens || 0),
-          runsConceded: updatedPlayer.stats?.runsConceded !== undefined ? (parseInt(updatedPlayer.stats.runsConceded) || 0) : (previousPlayer.stats?.runsConceded || 0),
-          // Calculate bowling average - use provided value, or calculate from base stats, or use existing
-          bowlingAverage: (() => {
-            // If explicitly provided, use it
-            if (updatedPlayer.stats?.bowlingAverage !== undefined && updatedPlayer.stats?.bowlingAverage !== null && updatedPlayer.stats?.bowlingAverage !== '') {
-              const provided = typeof updatedPlayer.stats.bowlingAverage === 'number' ? updatedPlayer.stats.bowlingAverage : parseFloat(updatedPlayer.stats.bowlingAverage);
-              if (!isNaN(provided) && provided > 0) {
-                return provided;
-              }
-            }
-            // Otherwise, calculate from base stats
-            const wickets = updatedPlayer.stats?.wickets !== undefined ? (parseInt(updatedPlayer.stats.wickets) || 0) : (previousPlayer.stats?.wickets || 0);
-            const runsConceded = updatedPlayer.stats?.runsConceded !== undefined ? (parseInt(updatedPlayer.stats.runsConceded) || 0) : (previousPlayer.stats?.runsConceded || 0);
-            if (wickets > 0 && runsConceded >= 0) {
-              return runsConceded / wickets;
-            }
-            // Fallback to existing value
-            return previousPlayer.stats?.bowlingAverage || 0;
-          })(),
-          bowlingStrikeRate: updatedPlayer.stats?.bowlingStrikeRate !== undefined ? (updatedPlayer.stats.bowlingStrikeRate || '') : (previousPlayer.stats?.bowlingStrikeRate || ''),
+          runsConceded: runsConceded,
+          bowlingAverage: bowlingAverageStr || finalBowlingAverage,
+          bowlingStrikeRate: bowlingStrikeRateStr,
           fourWickets: updatedPlayer.stats?.fourWickets !== undefined ? (parseInt(updatedPlayer.stats.fourWickets) || 0) : (previousPlayer.stats?.fourWickets || 0),
           fiveWickets: updatedPlayer.stats?.fiveWickets !== undefined ? (parseInt(updatedPlayer.stats.fiveWickets) || 0) : (previousPlayer.stats?.fiveWickets || 0),
         },

@@ -10,6 +10,11 @@ import { exportStatsData } from '@/lib/admin/statsExportUtils';
 import {
   calculateBattingDerivedStats,
   formatBattingDerivedStats,
+  getBattingAverageDisplayFromStats,
+  getBattingAverageSortValue,
+  getBattingStrikeRateDisplayFromStats,
+  getBattingStrikeRateSortValue,
+  parseBattingStatInput,
   parseBattingStatNumber,
 } from '@/lib/admin/battingStatsUtils';
 import { getQuickFilterCounts, PLAYER_QUICK_FILTERS, playerMatchesQuickFilter, PlayerQuickFilterId } from '@/lib/admin/playerQuickFilters';
@@ -267,6 +272,38 @@ const BattingStatsPage = () => {
     setShowEditModal(true);
   };
 
+  const liveDerivedBattingStats = useMemo(
+    () => getDerivedBattingStatsFromForm(editForm.stats),
+    [
+      editForm.stats.battingInnings,
+      editForm.stats.notOuts,
+      editForm.stats.runs,
+      editForm.stats.ballsFaced,
+    ],
+  );
+
+  useEffect(() => {
+    if (!showEditModal) return;
+
+    setEditForm((prev) => {
+      if (
+        prev.stats.battingAverage === liveDerivedBattingStats.battingAverage &&
+        prev.stats.battingStrikeRate === liveDerivedBattingStats.battingStrikeRate
+      ) {
+        return prev;
+      }
+
+      return {
+        ...prev,
+        stats: {
+          ...prev.stats,
+          battingAverage: liveDerivedBattingStats.battingAverage,
+          battingStrikeRate: liveDerivedBattingStats.battingStrikeRate,
+        },
+      };
+    });
+  }, [liveDerivedBattingStats, showEditModal]);
+
   const changedFields = useMemo(
     () => getChangedStatFields(originalEditForm, editForm, battingAuditLabels),
     [editForm, originalEditForm]
@@ -518,12 +555,12 @@ const BattingStatsPage = () => {
           bVal = b.stats?.runs || 0;
           break;
         case 'average':
-          aVal = parseFloat(a.stats?.battingAverage) || 0;
-          bVal = parseFloat(b.stats?.battingAverage) || 0;
+          aVal = getBattingAverageSortValue(a.stats || {});
+          bVal = getBattingAverageSortValue(b.stats || {});
           break;
         case 'strikeRate':
-          aVal = parseFloat(a.stats?.battingStrikeRate) || 0;
-          bVal = parseFloat(b.stats?.battingStrikeRate) || 0;
+          aVal = getBattingStrikeRateSortValue(a.stats || {});
+          bVal = getBattingStrikeRateSortValue(b.stats || {});
           break;
         case 'highest':
           aVal = a.stats?.highest || 0;
@@ -951,30 +988,8 @@ const BattingStatsPage = () => {
                       const runs = player.stats?.runs || 0;
                       const maxRuns = Math.max(...filteredAndSortedPlayers.map(p => p.stats?.runs || 0), 1);
                       const runsPercentage = (runs / maxRuns) * 100;
-                      const battingAverage = (() => {
-                        if (player.stats?.battingAverage && player.stats.battingAverage !== '0' && player.stats.battingAverage !== '-') {
-                          return player.stats.battingAverage;
-                        }
-                        if (player.stats?.average && player.stats.average > 0) {
-                          return player.stats.average.toFixed(2);
-                        }
-                        const totalRuns = player.stats?.runs || 0;
-                        const innings = player.stats?.battingInnings || 0;
-                        const notOuts = player.stats?.notOuts || 0;
-                        const dismissals = innings - notOuts;
-                        return dismissals > 0 && totalRuns > 0 ? (totalRuns / dismissals).toFixed(2) : '-';
-                      })();
-                      const battingStrikeRate = (() => {
-                        if (player.stats?.battingStrikeRate && player.stats.battingStrikeRate !== '0' && player.stats.battingStrikeRate !== '-') {
-                          return player.stats.battingStrikeRate;
-                        }
-                        if (player.stats?.strikeRate && player.stats.strikeRate > 0) {
-                          return player.stats.strikeRate.toFixed(1);
-                        }
-                        const totalRuns = player.stats?.runs || 0;
-                        const ballsFaced = player.stats?.ballsFaced || 0;
-                        return ballsFaced > 0 && totalRuns > 0 ? ((totalRuns * 100) / ballsFaced).toFixed(1) : '-';
-                      })();
+                      const battingAverage = getBattingAverageDisplayFromStats(player.stats || {});
+                      const battingStrikeRate = getBattingStrikeRateDisplayFromStats(player.stats || {});
 
                       return (
                         <tr key={player.id} className="group">
@@ -1133,41 +1148,13 @@ const BattingStatsPage = () => {
                                   <div className="grid grid-cols-2 gap-2 mt-3">
                                     <div className="bg-[#07110f]/70 rounded-xl p-2 text-center border border-[#d7a85b]/20 hover:border-[#d7a85b]/50 transition-all">
                                       <div className="text-[#f2d39a] font-semibold">
-                                        {(() => {
-                                          if (player.stats?.battingAverage && player.stats.battingAverage !== '0' && player.stats.battingAverage !== '-') {
-                                            return player.stats.battingAverage;
-                                          }
-                                          if (player.stats?.average && player.stats.average > 0) {
-                                            return player.stats.average.toFixed(2);
-                                          }
-                                          const runs = player.stats?.runs || 0;
-                                          const battingInnings = player.stats?.battingInnings || 0;
-                                          const notOuts = player.stats?.notOuts || 0;
-                                          const dismissals = battingInnings - notOuts;
-                                          if (dismissals > 0 && runs > 0) {
-                                            return (runs / dismissals).toFixed(2);
-                                          }
-                                          return '-';
-                                        })()}
+                                        {getBattingAverageDisplayFromStats(player.stats || {})}
                                       </div>
                                       <div className="text-xs text-gray-400 font-semibold">Average</div>
                                     </div>
                                     <div className="bg-[#07110f]/70 rounded-xl p-2 text-center border border-[#4fb6c4]/20 hover:border-[#4fb6c4]/50 transition-all">
                                       <div className="text-[#a8e9ef] font-semibold">
-                                        {(() => {
-                                          if (player.stats?.battingStrikeRate && player.stats.battingStrikeRate !== '0' && player.stats.battingStrikeRate !== '-') {
-                                            return player.stats.battingStrikeRate;
-                                          }
-                                          if (player.stats?.strikeRate && player.stats.strikeRate > 0) {
-                                            return player.stats.strikeRate.toFixed(1);
-                                          }
-                                          const runs = player.stats?.runs || 0;
-                                          const ballsFaced = player.stats?.ballsFaced || 0;
-                                          if (ballsFaced > 0 && runs > 0) {
-                                            return ((runs * 100) / ballsFaced).toFixed(1);
-                                          }
-                                          return '-';
-                                        })()}
+                                        {getBattingStrikeRateDisplayFromStats(player.stats || {})}
                                       </div>
                                       <div className="text-xs text-gray-400 font-semibold">Strike Rate</div>
                                     </div>
@@ -1309,11 +1296,11 @@ const BattingStatsPage = () => {
                     </div>
                     <div className="rounded-2xl border border-[#4cc39a]/25 bg-[#4cc39a]/10 px-4 py-3">
                       <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#9cf2c8]">Avg</p>
-                      <p className="mt-1 text-xl font-black text-white">{editForm.stats.battingAverage || '-'}</p>
+                      <p className="mt-1 text-xl font-black text-white">{liveDerivedBattingStats.battingAverage || '-'}</p>
                     </div>
                     <div className="rounded-2xl border border-[#4fb6c4]/25 bg-[#4fb6c4]/10 px-4 py-3">
                       <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#a8e9ef]">SR</p>
-                      <p className="mt-1 text-xl font-black text-white">{editForm.stats.battingStrikeRate || '-'}</p>
+                      <p className="mt-1 text-xl font-black text-white">{liveDerivedBattingStats.battingStrikeRate || '-'}</p>
                     </div>
                   </div>
                   <button
@@ -1328,8 +1315,8 @@ const BattingStatsPage = () => {
                   {[
                     { label: 'Runs', value: editForm.stats.runs || 0 },
                     { label: 'Innings', value: editForm.stats.battingInnings || 0 },
-                    { label: 'Avg', value: editForm.stats.battingAverage || '-' },
-                    { label: 'SR', value: editForm.stats.battingStrikeRate || '-' },
+                    { label: 'Avg', value: liveDerivedBattingStats.battingAverage || '-' },
+                    { label: 'SR', value: liveDerivedBattingStats.battingStrikeRate || '-' },
                     { label: '100s', value: editForm.stats.hundreds || 0 },
                     { label: '50s', value: editForm.stats.fifties || 0 },
                     { label: 'Ducks', value: editForm.stats.ducks || 0 }
@@ -1448,7 +1435,7 @@ const BattingStatsPage = () => {
                           id="edit-stats-matches"
                           name="statsMatches"
                           value={editForm.stats.matches}
-                          onChange={(e) => handleFormChange('stats.matches', e.target.value === '' ? '' : parseInt(e.target.value) || '')}
+                          onChange={(e) => handleFormChange('stats.matches', parseBattingStatInput(e.target.value))}
                           className="oil-modal-input oil-editor-input"
                           placeholder="Matches played"
                         />
@@ -1463,7 +1450,7 @@ const BattingStatsPage = () => {
                           id="edit-stats-batting-innings"
                           name="statsBattingInnings"
                           value={editForm.stats.battingInnings}
-                          onChange={(e) => handleFormChange('stats.battingInnings', e.target.value === '' ? '' : parseInt(e.target.value) || '')}
+                          onChange={(e) => handleFormChange('stats.battingInnings', parseBattingStatInput(e.target.value))}
                           className="oil-modal-input oil-editor-input"
                           placeholder="Innings batted"
                         />
@@ -1478,7 +1465,7 @@ const BattingStatsPage = () => {
                           id="edit-stats-not-outs"
                           name="statsNotOuts"
                           value={editForm.stats.notOuts}
-                          onChange={(e) => handleFormChange('stats.notOuts', e.target.value === '' ? '' : parseInt(e.target.value) || '')}
+                          onChange={(e) => handleFormChange('stats.notOuts', parseBattingStatInput(e.target.value))}
                           className="oil-modal-input oil-editor-input"
                           placeholder="Not-out innings"
                         />
@@ -1508,7 +1495,7 @@ const BattingStatsPage = () => {
                           id="edit-stats-runs"
                           name="statsRuns"
                           value={editForm.stats.runs}
-                          onChange={(e) => handleFormChange('stats.runs', e.target.value === '' ? '' : parseInt(e.target.value) || '')}
+                          onChange={(e) => handleFormChange('stats.runs', parseBattingStatInput(e.target.value))}
                           className="oil-modal-input oil-editor-input"
                           placeholder="Total runs"
                         />
@@ -1523,7 +1510,7 @@ const BattingStatsPage = () => {
                           id="edit-stats-highest"
                           name="statsHighest"
                           value={editForm.stats.highest}
-                          onChange={(e) => handleFormChange('stats.highest', e.target.value === '' ? '' : parseInt(e.target.value) || '')}
+                          onChange={(e) => handleFormChange('stats.highest', parseBattingStatInput(e.target.value))}
                           className="oil-modal-input oil-editor-input"
                           placeholder="Highest score"
                         />
@@ -1538,7 +1525,7 @@ const BattingStatsPage = () => {
                           id="edit-stats-balls-faced"
                           name="statsBallsFaced"
                           value={editForm.stats.ballsFaced}
-                          onChange={(e) => handleFormChange('stats.ballsFaced', e.target.value === '' ? '' : parseInt(e.target.value) || '')}
+                          onChange={(e) => handleFormChange('stats.ballsFaced', parseBattingStatInput(e.target.value))}
                           className="oil-modal-input oil-editor-input"
                           placeholder="Balls faced"
                         />
@@ -1553,7 +1540,7 @@ const BattingStatsPage = () => {
                           id="edit-stats-fours"
                           name="statsFours"
                           value={editForm.stats.fours}
-                          onChange={(e) => handleFormChange('stats.fours', e.target.value === '' ? '' : parseInt(e.target.value) || '')}
+                          onChange={(e) => handleFormChange('stats.fours', parseBattingStatInput(e.target.value))}
                           className="oil-modal-input oil-editor-input"
                           placeholder="Boundary fours"
                         />
@@ -1568,7 +1555,7 @@ const BattingStatsPage = () => {
                           id="edit-stats-sixes"
                           name="statsSixes"
                           value={editForm.stats.sixes}
-                          onChange={(e) => handleFormChange('stats.sixes', e.target.value === '' ? '' : parseInt(e.target.value) || '')}
+                          onChange={(e) => handleFormChange('stats.sixes', parseBattingStatInput(e.target.value))}
                           className="oil-modal-input oil-editor-input"
                           placeholder="Boundary sixes"
                         />
@@ -1600,7 +1587,7 @@ const BattingStatsPage = () => {
                           id="edit-stats-fifties"
                           name="statsFifties"
                           value={editForm.stats.fifties}
-                          onChange={(e) => handleFormChange('stats.fifties', e.target.value === '' ? '' : parseInt(e.target.value) || '')}
+                          onChange={(e) => handleFormChange('stats.fifties', parseBattingStatInput(e.target.value))}
                           className="oil-modal-input oil-editor-input"
                           placeholder="50+ scores"
                         />
@@ -1615,7 +1602,7 @@ const BattingStatsPage = () => {
                           id="edit-stats-hundreds"
                           name="statsHundreds"
                           value={editForm.stats.hundreds}
-                          onChange={(e) => handleFormChange('stats.hundreds', e.target.value === '' ? '' : parseInt(e.target.value) || '')}
+                          onChange={(e) => handleFormChange('stats.hundreds', parseBattingStatInput(e.target.value))}
                           className="oil-modal-input oil-editor-input"
                           placeholder="100+ scores"
                         />
@@ -1630,7 +1617,7 @@ const BattingStatsPage = () => {
                           id="edit-stats-ducks"
                           name="statsDucks"
                           value={editForm.stats.ducks}
-                          onChange={(e) => handleFormChange('stats.ducks', e.target.value === '' ? '' : parseInt(e.target.value) || '')}
+                          onChange={(e) => handleFormChange('stats.ducks', parseBattingStatInput(e.target.value))}
                           className="oil-modal-input oil-editor-input"
                           placeholder="Zero scores"
                         />
@@ -1646,7 +1633,7 @@ const BattingStatsPage = () => {
                           id="edit-stats-batting-average"
                           name="statsBattingAverage"
                           readOnly
-                          value={editForm.stats.battingAverage}
+                          value={liveDerivedBattingStats.battingAverage}
                           className="oil-modal-input oil-editor-input cursor-default bg-white/[0.03] text-white/80"
                           placeholder="Runs ÷ dismissals"
                         />
@@ -1662,7 +1649,7 @@ const BattingStatsPage = () => {
                           id="edit-stats-batting-strike-rate"
                           name="statsBattingStrikeRate"
                           readOnly
-                          value={editForm.stats.battingStrikeRate}
+                          value={liveDerivedBattingStats.battingStrikeRate}
                           className="oil-modal-input oil-editor-input cursor-default bg-white/[0.03] text-white/80"
                           placeholder="(Runs × 100) ÷ balls"
                         />

@@ -10,6 +10,13 @@ import { exportStatsData } from '@/lib/admin/statsExportUtils';
 import {
   calculateBowlingDerivedStats,
   formatBowlingDerivedStats,
+  getBowlingAverageDisplayFromStats,
+  getBowlingAverageSortValue,
+  getBowlingEconomyDisplayFromStats,
+  getBowlingEconomySortValue,
+  getBowlingStrikeRateDisplayFromStats,
+  getBowlingStrikeRateSortValue,
+  parseBowlingStatInput,
   parseBowlingStatNumber,
 } from '@/lib/admin/bowlingStatsUtils';
 import { getQuickFilterCounts, PLAYER_QUICK_FILTERS, playerMatchesQuickFilter, PlayerQuickFilterId } from '@/lib/admin/playerQuickFilters';
@@ -259,6 +266,35 @@ const BowlingStatsPage = () => {
     setShowEditModal(true);
   };
 
+  const liveDerivedBowlingStats = useMemo(
+    () => getDerivedBowlingStatsFromForm(editForm.stats),
+    [editForm.stats.balls, editForm.stats.wickets, editForm.stats.runsConceded],
+  );
+
+  useEffect(() => {
+    if (!showEditModal) return;
+
+    setEditForm((prev) => {
+      if (
+        prev.stats.bowlingAverage === liveDerivedBowlingStats.bowlingAverage &&
+        prev.stats.economy === liveDerivedBowlingStats.economy &&
+        prev.stats.bowlingStrikeRate === liveDerivedBowlingStats.bowlingStrikeRate
+      ) {
+        return prev;
+      }
+
+      return {
+        ...prev,
+        stats: {
+          ...prev.stats,
+          bowlingAverage: liveDerivedBowlingStats.bowlingAverage,
+          economy: liveDerivedBowlingStats.economy,
+          bowlingStrikeRate: liveDerivedBowlingStats.bowlingStrikeRate,
+        },
+      };
+    });
+  }, [liveDerivedBowlingStats, showEditModal]);
+
   const changedFields = useMemo(
     () => getChangedStatFields(originalEditForm, editForm, bowlingAuditLabels),
     [editForm, originalEditForm]
@@ -498,16 +534,16 @@ const BowlingStatsPage = () => {
           bVal = b.stats?.wickets || 0;
           break;
         case 'average':
-          aVal = parseFloat(a.stats?.bowlingAverage) || Infinity;
-          bVal = parseFloat(b.stats?.bowlingAverage) || Infinity;
+          aVal = getBowlingAverageSortValue(a.stats || {});
+          bVal = getBowlingAverageSortValue(b.stats || {});
           break;
         case 'economy':
-          aVal = parseFloat(a.stats?.economy) || Infinity;
-          bVal = parseFloat(b.stats?.economy) || Infinity;
+          aVal = getBowlingEconomySortValue(a.stats || {});
+          bVal = getBowlingEconomySortValue(b.stats || {});
           break;
         case 'strikeRate':
-          aVal = parseFloat(a.stats?.bowlingStrikeRate) || Infinity;
-          bVal = parseFloat(b.stats?.bowlingStrikeRate) || Infinity;
+          aVal = getBowlingStrikeRateSortValue(a.stats || {});
+          bVal = getBowlingStrikeRateSortValue(b.stats || {});
           break;
         case 'fourWickets':
           aVal = a.stats?.fourWickets || 0;
@@ -550,7 +586,7 @@ const BowlingStatsPage = () => {
       const fourWickets = player.stats?.fourWickets || 0;
       const fiveWickets = player.stats?.fiveWickets || 0;
       const maidens = player.stats?.maidens || 0;
-      const economy = parseFloat(player.stats?.economy) || 0;
+      const economy = getBowlingEconomySortValue(player.stats || {});
       const avgWickets = wickets; // For individual player, avg is just their wickets
 
       return { 
@@ -559,7 +595,7 @@ const BowlingStatsPage = () => {
         totalFourWickets: fourWickets,
         totalFiveWickets: fiveWickets, 
         totalMaidens: maidens, 
-        bestEconomy: economy.toFixed(2),
+        bestEconomy: Number.isFinite(economy) ? economy.toFixed(2) : '0.00',
         avgWickets: avgWickets
       };
     }
@@ -570,7 +606,7 @@ const BowlingStatsPage = () => {
     const totalFiveWickets = activeBowlers.reduce((sum, p) => sum + (p.stats?.fiveWickets || 0), 0);
     const totalMaidens = activeBowlers.reduce((sum, p) => sum + (p.stats?.maidens || 0), 0);
     const economies = activeBowlers
-      .map(p => parseFloat(p.stats?.economy) || Infinity)
+      .map(p => getBowlingEconomySortValue(p.stats || {}))
       .filter(e => e !== Infinity);
     const bestEconomy = economies.length > 0 ? Math.min(...economies) : 0;
     const avgWickets = activeBowlers.length > 0 ? (totalWickets / activeBowlers.length).toFixed(1) : 0;
@@ -960,34 +996,9 @@ const BowlingStatsPage = () => {
                       const overs = player.stats?.balls ? Math.floor(player.stats.balls / 6) : 0;
                       const balls = player.stats?.balls ? player.stats.balls % 6 : 0;
                       const oversDisplay = overs > 0 ? `${overs}.${balls}` : '0.0';
-                      const bowlingAverage = (() => {
-                        if (player.stats?.bowlingAverage && typeof player.stats.bowlingAverage === 'string' && player.stats.bowlingAverage !== '0' && player.stats.bowlingAverage !== '-') {
-                          return player.stats.bowlingAverage;
-                        }
-                        if (player.stats?.bowlingAverage && typeof player.stats.bowlingAverage === 'number' && player.stats.bowlingAverage > 0) {
-                          return player.stats.bowlingAverage.toFixed(2);
-                        }
-                        const runsConceded = player.stats?.runsConceded || 0;
-                        return wickets > 0 && runsConceded >= 0 ? (runsConceded / wickets).toFixed(2) : '-';
-                      })();
-                      const economy = (() => {
-                        if (player.stats?.economy && typeof player.stats.economy === 'string' && player.stats.economy !== '0' && player.stats.economy !== '-') {
-                          return player.stats.economy;
-                        }
-                        if (player.stats?.economy && typeof player.stats.economy === 'number' && player.stats.economy > 0) {
-                          return player.stats.economy.toFixed(2);
-                        }
-                        const totalBalls = player.stats?.balls || 0;
-                        const runsConceded = player.stats?.runsConceded || 0;
-                        return totalBalls > 0 && runsConceded >= 0 ? ((runsConceded * 6) / totalBalls).toFixed(2) : '-';
-                      })();
-                      const bowlingStrikeRate = (() => {
-                        if (player.stats?.bowlingStrikeRate && player.stats.bowlingStrikeRate !== '0' && player.stats.bowlingStrikeRate !== '-') {
-                          return player.stats.bowlingStrikeRate;
-                        }
-                        const totalBalls = player.stats?.balls || 0;
-                        return wickets > 0 && totalBalls > 0 ? (totalBalls / wickets).toFixed(1) : '-';
-                      })();
+                      const bowlingAverage = getBowlingAverageDisplayFromStats(player.stats || {});
+                      const economy = getBowlingEconomyDisplayFromStats(player.stats || {});
+                      const bowlingStrikeRate = getBowlingStrikeRateDisplayFromStats(player.stats || {});
 
                       return (
                         <tr key={player.id} className="group">
@@ -1155,39 +1166,13 @@ const BowlingStatsPage = () => {
                                   <div className="grid grid-cols-2 gap-2 mt-3">
                                     <div className="bg-[#07110f]/70 rounded-lg p-2 text-center border border-[#4cc39a]/20">
                                       <div className="text-[#9cf2c8] font-semibold">
-                                        {(() => {
-                                          if (player.stats?.bowlingAverage && typeof player.stats.bowlingAverage === 'string' && player.stats.bowlingAverage !== '0' && player.stats.bowlingAverage !== '-') {
-                                            return player.stats.bowlingAverage;
-                                          }
-                                          if (player.stats?.bowlingAverage && typeof player.stats.bowlingAverage === 'number' && player.stats.bowlingAverage > 0) {
-                                            return player.stats.bowlingAverage.toFixed(2);
-                                          }
-                                          const wickets = player.stats?.wickets || 0;
-                                          const runsConceded = player.stats?.runsConceded || 0;
-                                          if (wickets > 0 && runsConceded >= 0) {
-                                            return (runsConceded / wickets).toFixed(2);
-                                          }
-                                          return '-';
-                                        })()}
+                                        {getBowlingAverageDisplayFromStats(player.stats || {})}
                                       </div>
                                       <div className="text-xs text-gray-400">Average</div>
                                     </div>
                                     <div className="bg-[#07110f]/70 rounded-lg p-2 text-center border border-[#d7a85b]/20">
                                       <div className="text-[#f2d39a] font-semibold">
-                                        {(() => {
-                                          if (player.stats?.economy && typeof player.stats.economy === 'string' && player.stats.economy !== '0' && player.stats.economy !== '-') {
-                                            return player.stats.economy;
-                                          }
-                                          if (player.stats?.economy && typeof player.stats.economy === 'number' && player.stats.economy > 0) {
-                                            return player.stats.economy.toFixed(2);
-                                          }
-                                          const balls = player.stats?.balls || 0;
-                                          const runsConceded = player.stats?.runsConceded || 0;
-                                          if (balls > 0 && runsConceded >= 0) {
-                                            return ((runsConceded * 6) / balls).toFixed(2);
-                                          }
-                                          return '-';
-                                        })()}
+                                        {getBowlingEconomyDisplayFromStats(player.stats || {})}
                                       </div>
                                       <div className="text-xs text-gray-400">Economy</div>
                                     </div>
@@ -1332,11 +1317,11 @@ const BowlingStatsPage = () => {
                     </div>
                     <div className="rounded-2xl border border-[#d7a85b]/25 bg-[#d7a85b]/10 px-4 py-3">
                       <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#f2d39a]">Econ</p>
-                      <p className="mt-1 text-xl font-black text-white">{editForm.stats.economy || '-'}</p>
+                      <p className="mt-1 text-xl font-black text-white">{liveDerivedBowlingStats.economy || '-'}</p>
                     </div>
                     <div className="rounded-2xl border border-[#4fb6c4]/25 bg-[#4fb6c4]/10 px-4 py-3">
                       <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#a8e9ef]">SR</p>
-                      <p className="mt-1 text-xl font-black text-white">{editForm.stats.bowlingStrikeRate || '-'}</p>
+                      <p className="mt-1 text-xl font-black text-white">{liveDerivedBowlingStats.bowlingStrikeRate || '-'}</p>
                     </div>
                   </div>
                   <button
@@ -1350,9 +1335,9 @@ const BowlingStatsPage = () => {
                 <div className="relative z-10 mt-5 flex flex-wrap gap-2">
                   {[
                     { label: 'Wickets', value: editForm.stats.wickets || 0 },
-                    { label: 'Economy', value: editForm.stats.economy || '-' },
-                    { label: 'Avg', value: editForm.stats.bowlingAverage || '-' },
-                    { label: 'SR', value: editForm.stats.bowlingStrikeRate || '-' },
+                    { label: 'Economy', value: liveDerivedBowlingStats.economy || '-' },
+                    { label: 'Avg', value: liveDerivedBowlingStats.bowlingAverage || '-' },
+                    { label: 'SR', value: liveDerivedBowlingStats.bowlingStrikeRate || '-' },
                     { label: '4W', value: editForm.stats.fourWickets || 0 },
                     { label: '5W', value: editForm.stats.fiveWickets || 0 },
                     { label: 'Best', value: editForm.stats.bestBowling || '-' }
@@ -1473,7 +1458,7 @@ const BowlingStatsPage = () => {
                         <input
                           type="number"
                           value={editForm.stats.matches}
-                          onChange={(e) => handleFormChange('stats.matches', e.target.value === '' ? '' : parseInt(e.target.value) || '')}
+                          onChange={(e) => handleFormChange('stats.matches', parseBowlingStatInput(e.target.value))}
                           className="oil-modal-input oil-editor-input"
                           placeholder="Matches played"
                         />
@@ -1486,7 +1471,7 @@ const BowlingStatsPage = () => {
                         <input
                           type="number"
                           value={editForm.stats.bowlingInnings}
-                          onChange={(e) => handleFormChange('stats.bowlingInnings', e.target.value === '' ? '' : parseInt(e.target.value) || '')}
+                          onChange={(e) => handleFormChange('stats.bowlingInnings', parseBowlingStatInput(e.target.value))}
                           className="oil-modal-input oil-editor-input"
                           placeholder="Innings bowled"
                         />
@@ -1499,7 +1484,7 @@ const BowlingStatsPage = () => {
                         <input
                           type="number"
                           value={editForm.stats.balls}
-                          onChange={(e) => handleFormChange('stats.balls', e.target.value === '' ? '' : parseInt(e.target.value) || '')}
+                          onChange={(e) => handleFormChange('stats.balls', parseBowlingStatInput(e.target.value))}
                           className="oil-modal-input oil-editor-input"
                           placeholder="Legal balls"
                         />
@@ -1527,7 +1512,7 @@ const BowlingStatsPage = () => {
                         <input
                           type="number"
                           value={editForm.stats.wickets}
-                          onChange={(e) => handleFormChange('stats.wickets', e.target.value === '' ? '' : parseInt(e.target.value) || '')}
+                          onChange={(e) => handleFormChange('stats.wickets', parseBowlingStatInput(e.target.value))}
                           className="oil-modal-input oil-editor-input"
                           placeholder="Wickets taken"
                         />
@@ -1540,7 +1525,7 @@ const BowlingStatsPage = () => {
                         <input
                           type="number"
                           value={editForm.stats.maidens}
-                          onChange={(e) => handleFormChange('stats.maidens', e.target.value === '' ? '' : parseInt(e.target.value) || '')}
+                          onChange={(e) => handleFormChange('stats.maidens', parseBowlingStatInput(e.target.value))}
                           className="oil-modal-input oil-editor-input"
                           placeholder="Maidens"
                         />
@@ -1553,7 +1538,7 @@ const BowlingStatsPage = () => {
                         <input
                           type="number"
                           value={editForm.stats.runsConceded}
-                          onChange={(e) => handleFormChange('stats.runsConceded', e.target.value === '' ? '' : parseInt(e.target.value) || '')}
+                          onChange={(e) => handleFormChange('stats.runsConceded', parseBowlingStatInput(e.target.value))}
                           className="oil-modal-input oil-editor-input"
                           placeholder="Runs conceded"
                         />
@@ -1592,7 +1577,7 @@ const BowlingStatsPage = () => {
                         <input
                           type="text"
                           readOnly
-                          value={editForm.stats.economy}
+                          value={liveDerivedBowlingStats.economy}
                           className="oil-modal-input oil-editor-input cursor-default bg-white/[0.03] text-white/80"
                           placeholder="Auto from runs & balls"
                         />
@@ -1606,7 +1591,7 @@ const BowlingStatsPage = () => {
                         <input
                           type="text"
                           readOnly
-                          value={editForm.stats.bowlingAverage}
+                          value={liveDerivedBowlingStats.bowlingAverage}
                           className="oil-modal-input oil-editor-input cursor-default bg-white/[0.03] text-white/80"
                           placeholder="Auto from runs & wickets"
                         />
@@ -1620,7 +1605,7 @@ const BowlingStatsPage = () => {
                         <input
                           type="text"
                           readOnly
-                          value={editForm.stats.bowlingStrikeRate}
+                          value={liveDerivedBowlingStats.bowlingStrikeRate}
                           className="oil-modal-input oil-editor-input cursor-default bg-white/[0.03] text-white/80"
                           placeholder="Auto from balls & wickets"
                         />
@@ -1646,7 +1631,7 @@ const BowlingStatsPage = () => {
                         <input
                           type="number"
                           value={editForm.stats.fourWickets}
-                          onChange={(e) => handleFormChange('stats.fourWickets', e.target.value === '' ? '' : parseInt(e.target.value) || '')}
+                          onChange={(e) => handleFormChange('stats.fourWickets', parseBowlingStatInput(e.target.value))}
                           className="oil-modal-input oil-editor-input"
                           placeholder="4-wicket hauls"
                         />
@@ -1659,7 +1644,7 @@ const BowlingStatsPage = () => {
                         <input
                           type="number"
                           value={editForm.stats.fiveWickets}
-                          onChange={(e) => handleFormChange('stats.fiveWickets', e.target.value === '' ? '' : parseInt(e.target.value) || '')}
+                          onChange={(e) => handleFormChange('stats.fiveWickets', parseBowlingStatInput(e.target.value))}
                           className="oil-modal-input oil-editor-input"
                           placeholder="5-wicket hauls"
                         />

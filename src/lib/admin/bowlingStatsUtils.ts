@@ -28,8 +28,8 @@ export function calculateBowlingDerivedStats({
   return { bowlingAverage, economy, bowlingStrikeRate };
 }
 
-export function formatBowlingAverage(value: number): string {
-  if (value <= 0) return '';
+export function formatBowlingAverage(value: number, wickets: number): string {
+  if (wickets <= 0) return '';
   return value.toFixed(2);
 }
 
@@ -38,9 +38,72 @@ export function formatBowlingEconomy(value: number, balls: number): string {
   return value.toFixed(2);
 }
 
-export function formatBowlingStrikeRate(value: number): string {
-  if (value <= 0) return '';
+export function formatBowlingStrikeRate(value: number, wickets: number): string {
+  if (wickets <= 0) return '';
   return value.toFixed(1);
+}
+
+export function getBowlingAverageDisplayFromStats(stats: {
+  runsConceded?: number;
+  wickets?: number;
+}): string {
+  const wickets = stats.wickets ?? 0;
+  const runsConceded = stats.runsConceded ?? 0;
+  if (wickets <= 0) return '-';
+  return (runsConceded / wickets).toFixed(2);
+}
+
+export function getBowlingEconomyDisplayFromStats(stats: {
+  runsConceded?: number;
+  balls?: number;
+}): string {
+  const balls = stats.balls ?? 0;
+  const runsConceded = stats.runsConceded ?? 0;
+  if (balls <= 0) return '-';
+  return ((runsConceded * 6) / balls).toFixed(2);
+}
+
+export function getBowlingStrikeRateDisplayFromStats(stats: {
+  balls?: number;
+  wickets?: number;
+}): string {
+  const balls = stats.balls ?? 0;
+  const wickets = stats.wickets ?? 0;
+  if (wickets <= 0 || balls <= 0) return '-';
+  return (balls / wickets).toFixed(1);
+}
+
+export function getBowlingAverageSortValue(stats: {
+  runsConceded?: number;
+  wickets?: number;
+}): number {
+  const wickets = stats.wickets ?? 0;
+  const runsConceded = stats.runsConceded ?? 0;
+  return wickets > 0 ? runsConceded / wickets : Infinity;
+}
+
+export function getBowlingEconomySortValue(stats: {
+  runsConceded?: number;
+  balls?: number;
+}): number {
+  const balls = stats.balls ?? 0;
+  const runsConceded = stats.runsConceded ?? 0;
+  return balls > 0 ? (runsConceded * 6) / balls : Infinity;
+}
+
+export function getBowlingStrikeRateSortValue(stats: {
+  balls?: number;
+  wickets?: number;
+}): number {
+  const balls = stats.balls ?? 0;
+  const wickets = stats.wickets ?? 0;
+  return wickets > 0 && balls > 0 ? balls / wickets : Infinity;
+}
+
+export function parseBowlingStatInput(value: string): number | '' {
+  if (value === '') return '';
+  const parsed = parseInt(value, 10);
+  return Number.isNaN(parsed) ? '' : parsed;
 }
 
 export function formatBowlingDerivedStats(
@@ -52,9 +115,9 @@ export function formatBowlingDerivedStats(
   bowlingStrikeRate: string;
 } {
   return {
-    bowlingAverage: formatBowlingAverage(derived.bowlingAverage),
+    bowlingAverage: formatBowlingAverage(derived.bowlingAverage, wickets),
     economy: formatBowlingEconomy(derived.economy, balls),
-    bowlingStrikeRate: formatBowlingStrikeRate(derived.bowlingStrikeRate),
+    bowlingStrikeRate: formatBowlingStrikeRate(derived.bowlingStrikeRate, wickets),
   };
 }
 

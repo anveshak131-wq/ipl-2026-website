@@ -102,46 +102,32 @@ const getTeamMeta = (teams: ExportTeam[], teamId: string) =>
   teams.find((team) => String(team.id) === String(teamId));
 
 const getBattingAverage = (player: ExportPlayer) => {
-  const raw = player.stats?.battingAverage;
-  if (raw && raw !== '0' && raw !== '-') return String(raw);
-  if (Number(player.stats?.average) > 0) return formatNumber(player.stats?.average, 2);
   const runs = Number(player.stats?.runs) || 0;
   const innings = Number(player.stats?.battingInnings) || 0;
   const notOuts = Number(player.stats?.notOuts) || 0;
-  const dismissals = innings - notOuts;
-  return dismissals > 0 && runs > 0 ? formatNumber(runs / dismissals, 2) : '-';
+  const dismissals = Math.max(innings - notOuts, 0);
+  return dismissals > 0 ? formatNumber(runs / dismissals, 2) : '-';
 };
 
 const getBattingStrikeRate = (player: ExportPlayer) => {
-  const raw = player.stats?.battingStrikeRate;
-  if (raw && raw !== '0' && raw !== '-') return String(raw);
-  if (Number(player.stats?.strikeRate) > 0) return formatNumber(player.stats?.strikeRate, 1);
   const runs = Number(player.stats?.runs) || 0;
   const ballsFaced = Number(player.stats?.ballsFaced) || 0;
-  return ballsFaced > 0 && runs > 0 ? formatNumber((runs * 100) / ballsFaced, 1) : '-';
+  return ballsFaced > 0 ? formatNumber((runs * 100) / ballsFaced, 1) : '-';
 };
 
 const getBowlingAverage = (player: ExportPlayer) => {
-  const raw = player.stats?.bowlingAverage;
-  if (typeof raw === 'string' && raw !== '0' && raw !== '-') return raw;
-  if (typeof raw === 'number' && raw > 0) return formatNumber(raw, 2);
   const wickets = Number(player.stats?.wickets) || 0;
   const runsConceded = Number(player.stats?.runsConceded) || 0;
   return wickets > 0 ? formatNumber(runsConceded / wickets, 2) : '-';
 };
 
 const getBowlingStrikeRate = (player: ExportPlayer) => {
-  const raw = player.stats?.bowlingStrikeRate;
-  if (raw && raw !== '0' && raw !== '-') return String(raw);
   const wickets = Number(player.stats?.wickets) || 0;
   const balls = Number(player.stats?.balls) || 0;
   return wickets > 0 && balls > 0 ? formatNumber(balls / wickets, 1) : '-';
 };
 
 const getEconomy = (player: ExportPlayer) => {
-  const raw = player.stats?.economy;
-  if (typeof raw === 'string' && raw !== '0' && raw !== '-') return raw;
-  if (typeof raw === 'number' && raw > 0) return formatNumber(raw, 2);
   const balls = Number(player.stats?.balls) || 0;
   const runsConceded = Number(player.stats?.runsConceded) || 0;
   return balls > 0 ? formatNumber((runsConceded * 6) / balls, 2) : '-';
