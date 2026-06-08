@@ -91,7 +91,7 @@ const getDerivedBowlingStatsFromForm = (stats: {
   const wickets = parseBowlingStatNumber(stats.wickets);
   const runsConceded = parseBowlingStatNumber(stats.runsConceded);
   const derived = calculateBowlingDerivedStats({ balls, runsConceded, wickets });
-  return formatBowlingDerivedStats(derived, balls);
+  return formatBowlingDerivedStats(derived, balls, wickets);
 };
 
 const BowlingStatsPage = () => {
@@ -320,7 +320,7 @@ const BowlingStatsPage = () => {
 
       const derived = calculateBowlingDerivedStats({ balls, runsConceded, wickets });
       const { bowlingAverage: bowlingAverageStr, economy: economyStr, bowlingStrikeRate: bowlingStrikeRateStr } =
-        formatBowlingDerivedStats(derived, balls);
+        formatBowlingDerivedStats(derived, balls, wickets);
       const bowlingAverageNum = derived.bowlingAverage;
       const economyNum = derived.economy;
       const bowlingStrikeRateNum = derived.bowlingStrikeRate;

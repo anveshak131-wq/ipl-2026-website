@@ -109,6 +109,7 @@ export function parseBowlingStatInput(value: string): number | '' {
 export function formatBowlingDerivedStats(
   derived: BowlingDerivedStats,
   balls: number,
+  wickets: number,
 ): {
   bowlingAverage: string;
   economy: string;
