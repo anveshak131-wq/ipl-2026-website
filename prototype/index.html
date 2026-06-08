@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>IPL Admin — Prototype: Players</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="app-bar">
+    <div class="brand">IPL Admin — Prototype</div>
+    <div class="controls">
+      <label class="control">
+        Team:
+        <select id="teamSelect">
+          <option value="default">Default</option>
+          <option value="mi">MI</option>
+          <option value="csk">CSK</option>
+          <option value="rcb">RCB</option>
+          <option value="kkr">KKR</option>
+        </select>
+      </label>
+      <button id="darkToggle" aria-pressed="false">Dark</button>
+      <button id="printBtn">Print</button>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="panel">
+      <div class="panel-header">
+        <h2>Players</h2>
+        <div class="toolbar">
+          <button id="compactToggle" class="toggle-btn">Compact</button>
+          <div class="bulk-actions" id="bulkActions" style="display:none">
+            <span id="selectedCount">0</span> selected
+            <button id="bulkExport" class="bulk-action-btn">Export</button>
+            <button id="bulkEdit" class="bulk-action-btn">Edit</button>
+            <button id="bulkDelete" class="bulk-action-btn delete">Delete</button>
+          </div>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table class="data-table" id="playersTable">
+          <thead>
+            <tr>
+              <th><input type="checkbox" id="selectAll" aria-label="Select all"></th>
+              <th>Avatar</th>
+              <th>Player</th>
+              <th>Team</th>
+              <th>Role</th>
+              <th>Matches</th>
+              <th>Runs</th>
+              <th>Wickets</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="player-row" data-id="1">
+              <td><input type="checkbox" class="row-select" value="1" aria-label="Select R. Sharma"></td>
+              <td><div class="avatar">RS</div></td>
+              <td>R. Sharma <div class="badges"><span class="badge captain" title="Captain">C</span><span class="badge new" title="New Signing">NEW</span></div></td>
+              <td>MI</td>
+              <td>Batsman</td>
+              <td>12</td>
+              <td>487</td>
+              <td>0</td>
+            </tr>
+            <tr class="player-row" data-id="2">
+              <td><input type="checkbox" class="row-select" value="2" aria-label="Select V. Kohli"></td>
+              <td><div class="avatar">VK</div></td>
+              <td>V. Kohli <div class="badges"><span class="badge overseas" title="Overseas">OVS</span></div></td>
+              <td>RCB</td>
+              <td>Batsman</td>
+              <td>14</td>
+              <td>612</td>
+              <td>0</td>
+            </tr>
+            <tr class="player-row" data-id="3">
+              <td><input type="checkbox" class="row-select" value="3" aria-label="Select M. Suryakumar"></td>
+              <td><div class="avatar">MS</div></td>
+              <td>M. Suryakumar <div class="badges"><span class="badge injured" title="Injured">INJ</span></div></td>
+              <td>MI</td>
+              <td>Batsman</td>
+              <td>11</td>
+              <td>421</td>
+              <td>1</td>
+            </tr>
+            <tr class="player-row" data-id="4">
+              <td><input type="checkbox" class="row-select" value="4" aria-label="Select J. Bumrah"></td>
+              <td><div class="avatar">JB</div></td>
+              <td>J. Bumrah</td>
+              <td>MI</td>
+              <td>Bowler</td>
+              <td>13</td>
+              <td>15</td>
+              <td>22</td>
+            </tr>
+            <tr class="player-row" data-id="5">
+              <td><input type="checkbox" class="row-select" value="5" aria-label="Select M. Pandey"></td>
+              <td><div class="avatar">MP</div></td>
+              <td>M. Pandey <div class="badges"><span class="badge new" title="New Signing">NEW</span></div></td>
+              <td>KKR</td>
+              <td>All-Rounder</td>
+              <td>10</td>
+              <td>210</td>
+              <td>8</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer-note">Players, Cards, Badges, Bulk Actions, Compact Mode</footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
