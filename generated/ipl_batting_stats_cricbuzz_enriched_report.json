@@ -1,0 +1,6718 @@
+{
+  "generatedAt": "2026-06-12T09:03:18.768Z",
+  "input": "/Users/anvesh/Downloads/sportsup99/generated/ipl_batting_stats_filled.json",
+  "source": "Cricbuzz profile IPL batting tables",
+  "sourcePages": [
+    "https://www.cricbuzz.com/cricket-series/9241/indian-premier-league-2026/stats",
+    "https://www.cricbuzz.com/api/cricket-series/series-stats/9241?statsType=mostRuns&seasonSeriesId=all&seriesType=IPL&matchFormat=3",
+    "https://www.cricbuzz.com/api/cricket-series/series-stats/9241?statsType=highestScore&seasonSeriesId=all&seriesType=IPL&matchFormat=3",
+    "https://www.cricbuzz.com/api/cricket-series/series-stats/9241?statsType=highestAvg&seasonSeriesId=all&seriesType=IPL&matchFormat=3",
+    "https://www.cricbuzz.com/api/cricket-series/series-stats/9241?statsType=highestSr&seasonSeriesId=all&seriesType=IPL&matchFormat=3",
+    "https://www.cricbuzz.com/api/cricket-series/series-stats/9241?statsType=mostHundreds&seasonSeriesId=all&seriesType=IPL&matchFormat=3",
+    "https://www.cricbuzz.com/api/cricket-series/series-stats/9241?statsType=mostFifties&seasonSeriesId=all&seriesType=IPL&matchFormat=3",
+    "https://www.cricbuzz.com/api/cricket-series/series-stats/9241?statsType=mostFours&seasonSeriesId=all&seriesType=IPL&matchFormat=3",
+    "https://www.cricbuzz.com/api/cricket-series/series-stats/9241?statsType=mostSixes&seasonSeriesId=all&seriesType=IPL&matchFormat=3",
+    "https://www.cricbuzz.com/api/cricket-series/series-stats/9241?statsType=mostNineties&seasonSeriesId=all&seriesType=IPL&matchFormat=3",
+    "https://www.cricbuzz.com/api/cricket-series/series-stats/9241?statsType=mostRuns&seasonSeriesId=9241&matchFormat=3",
+    "https://www.cricbuzz.com/api/cricket-series/series-stats/9241?statsType=mostRuns&seasonSeriesId=9241&matchFormat=3&teamId=58",
+    "https://www.cricbuzz.com/api/cricket-series/series-stats/9241?statsType=highestScore&seasonSeriesId=9241&matchFormat=3&teamId=58",
+    "https://www.cricbuzz.com/api/cricket-series/series-stats/9241?statsType=mostHundreds&seasonSeriesId=9241&matchFormat=3&teamId=58",
+    "https://www.cricbuzz.com/api/cricket-series/series-stats/9241?statsType=mostFifties&seasonSeriesId=9241&matchFormat=3&teamId=58",
+    "https://www.cricbuzz.com/api/cricket-series/series-stats/9241?statsType=mostFours&seasonSeriesId=9241&matchFormat=3&teamId=58",
+    "https://www.cricbuzz.com/api/cricket-series/series-stats/9241?statsType=mostSixes&seasonSeriesId=9241&matchFormat=3&teamId=58",
+    "https://www.cricbuzz.com/api/cricket-series/series-stats/9241?statsType=mostRuns&seasonSeriesId=9241&matchFormat=3&teamId=59",
+    "https://www.cricbuzz.com/api/cricket-series/series-stats/9241?statsType=highestScore&seasonSeriesId=9241&matchFormat=3&teamId=59",
+    "https://www.cricbuzz.com/api/cricket-series/series-stats/9241?statsType=mostHundreds&seasonSeriesId=9241&matchFormat=3&teamId=59",
+    "https://www.cricbuzz.com/api/cricket-series/series-stats/9241?statsType=mostFifties&seasonSeriesId=9241&matchFormat=3&teamId=59",
+    "https://www.cricbuzz.com/api/cricket-series/series-stats/9241?statsType=mostFours&seasonSeriesId=9241&matchFormat=3&teamId=59",
+    "https://www.cricbuzz.com/api/cricket-series/series-stats/9241?statsType=mostSixes&seasonSeriesId=9241&matchFormat=3&teamId=59",
+    "https://www.cricbuzz.com/api/cricket-series/series-stats/9241?statsType=mostRuns&seasonSeriesId=9241&matchFormat=3&teamId=61",
+    "https://www.cricbuzz.com/api/cricket-series/series-stats/9241?statsType=highestScore&seasonSeriesId=9241&matchFormat=3&teamId=61",
+    "https://www.cricbuzz.com/api/cricket-series/series-stats/9241?statsType=mostHundreds&seasonSeriesId=9241&matchFormat=3&teamId=61",
+    "https://www.cricbuzz.com/api/cricket-series/series-stats/9241?statsType=mostFifties&seasonSeriesId=9241&matchFormat=3&teamId=61",
+    "https://www.cricbuzz.com/api/cricket-series/series-stats/9241?statsType=mostFours&seasonSeriesId=9241&matchFormat=3&teamId=61",
+    "https://www.cricbuzz.com/api/cricket-series/series-stats/9241?statsType=mostSixes&seasonSeriesId=9241&matchFormat=3&teamId=61",
+    "https://www.cricbuzz.com/api/cricket-series/series-stats/9241?statsType=mostRuns&seasonSeriesId=9241&matchFormat=3&teamId=62",
+    "https://www.cricbuzz.com/api/cricket-series/series-stats/9241?statsType=highestScore&seasonSeriesId=9241&matchFormat=3&teamId=62",
+    "https://www.cricbuzz.com/api/cricket-series/series-stats/9241?statsType=mostHundreds&seasonSeriesId=9241&matchFormat=3&teamId=62",
+    "https://www.cricbuzz.com/api/cricket-series/series-stats/9241?statsType=mostFifties&seasonSeriesId=9241&matchFormat=3&teamId=62",
+    "https://www.cricbuzz.com/api/cricket-series/series-stats/9241?statsType=mostFours&seasonSeriesId=9241&matchFormat=3&teamId=62",
+    "https://www.cricbuzz.com/api/cricket-series/series-stats/9241?statsType=mostSixes&seasonSeriesId=9241&matchFormat=3&teamId=62",
+    "https://www.cricbuzz.com/api/cricket-series/series-stats/9241?statsType=mostRuns&seasonSeriesId=9241&matchFormat=3&teamId=63",
+    "https://www.cricbuzz.com/api/cricket-series/series-stats/9241?statsType=highestScore&seasonSeriesId=9241&matchFormat=3&teamId=63",
+    "https://www.cricbuzz.com/api/cricket-series/series-stats/9241?statsType=mostHundreds&seasonSeriesId=9241&matchFormat=3&teamId=63",
+    "https://www.cricbuzz.com/api/cricket-series/series-stats/9241?statsType=mostFifties&seasonSeriesId=9241&matchFormat=3&teamId=63",
+    "https://www.cricbuzz.com/api/cricket-series/series-stats/9241?statsType=mostFours&seasonSeriesId=9241&matchFormat=3&teamId=63",
+    "https://www.cricbuzz.com/api/cricket-series/series-stats/9241?statsType=mostSixes&seasonSeriesId=9241&matchFormat=3&teamId=63",
+    "https://www.cricbuzz.com/api/cricket-series/series-stats/9241?statsType=mostRuns&seasonSeriesId=9241&matchFormat=3&teamId=64",
+    "https://www.cricbuzz.com/api/cricket-series/series-stats/9241?statsType=highestScore&seasonSeriesId=9241&matchFormat=3&teamId=64",
+    "https://www.cricbuzz.com/api/cricket-series/series-stats/9241?statsType=mostHundreds&seasonSeriesId=9241&matchFormat=3&teamId=64",
+    "https://www.cricbuzz.com/api/cricket-series/series-stats/9241?statsType=mostFifties&seasonSeriesId=9241&matchFormat=3&teamId=64",
+    "https://www.cricbuzz.com/api/cricket-series/series-stats/9241?statsType=mostFours&seasonSeriesId=9241&matchFormat=3&teamId=64",
+    "https://www.cricbuzz.com/api/cricket-series/series-stats/9241?statsType=mostSixes&seasonSeriesId=9241&matchFormat=3&teamId=64",
+    "https://www.cricbuzz.com/api/cricket-series/series-stats/9241?statsType=mostRuns&seasonSeriesId=9241&matchFormat=3&teamId=65",
+    "https://www.cricbuzz.com/api/cricket-series/series-stats/9241?statsType=highestScore&seasonSeriesId=9241&matchFormat=3&teamId=65",
+    "https://www.cricbuzz.com/api/cricket-series/series-stats/9241?statsType=mostHundreds&seasonSeriesId=9241&matchFormat=3&teamId=65",
+    "https://www.cricbuzz.com/api/cricket-series/series-stats/9241?statsType=mostFifties&seasonSeriesId=9241&matchFormat=3&teamId=65",
+    "https://www.cricbuzz.com/api/cricket-series/series-stats/9241?statsType=mostFours&seasonSeriesId=9241&matchFormat=3&teamId=65",
+    "https://www.cricbuzz.com/api/cricket-series/series-stats/9241?statsType=mostSixes&seasonSeriesId=9241&matchFormat=3&teamId=65",
+    "https://www.cricbuzz.com/api/cricket-series/series-stats/9241?statsType=mostRuns&seasonSeriesId=9241&matchFormat=3&teamId=255",
+    "https://www.cricbuzz.com/api/cricket-series/series-stats/9241?statsType=highestScore&seasonSeriesId=9241&matchFormat=3&teamId=255",
+    "https://www.cricbuzz.com/api/cricket-series/series-stats/9241?statsType=mostHundreds&seasonSeriesId=9241&matchFormat=3&teamId=255",
+    "https://www.cricbuzz.com/api/cricket-series/series-stats/9241?statsType=mostFifties&seasonSeriesId=9241&matchFormat=3&teamId=255",
+    "https://www.cricbuzz.com/api/cricket-series/series-stats/9241?statsType=mostFours&seasonSeriesId=9241&matchFormat=3&teamId=255",
+    "https://www.cricbuzz.com/api/cricket-series/series-stats/9241?statsType=mostSixes&seasonSeriesId=9241&matchFormat=3&teamId=255",
+    "https://www.cricbuzz.com/api/cricket-series/series-stats/9241?statsType=mostRuns&seasonSeriesId=9241&matchFormat=3&teamId=966",
+    "https://www.cricbuzz.com/api/cricket-series/series-stats/9241?statsType=highestScore&seasonSeriesId=9241&matchFormat=3&teamId=966",
+    "https://www.cricbuzz.com/api/cricket-series/series-stats/9241?statsType=mostHundreds&seasonSeriesId=9241&matchFormat=3&teamId=966",
+    "https://www.cricbuzz.com/api/cricket-series/series-stats/9241?statsType=mostFifties&seasonSeriesId=9241&matchFormat=3&teamId=966",
+    "https://www.cricbuzz.com/api/cricket-series/series-stats/9241?statsType=mostFours&seasonSeriesId=9241&matchFormat=3&teamId=966",
+    "https://www.cricbuzz.com/api/cricket-series/series-stats/9241?statsType=mostSixes&seasonSeriesId=9241&matchFormat=3&teamId=966",
+    "https://www.cricbuzz.com/api/cricket-series/series-stats/9241?statsType=mostRuns&seasonSeriesId=9241&matchFormat=3&teamId=971",
+    "https://www.cricbuzz.com/api/cricket-series/series-stats/9241?statsType=highestScore&seasonSeriesId=9241&matchFormat=3&teamId=971",
+    "https://www.cricbuzz.com/api/cricket-series/series-stats/9241?statsType=mostHundreds&seasonSeriesId=9241&matchFormat=3&teamId=971",
+    "https://www.cricbuzz.com/api/cricket-series/series-stats/9241?statsType=mostFifties&seasonSeriesId=9241&matchFormat=3&teamId=971",
+    "https://www.cricbuzz.com/api/cricket-series/series-stats/9241?statsType=mostFours&seasonSeriesId=9241&matchFormat=3&teamId=971",
+    "https://www.cricbuzz.com/api/cricket-series/series-stats/9241?statsType=mostSixes&seasonSeriesId=9241&matchFormat=3&teamId=971"
+  ],
+  "notes": [
+    "ESPNcricinfo records pages returned Access Denied from this environment, so this generator uses Cricbuzz.",
+    "Cricbuzz series stat tables are used only to map player names to Cricbuzz profile ids.",
+    "The actual batting fields come from each Cricbuzz profile page IPL career column."
+  ],
+  "players": 264,
+  "cricbuzzNamesIndexed": 178,
+  "profilesFetchedOrRead": 151,
+  "matched": 151,
+  "changed": 140,
+  "unchanged": 11,
+  "unmatched": 113,
+  "profileFailures": 0,
+  "changedPlayers": [
+    {
+      "id": "7",
+      "name": "Josh Inglis",
+      "cricbuzzId": "10637",
+      "cricbuzzName": "Josh Inglis",
+      "mappingSources": [
+        "all:highestSr",
+        "season:LSG:mostRuns",
+        "season:LSG:highestScore",
+        "season:LSG:mostFifties",
+        "season:LSG:mostFours",
+        "season:LSG:mostSixes"
+      ],
+      "stats": {
+        "matches": 16,
+        "battingInnings": 16,
+        "runs": 544,
+        "ballsFaced": 314,
+        "highest": 85,
+        "average": 38.857142857142854,
+        "strikeRate": 173.2484076433121,
+        "notOuts": 2,
+        "fours": 58,
+        "sixes": 28,
+        "ducks": 0,
+        "fifties": 4,
+        "hundreds": 0,
+        "battingAverage": "38.86",
+        "battingStrikeRate": "173.2"
+      },
+      "changes": [
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 0
+        }
+      ]
+    },
+    {
+      "id": "10",
+      "name": "Venkatesh Iyer",
+      "cricbuzzId": "10917",
+      "cricbuzzName": "Venkatesh Iyer",
+      "mappingSources": [
+        "season:RCB:mostRuns",
+        "season:RCB:highestScore",
+        "season:RCB:mostFifties",
+        "season:RCB:mostFours",
+        "season:RCB:mostSixes"
+      ],
+      "stats": {
+        "matches": 68,
+        "battingInnings": 62,
+        "runs": 1677,
+        "ballsFaced": 1181,
+        "highest": 104,
+        "average": 31.641509433962263,
+        "strikeRate": 141.9983065198984,
+        "notOuts": 9,
+        "fours": 157,
+        "sixes": 78,
+        "ducks": 2,
+        "fifties": 13,
+        "hundreds": 1,
+        "battingAverage": "31.64",
+        "battingStrikeRate": "142.0"
+      },
+      "changes": [
+        {
+          "field": "matches",
+          "before": 69,
+          "after": 68
+        }
+      ]
+    },
+    {
+      "id": "11",
+      "name": "Jason Holder",
+      "cricbuzzId": "8313",
+      "cricbuzzName": "Jason Holder",
+      "mappingSources": [
+        "season:GT:mostRuns",
+        "season:GT:mostFours",
+        "season:GT:mostSixes"
+      ],
+      "stats": {
+        "matches": 57,
+        "battingInnings": 34,
+        "runs": 324,
+        "ballsFaced": 262,
+        "highest": 47,
+        "average": 12.461538461538462,
+        "strikeRate": 123.66412213740458,
+        "notOuts": 8,
+        "fours": 16,
+        "sixes": 21,
+        "ducks": 3,
+        "fifties": 0,
+        "hundreds": 0,
+        "battingAverage": "12.46",
+        "battingStrikeRate": "123.7"
+      },
+      "changes": [
+        {
+          "field": "ballsFaced",
+          "before": 263,
+          "after": 262
+        },
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 3
+        },
+        {
+          "field": "battingStrikeRate",
+          "before": "123.2",
+          "after": "123.7"
+        },
+        {
+          "field": "strikeRate",
+          "before": 123.19391634980988,
+          "after": 123.66412213740458
+        }
+      ]
+    },
+    {
+      "id": "14",
+      "name": "Pathum Nissanka",
+      "cricbuzzId": "13682",
+      "cricbuzzName": "Pathum Nissanka",
+      "mappingSources": [
+        "season:DC:mostRuns",
+        "season:DC:highestScore",
+        "season:DC:mostFifties",
+        "season:DC:mostFours",
+        "season:DC:mostSixes"
+      ],
+      "stats": {
+        "matches": 10,
+        "battingInnings": 10,
+        "runs": 278,
+        "ballsFaced": 175,
+        "highest": 62,
+        "average": 27.8,
+        "strikeRate": 158.85714285714286,
+        "notOuts": 0,
+        "fours": 33,
+        "sixes": 12,
+        "ducks": 0,
+        "fifties": 2,
+        "hundreds": 0,
+        "battingAverage": "27.80",
+        "battingStrikeRate": "158.9"
+      },
+      "changes": [
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 0
+        }
+      ]
+    },
+    {
+      "id": "16",
+      "name": "Cooper Connolly",
+      "cricbuzzId": "15927",
+      "cricbuzzName": "Cooper Connolly",
+      "mappingSources": [
+        "all:highestAvg",
+        "season:PBKS:mostRuns",
+        "season:PBKS:highestScore",
+        "season:PBKS:mostHundreds",
+        "season:PBKS:mostFifties",
+        "season:PBKS:mostFours",
+        "season:PBKS:mostSixes"
+      ],
+      "stats": {
+        "matches": 14,
+        "battingInnings": 13,
+        "runs": 491,
+        "ballsFaced": 301,
+        "highest": 107,
+        "average": 44.63636363636363,
+        "strikeRate": 163.12292358803987,
+        "notOuts": 2,
+        "fours": 43,
+        "sixes": 32,
+        "ducks": 1,
+        "fifties": 2,
+        "hundreds": 1,
+        "battingAverage": "44.64",
+        "battingStrikeRate": "163.1"
+      },
+      "changes": [
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 1
+        }
+      ]
+    },
+    {
+      "id": "17",
+      "name": "Mukul Choudhary",
+      "cricbuzzId": "39219",
+      "cricbuzzName": "Mukul Choudhary",
+      "mappingSources": [
+        "season:LSG:mostRuns",
+        "season:LSG:highestScore",
+        "season:LSG:mostFifties",
+        "season:LSG:mostFours",
+        "season:LSG:mostSixes"
+      ],
+      "stats": {
+        "matches": 10,
+        "battingInnings": 10,
+        "runs": 170,
+        "ballsFaced": 120,
+        "highest": 54,
+        "average": 28.333333333333332,
+        "strikeRate": 141.66666666666666,
+        "notOuts": 4,
+        "fours": 11,
+        "sixes": 12,
+        "ducks": 0,
+        "fifties": 1,
+        "hundreds": 0,
+        "battingAverage": "28.33",
+        "battingStrikeRate": "141.7"
+      },
+      "changes": [
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 0
+        }
+      ]
+    },
+    {
+      "id": "19",
+      "name": "Akshat Raghuwanshi",
+      "cricbuzzId": "24431",
+      "cricbuzzName": "Akshat Raghuwanshi",
+      "mappingSources": [
+        "season:LSG:mostRuns",
+        "season:LSG:mostFours",
+        "season:LSG:mostSixes"
+      ],
+      "stats": {
+        "matches": 3,
+        "battingInnings": 2,
+        "runs": 29,
+        "ballsFaced": 25,
+        "highest": 18,
+        "average": 14.5,
+        "strikeRate": 116,
+        "notOuts": 0,
+        "fours": 1,
+        "sixes": 1,
+        "ducks": 0,
+        "fifties": 0,
+        "hundreds": 0,
+        "battingAverage": "14.50",
+        "battingStrikeRate": "116.0"
+      },
+      "changes": [
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 0
+        }
+      ]
+    },
+    {
+      "id": "21",
+      "name": "David Miller",
+      "cricbuzzId": "6349",
+      "cricbuzzName": "David Miller",
+      "mappingSources": [
+        "season:DC:mostRuns",
+        "season:DC:highestScore",
+        "season:DC:mostFifties",
+        "season:DC:mostFours",
+        "season:DC:mostSixes"
+      ],
+      "stats": {
+        "matches": 152,
+        "battingInnings": 145,
+        "runs": 3288,
+        "ballsFaced": 2357,
+        "highest": 101,
+        "average": 35.73913043478261,
+        "strikeRate": 139.4993635977938,
+        "notOuts": 53,
+        "fours": 235,
+        "sixes": 152,
+        "ducks": 5,
+        "fifties": 14,
+        "hundreds": 1,
+        "battingAverage": "35.74",
+        "battingStrikeRate": "139.5"
+      },
+      "changes": [
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 5
+        }
+      ]
+    },
+    {
+      "id": "24",
+      "name": "Kyle Jamieson",
+      "cricbuzzId": "9441",
+      "cricbuzzName": "Kyle Jamieson",
+      "mappingSources": [
+        "season:DC:mostRuns",
+        "season:DC:mostFours",
+        "season:DC:mostSixes"
+      ],
+      "stats": {
+        "matches": 15,
+        "battingInnings": 10,
+        "runs": 77,
+        "ballsFaced": 73,
+        "highest": 16,
+        "average": 15.4,
+        "strikeRate": 105.47945205479452,
+        "notOuts": 5,
+        "fours": 6,
+        "sixes": 4,
+        "ducks": 0,
+        "fifties": 0,
+        "hundreds": 0,
+        "battingAverage": "15.40",
+        "battingStrikeRate": "105.5"
+      },
+      "changes": [
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 0
+        }
+      ]
+    },
+    {
+      "id": "27",
+      "name": "Matt Henry",
+      "cricbuzzId": "9067",
+      "cricbuzzName": "Matt Henry",
+      "mappingSources": [
+        "season:CSK:mostRuns",
+        "season:CSK:mostFours",
+        "season:CSK:mostSixes"
+      ],
+      "stats": {
+        "matches": 9,
+        "battingInnings": 2,
+        "runs": 7,
+        "ballsFaced": 10,
+        "highest": 5,
+        "average": 3.5,
+        "strikeRate": 70,
+        "notOuts": 0,
+        "fours": 1,
+        "sixes": 0,
+        "ducks": 0,
+        "fifties": 0,
+        "hundreds": 0,
+        "battingAverage": "3.50",
+        "battingStrikeRate": "70.0"
+      },
+      "changes": [
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 0
+        }
+      ]
+    },
+    {
+      "id": "28",
+      "name": "Akeal Hosein",
+      "cricbuzzId": "8435",
+      "cricbuzzName": "Akeal Hosein",
+      "mappingSources": [
+        "season:CSK:mostRuns",
+        "season:CSK:mostSixes"
+      ],
+      "stats": {
+        "matches": 8,
+        "battingInnings": 4,
+        "runs": 21,
+        "ballsFaced": 13,
+        "highest": 16,
+        "average": 0,
+        "strikeRate": 161.53846153846155,
+        "notOuts": 4,
+        "fours": 1,
+        "sixes": 1,
+        "ducks": 0,
+        "fifties": 0,
+        "hundreds": 0,
+        "battingAverage": "",
+        "battingStrikeRate": "161.5"
+      },
+      "changes": [
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 0
+        }
+      ]
+    },
+    {
+      "id": "29",
+      "name": "Finn Allen",
+      "cricbuzzId": "11172",
+      "cricbuzzName": "Finn Allen",
+      "mappingSources": [
+        "all:highestSr",
+        "season:KKR:mostRuns",
+        "season:KKR:highestScore",
+        "season:KKR:mostHundreds",
+        "season:KKR:mostFifties",
+        "season:KKR:mostFours",
+        "season:KKR:mostSixes"
+      ],
+      "stats": {
+        "matches": 11,
+        "battingInnings": 11,
+        "runs": 349,
+        "ballsFaced": 163,
+        "highest": 100,
+        "average": 34.9,
+        "strikeRate": 214.11042944785277,
+        "notOuts": 1,
+        "fours": 33,
+        "sixes": 28,
+        "ducks": 0,
+        "fifties": 1,
+        "hundreds": 1,
+        "battingAverage": "34.90",
+        "battingStrikeRate": "214.1"
+      },
+      "changes": [
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 0
+        }
+      ]
+    },
+    {
+      "id": "31",
+      "name": "Salil Arora",
+      "cricbuzzId": "15418",
+      "cricbuzzName": "Salil Arora",
+      "mappingSources": [
+        "season:SRH:mostRuns",
+        "season:SRH:mostFours",
+        "season:SRH:mostSixes"
+      ],
+      "stats": {
+        "matches": 14,
+        "battingInnings": 11,
+        "runs": 156,
+        "ballsFaced": 98,
+        "highest": 35,
+        "average": 22.285714285714285,
+        "strikeRate": 159.18367346938774,
+        "notOuts": 4,
+        "fours": 11,
+        "sixes": 11,
+        "ducks": 1,
+        "fifties": 0,
+        "hundreds": 0,
+        "battingAverage": "22.29",
+        "battingStrikeRate": "159.2"
+      },
+      "changes": [
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 1
+        }
+      ]
+    },
+    {
+      "id": "33",
+      "name": "Tim Seifert",
+      "cricbuzzId": "9443",
+      "cricbuzzName": "Tim Seifert",
+      "mappingSources": [
+        "season:KKR:mostRuns",
+        "season:KKR:mostFours",
+        "season:KKR:mostSixes"
+      ],
+      "stats": {
+        "matches": 6,
+        "battingInnings": 6,
+        "runs": 45,
+        "ballsFaced": 41,
+        "highest": 21,
+        "average": 7.5,
+        "strikeRate": 109.7560975609756,
+        "notOuts": 0,
+        "fours": 6,
+        "sixes": 1,
+        "ducks": 2,
+        "fifties": 0,
+        "hundreds": 0,
+        "battingAverage": "7.50",
+        "battingStrikeRate": "109.8"
+      },
+      "changes": [
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 2
+        }
+      ]
+    },
+    {
+      "id": "36",
+      "name": "Quinton de Kock",
+      "cricbuzzId": "8520",
+      "cricbuzzName": "Quinton de Kock",
+      "mappingSources": [
+        "all:highestScore",
+        "all:mostHundreds",
+        "season:MI:mostRuns",
+        "season:MI:highestScore",
+        "season:MI:mostHundreds",
+        "season:MI:mostFours",
+        "season:MI:mostSixes"
+      ],
+      "stats": {
+        "matches": 118,
+        "battingInnings": 118,
+        "runs": 3441,
+        "ballsFaced": 2550,
+        "highest": 140,
+        "average": 31.28181818181818,
+        "strikeRate": 134.94117647058823,
+        "notOuts": 8,
+        "fours": 334,
+        "sixes": 143,
+        "ducks": 4,
+        "fifties": 24,
+        "hundreds": 3,
+        "battingAverage": "31.28",
+        "battingStrikeRate": "134.9"
+      },
+      "changes": [
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 4
+        }
+      ]
+    },
+    {
+      "id": "38",
+      "name": "Ravi Singh",
+      "cricbuzzId": "1448413",
+      "cricbuzzName": "Ravi Singh",
+      "mappingSources": [
+        "season:RR:mostRuns",
+        "season:RR:mostFours",
+        "season:RR:mostSixes"
+      ],
+      "stats": {
+        "matches": 1,
+        "battingInnings": 1,
+        "runs": 4,
+        "ballsFaced": 2,
+        "highest": 4,
+        "average": 4,
+        "strikeRate": 200,
+        "notOuts": 0,
+        "fours": 1,
+        "sixes": 0,
+        "ducks": 0,
+        "fifties": 0,
+        "hundreds": 0,
+        "battingAverage": "4.00",
+        "battingStrikeRate": "200.0"
+      },
+      "changes": [
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 0
+        }
+      ]
+    },
+    {
+      "id": "41",
+      "name": "Sarfaraz Khan",
+      "cricbuzzId": "9429",
+      "cricbuzzName": "Sarfaraz Khan",
+      "mappingSources": [
+        "season:CSK:mostRuns",
+        "season:CSK:highestScore",
+        "season:CSK:mostFifties",
+        "season:CSK:mostFours",
+        "season:CSK:mostSixes"
+      ],
+      "stats": {
+        "matches": 58,
+        "battingInnings": 44,
+        "runs": 746,
+        "ballsFaced": 543,
+        "highest": 67,
+        "average": 22.606060606060606,
+        "strikeRate": 137.38489871086557,
+        "notOuts": 11,
+        "fours": 86,
+        "sixes": 20,
+        "ducks": 4,
+        "fifties": 2,
+        "hundreds": 0,
+        "battingAverage": "22.61",
+        "battingStrikeRate": "137.4"
+      },
+      "changes": [
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 4
+        }
+      ]
+    },
+    {
+      "id": "64",
+      "name": "Kartik Tyagi",
+      "cricbuzzId": "13136",
+      "cricbuzzName": "Kartik Tyagi",
+      "mappingSources": [
+        "season:KKR:mostRuns",
+        "season:KKR:mostFours",
+        "season:KKR:mostSixes"
+      ],
+      "stats": {
+        "matches": 34,
+        "battingInnings": 10,
+        "runs": 24,
+        "ballsFaced": 26,
+        "highest": 7,
+        "average": 3.4285714285714284,
+        "strikeRate": 92.3076923076923,
+        "notOuts": 3,
+        "fours": 2,
+        "sixes": 1,
+        "ducks": 2,
+        "fifties": 0,
+        "hundreds": 0,
+        "battingAverage": "3.43",
+        "battingStrikeRate": "92.3"
+      },
+      "changes": [
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 2
+        }
+      ]
+    },
+    {
+      "id": "81",
+      "name": "Jasprit Bumrah",
+      "cricbuzzId": "9311",
+      "cricbuzzName": "Jasprit Bumrah",
+      "mappingSources": [
+        "season:MI:mostFours"
+      ],
+      "stats": {
+        "matches": 158,
+        "battingInnings": 33,
+        "runs": 75,
+        "ballsFaced": 86,
+        "highest": 16,
+        "average": 9.375,
+        "strikeRate": 87.20930232558139,
+        "notOuts": 25,
+        "fours": 6,
+        "sixes": 1,
+        "ducks": 5,
+        "fifties": 0,
+        "hundreds": 0,
+        "battingAverage": "9.38",
+        "battingStrikeRate": "87.2"
+      },
+      "changes": [
+        {
+          "field": "battingInnings",
+          "before": 34,
+          "after": 33
+        },
+        {
+          "field": "notOuts",
+          "before": 26,
+          "after": 25
+        },
+        {
+          "field": "runs",
+          "before": 76,
+          "after": 75
+        },
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 5
+        },
+        {
+          "field": "battingAverage",
+          "before": "9.50",
+          "after": "9.38"
+        },
+        {
+          "field": "battingStrikeRate",
+          "before": "88.4",
+          "after": "87.2"
+        },
+        {
+          "field": "average",
+          "before": 9.5,
+          "after": 9.375
+        },
+        {
+          "field": "strikeRate",
+          "before": 88.37209302325581,
+          "after": 87.20930232558139
+        }
+      ]
+    },
+    {
+      "id": "82",
+      "name": "Suryakumar Yadav",
+      "cricbuzzId": "7915",
+      "cricbuzzName": "Suryakumar Yadav",
+      "mappingSources": [
+        "all:mostHundreds",
+        "all:mostFifties",
+        "all:mostFours",
+        "season:MI:mostRuns",
+        "season:MI:highestScore",
+        "season:MI:mostFifties",
+        "season:MI:mostFours",
+        "season:MI:mostSixes"
+      ],
+      "stats": {
+        "matches": 179,
+        "battingInnings": 164,
+        "runs": 4581,
+        "ballsFaced": 3083,
+        "highest": 103,
+        "average": 33.68382352941177,
+        "strikeRate": 148.5890366526111,
+        "notOuts": 28,
+        "fours": 482,
+        "sixes": 178,
+        "ducks": 12,
+        "fifties": 31,
+        "hundreds": 2,
+        "battingAverage": "33.68",
+        "battingStrikeRate": "148.6"
+      },
+      "changes": [
+        {
+          "field": "battingInnings",
+          "before": 163,
+          "after": 164
+        },
+        {
+          "field": "battingAverage",
+          "before": "33.93",
+          "after": "33.68"
+        },
+        {
+          "field": "average",
+          "before": 33.93333333333333,
+          "after": 33.68382352941177
+        }
+      ]
+    },
+    {
+      "id": "83",
+      "name": "Hardik Pandya",
+      "cricbuzzId": "9647",
+      "cricbuzzName": "Hardik Pandya",
+      "mappingSources": [
+        "season:MI:mostRuns",
+        "season:MI:mostFours",
+        "season:MI:mostSixes"
+      ],
+      "stats": {
+        "matches": 162,
+        "battingInnings": 150,
+        "runs": 2955,
+        "ballsFaced": 2020,
+        "highest": 91,
+        "average": 27.87735849056604,
+        "strikeRate": 146.2871287128713,
+        "notOuts": 44,
+        "fours": 228,
+        "sixes": 155,
+        "ducks": 6,
+        "fifties": 10,
+        "hundreds": 0,
+        "battingAverage": "27.88",
+        "battingStrikeRate": "146.3"
+      },
+      "changes": [
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 6
+        }
+      ]
+    },
+    {
+      "id": "84",
+      "name": "Rohit Sharma",
+      "cricbuzzId": "576",
+      "cricbuzzName": "Rohit Sharma",
+      "mappingSources": [
+        "all:mostRuns",
+        "all:mostHundreds",
+        "all:mostFifties",
+        "all:mostFours",
+        "all:mostSixes",
+        "all:mostNineties",
+        "season:MI:mostRuns",
+        "season:MI:highestScore",
+        "season:MI:mostFifties",
+        "season:MI:mostFours",
+        "season:MI:mostSixes"
+      ],
+      "stats": {
+        "matches": 281,
+        "battingInnings": 276,
+        "runs": 7329,
+        "ballsFaced": 5514,
+        "highest": 109,
+        "average": 29.79268292682927,
+        "strikeRate": 132.91621327529924,
+        "notOuts": 30,
+        "fours": 661,
+        "sixes": 323,
+        "ducks": 19,
+        "fifties": 49,
+        "hundreds": 2,
+        "battingAverage": "29.79",
+        "battingStrikeRate": "132.9"
+      },
+      "changes": [
+        {
+          "field": "notOuts",
+          "before": 31,
+          "after": 30
+        },
+        {
+          "field": "battingAverage",
+          "before": "29.91",
+          "after": "29.79"
+        },
+        {
+          "field": "average",
+          "before": 29.914285714285715,
+          "after": 29.79268292682927
+        }
+      ]
+    },
+    {
+      "id": "86",
+      "name": "Heinrich Klaasen",
+      "cricbuzzId": "10209",
+      "cricbuzzName": "Heinrich Klaasen",
+      "mappingSources": [
+        "all:highestAvg",
+        "season:SRH:mostRuns",
+        "season:SRH:highestScore",
+        "season:SRH:mostFifties",
+        "season:SRH:mostFours",
+        "season:SRH:mostSixes"
+      ],
+      "stats": {
+        "matches": 64,
+        "battingInnings": 60,
+        "runs": 2104,
+        "ballsFaced": 1262,
+        "highest": 105,
+        "average": 42.08,
+        "strikeRate": 166.71949286846277,
+        "notOuts": 10,
+        "fours": 146,
+        "sixes": 120,
+        "ducks": 1,
+        "fifties": 13,
+        "hundreds": 2,
+        "battingAverage": "42.08",
+        "battingStrikeRate": "166.7"
+      },
+      "changes": [
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 1
+        }
+      ]
+    },
+    {
+      "id": "88",
+      "name": "Abhishek Sharma",
+      "cricbuzzId": "12086",
+      "cricbuzzName": "Abhishek Sharma",
+      "mappingSources": [
+        "all:highestScore",
+        "all:highestSr",
+        "season:SRH:mostRuns",
+        "season:SRH:highestScore",
+        "season:SRH:mostHundreds",
+        "season:SRH:mostFifties",
+        "season:SRH:mostFours",
+        "season:SRH:mostSixes"
+      ],
+      "stats": {
+        "matches": 92,
+        "battingInnings": 89,
+        "runs": 2378,
+        "ballsFaced": 1389,
+        "highest": 141,
+        "average": 29.358024691358025,
+        "strikeRate": 171.20230381569473,
+        "notOuts": 8,
+        "fours": 224,
+        "sixes": 144,
+        "ducks": 6,
+        "fifties": 13,
+        "hundreds": 2,
+        "battingAverage": "29.36",
+        "battingStrikeRate": "171.2"
+      },
+      "changes": [
+        {
+          "field": "runs",
+          "before": 2379,
+          "after": 2378
+        },
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 6
+        },
+        {
+          "field": "battingAverage",
+          "before": "29.37",
+          "after": "29.36"
+        },
+        {
+          "field": "battingStrikeRate",
+          "before": "171.3",
+          "after": "171.2"
+        },
+        {
+          "field": "average",
+          "before": 29.37037037037037,
+          "after": 29.358024691358025
+        },
+        {
+          "field": "strikeRate",
+          "before": 171.27429805615552,
+          "after": 171.20230381569473
+        }
+      ]
+    },
+    {
+      "id": "89",
+      "name": "Travis Head",
+      "cricbuzzId": "8497",
+      "cricbuzzName": "Travis Head",
+      "mappingSources": [
+        "season:SRH:mostRuns",
+        "season:SRH:highestScore",
+        "season:SRH:mostFifties",
+        "season:SRH:mostFours",
+        "season:SRH:mostSixes"
+      ],
+      "stats": {
+        "matches": 53,
+        "battingInnings": 52,
+        "runs": 1556,
+        "ballsFaced": 915,
+        "highest": 102,
+        "average": 32.416666666666664,
+        "strikeRate": 170.05464480874318,
+        "notOuts": 4,
+        "fours": 172,
+        "sixes": 78,
+        "ducks": 6,
+        "fifties": 10,
+        "hundreds": 1,
+        "battingAverage": "32.42",
+        "battingStrikeRate": "170.1"
+      },
+      "changes": [
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 6
+        }
+      ]
+    },
+    {
+      "id": "90",
+      "name": "Nitish Kumar Reddy",
+      "cricbuzzId": "14701",
+      "cricbuzzName": "Nitish Kumar Reddy",
+      "mappingSources": [
+        "season:SRH:mostRuns",
+        "season:SRH:mostFifties",
+        "season:SRH:mostFours",
+        "season:SRH:mostSixes"
+      ],
+      "stats": {
+        "matches": 42,
+        "battingInnings": 35,
+        "runs": 787,
+        "ballsFaced": 541,
+        "highest": 76,
+        "average": 29.14814814814815,
+        "strikeRate": 145.4713493530499,
+        "notOuts": 8,
+        "fours": 50,
+        "sixes": 46,
+        "ducks": 1,
+        "fifties": 3,
+        "hundreds": 0,
+        "battingAverage": "29.15",
+        "battingStrikeRate": "145.5"
+      },
+      "changes": [
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 1
+        }
+      ]
+    },
+    {
+      "id": "91",
+      "name": "Ruturaj Gaikwad",
+      "cricbuzzId": "11813",
+      "cricbuzzName": "Ruturaj Gaikwad",
+      "mappingSources": [
+        "all:mostNineties",
+        "season:CSK:mostRuns",
+        "season:CSK:highestScore",
+        "season:CSK:mostFifties",
+        "season:CSK:mostFours",
+        "season:CSK:mostSixes"
+      ],
+      "stats": {
+        "matches": 85,
+        "battingInnings": 84,
+        "runs": 2839,
+        "ballsFaced": 2093,
+        "highest": 108,
+        "average": 38.36486486486486,
+        "strikeRate": 135.6426182513139,
+        "notOuts": 10,
+        "fours": 260,
+        "sixes": 107,
+        "ducks": 7,
+        "fifties": 22,
+        "hundreds": 2,
+        "battingAverage": "38.36",
+        "battingStrikeRate": "135.6"
+      },
+      "changes": [
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 7
+        }
+      ]
+    },
+    {
+      "id": "92",
+      "name": "Ravindra Jadeja",
+      "cricbuzzId": "587",
+      "cricbuzzName": "Ravindra Jadeja",
+      "mappingSources": [
+        "season:RR:mostRuns",
+        "season:RR:mostFours",
+        "season:RR:mostSixes"
+      ],
+      "stats": {
+        "matches": 268,
+        "battingInnings": 209,
+        "runs": 3526,
+        "ballsFaced": 2700,
+        "highest": 77,
+        "average": 29.140495867768596,
+        "strikeRate": 130.59259259259258,
+        "notOuts": 88,
+        "fours": 264,
+        "sixes": 122,
+        "ducks": 9,
+        "fifties": 5,
+        "hundreds": 0,
+        "battingAverage": "29.14",
+        "battingStrikeRate": "130.6"
+      },
+      "changes": [
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 9
+        }
+      ]
+    },
+    {
+      "id": "93",
+      "name": "Shivam Dube",
+      "cricbuzzId": "11195",
+      "cricbuzzName": "Shivam Dube",
+      "mappingSources": [
+        "season:CSK:mostRuns",
+        "season:CSK:highestScore",
+        "season:CSK:mostFours",
+        "season:CSK:mostSixes"
+      ],
+      "stats": {
+        "matches": 92,
+        "battingInnings": 87,
+        "runs": 2129,
+        "ballsFaced": 1464,
+        "highest": 95,
+        "average": 31.308823529411764,
+        "strikeRate": 145.42349726775956,
+        "notOuts": 19,
+        "fours": 132,
+        "sixes": 137,
+        "ducks": 3,
+        "fifties": 10,
+        "hundreds": 0,
+        "battingAverage": "31.31",
+        "battingStrikeRate": "145.4"
+      },
+      "changes": [
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 3
+        }
+      ]
+    },
+    {
+      "id": "94",
+      "name": "MS Dhoni",
+      "cricbuzzId": "265",
+      "cricbuzzName": "MS Dhoni",
+      "mappingSources": [
+        "all:mostRuns",
+        "all:mostSixes"
+      ],
+      "stats": {
+        "matches": 278,
+        "battingInnings": 242,
+        "runs": 5439,
+        "ballsFaced": 3957,
+        "highest": 84,
+        "average": 38.30281690140845,
+        "strikeRate": 137.45261561789235,
+        "notOuts": 100,
+        "fours": 375,
+        "sixes": 264,
+        "ducks": 6,
+        "fifties": 24,
+        "hundreds": 0,
+        "battingAverage": "38.30",
+        "battingStrikeRate": "137.5"
+      },
+      "changes": [
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 6
+        }
+      ]
+    },
+    {
+      "id": "95",
+      "name": "Axar Patel",
+      "cricbuzzId": "8808",
+      "cricbuzzName": "Axar Patel",
+      "mappingSources": [
+        "season:DC:mostRuns",
+        "season:DC:highestScore",
+        "season:DC:mostFifties",
+        "season:DC:mostFours",
+        "season:DC:mostSixes"
+      ],
+      "stats": {
+        "matches": 176,
+        "battingInnings": 135,
+        "runs": 2089,
+        "ballsFaced": 1562,
+        "highest": 66,
+        "average": 21.536082474226806,
+        "strikeRate": 133.73879641485274,
+        "notOuts": 38,
+        "fours": 146,
+        "sixes": 100,
+        "ducks": 9,
+        "fifties": 4,
+        "hundreds": 0,
+        "battingAverage": "21.54",
+        "battingStrikeRate": "133.7"
+      },
+      "changes": [
+        {
+          "field": "notOuts",
+          "before": 39,
+          "after": 38
+        },
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 9
+        },
+        {
+          "field": "battingAverage",
+          "before": "21.76",
+          "after": "21.54"
+        },
+        {
+          "field": "average",
+          "before": 21.760416666666668,
+          "after": 21.536082474226806
+        }
+      ]
+    },
+    {
+      "id": "97",
+      "name": "Tristan Stubbs",
+      "cricbuzzId": "19243",
+      "cricbuzzName": "Tristan Stubbs",
+      "mappingSources": [
+        "season:DC:mostRuns",
+        "season:DC:highestScore",
+        "season:DC:mostFifties",
+        "season:DC:mostFours",
+        "season:DC:mostSixes"
+      ],
+      "stats": {
+        "matches": 46,
+        "battingInnings": 43,
+        "runs": 980,
+        "ballsFaced": 648,
+        "highest": 71,
+        "average": 39.2,
+        "strikeRate": 151.23456790123456,
+        "notOuts": 18,
+        "fours": 69,
+        "sixes": 46,
+        "ducks": 2,
+        "fifties": 5,
+        "hundreds": 0,
+        "battingAverage": "39.20",
+        "battingStrikeRate": "151.2"
+      },
+      "changes": [
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 2
+        }
+      ]
+    },
+    {
+      "id": "98",
+      "name": "Abishek Porel",
+      "cricbuzzId": "24326",
+      "cricbuzzName": "Abishek Porel",
+      "mappingSources": [
+        "season:DC:mostRuns",
+        "season:DC:mostFifties",
+        "season:DC:mostFours",
+        "season:DC:mostSixes"
+      ],
+      "stats": {
+        "matches": 35,
+        "battingInnings": 33,
+        "runs": 769,
+        "ballsFaced": 529,
+        "highest": 65,
+        "average": 25.633333333333333,
+        "strikeRate": 145.36862003780718,
+        "notOuts": 3,
+        "fours": 80,
+        "sixes": 28,
+        "ducks": 2,
+        "fifties": 4,
+        "hundreds": 0,
+        "battingAverage": "25.63",
+        "battingStrikeRate": "145.4"
+      },
+      "changes": [
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 2
+        }
+      ]
+    },
+    {
+      "id": "99",
+      "name": "Rinku Singh",
+      "cricbuzzId": "10896",
+      "cricbuzzName": "Rinku Singh",
+      "mappingSources": [
+        "season:KKR:mostRuns",
+        "season:KKR:highestScore",
+        "season:KKR:mostFifties",
+        "season:KKR:mostFours",
+        "season:KKR:mostSixes"
+      ],
+      "stats": {
+        "matches": 72,
+        "battingInnings": 62,
+        "runs": 1394,
+        "ballsFaced": 955,
+        "highest": 83,
+        "average": 34,
+        "strikeRate": 145.96858638743456,
+        "notOuts": 21,
+        "fours": 114,
+        "sixes": 67,
+        "ducks": 1,
+        "fifties": 6,
+        "hundreds": 0,
+        "battingAverage": "34.00",
+        "battingStrikeRate": "146.0"
+      },
+      "changes": [
+        {
+          "field": "matches",
+          "before": 73,
+          "after": 72
+        },
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 1
+        }
+      ]
+    },
+    {
+      "id": "100",
+      "name": "Varun Chakaravarthy",
+      "cricbuzzId": "12926",
+      "cricbuzzName": "Varun Chakaravarthy",
+      "mappingSources": [
+        "season:KKR:mostRuns",
+        "season:KKR:mostFours",
+        "season:KKR:mostSixes"
+      ],
+      "stats": {
+        "matches": 94,
+        "battingInnings": 15,
+        "runs": 31,
+        "ballsFaced": 53,
+        "highest": 10,
+        "average": 5.166666666666667,
+        "strikeRate": 58.490566037735846,
+        "notOuts": 9,
+        "fours": 3,
+        "sixes": 0,
+        "ducks": 2,
+        "fifties": 0,
+        "hundreds": 0,
+        "battingAverage": "5.17",
+        "battingStrikeRate": "58.5"
+      },
+      "changes": [
+        {
+          "field": "matches",
+          "before": 95,
+          "after": 94
+        },
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 2
+        }
+      ]
+    },
+    {
+      "id": "101",
+      "name": "Sunil Narine",
+      "cricbuzzId": "2276",
+      "cricbuzzName": "Sunil Narine",
+      "mappingSources": [
+        "season:KKR:mostRuns",
+        "season:KKR:mostFours",
+        "season:KKR:mostSixes"
+      ],
+      "stats": {
+        "matches": 201,
+        "battingInnings": 126,
+        "runs": 1820,
+        "ballsFaced": 1101,
+        "highest": 109,
+        "average": 17.5,
+        "strikeRate": 165.3042688465032,
+        "notOuts": 22,
+        "fours": 191,
+        "sixes": 120,
+        "ducks": 18,
+        "fifties": 7,
+        "hundreds": 1,
+        "battingAverage": "17.50",
+        "battingStrikeRate": "165.3"
+      },
+      "changes": [
+        {
+          "field": "matches",
+          "before": 202,
+          "after": 201
+        },
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 18
+        }
+      ]
+    },
+    {
+      "id": "102",
+      "name": "Andre Russell",
+      "cricbuzzId": "7736",
+      "cricbuzzName": "Andre Russell",
+      "mappingSources": [
+        "all:highestSr",
+        "all:mostSixes"
+      ],
+      "stats": {
+        "matches": 139,
+        "battingInnings": 115,
+        "runs": 2651,
+        "ballsFaced": 1522,
+        "highest": 88,
+        "average": 28.20212765957447,
+        "strikeRate": 174.17871222076215,
+        "notOuts": 21,
+        "fours": 186,
+        "sixes": 223,
+        "ducks": 6,
+        "fifties": 12,
+        "hundreds": 0,
+        "battingAverage": "28.20",
+        "battingStrikeRate": "174.2"
+      },
+      "changes": [
+        {
+          "field": "matches",
+          "before": 140,
+          "after": 139
+        },
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 6
+        }
+      ]
+    },
+    {
+      "id": "104",
+      "name": "Ramandeep Singh",
+      "cricbuzzId": "12337",
+      "cricbuzzName": "Ramandeep Singh",
+      "mappingSources": [
+        "season:KKR:mostRuns",
+        "season:KKR:mostFours",
+        "season:KKR:mostSixes"
+      ],
+      "stats": {
+        "matches": 38,
+        "battingInnings": 26,
+        "runs": 299,
+        "ballsFaced": 205,
+        "highest": 35,
+        "average": 18.6875,
+        "strikeRate": 145.85365853658536,
+        "notOuts": 10,
+        "fours": 17,
+        "sixes": 19,
+        "ducks": 1,
+        "fifties": 0,
+        "hundreds": 0,
+        "battingAverage": "18.69",
+        "battingStrikeRate": "145.9"
+      },
+      "changes": [
+        {
+          "field": "matches",
+          "before": 39,
+          "after": 38
+        },
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 1
+        }
+      ]
+    },
+    {
+      "id": "105",
+      "name": "Sanju Samson",
+      "cricbuzzId": "8271",
+      "cricbuzzName": "Sanju Samson",
+      "mappingSources": [
+        "all:mostRuns",
+        "all:mostHundreds",
+        "all:mostFours",
+        "all:mostSixes",
+        "season:CSK:mostRuns",
+        "season:CSK:highestScore",
+        "season:CSK:mostHundreds",
+        "season:CSK:mostFifties",
+        "season:CSK:mostFours",
+        "season:CSK:mostSixes"
+      ],
+      "stats": {
+        "matches": 190,
+        "battingInnings": 186,
+        "runs": 5181,
+        "ballsFaced": 3671,
+        "highest": 119,
+        "average": 31.591463414634145,
+        "strikeRate": 141.13320621084173,
+        "notOuts": 22,
+        "fours": 432,
+        "sixes": 243,
+        "ducks": 12,
+        "fifties": 27,
+        "hundreds": 5,
+        "battingAverage": "31.59",
+        "battingStrikeRate": "141.1"
+      },
+      "changes": [
+        {
+          "field": "matches",
+          "before": 191,
+          "after": 190
+        },
+        {
+          "field": "notOuts",
+          "before": 23,
+          "after": 22
+        },
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 12
+        },
+        {
+          "field": "battingAverage",
+          "before": "31.79",
+          "after": "31.59"
+        },
+        {
+          "field": "average",
+          "before": 31.78527607361963,
+          "after": 31.591463414634145
+        }
+      ]
+    },
+    {
+      "id": "106",
+      "name": "Yashasvi Jaiswal",
+      "cricbuzzId": "13940",
+      "cricbuzzName": "Yashasvi Jaiswal",
+      "mappingSources": [
+        "all:highestScore",
+        "season:RR:mostRuns",
+        "season:RR:highestScore",
+        "season:RR:mostFifties",
+        "season:RR:mostFours",
+        "season:RR:mostSixes"
+      ],
+      "stats": {
+        "matches": 82,
+        "battingInnings": 82,
+        "runs": 2593,
+        "ballsFaced": 1697,
+        "highest": 124,
+        "average": 33.675324675324674,
+        "strikeRate": 152.79905715969358,
+        "notOuts": 5,
+        "fours": 310,
+        "sixes": 110,
+        "ducks": 4,
+        "fifties": 18,
+        "hundreds": 2,
+        "battingAverage": "33.68",
+        "battingStrikeRate": "152.8"
+      },
+      "changes": [
+        {
+          "field": "matches",
+          "before": 83,
+          "after": 82
+        },
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 4
+        }
+      ]
+    },
+    {
+      "id": "107",
+      "name": "Riyan Parag",
+      "cricbuzzId": "12305",
+      "cricbuzzName": "Riyan Parag",
+      "mappingSources": [
+        "season:RR:mostRuns",
+        "season:RR:highestScore",
+        "season:RR:mostFifties",
+        "season:RR:mostFours",
+        "season:RR:mostSixes"
+      ],
+      "stats": {
+        "matches": 97,
+        "battingInnings": 86,
+        "runs": 1875,
+        "ballsFaced": 1300,
+        "highest": 95,
+        "average": 25.684931506849313,
+        "strikeRate": 144.23076923076923,
+        "notOuts": 13,
+        "fours": 135,
+        "sixes": 108,
+        "ducks": 3,
+        "fifties": 9,
+        "hundreds": 0,
+        "battingAverage": "25.68",
+        "battingStrikeRate": "144.2"
+      },
+      "changes": [
+        {
+          "field": "matches",
+          "before": 98,
+          "after": 97
+        },
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 3
+        }
+      ]
+    },
+    {
+      "id": "108",
+      "name": "Dhruv Jurel",
+      "cricbuzzId": "14691",
+      "cricbuzzName": "Dhruv Jurel",
+      "mappingSources": [
+        "season:RR:mostRuns",
+        "season:RR:highestScore",
+        "season:RR:mostFifties",
+        "season:RR:mostFours",
+        "season:RR:mostSixes"
+      ],
+      "stats": {
+        "matches": 57,
+        "battingInnings": 51,
+        "runs": 1195,
+        "ballsFaced": 775,
+        "highest": 81,
+        "average": 31.44736842105263,
+        "strikeRate": 154.19354838709677,
+        "notOuts": 13,
+        "fours": 98,
+        "sixes": 62,
+        "ducks": 5,
+        "fifties": 10,
+        "hundreds": 0,
+        "battingAverage": "31.45",
+        "battingStrikeRate": "154.2"
+      },
+      "changes": [
+        {
+          "field": "matches",
+          "before": 58,
+          "after": 57
+        },
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 5
+        }
+      ]
+    },
+    {
+      "id": "109",
+      "name": "Shimron Hetmyer",
+      "cricbuzzId": "9789",
+      "cricbuzzName": "Shimron Hetmyer",
+      "mappingSources": [
+        "season:RR:mostRuns",
+        "season:RR:mostFours",
+        "season:RR:mostSixes"
+      ],
+      "stats": {
+        "matches": 94,
+        "battingInnings": 86,
+        "runs": 1560,
+        "ballsFaced": 1045,
+        "highest": 75,
+        "average": 27.36842105263158,
+        "strikeRate": 149.2822966507177,
+        "notOuts": 29,
+        "fours": 98,
+        "sixes": 96,
+        "ducks": 4,
+        "fifties": 5,
+        "hundreds": 0,
+        "battingAverage": "27.37",
+        "battingStrikeRate": "149.3"
+      },
+      "changes": [
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 4
+        }
+      ]
+    },
+    {
+      "id": "110",
+      "name": "Rashid Khan",
+      "cricbuzzId": "10738",
+      "cricbuzzName": "Rashid Khan",
+      "mappingSources": [
+        "season:GT:mostRuns",
+        "season:GT:mostFours",
+        "season:GT:mostSixes"
+      ],
+      "stats": {
+        "matches": 153,
+        "battingInnings": 74,
+        "runs": 635,
+        "ballsFaced": 406,
+        "highest": 79,
+        "average": 13.804347826086957,
+        "strikeRate": 156.4039408866995,
+        "notOuts": 28,
+        "fours": 45,
+        "sixes": 43,
+        "ducks": 16,
+        "fifties": 1,
+        "hundreds": 0,
+        "battingAverage": "13.80",
+        "battingStrikeRate": "156.4"
+      },
+      "changes": [
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 16
+        }
+      ]
+    },
+    {
+      "id": "111",
+      "name": "Shubman Gill",
+      "cricbuzzId": "11808",
+      "cricbuzzName": "Shubman Gill",
+      "mappingSources": [
+        "all:highestScore",
+        "all:highestAvg",
+        "all:mostHundreds",
+        "all:mostFifties",
+        "all:mostFours",
+        "all:mostNineties",
+        "season:GT:mostRuns",
+        "season:GT:highestScore",
+        "season:GT:mostHundreds",
+        "season:GT:mostFifties",
+        "season:GT:mostFours",
+        "season:GT:mostSixes"
+      ],
+      "stats": {
+        "matches": 134,
+        "battingInnings": 131,
+        "runs": 4598,
+        "ballsFaced": 3236,
+        "highest": 129,
+        "average": 40.333333333333336,
+        "strikeRate": 142.08899876390606,
+        "notOuts": 17,
+        "fours": 446,
+        "sixes": 152,
+        "ducks": 4,
+        "fifties": 32,
+        "hundreds": 5,
+        "battingAverage": "40.33",
+        "battingStrikeRate": "142.1"
+      },
+      "changes": [
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 4
+        }
+      ]
+    },
+    {
+      "id": "112",
+      "name": "Sai Sudharsan",
+      "cricbuzzId": "13866",
+      "cricbuzzName": "Sai Sudharsan",
+      "mappingSources": [
+        "all:highestAvg",
+        "all:mostHundreds",
+        "season:GT:mostRuns",
+        "season:GT:highestScore",
+        "season:GT:mostHundreds",
+        "season:GT:mostFifties",
+        "season:GT:mostFours",
+        "season:GT:mostSixes"
+      ],
+      "stats": {
+        "matches": 57,
+        "battingInnings": 57,
+        "runs": 2515,
+        "ballsFaced": 1686,
+        "highest": 108,
+        "average": 48.36538461538461,
+        "strikeRate": 149.16963226571767,
+        "notOuts": 5,
+        "fours": 258,
+        "sixes": 82,
+        "ducks": 1,
+        "fifties": 20,
+        "hundreds": 3,
+        "battingAverage": "48.37",
+        "battingStrikeRate": "149.2"
+      },
+      "changes": [
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 1
+        }
+      ]
+    },
+    {
+      "id": "113",
+      "name": "Rahul Tewatia",
+      "cricbuzzId": "9693",
+      "cricbuzzName": "Rahul Tewatia",
+      "mappingSources": [
+        "season:GT:mostRuns",
+        "season:GT:highestScore",
+        "season:GT:mostFifties",
+        "season:GT:mostFours",
+        "season:GT:mostSixes"
+      ],
+      "stats": {
+        "matches": 124,
+        "battingInnings": 92,
+        "runs": 1302,
+        "ballsFaced": 943,
+        "highest": 68,
+        "average": 23.672727272727272,
+        "strikeRate": 138.06998939554612,
+        "notOuts": 37,
+        "fours": 110,
+        "sixes": 62,
+        "ducks": 4,
+        "fifties": 2,
+        "hundreds": 0,
+        "battingAverage": "23.67",
+        "battingStrikeRate": "138.1"
+      },
+      "changes": [
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 4
+        }
+      ]
+    },
+    {
+      "id": "114",
+      "name": "M Shahrukh Khan",
+      "cricbuzzId": "10226",
+      "cricbuzzName": "Shahrukh Khan",
+      "mappingSources": [
+        "season:GT:mostRuns",
+        "season:GT:mostFours",
+        "season:GT:mostSixes"
+      ],
+      "stats": {
+        "matches": 64,
+        "battingInnings": 54,
+        "runs": 775,
+        "ballsFaced": 524,
+        "highest": 58,
+        "average": 20.394736842105264,
+        "strikeRate": 147.90076335877862,
+        "notOuts": 16,
+        "fours": 49,
+        "sixes": 52,
+        "ducks": 3,
+        "fifties": 2,
+        "hundreds": 0,
+        "battingAverage": "20.39",
+        "battingStrikeRate": "147.9"
+      },
+      "changes": [
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 3
+        }
+      ]
+    },
+    {
+      "id": "115",
+      "name": "Nicholas Pooran",
+      "cricbuzzId": "9406",
+      "cricbuzzName": "Nicholas Pooran",
+      "mappingSources": [
+        "all:mostSixes",
+        "season:LSG:mostRuns",
+        "season:LSG:highestScore",
+        "season:LSG:mostFifties",
+        "season:LSG:mostFours",
+        "season:LSG:mostSixes"
+      ],
+      "stats": {
+        "matches": 104,
+        "battingInnings": 101,
+        "runs": 2527,
+        "ballsFaced": 1540,
+        "highest": 87,
+        "average": 31.5875,
+        "strikeRate": 164.0909090909091,
+        "notOuts": 21,
+        "fours": 168,
+        "sixes": 186,
+        "ducks": 9,
+        "fifties": 15,
+        "hundreds": 0,
+        "battingAverage": "31.59",
+        "battingStrikeRate": "164.1"
+      },
+      "changes": [
+        {
+          "field": "fours",
+          "before": 169,
+          "after": 168
+        },
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 9
+        }
+      ]
+    },
+    {
+      "id": "118",
+      "name": "Ayush Badoni",
+      "cricbuzzId": "13907",
+      "cricbuzzName": "Ayush Badoni",
+      "mappingSources": [
+        "season:LSG:mostRuns",
+        "season:LSG:highestScore",
+        "season:LSG:mostFifties",
+        "season:LSG:mostFours",
+        "season:LSG:mostSixes"
+      ],
+      "stats": {
+        "matches": 66,
+        "battingInnings": 56,
+        "runs": 1178,
+        "ballsFaced": 836,
+        "highest": 74,
+        "average": 25.608695652173914,
+        "strikeRate": 140.9090909090909,
+        "notOuts": 10,
+        "fours": 96,
+        "sixes": 47,
+        "ducks": 5,
+        "fifties": 7,
+        "hundreds": 0,
+        "battingAverage": "25.61",
+        "battingStrikeRate": "140.9"
+      },
+      "changes": [
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 5
+        }
+      ]
+    },
+    {
+      "id": "119",
+      "name": "Shashank Singh",
+      "cricbuzzId": "10919",
+      "cricbuzzName": "Shashank Singh",
+      "mappingSources": [
+        "season:PBKS:mostRuns",
+        "season:PBKS:mostFifties",
+        "season:PBKS:mostFours",
+        "season:PBKS:mostSixes"
+      ],
+      "stats": {
+        "matches": 53,
+        "battingInnings": 42,
+        "runs": 905,
+        "ballsFaced": 560,
+        "highest": 68,
+        "average": 36.2,
+        "strikeRate": 161.60714285714286,
+        "notOuts": 17,
+        "fours": 67,
+        "sixes": 51,
+        "ducks": 3,
+        "fifties": 6,
+        "hundreds": 0,
+        "battingAverage": "36.20",
+        "battingStrikeRate": "161.6"
+      },
+      "changes": [
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 3
+        }
+      ]
+    },
+    {
+      "id": "120",
+      "name": "Prabhsimran Singh",
+      "cricbuzzId": "14254",
+      "cricbuzzName": "Prabhsimran Singh",
+      "mappingSources": [
+        "season:PBKS:mostRuns",
+        "season:PBKS:highestScore",
+        "season:PBKS:mostFifties",
+        "season:PBKS:mostFours",
+        "season:PBKS:mostSixes"
+      ],
+      "stats": {
+        "matches": 65,
+        "battingInnings": 64,
+        "runs": 1815,
+        "ballsFaced": 1161,
+        "highest": 103,
+        "average": 28.80952380952381,
+        "strikeRate": 156.33074935400518,
+        "notOuts": 1,
+        "fours": 189,
+        "sixes": 94,
+        "ducks": 5,
+        "fifties": 13,
+        "hundreds": 1,
+        "battingAverage": "28.81",
+        "battingStrikeRate": "156.3"
+      },
+      "changes": [
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 5
+        }
+      ]
+    },
+    {
+      "id": "121",
+      "name": "Jos Buttler",
+      "cricbuzzId": "2258",
+      "cricbuzzName": "Jos Buttler",
+      "mappingSources": [
+        "all:mostRuns",
+        "all:mostHundreds",
+        "all:mostFifties",
+        "all:mostFours",
+        "all:mostSixes",
+        "all:mostNineties",
+        "season:GT:mostRuns",
+        "season:GT:highestScore",
+        "season:GT:mostFifties",
+        "season:GT:mostFours",
+        "season:GT:mostSixes"
+      ],
+      "stats": {
+        "matches": 138,
+        "battingInnings": 136,
+        "runs": 4646,
+        "ballsFaced": 3103,
+        "highest": 124,
+        "average": 39.70940170940171,
+        "strikeRate": 149.72607154366742,
+        "notOuts": 19,
+        "fours": 458,
+        "sixes": 211,
+        "ducks": 8,
+        "fifties": 28,
+        "hundreds": 7,
+        "battingAverage": "39.71",
+        "battingStrikeRate": "149.7"
+      },
+      "changes": [
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 8
+        }
+      ]
+    },
+    {
+      "id": "122",
+      "name": "Shreyas Iyer",
+      "cricbuzzId": "9428",
+      "cricbuzzName": "Shreyas Iyer",
+      "mappingSources": [
+        "all:mostFifties",
+        "all:mostNineties",
+        "season:PBKS:mostRuns",
+        "season:PBKS:highestScore",
+        "season:PBKS:mostHundreds",
+        "season:PBKS:mostFifties",
+        "season:PBKS:mostFours",
+        "season:PBKS:mostSixes"
+      ],
+      "stats": {
+        "matches": 146,
+        "battingInnings": 145,
+        "runs": 4229,
+        "ballsFaced": 3093,
+        "highest": 101,
+        "average": 35.83898305084746,
+        "strikeRate": 136.72809569996767,
+        "notOuts": 27,
+        "fours": 353,
+        "sixes": 182,
+        "ducks": 7,
+        "fifties": 32,
+        "hundreds": 1,
+        "battingAverage": "35.84",
+        "battingStrikeRate": "136.7"
+      },
+      "changes": [
+        {
+          "field": "matches",
+          "before": 147,
+          "after": 146
+        },
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 7
+        }
+      ]
+    },
+    {
+      "id": "123",
+      "name": "Rishabh Pant",
+      "cricbuzzId": "10744",
+      "cricbuzzName": "Rishabh Pant",
+      "mappingSources": [
+        "all:highestScore",
+        "season:LSG:mostRuns",
+        "season:LSG:highestScore",
+        "season:LSG:mostFifties",
+        "season:LSG:mostFours",
+        "season:LSG:mostSixes"
+      ],
+      "stats": {
+        "matches": 139,
+        "battingInnings": 136,
+        "runs": 3865,
+        "ballsFaced": 2633,
+        "highest": 128,
+        "average": 33.608695652173914,
+        "strikeRate": 146.79073300417775,
+        "notOuts": 21,
+        "fours": 349,
+        "sixes": 181,
+        "ducks": 7,
+        "fifties": 20,
+        "hundreds": 2,
+        "battingAverage": "33.61",
+        "battingStrikeRate": "146.8"
+      },
+      "changes": [
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 7
+        }
+      ]
+    },
+    {
+      "id": "124",
+      "name": "Kagiso Rabada",
+      "cricbuzzId": "9585",
+      "cricbuzzName": "Kagiso Rabada",
+      "mappingSources": [
+        "season:GT:mostRuns",
+        "season:GT:mostFours",
+        "season:GT:mostSixes"
+      ],
+      "stats": {
+        "matches": 101,
+        "battingInnings": 37,
+        "runs": 262,
+        "ballsFaced": 239,
+        "highest": 44,
+        "average": 13.1,
+        "strikeRate": 109.6234309623431,
+        "notOuts": 17,
+        "fours": 21,
+        "sixes": 11,
+        "ducks": 4,
+        "fifties": 0,
+        "hundreds": 0,
+        "battingAverage": "13.10",
+        "battingStrikeRate": "109.6"
+      },
+      "changes": [
+        {
+          "field": "notOuts",
+          "before": 16,
+          "after": 17
+        },
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 4
+        },
+        {
+          "field": "battingAverage",
+          "before": "12.48",
+          "after": "13.10"
+        },
+        {
+          "field": "average",
+          "before": 12.476190476190476,
+          "after": 13.1
+        }
+      ]
+    },
+    {
+      "id": "125",
+      "name": "Arshdeep Singh",
+      "cricbuzzId": "13217",
+      "cricbuzzName": "Arshdeep Singh",
+      "mappingSources": [
+        "season:PBKS:mostRuns",
+        "season:PBKS:mostSixes"
+      ],
+      "stats": {
+        "matches": 96,
+        "battingInnings": 15,
+        "runs": 32,
+        "ballsFaced": 47,
+        "highest": 10,
+        "average": 5.333333333333333,
+        "strikeRate": 68.08510638297872,
+        "notOuts": 9,
+        "fours": 4,
+        "sixes": 0,
+        "ducks": 3,
+        "fifties": 0,
+        "hundreds": 0,
+        "battingAverage": "5.33",
+        "battingStrikeRate": "68.1"
+      },
+      "changes": [
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 3
+        }
+      ]
+    },
+    {
+      "id": "128",
+      "name": "KL Rahul",
+      "cricbuzzId": "8733",
+      "cricbuzzName": "KL Rahul",
+      "mappingSources": [
+        "all:mostRuns",
+        "all:highestScore",
+        "all:highestAvg",
+        "all:mostHundreds",
+        "all:mostFifties",
+        "all:mostFours",
+        "all:mostSixes",
+        "all:mostNineties",
+        "season:DC:mostRuns",
+        "season:DC:highestScore",
+        "season:DC:mostHundreds",
+        "season:DC:mostFifties",
+        "season:DC:mostFours",
+        "season:DC:mostSixes"
+      ],
+      "stats": {
+        "matches": 159,
+        "battingInnings": 150,
+        "runs": 5815,
+        "ballsFaced": 4179,
+        "highest": 152,
+        "average": 46.15079365079365,
+        "strikeRate": 139.14812156018186,
+        "notOuts": 24,
+        "fours": 508,
+        "sixes": 239,
+        "ducks": 5,
+        "fifties": 45,
+        "hundreds": 6,
+        "battingAverage": "46.15",
+        "battingStrikeRate": "139.1"
+      },
+      "changes": [
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 5
+        }
+      ]
+    },
+    {
+      "id": "130",
+      "name": "Mohammed Siraj",
+      "cricbuzzId": "10808",
+      "cricbuzzName": "Mohammed Siraj",
+      "mappingSources": [
+        "season:GT:mostRuns",
+        "season:GT:mostFours",
+        "season:GT:mostSixes"
+      ],
+      "stats": {
+        "matches": 125,
+        "battingInnings": 28,
+        "runs": 117,
+        "ballsFaced": 139,
+        "highest": 14,
+        "average": 9.75,
+        "strikeRate": 84.1726618705036,
+        "notOuts": 16,
+        "fours": 11,
+        "sixes": 4,
+        "ducks": 3,
+        "fifties": 0,
+        "hundreds": 0,
+        "battingAverage": "9.75",
+        "battingStrikeRate": "84.2"
+      },
+      "changes": [
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 3
+        }
+      ]
+    },
+    {
+      "id": "134",
+      "name": "Aiden Markram",
+      "cricbuzzId": "9582",
+      "cricbuzzName": "Aiden Markram",
+      "mappingSources": [
+        "season:LSG:mostRuns",
+        "season:LSG:highestScore",
+        "season:LSG:mostFours",
+        "season:LSG:mostSixes"
+      ],
+      "stats": {
+        "matches": 69,
+        "battingInnings": 66,
+        "runs": 1671,
+        "ballsFaced": 1233,
+        "highest": 68,
+        "average": 30.381818181818183,
+        "strikeRate": 135.52311435523114,
+        "notOuts": 11,
+        "fours": 131,
+        "sixes": 68,
+        "ducks": 3,
+        "fifties": 10,
+        "hundreds": 0,
+        "battingAverage": "30.38",
+        "battingStrikeRate": "135.5"
+      },
+      "changes": [
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 3
+        }
+      ]
+    },
+    {
+      "id": "137",
+      "name": "Mitchell Marsh",
+      "cricbuzzId": "6250",
+      "cricbuzzName": "Mitchell Marsh",
+      "mappingSources": [
+        "season:LSG:mostRuns",
+        "season:LSG:highestScore",
+        "season:LSG:mostHundreds",
+        "season:LSG:mostFifties",
+        "season:LSG:mostFours",
+        "season:LSG:mostSixes"
+      ],
+      "stats": {
+        "matches": 68,
+        "battingInnings": 62,
+        "runs": 1855,
+        "ballsFaced": 1249,
+        "highest": 117,
+        "average": 30.916666666666668,
+        "strikeRate": 148.51881505204165,
+        "notOuts": 2,
+        "fours": 155,
+        "sixes": 111,
+        "ducks": 7,
+        "fifties": 12,
+        "hundreds": 2,
+        "battingAverage": "30.92",
+        "battingStrikeRate": "148.5"
+      },
+      "changes": [
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 7
+        }
+      ]
+    },
+    {
+      "id": "139",
+      "name": "Harshal Patel",
+      "cricbuzzId": "8175",
+      "cricbuzzName": "Harshal Patel",
+      "mappingSources": [
+        "season:SRH:mostRuns",
+        "season:SRH:mostFours",
+        "season:SRH:mostSixes"
+      ],
+      "stats": {
+        "matches": 124,
+        "battingInnings": 49,
+        "runs": 280,
+        "ballsFaced": 238,
+        "highest": 36,
+        "average": 8.75,
+        "strikeRate": 117.6470588235294,
+        "notOuts": 17,
+        "fours": 18,
+        "sixes": 15,
+        "ducks": 10,
+        "fifties": 0,
+        "hundreds": 0,
+        "battingAverage": "8.75",
+        "battingStrikeRate": "117.6"
+      },
+      "changes": [
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 10
+        }
+      ]
+    },
+    {
+      "id": "140",
+      "name": "Marcus Stoinis",
+      "cricbuzzId": "8989",
+      "cricbuzzName": "Marcus Stoinis",
+      "mappingSources": [
+        "season:PBKS:mostRuns",
+        "season:PBKS:highestScore",
+        "season:PBKS:mostFifties",
+        "season:PBKS:mostFours",
+        "season:PBKS:mostSixes"
+      ],
+      "stats": {
+        "matches": 122,
+        "battingInnings": 108,
+        "runs": 2242,
+        "ballsFaced": 1520,
+        "highest": 124,
+        "average": 28.743589743589745,
+        "strikeRate": 147.5,
+        "notOuts": 30,
+        "fours": 181,
+        "sixes": 117,
+        "ducks": 10,
+        "fifties": 10,
+        "hundreds": 1,
+        "battingAverage": "28.74",
+        "battingStrikeRate": "147.5"
+      },
+      "changes": [
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 10
+        }
+      ]
+    },
+    {
+      "id": "142",
+      "name": "Ishan Kishan",
+      "cricbuzzId": "10276",
+      "cricbuzzName": "Ishan Kishan",
+      "mappingSources": [
+        "all:mostNineties",
+        "season:SRH:mostRuns",
+        "season:SRH:highestScore",
+        "season:SRH:mostFifties",
+        "season:SRH:mostFours",
+        "season:SRH:mostSixes"
+      ],
+      "stats": {
+        "matches": 134,
+        "battingInnings": 127,
+        "runs": 3600,
+        "ballsFaced": 2508,
+        "highest": 106,
+        "average": 30.508474576271187,
+        "strikeRate": 143.54066985645932,
+        "notOuts": 9,
+        "fours": 348,
+        "sixes": 166,
+        "ducks": 11,
+        "fifties": 23,
+        "hundreds": 1,
+        "battingAverage": "30.51",
+        "battingStrikeRate": "143.5"
+      },
+      "changes": [
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 11
+        }
+      ]
+    },
+    {
+      "id": "146",
+      "name": "Trent Boult",
+      "cricbuzzId": "8117",
+      "cricbuzzName": "Trent Boult",
+      "mappingSources": [
+        "season:MI:mostSixes"
+      ],
+      "stats": {
+        "matches": 124,
+        "battingInnings": 31,
+        "runs": 93,
+        "ballsFaced": 85,
+        "highest": 17,
+        "average": 9.3,
+        "strikeRate": 109.41176470588235,
+        "notOuts": 21,
+        "fours": 5,
+        "sixes": 4,
+        "ducks": 3,
+        "fifties": 0,
+        "hundreds": 0,
+        "battingAverage": "9.30",
+        "battingStrikeRate": "109.4"
+      },
+      "changes": [
+        {
+          "field": "matches",
+          "before": 125,
+          "after": 124
+        },
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 3
+        }
+      ]
+    },
+    {
+      "id": "148",
+      "name": "Avesh Khan",
+      "cricbuzzId": "9781",
+      "cricbuzzName": "Avesh Khan",
+      "mappingSources": [
+        "season:LSG:mostRuns",
+        "season:LSG:mostFours",
+        "season:LSG:mostSixes"
+      ],
+      "stats": {
+        "matches": 82,
+        "battingInnings": 18,
+        "runs": 68,
+        "ballsFaced": 43,
+        "highest": 19,
+        "average": 17,
+        "strikeRate": 158.13953488372093,
+        "notOuts": 14,
+        "fours": 7,
+        "sixes": 4,
+        "ducks": 1,
+        "fifties": 0,
+        "hundreds": 0,
+        "battingAverage": "17.00",
+        "battingStrikeRate": "158.1"
+      },
+      "changes": [
+        {
+          "field": "matches",
+          "before": 83,
+          "after": 82
+        },
+        {
+          "field": "notOuts",
+          "before": 15,
+          "after": 14
+        },
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 1
+        },
+        {
+          "field": "battingAverage",
+          "before": "22.67",
+          "after": "17.00"
+        },
+        {
+          "field": "average",
+          "before": 22.666666666666668,
+          "after": 17
+        }
+      ]
+    },
+    {
+      "id": "149",
+      "name": "Prasidh Krishna",
+      "cricbuzzId": "10551",
+      "cricbuzzName": "Prasidh Krishna",
+      "mappingSources": [
+        "season:GT:mostRuns",
+        "season:GT:mostFours",
+        "season:GT:mostSixes"
+      ],
+      "stats": {
+        "matches": 78,
+        "battingInnings": 11,
+        "runs": 15,
+        "ballsFaced": 31,
+        "highest": 6,
+        "average": 5,
+        "strikeRate": 48.38709677419355,
+        "notOuts": 8,
+        "fours": 1,
+        "sixes": 0,
+        "ducks": 2,
+        "fifties": 0,
+        "hundreds": 0,
+        "battingAverage": "5.00",
+        "battingStrikeRate": "48.4"
+      },
+      "changes": [
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 2
+        }
+      ]
+    },
+    {
+      "id": "151",
+      "name": "Noor Ahmad",
+      "cricbuzzId": "15452",
+      "cricbuzzName": "Noor Ahmad",
+      "mappingSources": [
+        "season:CSK:mostRuns",
+        "season:CSK:mostSixes"
+      ],
+      "stats": {
+        "matches": 51,
+        "battingInnings": 17,
+        "runs": 31,
+        "ballsFaced": 58,
+        "highest": 8,
+        "average": 2.8181818181818183,
+        "strikeRate": 53.44827586206897,
+        "notOuts": 6,
+        "fours": 2,
+        "sixes": 1,
+        "ducks": 2,
+        "fifties": 0,
+        "hundreds": 0,
+        "battingAverage": "2.82",
+        "battingStrikeRate": "53.4"
+      },
+      "changes": [
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 2
+        }
+      ]
+    },
+    {
+      "id": "155",
+      "name": "Karun Nair",
+      "cricbuzzId": "8257",
+      "cricbuzzName": "Karun Nair",
+      "mappingSources": [
+        "season:DC:mostRuns",
+        "season:DC:mostFours",
+        "season:DC:mostSixes"
+      ],
+      "stats": {
+        "matches": 86,
+        "battingInnings": 78,
+        "runs": 1712,
+        "ballsFaced": 1304,
+        "highest": 89,
+        "average": 23.45205479452055,
+        "strikeRate": 131.2883435582822,
+        "notOuts": 5,
+        "fours": 188,
+        "sixes": 49,
+        "ducks": 5,
+        "fifties": 11,
+        "hundreds": 0,
+        "battingAverage": "23.45",
+        "battingStrikeRate": "131.3"
+      },
+      "changes": [
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 5
+        }
+      ]
+    },
+    {
+      "id": "156",
+      "name": "Angkrish Raghuvanshi",
+      "cricbuzzId": "22566",
+      "cricbuzzName": "Angkrish Raghuvanshi",
+      "mappingSources": [
+        "season:KKR:mostRuns",
+        "season:KKR:highestScore",
+        "season:KKR:mostFifties",
+        "season:KKR:mostFours",
+        "season:KKR:mostSixes"
+      ],
+      "stats": {
+        "matches": 35,
+        "battingInnings": 30,
+        "runs": 885,
+        "ballsFaced": 608,
+        "highest": 82,
+        "average": 34.03846153846154,
+        "strikeRate": 145.55921052631578,
+        "notOuts": 4,
+        "fours": 86,
+        "sixes": 35,
+        "ducks": 0,
+        "fifties": 7,
+        "hundreds": 0,
+        "battingAverage": "34.04",
+        "battingStrikeRate": "145.6"
+      },
+      "changes": [
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 0
+        }
+      ]
+    },
+    {
+      "id": "158",
+      "name": "Nehal Wadhera",
+      "cricbuzzId": "13915",
+      "cricbuzzName": "Nehal Wadhera",
+      "mappingSources": [
+        "season:PBKS:mostRuns",
+        "season:PBKS:mostFours",
+        "season:PBKS:mostSixes"
+      ],
+      "stats": {
+        "matches": 44,
+        "battingInnings": 37,
+        "runs": 784,
+        "ballsFaced": 560,
+        "highest": 70,
+        "average": 23.757575757575758,
+        "strikeRate": 140,
+        "notOuts": 4,
+        "fours": 64,
+        "sixes": 43,
+        "ducks": 2,
+        "fifties": 4,
+        "hundreds": 0,
+        "battingAverage": "23.76",
+        "battingStrikeRate": "140.0"
+      },
+      "changes": [
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 2
+        }
+      ]
+    },
+    {
+      "id": "159",
+      "name": "Harpreet Brar",
+      "cricbuzzId": "14452",
+      "cricbuzzName": "Harpreet Brar",
+      "mappingSources": [
+        "season:PBKS:mostRuns",
+        "season:PBKS:mostFours",
+        "season:PBKS:mostSixes"
+      ],
+      "stats": {
+        "matches": 51,
+        "battingInnings": 27,
+        "runs": 249,
+        "ballsFaced": 206,
+        "highest": 29,
+        "average": 20.75,
+        "strikeRate": 120.87378640776699,
+        "notOuts": 15,
+        "fours": 20,
+        "sixes": 10,
+        "ducks": 1,
+        "fifties": 0,
+        "hundreds": 0,
+        "battingAverage": "20.75",
+        "battingStrikeRate": "120.9"
+      },
+      "changes": [
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 1
+        }
+      ]
+    },
+    {
+      "id": "160",
+      "name": "Naman Dhir",
+      "cricbuzzId": "36139",
+      "cricbuzzName": "Naman Dhir",
+      "mappingSources": [
+        "season:MI:mostRuns",
+        "season:MI:highestScore",
+        "season:MI:mostFifties",
+        "season:MI:mostFours",
+        "season:MI:mostSixes"
+      ],
+      "stats": {
+        "matches": 37,
+        "battingInnings": 33,
+        "runs": 710,
+        "ballsFaced": 433,
+        "highest": 62,
+        "average": 27.307692307692307,
+        "strikeRate": 163.97228637413394,
+        "notOuts": 7,
+        "fours": 67,
+        "sixes": 36,
+        "ducks": 5,
+        "fifties": 3,
+        "hundreds": 0,
+        "battingAverage": "27.31",
+        "battingStrikeRate": "164.0"
+      },
+      "changes": [
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 5
+        }
+      ]
+    },
+    {
+      "id": "162",
+      "name": "Sameer Rizvi",
+      "cricbuzzId": "14700",
+      "cricbuzzName": "Sameer Rizvi",
+      "mappingSources": [
+        "season:DC:mostRuns",
+        "season:DC:highestScore",
+        "season:DC:mostFifties",
+        "season:DC:mostFours",
+        "season:DC:mostSixes"
+      ],
+      "stats": {
+        "matches": 24,
+        "battingInnings": 18,
+        "runs": 424,
+        "ballsFaced": 293,
+        "highest": 90,
+        "average": 30.285714285714285,
+        "strikeRate": 144.7098976109215,
+        "notOuts": 4,
+        "fours": 30,
+        "sixes": 26,
+        "ducks": 3,
+        "fifties": 3,
+        "hundreds": 0,
+        "battingAverage": "30.29",
+        "battingStrikeRate": "144.7"
+      },
+      "changes": [
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 3
+        }
+      ]
+    },
+    {
+      "id": "163",
+      "name": "Abdul Samad",
+      "cricbuzzId": "14628",
+      "cricbuzzName": "Abdul Samad",
+      "mappingSources": [
+        "season:LSG:mostRuns",
+        "season:LSG:mostFours",
+        "season:LSG:mostSixes"
+      ],
+      "stats": {
+        "matches": 71,
+        "battingInnings": 60,
+        "runs": 857,
+        "ballsFaced": 576,
+        "highest": 45,
+        "average": 19.477272727272727,
+        "strikeRate": 148.78472222222223,
+        "notOuts": 16,
+        "fours": 55,
+        "sixes": 55,
+        "ducks": 4,
+        "fifties": 0,
+        "hundreds": 0,
+        "battingAverage": "19.48",
+        "battingStrikeRate": "148.8"
+      },
+      "changes": [
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 4
+        }
+      ]
+    },
+    {
+      "id": "165",
+      "name": "Ashutosh Sharma",
+      "cricbuzzId": "13497",
+      "cricbuzzName": "Ashutosh Sharma",
+      "mappingSources": [
+        "season:DC:mostRuns",
+        "season:DC:mostFours",
+        "season:DC:mostSixes"
+      ],
+      "stats": {
+        "matches": 32,
+        "battingInnings": 26,
+        "runs": 564,
+        "ballsFaced": 334,
+        "highest": 66,
+        "average": 29.68421052631579,
+        "strikeRate": 168.8622754491018,
+        "notOuts": 7,
+        "fours": 39,
+        "sixes": 40,
+        "ducks": 0,
+        "fifties": 2,
+        "hundreds": 0,
+        "battingAverage": "29.68",
+        "battingStrikeRate": "168.9"
+      },
+      "changes": [
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 0
+        }
+      ]
+    },
+    {
+      "id": "166",
+      "name": "Nishant Sindhu",
+      "cricbuzzId": "22576",
+      "cricbuzzName": "Nishant Sindhu",
+      "mappingSources": [
+        "season:GT:mostRuns",
+        "season:GT:mostFours",
+        "season:GT:mostSixes"
+      ],
+      "stats": {
+        "matches": 8,
+        "battingInnings": 5,
+        "runs": 63,
+        "ballsFaced": 50,
+        "highest": 22,
+        "average": 12.6,
+        "strikeRate": 126,
+        "notOuts": 0,
+        "fours": 7,
+        "sixes": 2,
+        "ducks": 0,
+        "fifties": 0,
+        "hundreds": 0,
+        "battingAverage": "12.60",
+        "battingStrikeRate": "126.0"
+      },
+      "changes": [
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 0
+        }
+      ]
+    },
+    {
+      "id": "168",
+      "name": "Kumar Kushagra",
+      "cricbuzzId": "15779",
+      "cricbuzzName": "Kumar Kushagra",
+      "mappingSources": [
+        "season:GT:mostRuns",
+        "season:GT:mostFours",
+        "season:GT:mostSixes"
+      ],
+      "stats": {
+        "matches": 5,
+        "battingInnings": 4,
+        "runs": 21,
+        "ballsFaced": 21,
+        "highest": 18,
+        "average": 5.25,
+        "strikeRate": 100,
+        "notOuts": 0,
+        "fours": 3,
+        "sixes": 0,
+        "ducks": 1,
+        "fifties": 0,
+        "hundreds": 0,
+        "battingAverage": "5.25",
+        "battingStrikeRate": "100.0"
+      },
+      "changes": [
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 1
+        }
+      ]
+    },
+    {
+      "id": "172",
+      "name": "Vishnu Vinod",
+      "cricbuzzId": "11893",
+      "cricbuzzName": "Vishnu Vinod",
+      "mappingSources": [
+        "season:PBKS:mostRuns",
+        "season:PBKS:mostFours",
+        "season:PBKS:mostSixes"
+      ],
+      "stats": {
+        "matches": 7,
+        "battingInnings": 7,
+        "runs": 71,
+        "ballsFaced": 65,
+        "highest": 30,
+        "average": 11.833333333333334,
+        "strikeRate": 109.23076923076923,
+        "notOuts": 1,
+        "fours": 4,
+        "sixes": 4,
+        "ducks": 0,
+        "fifties": 0,
+        "hundreds": 0,
+        "battingAverage": "11.83",
+        "battingStrikeRate": "109.2"
+      },
+      "changes": [
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 0
+        }
+      ]
+    },
+    {
+      "id": "179",
+      "name": "Vijaykumar Vyshak",
+      "cricbuzzId": "10486",
+      "cricbuzzName": "Vijaykumar Vyshak",
+      "mappingSources": [
+        "season:PBKS:mostRuns",
+        "season:PBKS:mostSixes"
+      ],
+      "stats": {
+        "matches": 26,
+        "battingInnings": 6,
+        "runs": 16,
+        "ballsFaced": 16,
+        "highest": 13,
+        "average": 8,
+        "strikeRate": 100,
+        "notOuts": 4,
+        "fours": 0,
+        "sixes": 1,
+        "ducks": 2,
+        "fifties": 0,
+        "hundreds": 0,
+        "battingAverage": "8.00",
+        "battingStrikeRate": "100.0"
+      },
+      "changes": [
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 2
+        }
+      ]
+    },
+    {
+      "id": "187",
+      "name": "Glenn Phillips",
+      "cricbuzzId": "10693",
+      "cricbuzzName": "Glenn Phillips",
+      "mappingSources": [
+        "season:GT:mostRuns",
+        "season:GT:mostFours",
+        "season:GT:mostSixes"
+      ],
+      "stats": {
+        "matches": 14,
+        "battingInnings": 13,
+        "runs": 132,
+        "ballsFaced": 109,
+        "highest": 25,
+        "average": 12,
+        "strikeRate": 121.10091743119266,
+        "notOuts": 2,
+        "fours": 7,
+        "sixes": 8,
+        "ducks": 1,
+        "fifties": 0,
+        "hundreds": 0,
+        "battingAverage": "12.00",
+        "battingStrikeRate": "121.1"
+      },
+      "changes": [
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 1
+        }
+      ]
+    },
+    {
+      "id": "188",
+      "name": "Rovman Powell",
+      "cricbuzzId": "11445",
+      "cricbuzzName": "Rovman Powell",
+      "mappingSources": [
+        "season:KKR:mostRuns",
+        "season:KKR:mostFours",
+        "season:KKR:mostSixes"
+      ],
+      "stats": {
+        "matches": 39,
+        "battingInnings": 30,
+        "runs": 555,
+        "ballsFaced": 390,
+        "highest": 67,
+        "average": 22.2,
+        "strikeRate": 142.30769230769232,
+        "notOuts": 5,
+        "fours": 38,
+        "sixes": 38,
+        "ducks": 2,
+        "fifties": 1,
+        "hundreds": 0,
+        "battingAverage": "22.20",
+        "battingStrikeRate": "142.3"
+      },
+      "changes": [
+        {
+          "field": "matches",
+          "before": 40,
+          "after": 39
+        },
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 2
+        }
+      ]
+    },
+    {
+      "id": "189",
+      "name": "Ajinkya Rahane",
+      "cricbuzzId": "1447",
+      "cricbuzzName": "Ajinkya Rahane",
+      "mappingSources": [
+        "all:mostRuns",
+        "all:mostHundreds",
+        "all:mostFifties",
+        "all:mostFours",
+        "season:KKR:mostRuns",
+        "season:KKR:highestScore",
+        "season:KKR:mostFifties",
+        "season:KKR:mostFours",
+        "season:KKR:mostSixes"
+      ],
+      "stats": {
+        "matches": 212,
+        "battingInnings": 197,
+        "runs": 5367,
+        "ballsFaced": 4273,
+        "highest": 105,
+        "average": 30.151685393258425,
+        "strikeRate": 125.6026211092909,
+        "notOuts": 19,
+        "fours": 539,
+        "sixes": 141,
+        "ducks": 15,
+        "fifties": 35,
+        "hundreds": 2,
+        "battingAverage": "30.15",
+        "battingStrikeRate": "125.6"
+      },
+      "changes": [
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 15
+        }
+      ]
+    },
+    {
+      "id": "191",
+      "name": "Marco Jansen",
+      "cricbuzzId": "14565",
+      "cricbuzzName": "Marco Jansen",
+      "mappingSources": [
+        "season:PBKS:mostRuns",
+        "season:PBKS:mostFours",
+        "season:PBKS:mostSixes"
+      ],
+      "stats": {
+        "matches": 48,
+        "battingInnings": 26,
+        "runs": 192,
+        "ballsFaced": 174,
+        "highest": 34,
+        "average": 12.8,
+        "strikeRate": 110.34482758620689,
+        "notOuts": 11,
+        "fours": 9,
+        "sixes": 9,
+        "ducks": 3,
+        "fifties": 0,
+        "hundreds": 0,
+        "battingAverage": "12.80",
+        "battingStrikeRate": "110.3"
+      },
+      "changes": [
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 3
+        }
+      ]
+    },
+    {
+      "id": "192",
+      "name": "Krunal Pandya",
+      "cricbuzzId": "11311",
+      "cricbuzzName": "Krunal Pandya",
+      "mappingSources": [
+        "season:RCB:mostRuns",
+        "season:RCB:highestScore",
+        "season:RCB:mostFifties",
+        "season:RCB:mostFours",
+        "season:RCB:mostSixes"
+      ],
+      "stats": {
+        "matches": 158,
+        "battingInnings": 126,
+        "runs": 1974,
+        "ballsFaced": 1475,
+        "highest": 86,
+        "average": 22.953488372093023,
+        "strikeRate": 133.83050847457628,
+        "notOuts": 40,
+        "fours": 171,
+        "sixes": 76,
+        "ducks": 7,
+        "fifties": 3,
+        "hundreds": 0,
+        "battingAverage": "22.95",
+        "battingStrikeRate": "133.8"
+      },
+      "changes": [
+        {
+          "field": "battingInnings",
+          "before": 127,
+          "after": 126
+        },
+        {
+          "field": "notOuts",
+          "before": 42,
+          "after": 40
+        },
+        {
+          "field": "runs",
+          "before": 1982,
+          "after": 1974
+        },
+        {
+          "field": "ballsFaced",
+          "before": 1481,
+          "after": 1475
+        },
+        {
+          "field": "fours",
+          "before": 173,
+          "after": 171
+        },
+        {
+          "field": "battingAverage",
+          "before": "23.32",
+          "after": "22.95"
+        },
+        {
+          "field": "average",
+          "before": 23.31764705882353,
+          "after": 22.953488372093023
+        },
+        {
+          "field": "strikeRate",
+          "before": 133.8284942606347,
+          "after": 133.83050847457628
+        }
+      ]
+    },
+    {
+      "id": "193",
+      "name": "Nitish Rana",
+      "cricbuzzId": "9204",
+      "cricbuzzName": "Nitish Rana",
+      "mappingSources": [
+        "season:DC:mostRuns",
+        "season:DC:highestScore",
+        "season:DC:mostFifties",
+        "season:DC:mostFours",
+        "season:DC:mostSixes"
+      ],
+      "stats": {
+        "matches": 127,
+        "battingInnings": 121,
+        "runs": 3078,
+        "ballsFaced": 2235,
+        "highest": 91,
+        "average": 27.482142857142858,
+        "strikeRate": 137.71812080536913,
+        "notOuts": 9,
+        "fours": 288,
+        "sixes": 151,
+        "ducks": 8,
+        "fifties": 22,
+        "hundreds": 0,
+        "battingAverage": "27.48",
+        "battingStrikeRate": "137.7"
+      },
+      "changes": [
+        {
+          "field": "notOuts",
+          "before": 10,
+          "after": 9
+        },
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 8
+        },
+        {
+          "field": "battingAverage",
+          "before": "27.73",
+          "after": "27.48"
+        },
+        {
+          "field": "average",
+          "before": 27.72972972972973,
+          "after": 27.482142857142858
+        }
+      ]
+    },
+    {
+      "id": "194",
+      "name": "Washington Sundar",
+      "cricbuzzId": "10945",
+      "cricbuzzName": "Washington Sundar",
+      "mappingSources": [
+        "season:GT:mostRuns",
+        "season:GT:mostFifties",
+        "season:GT:mostFours",
+        "season:GT:mostSixes"
+      ],
+      "stats": {
+        "matches": 83,
+        "battingInnings": 61,
+        "runs": 888,
+        "ballsFaced": 656,
+        "highest": 55,
+        "average": 21.142857142857142,
+        "strikeRate": 135.3658536585366,
+        "notOuts": 19,
+        "fours": 82,
+        "sixes": 28,
+        "ducks": 2,
+        "fifties": 3,
+        "hundreds": 0,
+        "battingAverage": "21.14",
+        "battingStrikeRate": "135.4"
+      },
+      "changes": [
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 2
+        }
+      ]
+    },
+    {
+      "id": "195",
+      "name": "Donovan Ferreira",
+      "cricbuzzId": "14798",
+      "cricbuzzName": "Donovan Ferreira",
+      "mappingSources": [
+        "all:highestSr",
+        "season:RR:mostRuns",
+        "season:RR:highestScore",
+        "season:RR:mostFifties",
+        "season:RR:mostFours",
+        "season:RR:mostSixes"
+      ],
+      "stats": {
+        "matches": 18,
+        "battingInnings": 16,
+        "runs": 326,
+        "ballsFaced": 191,
+        "highest": 69,
+        "average": 27.166666666666668,
+        "strikeRate": 170.6806282722513,
+        "notOuts": 4,
+        "fours": 25,
+        "sixes": 23,
+        "ducks": 1,
+        "fifties": 2,
+        "hundreds": 0,
+        "battingAverage": "27.17",
+        "battingStrikeRate": "170.7"
+      },
+      "changes": [
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 1
+        }
+      ]
+    },
+    {
+      "id": "196",
+      "name": "Ryan Rickelton",
+      "cricbuzzId": "13070",
+      "cricbuzzName": "Ryan Rickelton",
+      "mappingSources": [
+        "season:MI:mostRuns",
+        "season:MI:highestScore",
+        "season:MI:mostHundreds",
+        "season:MI:mostFifties",
+        "season:MI:mostFours",
+        "season:MI:mostSixes"
+      ],
+      "stats": {
+        "matches": 26,
+        "battingInnings": 26,
+        "runs": 836,
+        "ballsFaced": 497,
+        "highest": 123,
+        "average": 34.833333333333336,
+        "strikeRate": 168.20925553319918,
+        "notOuts": 2,
+        "fours": 78,
+        "sixes": 55,
+        "ducks": 0,
+        "fifties": 5,
+        "hundreds": 1,
+        "battingAverage": "34.83",
+        "battingStrikeRate": "168.2"
+      },
+      "changes": [
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 0
+        }
+      ]
+    },
+    {
+      "id": "197",
+      "name": "Deepak Chahar",
+      "cricbuzzId": "7836",
+      "cricbuzzName": "Deepak Chahar",
+      "mappingSources": [
+        "season:MI:mostRuns",
+        "season:MI:mostFours",
+        "season:MI:mostSixes"
+      ],
+      "stats": {
+        "matches": 103,
+        "battingInnings": 21,
+        "runs": 142,
+        "ballsFaced": 103,
+        "highest": 39,
+        "average": 14.2,
+        "strikeRate": 137.8640776699029,
+        "notOuts": 11,
+        "fours": 8,
+        "sixes": 9,
+        "ducks": 4,
+        "fifties": 0,
+        "hundreds": 0,
+        "battingAverage": "14.20",
+        "battingStrikeRate": "137.9"
+      },
+      "changes": [
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 4
+        }
+      ]
+    },
+    {
+      "id": "199",
+      "name": "Tushar Deshpande",
+      "cricbuzzId": "11307",
+      "cricbuzzName": "Tushar Deshpande",
+      "mappingSources": [
+        "season:RR:mostRuns",
+        "season:RR:mostSixes"
+      ],
+      "stats": {
+        "matches": 53,
+        "battingInnings": 10,
+        "runs": 54,
+        "ballsFaced": 36,
+        "highest": 25,
+        "average": 13.5,
+        "strikeRate": 150,
+        "notOuts": 6,
+        "fours": 2,
+        "sixes": 4,
+        "ducks": 0,
+        "fifties": 0,
+        "hundreds": 0,
+        "battingAverage": "13.50",
+        "battingStrikeRate": "150.0"
+      },
+      "changes": [
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 0
+        }
+      ]
+    },
+    {
+      "id": "201",
+      "name": "Bhuvneshwar Kumar",
+      "cricbuzzId": "1726",
+      "cricbuzzName": "Bhuvneshwar Kumar",
+      "mappingSources": [
+        "season:RCB:mostRuns",
+        "season:RCB:mostFours",
+        "season:RCB:mostSixes"
+      ],
+      "stats": {
+        "matches": 206,
+        "battingInnings": 78,
+        "runs": 354,
+        "ballsFaced": 377,
+        "highest": 27,
+        "average": 9.31578947368421,
+        "strikeRate": 93.89920424403184,
+        "notOuts": 40,
+        "fours": 34,
+        "sixes": 4,
+        "ducks": 6,
+        "fifties": 0,
+        "hundreds": 0,
+        "battingAverage": "9.32",
+        "battingStrikeRate": "93.9"
+      },
+      "changes": [
+        {
+          "field": "notOuts",
+          "before": 39,
+          "after": 40
+        },
+        {
+          "field": "battingAverage",
+          "before": "9.08",
+          "after": "9.32"
+        },
+        {
+          "field": "average",
+          "before": 9.076923076923077,
+          "after": 9.31578947368421
+        }
+      ]
+    },
+    {
+      "id": "205",
+      "name": "Shubham Dubey",
+      "cricbuzzId": "19328",
+      "cricbuzzName": "Shubham Dubey",
+      "mappingSources": [
+        "season:RR:mostRuns",
+        "season:RR:mostFours",
+        "season:RR:mostSixes"
+      ],
+      "stats": {
+        "matches": 20,
+        "battingInnings": 17,
+        "runs": 220,
+        "ballsFaced": 143,
+        "highest": 34,
+        "average": 22,
+        "strikeRate": 153.84615384615384,
+        "notOuts": 7,
+        "fours": 17,
+        "sixes": 13,
+        "ducks": 1,
+        "fifties": 0,
+        "hundreds": 0,
+        "battingAverage": "22.00",
+        "battingStrikeRate": "153.8"
+      },
+      "changes": [
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 1
+        }
+      ]
+    },
+    {
+      "id": "207",
+      "name": "Himmat Singh",
+      "cricbuzzId": "10223",
+      "cricbuzzName": "Himmat Singh",
+      "mappingSources": [
+        "season:LSG:mostRuns",
+        "season:LSG:mostFours",
+        "season:LSG:mostSixes"
+      ],
+      "stats": {
+        "matches": 9,
+        "battingInnings": 5,
+        "runs": 92,
+        "ballsFaced": 69,
+        "highest": 40,
+        "average": 30.666666666666668,
+        "strikeRate": 133.33333333333334,
+        "notOuts": 2,
+        "fours": 5,
+        "sixes": 5,
+        "ducks": 0,
+        "fifties": 0,
+        "hundreds": 0,
+        "battingAverage": "30.67",
+        "battingStrikeRate": "133.3"
+      },
+      "changes": [
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 0
+        }
+      ]
+    },
+    {
+      "id": "208",
+      "name": "Anshul Kamboj",
+      "cricbuzzId": "14598",
+      "cricbuzzName": "Anshul Kamboj",
+      "mappingSources": [
+        "season:CSK:mostRuns",
+        "season:CSK:mostFours",
+        "season:CSK:mostSixes"
+      ],
+      "stats": {
+        "matches": 25,
+        "battingInnings": 10,
+        "runs": 74,
+        "ballsFaced": 52,
+        "highest": 19,
+        "average": 24.666666666666668,
+        "strikeRate": 142.30769230769232,
+        "notOuts": 7,
+        "fours": 5,
+        "sixes": 4,
+        "ducks": 1,
+        "fifties": 0,
+        "hundreds": 0,
+        "battingAverage": "24.67",
+        "battingStrikeRate": "142.3"
+      },
+      "changes": [
+        {
+          "field": "notOuts",
+          "before": 6,
+          "after": 7
+        },
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 1
+        },
+        {
+          "field": "battingAverage",
+          "before": "18.50",
+          "after": "24.67"
+        },
+        {
+          "field": "average",
+          "before": 18.5,
+          "after": 24.666666666666668
+        }
+      ]
+    },
+    {
+      "id": "209",
+      "name": "Arshad Khan",
+      "cricbuzzId": "18637",
+      "cricbuzzName": "Arshad Khan",
+      "mappingSources": [
+        "season:GT:mostRuns",
+        "season:GT:mostFours",
+        "season:GT:mostSixes"
+      ],
+      "stats": {
+        "matches": 27,
+        "battingInnings": 14,
+        "runs": 147,
+        "ballsFaced": 99,
+        "highest": 58,
+        "average": 21,
+        "strikeRate": 148.4848484848485,
+        "notOuts": 7,
+        "fours": 7,
+        "sixes": 11,
+        "ducks": 1,
+        "fifties": 1,
+        "hundreds": 0,
+        "battingAverage": "21.00",
+        "battingStrikeRate": "148.5"
+      },
+      "changes": [
+        {
+          "field": "matches",
+          "before": 19,
+          "after": 27
+        },
+        {
+          "field": "battingInnings",
+          "before": 12,
+          "after": 14
+        },
+        {
+          "field": "notOuts",
+          "before": 6,
+          "after": 7
+        },
+        {
+          "field": "runs",
+          "before": 124,
+          "after": 147
+        },
+        {
+          "field": "ballsFaced",
+          "before": 88,
+          "after": 99
+        },
+        {
+          "field": "fours",
+          "before": 6,
+          "after": 7
+        },
+        {
+          "field": "sixes",
+          "before": 9,
+          "after": 11
+        },
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 1
+        },
+        {
+          "field": "battingAverage",
+          "before": "20.67",
+          "after": "21.00"
+        },
+        {
+          "field": "battingStrikeRate",
+          "before": "140.91",
+          "after": "148.5"
+        },
+        {
+          "field": "average",
+          "before": 20.67,
+          "after": 21
+        },
+        {
+          "field": "strikeRate",
+          "before": 140.91,
+          "after": 148.4848484848485
+        }
+      ]
+    },
+    {
+      "id": "211",
+      "name": "Anukul Roy",
+      "cricbuzzId": "12344",
+      "cricbuzzName": "Anukul Roy",
+      "mappingSources": [
+        "season:KKR:mostRuns",
+        "season:KKR:mostFours",
+        "season:KKR:mostSixes"
+      ],
+      "stats": {
+        "matches": 25,
+        "battingInnings": 14,
+        "runs": 78,
+        "ballsFaced": 64,
+        "highest": 29,
+        "average": 9.75,
+        "strikeRate": 121.875,
+        "notOuts": 6,
+        "fours": 6,
+        "sixes": 2,
+        "ducks": 5,
+        "fifties": 0,
+        "hundreds": 0,
+        "battingAverage": "9.75",
+        "battingStrikeRate": "121.9"
+      },
+      "changes": [
+        {
+          "field": "matches",
+          "before": 26,
+          "after": 25
+        },
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 5
+        }
+      ]
+    },
+    {
+      "id": "221",
+      "name": "Manish Pandey",
+      "cricbuzzId": "1836",
+      "cricbuzzName": "Manish Pandey",
+      "mappingSources": [
+        "season:KKR:mostRuns",
+        "season:KKR:highestScore",
+        "season:KKR:mostFours",
+        "season:KKR:mostSixes"
+      ],
+      "stats": {
+        "matches": 180,
+        "battingInnings": 164,
+        "runs": 4012,
+        "ballsFaced": 3293,
+        "highest": 114,
+        "average": 29.5,
+        "strikeRate": 121.8341937443061,
+        "notOuts": 28,
+        "fours": 347,
+        "sixes": 117,
+        "ducks": 14,
+        "fifties": 22,
+        "hundreds": 1,
+        "battingAverage": "29.50",
+        "battingStrikeRate": "121.8"
+      },
+      "changes": [
+        {
+          "field": "fours",
+          "before": 348,
+          "after": 347
+        },
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 14
+        }
+      ]
+    },
+    {
+      "id": "222",
+      "name": "Sherfane Rutherford",
+      "cricbuzzId": "13748",
+      "cricbuzzName": "Sherfane Rutherford",
+      "mappingSources": [
+        "season:MI:mostRuns",
+        "season:MI:highestScore",
+        "season:MI:mostFifties",
+        "season:MI:mostFours",
+        "season:MI:mostSixes"
+      ],
+      "stats": {
+        "matches": 31,
+        "battingInnings": 27,
+        "runs": 520,
+        "ballsFaced": 364,
+        "highest": 71,
+        "average": 24.761904761904763,
+        "strikeRate": 142.85714285714286,
+        "notOuts": 6,
+        "fours": 30,
+        "sixes": 38,
+        "ducks": 2,
+        "fifties": 1,
+        "hundreds": 0,
+        "battingAverage": "24.76",
+        "battingStrikeRate": "142.9"
+      },
+      "changes": [
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 2
+        }
+      ]
+    },
+    {
+      "id": "223",
+      "name": "Shahbaz Ahmed",
+      "cricbuzzId": "14606",
+      "cricbuzzName": "Shahbaz Ahmed",
+      "mappingSources": [
+        "season:LSG:mostRuns",
+        "season:LSG:mostFours",
+        "season:LSG:mostSixes"
+      ],
+      "stats": {
+        "matches": 63,
+        "battingInnings": 40,
+        "runs": 603,
+        "ballsFaced": 489,
+        "highest": 59,
+        "average": 20.79310344827586,
+        "strikeRate": 123.31288343558282,
+        "notOuts": 11,
+        "fours": 33,
+        "sixes": 28,
+        "ducks": 1,
+        "fifties": 1,
+        "hundreds": 0,
+        "battingAverage": "20.79",
+        "battingStrikeRate": "123.3"
+      },
+      "changes": [
+        {
+          "field": "matches",
+          "before": 58,
+          "after": 63
+        },
+        {
+          "field": "battingInnings",
+          "before": 38,
+          "after": 40
+        },
+        {
+          "field": "notOuts",
+          "before": 9,
+          "after": 11
+        },
+        {
+          "field": "runs",
+          "before": 545,
+          "after": 603
+        },
+        {
+          "field": "ballsFaced",
+          "before": 448,
+          "after": 489
+        },
+        {
+          "field": "fours",
+          "before": 29,
+          "after": 33
+        },
+        {
+          "field": "sixes",
+          "before": 25,
+          "after": 28
+        },
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 1
+        },
+        {
+          "field": "battingAverage",
+          "before": "18.79",
+          "after": "20.79"
+        },
+        {
+          "field": "battingStrikeRate",
+          "before": "121.66",
+          "after": "123.3"
+        },
+        {
+          "field": "average",
+          "before": 18.79,
+          "after": 20.79310344827586
+        },
+        {
+          "field": "strikeRate",
+          "before": 121.66,
+          "after": 123.31288343558282
+        }
+      ]
+    },
+    {
+      "id": "227",
+      "name": "Will Jacks",
+      "cricbuzzId": "12258",
+      "cricbuzzName": "Will Jacks",
+      "mappingSources": [
+        "season:MI:mostRuns",
+        "season:MI:mostFours",
+        "season:MI:mostSixes"
+      ],
+      "stats": {
+        "matches": 28,
+        "battingInnings": 26,
+        "runs": 602,
+        "ballsFaced": 379,
+        "highest": 100,
+        "average": 27.363636363636363,
+        "strikeRate": 158.83905013192611,
+        "notOuts": 4,
+        "fours": 50,
+        "sixes": 38,
+        "ducks": 0,
+        "fifties": 2,
+        "hundreds": 1,
+        "battingAverage": "27.36",
+        "battingStrikeRate": "158.8"
+      },
+      "changes": [
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 0
+        }
+      ]
+    },
+    {
+      "id": "228",
+      "name": "Azmatullah Omarzai",
+      "cricbuzzId": "13214",
+      "cricbuzzName": "Azmatullah Omarzai",
+      "mappingSources": [
+        "season:PBKS:mostRuns",
+        "season:PBKS:mostFours",
+        "season:PBKS:mostSixes"
+      ],
+      "stats": {
+        "matches": 19,
+        "battingInnings": 11,
+        "runs": 151,
+        "ballsFaced": 101,
+        "highest": 38,
+        "average": 15.1,
+        "strikeRate": 149.5049504950495,
+        "notOuts": 1,
+        "fours": 11,
+        "sixes": 10,
+        "ducks": 0,
+        "fifties": 0,
+        "hundreds": 0,
+        "battingAverage": "15.10",
+        "battingStrikeRate": "149.5"
+      },
+      "changes": [
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 0
+        }
+      ]
+    },
+    {
+      "id": "241",
+      "name": "Arshin Kulkarni",
+      "cricbuzzId": "51378",
+      "cricbuzzName": "Arshin Kulkarni",
+      "mappingSources": [
+        "season:LSG:mostRuns",
+        "season:LSG:mostFours",
+        "season:LSG:mostSixes"
+      ],
+      "stats": {
+        "matches": 4,
+        "battingInnings": 4,
+        "runs": 26,
+        "ballsFaced": 33,
+        "highest": 17,
+        "average": 6.5,
+        "strikeRate": 78.78787878787878,
+        "notOuts": 0,
+        "fours": 3,
+        "sixes": 0,
+        "ducks": 2,
+        "fifties": 0,
+        "hundreds": 0,
+        "battingAverage": "6.50",
+        "battingStrikeRate": "78.8"
+      },
+      "changes": [
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 2
+        }
+      ]
+    },
+    {
+      "id": "246",
+      "name": "Mitchell Santner",
+      "cricbuzzId": "10100",
+      "cricbuzzName": "Mitchell Santner",
+      "mappingSources": [
+        "season:MI:mostRuns",
+        "season:MI:mostFours",
+        "season:MI:mostSixes"
+      ],
+      "stats": {
+        "matches": 35,
+        "battingInnings": 21,
+        "runs": 136,
+        "ballsFaced": 123,
+        "highest": 22,
+        "average": 17,
+        "strikeRate": 110.5691056910569,
+        "notOuts": 13,
+        "fours": 9,
+        "sixes": 6,
+        "ducks": 1,
+        "fifties": 0,
+        "hundreds": 0,
+        "battingAverage": "17.00",
+        "battingStrikeRate": "110.6"
+      },
+      "changes": [
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 1
+        }
+      ]
+    },
+    {
+      "id": "253",
+      "name": "Priyansh Arya",
+      "cricbuzzId": "14689",
+      "cricbuzzName": "Priyansh Arya",
+      "mappingSources": [
+        "all:highestSr",
+        "season:PBKS:mostRuns",
+        "season:PBKS:highestScore",
+        "season:PBKS:mostFifties",
+        "season:PBKS:mostFours",
+        "season:PBKS:mostSixes"
+      ],
+      "stats": {
+        "matches": 30,
+        "battingInnings": 30,
+        "runs": 839,
+        "ballsFaced": 437,
+        "highest": 103,
+        "average": 27.966666666666665,
+        "strikeRate": 191.9908466819222,
+        "notOuts": 0,
+        "fours": 82,
+        "sixes": 57,
+        "ducks": 3,
+        "fifties": 5,
+        "hundreds": 1,
+        "battingAverage": "27.97",
+        "battingStrikeRate": "192.0"
+      },
+      "changes": [
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 3
+        }
+      ]
+    },
+    {
+      "id": "257",
+      "name": "Vipraj Nigam",
+      "cricbuzzId": "1431811",
+      "cricbuzzName": "Vipraj Nigam",
+      "mappingSources": [
+        "all:highestSr",
+        "season:DC:mostRuns",
+        "season:DC:mostFours",
+        "season:DC:mostSixes"
+      ],
+      "stats": {
+        "matches": 19,
+        "battingInnings": 10,
+        "runs": 157,
+        "ballsFaced": 89,
+        "highest": 39,
+        "average": 19.625,
+        "strikeRate": 176.40449438202248,
+        "notOuts": 2,
+        "fours": 17,
+        "sixes": 8,
+        "ducks": 1,
+        "fifties": 0,
+        "hundreds": 0,
+        "battingAverage": "19.63",
+        "battingStrikeRate": "176.4"
+      },
+      "changes": [
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 1
+        }
+      ]
+    },
+    {
+      "id": "267",
+      "name": "Aniket Verma",
+      "cricbuzzId": "1447065",
+      "cricbuzzName": "Aniket Verma",
+      "mappingSources": [
+        "season:SRH:mostRuns",
+        "season:SRH:mostFours",
+        "season:SRH:mostSixes"
+      ],
+      "stats": {
+        "matches": 24,
+        "battingInnings": 20,
+        "runs": 315,
+        "ballsFaced": 196,
+        "highest": 74,
+        "average": 21,
+        "strikeRate": 160.71428571428572,
+        "notOuts": 5,
+        "fours": 18,
+        "sixes": 25,
+        "ducks": 0,
+        "fifties": 1,
+        "hundreds": 0,
+        "battingAverage": "21.00",
+        "battingStrikeRate": "160.7"
+      },
+      "changes": [
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 0
+        }
+      ]
+    },
+    {
+      "id": "268",
+      "name": "Raj Bawa",
+      "cricbuzzId": "22601",
+      "cricbuzzName": "Raj Bawa",
+      "mappingSources": [
+        "season:MI:mostRuns",
+        "season:MI:mostFours",
+        "season:MI:mostSixes"
+      ],
+      "stats": {
+        "matches": 8,
+        "battingInnings": 4,
+        "runs": 35,
+        "ballsFaced": 32,
+        "highest": 16,
+        "average": 11.666666666666666,
+        "strikeRate": 109.375,
+        "notOuts": 1,
+        "fours": 2,
+        "sixes": 0,
+        "ducks": 1,
+        "fifties": 0,
+        "hundreds": 0,
+        "battingAverage": "11.67",
+        "battingStrikeRate": "109.4"
+      },
+      "changes": [
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 1
+        }
+      ]
+    },
+    {
+      "id": "271",
+      "name": "Suryansh Shedge",
+      "cricbuzzId": "14922",
+      "cricbuzzName": "Suryansh Shedge",
+      "mappingSources": [
+        "season:PBKS:mostRuns",
+        "season:PBKS:mostFifties",
+        "season:PBKS:mostFours",
+        "season:PBKS:mostSixes"
+      ],
+      "stats": {
+        "matches": 12,
+        "battingInnings": 10,
+        "runs": 165,
+        "ballsFaced": 101,
+        "highest": 57,
+        "average": 23.571428571428573,
+        "strikeRate": 163.36633663366337,
+        "notOuts": 3,
+        "fours": 9,
+        "sixes": 12,
+        "ducks": 0,
+        "fifties": 1,
+        "hundreds": 0,
+        "battingAverage": "23.57",
+        "battingStrikeRate": "163.4"
+      },
+      "changes": [
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 0
+        }
+      ]
+    },
+    {
+      "id": "274",
+      "name": "Jamie Overton",
+      "cricbuzzId": "8512",
+      "cricbuzzName": "Jamie Overton",
+      "mappingSources": [
+        "season:CSK:mostRuns",
+        "season:CSK:mostFours",
+        "season:CSK:mostSixes"
+      ],
+      "stats": {
+        "matches": 13,
+        "battingInnings": 8,
+        "runs": 151,
+        "ballsFaced": 93,
+        "highest": 43,
+        "average": 30.2,
+        "strikeRate": 162.36559139784947,
+        "notOuts": 3,
+        "fours": 14,
+        "sixes": 7,
+        "ducks": 0,
+        "fifties": 0,
+        "hundreds": 0,
+        "battingAverage": "30.20",
+        "battingStrikeRate": "162.4"
+      },
+      "changes": [
+        {
+          "field": "notOuts",
+          "before": 4,
+          "after": 3
+        },
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 0
+        },
+        {
+          "field": "battingAverage",
+          "before": "37.75",
+          "after": "30.20"
+        },
+        {
+          "field": "average",
+          "before": 37.75,
+          "after": 30.2
+        }
+      ]
+    },
+    {
+      "id": "275",
+      "name": "Xavier Bartlett",
+      "cricbuzzId": "11689",
+      "cricbuzzName": "Xavier Bartlett",
+      "mappingSources": [
+        "season:PBKS:mostRuns",
+        "season:PBKS:mostFours",
+        "season:PBKS:mostSixes"
+      ],
+      "stats": {
+        "matches": 13,
+        "battingInnings": 4,
+        "runs": 40,
+        "ballsFaced": 28,
+        "highest": 18,
+        "average": 20,
+        "strikeRate": 142.85714285714286,
+        "notOuts": 2,
+        "fours": 3,
+        "sixes": 2,
+        "ducks": 1,
+        "fifties": 0,
+        "hundreds": 0,
+        "battingAverage": "20.00",
+        "battingStrikeRate": "142.9"
+      },
+      "changes": [
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 1
+        }
+      ]
+    },
+    {
+      "id": "283",
+      "name": "Vaibhav Sooryavanshi",
+      "cricbuzzId": "51791",
+      "cricbuzzName": "Vaibhav Sooryavanshi",
+      "mappingSources": [
+        "all:highestAvg",
+        "all:highestSr",
+        "all:mostNineties",
+        "season:RR:mostRuns",
+        "season:RR:highestScore",
+        "season:RR:mostHundreds",
+        "season:RR:mostFifties",
+        "season:RR:mostFours",
+        "season:RR:mostSixes"
+      ],
+      "stats": {
+        "matches": 23,
+        "battingInnings": 23,
+        "runs": 1028,
+        "ballsFaced": 449,
+        "highest": 103,
+        "average": 44.69565217391305,
+        "strikeRate": 228.9532293986637,
+        "notOuts": 0,
+        "fours": 81,
+        "sixes": 96,
+        "ducks": 2,
+        "fifties": 6,
+        "hundreds": 2,
+        "battingAverage": "44.70",
+        "battingStrikeRate": "229.0"
+      },
+      "changes": [
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 2
+        }
+      ]
+    },
+    {
+      "id": "284",
+      "name": "Eshan Malinga",
+      "cricbuzzId": "46926",
+      "cricbuzzName": "Eshan Malinga",
+      "mappingSources": [
+        "season:SRH:mostRuns",
+        "season:SRH:mostSixes"
+      ],
+      "stats": {
+        "matches": 22,
+        "battingInnings": 3,
+        "runs": 7,
+        "ballsFaced": 17,
+        "highest": 5,
+        "average": 7,
+        "strikeRate": 41.1764705882353,
+        "notOuts": 2,
+        "fours": 0,
+        "sixes": 0,
+        "ducks": 0,
+        "fifties": 0,
+        "hundreds": 0,
+        "battingAverage": "7.00",
+        "battingStrikeRate": "41.2"
+      },
+      "changes": [
+        {
+          "field": "matches",
+          "before": 8,
+          "after": 22
+        },
+        {
+          "field": "battingInnings",
+          "before": 0,
+          "after": 3
+        },
+        {
+          "field": "notOuts",
+          "before": 0,
+          "after": 2
+        },
+        {
+          "field": "runs",
+          "before": 0,
+          "after": 7
+        },
+        {
+          "field": "ballsFaced",
+          "before": 0,
+          "after": 17
+        },
+        {
+          "field": "highest",
+          "before": 0,
+          "after": 5
+        },
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 0
+        },
+        {
+          "field": "battingAverage",
+          "before": "",
+          "after": "7.00"
+        },
+        {
+          "field": "battingStrikeRate",
+          "before": "",
+          "after": "41.2"
+        },
+        {
+          "field": "average",
+          "before": 0,
+          "after": 7
+        },
+        {
+          "field": "strikeRate",
+          "before": 0,
+          "after": 41.1764705882353
+        }
+      ]
+    },
+    {
+      "id": "286",
+      "name": "Madhav Tiwari",
+      "cricbuzzId": "1447321",
+      "cricbuzzName": "Madhav Tiwari",
+      "mappingSources": [
+        "season:DC:mostRuns",
+        "season:DC:mostFours",
+        "season:DC:mostSixes"
+      ],
+      "stats": {
+        "matches": 4,
+        "battingInnings": 2,
+        "runs": 21,
+        "ballsFaced": 12,
+        "highest": 18,
+        "average": 21,
+        "strikeRate": 175,
+        "notOuts": 1,
+        "fours": 2,
+        "sixes": 1,
+        "ducks": 0,
+        "fifties": 0,
+        "hundreds": 0,
+        "battingAverage": "21.00",
+        "battingStrikeRate": "175.0"
+      },
+      "changes": [
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 0
+        }
+      ]
+    },
+    {
+      "id": "287",
+      "name": "Jofra Archer",
+      "cricbuzzId": "11540",
+      "cricbuzzName": "Jofra Archer",
+      "mappingSources": [
+        "season:RR:mostRuns",
+        "season:RR:mostFours",
+        "season:RR:mostSixes"
+      ],
+      "stats": {
+        "matches": 68,
+        "battingInnings": 42,
+        "runs": 326,
+        "ballsFaced": 225,
+        "highest": 32,
+        "average": 13.04,
+        "strikeRate": 144.88888888888889,
+        "notOuts": 17,
+        "fours": 18,
+        "sixes": 22,
+        "ducks": 5,
+        "fifties": 0,
+        "hundreds": 0,
+        "battingAverage": "13.04",
+        "battingStrikeRate": "144.9"
+      },
+      "changes": [
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 5
+        }
+      ]
+    },
+    {
+      "id": "288",
+      "name": "Mohammed Shami",
+      "cricbuzzId": "7909",
+      "cricbuzzName": "Mohammed Shami",
+      "mappingSources": [
+        "season:LSG:mostRuns",
+        "season:LSG:mostFours",
+        "season:LSG:mostSixes"
+      ],
+      "stats": {
+        "matches": 132,
+        "battingInnings": 36,
+        "runs": 115,
+        "ballsFaced": 111,
+        "highest": 21,
+        "average": 6.052631578947368,
+        "strikeRate": 103.6036036036036,
+        "notOuts": 17,
+        "fours": 9,
+        "sixes": 5,
+        "ducks": 6,
+        "fifties": 0,
+        "hundreds": 0,
+        "battingAverage": "6.05",
+        "battingStrikeRate": "103.6"
+      },
+      "changes": [
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 6
+        }
+      ]
+    },
+    {
+      "id": "289",
+      "name": "Nandre Burger",
+      "cricbuzzId": "13630",
+      "cricbuzzName": "Nandre Burger",
+      "mappingSources": [
+        "season:RR:mostRuns",
+        "season:RR:mostSixes"
+      ],
+      "stats": {
+        "matches": 18,
+        "battingInnings": 3,
+        "runs": 14,
+        "ballsFaced": 9,
+        "highest": 10,
+        "average": 14,
+        "strikeRate": 155.55555555555554,
+        "notOuts": 2,
+        "fours": 0,
+        "sixes": 1,
+        "ducks": 0,
+        "fifties": 0,
+        "hundreds": 0,
+        "battingAverage": "14.00",
+        "battingStrikeRate": "155.6"
+      },
+      "changes": [
+        {
+          "field": "matches",
+          "before": 19,
+          "after": 18
+        },
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 0
+        }
+      ]
+    },
+    {
+      "id": "290",
+      "name": "Lhuan-dre Pretorius",
+      "cricbuzzId": "50545",
+      "cricbuzzName": "Lhuan-dre Pretorius",
+      "mappingSources": [
+        "season:RR:mostRuns",
+        "season:RR:mostSixes"
+      ],
+      "stats": {
+        "matches": 2,
+        "battingInnings": 2,
+        "runs": 7,
+        "ballsFaced": 8,
+        "highest": 7,
+        "average": 3.5,
+        "strikeRate": 87.5,
+        "notOuts": 0,
+        "fours": 0,
+        "sixes": 0,
+        "ducks": 1,
+        "fifties": 0,
+        "hundreds": 0,
+        "battingAverage": "3.50",
+        "battingStrikeRate": "87.5"
+      },
+      "changes": [
+        {
+          "field": "matches",
+          "before": 0,
+          "after": 2
+        },
+        {
+          "field": "battingInnings",
+          "before": 0,
+          "after": 2
+        },
+        {
+          "field": "runs",
+          "before": 0,
+          "after": 7
+        },
+        {
+          "field": "ballsFaced",
+          "before": 0,
+          "after": 8
+        },
+        {
+          "field": "highest",
+          "before": 0,
+          "after": 7
+        },
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 1
+        },
+        {
+          "field": "battingAverage",
+          "before": "",
+          "after": "3.50"
+        },
+        {
+          "field": "battingStrikeRate",
+          "before": "",
+          "after": "87.5"
+        },
+        {
+          "field": "average",
+          "before": 0,
+          "after": 3.5
+        },
+        {
+          "field": "strikeRate",
+          "before": 0,
+          "after": 87.5
+        }
+      ]
+    },
+    {
+      "id": "291",
+      "name": "Shardul Thakur",
+      "cricbuzzId": "8683",
+      "cricbuzzName": "Shardul Thakur",
+      "mappingSources": [
+        "season:MI:mostRuns",
+        "season:MI:mostFours",
+        "season:MI:mostSixes"
+      ],
+      "stats": {
+        "matches": 114,
+        "battingInnings": 45,
+        "runs": 349,
+        "ballsFaced": 263,
+        "highest": 68,
+        "average": 11.633333333333333,
+        "strikeRate": 132.69961977186313,
+        "notOuts": 15,
+        "fours": 32,
+        "sixes": 13,
+        "ducks": 8,
+        "fifties": 1,
+        "hundreds": 0,
+        "battingAverage": "11.63",
+        "battingStrikeRate": "132.7"
+      },
+      "changes": [
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 8
+        }
+      ]
+    },
+    {
+      "id": "292",
+      "name": "Corbin Bosch",
+      "cricbuzzId": "9576",
+      "cricbuzzName": "Corbin Bosch",
+      "mappingSources": [
+        "season:MI:mostRuns",
+        "season:MI:mostFours",
+        "season:MI:mostSixes"
+      ],
+      "stats": {
+        "matches": 9,
+        "battingInnings": 6,
+        "runs": 97,
+        "ballsFaced": 63,
+        "highest": 32,
+        "average": 32.333333333333336,
+        "strikeRate": 153.96825396825398,
+        "notOuts": 3,
+        "fours": 8,
+        "sixes": 5,
+        "ducks": 0,
+        "fifties": 0,
+        "hundreds": 0,
+        "battingAverage": "32.33",
+        "battingStrikeRate": "154.0"
+      },
+      "changes": [
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 0
+        }
+      ]
+    },
+    {
+      "id": "294",
+      "name": "Dewald Brevis",
+      "cricbuzzId": "20538",
+      "cricbuzzName": "Dewald Brevis",
+      "mappingSources": [
+        "season:CSK:mostRuns",
+        "season:CSK:highestScore",
+        "season:CSK:mostFours",
+        "season:CSK:mostSixes"
+      ],
+      "stats": {
+        "matches": 27,
+        "battingInnings": 24,
+        "runs": 606,
+        "ballsFaced": 415,
+        "highest": 57,
+        "average": 25.25,
+        "strikeRate": 146.02409638554218,
+        "notOuts": 0,
+        "fours": 38,
+        "sixes": 43,
+        "ducks": 3,
+        "fifties": 2,
+        "hundreds": 0,
+        "battingAverage": "25.25",
+        "battingStrikeRate": "146.0"
+      },
+      "changes": [
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 3
+        }
+      ]
+    },
+    {
+      "id": "295",
+      "name": "Ayush Mhatre",
+      "cricbuzzId": "1431163",
+      "cricbuzzName": "Ayush Mhatre",
+      "mappingSources": [
+        "all:highestSr",
+        "season:CSK:mostRuns",
+        "season:CSK:highestScore",
+        "season:CSK:mostFifties",
+        "season:CSK:mostFours",
+        "season:CSK:mostSixes"
+      ],
+      "stats": {
+        "matches": 13,
+        "battingInnings": 13,
+        "runs": 441,
+        "ballsFaced": 240,
+        "highest": 94,
+        "average": 33.92307692307692,
+        "strikeRate": 183.75,
+        "notOuts": 0,
+        "fours": 51,
+        "sixes": 23,
+        "ducks": 2,
+        "fifties": 3,
+        "hundreds": 0,
+        "battingAverage": "33.92",
+        "battingStrikeRate": "183.8"
+      },
+      "changes": [
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 2
+        }
+      ]
+    },
+    {
+      "id": "296",
+      "name": "Urvil Patel",
+      "cricbuzzId": "13476",
+      "cricbuzzName": "Urvil Patel",
+      "mappingSources": [
+        "all:highestSr",
+        "season:CSK:mostRuns",
+        "season:CSK:highestScore",
+        "season:CSK:mostFifties",
+        "season:CSK:mostFours",
+        "season:CSK:mostSixes"
+      ],
+      "stats": {
+        "matches": 10,
+        "battingInnings": 10,
+        "runs": 197,
+        "ballsFaced": 96,
+        "highest": 65,
+        "average": 19.7,
+        "strikeRate": 205.20833333333334,
+        "notOuts": 0,
+        "fours": 11,
+        "sixes": 20,
+        "ducks": 2,
+        "fifties": 1,
+        "hundreds": 0,
+        "battingAverage": "19.70",
+        "battingStrikeRate": "205.2"
+      },
+      "changes": [
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 2
+        }
+      ]
+    },
+    {
+      "id": "297",
+      "name": "Sakib Hussain",
+      "cricbuzzId": "33129",
+      "cricbuzzName": "Sakib Hussain",
+      "mappingSources": [
+        "season:SRH:mostFours"
+      ],
+      "stats": {
+        "matches": 11,
+        "battingInnings": 1,
+        "runs": 5,
+        "ballsFaced": 7,
+        "highest": 5,
+        "average": 0,
+        "strikeRate": 71.42857142857143,
+        "notOuts": 1,
+        "fours": 1,
+        "sixes": 0,
+        "ducks": 0,
+        "fifties": 0,
+        "hundreds": 0,
+        "battingAverage": "",
+        "battingStrikeRate": "71.4"
+      },
+      "changes": [
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 0
+        }
+      ]
+    },
+    {
+      "id": "299",
+      "name": "Liam Livingstone",
+      "cricbuzzId": "10045",
+      "cricbuzzName": "Liam Livingstone",
+      "mappingSources": [
+        "season:SRH:mostRuns",
+        "season:SRH:mostSixes"
+      ],
+      "stats": {
+        "matches": 51,
+        "battingInnings": 49,
+        "runs": 1066,
+        "ballsFaced": 687,
+        "highest": 94,
+        "average": 25.38095238095238,
+        "strikeRate": 155.16739446870452,
+        "notOuts": 7,
+        "fours": 70,
+        "sixes": 76,
+        "ducks": 3,
+        "fifties": 7,
+        "hundreds": 0,
+        "battingAverage": "25.38",
+        "battingStrikeRate": "155.2"
+      },
+      "changes": [
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 3
+        }
+      ]
+    },
+    {
+      "id": "301",
+      "name": "Smaran Ravichandran",
+      "cricbuzzId": "29130",
+      "cricbuzzName": "Smaran Ravichandran",
+      "mappingSources": [
+        "season:SRH:mostRuns",
+        "season:SRH:mostFours",
+        "season:SRH:mostSixes"
+      ],
+      "stats": {
+        "matches": 6,
+        "battingInnings": 4,
+        "runs": 19,
+        "ballsFaced": 25,
+        "highest": 9,
+        "average": 6.333333333333333,
+        "strikeRate": 76,
+        "notOuts": 1,
+        "fours": 3,
+        "sixes": 0,
+        "ducks": 0,
+        "fifties": 0,
+        "hundreds": 0,
+        "battingAverage": "6.33",
+        "battingStrikeRate": "76.0"
+      },
+      "changes": [
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 0
+        }
+      ]
+    },
+    {
+      "id": "302",
+      "name": "Harsh Dubey",
+      "cricbuzzId": "14695",
+      "cricbuzzName": "Harsh Dubey",
+      "mappingSources": [
+        "season:SRH:mostRuns",
+        "season:SRH:mostFours",
+        "season:SRH:mostSixes"
+      ],
+      "stats": {
+        "matches": 11,
+        "battingInnings": 5,
+        "runs": 13,
+        "ballsFaced": 9,
+        "highest": 9,
+        "average": 6.5,
+        "strikeRate": 144.44444444444446,
+        "notOuts": 3,
+        "fours": 2,
+        "sixes": 0,
+        "ducks": 1,
+        "fifties": 0,
+        "hundreds": 0,
+        "battingAverage": "6.50",
+        "battingStrikeRate": "144.4"
+      },
+      "changes": [
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 1
+        }
+      ]
+    },
+    {
+      "id": "304",
+      "name": "Shivang Kumar",
+      "cricbuzzId": "1455907",
+      "cricbuzzName": "Shivang Kumar",
+      "mappingSources": [
+        "season:SRH:mostRuns",
+        "season:SRH:mostFours",
+        "season:SRH:mostSixes"
+      ],
+      "stats": {
+        "matches": 13,
+        "battingInnings": 6,
+        "runs": 53,
+        "ballsFaced": 46,
+        "highest": 27,
+        "average": 8.833333333333334,
+        "strikeRate": 115.21739130434783,
+        "notOuts": 0,
+        "fours": 6,
+        "sixes": 1,
+        "ducks": 0,
+        "fifties": 0,
+        "hundreds": 0,
+        "battingAverage": "8.83",
+        "battingStrikeRate": "115.2"
+      },
+      "changes": [
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 0
+        }
+      ]
+    },
+    {
+      "id": "306",
+      "name": "Pat Cummins",
+      "cricbuzzId": "8095",
+      "cricbuzzName": "Pat Cummins",
+      "mappingSources": [
+        "season:SRH:mostRuns",
+        "season:SRH:mostFours",
+        "season:SRH:mostSixes"
+      ],
+      "stats": {
+        "matches": 80,
+        "battingInnings": 53,
+        "runs": 642,
+        "ballsFaced": 421,
+        "highest": 66,
+        "average": 19.454545454545453,
+        "strikeRate": 152.49406175771972,
+        "notOuts": 20,
+        "fours": 40,
+        "sixes": 44,
+        "ducks": 4,
+        "fifties": 3,
+        "hundreds": 0,
+        "battingAverage": "19.45",
+        "battingStrikeRate": "152.5"
+      },
+      "changes": [
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 4
+        }
+      ]
+    },
+    {
+      "id": "311",
+      "name": "Sahil Parakh",
+      "cricbuzzId": "1430465",
+      "cricbuzzName": "Sahil Parakh",
+      "mappingSources": [
+        "season:DC:mostRuns",
+        "season:DC:mostFours",
+        "season:DC:mostSixes"
+      ],
+      "stats": {
+        "matches": 4,
+        "battingInnings": 4,
+        "runs": 46,
+        "ballsFaced": 33,
+        "highest": 24,
+        "average": 11.5,
+        "strikeRate": 139.3939393939394,
+        "notOuts": 0,
+        "fours": 5,
+        "sixes": 2,
+        "ducks": 1,
+        "fifties": 0,
+        "hundreds": 0,
+        "battingAverage": "11.50",
+        "battingStrikeRate": "139.4"
+      },
+      "changes": [
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 1
+        }
+      ]
+    },
+    {
+      "id": "312",
+      "name": "Brijesh Sharma",
+      "cricbuzzId": "1467167",
+      "cricbuzzName": "Brijesh Sharma",
+      "mappingSources": [
+        "season:RR:mostRuns",
+        "season:RR:mostSixes"
+      ],
+      "stats": {
+        "matches": 13,
+        "battingInnings": 2,
+        "runs": 2,
+        "ballsFaced": 4,
+        "highest": 1,
+        "average": 0,
+        "strikeRate": 50,
+        "notOuts": 2,
+        "fours": 0,
+        "sixes": 0,
+        "ducks": 0,
+        "fifties": 0,
+        "hundreds": 0,
+        "battingAverage": "",
+        "battingStrikeRate": "50.0"
+      },
+      "changes": [
+        {
+          "field": "matches",
+          "before": 1,
+          "after": 13
+        },
+        {
+          "field": "battingInnings",
+          "before": null,
+          "after": 2
+        },
+        {
+          "field": "notOuts",
+          "before": null,
+          "after": 2
+        },
+        {
+          "field": "runs",
+          "before": 0,
+          "after": 2
+        },
+        {
+          "field": "ballsFaced",
+          "before": null,
+          "after": 4
+        },
+        {
+          "field": "highest",
+          "before": null,
+          "after": 1
+        },
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 0
+        },
+        {
+          "field": "battingStrikeRate",
+          "before": null,
+          "after": "50.0"
+        },
+        {
+          "field": "strikeRate",
+          "before": 0,
+          "after": 50
+        }
+      ]
+    },
+    {
+      "id": "314",
+      "name": "Matthew Short",
+      "cricbuzzId": "9456",
+      "cricbuzzName": "Matthew Short",
+      "mappingSources": [
+        "season:CSK:mostRuns",
+        "season:CSK:mostFours",
+        "season:CSK:mostSixes"
+      ],
+      "stats": {
+        "matches": 9,
+        "battingInnings": 9,
+        "runs": 177,
+        "ballsFaced": 143,
+        "highest": 36,
+        "average": 19.666666666666668,
+        "strikeRate": 123.77622377622377,
+        "notOuts": 0,
+        "fours": 21,
+        "sixes": 5,
+        "ducks": 0,
+        "fifties": 0,
+        "hundreds": 0,
+        "battingAverage": "19.67",
+        "battingStrikeRate": "123.8"
+      },
+      "changes": [
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 0
+        }
+      ]
+    },
+    {
+      "id": "315",
+      "name": "Kartik Sharma",
+      "cricbuzzId": "49557",
+      "cricbuzzName": "Kartik Sharma",
+      "mappingSources": [
+        "season:CSK:mostRuns",
+        "season:CSK:highestScore",
+        "season:CSK:mostFifties",
+        "season:CSK:mostFours",
+        "season:CSK:mostSixes"
+      ],
+      "stats": {
+        "matches": 11,
+        "battingInnings": 11,
+        "runs": 295,
+        "ballsFaced": 216,
+        "highest": 71,
+        "average": 32.77777777777778,
+        "strikeRate": 136.57407407407408,
+        "notOuts": 2,
+        "fours": 24,
+        "sixes": 16,
+        "ducks": 0,
+        "fifties": 2,
+        "hundreds": 0,
+        "battingAverage": "32.78",
+        "battingStrikeRate": "136.6"
+      },
+      "changes": [
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 0
+        }
+      ]
+    },
+    {
+      "id": "316",
+      "name": "Prashant Veer",
+      "cricbuzzId": "51417",
+      "cricbuzzName": "Prashant Veer",
+      "mappingSources": [
+        "season:CSK:mostRuns",
+        "season:CSK:mostFours",
+        "season:CSK:mostSixes"
+      ],
+      "stats": {
+        "matches": 6,
+        "battingInnings": 5,
+        "runs": 91,
+        "ballsFaced": 67,
+        "highest": 43,
+        "average": 45.5,
+        "strikeRate": 135.82089552238807,
+        "notOuts": 3,
+        "fours": 10,
+        "sixes": 3,
+        "ducks": 0,
+        "fifties": 0,
+        "hundreds": 0,
+        "battingAverage": "45.50",
+        "battingStrikeRate": "135.8"
+      },
+      "changes": [
+        {
+          "field": "runs",
+          "before": 90,
+          "after": 91
+        },
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 0
+        },
+        {
+          "field": "battingAverage",
+          "before": "45.00",
+          "after": "45.50"
+        },
+        {
+          "field": "battingStrikeRate",
+          "before": "134.3",
+          "after": "135.8"
+        },
+        {
+          "field": "average",
+          "before": 45,
+          "after": 45.5
+        },
+        {
+          "field": "strikeRate",
+          "before": 134.32835820895522,
+          "after": 135.82089552238807
+        }
+      ]
+    },
+    {
+      "id": "317",
+      "name": "David Payne",
+      "cricbuzzId": "6834",
+      "cricbuzzName": "David Payne",
+      "mappingSources": [
+        "season:SRH:mostRuns",
+        "season:SRH:mostSixes"
+      ],
+      "stats": {
+        "matches": 2,
+        "battingInnings": 1,
+        "runs": 6,
+        "ballsFaced": 5,
+        "highest": 6,
+        "average": 0,
+        "strikeRate": 120,
+        "notOuts": 1,
+        "fours": 0,
+        "sixes": 0,
+        "ducks": 0,
+        "fifties": 0,
+        "hundreds": 0,
+        "battingAverage": "",
+        "battingStrikeRate": "120.0"
+      },
+      "changes": [
+        {
+          "field": "matches",
+          "before": 1,
+          "after": 2
+        },
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 0
+        },
+        {
+          "field": "battingStrikeRate",
+          "before": "120.00",
+          "after": "120.0"
+        }
+      ]
+    },
+    {
+      "id": "318",
+      "name": "Cameron Green",
+      "cricbuzzId": "12225",
+      "cricbuzzName": "Cameron Green",
+      "mappingSources": [
+        "season:KKR:mostRuns",
+        "season:KKR:highestScore",
+        "season:KKR:mostFifties",
+        "season:KKR:mostFours",
+        "season:KKR:mostSixes"
+      ],
+      "stats": {
+        "matches": 43,
+        "battingInnings": 42,
+        "runs": 1029,
+        "ballsFaced": 681,
+        "highest": 100,
+        "average": 38.111111111111114,
+        "strikeRate": 151.1013215859031,
+        "notOuts": 15,
+        "fours": 84,
+        "sixes": 49,
+        "ducks": 1,
+        "fifties": 4,
+        "hundreds": 1,
+        "battingAverage": "38.11",
+        "battingStrikeRate": "151.1"
+      },
+      "changes": [
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 1
+        }
+      ]
+    },
+    {
+      "id": "319",
+      "name": "Saurabh Dubey",
+      "cricbuzzId": "15766",
+      "cricbuzzName": "Saurabh Dubey",
+      "mappingSources": [
+        "season:KKR:mostRuns",
+        "season:KKR:mostFours",
+        "season:KKR:mostSixes"
+      ],
+      "stats": {
+        "matches": 4,
+        "battingInnings": 1,
+        "runs": 4,
+        "ballsFaced": 2,
+        "highest": 4,
+        "average": 0,
+        "strikeRate": 200,
+        "notOuts": 1,
+        "fours": 1,
+        "sixes": 0,
+        "ducks": 0,
+        "fifties": 0,
+        "hundreds": 0,
+        "battingAverage": "",
+        "battingStrikeRate": "200.0"
+      },
+      "changes": [
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 0
+        }
+      ]
+    },
+    {
+      "id": "320",
+      "name": "George Linde ",
+      "cricbuzzId": "10187",
+      "cricbuzzName": "George Linde",
+      "mappingSources": [
+        "season:LSG:mostRuns",
+        "season:LSG:mostFours",
+        "season:LSG:mostSixes"
+      ],
+      "stats": {
+        "matches": 3,
+        "battingInnings": 3,
+        "runs": 31,
+        "ballsFaced": 21,
+        "highest": 16,
+        "average": 10.333333333333334,
+        "strikeRate": 147.61904761904762,
+        "notOuts": 0,
+        "fours": 6,
+        "sixes": 0,
+        "ducks": 0,
+        "fifties": 0,
+        "hundreds": 0,
+        "battingAverage": "10.33",
+        "battingStrikeRate": "147.6"
+      },
+      "changes": [
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 0
+        }
+      ]
+    },
+    {
+      "id": "323",
+      "name": "Krish Bhagat",
+      "cricbuzzId": "1431875",
+      "cricbuzzName": "Krish Bhagat",
+      "mappingSources": [
+        "season:MI:mostRuns"
+      ],
+      "stats": {
+        "matches": 3,
+        "battingInnings": 2,
+        "runs": 10,
+        "ballsFaced": 21,
+        "highest": 7,
+        "average": 10,
+        "strikeRate": 47.61904761904762,
+        "notOuts": 1,
+        "fours": 0,
+        "sixes": 0,
+        "ducks": 0,
+        "fifties": 0,
+        "hundreds": 0,
+        "battingAverage": "10.00",
+        "battingStrikeRate": "47.6"
+      },
+      "changes": [
+        {
+          "field": "matches",
+          "before": 0,
+          "after": 3
+        },
+        {
+          "field": "battingInnings",
+          "before": null,
+          "after": 2
+        },
+        {
+          "field": "notOuts",
+          "before": null,
+          "after": 1
+        },
+        {
+          "field": "runs",
+          "before": 0,
+          "after": 10
+        },
+        {
+          "field": "ballsFaced",
+          "before": null,
+          "after": 21
+        },
+        {
+          "field": "highest",
+          "before": null,
+          "after": 7
+        },
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 0
+        },
+        {
+          "field": "battingAverage",
+          "before": null,
+          "after": "10.00"
+        },
+        {
+          "field": "battingStrikeRate",
+          "before": null,
+          "after": "47.6"
+        },
+        {
+          "field": "average",
+          "before": 0,
+          "after": 10
+        },
+        {
+          "field": "strikeRate",
+          "before": 0,
+          "after": 47.61904761904762
+        }
+      ]
+    },
+    {
+      "id": "325",
+      "name": "Dasun Shanaka",
+      "cricbuzzId": "8422",
+      "cricbuzzName": "Dasun Shanaka",
+      "mappingSources": [
+        "season:RR:mostRuns",
+        "season:RR:mostFours",
+        "season:RR:mostSixes"
+      ],
+      "stats": {
+        "matches": 10,
+        "battingInnings": 8,
+        "runs": 89,
+        "ballsFaced": 72,
+        "highest": 29,
+        "average": 12.714285714285714,
+        "strikeRate": 123.61111111111111,
+        "notOuts": 1,
+        "fours": 5,
+        "sixes": 5,
+        "ducks": 1,
+        "fifties": 0,
+        "hundreds": 0,
+        "battingAverage": "12.71",
+        "battingStrikeRate": "123.6"
+      },
+      "changes": [
+        {
+          "field": "ducks",
+          "before": null,
+          "after": 1
+        }
+      ]
+    }
+  ],
+  "unchangedPlayers": [
+    {
+      "id": "30",
+      "name": "Jacob Duffy",
+      "cricbuzzId": "8554",
+      "cricbuzzName": "Jacob Duffy",
+      "mappingSources": [
+        "season:RCB:mostSixes"
+      ],
+      "stats": {
+        "matches": 6,
+        "battingInnings": 0,
+        "runs": 0,
+        "ballsFaced": 0,
+        "highest": 0,
+        "average": 0,
+        "strikeRate": 0,
+        "notOuts": 0,
+        "fours": 0,
+        "sixes": 0,
+        "ducks": 0,
+        "fifties": 0,
+        "hundreds": 0,
+        "battingAverage": "",
+        "battingStrikeRate": ""
+      },
+      "changes": []
+    },
+    {
+      "id": "78",
+      "name": "Virat Kohli",
+      "cricbuzzId": "1413",
+      "cricbuzzName": "Virat Kohli",
+      "mappingSources": [
+        "all:mostRuns",
+        "all:highestAvg",
+        "all:mostHundreds",
+        "all:mostFifties",
+        "all:mostFours",
+        "all:mostSixes",
+        "all:mostNineties",
+        "season:RCB:mostRuns",
+        "season:RCB:highestScore",
+        "season:RCB:mostHundreds",
+        "season:RCB:mostFifties",
+        "season:RCB:mostFours",
+        "season:RCB:mostSixes"
+      ],
+      "stats": {
+        "matches": 283,
+        "battingInnings": 275,
+        "runs": 9336,
+        "ballsFaced": 6926,
+        "highest": 113,
+        "average": 40.41558441558441,
+        "strikeRate": 134.79641928963326,
+        "notOuts": 44,
+        "fours": 844,
+        "sixes": 316,
+        "ducks": 12,
+        "fifties": 68,
+        "hundreds": 9,
+        "battingAverage": "40.42",
+        "battingStrikeRate": "134.8"
+      },
+      "changes": []
+    },
+    {
+      "id": "79",
+      "name": "Rajat Patidar",
+      "cricbuzzId": "10636",
+      "cricbuzzName": "Rajat Patidar",
+      "mappingSources": [
+        "season:RCB:mostRuns",
+        "season:RCB:highestScore",
+        "season:RCB:mostFifties",
+        "season:RCB:mostFours",
+        "season:RCB:mostSixes"
+      ],
+      "stats": {
+        "matches": 57,
+        "battingInnings": 52,
+        "runs": 1612,
+        "ballsFaced": 980,
+        "highest": 112,
+        "average": 33.583333333333336,
+        "strikeRate": 164.48979591836735,
+        "notOuts": 4,
+        "fours": 106,
+        "sixes": 110,
+        "ducks": 1,
+        "fifties": 14,
+        "hundreds": 1,
+        "battingAverage": "33.58",
+        "battingStrikeRate": "164.5"
+      },
+      "changes": []
+    },
+    {
+      "id": "85",
+      "name": "Tilak Varma",
+      "cricbuzzId": "14504",
+      "cricbuzzName": "Tilak Varma",
+      "mappingSources": [
+        "season:MI:mostRuns",
+        "season:MI:highestScore",
+        "season:MI:mostHundreds",
+        "season:MI:mostFifties",
+        "season:MI:mostFours",
+        "season:MI:mostSixes"
+      ],
+      "stats": {
+        "matches": 68,
+        "battingInnings": 65,
+        "runs": 1858,
+        "ballsFaced": 1284,
+        "highest": 101,
+        "average": 35.73076923076923,
+        "strikeRate": 144.70404984423675,
+        "notOuts": 13,
+        "fours": 143,
+        "sixes": 91,
+        "ducks": 2,
+        "fifties": 10,
+        "hundreds": 1,
+        "battingAverage": "35.73",
+        "battingStrikeRate": "144.7"
+      },
+      "changes": []
+    },
+    {
+      "id": "135",
+      "name": "Devdutt Padikkal",
+      "cricbuzzId": "13088",
+      "cricbuzzName": "Devdutt Padikkal",
+      "mappingSources": [
+        "season:RCB:mostRuns",
+        "season:RCB:highestScore",
+        "season:RCB:mostFifties",
+        "season:RCB:mostFours",
+        "season:RCB:mostSixes"
+      ],
+      "stats": {
+        "matches": 90,
+        "battingInnings": 89,
+        "runs": 2270,
+        "ballsFaced": 1705,
+        "highest": 101,
+        "average": 26.705882352941178,
+        "strikeRate": 133.13782991202345,
+        "notOuts": 4,
+        "fours": 239,
+        "sixes": 80,
+        "ducks": 6,
+        "fifties": 14,
+        "hundreds": 1,
+        "battingAverage": "26.71",
+        "battingStrikeRate": "133.1"
+      },
+      "changes": []
+    },
+    {
+      "id": "144",
+      "name": "Jitesh Sharma",
+      "cricbuzzId": "10214",
+      "cricbuzzName": "Jitesh Sharma",
+      "mappingSources": [
+        "season:RCB:mostRuns",
+        "season:RCB:mostFours",
+        "season:RCB:mostSixes"
+      ],
+      "stats": {
+        "matches": 71,
+        "battingInnings": 59,
+        "runs": 1107,
+        "ballsFaced": 726,
+        "highest": 85,
+        "average": 23.0625,
+        "strikeRate": 152.4793388429752,
+        "notOuts": 11,
+        "fours": 86,
+        "sixes": 68,
+        "ducks": 3,
+        "fifties": 1,
+        "hundreds": 0,
+        "battingAverage": "23.06",
+        "battingStrikeRate": "152.5"
+      },
+      "changes": []
+    },
+    {
+      "id": "147",
+      "name": "Josh Hazlewood",
+      "cricbuzzId": "6258",
+      "cricbuzzName": "Josh Hazlewood",
+      "mappingSources": [
+        "season:RCB:mostSixes"
+      ],
+      "stats": {
+        "matches": 52,
+        "battingInnings": 8,
+        "runs": 19,
+        "ballsFaced": 30,
+        "highest": 7,
+        "average": 19,
+        "strikeRate": 63.333333333333336,
+        "notOuts": 7,
+        "fours": 1,
+        "sixes": 0,
+        "ducks": 1,
+        "fifties": 0,
+        "hundreds": 0,
+        "battingAverage": "19.00",
+        "battingStrikeRate": "63.3"
+      },
+      "changes": []
+    },
+    {
+      "id": "225",
+      "name": "Tim David",
+      "cricbuzzId": "13169",
+      "cricbuzzName": "Tim David",
+      "mappingSources": [
+        "all:highestSr",
+        "season:RCB:mostRuns",
+        "season:RCB:highestScore",
+        "season:RCB:mostFifties",
+        "season:RCB:mostFours",
+        "season:RCB:mostSixes"
+      ],
+      "stats": {
+        "matches": 66,
+        "battingInnings": 59,
+        "runs": 1151,
+        "ballsFaced": 650,
+        "highest": 70,
+        "average": 32.885714285714286,
+        "strikeRate": 177.07692307692307,
+        "notOuts": 24,
+        "fours": 76,
+        "sixes": 83,
+        "ducks": 4,
+        "fifties": 2,
+        "hundreds": 0,
+        "battingAverage": "32.89",
+        "battingStrikeRate": "177.1"
+      },
+      "changes": []
+    },
+    {
+      "id": "230",
+      "name": "Romario Shepherd",
+      "cricbuzzId": "13646",
+      "cricbuzzName": "Romario Shepherd",
+      "mappingSources": [
+        "all:highestSr",
+        "season:RCB:mostRuns",
+        "season:RCB:mostFours",
+        "season:RCB:mostSixes"
+      ],
+      "stats": {
+        "matches": 33,
+        "battingInnings": 19,
+        "runs": 268,
+        "ballsFaced": 153,
+        "highest": 53,
+        "average": 24.363636363636363,
+        "strikeRate": 175.16339869281046,
+        "notOuts": 8,
+        "fours": 18,
+        "sixes": 22,
+        "ducks": 2,
+        "fifties": 1,
+        "hundreds": 0,
+        "battingAverage": "24.36",
+        "battingStrikeRate": "175.2"
+      },
+      "changes": []
+    },
+    {
+      "id": "260",
+      "name": "Jacob Bethell",
+      "cricbuzzId": "19636",
+      "cricbuzzName": "Jacob Bethell",
+      "mappingSources": [
+        "season:RCB:mostRuns",
+        "season:RCB:mostFours",
+        "season:RCB:mostSixes"
+      ],
+      "stats": {
+        "matches": 9,
+        "battingInnings": 9,
+        "runs": 163,
+        "ballsFaced": 116,
+        "highest": 55,
+        "average": 18.11111111111111,
+        "strikeRate": 140.51724137931035,
+        "notOuts": 0,
+        "fours": 21,
+        "sixes": 6,
+        "ducks": 0,
+        "fifties": 1,
+        "hundreds": 0,
+        "battingAverage": "18.11",
+        "battingStrikeRate": "140.5"
+      },
+      "changes": []
+    },
+    {
+      "id": "277",
+      "name": "Abhinandan Singh",
+      "cricbuzzId": "1447073",
+      "cricbuzzName": "Abhinandan Singh",
+      "mappingSources": [
+        "season:RCB:mostSixes"
+      ],
+      "stats": {
+        "matches": 3,
+        "battingInnings": 0,
+        "runs": 0,
+        "ballsFaced": 0,
+        "highest": 0,
+        "average": 0,
+        "strikeRate": 0,
+        "notOuts": 0,
+        "fours": 0,
+        "sixes": 0,
+        "ducks": 0,
+        "fifties": 0,
+        "hundreds": 0,
+        "battingAverage": "",
+        "battingStrikeRate": ""
+      },
+      "changes": []
+    }
+  ],
+  "unmatchedPlayers": [
+    {
+      "id": "2",
+      "name": "Matheesha Pathirana",
+      "reason": "No Cricbuzz id found in IPL all-time/current stat rows"
+    },
+    {
+      "id": "6",
+      "name": "Mustafizur Rahman",
+      "reason": "No Cricbuzz id found in IPL all-time/current stat rows"
+    },
+    {
+      "id": "8",
+      "name": "Auqib Nabi",
+      "reason": "No Cricbuzz id found in IPL all-time/current stat rows"
+    },
+    {
+      "id": "9",
+      "name": "Ravi Bishnoi",
+      "reason": "No Cricbuzz id found in IPL all-time/current stat rows"
+    },
+    {
+      "id": "12",
+      "name": "Mangesh Yadav",
+      "reason": "No Cricbuzz id found in IPL all-time/current stat rows"
+    },
+    {
+      "id": "13",
+      "name": "Rahul Chahar",
+      "reason": "No Cricbuzz id found in IPL all-time/current stat rows"
+    },
+    {
+      "id": "15",
+      "name": "Tejasvi Singh",
+      "reason": "No Cricbuzz id found in IPL all-time/current stat rows"
+    },
+    {
+      "id": "18",
+      "name": "Adam Milne",
+      "reason": "No Cricbuzz id found in IPL all-time/current stat rows"
+    },
+    {
+      "id": "20",
+      "name": "Rachin Ravindra",
+      "reason": "No Cricbuzz id found in IPL all-time/current stat rows"
+    },
+    {
+      "id": "22",
+      "name": "Wanindu Hasaranga",
+      "reason": "No Cricbuzz id found in IPL all-time/current stat rows"
+    },
+    {
+      "id": "23",
+      "name": "Anrich Nortje",
+      "reason": "No Cricbuzz id found in IPL all-time/current stat rows"
+    },
+    {
+      "id": "25",
+      "name": "Lungi Ngidi",
+      "reason": "No Cricbuzz id found in IPL all-time/current stat rows"
+    },
+    {
+      "id": "26",
+      "name": "Ben Duckett",
+      "reason": "No Cricbuzz id found in IPL all-time/current stat rows"
+    },
+    {
+      "id": "35",
+      "name": "Akash Deep",
+      "reason": "No Cricbuzz id found in IPL all-time/current stat rows"
+    },
+    {
+      "id": "37",
+      "name": "Naman Tiwari",
+      "reason": "No Cricbuzz id found in IPL all-time/current stat rows"
+    },
+    {
+      "id": "39",
+      "name": "Ashok Sharma",
+      "reason": "No Cricbuzz id found in IPL all-time/current stat rows"
+    },
+    {
+      "id": "40",
+      "name": "Sushant Mishra",
+      "reason": "No Cricbuzz id found in IPL all-time/current stat rows"
+    },
+    {
+      "id": "42",
+      "name": "Prithvi Shaw",
+      "reason": "No Cricbuzz id found in IPL all-time/current stat rows"
+    },
+    {
+      "id": "43",
+      "name": "Rahul Tripathi",
+      "reason": "No Cricbuzz id found in IPL all-time/current stat rows"
+    },
+    {
+      "id": "44",
+      "name": "Zak Foulkes",
+      "reason": "No Cricbuzz id found in IPL all-time/current stat rows"
+    },
+    {
+      "id": "45",
+      "name": "Luke Wood",
+      "reason": "No Cricbuzz id found in IPL all-time/current stat rows"
+    },
+    {
+      "id": "46",
+      "name": "Shivam Mavi",
+      "reason": "No Cricbuzz id found in IPL all-time/current stat rows"
+    },
+    {
+      "id": "48",
+      "name": "Sandeep Sharma",
+      "reason": "No Cricbuzz id found in IPL all-time/current stat rows"
+    },
+    {
+      "id": "49",
+      "name": "Aman Khan",
+      "reason": "No Cricbuzz id found in IPL all-time/current stat rows"
+    },
+    {
+      "id": "50",
+      "name": "Daksh Kamra",
+      "reason": "No Cricbuzz id found in IPL all-time/current stat rows"
+    },
+    {
+      "id": "51",
+      "name": "Sarthak Ranjan",
+      "reason": "No Cricbuzz id found in IPL all-time/current stat rows"
+    },
+    {
+      "id": "52",
+      "name": "Krains Fuletra",
+      "reason": "No Cricbuzz id found in IPL all-time/current stat rows"
+    },
+    {
+      "id": "54",
+      "name": "Atharva Ankolekar",
+      "reason": "No Cricbuzz id found in IPL all-time/current stat rows"
+    },
+    {
+      "id": "55",
+      "name": "Amit Kumar",
+      "reason": "No Cricbuzz id found in IPL all-time/current stat rows"
+    },
+    {
+      "id": "56",
+      "name": "Onkar Tarmale",
+      "reason": "No Cricbuzz id found in IPL all-time/current stat rows"
+    },
+    {
+      "id": "57",
+      "name": "Mohammed Salahuddin Izhar",
+      "reason": "No Cricbuzz id found in IPL all-time/current stat rows"
+    },
+    {
+      "id": "59",
+      "name": "Satvik Deswal",
+      "reason": "No Cricbuzz id found in IPL all-time/current stat rows"
+    },
+    {
+      "id": "60",
+      "name": "Danish Malewar",
+      "reason": "No Cricbuzz id found in IPL all-time/current stat rows"
+    },
+    {
+      "id": "61",
+      "name": "Vignesh Puthur",
+      "reason": "No Cricbuzz id found in IPL all-time/current stat rows"
+    },
+    {
+      "id": "62",
+      "name": "Prashant Solanki",
+      "reason": "No Cricbuzz id found in IPL all-time/current stat rows"
+    },
+    {
+      "id": "63",
+      "name": "Yash Raj Punja",
+      "reason": "No Cricbuzz id found in IPL all-time/current stat rows"
+    },
+    {
+      "id": "67",
+      "name": "Prithviraj Yarra",
+      "reason": "No Cricbuzz id found in IPL all-time/current stat rows"
+    },
+    {
+      "id": "68",
+      "name": "Mayank Rawat",
+      "reason": "No Cricbuzz id found in IPL all-time/current stat rows"
+    },
+    {
+      "id": "70",
+      "name": "Aman Rao Perala",
+      "reason": "No Cricbuzz id found in IPL all-time/current stat rows"
+    },
+    {
+      "id": "71",
+      "name": "Jordan Cox",
+      "reason": "No Cricbuzz id found in IPL all-time/current stat rows"
+    },
+    {
+      "id": "72",
+      "name": "Kanishk Chouhan",
+      "reason": "No Cricbuzz id found in IPL all-time/current stat rows"
+    },
+    {
+      "id": "73",
+      "name": "Vihaan Malhotra",
+      "reason": "No Cricbuzz id found in IPL all-time/current stat rows"
+    },
+    {
+      "id": "74",
+      "name": "Vicky Ostwal",
+      "reason": "No Cricbuzz id found in IPL all-time/current stat rows"
+    },
+    {
+      "id": "80",
+      "name": "Yash Dayal",
+      "reason": "No Cricbuzz id found in IPL all-time/current stat rows"
+    },
+    {
+      "id": "96",
+      "name": "Kuldeep Yadav",
+      "reason": "No Cricbuzz id found in IPL all-time/current stat rows"
+    },
+    {
+      "id": "103",
+      "name": "Harshit Rana",
+      "reason": "No Cricbuzz id found in IPL all-time/current stat rows"
+    },
+    {
+      "id": "116",
+      "name": "Mayank Yadav",
+      "reason": "No Cricbuzz id found in IPL all-time/current stat rows"
+    },
+    {
+      "id": "117",
+      "name": "Mohsin Khan",
+      "reason": "No Cricbuzz id found in IPL all-time/current stat rows"
+    },
+    {
+      "id": "126",
+      "name": "Mitchell Starc",
+      "reason": "No Cricbuzz id found in IPL all-time/current stat rows"
+    },
+    {
+      "id": "127",
+      "name": "Yuzvendra Chahal",
+      "reason": "No Cricbuzz id found in IPL all-time/current stat rows"
+    },
+    {
+      "id": "141",
+      "name": "Rahmanullah Gurbaz",
+      "reason": "No Cricbuzz id found in IPL all-time/current stat rows"
+    },
+    {
+      "id": "143",
+      "name": "Phil Salt",
+      "reason": "No Cricbuzz id found in IPL all-time/current stat rows"
+    },
+    {
+      "id": "145",
+      "name": "Khaleel Ahmed",
+      "reason": "No Cricbuzz id found in IPL all-time/current stat rows"
+    },
+    {
+      "id": "150",
+      "name": "T Natarajan",
+      "reason": "No Cricbuzz id found in IPL all-time/current stat rows"
+    },
+    {
+      "id": "169",
+      "name": "Robin Minz",
+      "reason": "No Cricbuzz id found in IPL all-time/current stat rows"
+    },
+    {
+      "id": "170",
+      "name": "Anuj Rawat",
+      "reason": "No Cricbuzz id found in IPL all-time/current stat rows"
+    },
+    {
+      "id": "171",
+      "name": "Luvnith Sisodia",
+      "reason": "No Cricbuzz id found in IPL all-time/current stat rows"
+    },
+    {
+      "id": "173",
+      "name": "Vaibhav Arora",
+      "reason": "No Cricbuzz id found in IPL all-time/current stat rows"
+    },
+    {
+      "id": "174",
+      "name": "Rasikh Salam",
+      "reason": "No Cricbuzz id found in IPL all-time/current stat rows"
+    },
+    {
+      "id": "178",
+      "name": "Yash Thakur",
+      "reason": "No Cricbuzz id found in IPL all-time/current stat rows"
+    },
+    {
+      "id": "180",
+      "name": "Shreyas Gopal",
+      "reason": "No Cricbuzz id found in IPL all-time/current stat rows"
+    },
+    {
+      "id": "181",
+      "name": "Mayank Markande",
+      "reason": "No Cricbuzz id found in IPL all-time/current stat rows"
+    },
+    {
+      "id": "182",
+      "name": "Suyash Sharma",
+      "reason": "No Cricbuzz id found in IPL all-time/current stat rows"
+    },
+    {
+      "id": "185",
+      "name": "Manav Suthar",
+      "reason": "No Cricbuzz id found in IPL all-time/current stat rows"
+    },
+    {
+      "id": "190",
+      "name": "Sam Curran",
+      "reason": "No Cricbuzz id found in IPL all-time/current stat rows"
+    },
+    {
+      "id": "200",
+      "name": "Lockie Ferguson",
+      "reason": "No Cricbuzz id found in IPL all-time/current stat rows"
+    },
+    {
+      "id": "202",
+      "name": "Mukesh Kumar",
+      "reason": "No Cricbuzz id found in IPL all-time/current stat rows"
+    },
+    {
+      "id": "203",
+      "name": "Allah Ghazanfar",
+      "reason": "No Cricbuzz id found in IPL all-time/current stat rows"
+    },
+    {
+      "id": "212",
+      "name": "Swapnil Singh",
+      "reason": "No Cricbuzz id found in IPL all-time/current stat rows"
+    },
+    {
+      "id": "215",
+      "name": "Gurnoor Brar",
+      "reason": "No Cricbuzz id found in IPL all-time/current stat rows"
+    },
+    {
+      "id": "216",
+      "name": "Mukesh Choudhary",
+      "reason": "No Cricbuzz id found in IPL all-time/current stat rows"
+    },
+    {
+      "id": "217",
+      "name": "Arjun Tendulkar",
+      "reason": "No Cricbuzz id found in IPL all-time/current stat rows"
+    },
+    {
+      "id": "219",
+      "name": "Manimaran Siddharth",
+      "reason": "No Cricbuzz id found in IPL all-time/current stat rows"
+    },
+    {
+      "id": "220",
+      "name": "Digvesh Singh",
+      "reason": "No Cricbuzz id found in IPL all-time/current stat rows"
+    },
+    {
+      "id": "224",
+      "name": "Moeen Ali",
+      "reason": "No Cricbuzz id found in IPL all-time/current stat rows"
+    },
+    {
+      "id": "229",
+      "name": "Sai Kishore",
+      "reason": "No Cricbuzz id found in IPL all-time/current stat rows"
+    },
+    {
+      "id": "231",
+      "name": "Spencer Johnson",
+      "reason": "No Cricbuzz id found in IPL all-time/current stat rows"
+    },
+    {
+      "id": "232",
+      "name": "Umran Malik",
+      "reason": "No Cricbuzz id found in IPL all-time/current stat rows"
+    },
+    {
+      "id": "233",
+      "name": "Ishant Sharma",
+      "reason": "No Cricbuzz id found in IPL all-time/current stat rows"
+    },
+    {
+      "id": "234",
+      "name": "Nuwan Thushara",
+      "reason": "No Cricbuzz id found in IPL all-time/current stat rows"
+    },
+    {
+      "id": "237",
+      "name": "Harnoor Singh",
+      "reason": "No Cricbuzz id found in IPL all-time/current stat rows"
+    },
+    {
+      "id": "239",
+      "name": "Yudhvir Singh",
+      "reason": "No Cricbuzz id found in IPL all-time/current stat rows"
+    },
+    {
+      "id": "242",
+      "name": "Ashwani Kumar",
+      "reason": "No Cricbuzz id found in IPL all-time/current stat rows"
+    },
+    {
+      "id": "243",
+      "name": "Akash Singh",
+      "reason": "No Cricbuzz id found in IPL all-time/current stat rows"
+    },
+    {
+      "id": "244",
+      "name": "Gurjapneet Singh",
+      "reason": "No Cricbuzz id found in IPL all-time/current stat rows"
+    },
+    {
+      "id": "245",
+      "name": "Matthew Breetzke",
+      "reason": "No Cricbuzz id found in IPL all-time/current stat rows"
+    },
+    {
+      "id": "247",
+      "name": "Jayant Yadav",
+      "reason": "No Cricbuzz id found in IPL all-time/current stat rows"
+    },
+    {
+      "id": "249",
+      "name": "Kwena Maphaka",
+      "reason": "No Cricbuzz id found in IPL all-time/current stat rows"
+    },
+    {
+      "id": "250",
+      "name": "Kuldeep Sen",
+      "reason": "No Cricbuzz id found in IPL all-time/current stat rows"
+    },
+    {
+      "id": "255",
+      "name": "Praveen Dubey",
+      "reason": "No Cricbuzz id found in IPL all-time/current stat rows"
+    },
+    {
+      "id": "256",
+      "name": "Ajay Mandal",
+      "reason": "No Cricbuzz id found in IPL all-time/current stat rows"
+    },
+    {
+      "id": "261",
+      "name": "Brydon Carse",
+      "reason": "No Cricbuzz id found in IPL all-time/current stat rows"
+    },
+    {
+      "id": "263",
+      "name": "Kamindu Mendis",
+      "reason": "No Cricbuzz id found in IPL all-time/current stat rows"
+    },
+    {
+      "id": "264",
+      "name": "Dushmantha Chameera",
+      "reason": "No Cricbuzz id found in IPL all-time/current stat rows"
+    },
+    {
+      "id": "265",
+      "name": "Nathan Ellis",
+      "reason": "No Cricbuzz id found in IPL all-time/current stat rows"
+    },
+    {
+      "id": "269",
+      "name": "Musheer Khan",
+      "reason": "No Cricbuzz id found in IPL all-time/current stat rows"
+    },
+    {
+      "id": "273",
+      "name": "Prince Yadav",
+      "reason": "No Cricbuzz id found in IPL all-time/current stat rows"
+    },
+    {
+      "id": "279",
+      "name": "Pyla Avinash",
+      "reason": "No Cricbuzz id found in IPL all-time/current stat rows"
+    },
+    {
+      "id": "280",
+      "name": "Ramakrishna Ghosh",
+      "reason": "No Cricbuzz id found in IPL all-time/current stat rows"
+    },
+    {
+      "id": "285",
+      "name": "Tripurana Vijay",
+      "reason": "No Cricbuzz id found in IPL all-time/current stat rows"
+    },
+    {
+      "id": "293",
+      "name": "Raghu Sharma",
+      "reason": "No Cricbuzz id found in IPL all-time/current stat rows"
+    },
+    {
+      "id": "298",
+      "name": "Praful Hinge",
+      "reason": "No Cricbuzz id found in IPL all-time/current stat rows"
+    },
+    {
+      "id": "300",
+      "name": "Jack Edwards",
+      "reason": "No Cricbuzz id found in IPL all-time/current stat rows"
+    },
+    {
+      "id": "303",
+      "name": "Jaydev Unadkat",
+      "reason": "No Cricbuzz id found in IPL all-time/current stat rows"
+    },
+    {
+      "id": "305",
+      "name": "Zeeshan Ansari",
+      "reason": "No Cricbuzz id found in IPL all-time/current stat rows"
+    },
+    {
+      "id": "307",
+      "name": "Tom Banton",
+      "reason": "No Cricbuzz id found in IPL all-time/current stat rows"
+    },
+    {
+      "id": "308",
+      "name": "Mitchell Owen",
+      "reason": "No Cricbuzz id found in IPL all-time/current stat rows"
+    },
+    {
+      "id": "309",
+      "name": "Vishal Nishad",
+      "reason": "No Cricbuzz id found in IPL all-time/current stat rows"
+    },
+    {
+      "id": "310",
+      "name": "Ben Dwarshuis",
+      "reason": "No Cricbuzz id found in IPL all-time/current stat rows"
+    },
+    {
+      "id": "313",
+      "name": "Blessing Muzarabani",
+      "reason": "No Cricbuzz id found in IPL all-time/current stat rows"
+    },
+    {
+      "id": "321",
+      "name": "Kulwant Khejroliya",
+      "reason": "No Cricbuzz id found in IPL all-time/current stat rows"
+    },
+    {
+      "id": "322",
+      "name": "Navdeep Saini",
+      "reason": "No Cricbuzz id found in IPL all-time/current stat rows"
+    },
+    {
+      "id": "324",
+      "name": "Dilshan Madushanka",
+      "reason": "No Cricbuzz id found in IPL all-time/current stat rows"
+    }
+  ],
+  "profileFailuresDetail": []
+}
