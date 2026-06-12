@@ -1,0 +1,7228 @@
+{
+  "generatedAt": "2026-06-12T05:33:10.577Z",
+  "sources": {
+    "officialBase": "https://scores.iplt20.com/ipl/feeds/stats/",
+    "battingFeeds": [
+      "toprunsscorers",
+      "mostfours",
+      "mostsixes",
+      "mostfifties",
+      "mostcenturies",
+      "highestaverages",
+      "higheststrikeratetournament",
+      "highestindividualscorers"
+    ],
+    "bowlingFeeds": [
+      "mostwickets",
+      "bestaverages",
+      "besteconomyrates",
+      "beststrikeratestournament",
+      "mostdotballsbowledtournament",
+      "mostmaidenoversbowledtournament",
+      "mosthattricks"
+    ]
+  },
+  "totals": {
+    "players": 264,
+    "matchedBatting": 191,
+    "matchedBowling": 156,
+    "matchedAny": 232,
+    "changed": 263,
+    "unchangedMatched": 1,
+    "unmatched": 32
+  },
+  "changedPlayers": [
+    {
+      "id": "2",
+      "name": "Matheesha Pathirana",
+      "teamId": "9",
+      "role": "Bowler",
+      "sourceNames": {
+        "batting": null,
+        "bowling": "Matheesha Pathirana"
+      },
+      "before": {
+        "matches": 32,
+        "runs": 0,
+        "wickets": 47,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": "8.68"
+      },
+      "after": {
+        "matches": 33,
+        "runs": 0,
+        "wickets": 47,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": 8.66
+      }
+    },
+    {
+      "id": "6",
+      "name": "Mustafizur Rahman",
+      "teamId": "",
+      "role": "Bowler",
+      "sourceNames": {
+        "batting": "Mustafizur Rahman",
+        "bowling": "Mustafizur Rahman"
+      },
+      "before": {
+        "matches": 0,
+        "runs": 0,
+        "wickets": 0,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": 0
+      },
+      "after": {
+        "matches": 60,
+        "runs": 13,
+        "wickets": 65,
+        "average": 6.5,
+        "strikeRate": 54.17,
+        "economy": 8.13
+      }
+    },
+    {
+      "id": "7",
+      "name": "Josh Inglis",
+      "teamId": "7",
+      "role": "Wicket-keeper",
+      "sourceNames": {
+        "batting": "Josh Inglis",
+        "bowling": null
+      },
+      "before": {
+        "matches": 0,
+        "runs": 0,
+        "wickets": 0,
+        "average": 30.89,
+        "strikeRate": 162.58,
+        "economy": 0
+      },
+      "after": {
+        "matches": 16,
+        "runs": 544,
+        "wickets": 0,
+        "average": 38.86,
+        "strikeRate": 173.25,
+        "economy": 0
+      }
+    },
+    {
+      "id": "8",
+      "name": "Auqib Nabi",
+      "teamId": "6",
+      "role": "All-rounder",
+      "sourceNames": {
+        "batting": "Auqib Nabi",
+        "bowling": null
+      },
+      "before": {
+        "matches": 0,
+        "runs": 0,
+        "wickets": 0,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": 0
+      },
+      "after": {
+        "matches": 5,
+        "runs": 14,
+        "wickets": 0,
+        "average": 14,
+        "strikeRate": 350,
+        "economy": 0
+      }
+    },
+    {
+      "id": "9",
+      "name": "Ravi Bishnoi",
+      "teamId": "8",
+      "role": "Bowler",
+      "sourceNames": {
+        "batting": "Ravi Bishnoi",
+        "bowling": "Ravi Bishnoi"
+      },
+      "before": {
+        "matches": 78,
+        "runs": 45,
+        "wickets": 73,
+        "average": 4.5,
+        "strikeRate": 68.19,
+        "economy": "8.19"
+      },
+      "after": {
+        "matches": 86,
+        "runs": 45,
+        "wickets": 83,
+        "average": 3.75,
+        "strikeRate": 65.22,
+        "economy": 8.37
+      }
+    },
+    {
+      "id": "10",
+      "name": "Venkatesh Iyer",
+      "teamId": "1",
+      "role": "All-rounder",
+      "sourceNames": {
+        "batting": "Venkatesh Iyer",
+        "bowling": "Venkatesh Iyer"
+      },
+      "before": {
+        "matches": 68,
+        "runs": 1677,
+        "wickets": 3,
+        "average": 31.641509433962263,
+        "strikeRate": 141.9983065198984,
+        "economy": 10.592592592592593
+      },
+      "after": {
+        "matches": 69,
+        "runs": 1677,
+        "wickets": 3,
+        "average": 31.64,
+        "strikeRate": 142,
+        "economy": 10.59
+      }
+    },
+    {
+      "id": "11",
+      "name": "Jason Holder",
+      "teamId": "4",
+      "role": "All-rounder",
+      "sourceNames": {
+        "batting": "Jason Holder",
+        "bowling": "Jason Holder"
+      },
+      "before": {
+        "matches": 46,
+        "runs": 259,
+        "wickets": 53,
+        "average": 12.33,
+        "strikeRate": 123.34,
+        "economy": "8.81"
+      },
+      "after": {
+        "matches": 57,
+        "runs": 324,
+        "wickets": 70,
+        "average": 12.46,
+        "strikeRate": 123.19,
+        "economy": 8.58
+      }
+    },
+    {
+      "id": "12",
+      "name": "Mangesh Yadav",
+      "teamId": "1",
+      "role": "All-rounder",
+      "sourceNames": {
+        "batting": null,
+        "bowling": null
+      },
+      "before": {
+        "matches": 0,
+        "runs": 0,
+        "wickets": 0,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": 0
+      },
+      "after": {
+        "matches": 0,
+        "runs": 0,
+        "wickets": 0,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": 0
+      }
+    },
+    {
+      "id": "13",
+      "name": "Rahul Chahar",
+      "teamId": "10",
+      "role": "Bowler",
+      "sourceNames": {
+        "batting": "Rahul Chahar",
+        "bowling": "Rahul Chahar"
+      },
+      "before": {
+        "matches": 79,
+        "runs": 129,
+        "wickets": 75,
+        "average": 8.06,
+        "strikeRate": 104.04,
+        "economy": 7.72
+      },
+      "after": {
+        "matches": 80,
+        "runs": 129,
+        "wickets": 75,
+        "average": 8.06,
+        "strikeRate": 104.03,
+        "economy": 7.78
+      }
+    },
+    {
+      "id": "14",
+      "name": "Pathum Nissanka",
+      "teamId": "6",
+      "role": "Batsman",
+      "sourceNames": {
+        "batting": "Pathum Nissanka",
+        "bowling": null
+      },
+      "before": {
+        "matches": 0,
+        "runs": 0,
+        "wickets": 0,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": 0
+      },
+      "after": {
+        "matches": 10,
+        "runs": 278,
+        "wickets": 0,
+        "average": 27.8,
+        "strikeRate": 158.86,
+        "economy": 0
+      }
+    },
+    {
+      "id": "15",
+      "name": "Tejasvi Singh",
+      "teamId": "9",
+      "role": "Wicket-keeper",
+      "sourceNames": {
+        "batting": "Tejasvi Singh",
+        "bowling": null
+      },
+      "before": {
+        "matches": 0,
+        "runs": 0,
+        "wickets": 0,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": 0
+      },
+      "after": {
+        "matches": 2,
+        "runs": 12,
+        "wickets": 0,
+        "average": 6,
+        "strikeRate": 80,
+        "economy": 0
+      }
+    },
+    {
+      "id": "16",
+      "name": "Cooper Connolly",
+      "teamId": "5",
+      "role": "All-rounder",
+      "sourceNames": {
+        "batting": "Cooper Connolly",
+        "bowling": null
+      },
+      "before": {
+        "matches": 0,
+        "runs": 0,
+        "wickets": 0,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": 0
+      },
+      "after": {
+        "matches": 14,
+        "runs": 491,
+        "wickets": 0,
+        "average": 44.64,
+        "strikeRate": 163.12,
+        "economy": 0
+      }
+    },
+    {
+      "id": "17",
+      "name": "Mukul Choudhary",
+      "teamId": "7",
+      "role": "Wicket-keeper",
+      "sourceNames": {
+        "batting": "Mukul Choudhary",
+        "bowling": null
+      },
+      "before": {
+        "matches": 0,
+        "runs": 0,
+        "wickets": 0,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": 0
+      },
+      "after": {
+        "matches": 10,
+        "runs": 170,
+        "wickets": 0,
+        "average": 28.33,
+        "strikeRate": 141.67,
+        "economy": 0
+      }
+    },
+    {
+      "id": "18",
+      "name": "Adam Milne",
+      "teamId": "8",
+      "role": "Bowler",
+      "sourceNames": {
+        "batting": "Adam Milne",
+        "bowling": "Adam Milne"
+      },
+      "before": {
+        "matches": 10,
+        "runs": 23,
+        "wickets": 7,
+        "average": 5.75,
+        "strikeRate": 79.32,
+        "economy": "9.48"
+      },
+      "after": {
+        "matches": 11,
+        "runs": 25,
+        "wickets": 7,
+        "average": 6.25,
+        "strikeRate": 80.65,
+        "economy": 9.73
+      }
+    },
+    {
+      "id": "19",
+      "name": "Akshat Raghuwanshi",
+      "teamId": "7",
+      "role": "Batsman",
+      "sourceNames": {
+        "batting": "Akshat Raghuwanshi",
+        "bowling": null
+      },
+      "before": {
+        "matches": 0,
+        "runs": 0,
+        "wickets": 0,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": 0
+      },
+      "after": {
+        "matches": 3,
+        "runs": 29,
+        "wickets": 0,
+        "average": 14.5,
+        "strikeRate": 116,
+        "economy": 0
+      }
+    },
+    {
+      "id": "20",
+      "name": "Rachin Ravindra",
+      "teamId": "9",
+      "role": "All-rounder",
+      "sourceNames": {
+        "batting": "Rachin Ravindra",
+        "bowling": null
+      },
+      "before": {
+        "matches": 18,
+        "runs": 413,
+        "wickets": 0,
+        "average": 24.29,
+        "strikeRate": 143.91,
+        "economy": "3.5"
+      },
+      "after": {
+        "matches": 18,
+        "runs": 413,
+        "wickets": 0,
+        "average": 24.29,
+        "strikeRate": 143.9,
+        "economy": "3.5"
+      }
+    },
+    {
+      "id": "21",
+      "name": "David Miller",
+      "teamId": "6",
+      "role": "Batsman",
+      "sourceNames": {
+        "batting": "David Miller",
+        "bowling": null
+      },
+      "before": {
+        "matches": 141,
+        "runs": 3077,
+        "wickets": 0,
+        "average": 35.78,
+        "strikeRate": 138.61,
+        "economy": 0
+      },
+      "after": {
+        "matches": 152,
+        "runs": 3288,
+        "wickets": 0,
+        "average": 35.74,
+        "strikeRate": 139.5,
+        "economy": 0
+      }
+    },
+    {
+      "id": "22",
+      "name": "Wanindu Hasaranga",
+      "teamId": "",
+      "role": "All-rounder",
+      "sourceNames": {
+        "batting": "Wanindu Hasaranga",
+        "bowling": "Wanindu Hasaranga"
+      },
+      "before": {
+        "matches": 37,
+        "runs": 81,
+        "wickets": 46,
+        "average": 5.4,
+        "strikeRate": 92.05,
+        "economy": 8.41
+      },
+      "after": {
+        "matches": 37,
+        "runs": 81,
+        "wickets": 46,
+        "average": 5.4,
+        "strikeRate": 92.05,
+        "economy": 8.41
+      }
+    },
+    {
+      "id": "23",
+      "name": "Anrich Nortje",
+      "teamId": "7",
+      "role": "Bowler",
+      "sourceNames": {
+        "batting": "Anrich Nortje",
+        "bowling": "Anrich Nortje"
+      },
+      "before": {
+        "matches": 48,
+        "runs": 49,
+        "wickets": 61,
+        "average": 8.17,
+        "strikeRate": 100,
+        "economy": "9.07"
+      },
+      "after": {
+        "matches": 49,
+        "runs": 49,
+        "wickets": 61,
+        "average": 7,
+        "strikeRate": 98,
+        "economy": 9.09
+      }
+    },
+    {
+      "id": "24",
+      "name": "Kyle Jamieson",
+      "teamId": "6",
+      "role": "Bowler",
+      "sourceNames": {
+        "batting": "Kyle Jamieson",
+        "bowling": "Kyle Jamieson"
+      },
+      "before": {
+        "matches": 13,
+        "runs": 65,
+        "wickets": 14,
+        "average": 16.25,
+        "strikeRate": 108.34,
+        "economy": "9.67"
+      },
+      "after": {
+        "matches": 15,
+        "runs": 77,
+        "wickets": 16,
+        "average": 15.4,
+        "strikeRate": 105.48,
+        "economy": 10.12
+      }
+    },
+    {
+      "id": "25",
+      "name": "Lungi Ngidi",
+      "teamId": "6",
+      "role": "Bowler",
+      "sourceNames": {
+        "batting": null,
+        "bowling": null
+      },
+      "before": {
+        "matches": 16,
+        "runs": 0,
+        "wickets": 29,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": "8.53"
+      },
+      "after": {
+        "matches": 16,
+        "runs": 0,
+        "wickets": 29,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": "8.53"
+      }
+    },
+    {
+      "id": "26",
+      "name": "Ben Duckett",
+      "teamId": "6",
+      "role": "Batsman",
+      "sourceNames": {
+        "batting": null,
+        "bowling": null
+      },
+      "before": {
+        "matches": 0,
+        "runs": 0,
+        "wickets": 0,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": 0
+      },
+      "after": {
+        "matches": 0,
+        "runs": 0,
+        "wickets": 0,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": 0
+      }
+    },
+    {
+      "id": "27",
+      "name": "Matt Henry",
+      "teamId": "10",
+      "role": "Bowler",
+      "sourceNames": {
+        "batting": "Matt Henry",
+        "bowling": "Matt Henry"
+      },
+      "before": {
+        "matches": 7,
+        "runs": 5,
+        "wickets": 2,
+        "average": 5,
+        "strikeRate": 71.42857142857143,
+        "economy": "10.15"
+      },
+      "after": {
+        "matches": 9,
+        "runs": 7,
+        "wickets": 4,
+        "average": 3.5,
+        "strikeRate": 70,
+        "economy": 11.52
+      }
+    },
+    {
+      "id": "28",
+      "name": "Akeal Hosein",
+      "teamId": "10",
+      "role": "Bowler",
+      "sourceNames": {
+        "batting": "Akeal Hosein",
+        "bowling": "Akeal Hosein"
+      },
+      "before": {
+        "matches": 1,
+        "runs": 16,
+        "wickets": 1,
+        "average": 0,
+        "strikeRate": 160,
+        "economy": 10
+      },
+      "after": {
+        "matches": 8,
+        "runs": 21,
+        "wickets": 9,
+        "average": 0,
+        "strikeRate": 161.54,
+        "economy": 8.3
+      }
+    },
+    {
+      "id": "29",
+      "name": "Finn Allen",
+      "teamId": "9",
+      "role": "Batsman",
+      "sourceNames": {
+        "batting": "Finn Allen",
+        "bowling": null
+      },
+      "before": {
+        "matches": 1,
+        "runs": 37,
+        "wickets": 0,
+        "average": 37,
+        "strikeRate": 217.64705882352942,
+        "economy": 0
+      },
+      "after": {
+        "matches": 11,
+        "runs": 349,
+        "wickets": 0,
+        "average": 34.9,
+        "strikeRate": 214.11,
+        "economy": 0
+      }
+    },
+    {
+      "id": "30",
+      "name": "Jacob Duffy",
+      "teamId": "1",
+      "role": "Bowler",
+      "sourceNames": {
+        "batting": null,
+        "bowling": "Jacob Duffy"
+      },
+      "before": {
+        "matches": 6,
+        "runs": 0,
+        "wickets": 9,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": 10.958333333333334
+      },
+      "after": {
+        "matches": 6,
+        "runs": 0,
+        "wickets": 9,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": 10.96
+      }
+    },
+    {
+      "id": "31",
+      "name": "Salil Arora",
+      "teamId": "3",
+      "role": "Wicket-keeper",
+      "sourceNames": {
+        "batting": "Salil Arora",
+        "bowling": null
+      },
+      "before": {
+        "matches": 1,
+        "runs": 9,
+        "wickets": 0,
+        "average": 9,
+        "strikeRate": 150,
+        "economy": 0
+      },
+      "after": {
+        "matches": 14,
+        "runs": 156,
+        "wickets": 0,
+        "average": 22.29,
+        "strikeRate": 159.18,
+        "economy": 0
+      }
+    },
+    {
+      "id": "33",
+      "name": "Tim Seifert",
+      "teamId": "9",
+      "role": "Wicket-keeper",
+      "sourceNames": {
+        "batting": "Tim Seifert",
+        "bowling": null
+      },
+      "before": {
+        "matches": 3,
+        "runs": 26,
+        "wickets": 0,
+        "average": 8.67,
+        "strikeRate": 113.05,
+        "economy": 0
+      },
+      "after": {
+        "matches": 6,
+        "runs": 45,
+        "wickets": 0,
+        "average": 7.5,
+        "strikeRate": 109.76,
+        "economy": 0
+      }
+    },
+    {
+      "id": "35",
+      "name": "Akash Deep",
+      "teamId": "",
+      "role": "Bowler",
+      "sourceNames": {
+        "batting": "Akash Deep",
+        "bowling": "Akash Deep"
+      },
+      "before": {
+        "matches": 14,
+        "runs": 25,
+        "wickets": 10,
+        "average": 8.33,
+        "strikeRate": 178.58,
+        "economy": 11.83
+      },
+      "after": {
+        "matches": 14,
+        "runs": 25,
+        "wickets": 10,
+        "average": 8.33,
+        "strikeRate": 178.57,
+        "economy": 11.83
+      }
+    },
+    {
+      "id": "36",
+      "name": "Quinton de Kock",
+      "teamId": "2",
+      "role": "Wicket-keeper",
+      "sourceNames": {
+        "batting": "Quinton de Kock",
+        "bowling": null
+      },
+      "before": {
+        "matches": 115,
+        "runs": 3309,
+        "wickets": 0,
+        "average": 30.64,
+        "strikeRate": 134.03,
+        "economy": 0
+      },
+      "after": {
+        "matches": 118,
+        "runs": 3441,
+        "wickets": 0,
+        "average": 31.28,
+        "strikeRate": 134.94,
+        "economy": 0
+      }
+    },
+    {
+      "id": "37",
+      "name": "Naman Tiwari",
+      "teamId": "7",
+      "role": "Bowler",
+      "sourceNames": {
+        "batting": null,
+        "bowling": null
+      },
+      "before": {
+        "matches": 0,
+        "runs": 0,
+        "wickets": 0,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": 0
+      },
+      "after": {
+        "matches": 0,
+        "runs": 0,
+        "wickets": 0,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": 0
+      }
+    },
+    {
+      "id": "38",
+      "name": "Ravi Singh",
+      "teamId": "8",
+      "role": "Wicket-keeper",
+      "sourceNames": {
+        "batting": "Ravi Singh",
+        "bowling": null
+      },
+      "before": {
+        "matches": 0,
+        "runs": 0,
+        "wickets": 0,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": 0
+      },
+      "after": {
+        "matches": 1,
+        "runs": 4,
+        "wickets": 0,
+        "average": 4,
+        "strikeRate": 200,
+        "economy": 0
+      }
+    },
+    {
+      "id": "39",
+      "name": "Ashok Sharma",
+      "teamId": "4",
+      "role": "Bowler",
+      "sourceNames": {
+        "batting": null,
+        "bowling": "Ashok Sharma"
+      },
+      "before": {
+        "matches": 0,
+        "runs": 0,
+        "wickets": 0,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": 0
+      },
+      "after": {
+        "matches": 6,
+        "runs": 0,
+        "wickets": 6,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": 10.86
+      }
+    },
+    {
+      "id": "40",
+      "name": "Sushant Mishra",
+      "teamId": "8",
+      "role": "Bowler",
+      "sourceNames": {
+        "batting": null,
+        "bowling": "Sushant Mishra"
+      },
+      "before": {
+        "matches": 0,
+        "runs": 0,
+        "wickets": 0,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": 0
+      },
+      "after": {
+        "matches": 2,
+        "runs": 0,
+        "wickets": 2,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": 10.58
+      }
+    },
+    {
+      "id": "41",
+      "name": "Sarfaraz Khan",
+      "teamId": "10",
+      "role": "Batsman",
+      "sourceNames": {
+        "batting": "Sarfaraz Khan",
+        "bowling": null
+      },
+      "before": {
+        "matches": 51,
+        "runs": 602,
+        "wickets": 0,
+        "average": 22.5,
+        "strikeRate": 130.59,
+        "economy": 18
+      },
+      "after": {
+        "matches": 58,
+        "runs": 746,
+        "wickets": 0,
+        "average": 22.61,
+        "strikeRate": 137.38,
+        "economy": 18
+      }
+    },
+    {
+      "id": "42",
+      "name": "Prithvi Shaw",
+      "teamId": "6",
+      "role": "Batsman",
+      "sourceNames": {
+        "batting": "Prithvi Shaw",
+        "bowling": null
+      },
+      "before": {
+        "matches": 79,
+        "runs": 1892,
+        "wickets": 0,
+        "average": 23.95,
+        "strikeRate": 147.47,
+        "economy": 0
+      },
+      "after": {
+        "matches": 79,
+        "runs": 1892,
+        "wickets": 0,
+        "average": 23.95,
+        "strikeRate": 147.47,
+        "economy": 0
+      }
+    },
+    {
+      "id": "43",
+      "name": "Rahul Tripathi",
+      "teamId": "9",
+      "role": "Batsman",
+      "sourceNames": {
+        "batting": "Rahul Tripathi",
+        "bowling": null
+      },
+      "before": {
+        "matches": 100,
+        "runs": 2291,
+        "wickets": 0,
+        "average": 26.03,
+        "strikeRate": 137.85,
+        "economy": "12"
+      },
+      "after": {
+        "matches": 100,
+        "runs": 2291,
+        "wickets": 0,
+        "average": 26.33,
+        "strikeRate": 137.85,
+        "economy": "12"
+      }
+    },
+    {
+      "id": "44",
+      "name": "Zak Foulkes",
+      "teamId": "10",
+      "role": "All-rounder",
+      "sourceNames": {
+        "batting": null,
+        "bowling": null
+      },
+      "before": {
+        "matches": 0,
+        "runs": 0,
+        "wickets": 0,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": 0
+      },
+      "after": {
+        "matches": 0,
+        "runs": 0,
+        "wickets": 0,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": 0
+      }
+    },
+    {
+      "id": "45",
+      "name": "Luke Wood",
+      "teamId": "4",
+      "role": "Bowler",
+      "sourceNames": {
+        "batting": "Luke Wood",
+        "bowling": "Luke Wood"
+      },
+      "before": {
+        "matches": 2,
+        "runs": 9,
+        "wickets": 1,
+        "average": 0,
+        "strikeRate": 300,
+        "economy": "15.5"
+      },
+      "after": {
+        "matches": 2,
+        "runs": 9,
+        "wickets": 1,
+        "average": 0,
+        "strikeRate": 300,
+        "economy": 15.5
+      }
+    },
+    {
+      "id": "46",
+      "name": "Shivam Mavi",
+      "teamId": "3",
+      "role": "Bowler",
+      "sourceNames": {
+        "batting": "Shivam Mavi",
+        "bowling": "Shivam Mavi"
+      },
+      "before": {
+        "matches": 32,
+        "runs": 51,
+        "wickets": 30,
+        "average": 5.67,
+        "strikeRate": 91.08,
+        "economy": "8.71"
+      },
+      "after": {
+        "matches": 32,
+        "runs": 51,
+        "wickets": 30,
+        "average": 5.67,
+        "strikeRate": 91.07,
+        "economy": 8.71
+      }
+    },
+    {
+      "id": "48",
+      "name": "Sandeep Sharma",
+      "teamId": "8",
+      "role": "Bowler",
+      "sourceNames": {
+        "batting": "Sandeep Sharma",
+        "bowling": "Sandeep Sharma"
+      },
+      "before": {
+        "matches": 137,
+        "runs": 60,
+        "wickets": 147,
+        "average": 10,
+        "strikeRate": 80,
+        "economy": "8.03"
+      },
+      "after": {
+        "matches": 143,
+        "runs": 60,
+        "wickets": 151,
+        "average": 10,
+        "strikeRate": 81.08,
+        "economy": 8.16
+      }
+    },
+    {
+      "id": "49",
+      "name": "Aman Khan",
+      "teamId": "",
+      "role": "All-rounder",
+      "sourceNames": {
+        "batting": "Aman Khan",
+        "bowling": null
+      },
+      "before": {
+        "matches": 12,
+        "runs": 115,
+        "wickets": 0,
+        "average": 12.78,
+        "strikeRate": 110.58,
+        "economy": 13
+      },
+      "after": {
+        "matches": 12,
+        "runs": 115,
+        "wickets": 0,
+        "average": 12.78,
+        "strikeRate": 110.58,
+        "economy": 13
+      }
+    },
+    {
+      "id": "50",
+      "name": "Daksh Kamra",
+      "teamId": "9",
+      "role": "All-rounder",
+      "sourceNames": {
+        "batting": null,
+        "bowling": null
+      },
+      "before": {
+        "matches": 0,
+        "runs": 0,
+        "wickets": 0,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": 0
+      },
+      "after": {
+        "matches": 0,
+        "runs": 0,
+        "wickets": 0,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": 0
+      }
+    },
+    {
+      "id": "51",
+      "name": "Sarthak Ranjan",
+      "teamId": "9",
+      "role": "Batsman",
+      "sourceNames": {
+        "batting": null,
+        "bowling": null
+      },
+      "before": {
+        "matches": 0,
+        "runs": 0,
+        "wickets": 0,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": 0
+      },
+      "after": {
+        "matches": 0,
+        "runs": 0,
+        "wickets": 0,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": 0
+      }
+    },
+    {
+      "id": "52",
+      "name": "Krains Fuletra",
+      "teamId": "3",
+      "role": "Bowler",
+      "sourceNames": {
+        "batting": null,
+        "bowling": null
+      },
+      "before": {
+        "matches": 0,
+        "runs": 0,
+        "wickets": 0,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": 0
+      },
+      "after": {
+        "matches": 0,
+        "runs": 0,
+        "wickets": 0,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": 0
+      }
+    },
+    {
+      "id": "54",
+      "name": "Atharva Ankolekar",
+      "teamId": "",
+      "role": "All-rounder",
+      "sourceNames": {
+        "batting": null,
+        "bowling": null
+      },
+      "before": {
+        "matches": 0,
+        "runs": 0,
+        "wickets": 0,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": 0
+      },
+      "after": {
+        "matches": 0,
+        "runs": 0,
+        "wickets": 0,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": 0
+      }
+    },
+    {
+      "id": "55",
+      "name": "Amit Kumar",
+      "teamId": "3",
+      "role": "Bowler",
+      "sourceNames": {
+        "batting": null,
+        "bowling": null
+      },
+      "before": {
+        "matches": 0,
+        "runs": 0,
+        "wickets": 0,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": 0
+      },
+      "after": {
+        "matches": 0,
+        "runs": 0,
+        "wickets": 0,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": 0
+      }
+    },
+    {
+      "id": "56",
+      "name": "Onkar Tarmale",
+      "teamId": "3",
+      "role": "Bowler",
+      "sourceNames": {
+        "batting": null,
+        "bowling": null
+      },
+      "before": {
+        "matches": 0,
+        "runs": 0,
+        "wickets": 0,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": 0
+      },
+      "after": {
+        "matches": 0,
+        "runs": 0,
+        "wickets": 0,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": 0
+      }
+    },
+    {
+      "id": "57",
+      "name": "Mohammed Salahuddin Izhar",
+      "teamId": "2",
+      "role": "Bowler",
+      "sourceNames": {
+        "batting": null,
+        "bowling": null
+      },
+      "before": {
+        "matches": 0,
+        "runs": 0,
+        "wickets": 0,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": 0
+      },
+      "after": {
+        "matches": 0,
+        "runs": 0,
+        "wickets": 0,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": 0
+      }
+    },
+    {
+      "id": "59",
+      "name": "Satvik Deswal",
+      "teamId": "1",
+      "role": "All-rounder",
+      "sourceNames": {
+        "batting": null,
+        "bowling": null
+      },
+      "before": {
+        "matches": 0,
+        "runs": 0,
+        "wickets": 0,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": 0
+      },
+      "after": {
+        "matches": 0,
+        "runs": 0,
+        "wickets": 0,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": 0
+      }
+    },
+    {
+      "id": "60",
+      "name": "Danish Malewar",
+      "teamId": "2",
+      "role": "All-rounder",
+      "sourceNames": {
+        "batting": null,
+        "bowling": null
+      },
+      "before": {
+        "matches": 0,
+        "runs": 0,
+        "wickets": 0,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": 0
+      },
+      "after": {
+        "matches": 0,
+        "runs": 0,
+        "wickets": 0,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": 0
+      }
+    },
+    {
+      "id": "61",
+      "name": "Vignesh Puthur",
+      "teamId": "8",
+      "role": "Bowler",
+      "sourceNames": {
+        "batting": null,
+        "bowling": "Vignesh Puthur"
+      },
+      "before": {
+        "matches": 5,
+        "runs": 0,
+        "wickets": 6,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": "9.08"
+      },
+      "after": {
+        "matches": 5,
+        "runs": 0,
+        "wickets": 6,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": 9.08
+      }
+    },
+    {
+      "id": "62",
+      "name": "Prashant Solanki",
+      "teamId": "9",
+      "role": "Bowler",
+      "sourceNames": {
+        "batting": null,
+        "bowling": "Prashant Solanki"
+      },
+      "before": {
+        "matches": 2,
+        "runs": 0,
+        "wickets": 2,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": "6.33"
+      },
+      "after": {
+        "matches": 2,
+        "runs": 0,
+        "wickets": 2,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": 6.33
+      }
+    },
+    {
+      "id": "63",
+      "name": "Yash Raj Punja",
+      "teamId": "8",
+      "role": "Bowler",
+      "sourceNames": {
+        "batting": null,
+        "bowling": "Yash Raj Punja"
+      },
+      "before": {
+        "matches": 0,
+        "runs": 0,
+        "wickets": 0,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": 0
+      },
+      "after": {
+        "matches": 8,
+        "runs": 0,
+        "wickets": 9,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": 9.3
+      }
+    },
+    {
+      "id": "64",
+      "name": "Kartik Tyagi",
+      "teamId": "9",
+      "role": "Bowler",
+      "sourceNames": {
+        "batting": "Kartik Tyagi",
+        "bowling": "Kartik Tyagi"
+      },
+      "before": {
+        "matches": 21,
+        "runs": 13,
+        "wickets": 16,
+        "average": 3.25,
+        "strikeRate": 81.25,
+        "economy": "9.65"
+      },
+      "after": {
+        "matches": 34,
+        "runs": 24,
+        "wickets": 33,
+        "average": 3.43,
+        "strikeRate": 92.31,
+        "economy": 9.98
+      }
+    },
+    {
+      "id": "67",
+      "name": "Prithviraj Yarra",
+      "teamId": "",
+      "role": "Bowler",
+      "sourceNames": {
+        "batting": null,
+        "bowling": "Prithvi Raj Yarra"
+      },
+      "before": {
+        "matches": 2,
+        "runs": 0,
+        "wickets": 1,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": 11.4
+      },
+      "after": {
+        "matches": 2,
+        "runs": 0,
+        "wickets": 1,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": 11.4
+      }
+    },
+    {
+      "id": "68",
+      "name": "Mayank Rawat",
+      "teamId": "2",
+      "role": "All-rounder",
+      "sourceNames": {
+        "batting": null,
+        "bowling": null
+      },
+      "before": {
+        "matches": 0,
+        "runs": 0,
+        "wickets": 0,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": 0
+      },
+      "after": {
+        "matches": 0,
+        "runs": 0,
+        "wickets": 0,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": 0
+      }
+    },
+    {
+      "id": "70",
+      "name": "Aman Rao Perala",
+      "teamId": "8",
+      "role": "Batsman",
+      "sourceNames": {
+        "batting": null,
+        "bowling": null
+      },
+      "before": {
+        "matches": 0,
+        "runs": 0,
+        "wickets": 0,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": 0
+      },
+      "after": {
+        "matches": 0,
+        "runs": 0,
+        "wickets": 0,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": 0
+      }
+    },
+    {
+      "id": "71",
+      "name": "Jordan Cox",
+      "teamId": "1",
+      "role": "Wicket-keeper",
+      "sourceNames": {
+        "batting": null,
+        "bowling": null
+      },
+      "before": {
+        "matches": 0,
+        "runs": 0,
+        "wickets": 0,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": 0
+      },
+      "after": {
+        "matches": 0,
+        "runs": 0,
+        "wickets": 0,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": 0
+      }
+    },
+    {
+      "id": "72",
+      "name": "Kanishk Chouhan",
+      "teamId": "1",
+      "role": "Batsman",
+      "sourceNames": {
+        "batting": null,
+        "bowling": null
+      },
+      "before": {
+        "matches": 0,
+        "runs": 0,
+        "wickets": 0,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": 0
+      },
+      "after": {
+        "matches": 0,
+        "runs": 0,
+        "wickets": 0,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": 0
+      }
+    },
+    {
+      "id": "73",
+      "name": "Vihaan Malhotra",
+      "teamId": "1",
+      "role": "Batsman",
+      "sourceNames": {
+        "batting": null,
+        "bowling": null
+      },
+      "before": {
+        "matches": 0,
+        "runs": 0,
+        "wickets": 0,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": 0
+      },
+      "after": {
+        "matches": 0,
+        "runs": 0,
+        "wickets": 0,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": 0
+      }
+    },
+    {
+      "id": "74",
+      "name": "Vicky Ostwal",
+      "teamId": "1",
+      "role": "Bowler",
+      "sourceNames": {
+        "batting": null,
+        "bowling": null
+      },
+      "before": {
+        "matches": 0,
+        "runs": 0,
+        "wickets": 0,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": 0
+      },
+      "after": {
+        "matches": 0,
+        "runs": 0,
+        "wickets": 0,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": 0
+      }
+    },
+    {
+      "id": "78",
+      "name": "Virat Kohli",
+      "teamId": "1",
+      "role": "Batsman",
+      "sourceNames": {
+        "batting": "Virat Kohli",
+        "bowling": "Virat Kohli"
+      },
+      "before": {
+        "matches": 283,
+        "runs": 9336,
+        "wickets": 4,
+        "average": 40.42,
+        "strikeRate": 134.8,
+        "economy": 8.8
+      },
+      "after": {
+        "matches": 283,
+        "runs": 9336,
+        "wickets": 4,
+        "average": 40.42,
+        "strikeRate": 134.8,
+        "economy": 8.8
+      }
+    },
+    {
+      "id": "80",
+      "name": "Yash Dayal",
+      "teamId": "1",
+      "role": "Bowler",
+      "sourceNames": {
+        "batting": null,
+        "bowling": "Yash Dayal"
+      },
+      "before": {
+        "matches": 43,
+        "runs": 4,
+        "wickets": 41,
+        "average": 1.33,
+        "strikeRate": 44.45,
+        "economy": 9.58
+      },
+      "after": {
+        "matches": 43,
+        "runs": 4,
+        "wickets": 41,
+        "average": 1.33,
+        "strikeRate": 44.45,
+        "economy": 9.58
+      }
+    },
+    {
+      "id": "81",
+      "name": "Jasprit Bumrah",
+      "teamId": "2",
+      "role": "Bowler",
+      "sourceNames": {
+        "batting": "Jasprit Bumrah",
+        "bowling": "Jasprit Bumrah"
+      },
+      "before": {
+        "matches": 146,
+        "runs": 68,
+        "wickets": 183,
+        "average": 9.71,
+        "strikeRate": 86.08,
+        "economy": "7.23"
+      },
+      "after": {
+        "matches": 158,
+        "runs": 76,
+        "wickets": 187,
+        "average": 9.5,
+        "strikeRate": 88.37,
+        "economy": 7.34
+      }
+    },
+    {
+      "id": "82",
+      "name": "Suryakumar Yadav",
+      "teamId": "2",
+      "role": "Batsman",
+      "sourceNames": {
+        "batting": "Surya Kumar Yadav",
+        "bowling": null
+      },
+      "before": {
+        "matches": 179,
+        "runs": 4581,
+        "wickets": 0,
+        "average": 33.68382352941177,
+        "strikeRate": 148.5890366526111,
+        "economy": 8
+      },
+      "after": {
+        "matches": 179,
+        "runs": 4581,
+        "wickets": 0,
+        "average": 33.93,
+        "strikeRate": 148.59,
+        "economy": 8
+      }
+    },
+    {
+      "id": "83",
+      "name": "Hardik Pandya",
+      "teamId": "2",
+      "role": "All-rounder",
+      "sourceNames": {
+        "batting": "Hardik Pandya",
+        "bowling": "Hardik Pandya"
+      },
+      "before": {
+        "matches": 153,
+        "runs": 2749,
+        "wickets": 78,
+        "average": 28.34,
+        "strikeRate": 146.93,
+        "economy": "9.19"
+      },
+      "after": {
+        "matches": 162,
+        "runs": 2955,
+        "wickets": 82,
+        "average": 27.88,
+        "strikeRate": 146.29,
+        "economy": 9.36
+      }
+    },
+    {
+      "id": "84",
+      "name": "Rohit Sharma",
+      "teamId": "2",
+      "role": "Batsman",
+      "sourceNames": {
+        "batting": "Rohit Sharma",
+        "bowling": "Rohit Sharma"
+      },
+      "before": {
+        "matches": 281,
+        "runs": 7329,
+        "wickets": 15,
+        "average": 29.79268292682927,
+        "strikeRate": 132.91621327529924,
+        "economy": 8.017699115044248
+      },
+      "after": {
+        "matches": 281,
+        "runs": 7329,
+        "wickets": 15,
+        "average": 29.91,
+        "strikeRate": 132.92,
+        "economy": 8.02
+      }
+    },
+    {
+      "id": "85",
+      "name": "Tilak Varma",
+      "teamId": "2",
+      "role": "Batsman",
+      "sourceNames": {
+        "batting": "Tilak Varma",
+        "bowling": null
+      },
+      "before": {
+        "matches": 68,
+        "runs": 1858,
+        "wickets": 0,
+        "average": 35.73076923076923,
+        "strikeRate": 144.70404984423675,
+        "economy": 7.636363636363637
+      },
+      "after": {
+        "matches": 68,
+        "runs": 1858,
+        "wickets": 0,
+        "average": 35.73,
+        "strikeRate": 144.7,
+        "economy": 7.636363636363637
+      }
+    },
+    {
+      "id": "86",
+      "name": "Heinrich Klaasen",
+      "teamId": "3",
+      "role": "Wicket-keeper",
+      "sourceNames": {
+        "batting": "Heinrich Klaasen",
+        "bowling": null
+      },
+      "before": {
+        "matches": 50,
+        "runs": 1511,
+        "wickets": 0,
+        "average": 40,
+        "strikeRate": 169.73,
+        "economy": 0
+      },
+      "after": {
+        "matches": 64,
+        "runs": 2104,
+        "wickets": 0,
+        "average": 42.08,
+        "strikeRate": 166.72,
+        "economy": 0
+      }
+    },
+    {
+      "id": "88",
+      "name": "Abhishek Sharma",
+      "teamId": "3",
+      "role": "All-rounder",
+      "sourceNames": {
+        "batting": "Abhishek Sharma",
+        "bowling": "Abhishek Sharma"
+      },
+      "before": {
+        "matches": 78,
+        "runs": 1822,
+        "wickets": 11,
+        "average": 27.09,
+        "strikeRate": 162.93,
+        "economy": "8.95"
+      },
+      "after": {
+        "matches": 92,
+        "runs": 2379,
+        "wickets": 11,
+        "average": 29.37,
+        "strikeRate": 171.27,
+        "economy": 9.04
+      }
+    },
+    {
+      "id": "89",
+      "name": "Travis Head",
+      "teamId": "3",
+      "role": "Batsman",
+      "sourceNames": {
+        "batting": "Travis Head",
+        "bowling": "Travis Head"
+      },
+      "before": {
+        "matches": 39,
+        "runs": 1157,
+        "wickets": 2,
+        "average": 34.73,
+        "strikeRate": 170.03,
+        "economy": 11.69
+      },
+      "after": {
+        "matches": 53,
+        "runs": 1556,
+        "wickets": 3,
+        "average": 32.42,
+        "strikeRate": 170.05,
+        "economy": 11.25
+      }
+    },
+    {
+      "id": "90",
+      "name": "Nitish Kumar Reddy",
+      "teamId": "3",
+      "role": "All-rounder",
+      "sourceNames": {
+        "batting": "Nitish Kumar Reddy",
+        "bowling": "Nitish Kumar Reddy"
+      },
+      "before": {
+        "matches": 29,
+        "runs": 486,
+        "wickets": 5,
+        "average": 28.53,
+        "strikeRate": 132.88,
+        "economy": "10.85"
+      },
+      "after": {
+        "matches": 42,
+        "runs": 787,
+        "wickets": 13,
+        "average": 29.15,
+        "strikeRate": 145.47,
+        "economy": 10.65
+      }
+    },
+    {
+      "id": "91",
+      "name": "Ruturaj Gaikwad",
+      "teamId": "10",
+      "role": "Batsman",
+      "sourceNames": {
+        "batting": "Ruturaj Gaikwad",
+        "bowling": null
+      },
+      "before": {
+        "matches": 72,
+        "runs": 2508,
+        "wickets": 0,
+        "average": 40.35,
+        "strikeRate": 137.48,
+        "economy": 0
+      },
+      "after": {
+        "matches": 85,
+        "runs": 2839,
+        "wickets": 0,
+        "average": 38.36,
+        "strikeRate": 135.64,
+        "economy": 0
+      }
+    },
+    {
+      "id": "92",
+      "name": "Ravindra Jadeja",
+      "teamId": "8",
+      "role": "All-rounder",
+      "sourceNames": {
+        "batting": "Ravindra Jadeja",
+        "bowling": "Ravindra Jadeja"
+      },
+      "before": {
+        "matches": 255,
+        "runs": 3260,
+        "wickets": 172,
+        "average": 27.86,
+        "strikeRate": 130.25,
+        "economy": "7.67"
+      },
+      "after": {
+        "matches": 268,
+        "runs": 3526,
+        "wickets": 180,
+        "average": 29.14,
+        "strikeRate": 130.59,
+        "economy": 7.71
+      }
+    },
+    {
+      "id": "93",
+      "name": "Shivam Dube",
+      "teamId": "10",
+      "role": "All-rounder",
+      "sourceNames": {
+        "batting": "Shivam Dube",
+        "bowling": "Shivam Dube"
+      },
+      "before": {
+        "matches": 80,
+        "runs": 1865,
+        "wickets": 5,
+        "average": 30.48,
+        "strikeRate": 143.67,
+        "economy": 10.31
+      },
+      "after": {
+        "matches": 92,
+        "runs": 2129,
+        "wickets": 6,
+        "average": 31.31,
+        "strikeRate": 145.42,
+        "economy": 10.79
+      }
+    },
+    {
+      "id": "94",
+      "name": "MS Dhoni",
+      "teamId": "10",
+      "role": "Wicket-keeper",
+      "sourceNames": {
+        "batting": "MS Dhoni",
+        "bowling": null
+      },
+      "before": {
+        "matches": 278,
+        "runs": 5439,
+        "wickets": 0,
+        "average": 38.3,
+        "strikeRate": 137.46,
+        "economy": 0
+      },
+      "after": {
+        "matches": 278,
+        "runs": 5439,
+        "wickets": 0,
+        "average": 38.3,
+        "strikeRate": 137.45,
+        "economy": 0
+      }
+    },
+    {
+      "id": "95",
+      "name": "Axar Patel",
+      "teamId": "6",
+      "role": "All-rounder",
+      "sourceNames": {
+        "batting": "Axar Patel",
+        "bowling": "Axar Patel"
+      },
+      "before": {
+        "matches": 162,
+        "runs": 1916,
+        "wickets": 128,
+        "average": 22.02,
+        "strikeRate": 133.99,
+        "economy": "7.35"
+      },
+      "after": {
+        "matches": 176,
+        "runs": 2089,
+        "wickets": 139,
+        "average": 21.76,
+        "strikeRate": 133.74,
+        "economy": 7.41
+      }
+    },
+    {
+      "id": "96",
+      "name": "Kuldeep Yadav",
+      "teamId": "6",
+      "role": "Bowler",
+      "sourceNames": {
+        "batting": "Kuldeep Yadav",
+        "bowling": "Kuldeep Yadav"
+      },
+      "before": {
+        "matches": 98,
+        "runs": 201,
+        "wickets": 102,
+        "average": 13.4,
+        "strikeRate": 86.64,
+        "economy": "8.04"
+      },
+      "after": {
+        "matches": 110,
+        "runs": 210,
+        "wickets": 112,
+        "average": 11.67,
+        "strikeRate": 83,
+        "economy": 8.26
+      }
+    },
+    {
+      "id": "97",
+      "name": "Tristan Stubbs",
+      "teamId": "6",
+      "role": "Wicket-keeper",
+      "sourceNames": {
+        "batting": "Tristan Stubbs",
+        "bowling": "Tristan Stubbs"
+      },
+      "before": {
+        "matches": 32,
+        "runs": 705,
+        "wickets": 4,
+        "average": 41.47,
+        "strikeRate": 163.2,
+        "economy": "11.5"
+      },
+      "after": {
+        "matches": 46,
+        "runs": 980,
+        "wickets": 4,
+        "average": 39.2,
+        "strikeRate": 151.23,
+        "economy": 11.5
+      }
+    },
+    {
+      "id": "98",
+      "name": "Abishek Porel",
+      "teamId": "6",
+      "role": "Wicket-keeper",
+      "sourceNames": {
+        "batting": "Abishek Porel",
+        "bowling": null
+      },
+      "before": {
+        "matches": 31,
+        "runs": 661,
+        "wickets": 0,
+        "average": 25.42,
+        "strikeRate": 149.89,
+        "economy": 0
+      },
+      "after": {
+        "matches": 35,
+        "runs": 769,
+        "wickets": 0,
+        "average": 25.63,
+        "strikeRate": 145.37,
+        "economy": 0
+      }
+    },
+    {
+      "id": "99",
+      "name": "Rinku Singh",
+      "teamId": "9",
+      "role": "Batsman",
+      "sourceNames": {
+        "batting": "Rinku Singh",
+        "bowling": null
+      },
+      "before": {
+        "matches": 59,
+        "runs": 1115,
+        "wickets": 0,
+        "average": 30.53,
+        "strikeRate": 145.18,
+        "economy": 0
+      },
+      "after": {
+        "matches": 73,
+        "runs": 1394,
+        "wickets": 0,
+        "average": 34,
+        "strikeRate": 145.97,
+        "economy": 0
+      }
+    },
+    {
+      "id": "100",
+      "name": "Varun Chakaravarthy",
+      "teamId": "9",
+      "role": "Bowler",
+      "sourceNames": {
+        "batting": "Varun Chakaravarthy",
+        "bowling": "Varun Chakaravarthy"
+      },
+      "before": {
+        "matches": 84,
+        "runs": 26,
+        "wickets": 100,
+        "average": 6.5,
+        "strikeRate": 55.32,
+        "economy": "7.54"
+      },
+      "after": {
+        "matches": 95,
+        "runs": 31,
+        "wickets": 111,
+        "average": 5.17,
+        "strikeRate": 58.49,
+        "economy": 7.72
+      }
+    },
+    {
+      "id": "101",
+      "name": "Sunil Narine",
+      "teamId": "9",
+      "role": "All-rounder",
+      "sourceNames": {
+        "batting": "Sunil Narine",
+        "bowling": "Sunil Narine"
+      },
+      "before": {
+        "matches": 189,
+        "runs": 1780,
+        "wickets": 193,
+        "average": 17.62,
+        "strikeRate": 166.52,
+        "economy": "6.78"
+      },
+      "after": {
+        "matches": 202,
+        "runs": 1820,
+        "wickets": 207,
+        "average": 17.5,
+        "strikeRate": 165.3,
+        "economy": 6.79
+      }
+    },
+    {
+      "id": "102",
+      "name": "Andre Russell",
+      "teamId": "",
+      "role": "All-rounder",
+      "sourceNames": {
+        "batting": "Andre Russell",
+        "bowling": "Andre Russell"
+      },
+      "before": {
+        "matches": 139,
+        "runs": 2651,
+        "wickets": 123,
+        "average": 28.2,
+        "strikeRate": 174.18,
+        "economy": "9.51"
+      },
+      "after": {
+        "matches": 140,
+        "runs": 2651,
+        "wickets": 123,
+        "average": 28.2,
+        "strikeRate": 174.18,
+        "economy": 9.51
+      }
+    },
+    {
+      "id": "103",
+      "name": "Harshit Rana",
+      "teamId": "",
+      "role": "Bowler",
+      "sourceNames": {
+        "batting": "Harshit Rana",
+        "bowling": "Harshit Rana"
+      },
+      "before": {
+        "matches": 33,
+        "runs": 59,
+        "wickets": 40,
+        "average": 9.83,
+        "strikeRate": 105.36,
+        "economy": "9.51"
+      },
+      "after": {
+        "matches": 34,
+        "runs": 59,
+        "wickets": 40,
+        "average": 9.83,
+        "strikeRate": 105.36,
+        "economy": 9.51
+      }
+    },
+    {
+      "id": "104",
+      "name": "Ramandeep Singh",
+      "teamId": "9",
+      "role": "All-rounder",
+      "sourceNames": {
+        "batting": "Ramandeep Singh",
+        "bowling": "Ramandeep Singh"
+      },
+      "before": {
+        "matches": 31,
+        "runs": 221,
+        "wickets": 6,
+        "average": 19.73,
+        "strikeRate": 158.4,
+        "economy": "9.45"
+      },
+      "after": {
+        "matches": 39,
+        "runs": 299,
+        "wickets": 7,
+        "average": 18.69,
+        "strikeRate": 145.85,
+        "economy": 10.07
+      }
+    },
+    {
+      "id": "105",
+      "name": "Sanju Samson",
+      "teamId": "10",
+      "role": "Wicket-keeper",
+      "sourceNames": {
+        "batting": "Sanju Samson",
+        "bowling": null
+      },
+      "before": {
+        "matches": 177,
+        "runs": 4710,
+        "wickets": 0,
+        "average": 30.75,
+        "strikeRate": 139.05,
+        "economy": 0
+      },
+      "after": {
+        "matches": 191,
+        "runs": 5181,
+        "wickets": 0,
+        "average": 31.79,
+        "strikeRate": 141.13,
+        "economy": 0
+      }
+    },
+    {
+      "id": "106",
+      "name": "Yashasvi Jaiswal",
+      "teamId": "8",
+      "role": "Batsman",
+      "sourceNames": {
+        "batting": "Yashasvi Jaiswal",
+        "bowling": null
+      },
+      "before": {
+        "matches": 67,
+        "runs": 2204,
+        "wickets": 0,
+        "average": 34.38,
+        "strikeRate": 152.86,
+        "economy": "36.00"
+      },
+      "after": {
+        "matches": 83,
+        "runs": 2593,
+        "wickets": 0,
+        "average": 33.68,
+        "strikeRate": 152.8,
+        "economy": "36.00"
+      }
+    },
+    {
+      "id": "107",
+      "name": "Riyan Parag",
+      "teamId": "8",
+      "role": "All-rounder",
+      "sourceNames": {
+        "batting": "Riyan Parag",
+        "bowling": "Riyan Parag"
+      },
+      "before": {
+        "matches": 84,
+        "runs": 1580,
+        "wickets": 7,
+        "average": 26.1,
+        "strikeRate": 141.85,
+        "economy": 9.7
+      },
+      "after": {
+        "matches": 98,
+        "runs": 1875,
+        "wickets": 9,
+        "average": 25.68,
+        "strikeRate": 144.23,
+        "economy": 9.69
+      }
+    },
+    {
+      "id": "108",
+      "name": "Dhruv Jurel",
+      "teamId": "8",
+      "role": "Wicket-keeper",
+      "sourceNames": {
+        "batting": "Dhruv Jurel",
+        "bowling": null
+      },
+      "before": {
+        "matches": 42,
+        "runs": 698,
+        "wickets": 0,
+        "average": 28.33,
+        "strikeRate": 153.85,
+        "economy": 0
+      },
+      "after": {
+        "matches": 58,
+        "runs": 1195,
+        "wickets": 0,
+        "average": 31.45,
+        "strikeRate": 154.19,
+        "economy": 0
+      }
+    },
+    {
+      "id": "109",
+      "name": "Shimron Hetmyer",
+      "teamId": "8",
+      "role": "Batsman",
+      "sourceNames": {
+        "batting": "Shimron Hetmyer",
+        "bowling": null
+      },
+      "before": {
+        "matches": 86,
+        "runs": 1482,
+        "wickets": 0,
+        "average": 29.06,
+        "strikeRate": 151.85,
+        "economy": 0
+      },
+      "after": {
+        "matches": 94,
+        "runs": 1560,
+        "wickets": 0,
+        "average": 27.37,
+        "strikeRate": 149.28,
+        "economy": 0
+      }
+    },
+    {
+      "id": "110",
+      "name": "Rashid Khan",
+      "teamId": "4",
+      "role": "All-rounder",
+      "sourceNames": {
+        "batting": "Rashid Khan",
+        "bowling": "Rashid Khan"
+      },
+      "before": {
+        "matches": 136,
+        "runs": 585,
+        "wickets": 158,
+        "average": 13.93,
+        "strikeRate": 160.28,
+        "economy": "7.09"
+      },
+      "after": {
+        "matches": 153,
+        "runs": 635,
+        "wickets": 179,
+        "average": 13.8,
+        "strikeRate": 156.4,
+        "economy": 7.28
+      }
+    },
+    {
+      "id": "111",
+      "name": "Shubman Gill",
+      "teamId": "4",
+      "role": "Batsman",
+      "sourceNames": {
+        "batting": "Shubman Gill",
+        "bowling": null
+      },
+      "before": {
+        "matches": 118,
+        "runs": 3866,
+        "wickets": 0,
+        "average": 39.45,
+        "strikeRate": 138.72,
+        "economy": 0
+      },
+      "after": {
+        "matches": 134,
+        "runs": 4598,
+        "wickets": 0,
+        "average": 40.33,
+        "strikeRate": 142.09,
+        "economy": 0
+      }
+    },
+    {
+      "id": "112",
+      "name": "Sai Sudharsan",
+      "teamId": "4",
+      "role": "Batsman",
+      "sourceNames": {
+        "batting": "Sai Sudharsan",
+        "bowling": null
+      },
+      "before": {
+        "matches": 40,
+        "runs": 1793,
+        "wickets": 0,
+        "average": 49.81,
+        "strikeRate": 145.9,
+        "economy": 0
+      },
+      "after": {
+        "matches": 57,
+        "runs": 2515,
+        "wickets": 0,
+        "average": 48.37,
+        "strikeRate": 149.17,
+        "economy": 0
+      }
+    },
+    {
+      "id": "113",
+      "name": "Rahul Tewatia",
+      "teamId": "4",
+      "role": "All-rounder",
+      "sourceNames": {
+        "batting": "Rahul Tewatia",
+        "bowling": "Rahul Tewatia"
+      },
+      "before": {
+        "matches": 108,
+        "runs": 1112,
+        "wickets": 32,
+        "average": 23.17,
+        "strikeRate": 137.12,
+        "economy": "7.91"
+      },
+      "after": {
+        "matches": 124,
+        "runs": 1302,
+        "wickets": 32,
+        "average": 23.67,
+        "strikeRate": 138.07,
+        "economy": 7.91
+      }
+    },
+    {
+      "id": "114",
+      "name": "M Shahrukh Khan",
+      "teamId": "4",
+      "role": "All-rounder",
+      "sourceNames": {
+        "batting": "Shahrukh Khan",
+        "bowling": "Shahrukh Khan"
+      },
+      "before": {
+        "matches": 55,
+        "runs": 732,
+        "wickets": 1,
+        "average": 21.53,
+        "strikeRate": 149.09,
+        "economy": "9.33"
+      },
+      "after": {
+        "matches": 64,
+        "runs": 775,
+        "wickets": 1,
+        "average": 20.39,
+        "strikeRate": 147.9,
+        "economy": 9.33
+      }
+    },
+    {
+      "id": "115",
+      "name": "Nicholas Pooran",
+      "teamId": "7",
+      "role": "Wicket-keeper",
+      "sourceNames": {
+        "batting": "Nicholas Pooran",
+        "bowling": null
+      },
+      "before": {
+        "matches": 90,
+        "runs": 2293,
+        "wickets": 0,
+        "average": 34.22,
+        "strikeRate": 168.98,
+        "economy": 0
+      },
+      "after": {
+        "matches": 104,
+        "runs": 2527,
+        "wickets": 0,
+        "average": 31.59,
+        "strikeRate": 164.09,
+        "economy": 0
+      }
+    },
+    {
+      "id": "116",
+      "name": "Mayank Yadav",
+      "teamId": "7",
+      "role": "Bowler",
+      "sourceNames": {
+        "batting": "Mayank Yadav",
+        "bowling": "Mayank Yadav"
+      },
+      "before": {
+        "matches": 6,
+        "runs": 0,
+        "wickets": 9,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": "9.17"
+      },
+      "after": {
+        "matches": 10,
+        "runs": 5,
+        "wickets": 9,
+        "average": 5,
+        "strikeRate": 100,
+        "economy": 10.15
+      }
+    },
+    {
+      "id": "117",
+      "name": "Mohsin Khan",
+      "teamId": "7",
+      "role": "Bowler",
+      "sourceNames": {
+        "batting": "Mohsin Khan",
+        "bowling": "Mohsin Khan"
+      },
+      "before": {
+        "matches": 24,
+        "runs": 25,
+        "wickets": 27,
+        "average": 8.33,
+        "strikeRate": 104.17,
+        "economy": "8.51"
+      },
+      "after": {
+        "matches": 31,
+        "runs": 25,
+        "wickets": 38,
+        "average": 5,
+        "strikeRate": 89.29,
+        "economy": 8.41
+      }
+    },
+    {
+      "id": "118",
+      "name": "Ayush Badoni",
+      "teamId": "7",
+      "role": "All-rounder",
+      "sourceNames": {
+        "batting": "Ayush Badoni",
+        "bowling": "Ayush Badoni"
+      },
+      "before": {
+        "matches": 56,
+        "runs": 963,
+        "wickets": 4,
+        "average": 26.75,
+        "strikeRate": 138.57,
+        "economy": "8.4"
+      },
+      "after": {
+        "matches": 66,
+        "runs": 1178,
+        "wickets": 4,
+        "average": 25.61,
+        "strikeRate": 140.91,
+        "economy": 9.22
+      }
+    },
+    {
+      "id": "119",
+      "name": "Shashank Singh",
+      "teamId": "5",
+      "role": "All-rounder",
+      "sourceNames": {
+        "batting": "Shashank Singh",
+        "bowling": "Shashank Singh"
+      },
+      "before": {
+        "matches": 41,
+        "runs": 773,
+        "wickets": 1,
+        "average": 40.68,
+        "strikeRate": 157.76,
+        "economy": "10.4"
+      },
+      "after": {
+        "matches": 53,
+        "runs": 905,
+        "wickets": 5,
+        "average": 36.2,
+        "strikeRate": 161.61,
+        "economy": 9.33
+      }
+    },
+    {
+      "id": "120",
+      "name": "Prabhsimran Singh",
+      "teamId": "5",
+      "role": "Wicket-keeper",
+      "sourceNames": {
+        "batting": "Prabhsimran Singh",
+        "bowling": null
+      },
+      "before": {
+        "matches": 51,
+        "runs": 1305,
+        "wickets": 0,
+        "average": 25.59,
+        "strikeRate": 151.93,
+        "economy": 0
+      },
+      "after": {
+        "matches": 65,
+        "runs": 1815,
+        "wickets": 0,
+        "average": 28.81,
+        "strikeRate": 156.33,
+        "economy": 0
+      }
+    },
+    {
+      "id": "121",
+      "name": "Jos Buttler",
+      "teamId": "4",
+      "role": "Wicket-keeper",
+      "sourceNames": {
+        "batting": "Jos Buttler",
+        "bowling": null
+      },
+      "before": {
+        "matches": 121,
+        "runs": 4120,
+        "wickets": 0,
+        "average": 40,
+        "strikeRate": 149.39,
+        "economy": 0
+      },
+      "after": {
+        "matches": 138,
+        "runs": 4646,
+        "wickets": 0,
+        "average": 39.71,
+        "strikeRate": 149.73,
+        "economy": 0
+      }
+    },
+    {
+      "id": "122",
+      "name": "Shreyas Iyer",
+      "teamId": "5",
+      "role": "Batsman",
+      "sourceNames": {
+        "batting": "Shreyas Iyer",
+        "bowling": null
+      },
+      "before": {
+        "matches": 132,
+        "runs": 3731,
+        "wickets": 0,
+        "average": 34.23,
+        "strikeRate": 133.35,
+        "economy": "7"
+      },
+      "after": {
+        "matches": 147,
+        "runs": 4229,
+        "wickets": 0,
+        "average": 35.84,
+        "strikeRate": 136.73,
+        "economy": "7"
+      }
+    },
+    {
+      "id": "123",
+      "name": "Rishabh Pant",
+      "teamId": "7",
+      "role": "Wicket-keeper",
+      "sourceNames": {
+        "batting": "Rishabh Pant",
+        "bowling": null
+      },
+      "before": {
+        "matches": 125,
+        "runs": 3553,
+        "wickets": 0,
+        "average": 34.16,
+        "strikeRate": 147.62,
+        "economy": 0
+      },
+      "after": {
+        "matches": 139,
+        "runs": 3865,
+        "wickets": 0,
+        "average": 33.61,
+        "strikeRate": 146.79,
+        "economy": 0
+      }
+    },
+    {
+      "id": "124",
+      "name": "Kagiso Rabada",
+      "teamId": "4",
+      "role": "Bowler",
+      "sourceNames": {
+        "batting": "Kagiso Rabada",
+        "bowling": "Kagiso Rabada"
+      },
+      "before": {
+        "matches": 84,
+        "runs": 215,
+        "wickets": 119,
+        "average": 11.94,
+        "strikeRate": 106.97,
+        "economy": "8.62"
+      },
+      "after": {
+        "matches": 101,
+        "runs": 262,
+        "wickets": 148,
+        "average": 12.48,
+        "strikeRate": 109.62,
+        "economy": 8.8
+      }
+    },
+    {
+      "id": "125",
+      "name": "Arshdeep Singh",
+      "teamId": "5",
+      "role": "Bowler",
+      "sourceNames": {
+        "batting": "Arshdeep Singh",
+        "bowling": "Arshdeep Singh"
+      },
+      "before": {
+        "matches": 82,
+        "runs": 31,
+        "wickets": 97,
+        "average": 5.17,
+        "strikeRate": 67.4,
+        "economy": "9"
+      },
+      "after": {
+        "matches": 96,
+        "runs": 32,
+        "wickets": 111,
+        "average": 5.33,
+        "strikeRate": 68.09,
+        "economy": 9.19
+      }
+    },
+    {
+      "id": "126",
+      "name": "Mitchell Starc",
+      "teamId": "6",
+      "role": "Bowler",
+      "sourceNames": {
+        "batting": "Mitchell Starc",
+        "bowling": "Mitchell Starc"
+      },
+      "before": {
+        "matches": 51,
+        "runs": 111,
+        "wickets": 65,
+        "average": 10.09,
+        "strikeRate": 93.28,
+        "economy": "8.61"
+      },
+      "after": {
+        "matches": 58,
+        "runs": 111,
+        "wickets": 76,
+        "average": 9.25,
+        "strikeRate": 91.74,
+        "economy": 8.79
+      }
+    },
+    {
+      "id": "127",
+      "name": "Yuzvendra Chahal",
+      "teamId": "5",
+      "role": "Bowler",
+      "sourceNames": {
+        "batting": null,
+        "bowling": "Yuzvendra Chahal"
+      },
+      "before": {
+        "matches": 174,
+        "runs": 37,
+        "wickets": 221,
+        "average": 5.29,
+        "strikeRate": 43.03,
+        "economy": "7.96"
+      },
+      "after": {
+        "matches": 188,
+        "runs": 37,
+        "wickets": 233,
+        "average": 5.29,
+        "strikeRate": 43.03,
+        "economy": 8.05
+      }
+    },
+    {
+      "id": "128",
+      "name": "KL Rahul",
+      "teamId": "6",
+      "role": "Wicket-keeper",
+      "sourceNames": {
+        "batting": "KL Rahul",
+        "bowling": null
+      },
+      "before": {
+        "matches": 145,
+        "runs": 5222,
+        "wickets": 0,
+        "average": 46.21,
+        "strikeRate": 136.03,
+        "economy": 0
+      },
+      "after": {
+        "matches": 159,
+        "runs": 5815,
+        "wickets": 0,
+        "average": 46.15,
+        "strikeRate": 139.15,
+        "economy": 0
+      }
+    },
+    {
+      "id": "130",
+      "name": "Mohammed Siraj",
+      "teamId": "4",
+      "role": "Bowler",
+      "sourceNames": {
+        "batting": "Mohammed Siraj",
+        "bowling": "Mohammed Siraj"
+      },
+      "before": {
+        "matches": 108,
+        "runs": 112,
+        "wickets": 109,
+        "average": 11.2,
+        "strikeRate": 91.06,
+        "economy": "8.74"
+      },
+      "after": {
+        "matches": 125,
+        "runs": 117,
+        "wickets": 128,
+        "average": 9.75,
+        "strikeRate": 84.17,
+        "economy": 8.78
+      }
+    },
+    {
+      "id": "134",
+      "name": "Aiden Markram",
+      "teamId": "7",
+      "role": "Batsman",
+      "sourceNames": {
+        "batting": "Aiden Markram",
+        "bowling": "Aiden Markram"
+      },
+      "before": {
+        "matches": 57,
+        "runs": 1440,
+        "wickets": 6,
+        "average": 31.3,
+        "strikeRate": 135.09,
+        "economy": "8.79"
+      },
+      "after": {
+        "matches": 69,
+        "runs": 1671,
+        "wickets": 6,
+        "average": 30.38,
+        "strikeRate": 135.52,
+        "economy": 9.61
+      }
+    },
+    {
+      "id": "135",
+      "name": "Devdutt Padikkal",
+      "teamId": "1",
+      "role": "Batsman",
+      "sourceNames": {
+        "batting": "Devdutt Padikkal",
+        "bowling": null
+      },
+      "before": {
+        "matches": 90,
+        "runs": 2270,
+        "wickets": 0,
+        "average": 25.93,
+        "strikeRate": 128.23,
+        "economy": 0
+      },
+      "after": {
+        "matches": 90,
+        "runs": 2270,
+        "wickets": 0,
+        "average": 26.71,
+        "strikeRate": 133.14,
+        "economy": 0
+      }
+    },
+    {
+      "id": "137",
+      "name": "Mitchell Marsh",
+      "teamId": "7",
+      "role": "All-rounder",
+      "sourceNames": {
+        "batting": "Mitchell Marsh",
+        "bowling": "Mitchell Marsh"
+      },
+      "before": {
+        "matches": 55,
+        "runs": 1292,
+        "wickets": 37,
+        "average": 27.49,
+        "strikeRate": 142.93,
+        "economy": "8.52"
+      },
+      "after": {
+        "matches": 68,
+        "runs": 1855,
+        "wickets": 37,
+        "average": 30.92,
+        "strikeRate": 148.52,
+        "economy": 8.52
+      }
+    },
+    {
+      "id": "139",
+      "name": "Harshal Patel",
+      "teamId": "3",
+      "role": "Bowler",
+      "sourceNames": {
+        "batting": "Harshal Patel",
+        "bowling": "Harshal Patel"
+      },
+      "before": {
+        "matches": 120,
+        "runs": 270,
+        "wickets": 151,
+        "average": 9.31,
+        "strikeRate": 117.91,
+        "economy": "8.90"
+      },
+      "after": {
+        "matches": 124,
+        "runs": 280,
+        "wickets": 151,
+        "average": 8.75,
+        "strikeRate": 117.65,
+        "economy": 8.92
+      }
+    },
+    {
+      "id": "140",
+      "name": "Marcus Stoinis",
+      "teamId": "5",
+      "role": "All-rounder",
+      "sourceNames": {
+        "batting": "Marcus Stoinis",
+        "bowling": "Marcus Stoinis"
+      },
+      "before": {
+        "matches": 109,
+        "runs": 2026,
+        "wickets": 44,
+        "average": 28.14,
+        "strikeRate": 144.72,
+        "economy": "9.79"
+      },
+      "after": {
+        "matches": 122,
+        "runs": 2242,
+        "wickets": 46,
+        "average": 28.74,
+        "strikeRate": 147.5,
+        "economy": 9.93
+      }
+    },
+    {
+      "id": "141",
+      "name": "Rahmanullah Gurbaz",
+      "teamId": "",
+      "role": "Wicket-keeper",
+      "sourceNames": {
+        "batting": "Rahmanullah Gurbaz",
+        "bowling": null
+      },
+      "before": {
+        "matches": 18,
+        "runs": 363,
+        "wickets": 0,
+        "average": 21.35,
+        "strikeRate": 134.95,
+        "economy": 0
+      },
+      "after": {
+        "matches": 19,
+        "runs": 363,
+        "wickets": 0,
+        "average": 21.35,
+        "strikeRate": 134.94,
+        "economy": 0
+      }
+    },
+    {
+      "id": "142",
+      "name": "Ishan Kishan",
+      "teamId": "3",
+      "role": "Wicket-keeper",
+      "sourceNames": {
+        "batting": "Ishan Kishan",
+        "bowling": null
+      },
+      "before": {
+        "matches": 119,
+        "runs": 3078,
+        "wickets": 0,
+        "average": 29.11,
+        "strikeRate": 137.65,
+        "economy": "24.00"
+      },
+      "after": {
+        "matches": 134,
+        "runs": 3600,
+        "wickets": 0,
+        "average": 30.51,
+        "strikeRate": 143.54,
+        "economy": "24.00"
+      }
+    },
+    {
+      "id": "143",
+      "name": "Phil Salt",
+      "teamId": "1",
+      "role": "Wicket-keeper",
+      "sourceNames": {
+        "batting": "Phil Salt",
+        "bowling": null
+      },
+      "before": {
+        "matches": 40,
+        "runs": 1258,
+        "wickets": 0,
+        "average": 34,
+        "strikeRate": 174.47988904299584,
+        "economy": 0
+      },
+      "after": {
+        "matches": 40,
+        "runs": 1258,
+        "wickets": 0,
+        "average": 34,
+        "strikeRate": 174.48,
+        "economy": 0
+      }
+    },
+    {
+      "id": "144",
+      "name": "Jitesh Sharma",
+      "teamId": "1",
+      "role": "Wicket-keeper",
+      "sourceNames": {
+        "batting": "Jitesh Sharma",
+        "bowling": null
+      },
+      "before": {
+        "matches": 71,
+        "runs": 1107,
+        "wickets": 0,
+        "average": 23.0625,
+        "strikeRate": 152.4793388429752,
+        "economy": 0
+      },
+      "after": {
+        "matches": 71,
+        "runs": 1107,
+        "wickets": 0,
+        "average": 23.06,
+        "strikeRate": 152.48,
+        "economy": 0
+      }
+    },
+    {
+      "id": "145",
+      "name": "Khaleel Ahmed",
+      "teamId": "10",
+      "role": "Bowler",
+      "sourceNames": {
+        "batting": null,
+        "bowling": "Khaleel Ahmed"
+      },
+      "before": {
+        "matches": 72,
+        "runs": 2,
+        "wickets": 89,
+        "average": 0.4,
+        "strikeRate": 22.23,
+        "economy": "8.97"
+      },
+      "after": {
+        "matches": 76,
+        "runs": 2,
+        "wickets": 91,
+        "average": 0.4,
+        "strikeRate": 22.23,
+        "economy": 8.96
+      }
+    },
+    {
+      "id": "146",
+      "name": "Trent Boult",
+      "teamId": "2",
+      "role": "Bowler",
+      "sourceNames": {
+        "batting": "Trent Boult",
+        "bowling": "Trent Boult"
+      },
+      "before": {
+        "matches": 120,
+        "runs": 85,
+        "wickets": 143,
+        "average": 9.44,
+        "strikeRate": 104.94,
+        "economy": "8.39"
+      },
+      "after": {
+        "matches": 125,
+        "runs": 93,
+        "wickets": 145,
+        "average": 9.3,
+        "strikeRate": 109.41,
+        "economy": 8.49
+      }
+    },
+    {
+      "id": "147",
+      "name": "Josh Hazlewood",
+      "teamId": "1",
+      "role": "Bowler",
+      "sourceNames": {
+        "batting": "Josh Hazlewood",
+        "bowling": "Josh Hazlewood"
+      },
+      "before": {
+        "matches": 52,
+        "runs": 19,
+        "wickets": 72,
+        "average": 19,
+        "strikeRate": 63.333333333333336,
+        "economy": 8.622448979591837
+      },
+      "after": {
+        "matches": 52,
+        "runs": 19,
+        "wickets": 72,
+        "average": 19,
+        "strikeRate": 63.33,
+        "economy": 8.62
+      }
+    },
+    {
+      "id": "148",
+      "name": "Avesh Khan",
+      "teamId": "7",
+      "role": "Bowler",
+      "sourceNames": {
+        "batting": "Avesh Khan",
+        "bowling": "Avesh Khan"
+      },
+      "before": {
+        "matches": 75,
+        "runs": 62,
+        "wickets": 87,
+        "average": 20.67,
+        "strikeRate": 167.57,
+        "economy": "9.12"
+      },
+      "after": {
+        "matches": 83,
+        "runs": 68,
+        "wickets": 93,
+        "average": 22.67,
+        "strikeRate": 158.14,
+        "economy": 9.28
+      }
+    },
+    {
+      "id": "149",
+      "name": "Prasidh Krishna",
+      "teamId": "4",
+      "role": "Bowler",
+      "sourceNames": {
+        "batting": "Prasidh Krishna",
+        "bowling": "Prasidh Krishna"
+      },
+      "before": {
+        "matches": 66,
+        "runs": 9,
+        "wickets": 74,
+        "average": 3,
+        "strikeRate": 37.5,
+        "economy": "8.77"
+      },
+      "after": {
+        "matches": 78,
+        "runs": 15,
+        "wickets": 90,
+        "average": 5,
+        "strikeRate": 48.39,
+        "economy": 8.99
+      }
+    },
+    {
+      "id": "150",
+      "name": "T Natarajan",
+      "teamId": "6",
+      "role": "Bowler",
+      "sourceNames": {
+        "batting": null,
+        "bowling": "T Natarajan"
+      },
+      "before": {
+        "matches": 63,
+        "runs": 3,
+        "wickets": 67,
+        "average": 0,
+        "strikeRate": 60,
+        "economy": "8.94"
+      },
+      "after": {
+        "matches": 73,
+        "runs": 3,
+        "wickets": 72,
+        "average": 0,
+        "strikeRate": 60,
+        "economy": 9.21
+      }
+    },
+    {
+      "id": "151",
+      "name": "Noor Ahmad",
+      "teamId": "10",
+      "role": "Bowler",
+      "sourceNames": {
+        "batting": "Noor Ahmad",
+        "bowling": "Noor Ahmad"
+      },
+      "before": {
+        "matches": 38,
+        "runs": 21,
+        "wickets": 48,
+        "average": 2.5,
+        "strikeRate": 57.15,
+        "economy": "8.07"
+      },
+      "after": {
+        "matches": 51,
+        "runs": 31,
+        "wickets": 61,
+        "average": 2.82,
+        "strikeRate": 53.45,
+        "economy": 8.17
+      }
+    },
+    {
+      "id": "155",
+      "name": "Karun Nair",
+      "teamId": "6",
+      "role": "Batsman",
+      "sourceNames": {
+        "batting": "Karun Nair",
+        "bowling": null
+      },
+      "before": {
+        "matches": 84,
+        "runs": 1694,
+        "wickets": 0,
+        "average": 23.86,
+        "strikeRate": 131.73,
+        "economy": 0
+      },
+      "after": {
+        "matches": 86,
+        "runs": 1712,
+        "wickets": 0,
+        "average": 23.45,
+        "strikeRate": 131.29,
+        "economy": 0
+      }
+    },
+    {
+      "id": "156",
+      "name": "Angkrish Raghuvanshi",
+      "teamId": "9",
+      "role": "Batsman",
+      "sourceNames": {
+        "batting": "Angkrish Raghuvanshi",
+        "bowling": null
+      },
+      "before": {
+        "matches": 23,
+        "runs": 495,
+        "wickets": 0,
+        "average": 28.94,
+        "strikeRate": 144.69,
+        "economy": 0
+      },
+      "after": {
+        "matches": 35,
+        "runs": 885,
+        "wickets": 0,
+        "average": 34.04,
+        "strikeRate": 145.56,
+        "economy": 0
+      }
+    },
+    {
+      "id": "158",
+      "name": "Nehal Wadhera",
+      "teamId": "5",
+      "role": "Batsman",
+      "sourceNames": {
+        "batting": "Nehal Wadhera",
+        "bowling": null
+      },
+      "before": {
+        "matches": 36,
+        "runs": 719,
+        "wickets": 0,
+        "average": 26.63,
+        "strikeRate": 142.95,
+        "economy": "7.76"
+      },
+      "after": {
+        "matches": 44,
+        "runs": 784,
+        "wickets": 0,
+        "average": 23.76,
+        "strikeRate": 140,
+        "economy": "7.76"
+      }
+    },
+    {
+      "id": "159",
+      "name": "Harpreet Brar",
+      "teamId": "5",
+      "role": "Bowler",
+      "sourceNames": {
+        "batting": "Harpreet Brar",
+        "bowling": "Harpreet Brar"
+      },
+      "before": {
+        "matches": 49,
+        "runs": 244,
+        "wickets": 35,
+        "average": 20.33,
+        "strikeRate": 120.2,
+        "economy": "8.03"
+      },
+      "after": {
+        "matches": 51,
+        "runs": 249,
+        "wickets": 37,
+        "average": 20.75,
+        "strikeRate": 120.87,
+        "economy": 8
+      }
+    },
+    {
+      "id": "160",
+      "name": "Naman Dhir",
+      "teamId": "2",
+      "role": "Batsman",
+      "sourceNames": {
+        "batting": "Naman Dhir",
+        "bowling": null
+      },
+      "before": {
+        "matches": 24,
+        "runs": 397,
+        "wickets": 0,
+        "average": 28,
+        "strikeRate": 180.65,
+        "economy": 8.77
+      },
+      "after": {
+        "matches": 37,
+        "runs": 710,
+        "wickets": 0,
+        "average": 27.31,
+        "strikeRate": 163.97,
+        "economy": 8.77
+      }
+    },
+    {
+      "id": "162",
+      "name": "Sameer Rizvi",
+      "teamId": "6",
+      "role": "Batsman",
+      "sourceNames": {
+        "batting": "Sameer Rizvi",
+        "bowling": null
+      },
+      "before": {
+        "matches": 13,
+        "runs": 172,
+        "wickets": 0,
+        "average": 24.57,
+        "strikeRate": 140.99,
+        "economy": 0
+      },
+      "after": {
+        "matches": 24,
+        "runs": 424,
+        "wickets": 0,
+        "average": 30.29,
+        "strikeRate": 144.71,
+        "economy": 0
+      }
+    },
+    {
+      "id": "163",
+      "name": "Abdul Samad",
+      "teamId": "7",
+      "role": "All-rounder",
+      "sourceNames": {
+        "batting": "Abdul Samad",
+        "bowling": "Abdul Samad"
+      },
+      "before": {
+        "matches": 63,
+        "runs": 741,
+        "wickets": 2,
+        "average": 19.5,
+        "strikeRate": 151.85,
+        "economy": "12.75"
+      },
+      "after": {
+        "matches": 71,
+        "runs": 857,
+        "wickets": 2,
+        "average": 19.48,
+        "strikeRate": 148.78,
+        "economy": 13.16
+      }
+    },
+    {
+      "id": "165",
+      "name": "Ashutosh Sharma",
+      "teamId": "6",
+      "role": "All-rounder",
+      "sourceNames": {
+        "batting": "Ashutosh Sharma",
+        "bowling": null
+      },
+      "before": {
+        "matches": 24,
+        "runs": 393,
+        "wickets": 0,
+        "average": 28.07,
+        "strikeRate": 163.75,
+        "economy": 0
+      },
+      "after": {
+        "matches": 32,
+        "runs": 564,
+        "wickets": 0,
+        "average": 29.68,
+        "strikeRate": 168.86,
+        "economy": 0
+      }
+    },
+    {
+      "id": "166",
+      "name": "Nishant Sindhu",
+      "teamId": "4",
+      "role": "All-rounder",
+      "sourceNames": {
+        "batting": "Nishant Sindhu",
+        "bowling": null
+      },
+      "before": {
+        "matches": 0,
+        "runs": 0,
+        "wickets": 0,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": 0
+      },
+      "after": {
+        "matches": 8,
+        "runs": 63,
+        "wickets": 0,
+        "average": 12.6,
+        "strikeRate": 126,
+        "economy": 0
+      }
+    },
+    {
+      "id": "168",
+      "name": "Kumar Kushagra",
+      "teamId": "4",
+      "role": "Wicket-keeper",
+      "sourceNames": {
+        "batting": "Kumar Kushagra",
+        "bowling": null
+      },
+      "before": {
+        "matches": 4,
+        "runs": 3,
+        "wickets": 0,
+        "average": 1,
+        "strikeRate": 42.86,
+        "economy": 0
+      },
+      "after": {
+        "matches": 5,
+        "runs": 21,
+        "wickets": 0,
+        "average": 5.25,
+        "strikeRate": 100,
+        "economy": 0
+      }
+    },
+    {
+      "id": "169",
+      "name": "Robin Minz",
+      "teamId": "2",
+      "role": "Wicket-keeper",
+      "sourceNames": {
+        "batting": "Robin Minz",
+        "bowling": null
+      },
+      "before": {
+        "matches": 2,
+        "runs": 6,
+        "wickets": 0,
+        "average": 3,
+        "strikeRate": 40,
+        "economy": 0
+      },
+      "after": {
+        "matches": 4,
+        "runs": 12,
+        "wickets": 0,
+        "average": 4,
+        "strikeRate": 63.16,
+        "economy": 0
+      }
+    },
+    {
+      "id": "170",
+      "name": "Anuj Rawat",
+      "teamId": "4",
+      "role": "Wicket-keeper",
+      "sourceNames": {
+        "batting": "Anuj Rawat",
+        "bowling": null
+      },
+      "before": {
+        "matches": 24,
+        "runs": 318,
+        "wickets": 0,
+        "average": 19.88,
+        "strikeRate": 119.11,
+        "economy": 0
+      },
+      "after": {
+        "matches": 24,
+        "runs": 318,
+        "wickets": 0,
+        "average": 19.88,
+        "strikeRate": 119.1,
+        "economy": 0
+      }
+    },
+    {
+      "id": "171",
+      "name": "Luvnith Sisodia",
+      "teamId": "",
+      "role": "Wicket-keeper",
+      "sourceNames": {
+        "batting": null,
+        "bowling": null
+      },
+      "before": {
+        "matches": 0,
+        "runs": 0,
+        "wickets": 0,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": 0
+      },
+      "after": {
+        "matches": 0,
+        "runs": 0,
+        "wickets": 0,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": 0
+      }
+    },
+    {
+      "id": "172",
+      "name": "Vishnu Vinod",
+      "teamId": "5",
+      "role": "Wicket-keeper",
+      "sourceNames": {
+        "batting": "Vishnu Vinod",
+        "bowling": null
+      },
+      "before": {
+        "matches": 6,
+        "runs": 56,
+        "wickets": 0,
+        "average": 9.33,
+        "strikeRate": 98.25,
+        "economy": 0
+      },
+      "after": {
+        "matches": 7,
+        "runs": 71,
+        "wickets": 0,
+        "average": 11.83,
+        "strikeRate": 109.23,
+        "economy": 0
+      }
+    },
+    {
+      "id": "173",
+      "name": "Vaibhav Arora",
+      "teamId": "9",
+      "role": "Bowler",
+      "sourceNames": {
+        "batting": null,
+        "bowling": "Vaibhav Arora"
+      },
+      "before": {
+        "matches": 33,
+        "runs": 9,
+        "wickets": 37,
+        "average": 2.25,
+        "strikeRate": 37.5,
+        "economy": "9.34"
+      },
+      "after": {
+        "matches": 43,
+        "runs": 9,
+        "wickets": 47,
+        "average": 2.25,
+        "strikeRate": 37.5,
+        "economy": 9.74
+      }
+    },
+    {
+      "id": "174",
+      "name": "Rasikh Salam",
+      "teamId": "1",
+      "role": "Bowler",
+      "sourceNames": {
+        "batting": "Rasikh Salam",
+        "bowling": "Rasikh Salam"
+      },
+      "before": {
+        "matches": 25,
+        "runs": 43,
+        "wickets": 29,
+        "average": 8.6,
+        "strikeRate": 102.38095238095238,
+        "economy": 10.008196721311476
+      },
+      "after": {
+        "matches": 25,
+        "runs": 43,
+        "wickets": 29,
+        "average": 8.6,
+        "strikeRate": 102.38,
+        "economy": 10.01
+      }
+    },
+    {
+      "id": "178",
+      "name": "Yash Thakur",
+      "teamId": "5",
+      "role": "Bowler",
+      "sourceNames": {
+        "batting": null,
+        "bowling": "Yash Thakur"
+      },
+      "before": {
+        "matches": 21,
+        "runs": 0,
+        "wickets": 25,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": "10.43"
+      },
+      "after": {
+        "matches": 22,
+        "runs": 0,
+        "wickets": 27,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": 10.6
+      }
+    },
+    {
+      "id": "179",
+      "name": "Vijaykumar Vyshak",
+      "teamId": "5",
+      "role": "Bowler",
+      "sourceNames": {
+        "batting": "Vyshak Vijaykumar",
+        "bowling": "Vyshak Vijaykumar"
+      },
+      "before": {
+        "matches": 16,
+        "runs": 14,
+        "wickets": 17,
+        "average": 7,
+        "strikeRate": 116.67,
+        "economy": "10.38"
+      },
+      "after": {
+        "matches": 26,
+        "runs": 16,
+        "wickets": 26,
+        "average": 8,
+        "strikeRate": 100,
+        "economy": 10.47
+      }
+    },
+    {
+      "id": "180",
+      "name": "Shreyas Gopal",
+      "teamId": "10",
+      "role": "Bowler",
+      "sourceNames": {
+        "batting": "Shreyas Gopal",
+        "bowling": "Shreyas Gopal"
+      },
+      "before": {
+        "matches": 52,
+        "runs": 180,
+        "wickets": 52,
+        "average": 12.86,
+        "strikeRate": 106.51,
+        "economy": 8.16
+      },
+      "after": {
+        "matches": 52,
+        "runs": 180,
+        "wickets": 52,
+        "average": 12.86,
+        "strikeRate": 106.51,
+        "economy": 8.17
+      }
+    },
+    {
+      "id": "181",
+      "name": "Mayank Markande",
+      "teamId": "2",
+      "role": "Bowler",
+      "sourceNames": {
+        "batting": "Mayank Markande",
+        "bowling": "Mayank Markande"
+      },
+      "before": {
+        "matches": 38,
+        "runs": 48,
+        "wickets": 37,
+        "average": 16,
+        "strikeRate": 114.29,
+        "economy": "8.97"
+      },
+      "after": {
+        "matches": 40,
+        "runs": 48,
+        "wickets": 37,
+        "average": 16,
+        "strikeRate": 114.29,
+        "economy": 9.16
+      }
+    },
+    {
+      "id": "182",
+      "name": "Suyash Sharma",
+      "teamId": "1",
+      "role": "Bowler",
+      "sourceNames": {
+        "batting": null,
+        "bowling": "Suyash Sharma"
+      },
+      "before": {
+        "matches": 28,
+        "runs": 0,
+        "wickets": 19,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": "8.77"
+      },
+      "after": {
+        "matches": 39,
+        "runs": 0,
+        "wickets": 27,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": 8.89
+      }
+    },
+    {
+      "id": "185",
+      "name": "Manav Suthar",
+      "teamId": "4",
+      "role": "Bowler",
+      "sourceNames": {
+        "batting": null,
+        "bowling": "Manav Suthar"
+      },
+      "before": {
+        "matches": 1,
+        "runs": 1,
+        "wickets": 0,
+        "average": 1,
+        "strikeRate": 50,
+        "economy": "13.00"
+      },
+      "after": {
+        "matches": 5,
+        "runs": 1,
+        "wickets": 2,
+        "average": 1,
+        "strikeRate": 50,
+        "economy": 11.75
+      }
+    },
+    {
+      "id": "187",
+      "name": "Glenn Phillips",
+      "teamId": "4",
+      "role": "All-rounder",
+      "sourceNames": {
+        "batting": "Glenn Phillips",
+        "bowling": "Glenn Phillips"
+      },
+      "before": {
+        "matches": 8,
+        "runs": 65,
+        "wickets": 2,
+        "average": 9.29,
+        "strikeRate": 118.19,
+        "economy": "8"
+      },
+      "after": {
+        "matches": 14,
+        "runs": 132,
+        "wickets": 2,
+        "average": 12,
+        "strikeRate": 121.1,
+        "economy": 8
+      }
+    },
+    {
+      "id": "188",
+      "name": "Rovman Powell",
+      "teamId": "9",
+      "role": "Batsman",
+      "sourceNames": {
+        "batting": "Rovman Powell",
+        "bowling": "Rovman Powell"
+      },
+      "before": {
+        "matches": 28,
+        "runs": 365,
+        "wickets": 1,
+        "average": 18.25,
+        "strikeRate": 146.59,
+        "economy": "11.67"
+      },
+      "after": {
+        "matches": 40,
+        "runs": 555,
+        "wickets": 1,
+        "average": 22.2,
+        "strikeRate": 142.31,
+        "economy": 11.67
+      }
+    },
+    {
+      "id": "189",
+      "name": "Ajinkya Rahane",
+      "teamId": "9",
+      "role": "Batsman",
+      "sourceNames": {
+        "batting": "Ajinkya Rahane",
+        "bowling": null
+      },
+      "before": {
+        "matches": 199,
+        "runs": 5099,
+        "wickets": 1,
+        "average": 30.5,
+        "strikeRate": 125.02,
+        "economy": "5"
+      },
+      "after": {
+        "matches": 212,
+        "runs": 5367,
+        "wickets": 1,
+        "average": 30.15,
+        "strikeRate": 125.6,
+        "economy": "5"
+      }
+    },
+    {
+      "id": "190",
+      "name": "Sam Curran",
+      "teamId": "",
+      "role": "All-rounder",
+      "sourceNames": {
+        "batting": "Sam Curran",
+        "bowling": "Sam Curran"
+      },
+      "before": {
+        "matches": 64,
+        "runs": 997,
+        "wickets": 59,
+        "average": 24.93,
+        "strikeRate": 136.39,
+        "economy": "9.74"
+      },
+      "after": {
+        "matches": 64,
+        "runs": 997,
+        "wickets": 59,
+        "average": 24.93,
+        "strikeRate": 136.39,
+        "economy": 9.74
+      }
+    },
+    {
+      "id": "191",
+      "name": "Marco Jansen",
+      "teamId": "5",
+      "role": "All-rounder",
+      "sourceNames": {
+        "batting": "Marco Jansen",
+        "bowling": "Marco Jansen"
+      },
+      "before": {
+        "matches": 35,
+        "runs": 141,
+        "wickets": 36,
+        "average": 12.82,
+        "strikeRate": 109.31,
+        "economy": "9.41"
+      },
+      "after": {
+        "matches": 48,
+        "runs": 192,
+        "wickets": 45,
+        "average": 12.8,
+        "strikeRate": 110.34,
+        "economy": 9.63
+      }
+    },
+    {
+      "id": "192",
+      "name": "Krunal Pandya",
+      "teamId": "1",
+      "role": "All-rounder",
+      "sourceNames": {
+        "batting": "Krunal Pandya",
+        "bowling": "Krunal Pandya"
+      },
+      "before": {
+        "matches": 158,
+        "runs": 1748,
+        "wickets": 107,
+        "average": 21.85,
+        "strikeRate": 132.42424242424244,
+        "economy": 7.574972232506479
+      },
+      "after": {
+        "matches": 158,
+        "runs": 1982,
+        "wickets": 107,
+        "average": 23.32,
+        "strikeRate": 133.83,
+        "economy": 7.57
+      }
+    },
+    {
+      "id": "193",
+      "name": "Nitish Rana",
+      "teamId": "6",
+      "role": "Batsman",
+      "sourceNames": {
+        "batting": "Nitish Rana",
+        "bowling": "Nitish Rana"
+      },
+      "before": {
+        "matches": 118,
+        "runs": 2853,
+        "wickets": 10,
+        "average": 27.7,
+        "strikeRate": 136.77,
+        "economy": "8.44"
+      },
+      "after": {
+        "matches": 127,
+        "runs": 3078,
+        "wickets": 10,
+        "average": 27.73,
+        "strikeRate": 137.72,
+        "economy": 9.03
+      }
+    },
+    {
+      "id": "194",
+      "name": "Washington Sundar",
+      "teamId": "4",
+      "role": "All-rounder",
+      "sourceNames": {
+        "batting": "Washington Sundar",
+        "bowling": "Washington Sundar"
+      },
+      "before": {
+        "matches": 66,
+        "runs": 511,
+        "wickets": 39,
+        "average": 15.97,
+        "strikeRate": 126.18,
+        "economy": "7.7"
+      },
+      "after": {
+        "matches": 83,
+        "runs": 888,
+        "wickets": 40,
+        "average": 21.14,
+        "strikeRate": 135.37,
+        "economy": 7.77
+      }
+    },
+    {
+      "id": "195",
+      "name": "Donovan Ferreira",
+      "teamId": "8",
+      "role": "Wicket-keeper",
+      "sourceNames": {
+        "batting": "Donovan Ferreira",
+        "bowling": "Donovan Ferreira"
+      },
+      "before": {
+        "matches": 0,
+        "runs": 0,
+        "wickets": 0,
+        "average": 3,
+        "strikeRate": 64.29,
+        "economy": 0
+      },
+      "after": {
+        "matches": 18,
+        "runs": 326,
+        "wickets": 1,
+        "average": 27.17,
+        "strikeRate": 170.68,
+        "economy": 13.67
+      }
+    },
+    {
+      "id": "196",
+      "name": "Ryan Rickelton",
+      "teamId": "2",
+      "role": "Wicket-keeper",
+      "sourceNames": {
+        "batting": "Ryan Rickelton",
+        "bowling": null
+      },
+      "before": {
+        "matches": 15,
+        "runs": 469,
+        "wickets": 0,
+        "average": 29.85,
+        "strikeRate": 150.98,
+        "economy": 0
+      },
+      "after": {
+        "matches": 26,
+        "runs": 836,
+        "wickets": 0,
+        "average": 34.83,
+        "strikeRate": 168.21,
+        "economy": 0
+      }
+    },
+    {
+      "id": "197",
+      "name": "Deepak Chahar",
+      "teamId": "2",
+      "role": "Bowler",
+      "sourceNames": {
+        "batting": "Deepak Chahar",
+        "bowling": "Deepak Chahar"
+      },
+      "before": {
+        "matches": 95,
+        "runs": 117,
+        "wickets": 88,
+        "average": 14.63,
+        "strikeRate": 139.29,
+        "economy": 8.14
+      },
+      "after": {
+        "matches": 103,
+        "runs": 142,
+        "wickets": 96,
+        "average": 14.2,
+        "strikeRate": 137.86,
+        "economy": 8.3
+      }
+    },
+    {
+      "id": "199",
+      "name": "Tushar Deshpande",
+      "teamId": "8",
+      "role": "Bowler",
+      "sourceNames": {
+        "batting": "Tushar Deshpande",
+        "bowling": "Tushar Deshpande"
+      },
+      "before": {
+        "matches": 46,
+        "runs": 28,
+        "wickets": 51,
+        "average": 14,
+        "strikeRate": 127.28,
+        "economy": "9.84"
+      },
+      "after": {
+        "matches": 53,
+        "runs": 54,
+        "wickets": 55,
+        "average": 13.5,
+        "strikeRate": 150,
+        "economy": 10.11
+      }
+    },
+    {
+      "id": "200",
+      "name": "Lockie Ferguson",
+      "teamId": "5",
+      "role": "Bowler",
+      "sourceNames": {
+        "batting": "Lockie Ferguson",
+        "bowling": "Lockie Ferguson"
+      },
+      "before": {
+        "matches": 49,
+        "runs": 72,
+        "wickets": 51,
+        "average": 24,
+        "strikeRate": 153.2,
+        "economy": "8.97"
+      },
+      "after": {
+        "matches": 52,
+        "runs": 72,
+        "wickets": 52,
+        "average": 24,
+        "strikeRate": 153.19,
+        "economy": 9.21
+      }
+    },
+    {
+      "id": "201",
+      "name": "Bhuvneshwar Kumar",
+      "teamId": "1",
+      "role": "Bowler",
+      "sourceNames": {
+        "batting": "Bhuvneshwar Kumar",
+        "bowling": "Bhuvneshwar Kumar"
+      },
+      "before": {
+        "matches": 206,
+        "runs": 354,
+        "wickets": 226,
+        "average": 9.31578947368421,
+        "strikeRate": 93.89920424403184,
+        "economy": 7.7126086956521736
+      },
+      "after": {
+        "matches": 206,
+        "runs": 354,
+        "wickets": 226,
+        "average": 9.08,
+        "strikeRate": 93.9,
+        "economy": 7.71
+      }
+    },
+    {
+      "id": "202",
+      "name": "Mukesh Kumar",
+      "teamId": "6",
+      "role": "Bowler",
+      "sourceNames": {
+        "batting": null,
+        "bowling": "Mukesh Kumar"
+      },
+      "before": {
+        "matches": 32,
+        "runs": 10,
+        "wickets": 36,
+        "average": 10,
+        "strikeRate": 55.56,
+        "economy": "10.4"
+      },
+      "after": {
+        "matches": 42,
+        "runs": 10,
+        "wickets": 42,
+        "average": 10,
+        "strikeRate": 55.56,
+        "economy": 10.59
+      }
+    },
+    {
+      "id": "203",
+      "name": "Allah Ghazanfar",
+      "teamId": "2",
+      "role": "Bowler",
+      "sourceNames": {
+        "batting": null,
+        "bowling": "AM Ghazanfar"
+      },
+      "before": {
+        "matches": 1,
+        "runs": 0,
+        "wickets": 0,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": "6.50"
+      },
+      "after": {
+        "matches": 11,
+        "runs": 0,
+        "wickets": 15,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": 10.02
+      }
+    },
+    {
+      "id": "205",
+      "name": "Shubham Dubey",
+      "teamId": "8",
+      "role": "Batsman",
+      "sourceNames": {
+        "batting": "Shubham Dubey",
+        "bowling": null
+      },
+      "before": {
+        "matches": 13,
+        "runs": 139,
+        "wickets": 0,
+        "average": 23.17,
+        "strikeRate": 163.53,
+        "economy": 0
+      },
+      "after": {
+        "matches": 20,
+        "runs": 220,
+        "wickets": 0,
+        "average": 22,
+        "strikeRate": 153.85,
+        "economy": 0
+      }
+    },
+    {
+      "id": "207",
+      "name": "Himmat Singh",
+      "teamId": "7",
+      "role": "Batsman",
+      "sourceNames": {
+        "batting": "Himmat Singh",
+        "bowling": null
+      },
+      "before": {
+        "matches": 3,
+        "runs": 0,
+        "wickets": 0,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": 0
+      },
+      "after": {
+        "matches": 9,
+        "runs": 92,
+        "wickets": 0,
+        "average": 30.67,
+        "strikeRate": 133.33,
+        "economy": 0
+      }
+    },
+    {
+      "id": "208",
+      "name": "Anshul Kamboj",
+      "teamId": "10",
+      "role": "All-rounder",
+      "sourceNames": {
+        "batting": "Anshul Kamboj",
+        "bowling": "Anshul Kamboj"
+      },
+      "before": {
+        "matches": 12,
+        "runs": 23,
+        "wickets": 12,
+        "average": 8,
+        "strikeRate": 114.29,
+        "economy": "9.19"
+      },
+      "after": {
+        "matches": 25,
+        "runs": 74,
+        "wickets": 31,
+        "average": 18.5,
+        "strikeRate": 142.31,
+        "economy": 9.97
+      }
+    },
+    {
+      "id": "209",
+      "name": "Arshad Khan",
+      "teamId": "4",
+      "role": "All-rounder",
+      "sourceNames": {
+        "batting": null,
+        "bowling": "Arshad Khan"
+      },
+      "before": {
+        "matches": 19,
+        "runs": 124,
+        "wickets": 12,
+        "average": 20.67,
+        "strikeRate": 140.91,
+        "economy": "11.49"
+      },
+      "after": {
+        "matches": 27,
+        "runs": 124,
+        "wickets": 18,
+        "average": 20.67,
+        "strikeRate": 140.91,
+        "economy": 11.06
+      }
+    },
+    {
+      "id": "211",
+      "name": "Anukul Roy",
+      "teamId": "9",
+      "role": "All-rounder",
+      "sourceNames": {
+        "batting": "Anukul Roy",
+        "bowling": "Anukul Roy"
+      },
+      "before": {
+        "matches": 12,
+        "runs": 26,
+        "wickets": 6,
+        "average": 6.5,
+        "strikeRate": 104,
+        "economy": "8.03"
+      },
+      "after": {
+        "matches": 26,
+        "runs": 78,
+        "wickets": 15,
+        "average": 9.75,
+        "strikeRate": 121.88,
+        "economy": 8.9
+      }
+    },
+    {
+      "id": "212",
+      "name": "Swapnil Singh",
+      "teamId": "1",
+      "role": "All-rounder",
+      "sourceNames": {
+        "batting": "Swapnil Singh",
+        "bowling": "Swapnil Singh"
+      },
+      "before": {
+        "matches": 14,
+        "runs": 51,
+        "wickets": 7,
+        "average": 10.2,
+        "strikeRate": 113.3,
+        "economy": 8.93
+      },
+      "after": {
+        "matches": 14,
+        "runs": 51,
+        "wickets": 7,
+        "average": 10.2,
+        "strikeRate": 113.33,
+        "economy": 8.83
+      }
+    },
+    {
+      "id": "215",
+      "name": "Gurnoor Brar",
+      "teamId": "4",
+      "role": "Bowler",
+      "sourceNames": {
+        "batting": null,
+        "bowling": null
+      },
+      "before": {
+        "matches": 1,
+        "runs": 0,
+        "wickets": 0,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": "14"
+      },
+      "after": {
+        "matches": 1,
+        "runs": 0,
+        "wickets": 0,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": "14"
+      }
+    },
+    {
+      "id": "216",
+      "name": "Mukesh Choudhary",
+      "teamId": "10",
+      "role": "Bowler",
+      "sourceNames": {
+        "batting": "Mukesh Choudhary",
+        "bowling": "Mukesh Choudhary"
+      },
+      "before": {
+        "matches": 16,
+        "runs": 6,
+        "wickets": 17,
+        "average": 6,
+        "strikeRate": 100,
+        "economy": 9.94
+      },
+      "after": {
+        "matches": 24,
+        "runs": 8,
+        "wickets": 25,
+        "average": 8,
+        "strikeRate": 100,
+        "economy": 9.58
+      }
+    },
+    {
+      "id": "217",
+      "name": "Arjun Tendulkar",
+      "teamId": "7",
+      "role": "All-rounder",
+      "sourceNames": {
+        "batting": "Arjun Tendulkar",
+        "bowling": "Arjun Tendulkar"
+      },
+      "before": {
+        "matches": 5,
+        "runs": 13,
+        "wickets": 3,
+        "average": 13,
+        "strikeRate": 144.45,
+        "economy": "9.37"
+      },
+      "after": {
+        "matches": 6,
+        "runs": 18,
+        "wickets": 4,
+        "average": 18,
+        "strikeRate": 128.57,
+        "economy": 9.28
+      }
+    },
+    {
+      "id": "219",
+      "name": "Manimaran Siddharth",
+      "teamId": "7",
+      "role": "Bowler",
+      "sourceNames": {
+        "batting": null,
+        "bowling": "M Siddharth"
+      },
+      "before": {
+        "matches": 5,
+        "runs": 0,
+        "wickets": 3,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": "8.63"
+      },
+      "after": {
+        "matches": 9,
+        "runs": 0,
+        "wickets": 9,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": 9.13
+      }
+    },
+    {
+      "id": "220",
+      "name": "Digvesh Singh",
+      "teamId": "7",
+      "role": "Bowler",
+      "sourceNames": {
+        "batting": null,
+        "bowling": "Digvesh Singh"
+      },
+      "before": {
+        "matches": 13,
+        "runs": 1,
+        "wickets": 14,
+        "average": 1,
+        "strikeRate": 33.34,
+        "economy": "8.25"
+      },
+      "after": {
+        "matches": 23,
+        "runs": 1,
+        "wickets": 19,
+        "average": 1,
+        "strikeRate": 33.34,
+        "economy": 9.08
+      }
+    },
+    {
+      "id": "221",
+      "name": "Manish Pandey",
+      "teamId": "9",
+      "role": "Batsman",
+      "sourceNames": {
+        "batting": "Manish Pandey",
+        "bowling": null
+      },
+      "before": {
+        "matches": 174,
+        "runs": 3942,
+        "wickets": 0,
+        "average": 29.42,
+        "strikeRate": 121.52,
+        "economy": 0
+      },
+      "after": {
+        "matches": 180,
+        "runs": 4012,
+        "wickets": 0,
+        "average": 29.5,
+        "strikeRate": 121.83,
+        "economy": 0
+      }
+    },
+    {
+      "id": "222",
+      "name": "Sherfane Rutherford",
+      "teamId": "2",
+      "role": "All-rounder",
+      "sourceNames": {
+        "batting": "Sherfane Rutherford",
+        "bowling": "Sherfane Rutherford"
+      },
+      "before": {
+        "matches": 23,
+        "runs": 397,
+        "wickets": 1,
+        "average": 24.81,
+        "strikeRate": 137.38,
+        "economy": 8.63
+      },
+      "after": {
+        "matches": 31,
+        "runs": 520,
+        "wickets": 1,
+        "average": 24.76,
+        "strikeRate": 142.86,
+        "economy": 8.63
+      }
+    },
+    {
+      "id": "223",
+      "name": "Shahbaz Ahmed",
+      "teamId": "7",
+      "role": "All-rounder",
+      "sourceNames": {
+        "batting": null,
+        "bowling": "Shahbaz Ahmed"
+      },
+      "before": {
+        "matches": 58,
+        "runs": 545,
+        "wickets": 22,
+        "average": 18.79,
+        "strikeRate": 121.66,
+        "economy": "9.58"
+      },
+      "after": {
+        "matches": 63,
+        "runs": 545,
+        "wickets": 27,
+        "average": 18.79,
+        "strikeRate": 121.66,
+        "economy": 9.79
+      }
+    },
+    {
+      "id": "224",
+      "name": "Moeen Ali",
+      "teamId": "",
+      "role": "All-rounder",
+      "sourceNames": {
+        "batting": "Moeen Ali",
+        "bowling": "Moeen Ali"
+      },
+      "before": {
+        "matches": 0,
+        "runs": 0,
+        "wickets": 0,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": 0
+      },
+      "after": {
+        "matches": 73,
+        "runs": 1167,
+        "wickets": 41,
+        "average": 22.02,
+        "strikeRate": 139.76,
+        "economy": 7.23
+      }
+    },
+    {
+      "id": "225",
+      "name": "Tim David",
+      "teamId": "1",
+      "role": "Batsman",
+      "sourceNames": {
+        "batting": "Tim David",
+        "bowling": null
+      },
+      "before": {
+        "matches": 66,
+        "runs": 1151,
+        "wickets": 0,
+        "average": 32.885714285714286,
+        "strikeRate": 177.07692307692307,
+        "economy": 0
+      },
+      "after": {
+        "matches": 66,
+        "runs": 1151,
+        "wickets": 0,
+        "average": 32.89,
+        "strikeRate": 177.08,
+        "economy": 0
+      }
+    },
+    {
+      "id": "227",
+      "name": "Will Jacks",
+      "teamId": "2",
+      "role": "All-rounder",
+      "sourceNames": {
+        "batting": "Will Jacks",
+        "bowling": "Will Jacks"
+      },
+      "before": {
+        "matches": 21,
+        "runs": 463,
+        "wickets": 2,
+        "average": 27.24,
+        "strikeRate": 152.81,
+        "economy": 9.57
+      },
+      "after": {
+        "matches": 28,
+        "runs": 602,
+        "wickets": 10,
+        "average": 27.36,
+        "strikeRate": 158.84,
+        "economy": 9.86
+      }
+    },
+    {
+      "id": "228",
+      "name": "Azmatullah Omarzai",
+      "teamId": "5",
+      "role": "All-rounder",
+      "sourceNames": {
+        "batting": "Azmatullah Omarzai",
+        "bowling": "Azmatullah Omarzai"
+      },
+      "before": {
+        "matches": 16,
+        "runs": 99,
+        "wickets": 12,
+        "average": 12.38,
+        "strikeRate": 133.79,
+        "economy": "9.69"
+      },
+      "after": {
+        "matches": 19,
+        "runs": 151,
+        "wickets": 15,
+        "average": 15.1,
+        "strikeRate": 149.5,
+        "economy": 9.63
+      }
+    },
+    {
+      "id": "229",
+      "name": "Sai Kishore",
+      "teamId": "4",
+      "role": "All-rounder",
+      "sourceNames": {
+        "batting": "Sai Kishore",
+        "bowling": "Sai Kishore"
+      },
+      "before": {
+        "matches": 25,
+        "runs": 18,
+        "wickets": 32,
+        "average": 4.5,
+        "strikeRate": 112.5,
+        "economy": "8.86"
+      },
+      "after": {
+        "matches": 28,
+        "runs": 18,
+        "wickets": 33,
+        "average": 4.5,
+        "strikeRate": 112.5,
+        "economy": 8.99
+      }
+    },
+    {
+      "id": "230",
+      "name": "Romario Shepherd",
+      "teamId": "1",
+      "role": "All-rounder",
+      "sourceNames": {
+        "batting": "Romario Shepherd",
+        "bowling": "Romario Shepherd"
+      },
+      "before": {
+        "matches": 33,
+        "runs": 268,
+        "wickets": 17,
+        "average": 24.363636363636363,
+        "strikeRate": 175.16339869281046,
+        "economy": 11.766666666666667
+      },
+      "after": {
+        "matches": 33,
+        "runs": 268,
+        "wickets": 17,
+        "average": 24.36,
+        "strikeRate": 175.16,
+        "economy": 11.77
+      }
+    },
+    {
+      "id": "231",
+      "name": "Spencer Johnson",
+      "teamId": "10",
+      "role": "Bowler",
+      "sourceNames": {
+        "batting": "Spencer Johnson",
+        "bowling": "Spencer Johnson"
+      },
+      "before": {
+        "matches": 9,
+        "runs": 8,
+        "wickets": 5,
+        "average": 0,
+        "strikeRate": 72.73,
+        "economy": "10.39"
+      },
+      "after": {
+        "matches": 12,
+        "runs": 8,
+        "wickets": 7,
+        "average": 8,
+        "strikeRate": 66.67,
+        "economy": 10.33
+      }
+    },
+    {
+      "id": "232",
+      "name": "Umran Malik",
+      "teamId": "9",
+      "role": "Bowler",
+      "sourceNames": {
+        "batting": "Umran Malik",
+        "bowling": "Umran Malik"
+      },
+      "before": {
+        "matches": 26,
+        "runs": 23,
+        "wickets": 29,
+        "average": 11.5,
+        "strikeRate": 143.75,
+        "economy": "9.4"
+      },
+      "after": {
+        "matches": 26,
+        "runs": 23,
+        "wickets": 29,
+        "average": 11.5,
+        "strikeRate": 143.75,
+        "economy": 9.4
+      }
+    },
+    {
+      "id": "233",
+      "name": "Ishant Sharma",
+      "teamId": "4",
+      "role": "Bowler",
+      "sourceNames": {
+        "batting": "Ishant Sharma",
+        "bowling": "Ishant Sharma"
+      },
+      "before": {
+        "matches": 117,
+        "runs": 57,
+        "wickets": 96,
+        "average": 9.5,
+        "strikeRate": 82.61,
+        "economy": "8.38"
+      },
+      "after": {
+        "matches": 117,
+        "runs": 57,
+        "wickets": 97,
+        "average": 9.5,
+        "strikeRate": 82.61,
+        "economy": 8.36
+      }
+    },
+    {
+      "id": "234",
+      "name": "Nuwan Thushara",
+      "teamId": "1",
+      "role": "Bowler",
+      "sourceNames": {
+        "batting": null,
+        "bowling": "Nuwan Thushara"
+      },
+      "before": {
+        "matches": 8,
+        "runs": 0,
+        "wickets": 9,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": 9.43
+      },
+      "after": {
+        "matches": 8,
+        "runs": 0,
+        "wickets": 9,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": 9.43
+      }
+    },
+    {
+      "id": "237",
+      "name": "Harnoor Singh",
+      "teamId": "5",
+      "role": "Batsman",
+      "sourceNames": {
+        "batting": null,
+        "bowling": null
+      },
+      "before": {
+        "matches": 0,
+        "runs": 0,
+        "wickets": 0,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": 0
+      },
+      "after": {
+        "matches": 0,
+        "runs": 0,
+        "wickets": 0,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": 0
+      }
+    },
+    {
+      "id": "239",
+      "name": "Yudhvir Singh",
+      "teamId": "8",
+      "role": "Bowler",
+      "sourceNames": {
+        "batting": "Yudhvir Singh",
+        "bowling": "Yudhvir Singh"
+      },
+      "before": {
+        "matches": 9,
+        "runs": 22,
+        "wickets": 8,
+        "average": 5.5,
+        "strikeRate": 137.5,
+        "economy": "11"
+      },
+      "after": {
+        "matches": 9,
+        "runs": 22,
+        "wickets": 8,
+        "average": 5.5,
+        "strikeRate": 137.5,
+        "economy": 11
+      }
+    },
+    {
+      "id": "241",
+      "name": "Arshin Kulkarni",
+      "teamId": "7",
+      "role": "All-rounder",
+      "sourceNames": {
+        "batting": "Arshin Kulkarni",
+        "bowling": null
+      },
+      "before": {
+        "matches": 2,
+        "runs": 9,
+        "wickets": 0,
+        "average": 4.5,
+        "strikeRate": 112.5,
+        "economy": 0
+      },
+      "after": {
+        "matches": 4,
+        "runs": 26,
+        "wickets": 0,
+        "average": 6.5,
+        "strikeRate": 78.79,
+        "economy": 0
+      }
+    },
+    {
+      "id": "242",
+      "name": "Ashwani Kumar",
+      "teamId": "2",
+      "role": "Bowler",
+      "sourceNames": {
+        "batting": null,
+        "bowling": "Ashwani Kumar"
+      },
+      "before": {
+        "matches": 7,
+        "runs": 0,
+        "wickets": 11,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": 11.32
+      },
+      "after": {
+        "matches": 10,
+        "runs": 0,
+        "wickets": 17,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": 10.95
+      }
+    },
+    {
+      "id": "243",
+      "name": "Akash Singh",
+      "teamId": "7",
+      "role": "Bowler",
+      "sourceNames": {
+        "batting": null,
+        "bowling": "Akash Singh"
+      },
+      "before": {
+        "matches": 10,
+        "runs": 0,
+        "wickets": 9,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": "9.54"
+      },
+      "after": {
+        "matches": 12,
+        "runs": 0,
+        "wickets": 13,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": 9.86
+      }
+    },
+    {
+      "id": "244",
+      "name": "Gurjapneet Singh",
+      "teamId": "10",
+      "role": "Bowler",
+      "sourceNames": {
+        "batting": null,
+        "bowling": "Gurjapneet Singh"
+      },
+      "before": {
+        "matches": 0,
+        "runs": 0,
+        "wickets": 0,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": 0
+      },
+      "after": {
+        "matches": 8,
+        "runs": 0,
+        "wickets": 4,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": 9.26
+      }
+    },
+    {
+      "id": "245",
+      "name": "Matthew Breetzke",
+      "teamId": "7",
+      "role": "Wicket-keeper",
+      "sourceNames": {
+        "batting": "Matthew Breetzke",
+        "bowling": null
+      },
+      "before": {
+        "matches": 1,
+        "runs": 14,
+        "wickets": 0,
+        "average": 14,
+        "strikeRate": 116.67,
+        "economy": 0
+      },
+      "after": {
+        "matches": 1,
+        "runs": 14,
+        "wickets": 0,
+        "average": 14,
+        "strikeRate": 116.67,
+        "economy": 0
+      }
+    },
+    {
+      "id": "246",
+      "name": "Mitchell Santner",
+      "teamId": "2",
+      "role": "All-rounder",
+      "sourceNames": {
+        "batting": "Mitchell Santner",
+        "bowling": "Mitchell Santner"
+      },
+      "before": {
+        "matches": 31,
+        "runs": 110,
+        "wickets": 0,
+        "average": 13.75,
+        "strikeRate": 105.77,
+        "economy": 0
+      },
+      "after": {
+        "matches": 35,
+        "runs": 136,
+        "wickets": 30,
+        "average": 17,
+        "strikeRate": 110.57,
+        "economy": 7.51
+      }
+    },
+    {
+      "id": "247",
+      "name": "Jayant Yadav",
+      "teamId": "4",
+      "role": "All-rounder",
+      "sourceNames": {
+        "batting": "Jayant Yadav",
+        "bowling": "Jayant Yadav"
+      },
+      "before": {
+        "matches": 20,
+        "runs": 40,
+        "wickets": 8,
+        "average": 10,
+        "strikeRate": 111.12,
+        "economy": "6.85"
+      },
+      "after": {
+        "matches": 20,
+        "runs": 40,
+        "wickets": 8,
+        "average": 10,
+        "strikeRate": 111.11,
+        "economy": 6.85
+      }
+    },
+    {
+      "id": "249",
+      "name": "Kwena Maphaka",
+      "teamId": "8",
+      "role": "Bowler",
+      "sourceNames": {
+        "batting": "Kwena Maphaka",
+        "bowling": "Kwena Maphaka"
+      },
+      "before": {
+        "matches": 4,
+        "runs": 8,
+        "wickets": 2,
+        "average": 0,
+        "strikeRate": 400,
+        "economy": "13"
+      },
+      "after": {
+        "matches": 4,
+        "runs": 8,
+        "wickets": 2,
+        "average": 0,
+        "strikeRate": 400,
+        "economy": 13
+      }
+    },
+    {
+      "id": "250",
+      "name": "Kuldeep Sen",
+      "teamId": "8",
+      "role": "Bowler",
+      "sourceNames": {
+        "batting": null,
+        "bowling": "Kuldeep Sen"
+      },
+      "before": {
+        "matches": 12,
+        "runs": 0,
+        "wickets": 14,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": "9.63"
+      },
+      "after": {
+        "matches": 12,
+        "runs": 0,
+        "wickets": 14,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": 9.63
+      }
+    },
+    {
+      "id": "253",
+      "name": "Priyansh Arya",
+      "teamId": "5",
+      "role": "Batsman",
+      "sourceNames": {
+        "batting": "Priyansh Arya",
+        "bowling": null
+      },
+      "before": {
+        "matches": 17,
+        "runs": 475,
+        "wickets": 0,
+        "average": 27.94,
+        "strikeRate": 179.25,
+        "economy": 0
+      },
+      "after": {
+        "matches": 30,
+        "runs": 839,
+        "wickets": 0,
+        "average": 27.97,
+        "strikeRate": 191.99,
+        "economy": 0
+      }
+    },
+    {
+      "id": "255",
+      "name": "Praveen Dubey",
+      "teamId": "5",
+      "role": "All-rounder",
+      "sourceNames": {
+        "batting": "Pravin Dubey",
+        "bowling": "Pravin Dubey"
+      },
+      "before": {
+        "matches": 5,
+        "runs": 23,
+        "wickets": 2,
+        "average": 23,
+        "strikeRate": 69.7,
+        "economy": "8.54"
+      },
+      "after": {
+        "matches": 5,
+        "runs": 23,
+        "wickets": 2,
+        "average": 23,
+        "strikeRate": 69.7,
+        "economy": 8.54
+      }
+    },
+    {
+      "id": "256",
+      "name": "Ajay Mandal",
+      "teamId": "6",
+      "role": "All-rounder",
+      "sourceNames": {
+        "batting": null,
+        "bowling": null
+      },
+      "before": {
+        "matches": 0,
+        "runs": 0,
+        "wickets": 0,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": 0
+      },
+      "after": {
+        "matches": 0,
+        "runs": 0,
+        "wickets": 0,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": 0
+      }
+    },
+    {
+      "id": "257",
+      "name": "Vipraj Nigam",
+      "teamId": "6",
+      "role": "Bowler",
+      "sourceNames": {
+        "batting": "Vipraj Nigam",
+        "bowling": "Vipraj Nigam"
+      },
+      "before": {
+        "matches": 14,
+        "runs": 142,
+        "wickets": 11,
+        "average": 20.29,
+        "strikeRate": 179.75,
+        "economy": "9.13"
+      },
+      "after": {
+        "matches": 19,
+        "runs": 157,
+        "wickets": 13,
+        "average": 19.63,
+        "strikeRate": 176.4,
+        "economy": 9.77
+      }
+    },
+    {
+      "id": "260",
+      "name": "Jacob Bethell",
+      "teamId": "1",
+      "role": "All-rounder",
+      "sourceNames": {
+        "batting": "Jacob Bethell",
+        "bowling": null
+      },
+      "before": {
+        "matches": 9,
+        "runs": 163,
+        "wickets": 0,
+        "average": 18.11111111111111,
+        "strikeRate": 140.51724137931035,
+        "economy": 0
+      },
+      "after": {
+        "matches": 9,
+        "runs": 163,
+        "wickets": 0,
+        "average": 18.11,
+        "strikeRate": 140.52,
+        "economy": 0
+      }
+    },
+    {
+      "id": "261",
+      "name": "Brydon Carse",
+      "teamId": "",
+      "role": "Bowler",
+      "sourceNames": {
+        "batting": null,
+        "bowling": null
+      },
+      "before": {
+        "matches": 0,
+        "runs": 0,
+        "wickets": 0,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": 0
+      },
+      "after": {
+        "matches": 0,
+        "runs": 0,
+        "wickets": 0,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": 0
+      }
+    },
+    {
+      "id": "263",
+      "name": "Kamindu Mendis",
+      "teamId": "3",
+      "role": "All-rounder",
+      "sourceNames": {
+        "batting": "Kamindu Mendis",
+        "bowling": "Kamindu Mendis"
+      },
+      "before": {
+        "matches": 5,
+        "runs": 92,
+        "wickets": 2,
+        "average": 23,
+        "strikeRate": 133.34,
+        "economy": "8.57"
+      },
+      "after": {
+        "matches": 5,
+        "runs": 92,
+        "wickets": 2,
+        "average": 30.67,
+        "strikeRate": 133.33,
+        "economy": 8.57
+      }
+    },
+    {
+      "id": "264",
+      "name": "Dushmantha Chameera",
+      "teamId": "6",
+      "role": "Bowler",
+      "sourceNames": {
+        "batting": "Dushmantha Chameera",
+        "bowling": "Dushmantha Chameera"
+      },
+      "before": {
+        "matches": 19,
+        "runs": 53,
+        "wickets": 13,
+        "average": 13.25,
+        "strikeRate": 126.2,
+        "economy": "9.73"
+      },
+      "after": {
+        "matches": 20,
+        "runs": 53,
+        "wickets": 13,
+        "average": 13.25,
+        "strikeRate": 117.78,
+        "economy": 9.7
+      }
+    },
+    {
+      "id": "265",
+      "name": "Nathan Ellis",
+      "teamId": "",
+      "role": "Bowler",
+      "sourceNames": {
+        "batting": "Nathan Ellis",
+        "bowling": "Nathan Ellis"
+      },
+      "before": {
+        "matches": 17,
+        "runs": 19,
+        "wickets": 19,
+        "average": 4.75,
+        "strikeRate": 76,
+        "economy": 8.67
+      },
+      "after": {
+        "matches": 17,
+        "runs": 19,
+        "wickets": 19,
+        "average": 4.75,
+        "strikeRate": 76,
+        "economy": 8.66
+      }
+    },
+    {
+      "id": "267",
+      "name": "Aniket Verma",
+      "teamId": "3",
+      "role": "Batsman",
+      "sourceNames": {
+        "batting": "Aniket Verma",
+        "bowling": null
+      },
+      "before": {
+        "matches": 15,
+        "runs": 279,
+        "wickets": 0,
+        "average": 26.22,
+        "strikeRate": 166.2,
+        "economy": 0
+      },
+      "after": {
+        "matches": 24,
+        "runs": 315,
+        "wickets": 0,
+        "average": 21,
+        "strikeRate": 160.71,
+        "economy": 0
+      }
+    },
+    {
+      "id": "268",
+      "name": "Raj Bawa",
+      "teamId": "2",
+      "role": "All-rounder",
+      "sourceNames": {
+        "batting": "Raj Angad Bawa",
+        "bowling": "Rajangad Bawa"
+      },
+      "before": {
+        "matches": 5,
+        "runs": 19,
+        "wickets": 0,
+        "average": 9.5,
+        "strikeRate": 105.56,
+        "economy": 0
+      },
+      "after": {
+        "matches": 8,
+        "runs": 35,
+        "wickets": 2,
+        "average": 11.67,
+        "strikeRate": 109.38,
+        "economy": 12.5
+      }
+    },
+    {
+      "id": "269",
+      "name": "Musheer Khan",
+      "teamId": "5",
+      "role": "All-rounder",
+      "sourceNames": {
+        "batting": null,
+        "bowling": "Musheer Khan"
+      },
+      "before": {
+        "matches": 1,
+        "runs": 0,
+        "wickets": 1,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": "13.5"
+      },
+      "after": {
+        "matches": 1,
+        "runs": 0,
+        "wickets": 1,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": 13.5
+      }
+    },
+    {
+      "id": "271",
+      "name": "Suryansh Shedge",
+      "teamId": "5",
+      "role": "All-rounder",
+      "sourceNames": {
+        "batting": "Suryansh Shedge",
+        "bowling": null
+      },
+      "before": {
+        "matches": 5,
+        "runs": 7,
+        "wickets": 0,
+        "average": 2.33,
+        "strikeRate": 63.64,
+        "economy": "13.33"
+      },
+      "after": {
+        "matches": 12,
+        "runs": 165,
+        "wickets": 0,
+        "average": 23.57,
+        "strikeRate": 163.37,
+        "economy": "13.33"
+      }
+    },
+    {
+      "id": "273",
+      "name": "Prince Yadav",
+      "teamId": "7",
+      "role": "Bowler",
+      "sourceNames": {
+        "batting": null,
+        "bowling": "Prince Yadav"
+      },
+      "before": {
+        "matches": 6,
+        "runs": 5,
+        "wickets": 3,
+        "average": 0,
+        "strikeRate": 50,
+        "economy": "9.85"
+      },
+      "after": {
+        "matches": 20,
+        "runs": 5,
+        "wickets": 19,
+        "average": 0,
+        "strikeRate": 50,
+        "economy": 9.14
+      }
+    },
+    {
+      "id": "274",
+      "name": "Jamie Overton",
+      "teamId": "10",
+      "role": "All-rounder",
+      "sourceNames": {
+        "batting": "Jamie Overton",
+        "bowling": "Jamie Overton"
+      },
+      "before": {
+        "matches": 4,
+        "runs": 58,
+        "wickets": 0,
+        "average": 58,
+        "strikeRate": 214.29,
+        "economy": "13.29"
+      },
+      "after": {
+        "matches": 13,
+        "runs": 151,
+        "wickets": 14,
+        "average": 37.75,
+        "strikeRate": 162.37,
+        "economy": 9.76
+      }
+    },
+    {
+      "id": "275",
+      "name": "Xavier Bartlett",
+      "teamId": "5",
+      "role": "Bowler",
+      "sourceNames": {
+        "batting": "Xavier Bartlett",
+        "bowling": "Xavier Bartlett"
+      },
+      "before": {
+        "matches": 4,
+        "runs": 11,
+        "wickets": 2,
+        "average": 11,
+        "strikeRate": 73.34,
+        "economy": "9.6"
+      },
+      "after": {
+        "matches": 13,
+        "runs": 40,
+        "wickets": 7,
+        "average": 20,
+        "strikeRate": 142.86,
+        "economy": 11.13
+      }
+    },
+    {
+      "id": "277",
+      "name": "Abhinandan Singh",
+      "teamId": "1",
+      "role": "Bowler",
+      "sourceNames": {
+        "batting": null,
+        "bowling": "Abhinandan Singh"
+      },
+      "before": {
+        "matches": 3,
+        "runs": 0,
+        "wickets": 3,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": 12.620689655172415
+      },
+      "after": {
+        "matches": 3,
+        "runs": 0,
+        "wickets": 3,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": 12.62
+      }
+    },
+    {
+      "id": "279",
+      "name": "Pyla Avinash",
+      "teamId": "5",
+      "role": "Batsman",
+      "sourceNames": {
+        "batting": null,
+        "bowling": null
+      },
+      "before": {
+        "matches": 0,
+        "runs": 0,
+        "wickets": 0,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": 0
+      },
+      "after": {
+        "matches": 0,
+        "runs": 0,
+        "wickets": 0,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": 0
+      }
+    },
+    {
+      "id": "280",
+      "name": "Ramakrishna Ghosh",
+      "teamId": "10",
+      "role": "All-rounder",
+      "sourceNames": {
+        "batting": null,
+        "bowling": "Ramakrishna Ghosh"
+      },
+      "before": {
+        "matches": 0,
+        "runs": 0,
+        "wickets": 0,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": 0
+      },
+      "after": {
+        "matches": 1,
+        "runs": 0,
+        "wickets": 1,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": 8
+      }
+    },
+    {
+      "id": "283",
+      "name": "Vaibhav Sooryavanshi",
+      "teamId": "8",
+      "role": "Batsman",
+      "sourceNames": {
+        "batting": "Vaibhav Sooryavanshi",
+        "bowling": null
+      },
+      "before": {
+        "matches": 8,
+        "runs": 304,
+        "wickets": 0,
+        "average": 36,
+        "strikeRate": 206.56,
+        "economy": 0
+      },
+      "after": {
+        "matches": 23,
+        "runs": 1028,
+        "wickets": 0,
+        "average": 44.7,
+        "strikeRate": 228.95,
+        "economy": 0
+      }
+    },
+    {
+      "id": "284",
+      "name": "Eshan Malinga",
+      "teamId": "3",
+      "role": "Bowler",
+      "sourceNames": {
+        "batting": null,
+        "bowling": "Eshan Malinga"
+      },
+      "before": {
+        "matches": 8,
+        "runs": 0,
+        "wickets": 13,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": "9.52"
+      },
+      "after": {
+        "matches": 22,
+        "runs": 0,
+        "wickets": 33,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": 9.2
+      }
+    },
+    {
+      "id": "285",
+      "name": "Tripurana Vijay",
+      "teamId": "6",
+      "role": "All-rounder",
+      "sourceNames": {
+        "batting": null,
+        "bowling": null
+      },
+      "before": {
+        "matches": 0,
+        "runs": 0,
+        "wickets": 0,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": 0
+      },
+      "after": {
+        "matches": 0,
+        "runs": 0,
+        "wickets": 0,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": 0
+      }
+    },
+    {
+      "id": "286",
+      "name": "Madhav Tiwari",
+      "teamId": "6",
+      "role": "All-rounder",
+      "sourceNames": {
+        "batting": "Madhav Tiwari",
+        "bowling": "Madhav Tiwari"
+      },
+      "before": {
+        "matches": 0,
+        "runs": 0,
+        "wickets": 0,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": 0
+      },
+      "after": {
+        "matches": 4,
+        "runs": 21,
+        "wickets": 4,
+        "average": 21,
+        "strikeRate": 175,
+        "economy": 8.7
+      }
+    },
+    {
+      "id": "287",
+      "name": "Jofra Archer",
+      "teamId": "8",
+      "role": "Bowler",
+      "sourceNames": {
+        "batting": "Jofra Archer",
+        "bowling": "Jofra Archer"
+      },
+      "before": {
+        "matches": 53,
+        "runs": 262,
+        "wickets": 61,
+        "average": 11.4,
+        "strikeRate": 148.06,
+        "economy": "7.83"
+      },
+      "after": {
+        "matches": 68,
+        "runs": 326,
+        "wickets": 84,
+        "average": 13.04,
+        "strikeRate": 144.89,
+        "economy": 8.22
+      }
+    },
+    {
+      "id": "288",
+      "name": "Mohammed Shami",
+      "teamId": "7",
+      "role": "Bowler",
+      "sourceNames": {
+        "batting": "Mohammad Shami",
+        "bowling": "Mohammad Shami"
+      },
+      "before": {
+        "matches": 119,
+        "runs": 84,
+        "wickets": 133,
+        "average": 6,
+        "strikeRate": 94.39,
+        "economy": "8.63"
+      },
+      "after": {
+        "matches": 132,
+        "runs": 115,
+        "wickets": 145,
+        "average": 6.05,
+        "strikeRate": 103.6,
+        "economy": 8.67
+      }
+    },
+    {
+      "id": "289",
+      "name": "Nandre Burger",
+      "teamId": "8",
+      "role": "Bowler",
+      "sourceNames": {
+        "batting": "Nandre Burger",
+        "bowling": "Nandre Burger"
+      },
+      "before": {
+        "matches": 6,
+        "runs": 0,
+        "wickets": 9,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": "8.14"
+      },
+      "after": {
+        "matches": 19,
+        "runs": 14,
+        "wickets": 21,
+        "average": 14,
+        "strikeRate": 155.56,
+        "economy": 9.67
+      }
+    },
+    {
+      "id": "290",
+      "name": "Lhuan-dre Pretorius",
+      "teamId": "8",
+      "role": "Wicket-keeper",
+      "sourceNames": {
+        "batting": null,
+        "bowling": null
+      },
+      "before": {
+        "matches": 0,
+        "runs": 0,
+        "wickets": 0,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": 0
+      },
+      "after": {
+        "matches": 0,
+        "runs": 0,
+        "wickets": 0,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": 0
+      }
+    },
+    {
+      "id": "291",
+      "name": "Shardul Thakur",
+      "teamId": "2",
+      "role": "All-rounder",
+      "sourceNames": {
+        "batting": "Shardul Thakur",
+        "bowling": "Shardul Thakur"
+      },
+      "before": {
+        "matches": 106,
+        "runs": 325,
+        "wickets": 110,
+        "average": 11.61,
+        "strikeRate": 139.49,
+        "economy": "9.37"
+      },
+      "after": {
+        "matches": 114,
+        "runs": 349,
+        "wickets": 119,
+        "average": 11.63,
+        "strikeRate": 132.7,
+        "economy": 9.57
+      }
+    },
+    {
+      "id": "292",
+      "name": "Corbin Bosch",
+      "teamId": "2",
+      "role": "All-rounder",
+      "sourceNames": {
+        "batting": "Corbin Bosch",
+        "bowling": "Corbin Bosch"
+      },
+      "before": {
+        "matches": 3,
+        "runs": 47,
+        "wickets": 1,
+        "average": 23.5,
+        "strikeRate": 146.88,
+        "economy": 7.86
+      },
+      "after": {
+        "matches": 9,
+        "runs": 97,
+        "wickets": 13,
+        "average": 32.33,
+        "strikeRate": 153.97,
+        "economy": 9.2
+      }
+    },
+    {
+      "id": "293",
+      "name": "Raghu Sharma",
+      "teamId": "2",
+      "role": "Bowler",
+      "sourceNames": {
+        "batting": null,
+        "bowling": "Raghu Sharma"
+      },
+      "before": {
+        "matches": 0,
+        "runs": 0,
+        "wickets": 0,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": 0
+      },
+      "after": {
+        "matches": 5,
+        "runs": 0,
+        "wickets": 1,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": 8.67
+      }
+    },
+    {
+      "id": "294",
+      "name": "Dewald Brevis",
+      "teamId": "10",
+      "role": "Batsman",
+      "sourceNames": {
+        "batting": "Dewald Brevis",
+        "bowling": null
+      },
+      "before": {
+        "matches": 16,
+        "runs": 455,
+        "wickets": 1,
+        "average": 28.44,
+        "strikeRate": 153.2,
+        "economy": 16
+      },
+      "after": {
+        "matches": 27,
+        "runs": 606,
+        "wickets": 1,
+        "average": 25.25,
+        "strikeRate": 146.02,
+        "economy": 16
+      }
+    },
+    {
+      "id": "295",
+      "name": "Ayush Mhatre",
+      "teamId": "10",
+      "role": "Batsman",
+      "sourceNames": {
+        "batting": "Ayush Mhatre",
+        "bowling": null
+      },
+      "before": {
+        "matches": 8,
+        "runs": 240,
+        "wickets": 0,
+        "average": 34.29,
+        "strikeRate": 188.98,
+        "economy": 0
+      },
+      "after": {
+        "matches": 13,
+        "runs": 441,
+        "wickets": 0,
+        "average": 33.92,
+        "strikeRate": 183.75,
+        "economy": 0
+      }
+    },
+    {
+      "id": "296",
+      "name": "Urvil Patel",
+      "teamId": "10",
+      "role": "Wicket-keeper",
+      "sourceNames": {
+        "batting": "Urvil Patel",
+        "bowling": null
+      },
+      "before": {
+        "matches": 3,
+        "runs": 68,
+        "wickets": 0,
+        "average": 22.67,
+        "strikeRate": 212.5,
+        "economy": 0
+      },
+      "after": {
+        "matches": 10,
+        "runs": 197,
+        "wickets": 0,
+        "average": 19.7,
+        "strikeRate": 205.21,
+        "economy": 0
+      }
+    },
+    {
+      "id": "297",
+      "name": "Sakib Hussain",
+      "teamId": "3",
+      "role": "Bowler",
+      "sourceNames": {
+        "batting": "Sakib Hussain",
+        "bowling": "Sakib Hussain"
+      },
+      "before": {
+        "matches": 0,
+        "runs": 0,
+        "wickets": 0,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": 0
+      },
+      "after": {
+        "matches": 11,
+        "runs": 5,
+        "wickets": 15,
+        "average": 0,
+        "strikeRate": 71.43,
+        "economy": 9.45
+      }
+    },
+    {
+      "id": "298",
+      "name": "Praful Hinge",
+      "teamId": "3",
+      "role": "Bowler",
+      "sourceNames": {
+        "batting": null,
+        "bowling": "Praful Hinge"
+      },
+      "before": {
+        "matches": 0,
+        "runs": 0,
+        "wickets": 0,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": 0
+      },
+      "after": {
+        "matches": 7,
+        "runs": 0,
+        "wickets": 14,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": 11.73
+      }
+    },
+    {
+      "id": "299",
+      "name": "Liam Livingstone",
+      "teamId": "3",
+      "role": "All-rounder",
+      "sourceNames": {
+        "batting": "Liam Livingstone",
+        "bowling": "Liam Livingstone"
+      },
+      "before": {
+        "matches": 49,
+        "runs": 1051,
+        "wickets": 13,
+        "average": 26.28,
+        "strikeRate": 158.77,
+        "economy": "9.02"
+      },
+      "after": {
+        "matches": 51,
+        "runs": 1066,
+        "wickets": 13,
+        "average": 25.38,
+        "strikeRate": 155.17,
+        "economy": 9.02
+      }
+    },
+    {
+      "id": "300",
+      "name": "Jack Edwards",
+      "teamId": "",
+      "role": "Batsman",
+      "sourceNames": {
+        "batting": null,
+        "bowling": null
+      },
+      "before": {
+        "matches": 0,
+        "runs": 0,
+        "wickets": 0,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": 0
+      },
+      "after": {
+        "matches": 0,
+        "runs": 0,
+        "wickets": 0,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": 0
+      }
+    },
+    {
+      "id": "301",
+      "name": "Smaran Ravichandran",
+      "teamId": "3",
+      "role": "Batsman",
+      "sourceNames": {
+        "batting": "Smaran Ravichandran",
+        "bowling": null
+      },
+      "before": {
+        "matches": 0,
+        "runs": 0,
+        "wickets": 0,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": 0
+      },
+      "after": {
+        "matches": 6,
+        "runs": 19,
+        "wickets": 0,
+        "average": 6.33,
+        "strikeRate": 76,
+        "economy": 0
+      }
+    },
+    {
+      "id": "302",
+      "name": "Harsh Dubey",
+      "teamId": "3",
+      "role": "All-rounder",
+      "sourceNames": {
+        "batting": "Harsh Dubey",
+        "bowling": "Harsh Dubey"
+      },
+      "before": {
+        "matches": 4,
+        "runs": 3,
+        "wickets": 6,
+        "average": 3,
+        "strikeRate": 100,
+        "economy": "10.23"
+      },
+      "after": {
+        "matches": 11,
+        "runs": 13,
+        "wickets": 13,
+        "average": 6.5,
+        "strikeRate": 144.44,
+        "economy": 10.19
+      }
+    },
+    {
+      "id": "303",
+      "name": "Jaydev Unadkat",
+      "teamId": "3",
+      "role": "Bowler",
+      "sourceNames": {
+        "batting": "Jaydev Unadkat",
+        "bowling": "Jaydev Unadkat"
+      },
+      "before": {
+        "matches": 113,
+        "runs": 201,
+        "wickets": 111,
+        "average": 12.31,
+        "strikeRate": 118.68,
+        "economy": "8.88"
+      },
+      "after": {
+        "matches": 116,
+        "runs": 201,
+        "wickets": 114,
+        "average": 12.56,
+        "strikeRate": 118.93,
+        "economy": 8.94
+      }
+    },
+    {
+      "id": "304",
+      "name": "Shivang Kumar",
+      "teamId": "3",
+      "role": "All-rounder",
+      "sourceNames": {
+        "batting": "Shivang Kumar",
+        "bowling": "Shivang Kumar"
+      },
+      "before": {
+        "matches": 0,
+        "runs": 0,
+        "wickets": 0,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": 0
+      },
+      "after": {
+        "matches": 13,
+        "runs": 53,
+        "wickets": 9,
+        "average": 8.83,
+        "strikeRate": 115.22,
+        "economy": 9.62
+      }
+    },
+    {
+      "id": "305",
+      "name": "Zeeshan Ansari",
+      "teamId": "3",
+      "role": "Bowler",
+      "sourceNames": {
+        "batting": null,
+        "bowling": "Zeeshan Ansari"
+      },
+      "before": {
+        "matches": 10,
+        "runs": 0,
+        "wickets": 6,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": "9.84"
+      },
+      "after": {
+        "matches": 10,
+        "runs": 0,
+        "wickets": 6,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": 9.84
+      }
+    },
+    {
+      "id": "306",
+      "name": "Pat Cummins",
+      "teamId": "3",
+      "role": "Bowler",
+      "sourceNames": {
+        "batting": "Pat Cummins",
+        "bowling": "Pat Cummins"
+      },
+      "before": {
+        "matches": 72,
+        "runs": 612,
+        "wickets": 79,
+        "average": 20.4,
+        "strikeRate": 152.24,
+        "economy": "8.81"
+      },
+      "after": {
+        "matches": 80,
+        "runs": 642,
+        "wickets": 87,
+        "average": 19.45,
+        "strikeRate": 152.49,
+        "economy": 8.89
+      }
+    },
+    {
+      "id": "307",
+      "name": "Tom Banton",
+      "teamId": "4",
+      "role": "Wicket-keeper",
+      "sourceNames": {
+        "batting": "Tom Banton",
+        "bowling": null
+      },
+      "before": {
+        "matches": 2,
+        "runs": 18,
+        "wickets": 0,
+        "average": 9,
+        "strikeRate": 90,
+        "economy": 0
+      },
+      "after": {
+        "matches": 2,
+        "runs": 18,
+        "wickets": 0,
+        "average": 9,
+        "strikeRate": 90,
+        "economy": 0
+      }
+    },
+    {
+      "id": "308",
+      "name": "Mitchell Owen",
+      "teamId": "5",
+      "role": "All-rounder",
+      "sourceNames": {
+        "batting": null,
+        "bowling": null
+      },
+      "before": {
+        "matches": 1,
+        "runs": 0,
+        "wickets": 0,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": 0
+      },
+      "after": {
+        "matches": 1,
+        "runs": 0,
+        "wickets": 0,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": 0
+      }
+    },
+    {
+      "id": "309",
+      "name": "Vishal Nishad",
+      "teamId": "5",
+      "role": "All-rounder",
+      "sourceNames": {
+        "batting": null,
+        "bowling": null
+      },
+      "before": {
+        "matches": 0,
+        "runs": 0,
+        "wickets": 0,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": 0
+      },
+      "after": {
+        "matches": 0,
+        "runs": 0,
+        "wickets": 0,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": 0
+      }
+    },
+    {
+      "id": "310",
+      "name": "Ben Dwarshuis",
+      "teamId": "5",
+      "role": "Bowler",
+      "sourceNames": {
+        "batting": null,
+        "bowling": "Ben Dwarshuis"
+      },
+      "before": {
+        "matches": 0,
+        "runs": 0,
+        "wickets": 0,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": 0
+      },
+      "after": {
+        "matches": 1,
+        "runs": 0,
+        "wickets": 1,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": 12.75
+      }
+    },
+    {
+      "id": "311",
+      "name": "Sahil Parakh",
+      "teamId": "6",
+      "role": "Batsman",
+      "sourceNames": {
+        "batting": "Sahil Parakh",
+        "bowling": null
+      },
+      "before": {
+        "matches": 0,
+        "runs": 0,
+        "wickets": 0,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": 0
+      },
+      "after": {
+        "matches": 4,
+        "runs": 46,
+        "wickets": 0,
+        "average": 11.5,
+        "strikeRate": 139.39,
+        "economy": 0
+      }
+    },
+    {
+      "id": "312",
+      "name": "Brijesh Sharma",
+      "teamId": "8",
+      "role": "Bowler",
+      "sourceNames": {
+        "batting": null,
+        "bowling": "Brijesh Sharma"
+      },
+      "before": {
+        "matches": 1,
+        "runs": 0,
+        "wickets": 1,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": "5.67"
+      },
+      "after": {
+        "matches": 13,
+        "runs": 0,
+        "wickets": 14,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": 9.89
+      }
+    },
+    {
+      "id": "313",
+      "name": "Blessing Muzarabani",
+      "teamId": "9",
+      "role": "Bowler",
+      "sourceNames": {
+        "batting": null,
+        "bowling": "Blessing Muzarabani"
+      },
+      "before": {
+        "matches": 1,
+        "runs": 0,
+        "wickets": 0,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": "5.67"
+      },
+      "after": {
+        "matches": 2,
+        "runs": 0,
+        "wickets": 4,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": 10.71
+      }
+    },
+    {
+      "id": "314",
+      "name": "Matthew Short",
+      "teamId": "10",
+      "role": "Batsman",
+      "sourceNames": {
+        "batting": "Matthew Short",
+        "bowling": null
+      },
+      "before": {
+        "matches": 7,
+        "runs": 119,
+        "wickets": 0,
+        "average": 19.5,
+        "strikeRate": 127.18,
+        "economy": "10.56"
+      },
+      "after": {
+        "matches": 9,
+        "runs": 177,
+        "wickets": 0,
+        "average": 19.67,
+        "strikeRate": 123.78,
+        "economy": "10.56"
+      }
+    },
+    {
+      "id": "315",
+      "name": "Kartik Sharma",
+      "teamId": "10",
+      "role": "Wicket-keeper",
+      "sourceNames": {
+        "batting": "Kartik Sharma",
+        "bowling": null
+      },
+      "before": {
+        "matches": 1,
+        "runs": 18,
+        "wickets": 0,
+        "average": 18,
+        "strikeRate": 120,
+        "economy": 0
+      },
+      "after": {
+        "matches": 11,
+        "runs": 295,
+        "wickets": 0,
+        "average": 32.78,
+        "strikeRate": 136.57,
+        "economy": 0
+      }
+    },
+    {
+      "id": "316",
+      "name": "Prashant Veer",
+      "teamId": "10",
+      "role": "Bowler",
+      "sourceNames": {
+        "batting": "Prashant Veer",
+        "bowling": null
+      },
+      "before": {
+        "matches": 0,
+        "runs": 0,
+        "wickets": 0,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": 0
+      },
+      "after": {
+        "matches": 6,
+        "runs": 90,
+        "wickets": 0,
+        "average": 45,
+        "strikeRate": 134.33,
+        "economy": 0
+      }
+    },
+    {
+      "id": "317",
+      "name": "David Payne",
+      "teamId": "3",
+      "role": "Bowler",
+      "sourceNames": {
+        "batting": null,
+        "bowling": "David Payne"
+      },
+      "before": {
+        "matches": 1,
+        "runs": 6,
+        "wickets": 2,
+        "average": 0,
+        "strikeRate": 120,
+        "economy": "5.83"
+      },
+      "after": {
+        "matches": 2,
+        "runs": 6,
+        "wickets": 2,
+        "average": 0,
+        "strikeRate": 120,
+        "economy": 14
+      }
+    },
+    {
+      "id": "318",
+      "name": "Cameron Green",
+      "teamId": "9",
+      "role": "All-rounder",
+      "sourceNames": {
+        "batting": "Cameron Green",
+        "bowling": "Cameron Green"
+      },
+      "before": {
+        "matches": 30,
+        "runs": 725,
+        "wickets": 16,
+        "average": 41.59,
+        "strikeRate": 153.7,
+        "economy": "9.08"
+      },
+      "after": {
+        "matches": 43,
+        "runs": 1029,
+        "wickets": 23,
+        "average": 38.11,
+        "strikeRate": 151.1,
+        "economy": 9.44
+      }
+    },
+    {
+      "id": "319",
+      "name": "Saurabh Dubey",
+      "teamId": "9",
+      "role": "Bowler",
+      "sourceNames": {
+        "batting": "Saurabh Dubey",
+        "bowling": "Saurabh Dubey"
+      },
+      "before": {
+        "matches": 0,
+        "runs": 0,
+        "wickets": 0,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": 0
+      },
+      "after": {
+        "matches": 4,
+        "runs": 4,
+        "wickets": 5,
+        "average": 0,
+        "strikeRate": 200,
+        "economy": 8.26
+      }
+    },
+    {
+      "id": "320",
+      "name": "George Linde ",
+      "teamId": "7",
+      "role": "All-rounder",
+      "sourceNames": {
+        "batting": "George Linde",
+        "bowling": "George Linde"
+      },
+      "before": {
+        "matches": 0,
+        "runs": 0,
+        "wickets": 0,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": 0
+      },
+      "after": {
+        "matches": 3,
+        "runs": 31,
+        "wickets": 1,
+        "average": 10.33,
+        "strikeRate": 147.62,
+        "economy": 8.92
+      }
+    },
+    {
+      "id": "321",
+      "name": "Kulwant Khejroliya",
+      "teamId": "4",
+      "role": "Bowler",
+      "sourceNames": {
+        "batting": null,
+        "bowling": "Kulwant Khejroliya"
+      },
+      "before": {
+        "matches": 0,
+        "runs": 0,
+        "wickets": 0,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": 0
+      },
+      "after": {
+        "matches": 9,
+        "runs": 0,
+        "wickets": 6,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": 11.05
+      }
+    },
+    {
+      "id": "322",
+      "name": "Navdeep Saini",
+      "teamId": "9",
+      "role": "Bowler",
+      "sourceNames": {
+        "batting": "Navdeep Saini",
+        "bowling": "Navdeep Saini"
+      },
+      "before": {
+        "matches": 0,
+        "runs": 0,
+        "wickets": 0,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": 0
+      },
+      "after": {
+        "matches": 34,
+        "runs": 33,
+        "wickets": 23,
+        "average": 8.25,
+        "strikeRate": 89.19,
+        "economy": 8.97
+      }
+    },
+    {
+      "id": "323",
+      "name": "Krish Bhagat",
+      "teamId": "2",
+      "role": "All-rounder",
+      "sourceNames": {
+        "batting": null,
+        "bowling": null
+      },
+      "before": {
+        "matches": 0,
+        "runs": 0,
+        "wickets": 0,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": 0
+      },
+      "after": {
+        "matches": 0,
+        "runs": 0,
+        "wickets": 0,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": 0
+      }
+    },
+    {
+      "id": "324",
+      "name": "Dilshan Madushanka",
+      "teamId": "3",
+      "role": "Bowler",
+      "sourceNames": {
+        "batting": null,
+        "bowling": "Dilshan Madushanka"
+      },
+      "before": {
+        "matches": 0,
+        "runs": 0,
+        "wickets": 0,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": 0
+      },
+      "after": {
+        "matches": 1,
+        "runs": 0,
+        "wickets": 1,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": 9
+      }
+    },
+    {
+      "id": "325",
+      "name": "Dasun Shanaka",
+      "teamId": "8",
+      "role": "All-rounder",
+      "sourceNames": {
+        "batting": "Dasun Shanaka",
+        "bowling": "Dasun Shanaka"
+      },
+      "before": {
+        "matches": 0,
+        "runs": 0,
+        "wickets": 0,
+        "average": 0,
+        "strikeRate": 0,
+        "economy": 0
+      },
+      "after": {
+        "matches": 10,
+        "runs": 89,
+        "wickets": 1,
+        "average": 12.71,
+        "strikeRate": 123.61,
+        "economy": 10
+      }
+    }
+  ],
+  "unmatchedPlayers": [
+    {
+      "id": "12",
+      "name": "Mangesh Yadav",
+      "teamId": "1",
+      "role": "All-rounder",
+      "currentCore": {
+        "matches": 0,
+        "runs": 0,
+        "wickets": 0
+      }
+    },
+    {
+      "id": "25",
+      "name": "Lungi Ngidi",
+      "teamId": "6",
+      "role": "Bowler",
+      "currentCore": {
+        "matches": 16,
+        "runs": 0,
+        "wickets": 29
+      }
+    },
+    {
+      "id": "26",
+      "name": "Ben Duckett",
+      "teamId": "6",
+      "role": "Batsman",
+      "currentCore": {
+        "matches": 0,
+        "runs": 0,
+        "wickets": 0
+      }
+    },
+    {
+      "id": "37",
+      "name": "Naman Tiwari",
+      "teamId": "7",
+      "role": "Bowler",
+      "currentCore": {
+        "matches": 0,
+        "runs": 0,
+        "wickets": 0
+      }
+    },
+    {
+      "id": "44",
+      "name": "Zak Foulkes",
+      "teamId": "10",
+      "role": "All-rounder",
+      "currentCore": {
+        "matches": 0,
+        "runs": 0,
+        "wickets": 0
+      }
+    },
+    {
+      "id": "50",
+      "name": "Daksh Kamra",
+      "teamId": "9",
+      "role": "All-rounder",
+      "currentCore": {
+        "matches": 0,
+        "runs": 0,
+        "wickets": 0
+      }
+    },
+    {
+      "id": "51",
+      "name": "Sarthak Ranjan",
+      "teamId": "9",
+      "role": "Batsman",
+      "currentCore": {
+        "matches": 0,
+        "runs": 0,
+        "wickets": 0
+      }
+    },
+    {
+      "id": "52",
+      "name": "Krains Fuletra",
+      "teamId": "3",
+      "role": "Bowler",
+      "currentCore": {
+        "matches": 0,
+        "runs": 0,
+        "wickets": 0
+      }
+    },
+    {
+      "id": "54",
+      "name": "Atharva Ankolekar",
+      "teamId": "",
+      "role": "All-rounder",
+      "currentCore": {
+        "matches": 0,
+        "runs": 0,
+        "wickets": 0
+      }
+    },
+    {
+      "id": "55",
+      "name": "Amit Kumar",
+      "teamId": "3",
+      "role": "Bowler",
+      "currentCore": {
+        "matches": 0,
+        "runs": 0,
+        "wickets": 0
+      }
+    },
+    {
+      "id": "56",
+      "name": "Onkar Tarmale",
+      "teamId": "3",
+      "role": "Bowler",
+      "currentCore": {
+        "matches": 0,
+        "runs": 0,
+        "wickets": 0
+      }
+    },
+    {
+      "id": "57",
+      "name": "Mohammed Salahuddin Izhar",
+      "teamId": "2",
+      "role": "Bowler",
+      "currentCore": {
+        "matches": 0,
+        "runs": 0,
+        "wickets": 0
+      }
+    },
+    {
+      "id": "59",
+      "name": "Satvik Deswal",
+      "teamId": "1",
+      "role": "All-rounder",
+      "currentCore": {
+        "matches": 0,
+        "runs": 0,
+        "wickets": 0
+      }
+    },
+    {
+      "id": "60",
+      "name": "Danish Malewar",
+      "teamId": "2",
+      "role": "All-rounder",
+      "currentCore": {
+        "matches": 0,
+        "runs": 0,
+        "wickets": 0
+      }
+    },
+    {
+      "id": "68",
+      "name": "Mayank Rawat",
+      "teamId": "2",
+      "role": "All-rounder",
+      "currentCore": {
+        "matches": 0,
+        "runs": 0,
+        "wickets": 0
+      }
+    },
+    {
+      "id": "70",
+      "name": "Aman Rao Perala",
+      "teamId": "8",
+      "role": "Batsman",
+      "currentCore": {
+        "matches": 0,
+        "runs": 0,
+        "wickets": 0
+      }
+    },
+    {
+      "id": "71",
+      "name": "Jordan Cox",
+      "teamId": "1",
+      "role": "Wicket-keeper",
+      "currentCore": {
+        "matches": 0,
+        "runs": 0,
+        "wickets": 0
+      }
+    },
+    {
+      "id": "72",
+      "name": "Kanishk Chouhan",
+      "teamId": "1",
+      "role": "Batsman",
+      "currentCore": {
+        "matches": 0,
+        "runs": 0,
+        "wickets": 0
+      }
+    },
+    {
+      "id": "73",
+      "name": "Vihaan Malhotra",
+      "teamId": "1",
+      "role": "Batsman",
+      "currentCore": {
+        "matches": 0,
+        "runs": 0,
+        "wickets": 0
+      }
+    },
+    {
+      "id": "74",
+      "name": "Vicky Ostwal",
+      "teamId": "1",
+      "role": "Bowler",
+      "currentCore": {
+        "matches": 0,
+        "runs": 0,
+        "wickets": 0
+      }
+    },
+    {
+      "id": "171",
+      "name": "Luvnith Sisodia",
+      "teamId": "",
+      "role": "Wicket-keeper",
+      "currentCore": {
+        "matches": 0,
+        "runs": 0,
+        "wickets": 0
+      }
+    },
+    {
+      "id": "215",
+      "name": "Gurnoor Brar",
+      "teamId": "4",
+      "role": "Bowler",
+      "currentCore": {
+        "matches": 1,
+        "runs": 0,
+        "wickets": 0
+      }
+    },
+    {
+      "id": "237",
+      "name": "Harnoor Singh",
+      "teamId": "5",
+      "role": "Batsman",
+      "currentCore": {
+        "matches": 0,
+        "runs": 0,
+        "wickets": 0
+      }
+    },
+    {
+      "id": "256",
+      "name": "Ajay Mandal",
+      "teamId": "6",
+      "role": "All-rounder",
+      "currentCore": {
+        "matches": 0,
+        "runs": 0,
+        "wickets": 0
+      }
+    },
+    {
+      "id": "261",
+      "name": "Brydon Carse",
+      "teamId": "",
+      "role": "Bowler",
+      "currentCore": {
+        "matches": 0,
+        "runs": 0,
+        "wickets": 0
+      }
+    },
+    {
+      "id": "279",
+      "name": "Pyla Avinash",
+      "teamId": "5",
+      "role": "Batsman",
+      "currentCore": {
+        "matches": 0,
+        "runs": 0,
+        "wickets": 0
+      }
+    },
+    {
+      "id": "285",
+      "name": "Tripurana Vijay",
+      "teamId": "6",
+      "role": "All-rounder",
+      "currentCore": {
+        "matches": 0,
+        "runs": 0,
+        "wickets": 0
+      }
+    },
+    {
+      "id": "290",
+      "name": "Lhuan-dre Pretorius",
+      "teamId": "8",
+      "role": "Wicket-keeper",
+      "currentCore": {
+        "matches": 0,
+        "runs": 0,
+        "wickets": 0
+      }
+    },
+    {
+      "id": "300",
+      "name": "Jack Edwards",
+      "teamId": "",
+      "role": "Batsman",
+      "currentCore": {
+        "matches": 0,
+        "runs": 0,
+        "wickets": 0
+      }
+    },
+    {
+      "id": "308",
+      "name": "Mitchell Owen",
+      "teamId": "5",
+      "role": "All-rounder",
+      "currentCore": {
+        "matches": 1,
+        "runs": 0,
+        "wickets": 0
+      }
+    },
+    {
+      "id": "309",
+      "name": "Vishal Nishad",
+      "teamId": "5",
+      "role": "All-rounder",
+      "currentCore": {
+        "matches": 0,
+        "runs": 0,
+        "wickets": 0
+      }
+    },
+    {
+      "id": "323",
+      "name": "Krish Bhagat",
+      "teamId": "2",
+      "role": "All-rounder",
+      "currentCore": {
+        "matches": 0,
+        "runs": 0,
+        "wickets": 0
+      }
+    }
+  ]
+}
