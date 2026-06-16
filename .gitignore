@@ -13,8 +13,14 @@
 /.next/
 /out/
 
+# cloudflare/wrangler local state
+/.wrangler/
+
 # production
 /build
+
+# local scratch files
+/.tmp/
 
 # misc
 .DS_Store
