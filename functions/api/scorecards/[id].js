@@ -3,6 +3,9 @@
  * Handles GET, PUT, DELETE for specific scorecard by ID
  */
 
+import { appendAdminAuditLog } from '../_adminActivity.js';
+import { validateScorecardForPublish } from '../_scorecardValidation.js';
+
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
@@ -63,7 +66,11 @@ export async function onRequest(context) {
         });
       }
 
-      const updateData = await request.json();
+      const rawUpdateData = await request.json();
+      const validationOverride =
+        rawUpdateData?.validationOverride === true ||
+        url.searchParams.get('validationOverride') === '1';
+      const { validationOverride: _validationOverride, ...updateData } = rawUpdateData;
       const existingScorecard = JSON.parse(existingData);
       
       const updatedScorecard = {
@@ -73,10 +80,52 @@ export async function onRequest(context) {
         updatedAt: new Date().toISOString()
       };
 
+      if (existingScorecard.draft !== false && updatedScorecard.draft === false) {
+        const validation = await validateScorecardForPublish(updatedScorecard, env, {
+          currentScorecardId: scorecardId,
+        });
+
+        if (validation.errors.length > 0) {
+          return new Response(JSON.stringify({
+            error: 'Scorecard cannot be published',
+            validation,
+          }), {
+            status: 422,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          });
+        }
+
+        if (validation.warnings.length > 0 && !validationOverride) {
+          return new Response(JSON.stringify({
+            error: 'Publish validation warnings',
+            validation,
+          }), {
+            status: 409,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          });
+        }
+      }
+
       await env.IPL_CACHE.put(
         `scorecard_${scorecardId}`,
         JSON.stringify(updatedScorecard)
       );
+
+      if (existingScorecard.draft !== false && updatedScorecard.draft === false) {
+        await appendAdminAuditLog(request, env, {
+          action: 'publish_scorecard',
+          details: `Published scorecard for match ${updatedScorecard.matchId || scorecardId}`,
+          entityType: 'scorecard',
+          entityId: scorecardId,
+        });
+      } else {
+        await appendAdminAuditLog(request, env, {
+          action: 'update_scorecard',
+          details: `Updated scorecard for match ${updatedScorecard.matchId || scorecardId}`,
+          entityType: 'scorecard',
+          entityId: scorecardId,
+        });
+      }
 
       return new Response(JSON.stringify(updatedScorecard), {
         status: 200,

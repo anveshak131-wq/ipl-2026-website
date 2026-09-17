@@ -3,6 +3,9 @@
  * Handles PUT request to /api/scorecards/[id]/publish
  */
 
+import { appendAdminAuditLog } from '../../_adminActivity.js';
+import { validateScorecardForPublish } from '../../_scorecardValidation.js';
+
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
@@ -46,15 +49,52 @@ export async function onRequest(context) {
         });
       }
 
+      const body = await request.json().catch(() => ({}));
+      const url = new URL(request.url);
+      const validationOverride =
+        body?.validationOverride === true ||
+        url.searchParams.get('validationOverride') === '1';
+
       const scorecard = JSON.parse(existingData);
       scorecard.draft = false;
       scorecard.publishedAt = new Date().toISOString();
       scorecard.updatedAt = new Date().toISOString();
 
+      const validation = await validateScorecardForPublish(scorecard, env, {
+        currentScorecardId: scorecardId,
+      });
+
+      if (validation.errors.length > 0) {
+        return new Response(JSON.stringify({
+          error: 'Scorecard cannot be published',
+          validation,
+        }), {
+          status: 422,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+      }
+
+      if (validation.warnings.length > 0 && !validationOverride) {
+        return new Response(JSON.stringify({
+          error: 'Publish validation warnings',
+          validation,
+        }), {
+          status: 409,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+      }
+
       await env.IPL_CACHE.put(
         `scorecard_${scorecardId}`,
         JSON.stringify(scorecard)
       );
+
+      await appendAdminAuditLog(request, env, {
+        action: 'publish_scorecard',
+        details: `Published scorecard for match ${scorecard.matchId || scorecardId}`,
+        entityType: 'scorecard',
+        entityId: scorecardId,
+      });
 
       return new Response(JSON.stringify(scorecard), {
         status: 200,

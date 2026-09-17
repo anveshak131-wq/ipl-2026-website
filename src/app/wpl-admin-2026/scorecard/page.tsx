@@ -116,6 +116,15 @@ interface Scorecard {
   publishedAt?: string;
 }
 
+interface PublishValidationResponse {
+  error?: string;
+  validation?: {
+    errors?: string[];
+    warnings?: string[];
+    checkedAt?: string;
+  };
+}
+
 export default function ScorecardAdminPage() {
   const [matches, setMatches] = useState<Match[]>([]);
   const [players, setPlayers] = useState<Player[]>([]);
@@ -127,6 +136,7 @@ export default function ScorecardAdminPage() {
   const [activeTab, setActiveTab] = useState<'matchInfo' | 'innings1' | 'innings2'>('matchInfo');
   const [activeInnings, setActiveInnings] = useState(0);
   const [saving, setSaving] = useState(false);
+  const [publishWarnings, setPublishWarnings] = useState<string[]>([]);
 
   useEffect(() => {
     fetchMatches();
@@ -413,27 +423,57 @@ export default function ScorecardAdminPage() {
     if (!scorecard?.id) return;
     setSaving(true);
     setMessage('');
+    setPublishWarnings([]);
     try {
       const token = localStorage.getItem('adminToken');
       if (!token) {
         throw new Error('No authentication token found');
       }
 
-      const response = await fetch(`/api/scorecards/${scorecard.id}`, {
-        method: 'PUT',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          ...scorecard,
-          draft: false,
-          publishedAt: new Date().toISOString()
-        })
-      });
+      const publishPayload = {
+        ...scorecard,
+        draft: false,
+        publishedAt: new Date().toISOString(),
+      };
+
+      const publishRequest = (validationOverride = false) =>
+        fetch(`/api/scorecards/${scorecard.id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            ...publishPayload,
+            validationOverride,
+          }),
+        });
+
+      let response = await publishRequest(false);
+
+      if (response.status === 409) {
+        const warningPayload = (await response.json().catch(() => null)) as PublishValidationResponse | null;
+        const warnings = warningPayload?.validation?.warnings || [];
+        setPublishWarnings(warnings);
+
+        const shouldOverride = window.confirm(
+          `Publish validation found ${warnings.length} warning${warnings.length === 1 ? '' : 's'}:\n\n${warnings.join('\n')}\n\nPublish anyway?`
+        );
+
+        if (!shouldOverride) {
+          setMessage('⚠ Publish paused for validation review');
+          return;
+        }
+
+        response = await publishRequest(true);
+      }
 
       if (!response.ok) {
-        throw new Error(`Error: ${response.status} ${response.statusText}`);
+        const errorPayload = (await response.json().catch(() => null)) as PublishValidationResponse | null;
+        const errors = errorPayload?.validation?.errors || [];
+        const warnings = errorPayload?.validation?.warnings || [];
+        setPublishWarnings([...errors, ...warnings]);
+        throw new Error(errors[0] || errorPayload?.error || `Error: ${response.status} ${response.statusText}`);
       }
 
       const updatedScorecard = await response.json();
@@ -457,9 +497,11 @@ export default function ScorecardAdminPage() {
       setTimeout(() => setMessage(''), 4000);
     } catch (err) {
       console.error('Error publishing:', err);
-      setMessage('✗ Error publishing scorecard');
+      const detail = err instanceof Error ? err.message : 'Error publishing scorecard';
+      setMessage(`✗ ${detail}`);
+    } finally {
+      setSaving(false);
     }
-    setSaving(false);
   };
 
   const updateMatchInfo = (field: string, value: any) => {
@@ -2110,6 +2152,17 @@ export default function ScorecardAdminPage() {
         {message && (
           <div className={`mb-6 p-4 rounded-lg ${message.includes('✓') ? 'bg-green-900' : 'bg-red-900'}`}>
             {message}
+          </div>
+        )}
+
+        {publishWarnings.length > 0 && (
+          <div className="mb-6 rounded-lg border border-amber-500/40 bg-amber-500/10 p-4">
+            <h2 className="text-sm font-bold text-amber-200 mb-2">Publish validation warnings</h2>
+            <ul className="list-disc pl-5 space-y-1 text-sm text-amber-100">
+              {publishWarnings.map((warning, index) => (
+                <li key={`${warning}-${index}`}>{warning}</li>
+              ))}
+            </ul>
           </div>
         )}
 

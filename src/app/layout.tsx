@@ -4,6 +4,7 @@ import TermsGuard from "@/components/TermsGuard";
 import { LeagueProvider } from "@/contexts/LeagueContext";
 import { AdminLayoutWrapper } from "@/components/admin/AdminLayoutWrapper";
 import MatchNotificationManager from "@/components/notifications/MatchNotificationManager";
+import PageViewTracker from "@/components/analytics/PageViewTracker";
 
 export const metadata: Metadata = {
   title: "SportsUP18 - IPL 2026 Live Scores, Fixtures & Stats",
@@ -34,6 +35,7 @@ export default function RootLayout({
       <body className="antialiased">
         <LeagueProvider>
           <AdminLayoutWrapper>
+            <PageViewTracker />
             <MatchNotificationManager />
             {children}
           </AdminLayoutWrapper>

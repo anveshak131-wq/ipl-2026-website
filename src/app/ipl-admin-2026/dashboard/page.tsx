@@ -1,20 +1,23 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useLeague } from '@/contexts/LeagueContext';
-import { TrendingUp, Users, MessageSquare, Activity, Calendar, Eye, BarChart3, Zap, ArrowUpRight, Clock, Target, Globe, Database, Shield } from 'lucide-react';
+import { TrendingUp, Users, MessageSquare, Activity, Calendar, BarChart3, Target, Database, Shield, CheckCircle2, AlertTriangle, FileText, Route } from 'lucide-react';
 
 interface DashboardStats {
   totalUsers: number;
   activeUsers: number;
   peakActiveUsers: number;
   totalMatches: number;
+  liveMatches: number;
   upcomingMatches: number;
   totalMessages: number;
   messagesToday: number;
   messagesPerHour: number;
   pageViews: number;
+  totalPageViews: number;
+  uniqueVisitors: number;
   engagementRate: number;
 }
 
@@ -30,6 +33,53 @@ interface TimeOfDayBuckets {
   evening: number; // 18:00 - 23:59
 }
 
+interface PublishStatus {
+  publishedScorecards: number;
+  draftScorecards: number;
+  totalScorecards: number;
+  lastPublishedAt: string | null;
+}
+
+interface ApiServiceStatus {
+  name: string;
+  status: 'ok' | 'error';
+  latencyMs: number;
+  detail: string;
+}
+
+interface RecentAction {
+  id: string;
+  timestamp: string;
+  adminEmail: string;
+  adminName: string;
+  action: string;
+  details: string;
+  entityType: string | null;
+  entityId: string | null;
+}
+
+interface TopRoute {
+  path: string;
+  views: number;
+}
+
+interface DashboardApiResponse {
+  stats: DashboardStats;
+  hourlyMessages: HourlyMessageData[];
+  hourlyTraffic: HourlyMessageData[];
+  timeOfDayBuckets: TimeOfDayBuckets;
+  publishStatus: PublishStatus;
+  apiHealth: {
+    overall: 'ok' | 'error';
+    services: ApiServiceStatus[];
+  };
+  traffic: {
+    topRoutes: TopRoute[];
+    adminPageViewsToday: number;
+  };
+  recentActions: RecentAction[];
+}
+
 export default function AdminDashboard() {
   const router = useRouter();
   const { currentLeague } = useLeague();
@@ -39,31 +89,49 @@ export default function AdminDashboard() {
     activeUsers: 0,
     peakActiveUsers: 0,
     totalMatches: 0,
+    liveMatches: 0,
     upcomingMatches: 0,
     totalMessages: 0,
     messagesToday: 0,
     messagesPerHour: 0,
     pageViews: 0,
+    totalPageViews: 0,
+    uniqueVisitors: 0,
     engagementRate: 0,
   });
   const [hourlyMessages, setHourlyMessages] = useState<HourlyMessageData[]>([]);
+  const [hourlyTraffic, setHourlyTraffic] = useState<HourlyMessageData[]>([]);
   const [timeOfDayBuckets, setTimeOfDayBuckets] = useState<TimeOfDayBuckets>({
     night: 0,
     morning: 0,
     afternoon: 0,
     evening: 0,
   });
-  const [apiStatus, setApiStatus] = useState<{
-    users: 'ok' | 'error' | 'loading';
-    messages: 'ok' | 'error' | 'loading';
-    matches: 'ok' | 'error' | 'loading';
+  const [publishStatus, setPublishStatus] = useState<PublishStatus>({
+    publishedScorecards: 0,
+    draftScorecards: 0,
+    totalScorecards: 0,
+    lastPublishedAt: null,
+  });
+  const [apiHealth, setApiHealth] = useState<{
+    overall: 'ok' | 'error' | 'loading';
+    services: ApiServiceStatus[];
   }>({
-    users: 'loading',
-    messages: 'loading',
-    matches: 'loading',
+    overall: 'loading',
+    services: [],
+  });
+  const [topRoutes, setTopRoutes] = useState<TopRoute[]>([]);
+  const [recentActions, setRecentActions] = useState<RecentAction[]>([]);
+  const [apiStatus, setApiStatus] = useState<{
+    dashboard: 'ok' | 'error' | 'loading';
+    traffic: 'ok' | 'error' | 'loading';
+    scorecards: 'ok' | 'error' | 'loading';
+  }>({
+    dashboard: 'loading',
+    traffic: 'loading',
+    scorecards: 'loading',
   });
 
-  const hasFetchedStats = useRef(false);
   const getStoredAdminToken = () =>
     localStorage.getItem('auth_token') ||
     localStorage.getItem('adminToken') ||
@@ -71,134 +139,53 @@ export default function AdminDashboard() {
 
   // Fetch stats on mount (auth is handled by layout)
   useEffect(() => {
-    if (hasFetchedStats.current) return;
-    hasFetchedStats.current = true;
     fetchStats();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [currentLeague]);
 
   const fetchStats = async () => {
+    setIsLoading(true);
+    setApiStatus({
+      dashboard: 'loading',
+      traffic: 'loading',
+      scorecards: 'loading',
+    });
+    setApiHealth({ overall: 'loading', services: [] });
+
     try {
       const token = getStoredAdminToken();
-
-      // Fetch active users
-      let usersData = { users: [] };
-      try {
-        const usersRes = await fetch('/api/admin/users?matchId=current', {
-          headers: { 'Authorization': `Bearer ${token}` },
-        });
-        usersData = await usersRes.ok ? await usersRes.json() : { users: [] };
-        setApiStatus(prev => ({ ...prev, users: 'ok' }));
-      } catch (err) {
-        console.error('Users API error:', err);
-        setApiStatus(prev => ({ ...prev, users: 'error' }));
-      }
-
-      // Fetch messages
-      let messages: any[] = [];
-      try {
-        const messagesRes = await fetch('/api/messages?matchId=current&limit=1000');
-        messages = await messagesRes.ok ? await messagesRes.json() : [];
-        setApiStatus(prev => ({ ...prev, messages: 'ok' }));
-      } catch (err) {
-        console.error('Messages API error:', err);
-        setApiStatus(prev => ({ ...prev, messages: 'error' }));
-      }
-
-      // Calculate messages today and hourly breakdown
-      const now = new Date();
-      const today = new Date().setHours(0, 0, 0, 0);
-      const messagesToday = messages.filter((msg: any) => 
-        new Date(msg.timestamp).getTime() >= today
-      ).length;
-
-      // Calculate messages per hour (average for today)
-      const hoursElapsed = Math.max(1, Math.floor((now.getTime() - today) / (1000 * 60 * 60)));
-      const messagesPerHour = Math.round(messagesToday / hoursElapsed);
-
-      // Build hourly chart data (last 24 hours)
-      const hourlyData: { [key: string]: number } = {};
-      const last24Hours = now.getTime() - (24 * 60 * 60 * 1000);
-      
-      for (let i = 23; i >= 0; i--) {
-        const hourTime = new Date(now.getTime() - (i * 60 * 60 * 1000));
-        const hourKey = hourTime.getHours().toString().padStart(2, '0');
-        hourlyData[hourKey] = 0;
-      }
-
-      messages.forEach((msg: any) => {
-        const msgTime = new Date(msg.timestamp);
-        if (msgTime.getTime() >= last24Hours) {
-          const hourKey = msgTime.getHours().toString().padStart(2, '0');
-          hourlyData[hourKey] = (hourlyData[hourKey] || 0) + 1;
-        }
+      const response = await fetch(`/api/admin/dashboard?league=${currentLeague}`, {
+        headers: { Authorization: `Bearer ${token}` },
+        cache: 'no-store',
       });
 
-      const hourlyMessagesArray = Object.entries(hourlyData).map(([hour, count]) => ({
-        hour: `${hour}:00`,
-        count,
-      }));
-
-      setHourlyMessages(hourlyMessagesArray);
-
-      // Calculate time of day buckets
-      const buckets: TimeOfDayBuckets = {
-        night: 0,
-        morning: 0,
-        afternoon: 0,
-        evening: 0,
-      };
-
-      messages.forEach((msg: any) => {
-        const msgTime = new Date(msg.timestamp);
-        if (msgTime.getTime() < last24Hours) return;
-        const hour = msgTime.getHours();
-
-        if (hour < 6) {
-          buckets.night += 1;
-        } else if (hour < 12) {
-          buckets.morning += 1;
-        } else if (hour < 18) {
-          buckets.afternoon += 1;
-        } else {
-          buckets.evening += 1;
-        }
-      });
-
-      setTimeOfDayBuckets(buckets);
-
-      // Fetch matches (with league filter)
-      let matches: any[] = [];
-      try {
-        const matchesRes = await fetch(`/api/matches?league=${currentLeague}`);
-        matches = await matchesRes.ok ? await matchesRes.json() : [];
-        setApiStatus(prev => ({ ...prev, matches: 'ok' }));
-      } catch (err) {
-        console.error('Matches API error:', err);
-        setApiStatus(prev => ({ ...prev, matches: 'error' }));
+      if (!response.ok) {
+        throw new Error(`Dashboard API failed: ${response.status}`);
       }
-      
-      const upcomingMatches = matches.filter((m: any) => 
-        new Date(m.date) > now
-      ).length;
 
-      // Calculate peak active users (mock for now, would need historical tracking)
-      const peakActiveUsers = Math.max(usersData.users?.length || 0, Math.floor((usersData.users?.length || 0) * 1.3));
+      const data = (await response.json()) as DashboardApiResponse;
 
-      setStats({
-        totalUsers: usersData.users?.length || 0,
-        activeUsers: usersData.users?.length || 0,
-        peakActiveUsers,
-        totalMatches: matches.length || 0,
-        upcomingMatches,
-        totalMessages: messages.length || 0,
-        messagesToday,
-        messagesPerHour,
-        pageViews: Math.floor(Math.random() * 10000) + 5000, // Mock data
-        engagementRate: usersData.users?.length > 0 ? Math.min(78 + Math.floor(Math.random() * 10), 99) : 0,
+      setStats(data.stats);
+      setHourlyMessages(data.hourlyMessages || []);
+      setHourlyTraffic(data.hourlyTraffic || []);
+      setTimeOfDayBuckets(data.timeOfDayBuckets);
+      setPublishStatus(data.publishStatus);
+      setApiHealth(data.apiHealth);
+      setTopRoutes(data.traffic?.topRoutes || []);
+      setRecentActions(data.recentActions || []);
+      setApiStatus({
+        dashboard: 'ok',
+        traffic: 'ok',
+        scorecards: 'ok',
       });
     } catch (error) {
       console.error('Error fetching stats:', error);
+      setApiStatus({
+        dashboard: 'error',
+        traffic: 'error',
+        scorecards: 'error',
+      });
+      setApiHealth({ overall: 'error', services: [] });
     } finally {
       setIsLoading(false);
     }
@@ -227,8 +214,7 @@ export default function AdminDashboard() {
       title: 'Active Users',
       value: stats.activeUsers,
       subtitle: 'Currently online',
-      change: '+12.5%',
-      trend: 'up',
+      change: `${stats.peakActiveUsers.toLocaleString()} peak`,
       icon: Users,
       gradient: 'from-blue-500 to-indigo-600',
       bgGradient: 'from-blue-500/5 to-indigo-600/5',
@@ -236,11 +222,21 @@ export default function AdminDashboard() {
       glowColor: 'shadow-blue-500/20',
     },
     {
+      title: 'Public Views Today',
+      value: stats.pageViews,
+      subtitle: `${stats.uniqueVisitors.toLocaleString()} unique visitors`,
+      change: `${stats.totalPageViews.toLocaleString()} total`,
+      icon: Route,
+      gradient: 'from-cyan-500 to-sky-600',
+      bgGradient: 'from-cyan-500/5 to-sky-600/5',
+      borderColor: 'border-cyan-500/20',
+      glowColor: 'shadow-cyan-500/20',
+    },
+    {
       title: 'Live Matches',
-      value: stats.upcomingMatches,
+      value: stats.liveMatches,
       subtitle: 'In progress',
-      change: '+3',
-      trend: 'up',
+      change: `${stats.upcomingMatches.toLocaleString()} upcoming`,
       icon: Activity,
       gradient: 'from-emerald-500 to-green-600',
       bgGradient: 'from-emerald-500/5 to-green-600/5',
@@ -251,13 +247,35 @@ export default function AdminDashboard() {
       title: 'Messages Today',
       value: stats.messagesToday,
       subtitle: 'User interaction',
-      change: '+5.2%',
-      trend: 'up',
+      change: `${stats.totalMessages.toLocaleString()} total`,
       icon: Target,
       gradient: 'from-amber-500 to-orange-600',
       bgGradient: 'from-amber-500/5 to-orange-600/5',
       borderColor: 'border-amber-500/20',
       glowColor: 'shadow-amber-500/20',
+    },
+    {
+      title: 'Engagement Rate',
+      value: stats.engagementRate,
+      suffix: '%',
+      subtitle: 'Messages + active users / views',
+      change: `${stats.messagesPerHour.toLocaleString()} msg/hr`,
+      icon: MessageSquare,
+      gradient: 'from-fuchsia-500 to-pink-600',
+      bgGradient: 'from-fuchsia-500/5 to-pink-600/5',
+      borderColor: 'border-fuchsia-500/20',
+      glowColor: 'shadow-fuchsia-500/20',
+    },
+    {
+      title: 'Published Scorecards',
+      value: publishStatus.publishedScorecards,
+      subtitle: `${publishStatus.draftScorecards.toLocaleString()} drafts waiting`,
+      change: `${publishStatus.totalScorecards.toLocaleString()} total`,
+      icon: FileText,
+      gradient: 'from-violet-500 to-purple-600',
+      bgGradient: 'from-violet-500/5 to-purple-600/5',
+      borderColor: 'border-violet-500/20',
+      glowColor: 'shadow-violet-500/20',
     },
   ];
 
@@ -308,6 +326,22 @@ export default function AdminDashboard() {
     },
   ];
 
+  const formatTimestamp = (value: string | null) => {
+    if (!value) return 'Not published yet';
+    const parsed = new Date(value);
+    if (Number.isNaN(parsed.getTime())) return value;
+    return parsed.toLocaleString();
+  };
+
+  const formatActionLabel = (value: string) =>
+    value
+      .split('_')
+      .filter(Boolean)
+      .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+      .join(' ');
+
+  const maxTrafficCount = Math.max(...hourlyTraffic.map((item) => item.count), 1);
+
   return (
     <div className="max-w-7xl mx-auto px-8 py-8">
       {/* Header - Redesigned */}
@@ -332,7 +366,7 @@ export default function AdminDashboard() {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 mb-8">
         {statCards.map((stat, index) => (
           <div key={index} className={`relative overflow-hidden rounded-2xl border ${stat.borderColor} bg-gradient-to-br ${stat.bgGradient} backdrop-blur-sm`}>
             <div className="absolute inset-0 bg-gradient-to-br from-transparent to-black/5"></div>
@@ -347,7 +381,9 @@ export default function AdminDashboard() {
                 </div>
               </div>
               <div>
-                <h3 className="text-3xl font-bold text-white mb-1">{stat.value.toLocaleString()}</h3>
+                <h3 className="text-3xl font-bold text-white mb-1">
+                  {stat.value.toLocaleString()}{'suffix' in stat ? stat.suffix : ''}
+                </h3>
                 <p className="text-gray-300 text-sm font-medium">{stat.title}</p>
                 <p className="text-gray-500 text-xs">{stat.subtitle}</p>
               </div>
@@ -505,6 +541,157 @@ export default function AdminDashboard() {
               </div>
             );
           })()}
+        </div>
+      </div>
+
+      {/* Operational Status */}
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 mt-6">
+        <div className="bg-gradient-to-br from-slate-900/50 to-slate-800/50 rounded-xl p-6 border border-slate-700/50">
+          <div className="flex items-center justify-between mb-5">
+            <div>
+              <h3 className="text-xl font-semibold text-white">API Health</h3>
+              <p className="text-xs text-gray-400">Live checks from dashboard aggregation</p>
+            </div>
+            {apiHealth.overall === 'ok' ? (
+              <CheckCircle2 className="w-6 h-6 text-emerald-400" />
+            ) : (
+              <AlertTriangle className="w-6 h-6 text-amber-400" />
+            )}
+          </div>
+          <div className="space-y-3">
+            {apiHealth.services.length === 0 ? (
+              <div className="rounded-lg border border-red-500/20 bg-red-500/10 p-3 text-sm text-red-200">
+                Dashboard API unavailable
+              </div>
+            ) : (
+              apiHealth.services.map((service) => (
+                <div key={service.name} className="flex items-center justify-between rounded-lg border border-white/10 bg-white/5 px-3 py-2">
+                  <div>
+                    <p className="text-sm font-semibold text-white">{service.name}</p>
+                    <p className="text-xs text-gray-400">{service.detail}</p>
+                  </div>
+                  <div className="text-right">
+                    <span className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-semibold ${
+                      service.status === 'ok'
+                        ? 'bg-emerald-500/15 text-emerald-300'
+                        : 'bg-red-500/15 text-red-300'
+                    }`}>
+                      {service.status.toUpperCase()}
+                    </span>
+                    <p className="mt-1 text-xs text-gray-500">{service.latencyMs}ms</p>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+
+        <div className="bg-gradient-to-br from-slate-900/50 to-slate-800/50 rounded-xl p-6 border border-slate-700/50">
+          <div className="flex items-center justify-between mb-5">
+            <div>
+              <h3 className="text-xl font-semibold text-white">Publish Status</h3>
+              <p className="text-xs text-gray-400">Scorecards visible to end users</p>
+            </div>
+            <Shield className="w-6 h-6 text-blue-400" />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="rounded-lg border border-emerald-500/20 bg-emerald-500/10 p-4">
+              <p className="text-xs text-emerald-200">Published</p>
+              <p className="mt-1 text-3xl font-bold text-white">{publishStatus.publishedScorecards}</p>
+            </div>
+            <div className="rounded-lg border border-amber-500/20 bg-amber-500/10 p-4">
+              <p className="text-xs text-amber-200">Drafts</p>
+              <p className="mt-1 text-3xl font-bold text-white">{publishStatus.draftScorecards}</p>
+            </div>
+          </div>
+          <div className="mt-4 rounded-lg border border-white/10 bg-white/5 p-3">
+            <p className="text-xs text-gray-400">Last published</p>
+            <p className="mt-1 text-sm font-medium text-white">{formatTimestamp(publishStatus.lastPublishedAt)}</p>
+          </div>
+        </div>
+
+        <div className="bg-gradient-to-br from-slate-900/50 to-slate-800/50 rounded-xl p-6 border border-slate-700/50">
+          <div className="flex items-center justify-between mb-5">
+            <div>
+              <h3 className="text-xl font-semibold text-white">Recent Admin Actions</h3>
+              <p className="text-xs text-gray-400">Last 7 days</p>
+            </div>
+            <Database className="w-6 h-6 text-violet-400" />
+          </div>
+          <div className="space-y-3">
+            {recentActions.length === 0 ? (
+              <div className="rounded-lg border border-white/10 bg-white/5 p-4 text-sm text-gray-400">
+                No recent admin actions have been recorded yet.
+              </div>
+            ) : (
+              recentActions.slice(0, 5).map((action) => (
+                <div key={action.id} className="rounded-lg border border-white/10 bg-white/5 p-3">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className="text-sm font-semibold text-white">{formatActionLabel(action.action)}</p>
+                      <p className="mt-1 text-xs text-gray-400">{action.details || action.entityType || 'Admin update'}</p>
+                    </div>
+                    <p className="shrink-0 text-right text-[11px] text-gray-500">{formatTimestamp(action.timestamp)}</p>
+                  </div>
+                  <p className="mt-2 text-[11px] text-gray-500">{action.adminEmail || action.adminName}</p>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Traffic Detail */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+        <div className="bg-gradient-to-br from-slate-900/50 to-slate-800/50 rounded-xl p-6 border border-slate-700/50">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-xl font-semibold text-white">Hourly Traffic</h3>
+            <span className={`text-xs rounded-full px-2 py-1 ${
+              apiStatus.traffic === 'ok' ? 'bg-emerald-500/10 text-emerald-300' : 'bg-red-500/10 text-red-300'
+            }`}>
+              {apiStatus.traffic === 'ok' ? 'Recording' : 'Offline'}
+            </span>
+          </div>
+          <div className="flex items-end justify-between h-40 gap-1">
+            {hourlyTraffic.map((item, index) => {
+              const height = (item.count / maxTrafficCount) * 100;
+              return (
+                <div key={`${item.hour}-${index}`} className="flex-1 flex flex-col items-center gap-2">
+                  <div className="w-full rounded-t bg-gradient-to-t from-cyan-600 to-sky-300" style={{ height: `${Math.max(height, 4)}%` }} />
+                  <span className="text-[10px] text-gray-500">{item.hour}</span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className="bg-gradient-to-br from-slate-900/50 to-slate-800/50 rounded-xl p-6 border border-slate-700/50">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-xl font-semibold text-white">Top Routes Today</h3>
+            <Route className="w-5 h-5 text-cyan-400" />
+          </div>
+          <div className="space-y-3">
+            {topRoutes.length === 0 ? (
+              <div className="rounded-lg border border-white/10 bg-white/5 p-4 text-sm text-gray-400">
+                No page views recorded today yet.
+              </div>
+            ) : (
+              topRoutes.map((route) => {
+                const percentage = stats.pageViews > 0 ? Math.round((route.views / stats.pageViews) * 100) : 0;
+                return (
+                  <div key={route.path} className="rounded-lg border border-white/10 bg-white/5 p-3">
+                    <div className="flex items-center justify-between gap-3 mb-2">
+                      <p className="truncate text-sm font-medium text-white">{route.path}</p>
+                      <span className="text-sm font-bold text-cyan-300">{route.views}</span>
+                    </div>
+                    <div className="h-2 overflow-hidden rounded-full bg-slate-700/60">
+                      <div className="h-full rounded-full bg-gradient-to-r from-cyan-500 to-sky-400" style={{ width: `${Math.max(percentage, 4)}%` }} />
+                    </div>
+                  </div>
+                );
+              })
+            )}
+          </div>
         </div>
       </div>
     </div>
