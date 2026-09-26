@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="675" viewBox="0 0 1200 675">
+  <defs><linearGradient id="bg" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#302516"/><stop offset="1" stop-color="#100c08"/></linearGradient></defs>
+  <rect width="1200" height="675" fill="url(#bg)"/><circle cx="1050" cy="90" r="240" fill="#f2c866" opacity=".14"/>
+  <text x="80" y="92" fill="#f2c866" font-family="Arial" font-size="20" font-weight="600" letter-spacing="5">SPORTSUP99  /  PLAYER SPOTLIGHT</text>
+  <text x="80" y="170" fill="#fff" font-family="Arial" font-size="62" font-weight="800">VIRAT KOHLI</text>
+  <line x1="80" y1="205" x2="1120" y2="205" stroke="#f2c866" stroke-width="3" opacity=".7"/>
+  <text x="80" y="305" fill="#fff" font-family="Arial" font-size="40" font-weight="800">BATTER</text><text x="80" y="385" fill="#f2c866" font-family="Arial" font-size="30" font-weight="600">AVG 41.23   SR 148.76</text>
+  <text x="80" y="485" fill="#d8cdb5" font-family="Arial" font-size="30">82 runs in the last match</text>
+  <text x="80" y="610" fill="#b2a58b" font-family="Arial" font-size="18">A season built on intent.  #ViratKohli #IPL2026</text>
+</svg>

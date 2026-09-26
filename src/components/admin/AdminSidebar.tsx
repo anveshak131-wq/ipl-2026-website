@@ -459,6 +459,17 @@ export default function AdminSidebar({ currentPage = '', onLogout }: AdminSideba
         shortcut: 'N',
       },
       {
+        href: '/ipl-admin-2026/social',
+        label: 'Social Studio',
+        icon: (
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 8a3 3 0 11-6 0 3 3 0 016 0zm4 11a7 7 0 00-14 0m11-7 3-3m0 0 3 3m-3-3v7" />
+          </svg>
+        ),
+        group: 'Content',
+        shortcut: 'S',
+      },
+      {
         href: '/ipl-admin-2026/matchday',
         label: 'Match Day',
         icon: (
@@ -710,6 +721,7 @@ export default function AdminSidebar({ currentPage = '', onLogout }: AdminSideba
       Content: pick([
         '/ipl-admin-2026/content',
         '/ipl-admin-2026/news',
+        '/ipl-admin-2026/social',
         '/ipl-admin-2026/stories',
         '/ipl-admin-2026/predictions',
         '/ipl-admin-2026/moderation',
