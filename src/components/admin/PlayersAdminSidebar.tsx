@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import IPLLogo from '../ui/IPLLogo';
-import { Search, X, Users, TrendingUp, Zap } from 'lucide-react';
+import { Search, X, Users } from 'lucide-react';
 
 interface PlayersAdminSidebarProps {
   currentPage?: string;
@@ -51,18 +51,6 @@ export default function PlayersAdminSidebar({ currentPage = '', onLogout }: Play
       label: 'Players',
       icon: <Users className="w-5 h-5" />,
       shortcut: 'P',
-    },
-    {
-      href: '/ipl-admin-2026/batting-stats',
-      label: 'Batting Stats',
-      icon: <TrendingUp className="w-5 h-5" />,
-      shortcut: 'B',
-    },
-    {
-      href: '/ipl-admin-2026/bowling-stats',
-      label: 'Bowling Stats',
-      icon: <Zap className="w-5 h-5" />,
-      shortcut: 'W',
     },
   ];
 

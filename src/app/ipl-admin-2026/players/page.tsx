@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo, ReactNode } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useLeague } from '@/contexts/LeagueContext';
 import ModernDialog from '@/components/admin/ModernDialog';
 import LeagueSwitch from '@/components/admin/LeagueSwitch';
@@ -24,6 +24,8 @@ import AdminPlayerDetailsModal from '@/components/admin/players/AdminPlayerDetai
 import AdminPlayersGridPanel from '@/components/admin/players/AdminPlayersGridPanel';
 import AdminPlayerBasicInfoSection from '@/components/admin/players/AdminPlayerBasicInfoSection';
 import AdminPlayerFormProgress from '@/components/admin/players/AdminPlayerFormProgress';
+import BattingStatsPage from '@/components/admin/player-stats/BattingStatsWorkspace';
+import BowlingStatsPage from '@/components/admin/player-stats/BowlingStatsWorkspace';
 import { getQuickFilterCounts, PLAYER_QUICK_FILTERS, playerMatchesQuickFilter, PlayerQuickFilterId } from '@/lib/admin/playerQuickFilters';
 import '@/styles/flags.css';
 
@@ -179,7 +181,7 @@ function levenshteinDistance(str1: string, str2: string): number {
 // Mark this page as dynamic to prevent pre-rendering
 // Note: Removed for static export compatibility
 
-export default function AdminPlayers() {
+function AdminPlayersWorkspace() {
   const router = useRouter();
   const { currentLeague } = useLeague();
   // Auth handled by layout
@@ -6305,4 +6307,13 @@ export default function AdminPlayers() {
       )}
     </div>
   );
+}
+
+export default function AdminPlayers() {
+  const searchParams = useSearchParams();
+  const view = searchParams.get('view');
+
+  if (view === 'batting') return <BattingStatsPage />;
+  if (view === 'bowling') return <BowlingStatsPage />;
+  return <AdminPlayersWorkspace />;
 }

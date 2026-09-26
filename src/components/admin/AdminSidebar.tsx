@@ -704,8 +704,6 @@ export default function AdminSidebar({ currentPage = '', onLogout }: AdminSideba
       'League Data': pick([
         '/ipl-admin-2026/teams',
         '/ipl-admin-2026/players',
-        '/ipl-admin-2026/batting-stats',
-        '/ipl-admin-2026/bowling-stats',
         '/ipl-admin-2026/achievements',
         '/ipl-admin-2026/coaches',
       ]),
