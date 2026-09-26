@@ -48,6 +48,20 @@ const nextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
+  // Exclude admin routes from static export since they use dynamic features
+  exportPathMap: async function (
+    defaultPathMap,
+    { dev, dir, outDir, distDir, buildId }
+  ) {
+    const pathMap = {};
+    Object.keys(defaultPathMap).forEach((path) => {
+      // Skip admin routes from static export
+      if (!path.startsWith('/ipl-admin-2026') && !path.startsWith('/wpl-admin-2026')) {
+        pathMap[path] = defaultPathMap[path];
+      }
+    });
+    return pathMap;
+  },
 };
 
 export default nextConfig;
