@@ -104,7 +104,6 @@ interface Scorecard {
     date: string;
     time: string;
     toss?: { winner: string; decision: string };
-    weather?: string;
     status?: string;
   };
   innings: Innings[];

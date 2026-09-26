@@ -502,7 +502,6 @@ export default function AdminIplLiveScorePage() {
                 time={selectedMatch.time || '19:30'}
                 isEveningMatch={selectedMatch.isEveningMatch !== false}
                 toss={(selectedMatch.matchState?.toss || undefined) as any}
-                weather={selectedMatch.weather as any}
                 pitchReport={(selectedMatch as any).pitchReport || ''}
                 headToHead={(selectedMatch as any).headToHead}
                 resultType={selectedMatch.resultType}

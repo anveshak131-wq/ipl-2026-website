@@ -166,12 +166,6 @@ export default function TestLiveScorePage() {
                       winner: 'team1',
                       decision: 'bat',
                     }}
-                    weather={{
-                      temperature: 28,
-                      condition: 'partly-cloudy',
-                      humidity: 65,
-                      windSpeed: 12,
-                    }}
                     pitchReport="Hard and dry surface with even bounce. Good for stroke play. Expected to assist both batters and bowlers equally."
                     headToHead={{
                       matches: 15,
@@ -186,4 +180,3 @@ export default function TestLiveScorePage() {
     </div>
   );
 }
-

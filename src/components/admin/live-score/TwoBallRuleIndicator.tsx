@@ -49,8 +49,8 @@ export default function TwoBallRuleIndicator({
             </div>
             <div className="text-sm text-gray-300">
               {ballChanged 
-                ? 'Ball has been changed to counteract dew effects'
-                : 'Dew conditions detected. Ball change available from 11th over (2nd innings)'
+                ? 'Ball change has been recorded'
+                : 'Ball change is available from the 11th over (2nd innings)'
               }
             </div>
             {!ballChanged && (
@@ -79,4 +79,3 @@ export default function TwoBallRuleIndicator({
     </div>
   );
 }
-

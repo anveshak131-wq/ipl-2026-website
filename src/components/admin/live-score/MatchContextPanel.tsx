@@ -1,6 +1,6 @@
 'use client';
 
-import { MapPin, Cloud, Sun, Wind, Droplets, BarChart3, Trophy } from 'lucide-react';
+import { MapPin, BarChart3, Trophy } from 'lucide-react';
 import { LiveScoreState } from '@/hooks/useLiveScore';
 
 interface MatchContextPanelProps {
@@ -10,12 +10,6 @@ interface MatchContextPanelProps {
   toss?: {
     winner: 'team1' | 'team2';
     decision: 'bat' | 'bowl';
-  };
-  weather?: {
-    temperature: number;
-    condition: string;
-    humidity: number;
-    windSpeed: number;
   };
   pitchReport?: string;
   headToHead?: {
@@ -33,7 +27,6 @@ export default function MatchContextPanel({
   team2Name,
   venue = 'Test Venue',
   toss,
-  weather,
   pitchReport,
   headToHead,
   currentOver = 0,
@@ -55,21 +48,6 @@ export default function MatchContextPanel({
   };
 
   const colors = leagueColors[league];
-
-  const getWeatherIcon = (condition: string) => {
-    switch (condition.toLowerCase()) {
-      case 'sunny':
-      case 'clear':
-        return <Sun className="w-5 h-5 text-yellow-400" />;
-      case 'cloudy':
-      case 'partly-cloudy':
-        return <Cloud className="w-5 h-5 text-gray-400" />;
-      case 'rainy':
-        return <Droplets className="w-5 h-5 text-blue-400" />;
-      default:
-        return <Cloud className="w-5 h-5 text-gray-400" />;
-    }
-  };
 
   return (
     <div className={`${colors.bg} rounded-xl p-5 border-2 ${colors.border} backdrop-blur-xl space-y-4`}>
@@ -100,37 +78,6 @@ export default function MatchContextPanel({
         </div>
         <div className="text-sm text-gray-300">{venue}</div>
       </div>
-
-      {/* Weather */}
-      {weather && (
-        <div className="pb-4 border-b border-white/10">
-          <div className="flex items-center gap-2 mb-3">
-            {getWeatherIcon(weather.condition)}
-            <span className="text-sm font-semibold text-white">Weather</span>
-          </div>
-          <div className="grid grid-cols-2 gap-3 text-sm">
-            <div>
-              <div className="text-gray-400 text-xs">Temperature</div>
-              <div className="text-white font-bold">{weather.temperature}°C</div>
-            </div>
-            <div>
-              <div className="text-gray-400 text-xs">Condition</div>
-              <div className="text-white font-bold capitalize">{weather.condition}</div>
-            </div>
-            <div>
-              <div className="text-gray-400 text-xs">Humidity</div>
-              <div className="text-white font-bold">{weather.humidity}%</div>
-            </div>
-            <div>
-              <div className="text-gray-400 text-xs">Wind Speed</div>
-              <div className="text-white font-bold flex items-center gap-1">
-                <Wind className="w-3 h-3" />
-                {weather.windSpeed} km/h
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Pitch Report */}
       {pitchReport && (
@@ -199,7 +146,7 @@ export default function MatchContextPanel({
       </div>
 
       {/* Default message if no data */}
-      {!toss && !weather && !pitchReport && !headToHead && (
+      {!toss && !pitchReport && !headToHead && (
         <div className="text-center py-4 text-gray-400 text-sm">
           Match context information will appear here
         </div>

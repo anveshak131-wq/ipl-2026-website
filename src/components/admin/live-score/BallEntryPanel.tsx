@@ -56,12 +56,6 @@ interface BallEntryPanelProps {
     winner: 'team1' | 'team2';
     decision: 'bat' | 'bowl';
   };
-  weather?: {
-    temperature: number;
-    condition: string;
-    humidity: number;
-    windSpeed: number;
-  };
   pitchReport?: string;
   headToHead?: {
     matches: number;
@@ -92,7 +86,6 @@ export default function BallEntryPanel({
   date,
   time,
   toss,
-  weather,
   pitchReport,
   headToHead,
   resultType,
@@ -885,12 +878,6 @@ export default function BallEntryPanel({
             team2Name={team2Name}
             venue="Test Venue"
             toss={matchState.toss}
-            weather={{
-              temperature: 28,
-              condition: 'partly-cloudy',
-              humidity: 65,
-              windSpeed: 12,
-            }}
             pitchReport="Hard and dry surface with even bounce. Good for stroke play. Expected to assist spinners in the second innings."
             headToHead={{
               totalMatches: 24,

@@ -40,7 +40,7 @@ export const exportComprehensiveExcel = (scorecard: any) => {
     ['Team 1 ID', scorecard?.matchInfo?.team1?.id || 'N/A', '', 'Team 2 ID', scorecard?.matchInfo?.team2?.id || 'N/A', '', '', ''],
     ['Venue', scorecard?.matchInfo?.venue || 'Unknown Venue', '', 'Date', scorecard?.matchInfo?.date || 'Unknown Date', '', '', ''],
     ['Time', scorecard?.matchInfo?.time || 'Unknown Time', '', 'Status', scorecard?.matchInfo?.status || 'In Progress', '', '', ''],
-    ['Weather', scorecard?.matchInfo?.weather || 'N/A', '', 'Toss Winner', scorecard?.matchInfo?.toss?.winner || 'N/A', '', '', ''],
+    ['Toss Winner', scorecard?.matchInfo?.toss?.winner || 'N/A', '', 'Decision', scorecard?.matchInfo?.toss?.decision || 'N/A', '', '', ''],
     ['Toss Decision', scorecard?.matchInfo?.toss?.decision || 'N/A', '', 'Result Winner', scorecard?.result?.winner || 'To be determined', '', '', ''],
     ['Margin', scorecard?.result?.margin || 'N/A', '', 'Man of Match', scorecard?.result?.manOfTheMatch || 'N/A', '', '', ''],
     ['', '', '', '', '', '', '', ''],
