@@ -11,7 +11,7 @@ If your site is deployed to Cloudflare Pages:
 curl "https://YOUR_DOMAIN.pages.dev/api/players?diagnostic=true" | jq
 
 # Or use the test script:
-API_URL=https://YOUR_DOMAIN.pages.dev node test-diagnostic.js
+API_URL=https://YOUR_DOMAIN.pages.dev node test-diagnostic.mjs
 ```
 
 ### Option 2: Test Locally with Wrangler
@@ -24,7 +24,7 @@ wrangler pages dev out --port 8788 --kv IPL_CACHE --kv SPORTS_KV --kv WEATHER_CA
 
 2. **In another terminal, run the test:**
 ```bash
-node test-diagnostic.js
+node test-diagnostic.mjs
 ```
 
 Or use curl:
@@ -60,4 +60,3 @@ If you see "No IPL players found":
 1. Check if players exist: `/api/players` (without diagnostic)
 2. Use seed endpoint to restore: `/api/seed`
 3. Check KV storage in Cloudflare Dashboard
-

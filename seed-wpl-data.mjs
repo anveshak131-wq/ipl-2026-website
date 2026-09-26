@@ -2,13 +2,11 @@
 
 /**
  * Seed script to populate Cloudflare KV with WPL matches and players
- * Usage: node seed-wpl-data.js
+ * Usage: node seed-wpl-data.mjs
  * 
  * This script adds sample WPL matches and players to the local KV storage
  * so the WPL Scorecard Admin can display them.
  */
-
-const fetch = require('node-fetch');
 
 const KV_API_URL = 'http://localhost:8787/api';
 

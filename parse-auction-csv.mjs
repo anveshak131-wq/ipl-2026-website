@@ -2,8 +2,12 @@
  * Parse IPL Mini Auction 2026 CSV and convert to player objects
  */
 
-const fs = require('fs');
-const path = require('path');
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Team mapping: CSV abbreviation -> Team ID
 const teamMapping = {
@@ -153,7 +157,6 @@ dataLines.forEach((line, index) => {
 
 console.log(JSON.stringify(players, null, 2));
 console.error(`\nTotal players parsed: ${players.length}`);
-
 
 
 

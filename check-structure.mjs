@@ -1,4 +1,4 @@
-const fs = require('fs');
+import fs from 'node:fs';
 const content = fs.readFileSync('src/app/ipl-admin-2026/dashboard/page.tsx', 'utf8');
 
 // Find the return statement

@@ -178,7 +178,7 @@ wrangler kv:key put \
 
 **Method 3: Via Admin Script**
 
-Create `/scripts/create-admin.js`:
+Create `/scripts/create-admin.mjs`:
 ```javascript
 import crypto from 'crypto';
 
@@ -212,7 +212,7 @@ console.log('\nKV Key:', `user:${email}`);
 
 Run:
 ```bash
-node scripts/create-admin.js
+node scripts/create-admin.mjs
 # Copy output and paste into KV
 ```
 
@@ -771,4 +771,3 @@ Check: Firewall not blocking WebSocket
 **Deployment Status**: Ready for Production ✅  
 **Next Step**: Execute Step 1 above  
 **Estimated Time**: 2-4 hours for full setup
-

@@ -1,6 +1,6 @@
 /**
  * Test script to check KV storage for IPL players
- * Run with: node test-diagnostic.js
+ * Run with: node test-diagnostic.mjs
  */
 
 const API_BASE_URL = process.env.API_URL || 'http://localhost:8788';
@@ -81,9 +81,8 @@ async function testDiagnostic() {
     console.error('\n💡 Make sure:');
     console.error('   1. The dev server is running (wrangler pages dev or npm run dev)');
     console.error('   2. Or set API_URL environment variable to your deployed URL');
-    console.error('   3. Example: API_URL=https://your-domain.com node test-diagnostic.js');
+    console.error('   3. Example: API_URL=https://your-domain.com node test-diagnostic.mjs');
   }
 }
 
 testDiagnostic();
-

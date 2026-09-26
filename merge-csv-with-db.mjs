@@ -1,4 +1,4 @@
-const fs = require('fs');
+import fs from 'node:fs';
 
 console.log('Step 1: Reading CSV from bowling-stats export...');
 const csvContent = fs.readFileSync('/Users/anvesh/Downloads/ipl-bowling-stats-all-teams-2026-03-22.csv', 'utf8');

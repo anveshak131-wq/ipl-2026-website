@@ -15,6 +15,7 @@
     "start": "next start",
     "lint": "next lint",
     "type-check": "tsc --noEmit",
+    "check:file-formats": "node scripts/check-file-format-conventions.mjs",
     "build:analyze": "ANALYZE=true next build",
     "test:e2e": "playwright test"
   },
@@ -53,7 +54,6 @@
     "typescript": "^5.9.3"
   },
   "description": "This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).",
-  "main": "index.js",
   "keywords": [],
   "author": "",
   "license": "ISC",

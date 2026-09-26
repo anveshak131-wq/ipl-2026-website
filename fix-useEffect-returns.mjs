@@ -5,8 +5,8 @@
  * Ensures all useEffect hooks with conditional returns also return undefined when condition is false
  */
 
-const fs = require('fs');
-const path = require('path');
+import fs from 'node:fs';
+import path from 'node:path';
 
 // Find all TypeScript/JavaScript files
 function findFiles(dir, fileList = []) {

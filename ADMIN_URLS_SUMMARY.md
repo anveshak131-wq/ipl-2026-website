@@ -84,7 +84,6 @@ This document provides a comprehensive overview of all admin panel URLs for both
 - **Settings**: `/wpl-admin-2026/settings` ✨ *NEW*
 
 ### Special Features
-- **Weather Demo**: `/wpl-admin-2026/weather-demo`
 - **Data Sync**: `/wpl-admin-2026/data-sync` (directory exists)
 - **Admin**: `/wpl-admin-2026/admin` (directory exists)
 

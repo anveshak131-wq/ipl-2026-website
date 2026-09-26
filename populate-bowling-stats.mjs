@@ -1,4 +1,4 @@
-const fs = require('fs');
+import fs from 'node:fs';
 
 console.log('Reading CSV file...');
 const csvContent = fs.readFileSync('/Users/anvesh/Downloads/ipl-bowling-stats-all-teams-2026-03-22.csv', 'utf8');

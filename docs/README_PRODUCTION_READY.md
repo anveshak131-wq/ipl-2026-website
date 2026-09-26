@@ -314,7 +314,7 @@ wrangler kv:namespace list
 ### Admin login not working
 ```bash
 # Create admin account
-node scripts/create-admin.js admin@test.com Password123 "Admin"
+node scripts/create-admin.mjs admin@test.com Password123 "Admin"
 # Or visit: https://yourdomain.com/admin/setup
 ```
 

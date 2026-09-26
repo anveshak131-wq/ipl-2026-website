@@ -23,7 +23,6 @@ Base site URL: https://ipl-2026-website.pages.dev
 - https://ipl-2026-website.pages.dev/wpl-admin-2026/bowling-stats — src/app/wpl-admin-2026/bowling-stats/page.tsx
 - https://ipl-2026-website.pages.dev/wpl-admin-2026/stories — src/app/wpl-admin-2026/stories/page.tsx
 - https://ipl-2026-website.pages.dev/wpl-admin-2026/settings — src/app/wpl-admin-2026/settings/page.tsx
-- https://ipl-2026-website.pages.dev/wpl-admin-2026/weather-demo — src/app/wpl-admin-2026/weather-demo/page.tsx
 
 Notes:
 - These are the routes corresponding to files under `src/app/wpl-admin-2026/`.

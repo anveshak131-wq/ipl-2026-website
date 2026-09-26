@@ -1,4 +1,4 @@
-import { readFileSync, writeFileSync } from 'fs';
+import { readFileSync, writeFileSync } from 'node:fs';
 
 const file = 'src/app/ipl-admin-2026/matches/page.tsx';
 let c = readFileSync(file, 'utf8');

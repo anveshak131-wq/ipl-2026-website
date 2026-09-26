@@ -4,12 +4,12 @@
  * Admin User Creation Script
  * Creates an initial admin user for the IPL 2026 website
  * 
- * Usage: node scripts/create-admin.js [email] [password] [name]
- * Example: node scripts/create-admin.js admin@ipl2026.com IPLAdmin@2025 "Admin User"
+ * Usage: node scripts/create-admin.mjs [email] [password] [name]
+ * Example: node scripts/create-admin.mjs admin@ipl2026.com IPLAdmin@2025 "Admin User"
  */
 
-import crypto from 'crypto';
-import readline from 'readline';
+import crypto from 'node:crypto';
+import readline from 'node:readline';
 
 // Create readline interface for user input
 const rl = readline.createInterface({

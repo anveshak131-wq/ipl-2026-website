@@ -49,6 +49,6 @@ console.log('Sample grounds data:');
 console.log(JSON.stringify(sampleGrounds, null, 2));
 
 // Create grounds.json file for import
-import { writeFileSync } from 'fs';
+import { writeFileSync } from 'node:fs';
 writeFileSync('grounds.json', JSON.stringify(sampleGrounds, null, 2));
 console.log('Created grounds.json for KV import');

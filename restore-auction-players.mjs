@@ -1,10 +1,14 @@
 /**
  * Script to restore IPL Mini Auction 2026 players
- * Usage: node restore-auction-players.js [domain]
+ * Usage: node restore-auction-players.mjs [domain]
  */
 
-const fs = require('fs');
-const path = require('path');
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const domain = process.argv[2] || 'ipl-2026-website.pages.dev';
 const apiUrl = `https://${domain}/api/restore-players`;
@@ -57,7 +61,6 @@ async function restoreAuctionPlayers() {
 }
 
 restoreAuctionPlayers();
-
 
 
 

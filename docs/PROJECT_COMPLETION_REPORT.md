@@ -108,7 +108,7 @@ The IPL 2026 website development project has been **successfully completed** and
 - Password validation
 - Email validation
 - KV insertion instructions
-- File: `scripts/create-admin.js`
+- File: `scripts/create-admin.mjs`
 
 **Admin Setup Page**
 - Web-based setup interface
@@ -478,7 +478,7 @@ POST /api/messages    < 500ms        ✅ ~350ms
 - **Operations:** [MONITORING_OPERATIONS_GUIDE.md](./MONITORING_OPERATIONS_GUIDE.md)
 
 ### Tools
-- **Admin Script:** `scripts/create-admin.js`
+- **Admin Script:** `scripts/create-admin.mjs`
 - **Setup Page:** `/admin/setup`
 - **Health Check:** `/api/health`
 - **Metrics:** `/api/admin/metrics`
@@ -646,4 +646,3 @@ Thank you for this opportunity to build an excellent IPL 2026 website. The compl
 ---
 
 *For detailed information, start with [DOCUMENTATION_INDEX.md](./DOCUMENTATION_INDEX.md)*
-

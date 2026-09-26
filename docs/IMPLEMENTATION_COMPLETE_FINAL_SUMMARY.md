@@ -279,11 +279,11 @@ Step-by-step KV storage setup:
 
 ## 🛠️ Tools & Scripts Created
 
-### 1. **Admin Setup Script** (`scripts/create-admin.js`)
+### 1. **Admin Setup Script** (`scripts/create-admin.mjs`)
 **Purpose:** Create initial admin account from command line  
 **Usage:**
 ```bash
-node scripts/create-admin.js admin@ipl2026.com IPLAdmin@2025 "Admin User"
+node scripts/create-admin.mjs admin@ipl2026.com IPLAdmin@2025 "Admin User"
 ```
 
 **Features:**
@@ -374,7 +374,7 @@ node scripts/create-admin.js admin@ipl2026.com IPLAdmin@2025 "Admin User"
     - `ALLOWED_ORIGINS` (for CORS)
 
 - [ ] **Admin Account Setup**
-  - Option 1: Run `node scripts/create-admin.js`
+  - Option 1: Run `node scripts/create-admin.mjs`
   - Option 2: Visit `/admin/setup` (after deployment)
   - Option 3: Insert directly into KV storage
 
@@ -666,4 +666,3 @@ The application is built on a scalable, secure, and modern tech stack (Next.js +
 **Last Updated:** January 2025  
 **Version:** 1.0.0  
 **Status:** Final
-

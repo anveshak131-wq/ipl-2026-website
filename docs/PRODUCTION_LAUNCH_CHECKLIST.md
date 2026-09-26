@@ -142,7 +142,7 @@ cat wrangler.toml | grep -E "account_id|SPORTS_KV|SETUP_KEY"
 
 **Option 1: Using Setup Script (Recommended)**
 ```bash
-node scripts/create-admin.js admin@ipl2026.com "SecurePassword123" "Admin User"
+node scripts/create-admin.mjs admin@ipl2026.com "SecurePassword123" "Admin User"
 ```
 
 **Option 2: Using Setup Page**
@@ -844,4 +844,3 @@ APPROVAL:  ☐ Pass  ☐ Needs Work
 **Document Version:** 1.0  
 **Last Updated:** January 2025  
 **Status:** Ready for Deployment
-

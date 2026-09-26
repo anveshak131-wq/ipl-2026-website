@@ -3,8 +3,8 @@
  * Adds more players to reach 200+ total
  */
 
-const fs = require('fs');
-const path = require('path');
+import fs from 'node:fs';
+import path from 'node:path';
 
 // Read existing auction players
 const auctionPlayers = JSON.parse(fs.readFileSync('auction-players-clean.json', 'utf-8'));
@@ -129,7 +129,6 @@ const allPlayers = [...auctionPlayers, ...additionalPlayers];
 
 console.log(JSON.stringify(allPlayers, null, 2));
 console.error(`\nTotal players: ${allPlayers.length} (${auctionPlayers.length} auction + ${additionalPlayers.length} additional)`);
-
 
 
 

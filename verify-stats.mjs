@@ -1,4 +1,4 @@
-const fs = require('fs');
+import fs from 'node:fs';
 
 const players = JSON.parse(fs.readFileSync('comprehensive-players.json', 'utf8'));
 console.log('Total players in comprehensive-players.json:', players.length);
