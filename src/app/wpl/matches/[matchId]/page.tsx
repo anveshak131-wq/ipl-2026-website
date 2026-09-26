@@ -1,5 +1,6 @@
 import MatchCenterPage from '@/components/matches/MatchCenterPage';
 import { getStaticMatchRouteParams } from '@/lib/staticMatchRouteParams';
+import { Suspense } from 'react';
 
 export const dynamicParams = false;
 
@@ -8,5 +9,9 @@ export function generateStaticParams() {
 }
 
 export default function WplMatchDetailPage() {
-  return <MatchCenterPage backHref="/wpl/matches" preferredLeague="wpl" />;
+  return (
+    <Suspense fallback={null}>
+      <MatchCenterPage backHref="/wpl/matches" preferredLeague="wpl" />
+    </Suspense>
+  );
 }

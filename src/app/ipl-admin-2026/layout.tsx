@@ -17,6 +17,8 @@ import {
   setAdminCsrfToken,
 } from '@/lib/admin/csrf';
 
+export const dynamic = 'force-dynamic';
+
 const PLAYERS_ADMIN_PATHS = [
   '/ipl-admin-2026/players',
   '/ipl-admin-2026/batting-stats',
