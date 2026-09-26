@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { useLeague } from '@/contexts/LeagueContext';
 
@@ -29,10 +29,15 @@ export default function PageViewTracker() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const { currentLeague } = useLeague();
+  const [isMounted, setIsMounted] = useState(false);
   const search = useMemo(() => searchParams?.toString() || '', [searchParams]);
 
   useEffect(() => {
-    if (!pathname) return;
+    setIsMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!pathname || !isMounted) return;
 
     const payload = JSON.stringify({
       path: search ? `${pathname}?${search}` : pathname,
@@ -56,7 +61,7 @@ export default function PageViewTracker() {
     }).catch(() => {
       // Analytics must never interrupt navigation.
     });
-  }, [currentLeague, pathname, search]);
+  }, [currentLeague, pathname, search, isMounted]);
 
   return null;
 }
