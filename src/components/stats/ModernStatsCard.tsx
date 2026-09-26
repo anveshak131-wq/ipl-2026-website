@@ -54,7 +54,7 @@ export default function ModernStatsCard({
   const bowlingStrikeRateNumber = toOptionalNumber(stats?.bowlingStrikeRate);
   const bowlingStrikeRateDisplay =
     bowlingStrikeRateNumber !== null
-      ? bowlingStrikeRateNumber.toFixed(1)
+      ? bowlingStrikeRateNumber.toFixed(2)
       : (typeof stats?.bowlingStrikeRate === 'string' && stats.bowlingStrikeRate.trim()) || '-';
 
   const metricColor = isBatting ? 'text-amber-200' : 'text-violet-200';
@@ -65,7 +65,7 @@ export default function ModernStatsCard({
 
   const primary =
     resolvedMetric === 'strikeRate'
-      ? { value: formatValue(battingStrikeRate, 1), label: 'strike rate' }
+      ? { value: formatValue(battingStrikeRate, 2), label: 'strike rate' }
       : resolvedMetric === 'economy'
         ? { value: formatValue(bowlingEconomy, 2), label: 'economy' }
         : resolvedMetric === 'wickets'
@@ -74,13 +74,13 @@ export default function ModernStatsCard({
 
   const helper = isBatting
     ? resolvedMetric === 'strikeRate'
-      ? `${formatValue(toFiniteNumber(stats?.runs))} runs - Avg ${battingAverage.toFixed(1)}`
-      : `SR ${battingStrikeRate.toFixed(1)} - Avg ${battingAverage.toFixed(1)}`
+      ? `${formatValue(toFiniteNumber(stats?.runs))} runs - Avg ${battingAverage.toFixed(2)}`
+      : `SR ${battingStrikeRate.toFixed(2)} - Avg ${battingAverage.toFixed(2)}`
     : resolvedMetric === 'economy'
       ? `${formatValue(toFiniteNumber(stats?.wickets))} wickets - Avg ${
-          bowlingAverage !== null ? bowlingAverage.toFixed(1) : '-'
+          bowlingAverage !== null ? bowlingAverage.toFixed(2) : '-'
         }`
-      : `Eco ${bowlingEconomy.toFixed(2)} - Avg ${bowlingAverage !== null ? bowlingAverage.toFixed(1) : '-'}`;
+      : `Eco ${bowlingEconomy.toFixed(2)} - Avg ${bowlingAverage !== null ? bowlingAverage.toFixed(2) : '-'}`;
 
   return (
     <motion.button

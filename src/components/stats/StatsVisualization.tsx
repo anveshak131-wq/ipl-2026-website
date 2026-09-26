@@ -29,7 +29,7 @@ function getMetricValue(player: Player, metric: MetricKey): number {
 }
 
 function formatMetricValue(metric: MetricKey, value: number): string {
-  if (metric === 'strikeRate') return value.toFixed(1);
+  if (metric === 'strikeRate') return value.toFixed(2);
   if (metric === 'economy') return value.toFixed(2);
   return Math.round(value).toLocaleString();
 }

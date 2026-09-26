@@ -157,7 +157,7 @@ export default function TeamStatsSection({
     const rows = [
       { key: 'runs', label: 'Total Runs', a: t1.totalRuns, b: t2.totalRuns, fmt: (n: number) => n.toLocaleString() },
       { key: 'wickets', label: 'Total Wickets', a: t1.totalWickets, b: t2.totalWickets, fmt: (n: number) => n.toLocaleString() },
-      { key: 'strikeRate', label: 'Avg Strike Rate', a: t1.avgStrikeRate, b: t2.avgStrikeRate, fmt: (n: number) => n.toFixed(1) },
+      { key: 'strikeRate', label: 'Avg Strike Rate', a: t1.avgStrikeRate, b: t2.avgStrikeRate, fmt: (n: number) => n.toFixed(2) },
       { key: 'runsPerMatch', label: 'Avg Runs / Match', a: t1.avgRunsPerMatch, b: t2.avgRunsPerMatch, fmt: (n: number) => n.toFixed(1) },
     ];
 

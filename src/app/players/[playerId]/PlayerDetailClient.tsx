@@ -153,7 +153,7 @@ export default function PlayerDetailClient({ playerId }: PlayerDetailClientProps
   const recentFormItems = [
     { label: 'Runs / Match', value: runsPerMatch.toFixed(1) },
     { label: 'Boundaries / Match', value: boundariesPerMatch.toFixed(1) },
-    { label: 'Strike Rate', value: stats.strikeRate.toFixed(1) },
+    { label: 'Strike Rate', value: stats.strikeRate.toFixed(2) },
     { label: 'Economy', value: stats.economy.toFixed(1) },
     { label: 'Matches', value: stats.matches },
   ];
@@ -381,7 +381,7 @@ export default function PlayerDetailClient({ playerId }: PlayerDetailClientProps
               </div>
               <div className="rounded-2xl bg-black/40 border border-white/10 p-4">
                 <p className="text-xs text-gray-400 uppercase tracking-wide mb-1">Strike Rate</p>
-                <p className="text-2xl font-black text-emerald-400">{stats.strikeRate > 0 ? stats.strikeRate.toFixed(1) : '-'}</p>
+                <p className="text-2xl font-black text-emerald-400">{stats.strikeRate > 0 ? stats.strikeRate.toFixed(2) : '-'}</p>
               </div>
             </div>
           </section>
@@ -396,7 +396,7 @@ export default function PlayerDetailClient({ playerId }: PlayerDetailClientProps
                 { label: 'Innings runs', value: stats.runs, isNumeric: true },
                 { label: 'Highest score', value: stats.highest, isNumeric: true },
                 { label: 'Average', value: stats.average, isNumeric: true, format: (v: number) => v.toFixed(2) },
-                { label: 'Strike rate', value: stats.strikeRate, isNumeric: true, format: (v: number) => v.toFixed(1) },
+                { label: 'Strike rate', value: stats.strikeRate, isNumeric: true, format: (v: number) => v.toFixed(2) },
                 { label: 'Fours (4s)', value: stats.fours, isNumeric: true },
                 { label: 'Sixes (6s)', value: stats.sixes, isNumeric: true },
                 { label: 'Fifties (50s)', value: stats.fifties, isNumeric: true },

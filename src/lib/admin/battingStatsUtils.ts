@@ -41,7 +41,7 @@ export function formatBattingAverage(value: number, dismissals: number): string 
 
 export function formatBattingStrikeRate(value: number, ballsFaced: number): string {
   if (ballsFaced <= 0) return '';
-  return value.toFixed(1);
+  return value.toFixed(2);
 }
 
 export function getBattingAverageDisplayFromStats(stats: {
@@ -62,7 +62,7 @@ export function getBattingStrikeRateDisplayFromStats(stats: {
   const runs = stats.runs ?? 0;
   const ballsFaced = stats.ballsFaced ?? 0;
   if (ballsFaced <= 0) return '-';
-  return ((runs * 100) / ballsFaced).toFixed(1);
+  return ((runs * 100) / ballsFaced).toFixed(2);
 }
 
 export function getBattingAverageSortValue(stats: {

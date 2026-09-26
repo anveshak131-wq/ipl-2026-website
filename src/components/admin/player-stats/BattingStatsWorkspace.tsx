@@ -331,8 +331,8 @@ const BattingStatsPage = () => {
       const derived = calculateBattingDerivedStats({ battingInnings, notOuts, runs, ballsFaced });
       const { battingAverage: battingAverageStr, battingStrikeRate: battingStrikeRateStr } =
         formatBattingDerivedStats(derived, battingInnings, notOuts, ballsFaced);
-      const averageNum = derived.battingAverage;
-      const strikeRateNum = derived.strikeRate;
+      const averageNum = Number(derived.battingAverage.toFixed(2));
+      const strikeRateNum = Number(derived.strikeRate.toFixed(2));
 
       // Prepare stats object with proper type conversions
       // IMPORTANT: Set average and strikeRate AFTER spreading to ensure they override any old values
@@ -1751,4 +1751,3 @@ const BattingStatsPage = () => {
 };
 
 export default BattingStatsPage;
-

@@ -130,6 +130,11 @@ function displayValue(value: unknown): string {
   return raw;
 }
 
+function displayRate(value: unknown): string {
+  const numeric = Number(value);
+  return Number.isFinite(numeric) ? numeric.toFixed(2) : displayValue(value);
+}
+
 function MetricCard({ label, value, hint }: { label: string; value: string; hint?: string }) {
   return (
     <div className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3">
@@ -360,7 +365,7 @@ export default function PlayerCardModal({
                         { label: 'Matches', value: displayValue(player.matches), icon: <Calendar className="w-4 h-4" /> },
                         { label: 'Runs', value: displayValue(player.runs), icon: <Zap className="w-4 h-4" /> },
                         { label: 'Wickets', value: displayValue(player.wickets), icon: <Trophy className="w-4 h-4" /> },
-                        { label: 'SR', value: displayValue(player.strikeRate), icon: <Activity className="w-4 h-4" /> },
+                        { label: 'SR', value: displayRate(player.strikeRate), icon: <Activity className="w-4 h-4" /> },
                       ].map((item) => (
                         <div key={item.label} className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3">
                           <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wide text-white/55">
@@ -389,8 +394,8 @@ export default function PlayerCardModal({
                     <div className="lg:col-span-2 grid grid-cols-1 gap-4 sm:grid-cols-2">
                       <Section title="Batting Stats" icon={<BarChart3 className="h-4 w-4" />}>
                         <div className="grid grid-cols-2 gap-3">
-                          <MetricCard label="Avg" value={displayValue(player.battingAverage)} />
-                          <MetricCard label="SR" value={displayValue(player.strikeRate)} />
+                          <MetricCard label="Avg" value={displayRate(player.battingAverage)} />
+                          <MetricCard label="SR" value={displayRate(player.strikeRate)} />
                           <MetricCard label="HS" value={displayValue(player.highestScore)} />
                           <MetricCard label="Runs" value={displayValue(player.runs)} />
                           <MetricCard label="50s" value={displayValue(player.fifties)} />

@@ -48,8 +48,8 @@ export default function PlayerDetailModern({ player, teamColor }: PlayerDetailMo
   ];
 
   const battingStats = [
-    { label: 'Batting Avg', value: player.battingAverage },
-    { label: 'Strike Rate', value: player.strikeRate },
+    { label: 'Batting Avg', value: Number(player.battingAverage).toFixed(2) },
+    { label: 'Strike Rate', value: Number(player.strikeRate).toFixed(2) },
     { label: '50s', value: player.fifties },
     { label: '100s', value: player.hundreds },
   ];
@@ -246,7 +246,7 @@ export default function PlayerDetailModern({ player, teamColor }: PlayerDetailMo
                   { label: 'Best Bowling', value: player.bestBowling },
                   { label: 'Average', value: player.bowlingAverage },
                   { label: 'Economy', value: player.economy },
-                  { label: 'Strike Rate', value: (player.bowlingAverage / player.economy * 6).toFixed(1) },
+                  { label: 'Strike Rate', value: (player.bowlingAverage / player.economy * 6).toFixed(2) },
                   { label: '4+ Wickets', value: Math.floor(player.wickets / 4) },
                   { label: '5 Wickets', value: Math.floor(player.wickets / 5) },
                 ].map((stat, index) => (

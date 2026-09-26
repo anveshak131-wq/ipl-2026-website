@@ -330,7 +330,7 @@ export default function PlayerModal({ player, isOpen, onClose, teamColors, teamD
                 <p className="text-xs text-gray-400">Average</p>
               </div>
               <div className="text-center">
-                <p className="text-2xl font-bold text-green-400">{strikeRate > 0 ? strikeRate.toFixed(1) : '-'}</p>
+                <p className="text-2xl font-bold text-green-400">{strikeRate > 0 ? strikeRate.toFixed(2) : '-'}</p>
                 <p className="text-xs text-gray-400">Strike Rate</p>
               </div>
               <div className="text-center">

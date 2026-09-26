@@ -313,12 +313,12 @@ export default function IPLPlayersPanel({ initialPlayers = [], teams }: IPLPlaye
                     <div className="grid grid-cols-2 gap-4">
                       <div>
                         <p className="text-xs text-gray-400">Batting Avg</p>
-                        <p className="text-sm font-semibold">{player.battingAverage || '-'}</p>
+                        <p className="text-sm font-semibold">{player.battingAverage ? Number(player.battingAverage).toFixed(2) : '-'}</p>
                       </div>
                       <div>
                         <p className="text-xs text-gray-400">Strike Rate</p>
                         <p className="text-sm font-semibold">
-                          {player.strikeRate ? `${player.strikeRate}` : '-'}
+                          {player.strikeRate ? Number(player.strikeRate).toFixed(2) : '-'}
                         </p>
                       </div>
                       <div>

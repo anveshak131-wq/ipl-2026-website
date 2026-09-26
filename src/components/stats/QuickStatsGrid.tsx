@@ -52,7 +52,7 @@ export default function QuickStatsGrid({ players }: QuickStatsGridProps) {
     {
       icon: Gauge,
       label: 'Average strike rate',
-      value: stats.averageStrikeRate.toFixed(1),
+      value: stats.averageStrikeRate.toFixed(2),
       helper: 'Qualified batting tempo',
       color: 'from-cyan-300 to-sky-500',
     },

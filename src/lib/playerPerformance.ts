@@ -123,7 +123,7 @@ export function calculateBatterPerformance(player: Player): OverallPerformance {
     breakdown: [
       { label: 'Total Runs', value: runs > 0 ? runs.toLocaleString() : '-', weight: totalRunsScore },
       { label: 'Batting Avg', value: battingAvg > 0 ? battingAvg.toFixed(2) : '-', weight: avgScore },
-      { label: 'Strike Rate', value: strikeRate > 0 ? strikeRate.toFixed(1) : '-', weight: srScore },
+      { label: 'Strike Rate', value: strikeRate > 0 ? strikeRate.toFixed(2) : '-', weight: srScore },
       { label: '50s', value: fifties > 0 ? `${fifties} fifties` : '-', weight: fiftiesScore },
       { label: '100s', value: hundreds > 0 ? `${hundreds} hundreds` : '-', weight: hundredsScore },
       { label: 'Milestones Total', value: `${fifties} 50s, ${hundreds} 100s`, weight: milestonesScore - fiftiesScore - hundredsScore },
@@ -429,4 +429,3 @@ export function calculateOverallPerformance(player: Player): OverallPerformance 
     summary: 'Performance calculation not available for this role.'
   };
 }
-

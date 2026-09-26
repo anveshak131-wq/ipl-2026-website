@@ -479,7 +479,7 @@ function AdminPlayersWorkspace() {
               </div>
               <div className="text-center">
                 <div className="text-white font-bold text-lg">
-                  {player.stats?.average || '0.0'}
+                  {Number.isFinite(Number(player.stats?.average)) ? Number(player.stats?.average).toFixed(2) : '0.00'}
                 </div>
                 <div className="text-xs text-gray-300">Avg</div>
               </div>
@@ -3295,7 +3295,7 @@ function AdminPlayersWorkspace() {
           // Calculate average and strikeRate from base stats if not provided
           average: (() => {
             if (formData.stats.average && formData.stats.average.trim() !== '') {
-              return parseFloat(formData.stats.average) || 0;
+              return Number((parseFloat(formData.stats.average) || 0).toFixed(2));
             }
             // Calculate from runs, battingInnings, notOuts
             const runs = formData.stats.runs ? parseInt(formData.stats.runs) || 0 : 0;
@@ -3303,19 +3303,19 @@ function AdminPlayersWorkspace() {
             const notOuts = formData.stats.notOuts ? parseInt(formData.stats.notOuts) || 0 : 0;
             const dismissals = battingInnings - notOuts;
             if (dismissals > 0 && runs > 0) {
-              return runs / dismissals;
+              return Number((runs / dismissals).toFixed(2));
             }
             return 0;
           })(),
           strikeRate: (() => {
             if (formData.stats.strikeRate && formData.stats.strikeRate.trim() !== '') {
-              return parseFloat(formData.stats.strikeRate) || 0;
+              return Number((parseFloat(formData.stats.strikeRate) || 0).toFixed(2));
             }
             // Calculate from runs and ballsFaced
             const runs = formData.stats.runs ? parseInt(formData.stats.runs) || 0 : 0;
             const ballsFaced = formData.stats.ballsFaced ? parseInt(formData.stats.ballsFaced) || 0 : 0;
             if (ballsFaced > 0 && runs > 0) {
-              return (runs * 100) / ballsFaced;
+              return Number(((runs * 100) / ballsFaced).toFixed(2));
             }
             return 0;
           })(),

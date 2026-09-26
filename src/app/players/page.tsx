@@ -472,7 +472,9 @@ export default function PlayersPage() {
                               <div key={stat.key} className="text-center">
                                 <p className="text-xs text-gray-400">{stat.label}</p>
                                 <p className="text-sm font-semibold">
-                                  {player[stat.key as keyof typeof player] || '0'}
+                                  {stat.key === 'battingAverage' || stat.key === 'strikeRate'
+                                    ? Number(player[stat.key as keyof typeof player] || 0).toFixed(2)
+                                    : player[stat.key as keyof typeof player] || '0'}
                                 </p>
                               </div>
                             ))}
