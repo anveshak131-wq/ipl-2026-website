@@ -3,6 +3,9 @@
 import { useMemo } from 'react';
 import { motion } from 'framer-motion';
 import type { Player } from '@/types';
+import RadarChartVisualization from './RadarChart';
+import ScatterPlotVisualization from './ScatterPlot';
+import BubbleChartVisualization from './BubbleChart';
 
 type MetricKey = 'runs' | 'wickets' | 'strikeRate' | 'economy';
 
@@ -11,7 +14,7 @@ interface StatsVisualizationProps {
   type: 'batting' | 'bowling';
   metric?: MetricKey;
   maxItems?: number;
-  variant?: 'bar' | 'column' | 'donut' | 'axis' | 'lollipop';
+  variant?: 'bar' | 'column' | 'donut' | 'axis' | 'lollipop' | 'radar' | 'scatter' | 'bubble';
 }
 
 function getMetricValue(player: Player, metric: MetricKey): number {
@@ -104,6 +107,59 @@ export default function StatsVisualization({
       : 'Economy';
 
   const resolvedVariant = variant === 'axis' ? 'lollipop' : variant;
+
+  // Radar chart variant - multi-metric comparison
+  if (resolvedVariant === 'radar') {
+    return (
+      <div className="w-full">
+        <RadarChartVisualization
+          players={sortedPlayers}
+          metric={metricKey}
+          maxItems={Math.min(maxItems, 5)}
+          color={type === 'batting' ? 'from-orange-500 to-amber-500' : 'from-purple-500 to-violet-500'}
+        />
+      </div>
+    );
+  }
+
+  // Scatter plot variant - correlation between two metrics
+  if (resolvedVariant === 'scatter') {
+    const xMetric = type === 'batting' ? 'runs' : 'wickets';
+    const yMetric = type === 'batting' ? 'strikeRate' : 'economy';
+    
+    return (
+      <div className="w-full">
+        <ScatterPlotVisualization
+          players={sortedPlayers}
+          xMetric={xMetric}
+          yMetric={yMetric}
+          sizeMetric="matches"
+          maxItems={maxItems}
+          color={type === 'batting' ? 'from-orange-500 to-amber-500' : 'from-purple-500 to-violet-500'}
+        />
+      </div>
+    );
+  }
+
+  // Bubble chart variant - three-dimensional comparison
+  if (resolvedVariant === 'bubble') {
+    const xMetric = type === 'batting' ? 'strikeRate' : 'economy';
+    const yMetric = type === 'batting' ? 'average' : 'average';
+    const sizeMetric = type === 'batting' ? 'runs' : 'wickets';
+    
+    return (
+      <div className="w-full">
+        <BubbleChartVisualization
+          players={sortedPlayers}
+          xMetric={xMetric}
+          yMetric={yMetric}
+          sizeMetric={sizeMetric}
+          maxItems={Math.min(maxItems, 15)}
+          color={type === 'batting' ? 'from-orange-500 to-amber-500' : 'from-purple-500 to-violet-500'}
+        />
+      </div>
+    );
+  }
 
   // Lollipop chart variant inspired by common ranked comparison patterns.
   if (resolvedVariant === 'lollipop') {

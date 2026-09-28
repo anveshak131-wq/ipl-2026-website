@@ -732,7 +732,7 @@ export default function StatsPage() {
                         expandedPlayerId={expandedPlayerId}
                         onPlayerExpand={setExpandedPlayerId}
                         leadersLimit={leadersLimit}
-                        visualizationVariant="lollipop"
+                        visualizationVariant="bubble"
                       />
                     )}
 
@@ -749,7 +749,7 @@ export default function StatsPage() {
                         expandedPlayerId={expandedPlayerId}
                         onPlayerExpand={setExpandedPlayerId}
                         leadersLimit={leadersLimit}
-                        visualizationVariant="donut"
+                        visualizationVariant="scatter"
                       />
                     )}
                   </div>
@@ -797,7 +797,7 @@ export default function StatsPage() {
                       expandedPlayerId={expandedPlayerId}
                       onPlayerExpand={setExpandedPlayerId}
                       leadersLimit={leadersLimit}
-                      visualizationVariant="column"
+                      visualizationVariant="radar"
                     />
                   )}
                 </motion.div>

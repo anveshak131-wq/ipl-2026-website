@@ -20,7 +20,7 @@ interface LeaderboardSectionProps {
   expandedPlayerId: string | null;
   onPlayerExpand: (playerId: string | null) => void;
   leadersLimit: 10 | 50;
-  visualizationVariant?: 'bar' | 'column' | 'donut' | 'axis' | 'lollipop';
+  visualizationVariant?: 'bar' | 'column' | 'donut' | 'axis' | 'lollipop' | 'radar' | 'scatter' | 'bubble';
 }
 
 const metricHelp: Record<MetricKey, string> = {
