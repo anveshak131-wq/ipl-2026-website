@@ -25,6 +25,8 @@ import {
   type IplSavedRow,
 } from '@/lib/iplPointsTable';
 
+// Enhanced stats page with advanced visualizations
+
 interface TeamAggregate {
   team: Team | null;
   totalRuns: number;
