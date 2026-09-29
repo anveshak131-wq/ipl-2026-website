@@ -43,6 +43,7 @@ import WPLFloatingParticles from '@/components/animations/WPLFloatingParticles';
 import { WPLColors } from '@/lib/wplColors';
 import { formatMatchTime } from '@/lib/timeUtils';
 import PublicLiveMatchStrip from '@/components/live-score/PublicLiveMatchStrip';
+import WPLSeasonHeader from '@/components/wpl/WPLSeasonHeader';
 
 const TARGET_SEASON_YEAR = 2026;
 const HERO_BACKGROUND_IMAGE = '/images/wpl-oil-stadium-hero.webp';
@@ -121,6 +122,7 @@ export default function WPLHomePage() {
   const router = useRouter();
   const { currentLeague, setCurrentLeague } = useLeague();
   const prefersReducedMotion = useReducedMotion();
+  const [selectedSeason, setSelectedSeason] = useState<number>(2027);
   const [showTermsModal, setShowTermsModal] = useState(false);
   const [lastAcceptanceDate, setLastAcceptanceDate] = useState<string | null>(null);
   const [needsReAcceptance, setNeedsReAcceptance] = useState(false);
@@ -147,7 +149,7 @@ export default function WPLHomePage() {
   };
 
   const filterSeasonMatches = (items: Match[]): Match[] =>
-    items.filter((match) => getMatchYear(match.date) === TARGET_SEASON_YEAR);
+    items.filter((match) => getMatchYear(match.date) === selectedSeason);
   
   // Set league to WPL when page loads
   useEffect(() => {
@@ -424,6 +426,10 @@ export default function WPLHomePage() {
                 transition={{ duration: 0.75, type: 'spring', stiffness: 90 }}
                 className="max-w-3xl"
               >
+                <WPLSeasonHeader
+                  selectedSeason={selectedSeason}
+                  onSeasonChange={setSelectedSeason}
+                />
                 <motion.div
                   initial={{ opacity: 0, y: 12 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -446,7 +452,7 @@ export default function WPLHomePage() {
                     WPL
                   </span>
                   <span className="block bg-gradient-to-r from-pink-300 via-violet-300 to-amber-200 bg-clip-text text-transparent">
-                    2026
+                    {selectedSeason}
                   </span>
                 </motion.h1>
 
