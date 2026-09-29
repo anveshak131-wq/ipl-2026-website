@@ -2,6 +2,8 @@
 
 import { motion } from 'framer-motion';
 import { ChevronDown, ChevronUp, Medal, Trophy } from 'lucide-react';
+import PlayerShare from './PlayerShare';
+import PlayerBookmark from './PlayerBookmark';
 import type { Player } from '@/types';
 
 type MetricKey = 'runs' | 'wickets' | 'strikeRate' | 'economy';
@@ -139,6 +141,8 @@ export default function ModernStatsCard({
           </div>
 
           <div className="flex flex-shrink-0 items-center gap-3 text-right">
+            <PlayerBookmark playerId={player.id} />
+            <PlayerShare player={player} type={type} />
             <div>
               <div className={`text-2xl font-black ${metricColor}`}>
                 {primary.value}

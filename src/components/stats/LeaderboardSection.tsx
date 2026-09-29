@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { TrendingUp, Trophy } from 'lucide-react';
 import ModernStatsCard from './ModernStatsCard';
 import StatsVisualization from './StatsVisualization';
+import StatsExport from './StatsExport';
 import type { Player, Team } from '@/types';
 
 type MetricKey = 'runs' | 'wickets' | 'strikeRate' | 'economy';
@@ -86,8 +87,11 @@ export default function LeaderboardSection({
               </div>
             </div>
 
-            <div className="rounded-md border border-white/10 bg-white/[0.06] px-3 py-2 text-xs font-semibold text-slate-300">
-              Showing top {leadersLimit}
+            <div className="flex items-center gap-3">
+              <div className="rounded-md border border-white/10 bg-white/[0.06] px-3 py-2 text-xs font-semibold text-slate-300">
+                Showing top {leadersLimit}
+              </div>
+              <StatsExport players={players} title={title} type={type} />
             </div>
           </div>
 

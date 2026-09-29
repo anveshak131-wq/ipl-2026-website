@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 import TermsGuard from "@/components/TermsGuard";
 import { LeagueProvider } from "@/contexts/LeagueContext";
+import { ThemeProvider } from "@/contexts/ThemeContext";
+import { BookmarkProvider } from "@/contexts/BookmarkContext";
 import { AdminLayoutWrapper } from "@/components/admin/AdminLayoutWrapper";
 import MatchNotificationManager from "@/components/notifications/MatchNotificationManager";
 import PageViewTracker from "@/components/analytics/PageViewTracker";
@@ -34,15 +36,19 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="antialiased">
-        <LeagueProvider>
-          <AdminLayoutWrapper>
-            <Suspense fallback={null}>
-              <PageViewTracker />
-            </Suspense>
-            <MatchNotificationManager />
-            {children}
-          </AdminLayoutWrapper>
-        </LeagueProvider>
+        <ThemeProvider>
+          <BookmarkProvider>
+            <LeagueProvider>
+              <AdminLayoutWrapper>
+                <Suspense fallback={null}>
+                  <PageViewTracker />
+                </Suspense>
+                <MatchNotificationManager />
+                {children}
+              </AdminLayoutWrapper>
+            </LeagueProvider>
+          </BookmarkProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

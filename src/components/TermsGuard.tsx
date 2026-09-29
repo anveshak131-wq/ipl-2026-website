@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter, usePathname } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { PUBLIC_ROUTES_WITHOUT_TERMS, getTermsAcceptanceStatus } from "@/lib/terms-access";
 
@@ -9,35 +9,25 @@ interface TermsGuardProps {
   children: React.ReactNode;
 }
 
-/**
- * Client-side wrapper that enforces terms acceptance
- * Redirects to /terms if user hasn't accepted
- * Allows whitelisted routes to be accessed without acceptance
- * 
- * Features:
- * - Keyboard navigation (Escape to close)
- * - ARIA labels for accessibility
- * - Loading state with animated spinner
- * - Route whitelisting
- * - localStorage persistence
- */
 export default function TermsGuard({ children }: TermsGuardProps) {
-  const router = useRouter();
   const pathname = usePathname();
   const [isChecking, setIsChecking] = useState(true);
-  const [canAccess, setCanAccess] = useState(false);
 
   useEffect(() => {
-    // Check if current route is admin route - exclude admin routes from terms check
-    if (pathname.startsWith('/ipl-admin-2026') || pathname.startsWith('/wpl-admin-2026')) {
-      // Admin routes, allow access without terms check
-      setCanAccess(true);
+    // 1. Always allow admin routes
+    if (pathname.startsWith('/ipl-admin-2026') || pathname.startsWith('/wpl-admin-2026') || pathname.startsWith('/admin')) {
       setIsChecking(false);
       return;
     }
 
-    // Check if current route is whitelisted (doesn't require terms acceptance)
-    const isPublicRoute = PUBLIC_ROUTES_WITHOUT_TERMS.some(route => {
+    // 2. Always allow homepage, terms, privacy, and legal
+    if (pathname === '/' || pathname === '/terms' || pathname === '/privacy' || pathname === '/legal') {
+      setIsChecking(false);
+      return;
+    }
+
+    // 3. Check whitelisted public routes
+    const isPublicRoute = PUBLIC_ROUTES_WITHOUT_TERMS?.some((route) => {
       if (route.endsWith("/")) {
         return pathname.startsWith(route);
       }
@@ -45,77 +35,33 @@ export default function TermsGuard({ children }: TermsGuardProps) {
     });
 
     if (isPublicRoute) {
-      // Public route, allow access
-      setCanAccess(true);
       setIsChecking(false);
       return;
     }
 
-    // Check terms acceptance
+    // 4. Default: allow content rendering so search bots and users are not stuck
     const { isAccepted } = getTermsAcceptanceStatus();
-
-    if (!isAccepted) {
-      // Terms not accepted, redirect to home page (modal will show there)
-      // Store the intended destination for redirect after acceptance
+    if (!isAccepted && pathname !== "/") {
       sessionStorage.setItem("terms_redirect_after", pathname);
-      router.push("/");
-      return;
     }
 
-    // Terms accepted, allow access
-    setCanAccess(true);
     setIsChecking(false);
-  }, [pathname, router]);
-
-  // Handle Escape key to close loading modal (accessibility)
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && isChecking) {
-        // Escape during loading redirects to home
-        sessionStorage.setItem("terms_redirect_after", pathname);
-        router.push("/");
-      }
-    };
-
-    if (isChecking) {
-      window.addEventListener("keydown", handleKeyDown);
-      return () => window.removeEventListener("keydown", handleKeyDown);
-    }
-    return undefined;
-  }, [isChecking, pathname, router]);
+  }, [pathname]);
 
   if (isChecking) {
-    // Show loading state while checking
     return (
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        className="flex items-center justify-center min-h-screen bg-gradient-to-br from-slate-900 to-slate-800"
+      <div
+        className="flex items-center justify-center min-h-screen bg-slate-950"
         role="status"
-        aria-label="Verifying access..."
+        aria-label="Loading sports hub..."
       >
-        <div className="text-center">
-          <motion.div
-            animate={{ rotate: 360 }}
-            transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-            className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full mx-auto mb-4"
-            aria-hidden="true"
-          />
-          <p className="text-white text-lg">Verifying access...</p>
-          <p className="text-gray-400 text-sm mt-2">Press Escape to go to home page</p>
-        </div>
-      </motion.div>
+        <div className="w-10 h-10 border-4 border-amber-500 border-t-transparent rounded-full animate-spin" />
+      </div>
     );
   }
 
-  if (!canAccess) {
-    // This shouldn't happen as we redirect above, but as a safety net
-    return null;
-  }
-
   return (
-    <AnimatePresence>
+    <AnimatePresence mode="wait">
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}

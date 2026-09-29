@@ -13,7 +13,7 @@ import {
 /**
  * Cloudflare Pages Middleware
  *
- * Protects admin surfaces with the app's Google OAuth admin session.
+ * Protects unified admin surfaces under `/ops` with Google OAuth admin session.
  *
  * Required production environment variables:
  * - GOOGLE_CLIENT_ID
@@ -23,10 +23,17 @@ import {
  * - ADMIN_PLAYERS_ADMIN_EMAILS=anvesh.ak.131@gmail.com
  */
 
-const PROTECTED_PREFIXES = [
+// Legacy/predictable URLs to immediately reject with 404
+const LEGACY_SCAN_PROBES = [
   '/ipl-admin-2026',
   '/wpl-admin-2026',
   '/admin',
+  '/admin-2026',
+] as const;
+
+// New protected route boundaries
+const PROTECTED_PREFIXES = [
+  '/ops',
   '/api/admin',
 ] as const;
 
@@ -37,15 +44,22 @@ const PUBLIC_ADMIN_API_GET_PATHS = [
 ] as const;
 
 const ADMIN_WRITE_METHODS = new Set(['POST', 'PUT', 'DELETE']);
+
+// Updated players admin restrictions under /ops
 const PLAYERS_ADMIN_ALLOWED_PAGE_PATHS = new Set([
-  '/ipl-admin-2026/players',
-  '/ipl-admin-2026/batting-stats',
-  '/ipl-admin-2026/bowling-stats',
+  '/ops/ipl/players',
+  '/ops/ipl/batting-stats',
+  '/ops/ipl/bowling-stats',
 ]);
+
 const PLAYERS_ADMIN_ALLOWED_API_PATHS = new Set([
   '/api/admin/session',
   '/api/admin/logout',
 ]);
+
+function isLegacyProbe(pathname: string): boolean {
+  return LEGACY_SCAN_PROBES.some((probe) => pathname === probe || pathname.startsWith(`${probe}/`));
+}
 
 function isProtectedPath(pathname: string): boolean {
   return PROTECTED_PREFIXES.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`));
@@ -112,6 +126,16 @@ function wantsHtml(request: Request): boolean {
   return accept.includes('text/html') || accept.includes('*/*');
 }
 
+function notFoundResponse(): Response {
+  return new Response('Not Found', {
+    status: 404,
+    headers: {
+      'Content-Type': 'text/plain; charset=utf-8',
+      'Cache-Control': 'no-store',
+    },
+  });
+}
+
 function unauthorizedJson(message: string): Response {
   return new Response(JSON.stringify({ error: message }), {
     status: 401,
@@ -171,7 +195,7 @@ function isAllowedPlayersAdminApiPath(pathname: string): boolean {
 }
 
 function redirectPlayersAdminToAllowedPage(url: URL): Response {
-  const allowedUrl = new URL('/ipl-admin-2026/players', url.origin);
+  const allowedUrl = new URL('/ops/ipl/players', url.origin);
   return Response.redirect(allowedUrl.toString(), 302);
 }
 
@@ -180,6 +204,12 @@ export const onRequest = async (context: any) => {
   const url = new URL(request.url);
   const safeEnv = env || {};
 
+  // 1. Immediately drop and 404 any scanner targeting old known admin paths
+  if (isLegacyProbe(url.pathname)) {
+    return notFoundResponse();
+  }
+
+  // 2. Allow non-protected paths (homepage, live scores, teams, matches)
   if (!isProtectedPath(url.pathname)) {
     if (isApiRequest(url) && isAdminWriteRequest(request) && hasAdminSessionCookie(request)) {
       const session = await verifyAdminSession(request, safeEnv);
@@ -192,10 +222,12 @@ export const onRequest = async (context: any) => {
     return context.next();
   }
 
+  // 3. Allow public authentication endpoints
   if (isPublicAdminApiPath(url.pathname, request.method)) {
     return context.next();
   }
 
+  // 4. Handle legacy admin APIs
   if (isLegacyAdminApiPostPath(url.pathname, request.method)) {
     if (isAllowedLegacyAdminApiPath(url.pathname, safeEnv)) {
       return context.next();
@@ -204,10 +236,12 @@ export const onRequest = async (context: any) => {
     return forbiddenJson(legacyAdminApiDisabledMessage(url.pathname));
   }
 
+  // 5. Check local dev bypass
   if (shouldBypassAdminAuthForLocalDev(safeEnv, url)) {
     return context.next();
   }
 
+  // 6. Verify Google Admin Session
   const session = await verifyAdminSession(request, safeEnv);
 
   if (!session) {
@@ -218,10 +252,12 @@ export const onRequest = async (context: any) => {
     return unauthorizedJson('Google admin sign-in required');
   }
 
+  // 7. Enforce CSRF token on write operations
   if (isApiRequest(url) && isAdminWriteRequest(request) && !(await verifyAdminCsrfToken(request, safeEnv, session))) {
     return forbiddenJson(`Missing or invalid ${ADMIN_CSRF_HEADER}`);
   }
 
+  // 8. Enforce Players Admin role boundaries
   if (isPlayersAdminSession(session)) {
     if (isApiRequest(url)) {
       if (!isAllowedPlayersAdminApiPath(url.pathname)) {

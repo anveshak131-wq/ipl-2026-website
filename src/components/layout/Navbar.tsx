@@ -8,6 +8,7 @@ import SportsUP18LogoWithText from '../branding/SportsUP18LogoWithText';
 import SportsUP18Logo from '../branding/SportsUP18Logo';
 import Emoji from '../emoji/Emoji';
 import LeagueSwitcher from './LeagueSwitcher';
+import ThemeToggle from '@/components/ui/ThemeToggle';
 import { useLeague } from '@/contexts/LeagueContext';
 
 type NavEmojiName = 'cricket' | 'chart' | 'news' | 'glove' | 'target' | 'trophy' | 'sparkles' | 'people' | 'fire' | 'star' | 'cricket-bat' | 'lightning' | 'clock' | 'venue';
@@ -173,6 +174,9 @@ export default function Navbar() {
           <div className="hidden md:flex flex-1 items-center justify-end gap-4 ml-8">
             {/* League Switcher */}
             <LeagueSwitcher />
+            
+            {/* Theme Toggle */}
+            <ThemeToggle />
             
             {/* Primary Nav - Reorganized with visual grouping */}
             <div className="flex items-center gap-2">
@@ -528,6 +532,11 @@ export default function Navbar() {
               {/* League Switcher for Mobile */}
               <div className="flex justify-center pb-2 border-b border-white/10">
                 <LeagueSwitcher />
+              </div>
+              
+              {/* Theme Toggle for Mobile */}
+              <div className="flex justify-center pb-2 border-b border-white/10">
+                <ThemeToggle />
               </div>
             {/* Group 1: Real-time & Core (Highlighted) */}
             <motion.div

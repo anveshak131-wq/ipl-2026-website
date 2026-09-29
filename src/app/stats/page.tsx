@@ -15,6 +15,7 @@ import StatsTabs from '@/components/stats/StatsTabs';
 import LeaderboardSection from '@/components/stats/LeaderboardSection';
 import QuickStatsGrid from '@/components/stats/QuickStatsGrid';
 import TeamStatsSection from '@/components/stats/TeamStatsSection';
+import BookmarkedPlayersSection from '@/components/stats/BookmarkedPlayersSection';
 import { Trophy, Award, TrendingUp, Target, Sparkles, Filter } from 'lucide-react';
 import IplStatusPill from '@/components/points-table/IplStatusPill';
 import {
