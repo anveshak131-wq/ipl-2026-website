@@ -3262,33 +3262,7 @@ function AdminPlayersWorkspace() {
       
       const finalBowlingStyle = formData.customBowlingStyle.trim() || formData.bowlingStyle;
 
-      // For WPL, stats are not required - set all to 0
-      const statsForPlayer = formData.league === 'wpl' ? {
-        matches: 0,
-        runs: 0,
-        wickets: 0,
-        average: 0,
-        bowlingAverage: 0,
-        strikeRate: 0,
-        economy: 0,
-        highest: 0,
-        fours: 0,
-        sixes: 0,
-        fifties: 0,
-        hundreds: 0,
-        bestBowling: '-',
-        battingInnings: 0,
-        notOuts: 0,
-        ballsFaced: 0,
-        bowlingInnings: 0,
-        balls: 0,
-        maidens: 0,
-        runsConceded: 0,
-        bowlingStrikeRate: '',
-        fiveWickets: 0,
-        battingAverage: '',
-        battingStrikeRate: '',
-      } : {
+      const statsForPlayer = {
           matches: formData.stats.matches ? parseInt(formData.stats.matches) || 0 : 0,
           runs: formData.stats.runs ? parseInt(formData.stats.runs) || 0 : 0,
           wickets: formData.stats.wickets ? parseInt(formData.stats.wickets) || 0 : 0,
@@ -4959,7 +4933,7 @@ function AdminPlayersWorkspace() {
 
                 <div className="oil-modal-body custom-scrollbar overflow-y-auto max-h-[calc(95vh-176px)]">
                   <div className="oil-modal-strip border-b border-white/10 px-6 py-4">
-                    <AdminPlayerFormProgress showStatsStep={formData.league !== 'wpl'} />
+                    <AdminPlayerFormProgress showStatsStep={true} />
                   </div>
                   <form id="player-form" onSubmit={handleSubmit} className="space-y-6 p-6">
                     <AdminPlayerBasicInfoSection
@@ -5511,8 +5485,8 @@ function AdminPlayersWorkspace() {
                         })()}
                     </section>
 
-                    {/* Stats - Only show for IPL */}
-                    {formData.league !== 'wpl' && (
+                    
+                    {true && (
                       <section className="oil-modal-section p-5 oil-rise" id="player-form-stats">
                         <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
                           <div className="flex items-start gap-4">

@@ -306,7 +306,7 @@ export default function UnifiedAdminSidebar({ currentPage = '', onLogout }: Unif
     setExpandedGroups((prev) => {
       const newSet = new Set(prev);
       if (newSet.has(groupName)) {
-        newSet delete(groupName);
+        newSet.delete(groupName);
       } else {
         newSet.add(groupName);
       }
