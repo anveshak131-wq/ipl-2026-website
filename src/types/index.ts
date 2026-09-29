@@ -96,7 +96,7 @@ export interface Player {
   // Squad availability state for the active season. Inactive players are excluded
   // from team selections but still retained for profile/history use.
   isActiveInSquad?: boolean;
-  squadStatus?: 'active' | 'inactive';
+  squadStatus?: 'active' | 'inactive' | 'retained' | 'released' | 'auction';
   squadExitReason?: 'contract_terminated' | 'injury_replacement' | 'released' | 'unavailable' | 'other';
   squadExitDate?: string; // ISO date (YYYY-MM-DD)
   // Team-season history entry is recorded only if player has >= 1 appearance.

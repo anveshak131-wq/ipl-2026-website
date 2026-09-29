@@ -15,6 +15,7 @@ export interface PlayerBasicFormData {
   teamId: string;
   league: 'ipl' | 'wpl';
   isActiveInSquad: boolean;
+  squadStatus?: 'active' | 'inactive' | 'retained' | 'released' | 'auction';
 }
 
 interface AdminPlayerBasicInfoSectionProps {
@@ -215,6 +216,29 @@ export default function AdminPlayerBasicInfoSection({
             />
           </div>
         </FieldCard>
+        <FieldCard accent="purple" label="2027 Squad Status" icon={<Shield className="h-4 w-4 text-[#d9a8ff]" />}>
+          <CustomSelect
+            value={formData.squadStatus || (formData.isActiveInSquad ? 'retained' : 'released')}
+            onChange={(newStatus) => {
+              const status = newStatus as 'active' | 'inactive' | 'retained' | 'released' | 'auction';
+              onChange({
+                squadStatus: status,
+                isActiveInSquad: status === 'retained' || status === 'active',
+              });
+            }}
+            options={[
+              { value: 'retained', label: 'Retained (Active 2027)' },
+              { value: 'released', label: 'Released / Available' },
+              { value: 'auction', label: 'Auction Pool' },
+              { value: 'active', label: 'Active Squad' },
+              { value: 'inactive', label: 'Inactive / Unavailable' },
+            ]}
+            placeholder="Select Squad Status"
+            icon={<Shield className="w-5 h-5" />}
+            iconColor="text-[#d9a8ff]"
+          />
+        </FieldCard>
+
 
         <FieldCard accent="teal" label="Role" required icon={<Award className="h-4 w-4 text-[#9cf2c8]" />}>
           <CustomSelect
