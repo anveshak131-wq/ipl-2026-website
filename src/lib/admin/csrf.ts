@@ -47,6 +47,8 @@ function isAdminSurfacePath(pathname: string): boolean {
   return (
     pathname === '/admin' ||
     pathname.startsWith('/admin/') ||
+    pathname === '/ops' ||
+    pathname.startsWith('/ops/') ||
     pathname === '/ipl-admin-2026' ||
     pathname.startsWith('/ipl-admin-2026/') ||
     pathname === '/wpl-admin-2026' ||
