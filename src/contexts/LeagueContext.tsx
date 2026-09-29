@@ -27,17 +27,14 @@ export function LeagueProvider({ children }: { children: ReactNode }) {
       const pathname = window.location.pathname;
       let initialLeague: League = 'ipl';
       
-      // If on WPL admin pages, always use WPL
-      if (pathname.includes('/wpl-admin-2026')) {
-        initialLeague = 'wpl';
-      }
-      // If on IPL admin pages, allow stored preference
-      else if (pathname.includes('/ipl-admin-2026')) {
-        const stored = localStorage.getItem(LEAGUE_STORAGE_KEY);
-        if (stored === 'ipl' || stored === 'wpl') {
-          initialLeague = stored as League;
+        // If on WPL admin/ops pages, always use WPL
+        if (pathname.includes('/wpl-admin-2026') || pathname.startsWith('/ops/wpl')) {
+          initialLeague = 'wpl';
         }
-      }
+        // If on IPL admin/ops pages, always use IPL
+        else if (pathname.includes('/ipl-admin-2026') || pathname.startsWith('/ops/ipl')) {
+          initialLeague = 'ipl';
+        }
       // For end-user pages, default to IPL unless explicitly on WPL route
       else if (pathname.startsWith('/wpl/') || pathname === '/wpl') {
         initialLeague = 'wpl';
