@@ -677,7 +677,7 @@ export const onRequest = async (context) => {
 
       const previousPlayer = players[index];
       const wasActive = isPlayerActiveInSquad(previousPlayer);
-      const nextIsActive = !(updatedPlayer.isActiveInSquad === false || updatedPlayer.squadStatus === 'inactive');
+      const nextIsActive = isPlayerActiveInSquad(updatedPlayer);
       const previousTeamId = String(previousPlayer.teamId || '');
       const requestedTeamId = String(updatedPlayer.teamId || '').trim();
       const nextTeamId = nextIsActive ? requestedTeamId : '';

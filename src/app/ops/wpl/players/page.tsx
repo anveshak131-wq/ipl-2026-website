@@ -3180,7 +3180,8 @@ function AdminPlayersWorkspace() {
       transferable: typeof player.transferInfo?.transferable === 'boolean' ? player.transferInfo!.transferable : false,
       transferFee: player.transferInfo?.transferFee ? String(player.transferInfo.transferFee) : '',
       transferNotes: player.transferInfo?.notes || '',
-      isActiveInSquad: player.isActiveInSquad !== false && player.squadStatus !== 'inactive',
+      isActiveInSquad: !(player.isActiveInSquad === false || ['inactive', 'released', 'auction'].includes(player.squadStatus || '') || Boolean(player.squadExitReason)),
+      squadStatus: player.squadStatus || (player.isActiveInSquad === false ? 'released' : 'active'),
       squadExitReason: player.squadExitReason || '',
       squadExitDate: player.squadExitDate || '',
       stats: {
