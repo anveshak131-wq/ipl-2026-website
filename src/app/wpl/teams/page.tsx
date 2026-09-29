@@ -512,7 +512,7 @@ function WPLTeamsPageContent() {
                                     >
                                         <Sparkles className="w-4 h-4" />
                                     </motion.div>
-                                    WPL 2026 ELITE TEAMS
+                                    WPL 2027 CONTENDERS • SEASON 5
                                     <motion.div
                                         animate={{ scale: [1, 1.2, 1] }}
                                         transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
@@ -565,7 +565,7 @@ function WPLTeamsPageContent() {
                                     whileHover={{ scale: 1.02 }}
                                 >
                                     <Flame className="w-5 h-5 text-orange-400" />
-                                    Explore all elite franchises competing for glory in the Women's Premier League
+                                    Explore all 5 elite franchises preparing for the 2027 title fight (Jan 9 – Feb 5, 2027)
                                     <Trophy className="w-5 h-5 text-yellow-400" />
                                 </motion.span>
                             </motion.p>
