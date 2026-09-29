@@ -671,7 +671,6 @@ export default function IPLAdminLiveScoreTablePage() {
     if (decision === 'bat') {
       return innings === '1' ? winner : otherTeamKey(winner);
     }
-    // decision === 'bowl'
     return innings === '1' ? otherTeamKey(winner) : winner;
   };
 
@@ -998,11 +997,9 @@ export default function IPLAdminLiveScoreTablePage() {
     const current = { ...DEFAULT_EXTRAS, ...(extrasData[rowIndex] || {}) };
     const next: ExtrasRow = { ...current, [field]: value } as ExtrasRow;
 
-    // Guardrails: wides and no-balls are mutually exclusive in this UI
     if (field === 'hasWide' && value === true) next.hasNoBall = false;
     if (field === 'hasNoBall' && value === true) next.hasWide = false;
 
-    // If turning off wide/no-ball, reset their detail fields
     if ((field === 'hasWide' && value === false) || next.hasWide === false) {
       next.wideExtraRuns = 0;
     }
@@ -1011,7 +1008,6 @@ export default function IPLAdminLiveScoreTablePage() {
 
     setExtrasForRow(rowIndex, next);
 
-    // Keep CSV cell values in sync (store numeric totals in those columns)
     const wideTotal = next.hasWide ? 1 + (next.wideExtraRuns || 0) : '';
     const noBallTotal = next.hasNoBall ? 1 : '';
     const byesTotal = next.hasByes ? String(next.byesRuns || 0) : '';
@@ -1022,7 +1018,6 @@ export default function IPLAdminLiveScoreTablePage() {
     updateCell(rowIndex, 9, byesTotal);
     updateCell(rowIndex, 10, lbTotal);
 
-    // Guardrails (MCC Laws): enforce which dismissals are possible on No-ball/Wide.
     const wk = { ...DEFAULT_WICKET, ...(wicketData[rowIndex] || {}) };
     if (wk.hasWicket && wk.wicketType) {
       const allowed = next.hasNoBall
@@ -1053,10 +1048,8 @@ export default function IPLAdminLiveScoreTablePage() {
     if (field === 'wicketType') {
       const type = String(value || '').trim();
 
-      // Out batter selection is only meaningful for run-outs/rare cases.
       if (type === 'Mankad (Run out at non-striker end)') {
         next.outBatter = 'nonStriker';
-        // Usually effected by the bowler; default to bowler if present.
         const bowlerId = String(rows?.[rowIndex]?.[5] || '').trim();
         if (bowlerId) next.wicketTaker = bowlerId;
       } else if (type === 'Run Out' || type === 'Obstructing the Field') {
@@ -1065,7 +1058,6 @@ export default function IPLAdminLiveScoreTablePage() {
         next.outBatter = 'striker';
       }
 
-      // Clear wicket taker when it doesn't apply; keep it structured when it does.
       const takerNotUsed =
         type === 'Bowled' ||
         type === 'LBW' ||
@@ -1353,9 +1345,17 @@ export default function IPLAdminLiveScoreTablePage() {
     setExtrasData((prev) => ({ ...prev, [newIndex]: { ...DEFAULT_EXTRAS, ...effectiveExtras } }));
     setWicketData((prev) => ({ ...prev, [newIndex]: wicketRow }));
 
+    // Enhanced Strike Rotation Logic (Odd runs + Over end)
     if (autoSwapStrike && !wicketRow.hasWicket && !isNonDeliveryWicket(wicketRow)) {
       const completedRuns = computeBallTotals(sanitizedRuns, effectiveExtras).completedRuns;
-      if (completedRuns % 2 === 1) {
+      const isOddRuns = completedRuns % 2 === 1;
+      const isLegalBall = !effectiveExtras.hasWide && !effectiveExtras.hasNoBall;
+      const currentBallNum = Number(String(newRow[1] || '0').trim());
+      const isOverComplete = isLegalBall && currentBallNum === 6;
+
+      const shouldSwap = isOverComplete ? !isOddRuns : isOddRuns;
+
+      if (shouldSwap) {
         setFastStrikerId(fastNonStrikerId);
         setFastNonStrikerId(fastStrikerId);
       }
@@ -1510,7 +1510,7 @@ export default function IPLAdminLiveScoreTablePage() {
 
       if (ex.hasNoBall) {
         noBalls += 1;
-        extras += 1; // mandatory no-ball extra (additional runs should be recorded in Runs / Byes / LB)
+        extras += 1;
       }
 
       if (ex.hasByes && !ex.hasWide) {
@@ -1575,12 +1575,12 @@ export default function IPLAdminLiveScoreTablePage() {
 
       type RGB = readonly [number, number, number];
       const palette = {
-        bg: [13, 20, 27] as RGB, // deep ink
-        panel: [25, 38, 46] as RGB, // canvas
-        panelSoft: [33, 50, 60] as RGB, // raised canvas
-        accent: [60, 110, 113] as RGB, // petrol teal
-        accentSoft: [176, 138, 82] as RGB, // warm ochre
-        danger: [203, 97, 92] as RGB, // muted vermillion
+        bg: [13, 20, 27] as RGB,
+        panel: [25, 38, 46] as RGB,
+        panelSoft: [33, 50, 60] as RGB,
+        accent: [60, 110, 113] as RGB,
+        accentSoft: [176, 138, 82] as RGB,
+        danger: [203, 97, 92] as RGB,
         text: [235, 238, 240] as RGB,
         muted: [160, 171, 178] as RGB,
         grid: [49, 68, 78] as RGB,
@@ -1609,7 +1609,6 @@ export default function IPLAdminLiveScoreTablePage() {
           doc.rect(0, y, pageWidth, h, 'F');
         }
 
-        // Subtle oil-canvas accents (kept away from content areas).
         setFill(palette.accent);
         doc.circle(24, 22, 9, 'F');
         setFill(palette.accentSoft);
@@ -1723,27 +1722,23 @@ export default function IPLAdminLiveScoreTablePage() {
         return lines.join('\n');
       };
 
-      // ── Page 1: Modern summary (oil palette) ─────────────────────────────────
       drawBackground('cover');
 
       const contentW = pageWidth - marginX * 2;
       const gap = 8;
 
-      // Header card
       const headerX = marginX;
       const headerY = marginTop;
       const headerW = contentW;
       const headerH = 34;
       drawCard(headerX, headerY, headerW, headerH, palette.panel);
 
-      // Decorative “oil paint” blobs
       setFill(palette.accent);
       doc.circle(headerX + 18, headerY + 18, 10, 'F');
       setFill(palette.accentSoft);
       doc.circle(headerX + headerW - 18, headerY + 12, 6, 'F');
       doc.circle(headerX + headerW - 36, headerY + 26, 12, 'F');
 
-      // Header text
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(10);
       setText(palette.muted);
@@ -1763,7 +1758,6 @@ export default function IPLAdminLiveScoreTablePage() {
       setFill(palette.accent);
       doc.rect(headerX + 10, headerY + headerH - 5, headerW - 20, 1, 'F');
 
-      // Two top cards: match details + score snapshot
       const topRowY = headerY + headerH + 8;
       const topCardH = 52;
       const colW = (contentW - gap) / 2;
@@ -1838,7 +1832,6 @@ export default function IPLAdminLiveScoreTablePage() {
       drawScoreBlock(scoreY + 18, 'Innings 1', String(innings1BattingName || ''), inn1);
       drawScoreBlock(scoreY + 38, 'Innings 2', String(innings2BattingName || ''), inn2);
 
-      // Impact player card
       const impactX = marginX;
       const impactY = topRowY + topCardH + 8;
       const impactW = contentW;
@@ -1899,7 +1892,6 @@ export default function IPLAdminLiveScoreTablePage() {
         },
       });
 
-      // ── Innings tables ───────────────────────────────────────────────────────
       doc.addPage();
 
       const normalizeRowForPdf = (r: string[]) => {
@@ -1955,14 +1947,14 @@ export default function IPLAdminLiveScoreTablePage() {
             fillColor: [palette.panel[0], palette.panel[1], palette.panel[2]],
           },
           columnStyles: {
-            0: { cellWidth: 10, halign: 'center' }, // Over
-            1: { cellWidth: 10, halign: 'center' }, // Ball
-            2: { cellWidth: 12, halign: 'center' }, // Inn
-            6: { cellWidth: 10, halign: 'center' }, // Runs
-            7: { cellWidth: 10, halign: 'center' }, // Wide
-            8: { cellWidth: 12, halign: 'center' }, // No Ball
-            9: { cellWidth: 10, halign: 'center' }, // Byes
-            10: { cellWidth: 10, halign: 'center' }, // LB
+            0: { cellWidth: 10, halign: 'center' },
+            1: { cellWidth: 10, halign: 'center' },
+            2: { cellWidth: 12, halign: 'center' },
+            6: { cellWidth: 10, halign: 'center' },
+            7: { cellWidth: 10, halign: 'center' },
+            8: { cellWidth: 12, halign: 'center' },
+            9: { cellWidth: 10, halign: 'center' },
+            10: { cellWidth: 10, halign: 'center' },
           },
           didParseCell: (data) => {
             if (data.section !== 'body') return;
@@ -1985,7 +1977,6 @@ export default function IPLAdminLiveScoreTablePage() {
           willDrawPage: () => {
             drawBackground('table');
 
-            // Header bar
             drawCard(barX, barY, barW, barH, palette.panel);
             setFill(palette.accent);
             doc.rect(barX + 10, barY + barH - 4, barW - 20, 0.9, 'F');
@@ -2014,7 +2005,6 @@ export default function IPLAdminLiveScoreTablePage() {
             setText(palette.muted);
             doc.text(fitText('Ball-by-ball (including extras & wicket notes)', barW - 20), barX + barW - 10, barY + 18.6, { align: 'right' });
 
-            // Table "card" behind content area
             const cardX = marginX;
             const cardY = tableStartY - 4;
             const cardW = pageWidth - marginX * 2;
@@ -2029,7 +2019,6 @@ export default function IPLAdminLiveScoreTablePage() {
       doc.addPage();
       renderInningsTable('Innings 2', String(innings2BattingName || ''), inn2, innings2Rows);
 
-      // ── Page footer (page numbers) ───────────────────────────────────────────
       const totalPages = (doc as any).internal?.getNumberOfPages?.() ? (doc as any).internal.getNumberOfPages() : (doc.internal as any).pages.length - 1;
       for (let p = 1; p <= totalPages; p++) {
         doc.setPage(p);
@@ -2137,11 +2126,8 @@ export default function IPLAdminLiveScoreTablePage() {
 
       if (String(row?.[5] || '') === bowlerName) {
         const batRuns = ex.hasWide ? 0 : parseInt(String(row?.[6] || ''), 10) || 0;
-
-        // Batsman runs always count against bowler (unless user records byes/LB correctly as 0 in Runs)
         runsConceded += batRuns;
 
-        // Wide/no-ball penalties count against bowler; byes/LB do not.
         if (ex.hasWide) runsConceded += 1 + (ex.wideExtraRuns || 0);
         if (ex.hasNoBall) runsConceded += 1;
 
@@ -2653,7 +2639,7 @@ export default function IPLAdminLiveScoreTablePage() {
               playerId: cleaned,
               name: resolvePlayerName(cleaned),
               isCaptain: Boolean(bowlingCaptainId && cleaned === bowlingCaptainId),
-              balls: 0, // legal balls only
+              balls: 0,
               runs: 0,
               wickets: 0,
               wides: 0,
@@ -2668,138 +2654,135 @@ export default function IPLAdminLiveScoreTablePage() {
         let legalBalls = 0;
         let widesRuns = 0;
         let noBallRuns = 0;
-	        let byesRuns = 0;
-	        let legByesRuns = 0;
-	        let wicketCount = 0;
-	        const fallOfWickets: Array<{ player: string; score: string; over: string }> = [];
+        let byesRuns = 0;
+        let legByesRuns = 0;
+        let wicketCount = 0;
+        const fallOfWickets: Array<{ player: string; score: string; over: string }> = [];
 
-	        const toSortableNumber = (value: unknown) => {
-	          const n = Number.parseInt(String(value || '').trim(), 10);
-	          return Number.isFinite(n) ? n : Number.MAX_SAFE_INTEGER;
-	        };
+        const toSortableNumber = (value: unknown) => {
+          const n = Number.parseInt(String(value || '').trim(), 10);
+          return Number.isFinite(n) ? n : Number.MAX_SAFE_INTEGER;
+        };
 
-	        const deliveries = rows
-	          .map((row, idx) => ({ row, idx }))
-	          .filter(({ row }) => String(row?.[2] || '') === innings)
-	          .sort((a, b) => {
-	            const overA = toSortableNumber(a.row?.[0]);
-	            const overB = toSortableNumber(b.row?.[0]);
-	            if (overA !== overB) return overA - overB;
-	            const ballA = toSortableNumber(a.row?.[1]);
-	            const ballB = toSortableNumber(b.row?.[1]);
-	            if (ballA !== ballB) return ballA - ballB;
-	            return a.idx - b.idx;
-	          });
+        const deliveries = rows
+          .map((row, idx) => ({ row, idx }))
+          .filter(({ row }) => String(row?.[2] || '') === innings)
+          .sort((a, b) => {
+            const overA = toSortableNumber(a.row?.[0]);
+            const overB = toSortableNumber(b.row?.[0]);
+            if (overA !== overB) return overA - overB;
+            const ballA = toSortableNumber(a.row?.[1]);
+            const ballB = toSortableNumber(b.row?.[1]);
+            if (ballA !== ballB) return ballA - ballB;
+            return a.idx - b.idx;
+          });
 
-	        // T20: mandatory powerplay is first 6 overs (36 legal balls)
-	        const MANDATORY_POWERPLAY_BALLS = 36;
-	        let mandatoryPowerplayRuns = 0;
-	        let mandatoryPowerplayLegalBalls = 0;
+        const MANDATORY_POWERPLAY_BALLS = 36;
+        let mandatoryPowerplayRuns = 0;
+        let mandatoryPowerplayLegalBalls = 0;
 
-	        const partnerships: any[] = [];
-	        let currentPartnership: any = null;
+        const partnerships: any[] = [];
+        let currentPartnership: any = null;
 
-	        const startPartnership = (strikerId: string, nonStrikerId: string) => {
-	          const a = String(strikerId || '').trim();
-	          const b = String(nonStrikerId || '').trim();
-	          if (!a || !b || a === b) return;
-	          currentPartnership = {
-	            ids: [a, b],
-	            key: [a, b].slice().sort().join('|'),
-	            totalRuns: 0,
-	            runsById: { [a]: 0, [b]: 0 },
-	            ballsById: { [a]: 0, [b]: 0 },
-	          };
-	        };
+        const startPartnership = (strikerId: string, nonStrikerId: string) => {
+          const a = String(strikerId || '').trim();
+          const b = String(nonStrikerId || '').trim();
+          if (!a || !b || a === b) return;
+          currentPartnership = {
+            ids: [a, b],
+            key: [a, b].slice().sort().join('|'),
+            totalRuns: 0,
+            runsById: { [a]: 0, [b]: 0 },
+            ballsById: { [a]: 0, [b]: 0 },
+          };
+        };
 
-	        const pushCurrentPartnership = () => {
-	          if (!currentPartnership) return;
-	          const [a, b] = currentPartnership.ids as [string, string];
-	          const totalRuns = Number(currentPartnership.totalRuns) || 0;
-	          const runsA = Number(currentPartnership.runsById?.[a]) || 0;
-	          const ballsA = Number(currentPartnership.ballsById?.[a]) || 0;
-	          const runsB = Number(currentPartnership.runsById?.[b]) || 0;
-	          const ballsB = Number(currentPartnership.ballsById?.[b]) || 0;
-	          const hasAny = totalRuns > 0 || ballsA > 0 || ballsB > 0;
+        const pushCurrentPartnership = () => {
+          if (!currentPartnership) return;
+          const [a, b] = currentPartnership.ids as [string, string];
+          const totalRuns = Number(currentPartnership.totalRuns) || 0;
+          const runsA = Number(currentPartnership.runsById?.[a]) || 0;
+          const ballsA = Number(currentPartnership.ballsById?.[a]) || 0;
+          const runsB = Number(currentPartnership.runsById?.[b]) || 0;
+          const ballsB = Number(currentPartnership.ballsById?.[b]) || 0;
+          const hasAny = totalRuns > 0 || ballsA > 0 || ballsB > 0;
 
-	          if (hasAny) {
-	            partnerships.push({
-	              batsman1: resolvePlayerName(a),
-	              batsman1Runs: String(runsA),
-	              batsman1Balls: String(ballsA),
-	              batsman2: resolvePlayerName(b),
-	              batsman2Runs: String(runsB),
-	              batsman2Balls: String(ballsB),
-	              totalRuns: String(totalRuns),
-	            });
-	          }
+          if (hasAny) {
+            partnerships.push({
+              batsman1: resolvePlayerName(a),
+              batsman1Runs: String(runsA),
+              batsman1Balls: String(ballsA),
+              batsman2: resolvePlayerName(b),
+              batsman2Runs: String(runsB),
+              batsman2Balls: String(ballsB),
+              totalRuns: String(totalRuns),
+            });
+          }
 
-	          currentPartnership = null;
-	        };
+          currentPartnership = null;
+        };
 
-	        for (const { row, idx } of deliveries) {
-            if (legalBalls >= MAX_LEGAL_BALLS) break;
+        for (const { row, idx } of deliveries) {
+          if (legalBalls >= MAX_LEGAL_BALLS) break;
 
-	          const strikerId = String(row?.[3] || '').trim();
-	          const nonStrikerId = String(row?.[4] || '').trim();
-	          const bowlerId = String(row?.[5] || '').trim();
+          const strikerId = String(row?.[3] || '').trim();
+          const nonStrikerId = String(row?.[4] || '').trim();
+          const bowlerId = String(row?.[5] || '').trim();
 
-	          ensureBatter(strikerId);
-	          ensureBatter(nonStrikerId);
-	          const bowler = ensureBowler(bowlerId);
+          ensureBatter(strikerId);
+          ensureBatter(nonStrikerId);
+          const bowler = ensureBowler(bowlerId);
 
-	          const ex = { ...DEFAULT_EXTRAS, ...(extrasData[idx] || {}) };
-	          const wk = { ...DEFAULT_WICKET, ...(wicketData[idx] || {}) };
-	          const nonDelivery = isNonDeliveryWicket(wk);
+          const ex = { ...DEFAULT_EXTRAS, ...(extrasData[idx] || {}) };
+          const wk = { ...DEFAULT_WICKET, ...(wicketData[idx] || {}) };
+          const nonDelivery = isNonDeliveryWicket(wk);
 
-	          const isWide = Boolean(ex.hasWide);
-	          const isNoBall = Boolean(ex.hasNoBall);
+          const isWide = Boolean(ex.hasWide);
+          const isNoBall = Boolean(ex.hasNoBall);
 
-	          const batRuns = !nonDelivery && !isWide ? parseInt(String(row?.[6] || ''), 10) || 0 : 0;
-	          const wideRuns = !nonDelivery && isWide ? 1 + (ex.wideExtraRuns || 0) : 0;
-	          const nbRuns = !nonDelivery && isNoBall ? 1 : 0;
-	          const bRuns = !nonDelivery && ex.hasByes && !isWide ? ex.byesRuns || 0 : 0;
-	          const lbRuns = !nonDelivery && ex.hasLB && !isWide ? ex.lbRuns || 0 : 0;
-	          const totalRunsThisRow = batRuns + wideRuns + nbRuns + bRuns + lbRuns;
+          const batRuns = !nonDelivery && !isWide ? parseInt(String(row?.[6] || ''), 10) || 0 : 0;
+          const wideRuns = !nonDelivery && isWide ? 1 + (ex.wideExtraRuns || 0) : 0;
+          const nbRuns = !nonDelivery && isNoBall ? 1 : 0;
+          const bRuns = !nonDelivery && ex.hasByes && !isWide ? ex.byesRuns || 0 : 0;
+          const lbRuns = !nonDelivery && ex.hasLB && !isWide ? ex.lbRuns || 0 : 0;
+          const totalRunsThisRow = batRuns + wideRuns + nbRuns + bRuns + lbRuns;
 
-	          // Mandatory powerplay aggregation (first 6 legal overs)
-	          if (mandatoryPowerplayLegalBalls < MANDATORY_POWERPLAY_BALLS) {
-	            mandatoryPowerplayRuns += totalRunsThisRow;
-	            if (!nonDelivery && !isWide && !isNoBall) mandatoryPowerplayLegalBalls += 1;
-	          }
+          if (mandatoryPowerplayLegalBalls < MANDATORY_POWERPLAY_BALLS) {
+            mandatoryPowerplayRuns += totalRunsThisRow;
+            if (!nonDelivery && !isWide && !isNoBall) mandatoryPowerplayLegalBalls += 1;
+          }
 
-	          // Partnership aggregation (pair at crease)
-	          if (strikerId && nonStrikerId) {
-	            const key = [strikerId, nonStrikerId].slice().sort().join('|');
-	            if (!currentPartnership) {
-	              startPartnership(strikerId, nonStrikerId);
-	            } else if (key !== currentPartnership.key) {
-	              pushCurrentPartnership();
-	              startPartnership(strikerId, nonStrikerId);
-	            }
-	          }
+          if (strikerId && nonStrikerId) {
+            const key = [strikerId, nonStrikerId].slice().sort().join('|');
+            if (!currentPartnership) {
+              startPartnership(strikerId, nonStrikerId);
+            } else if (key !== currentPartnership.key) {
+              pushCurrentPartnership();
+              startPartnership(strikerId, nonStrikerId);
+            }
+          }
 
-	          if (currentPartnership) {
-	            currentPartnership.totalRuns += totalRunsThisRow;
-	            if (strikerId) {
-	              currentPartnership.runsById[strikerId] = (currentPartnership.runsById[strikerId] || 0) + batRuns;
-	              if (!nonDelivery && !isWide) {
-	                currentPartnership.ballsById[strikerId] = (currentPartnership.ballsById[strikerId] || 0) + 1;
-	              }
-	            }
-	          }
+          if (currentPartnership) {
+            currentPartnership.totalRuns += totalRunsThisRow;
+            if (strikerId) {
+              currentPartnership.runsById[strikerId] = (currentPartnership.runsById[strikerId] || 0) + batRuns;
+              if (!nonDelivery && !isWide) {
+                currentPartnership.ballsById[strikerId] = (currentPartnership.ballsById[strikerId] || 0) + 1;
+              }
+            }
+          }
 
-	          if (!nonDelivery) {
-	            teamTotal += totalRunsThisRow;
-	            widesRuns += wideRuns;
-	            noBallRuns += nbRuns;
-	            byesRuns += bRuns;
-	            legByesRuns += lbRuns;
+          if (!nonDelivery) {
+            teamTotal += totalRunsThisRow;
+            widesRuns += wideRuns;
+            noBallRuns += nbRuns;
+            byesRuns += bRuns;
+            legByesRuns += lbRuns;
 
             const striker = ensureBatter(strikerId);
             if (striker) {
               striker.runs += batRuns;
-              if (!isWide) striker.balls += 1; // no-balls count as a ball faced; wides do not
+              if (!isWide) striker.balls += 1;
               if (batRuns === 4) striker.fours += 1;
               if (batRuns === 6) striker.sixes += 1;
             }
@@ -2832,16 +2815,16 @@ export default function IPLAdminLiveScoreTablePage() {
                 ? 'nonStriker'
                 : 'striker';
 
-	          const dismissedId = outRole === 'nonStriker' ? nonStrikerId : strikerId;
-	          const dismissed = ensureBatter(dismissedId);
+          const dismissedId = outRole === 'nonStriker' ? nonStrikerId : strikerId;
+          const dismissed = ensureBatter(dismissedId);
 
-	          if (isRetiredHurtEvent(wk)) {
-	            if (dismissed && (!dismissed.dismissal || dismissed.dismissal.type === 'not-out')) {
-	              dismissed.dismissal = buildDismissal(wk, bowlerId);
-	            }
-	            pushCurrentPartnership();
-	            continue;
-	          }
+          if (isRetiredHurtEvent(wk)) {
+            if (dismissed && (!dismissed.dismissal || dismissed.dismissal.type === 'not-out')) {
+              dismissed.dismissal = buildDismissal(wk, bowlerId);
+            }
+            pushCurrentPartnership();
+            continue;
+          }
 
           wicketCount += 1;
 
@@ -2861,19 +2844,18 @@ export default function IPLAdminLiveScoreTablePage() {
             });
           }
 
-	          if (bowler && isBowlerWicketType(wicketType)) {
-	            bowler.wickets += 1;
-	          }
-	
-	          pushCurrentPartnership();
-	        }
+          if (bowler && isBowlerWicketType(wicketType)) {
+            bowler.wickets += 1;
+          }
 
-	        // Last partnership (not ended by wicket)
-	        pushCurrentPartnership();
+          pushCurrentPartnership();
+        }
 
-	        const batting = batterOrder
-	          .map((id) => {
-	            const b = batters.get(id);
+        pushCurrentPartnership();
+
+        const batting = batterOrder
+          .map((id) => {
+            const b = batters.get(id);
             if (!b) return null;
             const balls = Number(b.balls) || 0;
             const runs = Number(b.runs) || 0;
@@ -2910,21 +2892,21 @@ export default function IPLAdminLiveScoreTablePage() {
           })
           .filter(Boolean);
 
-	        const inningsOvers = `${Math.floor(legalBalls / 6)}.${legalBalls % 6}`;
+        const inningsOvers = `${Math.floor(legalBalls / 6)}.${legalBalls % 6}`;
 
-	        const formatOversFromBalls = (balls: number) => {
-	          const overs = Math.floor(balls / 6);
-	          const rem = balls % 6;
-	          return rem === 0 ? String(overs) : `${overs}.${rem}`;
-	        };
+        const formatOversFromBalls = (balls: number) => {
+          const overs = Math.floor(balls / 6);
+          const rem = balls % 6;
+          return rem === 0 ? String(overs) : `${overs}.${rem}`;
+        };
 
-	        const mandatoryPowerplayOvers =
-	          mandatoryPowerplayLegalBalls > 0 ? `0.1 - ${formatOversFromBalls(mandatoryPowerplayLegalBalls)}` : '';
+        const mandatoryPowerplayOvers =
+          mandatoryPowerplayLegalBalls > 0 ? `0.1 - ${formatOversFromBalls(mandatoryPowerplayLegalBalls)}` : '';
 
-	        const base =
-	          existing && typeof existing === 'object'
-	            ? { ...existing }
-	            : {
+        const base =
+          existing && typeof existing === 'object'
+            ? { ...existing }
+            : {
                 inningsNumber,
                 battingTeamId,
                 batting: [],
@@ -2939,17 +2921,17 @@ export default function IPLAdminLiveScoreTablePage() {
                   optional: { overs: '', runs: 0 },
                 },
                 partnerships: [],
-	            };
+              };
 
-	        const optionalPowerplay =
-	          base?.powerplays && typeof base.powerplays === 'object' && base.powerplays.optional
-	            ? base.powerplays.optional
-	            : { overs: '', runs: 0 };
+        const optionalPowerplay =
+          base?.powerplays && typeof base.powerplays === 'object' && base.powerplays.optional
+            ? base.powerplays.optional
+            : { overs: '', runs: 0 };
 
-	        return {
-	          ...base,
-	          inningsNumber,
-	          battingTeamId,
+        return {
+          ...base,
+          inningsNumber,
+          battingTeamId,
           batting,
           bowling,
           extras: {
@@ -2958,17 +2940,17 @@ export default function IPLAdminLiveScoreTablePage() {
             byes: byesRuns,
             legByes: legByesRuns,
           },
-	          totalRuns: teamTotal,
-	          totalWickets: wicketCount,
-	          totalOvers: inningsOvers,
-	          fallOfWickets,
-	          powerplays: {
-	            mandatory: { overs: mandatoryPowerplayOvers, runs: mandatoryPowerplayRuns },
-	            optional: optionalPowerplay,
-	          },
-	          partnerships,
-	        };
-	      };
+          totalRuns: teamTotal,
+          totalWickets: wicketCount,
+          totalOvers: inningsOvers,
+          fallOfWickets,
+          powerplays: {
+            mandatory: { overs: mandatoryPowerplayOvers, runs: mandatoryPowerplayRuns },
+            optional: optionalPowerplay,
+          },
+          partnerships,
+        };
+      };
 
       const innings1 = buildInningsFromTable('1', existing1);
       const innings2 = buildInningsFromTable('2', existing2);
@@ -3005,7 +2987,6 @@ export default function IPLAdminLiveScoreTablePage() {
 
       const token = getAdminAuthToken();
 
-      // Best-effort publish to the public live-score API (must not block scorecard sync).
       const payload = buildLiveScorePayload();
       if (payload && token) {
         try {
@@ -3022,7 +3003,6 @@ export default function IPLAdminLiveScoreTablePage() {
         }
       }
 
-      // Scorecard sync is required for IPL Live Score <-> Scorecard consistency.
       if (token) {
         await syncScorecardFromTable();
       }
@@ -3050,7 +3030,6 @@ export default function IPLAdminLiveScoreTablePage() {
       });
       if (!resp.ok) throw new Error('Failed to publish');
 
-      // Also update the scorecard using the same ball-by-ball table (powerplays/partnerships included).
       await syncScorecardFromTable();
 
       setSaveStatus('success');
@@ -4045,7 +4024,7 @@ export default function IPLAdminLiveScoreTablePage() {
         <div className="mt-5 grid gap-4 2xl:grid-cols-[minmax(0,1.35fr)_minmax(280px,1fr)_minmax(260px,0.85fr)]">
           <div className="min-w-0 space-y-3">
             <div className="text-xs font-semibold uppercase tracking-wide text-[#f2d39a]">Delivery Context</div>
-            <div className="flex flex-wrap gap-3">
+            <div className="flex flex-wrap items-end gap-3">
               <div>
                 <div className="text-[11px] text-white/60">Innings</div>
                 <div className="mt-1 flex items-center gap-2">
@@ -4064,6 +4043,7 @@ export default function IPLAdminLiveScoreTablePage() {
                   ))}
                 </div>
               </div>
+
               <div>
                 <div className="text-[11px] text-white/60">Striker</div>
                 <input
@@ -4074,6 +4054,23 @@ export default function IPLAdminLiveScoreTablePage() {
                   className={`mt-1 min-w-[150px] text-xs ${compactFieldClass}`}
                 />
               </div>
+
+              {/* ⇄ Interactive Strike Swap Button */}
+              <div className="flex pb-0.5">
+                <button
+                  type="button"
+                  title="Swap Striker and Non-striker (Key: S)"
+                  onClick={() => {
+                    const temp = fastStrikerId;
+                    setFastStrikerId(fastNonStrikerId);
+                    setFastNonStrikerId(temp);
+                  }}
+                  className="flex h-[32px] items-center justify-center rounded-lg border border-white/20 bg-white/5 px-2.5 text-xs font-semibold text-[#f2d39a] transition hover:border-[#d7a85b]/40 hover:bg-[#d7a85b]/20 active:scale-95"
+                >
+                  ⇄ Swap
+                </button>
+              </div>
+
               <div>
                 <div className="text-[11px] text-white/60">Non-striker</div>
                 <input
@@ -4086,6 +4083,7 @@ export default function IPLAdminLiveScoreTablePage() {
                   className={`mt-1 min-w-[150px] text-xs ${compactFieldClass}`}
                 />
               </div>
+
               <div>
                 <div className="text-[11px] text-white/60">Bowler</div>
                 <input
@@ -4096,12 +4094,14 @@ export default function IPLAdminLiveScoreTablePage() {
                   className={`mt-1 min-w-[150px] text-xs ${compactFieldClass}`}
                 />
               </div>
+
               <div>
                 <div className="text-[11px] text-white/60">Next delivery</div>
                 <div className="mt-1 rounded-lg border border-[#4cc39a]/30 bg-[#4cc39a]/10 px-3 py-2 text-xs font-semibold text-[#9cf2c8]">
                   {fastInningsComplete ? `Innings complete (${MAX_OVERS} ov)` : `Over ${fastNextBall.over}.${fastNextBall.ball}`}
                 </div>
               </div>
+
               <div>
                 <div className="text-[11px] text-white/60">Override over</div>
                 <input
@@ -4113,6 +4113,7 @@ export default function IPLAdminLiveScoreTablePage() {
                   className={`mt-1 w-24 text-xs ${compactFieldClass}`}
                 />
               </div>
+
               <div>
                 <div className="text-[11px] text-white/60">Override ball</div>
                 <input
@@ -4124,15 +4125,6 @@ export default function IPLAdminLiveScoreTablePage() {
                   className={`mt-1 w-24 text-xs ${compactFieldClass}`}
                 />
               </div>
-              <button
-                onClick={() => {
-                  setFastStrikerId(fastNonStrikerId);
-                  setFastNonStrikerId(fastStrikerId);
-                }}
-                className={`${actionButtonClass} mt-5 px-3 py-2 text-xs`}
-              >
-                Swap Strike
-              </button>
             </div>
           </div>
 
@@ -4548,7 +4540,7 @@ export default function IPLAdminLiveScoreTablePage() {
           </div>
         </section>
 
-        {/* Match Result (saved in Scorecards) */}
+        {/* Match Result */}
         <section className="rounded-2xl border border-white/10 bg-[#0a1815]/70 p-4 shadow-xl shadow-black/15 backdrop-blur">
           <div className="flex items-start justify-between gap-3">
             <div>
