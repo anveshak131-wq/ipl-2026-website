@@ -211,7 +211,8 @@ export const onRequest = async (context: any) => {
 
   // 2. Allow non-protected paths (homepage, live scores, teams, matches)
   if (!isProtectedPath(url.pathname)) {
-    if (isApiRequest(url) && isAdminWriteRequest(request) && hasAdminSessionCookie(request)) {
+    const hasBearerAuth = Boolean(request.headers.get("authorization")?.startsWith("Bearer "));
+    if (isApiRequest(url) && isAdminWriteRequest(request) && hasAdminSessionCookie(request) && !hasBearerAuth) {
       const session = await verifyAdminSession(request, safeEnv);
 
       if (session && !(await verifyAdminCsrfToken(request, safeEnv, session))) {
