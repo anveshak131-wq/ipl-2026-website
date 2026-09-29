@@ -47,7 +47,7 @@ export default function PlayersAdminSidebar({ currentPage = '', onLogout }: Play
   // Players-only navigation items
   const menuItems = [
     {
-      href: '/ipl-admin-2026/players',
+      href: '/ops/ipl/players',
       label: 'Players',
       icon: <Users className="w-5 h-5" />,
       shortcut: 'P',
@@ -82,7 +82,7 @@ export default function PlayersAdminSidebar({ currentPage = '', onLogout }: Play
     } catch {
       // localStorage not available
     }
-    router.push('/ipl-admin-2026');
+    router.push('/ops/ipl');
   };
 
   const adminInitials = adminName

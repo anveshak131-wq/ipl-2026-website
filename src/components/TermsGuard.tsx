@@ -15,7 +15,7 @@ export default function TermsGuard({ children }: TermsGuardProps) {
 
   useEffect(() => {
     // 1. Always allow admin routes
-    if (pathname.startsWith('/ipl-admin-2026') || pathname.startsWith('/wpl-admin-2026') || pathname.startsWith('/admin')) {
+    if (pathname.startsWith('/ops') || pathname.startsWith('/admin')) {
       setIsChecking(false);
       return;
     }

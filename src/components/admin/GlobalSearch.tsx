@@ -107,7 +107,7 @@ export default function GlobalSearch({ onClose }: GlobalSearchProps) {
                 type: 'team' as const,
                 title: team.name,
                 description: team.shortName,
-                href: `/ipl-admin-2026/teams`,
+                href: `/ops/ipl/teams`,
                 icon: <Users className="w-4 h-4" />,
               }));
             searchResults.push(...teamMatches);
@@ -145,7 +145,7 @@ export default function GlobalSearch({ onClose }: GlobalSearchProps) {
                 type: 'player' as const,
                 title: player.name,
                 description: `${player.role} • ${player.team?.name || 'Free Agent'}`,
-                href: `/ipl-admin-2026/players`,
+                href: `/ops/ipl/players`,
                 icon: <Users className="w-4 h-4" />,
               }));
             searchResults.push(...playerMatches);
@@ -171,7 +171,7 @@ export default function GlobalSearch({ onClose }: GlobalSearchProps) {
                 type: 'match' as const,
                 title: `${match.team1?.shortName} vs ${match.team2?.shortName}`,
                 description: match.venue || match.date,
-                href: `/ipl-admin-2026/matches`,
+                href: `/ops/ipl/matches`,
                 icon: <Calendar className="w-4 h-4" />,
               }));
             searchResults.push(...matchMatches);
@@ -193,14 +193,14 @@ export default function GlobalSearch({ onClose }: GlobalSearchProps) {
 
   const searchPages = (query: string): SearchResult[] => {
     const pages: { title: string; href: string; icon: React.ReactNode }[] = [
-      { title: 'Dashboard', href: '/ipl-admin-2026/dashboard', icon: <FileText className="w-4 h-4" /> },
-      { title: 'Teams', href: '/ipl-admin-2026/teams', icon: <Users className="w-4 h-4" /> },
-      { title: 'Matches', href: '/ipl-admin-2026/matches', icon: <Calendar className="w-4 h-4" /> },
-      { title: 'Players', href: '/ipl-admin-2026/players', icon: <Users className="w-4 h-4" /> },
-      { title: 'News', href: '/ipl-admin-2026/news', icon: <FileText className="w-4 h-4" /> },
-      { title: 'Content Hub', href: '/ipl-admin-2026/content', icon: <FileText className="w-4 h-4" /> },
-      { title: 'Moderation', href: '/ipl-admin-2026/moderation', icon: <Trophy className="w-4 h-4" /> },
-      { title: 'Settings', href: '/ipl-admin-2026/settings', icon: <FileText className="w-4 h-4" /> },
+      { title: 'Dashboard', href: '/ops/ipl/dashboard', icon: <FileText className="w-4 h-4" /> },
+      { title: 'Teams', href: '/ops/ipl/teams', icon: <Users className="w-4 h-4" /> },
+      { title: 'Matches', href: '/ops/ipl/matches', icon: <Calendar className="w-4 h-4" /> },
+      { title: 'Players', href: '/ops/ipl/players', icon: <Users className="w-4 h-4" /> },
+      { title: 'News', href: '/ops/ipl/news', icon: <FileText className="w-4 h-4" /> },
+      { title: 'Content Hub', href: '/ops/ipl/content', icon: <FileText className="w-4 h-4" /> },
+      { title: 'Moderation', href: '/ops/ipl/moderation', icon: <Trophy className="w-4 h-4" /> },
+      { title: 'Settings', href: '/ops/ipl/settings', icon: <FileText className="w-4 h-4" /> },
     ];
 
     return pages

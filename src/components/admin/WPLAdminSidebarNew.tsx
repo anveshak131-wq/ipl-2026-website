@@ -12,43 +12,43 @@ const menuSections = [
   {
     label: 'Overview',
     items: [
-      { href: '/wpl-admin-2026/dashboard', label: 'Dashboard', icon: Home },
-      { href: '/wpl-admin-2026/statistics', label: 'Statistics', icon: Award },
+      { href: '/ops/wpl/dashboard', label: 'Dashboard', icon: Home },
+      { href: '/ops/wpl/statistics', label: 'Statistics', icon: Award },
     ],
   },
   {
     label: 'Live Ops',
     items: [
-      { href: '/wpl-admin-2026/matches', label: 'Matches', icon: Calendar },
-      { href: '/wpl-admin-2026/live-score-ai', label: 'Live Score', icon: Activity },
-      { href: '/wpl-admin-2026/live-score-csv', label: 'Live Score CSV', icon: FileText },
-      { href: '/wpl-admin-2026/playing-11', label: 'Playing 11', icon: Users },
-      { href: '/wpl-admin-2026/scorecard', label: 'Scorecard', icon: FileText },
-      { href: '/wpl-admin-2026/matchday', label: 'Match Day', icon: Activity },
-      { href: '/wpl-admin-2026/points-table', label: 'Points Table', icon: BarChart3 },
+      { href: '/ops/wpl/matches', label: 'Matches', icon: Calendar },
+      { href: '/ops/wpl/live-score-ai', label: 'Live Score', icon: Activity },
+      { href: '/ops/wpl/live-score-csv', label: 'Live Score CSV', icon: FileText },
+      { href: '/ops/wpl/playing-11', label: 'Playing 11', icon: Users },
+      { href: '/ops/wpl/scorecard', label: 'Scorecard', icon: FileText },
+      { href: '/ops/wpl/matchday', label: 'Match Day', icon: Activity },
+      { href: '/ops/wpl/points-table', label: 'Points Table', icon: BarChart3 },
     ],
   },
   {
     label: 'League Data',
     items: [
-      { href: '/wpl-admin-2026/teams', label: 'Teams', icon: Shield },
-      { href: '/wpl-admin-2026/players', label: 'Players', icon: Users },
-      { href: '/wpl-admin-2026/batting-stats', label: 'Batting Stats', icon: TrendingUp },
-      { href: '/wpl-admin-2026/bowling-stats', label: 'Bowling Stats', icon: TrendingUp },
-      { href: '/wpl-admin-2026/venues', label: 'Venues', icon: MapPin },
+      { href: '/ops/wpl/teams', label: 'Teams', icon: Shield },
+      { href: '/ops/wpl/players', label: 'Players', icon: Users },
+      { href: '/ops/wpl/batting-stats', label: 'Batting Stats', icon: TrendingUp },
+      { href: '/ops/wpl/bowling-stats', label: 'Bowling Stats', icon: TrendingUp },
+      { href: '/ops/wpl/venues', label: 'Venues', icon: MapPin },
     ],
   },
   {
     label: 'Content',
     items: [
-      { href: '/wpl-admin-2026/stories', label: 'Stories', icon: FileText },
-      { href: '/wpl-admin-2026/predictions', label: 'Predictions', icon: Target },
+      { href: '/ops/wpl/stories', label: 'Stories', icon: FileText },
+      { href: '/ops/wpl/predictions', label: 'Predictions', icon: Target },
     ],
   },
   {
     label: 'System',
     items: [
-      { href: '/wpl-admin-2026/settings', label: 'Settings', icon: Settings },
+      { href: '/ops/wpl/settings', label: 'Settings', icon: Settings },
     ],
   },
 ];

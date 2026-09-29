@@ -115,7 +115,7 @@ export default function WPLAdminSidebar({ currentPage = '' }: WPLAdminSidebarPro
   const menuGroups: { [key: string]: MenuItem[] } = useMemo(() => ({
     Main: [
       {
-        href: '/wpl-admin-2026/dashboard',
+        href: '/ops/wpl/dashboard',
         label: 'Dashboard',
         icon: (
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -128,7 +128,7 @@ export default function WPLAdminSidebar({ currentPage = '' }: WPLAdminSidebarPro
     ],
     Content: [
       {
-        href: '/wpl-admin-2026/matchday',
+        href: '/ops/wpl/matchday',
         label: 'Match Day',
         icon: (
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -139,7 +139,7 @@ export default function WPLAdminSidebar({ currentPage = '' }: WPLAdminSidebarPro
         shortcut: 'M',
       },
       {
-        href: '/wpl-admin-2026/matches',
+        href: '/ops/wpl/matches',
         label: 'Matches',
         icon: (
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -150,7 +150,7 @@ export default function WPLAdminSidebar({ currentPage = '' }: WPLAdminSidebarPro
         shortcut: 'A',
       },
       {
-        href: '/wpl-admin-2026/teams',
+        href: '/ops/wpl/teams',
         label: 'Teams',
         icon: (
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -161,7 +161,7 @@ export default function WPLAdminSidebar({ currentPage = '' }: WPLAdminSidebarPro
         shortcut: 'E',
       },
       {
-        href: '/wpl-admin-2026/players',
+        href: '/ops/wpl/players',
         label: 'Players',
         icon: (
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -172,7 +172,7 @@ export default function WPLAdminSidebar({ currentPage = '' }: WPLAdminSidebarPro
         shortcut: 'Y',
       },
       {
-        href: '/wpl-admin-2026/venues',
+        href: '/ops/wpl/venues',
         label: 'Venues',
         icon: (
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -184,7 +184,7 @@ export default function WPLAdminSidebar({ currentPage = '' }: WPLAdminSidebarPro
         shortcut: 'V',
       },
       {
-        href: '/wpl-admin-2026/stories',
+        href: '/ops/wpl/stories',
         label: 'Fan Stories',
         icon: (
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -195,7 +195,7 @@ export default function WPLAdminSidebar({ currentPage = '' }: WPLAdminSidebarPro
         shortcut: 'F',
       },
       {
-        href: '/wpl-admin-2026/predictions',
+        href: '/ops/wpl/predictions',
         label: 'Predictions',
         icon: (
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -208,7 +208,7 @@ export default function WPLAdminSidebar({ currentPage = '' }: WPLAdminSidebarPro
     ],
     Tools: [
       {
-        href: '/wpl-admin-2026/live-score',
+        href: '/ops/wpl/live-score',
         label: 'Live Score',
         icon: (
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -219,7 +219,7 @@ export default function WPLAdminSidebar({ currentPage = '' }: WPLAdminSidebarPro
         shortcut: 'L',
       },
       {
-        href: '/wpl-admin-2026/playing-11',
+        href: '/ops/wpl/playing-11',
         label: 'Playing 11',
         icon: (
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -230,7 +230,7 @@ export default function WPLAdminSidebar({ currentPage = '' }: WPLAdminSidebarPro
         shortcut: 'P',
       },
       {
-        href: '/wpl-admin-2026/points-table',
+        href: '/ops/wpl/points-table',
         label: 'Points Table',
         icon: (
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -241,7 +241,7 @@ export default function WPLAdminSidebar({ currentPage = '' }: WPLAdminSidebarPro
         shortcut: 'T',
       },
       {
-        href: '/wpl-admin-2026/batting-stats',
+        href: '/ops/wpl/batting-stats',
         label: 'Batting Stats',
         icon: (
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -252,7 +252,7 @@ export default function WPLAdminSidebar({ currentPage = '' }: WPLAdminSidebarPro
         shortcut: 'B',
       },
       {
-        href: '/wpl-admin-2026/bowling-stats',
+        href: '/ops/wpl/bowling-stats',
         label: 'Bowling Stats',
         icon: (
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -263,7 +263,7 @@ export default function WPLAdminSidebar({ currentPage = '' }: WPLAdminSidebarPro
         shortcut: 'W',
       },
       {
-        href: '/wpl-admin-2026/scorecard',
+        href: '/ops/wpl/scorecard',
         label: 'Scorecard',
         icon: (
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

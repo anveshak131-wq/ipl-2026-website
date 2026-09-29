@@ -146,7 +146,7 @@ const BattingStatsPage = () => {
         
         if (!token) {
           console.log('Batting Stats: No token found, redirecting to dashboard');
-          router.push('/ipl-admin-2026');
+          router.push('/ops/ipl');
           return;
         }
 
@@ -157,7 +157,7 @@ const BattingStatsPage = () => {
 
         if (!response.ok || !data.success) {
           console.log('Batting Stats: Auth failed, redirecting to dashboard');
-          router.push('/ipl-admin-2026');
+          router.push('/ops/ipl');
           return;
         }
 
@@ -169,7 +169,7 @@ const BattingStatsPage = () => {
         if (role !== 'admin' && role !== 'user' && role !== 'super_admin' && role !== 'players_admin') {
           console.log('Batting Stats: Role not allowed, redirecting to dashboard');
           alert('Access denied. Admin privileges required.');
-          router.push('/ipl-admin-2026');
+          router.push('/ops/ipl');
           return;
         }
 
@@ -177,7 +177,7 @@ const BattingStatsPage = () => {
         setIsCheckingAuth(false);
       } catch (error) {
         console.error('Batting Stats: Auth error:', error);
-        router.push('/ipl-admin-2026');
+        router.push('/ops/ipl');
       }
     };
 

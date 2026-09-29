@@ -13,12 +13,12 @@ interface AdminLoginProps {
 const getDefaultRedirect = (pathname: string, role?: string) => {
   const isPlayersAdmin = role === 'players_admin';
 
-  if (pathname.startsWith('/wpl-admin-2026')) {
-    return isPlayersAdmin ? '/wpl-admin-2026/players' : '/wpl-admin-2026/dashboard';
+  if (pathname.startsWith('/ops/wpl')) {
+    return isPlayersAdmin ? '/ops/wpl/players' : '/ops/wpl/dashboard';
   }
 
-  if (pathname.startsWith('/ipl-admin-2026')) {
-    return isPlayersAdmin ? '/ipl-admin-2026/players' : '/ipl-admin-2026/dashboard';
+  if (pathname.startsWith('/ops/ipl')) {
+    return isPlayersAdmin ? '/ops/ipl/players' : '/ops/ipl/dashboard';
   }
 
   return isPlayersAdmin ? '/admin/ipl/players' : '/admin/ipl';

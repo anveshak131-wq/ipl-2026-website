@@ -6,21 +6,21 @@ import { TrendingDown, TrendingUp, Users } from 'lucide-react';
 
 const adminStatsLinks = [
   {
-    href: '/ipl-admin-2026/players?view=players',
+    href: '/ops/ipl/players?view=players',
     label: 'Players',
     Icon: Users,
     activeColor: 'border-[#d7a85b]/45 bg-[#d7a85b]/20 text-white shadow-[0_10px_28px_rgba(215,168,91,0.16)]',
     iconColor: 'text-[#f2d39a]'
   },
   {
-    href: '/ipl-admin-2026/players?view=batting',
+    href: '/ops/ipl/players?view=batting',
     label: 'Batting Stats',
     Icon: TrendingUp,
     activeColor: 'border-[#4cc39a]/45 bg-[#4cc39a]/20 text-white shadow-[0_10px_28px_rgba(76,195,154,0.16)]',
     iconColor: 'text-[#9cf2c8]'
   },
   {
-    href: '/ipl-admin-2026/players?view=bowling',
+    href: '/ops/ipl/players?view=bowling',
     label: 'Bowling Stats',
     Icon: TrendingDown,
     activeColor: 'border-[#4fb6c4]/45 bg-[#4fb6c4]/20 text-white shadow-[0_10px_28px_rgba(79,182,196,0.16)]',
@@ -41,7 +41,7 @@ export default function PlayersStatsSubNav() {
       <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
         {adminStatsLinks.map(({ href, label, Icon, activeColor, iconColor }) => {
           const hrefView = new URLSearchParams(href.split('?')[1]).get('view') || 'players';
-          const isActive = pathname === '/ipl-admin-2026/players' && currentView === hrefView;
+          const isActive = pathname === '/ops/ipl/players' && currentView === hrefView;
 
           return (
             <Link

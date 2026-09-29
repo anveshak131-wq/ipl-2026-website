@@ -143,7 +143,7 @@ const BowlingStatsPage = () => {
         
         if (!token) {
           console.log('Bowling Stats: No token found, redirecting to dashboard');
-          router.push('/ipl-admin-2026');
+          router.push('/ops/ipl');
           return;
         }
 
@@ -154,7 +154,7 @@ const BowlingStatsPage = () => {
 
         if (!response.ok || !data.success) {
           console.log('Bowling Stats: Auth failed, redirecting to dashboard');
-          router.push('/ipl-admin-2026');
+          router.push('/ops/ipl');
           return;
         }
 
@@ -166,7 +166,7 @@ const BowlingStatsPage = () => {
         if (role !== 'admin' && role !== 'user' && role !== 'super_admin' && role !== 'players_admin') {
           console.log('Bowling Stats: Role not allowed, redirecting to dashboard');
           alert('Access denied. Admin privileges required.');
-          router.push('/ipl-admin-2026');
+          router.push('/ops/ipl');
           return;
         }
 
@@ -174,7 +174,7 @@ const BowlingStatsPage = () => {
         setIsCheckingAuth(false);
       } catch (error) {
         console.error('Bowling Stats: Auth error:', error);
-        router.push('/ipl-admin-2026');
+        router.push('/ops/ipl');
       }
     };
 
