@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo, ReactNode } from 'react';
+import { Suspense, useState, useEffect, useMemo, ReactNode } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useLeague } from '@/contexts/LeagueContext';
 import ModernDialog from '@/components/admin/ModernDialog';
@@ -6309,11 +6309,19 @@ function AdminPlayersWorkspace() {
   );
 }
 
-export default function AdminPlayers() {
+function AdminPlayersContent() {
   const searchParams = useSearchParams();
   const view = searchParams.get('view');
 
   if (view === 'batting') return <BattingStatsPage />;
   if (view === 'bowling') return <BowlingStatsPage />;
   return <AdminPlayersWorkspace />;
+}
+
+export default function AdminPlayers() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-slate-950 flex items-center justify-center text-white">Loading...</div>}>
+      <AdminPlayersContent />
+    </Suspense>
+  );
 }
