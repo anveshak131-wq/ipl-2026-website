@@ -2,16 +2,30 @@
 
 import { motion } from 'framer-motion';
 import { Trophy, Sparkles } from 'lucide-react';
+import { useRouter, usePathname } from 'next/navigation';
 import { useLeague } from '@/contexts/LeagueContext';
 
 export default function AdminLeagueSwitcher() {
+  const router = useRouter();
+  const pathname = usePathname();
   const { currentLeague, setCurrentLeague, isIPL, isWPL } = useLeague();
+
+  const handleSwitch = (target: 'ipl' | 'wpl') => {
+    setCurrentLeague(target);
+    if (!pathname) return;
+
+    if (target === 'wpl' && pathname.includes('/ops/ipl')) {
+      router.push(pathname.replace('/ops/ipl', '/ops/wpl'));
+    } else if (target === 'ipl' && pathname.includes('/ops/wpl')) {
+      router.push(pathname.replace('/ops/wpl', '/ops/ipl'));
+    }
+  };
 
   return (
     <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white/5 border border-white/10 backdrop-blur-sm">
       {/* IPL Button */}
       <motion.button
-        onClick={() => setCurrentLeague('ipl')}
+        onClick={() => handleSwitch('ipl')}
         className={`
           relative px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-300
           flex items-center gap-2 whitespace-nowrap overflow-hidden group
@@ -26,7 +40,7 @@ export default function AdminLeagueSwitcher() {
         {isIPL && (
           <motion.div
             className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-cyan-500/20"
-            initial={{ scale: 0, opacity: 0 }}
+            initial={{ scale: 0, opacity: 1 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ duration: 0.3 }}
           />
@@ -45,7 +59,7 @@ export default function AdminLeagueSwitcher() {
 
       {/* WPL Button */}
       <motion.button
-        onClick={() => setCurrentLeague('wpl')}
+        onClick={() => handleSwitch('wpl')}
         className={`
           relative px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-300
           flex items-center gap-2 whitespace-nowrap overflow-hidden group
@@ -60,7 +74,7 @@ export default function AdminLeagueSwitcher() {
         {isWPL && (
           <motion.div
             className="absolute inset-0 bg-gradient-to-r from-purple-500/20 to-pink-500/20"
-            initial={{ scale: 0, opacity: 0 }}
+            initial={{ scale: 0, opacity: 1 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ duration: 0.3 }}
           />
@@ -79,4 +93,3 @@ export default function AdminLeagueSwitcher() {
     </div>
   );
 }
-

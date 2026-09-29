@@ -1,5 +1,6 @@
 'use client';
 
+import { useRouter, usePathname } from 'next/navigation';
 import { useLeague } from '@/contexts/LeagueContext';
 import { CustomEmoji } from '@/components/emoji/Emoji';
 
@@ -14,6 +15,8 @@ export default function LeagueSwitch({
   showLabel = true,
   size = 'md' 
 }: LeagueSwitchProps) {
+  const router = useRouter();
+  const pathname = usePathname();
   const { currentLeague, setCurrentLeague, isIPL, isWPL } = useLeague();
 
   const sizeClasses = {
@@ -29,9 +32,15 @@ export default function LeagueSwitch({
   };
 
   const handleLeagueChange = (league: 'ipl' | 'wpl') => {
-    // Only change league if it's different from current
     if (league !== currentLeague) {
       setCurrentLeague(league);
+      if (!pathname) return;
+
+      if (league === 'wpl' && pathname.includes('/ops/ipl')) {
+        router.push(pathname.replace('/ops/ipl', '/ops/wpl'));
+      } else if (league === 'ipl' && pathname.includes('/ops/wpl')) {
+        router.push(pathname.replace('/ops/wpl', '/ops/ipl'));
+      }
     }
   };
 
