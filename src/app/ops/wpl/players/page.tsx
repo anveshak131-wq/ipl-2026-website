@@ -183,7 +183,7 @@ function levenshteinDistance(str1: string, str2: string): number {
 
 function AdminPlayersWorkspace() {
   const router = useRouter();
-  const { currentLeague } = useLeague();
+  const currentLeague = 'wpl';
   // Auth handled by layout
   const [userRole, setUserRole] = useState<string | null>(null);
   const [players, setPlayers] = useState<Player[]>([]);
