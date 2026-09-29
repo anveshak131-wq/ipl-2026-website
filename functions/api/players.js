@@ -77,9 +77,10 @@ async function getTeamNameById(players, teamId, league, env) {
 const defaultPlayers = [];
 
 function isPlayerActiveInSquad(player) {
-  if (!player) return true;
+  if (!player) return false;
   if (player.isActiveInSquad === false) return false;
-  if (player.squadStatus === 'inactive') return false;
+  if (["inactive", "released", "auction"].includes(player.squadStatus)) return false;
+  if (player.squadExitReason && player.squadExitReason !== "") return false;
   return true;
 }
 
@@ -759,7 +760,7 @@ export const onRequest = async (context) => {
         bowlingStyle: updatedPlayer.bowlingStyle || 'N/A (Batsman)',
         battingStyle: updatedPlayer.battingStyle || 'Right-handed bat',
         isActiveInSquad: nextIsActive,
-        squadStatus: nextIsActive ? 'active' : 'inactive',
+        squadStatus: updatedPlayer.squadStatus || (nextIsActive ? "active" : "released"),
         squadExitReason: nextIsActive ? undefined : (updatedPlayer.squadExitReason || 'other'),
         squadExitDate: nextIsActive ? undefined : (updatedPlayer.squadExitDate || new Date().toISOString().slice(0, 10)),
         seasonTeamHistory,

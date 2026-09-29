@@ -3386,7 +3386,7 @@ function AdminPlayersWorkspace() {
         bowlingStyle: finalBowlingStyle,
         battingStyle: formData.battingStyle,
         isActiveInSquad: formData.isActiveInSquad,
-        squadStatus: formData.isActiveInSquad ? 'active' : 'inactive',
+        squadStatus: formData.squadStatus || (formData.isActiveInSquad ? "active" : "released"),
         squadExitReason: formData.isActiveInSquad ? undefined : (formData.squadExitReason || 'other'),
         squadExitDate: formData.isActiveInSquad ? undefined : (formData.squadExitDate || new Date().toISOString().slice(0, 10)),
         currentSeasonYear: new Date().getFullYear(),
