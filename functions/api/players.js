@@ -241,8 +241,7 @@ export const onRequest = async (context) => {
       
       // Save migrated data back to KV if any changes were made
       if (needsMigration) {
-        console.log('Migration: Auto-calculated batting/bowling stats for players');
-        await env.IPL_CACHE.put('players', JSON.stringify(players));
+        console.log('Migration: Auto-calculated batting/bowling stats for players (in-memory only)');
       }
       
       // Diagnostic mode - return detailed breakdown
@@ -321,7 +320,7 @@ export const onRequest = async (context) => {
       };
       
       // WPL team IDs are 11-15
-      const wplTeamIds = ['11', '12', '13', '14', '15'];
+      const wplTeamIds = ['11', '12', '13', '14', '15', 'mi-w', 'rcb-w', 'dc-w', 'gg', 'upw', 'mi', 'rcb', 'dc', 'up-warriorz', 'gujarat-giants'];
       // IPL team IDs are 1-10
       const iplTeamIds = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10'];
       
@@ -394,12 +393,12 @@ export const onRequest = async (context) => {
           };
         }
         
-        // Ensure league property exists
+        // Ensure league property exists - preserve wpl if team matches or already set
         if (!player.league) {
-          needsUpdate = true;
+          const isWplCandidate = isWPLTeam || wplTeamIds.includes(String(player.teamId || '').toLowerCase());
           return {
             ...player,
-            league: 'ipl'
+            league: isWplCandidate ? 'wpl' : 'ipl'
           };
         }
         
@@ -407,11 +406,9 @@ export const onRequest = async (context) => {
       });
       
       // Update KV storage if any corrections were made
+      // Write-on-read disabled to prevent corrupting KV backups
       if (needsUpdate) {
-        console.log(`[UPDATE] Writing corrected players to KV (${players.length} total)`);
-        await env.IPL_CACHE.put('players', JSON.stringify(players));
-      } else {
-        console.log('[NO UPDATE] Players data is already correct');
+        console.log('[INFO] Read-time normalization applied in-memory only (KV write suppressed)');
       }
       
       // Show final WPL count
