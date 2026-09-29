@@ -10,8 +10,8 @@ interface WPLSeasonHeaderProps {
 }
 
 export default function WPLSeasonHeader({ selectedSeason, onSeasonChange }: WPLSeasonHeaderProps) {
-  // Target: January 14, 2027 (WPL 2027 Opening Fixture)
-  const targetDate = new Date('2027-01-14T19:30:00+05:30').getTime();
+  // Target: January 9, 2027 (WPL 2027 Confirmed Season Window Start)
+  const targetDate = new Date('2027-01-09T19:30:00+05:30').getTime();
 
   const [timeLeft, setTimeLeft] = useState({
     days: 0,
@@ -42,7 +42,7 @@ export default function WPLSeasonHeader({ selectedSeason, onSeasonChange }: WPLS
 
   return (
     <div className="space-y-4 mb-6">
-      {/* Season Selector Pill */}
+      {/* Season Selector */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="inline-flex p-1 rounded-xl bg-white/[0.06] border border-white/10 backdrop-blur-xl shadow-lg">
           <button
@@ -75,7 +75,7 @@ export default function WPLSeasonHeader({ selectedSeason, onSeasonChange }: WPLS
           </button>
         </div>
 
-        {/* Retentions & Squads Quick Link */}
+        {/* Retentions Link */}
         <Link
           href="/wpl/teams"
           className="inline-flex items-center gap-1.5 text-xs font-semibold text-pink-300 hover:text-pink-200 transition-colors"
@@ -85,7 +85,7 @@ export default function WPLSeasonHeader({ selectedSeason, onSeasonChange }: WPLS
         </Link>
       </div>
 
-      {/* 2027 Countdown & Kickoff Banner */}
+      {/* Season Banner */}
       {selectedSeason === 2027 ? (
         <div className="relative overflow-hidden rounded-2xl border border-pink-500/30 bg-gradient-to-r from-purple-950/80 via-slate-900/90 to-pink-950/80 p-5 backdrop-blur-xl shadow-2xl">
           <div className="absolute top-0 right-0 -mt-6 -mr-6 h-36 w-36 rounded-full bg-pink-500/15 blur-3xl pointer-events-none" />
@@ -94,17 +94,17 @@ export default function WPLSeasonHeader({ selectedSeason, onSeasonChange }: WPLS
             <div>
               <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-md bg-pink-500/20 text-pink-300 text-xs font-bold uppercase tracking-wider mb-2">
                 <Flame className="w-3.5 h-3.5 text-pink-400" />
-                Season 5 • Jan 14 – Feb 7, 2027
+                Locked Window • Jan 9 – Feb 5, 2027
               </div>
               <h3 className="text-xl sm:text-2xl font-black text-white">
                 Road to WPL 2027 Kickoff
               </h3>
               <p className="mt-1 text-xs sm:text-sm text-gray-300 max-w-xl">
-                The championship defense begins. Five powerhouse franchises lock in their retained rosters, auction strategies, and title aspirations.
+                A compact 28-day season window running January 9 through February 5, 2027. Franchise retention lists and auction movements will finalize the 2027 title race.
               </p>
             </div>
 
-            {/* Countdown Clock */}
+            {/* Countdown Box */}
             <div className="grid grid-cols-4 gap-2 text-center shrink-0">
               {[
                 { label: 'DAYS', val: timeLeft.days },
@@ -128,12 +128,11 @@ export default function WPLSeasonHeader({ selectedSeason, onSeasonChange }: WPLS
           </div>
         </div>
       ) : (
-        /* 2026 Season Archive Alert */
         <div className="rounded-2xl border border-amber-500/30 bg-amber-950/30 p-4 backdrop-blur-xl flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <Trophy className="w-5 h-5 text-amber-400 shrink-0" />
             <p className="text-xs sm:text-sm text-amber-200">
-              Viewing archived <strong>WPL 2026</strong> season data, completed fixtures, and historical scorecards.
+              Viewing archived <strong>WPL 2026</strong> season data, final scorecards, and standings.
             </p>
           </div>
           <button
