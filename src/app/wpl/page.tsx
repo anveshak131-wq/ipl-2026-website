@@ -50,201 +50,42 @@ const HERO_BACKGROUND_IMAGE = '/images/wpl-oil-stadium-hero.webp';
 
 const SEASON_PULSE_CARDS = [
   {
-    label: 'Season Window',
-    value: 'Jan 9 - Feb 5',
-    detail: 'A compact 28-day WPL season built for nightly T20 viewing.',
+    title: 'Season Window',
+    value: 'Jan 9 – Feb 5',
+    description: 'Locked 28-day WPL 2027 championship window built for prime-time T20 action.',
     icon: Calendar,
-    accent: 'from-cyan-400 to-blue-500',
+    color: 'text-cyan-400',
+    bgGradient: 'from-cyan-500/15 to-blue-500/10',
+    border: 'border-cyan-500/30'
   },
   {
-    label: 'Host Cities',
-    value: 'Navi Mumbai + Vadodara',
-    detail: 'DY Patil hosted the opening leg; Vadodara carried the playoffs.',
+    title: 'Host Cities',
+    value: 'TBA',
+    description: 'Official venues and host hubs are yet to be confirmed by the BCCI.',
     icon: MapPin,
-    accent: 'from-emerald-400 to-teal-500',
+    color: 'text-emerald-400',
+    bgGradient: 'from-emerald-500/15 to-teal-500/10',
+    border: 'border-emerald-500/30'
   },
   {
-    label: 'Tournament Shape',
-    value: '22 Matches',
-    detail: 'League stage, Eliminator, and Final across five WPL franchises.',
-    icon: Trophy,
-    accent: 'from-amber-300 to-orange-500',
-  },
-  {
-    label: 'Final Story',
-    value: 'RCB-W 204/4',
-    detail: 'Royal Challengers Bengaluru chased Delhi Capitals 203/4 in Vadodara.',
-    icon: Star,
-    accent: 'from-pink-400 to-rose-500',
-  },
-] as const;
-
-const WPL_TOOLS = [
-  {
-    title: 'Over-by-over scorecards',
-    description: 'Follow runs, wickets, extras, partnerships, powerplay pressure, and death-over swings without losing the match context.',
+    title: 'Tournament Shape',
+    value: 'TBA',
+    description: 'Match count, schedule layout, and fixture dates are yet to be announced.',
     icon: Zap,
-    accent: 'from-amber-300 to-orange-500',
+    color: 'text-violet-400',
+    bgGradient: 'from-violet-500/15 to-purple-500/10',
+    border: 'border-violet-500/30'
   },
   {
-    title: 'Table and NRR signals',
-    description: 'Read form, points, net run rate, qualification pressure, and playoff movement in plain cricket language.',
-    icon: BarChart3,
-    accent: 'from-cyan-400 to-blue-500',
+    title: 'Final Storyline',
+    value: 'Awaiting Kickoff',
+    description: 'The 2027 championship narrative will unfold once the new season gets underway.',
+    icon: Trophy,
+    color: 'text-amber-400',
+    bgGradient: 'from-amber-500/15 to-yellow-500/10',
+    border: 'border-amber-500/30'
   },
-  {
-    title: 'Squads and roles',
-    description: 'Move from franchise cards to player pages with batting roles, bowling styles, all-rounders, and wicketkeeper context.',
-    icon: Users,
-    accent: 'from-violet-400 to-fuchsia-500',
-  },
-  {
-    title: 'Prediction checks',
-    description: 'Use toss, venue, form, and innings tempo to predict winners, top run-scorers, wicket-takers, and Player of the Match.',
-    icon: Target,
-    accent: 'from-pink-400 to-rose-500',
-  },
-  {
-    title: 'Match alerts',
-    description: 'Keep track of live starts, innings breaks, milestones, collapses, and scorecard updates during busy match nights.',
-    icon: BellRing,
-    accent: 'from-emerald-400 to-teal-500',
-  },
-  {
-    title: 'Mobile matchday',
-    description: 'Use fast touch targets, compact score views, and readable cards whether you are at the ground or following on the move.',
-    icon: Smartphone,
-    accent: 'from-sky-400 to-indigo-500',
-  },
-] as const;
-
-export default function WPLHomePage() {
-  const router = useRouter();
-  const { currentLeague, setCurrentLeague } = useLeague();
-  const prefersReducedMotion = useReducedMotion();
-  const [selectedSeason, setSelectedSeason] = useState<number>(2027);
-  const [showTermsModal, setShowTermsModal] = useState(false);
-  const [lastAcceptanceDate, setLastAcceptanceDate] = useState<string | null>(null);
-  const [needsReAcceptance, setNeedsReAcceptance] = useState(false);
-  const [isHydrated, setIsHydrated] = useState(false);
-  const [teams, setTeams] = useState<Team[]>([]);
-  const [matches, setMatches] = useState<Match[]>([]);
-  const [news, setNews] = useState<News[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [showConfetti, setShowConfetti] = useState(false);
-  const [hasLiveMatch, setHasLiveMatch] = useState(false);
-  
-  // Mouse tracking for subtle parallax effects.
-  const mouseX = useMotionValue(0);
-  const mouseY = useMotionValue(0);
-  const springConfig = { damping: 50, stiffness: 100 };
-  const springX = useSpring(mouseX, springConfig);
-  const springY = useSpring(mouseY, springConfig);
-
-  const getMatchYear = (dateString: string): number | null => {
-    const parsed = new Date(dateString);
-    if (!isNaN(parsed.getTime())) return parsed.getFullYear();
-    const match = dateString.match(/(20\d{2}|19\d{2})/);
-    return match ? parseInt(match[1], 10) : null;
-  };
-
-  const filterSeasonMatches = (items: Match[]): Match[] =>
-    items.filter((match) => getMatchYear(match.date) === selectedSeason);
-  
-  // Set league to WPL when page loads
-  useEffect(() => {
-    if (currentLeague !== 'wpl') {
-      setCurrentLeague('wpl');
-    }
-  }, [currentLeague, setCurrentLeague]);
-  
-  // Calculate derived data
-  const upcomingMatchCount = useMemo(() => matches.filter((match) => match.status === 'upcoming').length, [matches]);
-  const completedMatchCount = useMemo(() => matches.filter((match) => match.status === 'completed').length, [matches]);
-  const matchGridInitialFilter = upcomingMatchCount > 0 ? 'upcoming' : completedMatchCount > 0 ? 'completed' : 'all';
-  const matchesSectionTitle = upcomingMatchCount > 0 ? 'Upcoming Matches' : completedMatchCount > 0 ? 'Season Results' : 'Match Schedule';
-  const matchesSectionKicker = upcomingMatchCount > 0 ? 'Upcoming Fixtures' : completedMatchCount > 0 ? 'Scorecards & Results' : 'Fixtures';
-  const matchesSectionCopy = upcomingMatchCount > 0
-    ? 'Follow upcoming toss times, venues, squad news, and live scorecard links for the next WPL fixtures.'
-    : completedMatchCount > 0
-    ? 'Review completed WPL 2026 fixtures with scorecards, results, venues, and match context.'
-    : 'WPL fixtures will appear here as soon as they are added to the schedule.';
-
-  const featuredLiveMatch = useMemo(() => {
-    return matches.find(m => m.status === 'live') || null;
-  }, [matches]);
-  
-  // Calculate total players from teams
-  const totalPlayers = useMemo(() => {
-    return teams.reduce((sum, team) => sum + (team.players?.length || 0), 0);
-  }, [teams]);
-
-  // Mouse tracking effect
-  useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      const { clientX, clientY } = e;
-      const { innerWidth, innerHeight } = window;
-      const xPos = (clientX / innerWidth - 0.5) * 100;
-      const yPos = (clientY / innerHeight - 0.5) * 100;
-      mouseX.set(xPos);
-      mouseY.set(yPos);
-    };
-
-    window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
-  }, [mouseX, mouseY]);
-
-  useEffect(() => {
-    setIsHydrated(true);
-    
-    // Check if user has accepted terms
-    const termsAccepted = localStorage.getItem("terms_accepted");
-    const acceptanceDate = localStorage.getItem("terms_accepted_date");
-    const acceptedVersion = localStorage.getItem("terms_version");
-    
-    setLastAcceptanceDate(acceptanceDate);
-
-    if (termsAccepted !== "true") {
-      setShowTermsModal(true);
-    } else if (acceptedVersion !== "1.1") {
-      setNeedsReAcceptance(true);
-      setShowTermsModal(true);
-    }
-
-    // Helper function to normalize team/player IDs for matching
-    const normalizeId = (id: string | number | undefined): string => {
-      if (!id) return '';
-      const str = String(id).trim();
-      const numMatch = str.replace(/^team/i, '').match(/^\d+$/);
-      return numMatch ? numMatch[0] : str.toLowerCase();
-    };
-    
-    // Load data for WPL
-    const loadData = async () => {
-      setIsLoading(true);
-      try {
-        const [teamsData, matchesData, newsData, playersData] = await Promise.all([
-          api.getTeams('wpl'),
-          api.getMatches('wpl'),
-          api.getNews(),
-          api.getPlayers(undefined, 'wpl').catch(() => []), // Fetch players for accurate counts
-        ]);
-        
-        console.log('WPL Home page: Fetched players:', playersData?.length || 0);
-        
-        // Attach players to teams with improved matching
-        const teamsWithPlayers = teamsData
-          .filter(team => !isPlaceholderTeam(team))
-          .map(team => {
-            const normalizedTeamId = normalizeId(team.id);
-            const teamIdVariations = [
-              String(team.id),
-              normalizedTeamId,
-              `team${normalizedTeamId}`,
-              String(team.id).replace(/^team/i, ''),
-              String(team.id).toLowerCase(),
-              String(team.id).toUpperCase()
-            ];
+];
             
             const teamPlayers = (playersData || []).filter(player => {
               const normalizedPlayerTeamId = normalizeId(player.teamId);
