@@ -115,7 +115,30 @@ export const onRequest = async (context) => {
       const league = url.searchParams.get('league');
       const includeInactive = url.searchParams.get('includeInactive') === 'true';
       const forceRefresh = url.searchParams.get('forceRefresh') === 'true';
-      const fixEllyse = url.searchParams.get('fixEllyse') === 'true';
+      const fixEllyse = url.searchParams.get("fixEllyse") === "true";
+      const releaseLinsey = url.searchParams.get("releaseLinsey") === "true";
+
+      if (releaseLinsey) {
+        let playersData = await env.IPL_CACHE.get("players", "json");
+        let players = playersData || [];
+        const idx = players.findIndex(p => p.name && p.name.toLowerCase().includes("linsey smith"));
+        if (idx !== -1) {
+          players[idx].teamId = "";
+          players[idx].isActiveInSquad = false;
+          players[idx].squadStatus = "released";
+          players[idx].squadExitReason = "released";
+          players[idx].squadExitDate = new Date().toISOString().slice(0, 10);
+          await env.IPL_CACHE.put("players", JSON.stringify(players));
+          return new Response(JSON.stringify({ success: true, player: players[idx] }), {
+            status: 200,
+            headers: { "Content-Type": "application/json", ...corsHeaders }
+          });
+        }
+        return new Response(JSON.stringify({ error: "Linsey Smith not found in KV", count: players.length }), {
+          status: 404,
+          headers: { "Content-Type": "application/json", ...corsHeaders }
+        });
+      }
       const diagnostic = url.searchParams.get('diagnostic') === 'true';
       
       let playersData = await env.IPL_CACHE.get('players', 'json');
