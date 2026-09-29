@@ -4,23 +4,23 @@ import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { TrendingDown, TrendingUp, Users } from 'lucide-react';
 
-const adminStatsLinks = [
+const statsViews = [
   {
-    href: '/ops/ipl/players?view=players',
+    view: 'players',
     label: 'Players',
     Icon: Users,
     activeColor: 'border-[#d7a85b]/45 bg-[#d7a85b]/20 text-white shadow-[0_10px_28px_rgba(215,168,91,0.16)]',
     iconColor: 'text-[#f2d39a]'
   },
   {
-    href: '/ops/ipl/players?view=batting',
+    view: 'batting',
     label: 'Batting Stats',
     Icon: TrendingUp,
     activeColor: 'border-[#4cc39a]/45 bg-[#4cc39a]/20 text-white shadow-[0_10px_28px_rgba(76,195,154,0.16)]',
     iconColor: 'text-[#9cf2c8]'
   },
   {
-    href: '/ops/ipl/players?view=bowling',
+    view: 'bowling',
     label: 'Bowling Stats',
     Icon: TrendingDown,
     activeColor: 'border-[#4fb6c4]/45 bg-[#4fb6c4]/20 text-white shadow-[0_10px_28px_rgba(79,182,196,0.16)]',
@@ -33,19 +33,22 @@ export default function PlayersStatsSubNav() {
   const searchParams = useSearchParams();
   const currentView = searchParams.get('view') || 'players';
 
+  // Keep league scope dynamically based on whether path contains /ops/wpl or /ops/ipl
+  const basePath = pathname?.startsWith('/ops/wpl') ? '/ops/wpl/players' : '/ops/ipl/players';
+
   return (
     <nav
       aria-label="Players and stats admin pages"
       className="sticky top-0 z-40 mb-6 rounded-2xl border border-white/10 bg-[#07110f]/88 p-2 shadow-2xl shadow-black/20 backdrop-blur-xl"
     >
       <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
-        {adminStatsLinks.map(({ href, label, Icon, activeColor, iconColor }) => {
-          const hrefView = new URLSearchParams(href.split('?')[1]).get('view') || 'players';
-          const isActive = pathname === '/ops/ipl/players' && currentView === hrefView;
+        {statsViews.map(({ view, label, Icon, activeColor, iconColor }) => {
+          const href = `${basePath}?view=${view}`;
+          const isActive = currentView === view;
 
           return (
             <Link
-              key={href}
+              key={view}
               href={href}
               aria-current={isActive ? 'page' : undefined}
               className={`flex min-h-11 items-center justify-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-semibold transition-all ${
