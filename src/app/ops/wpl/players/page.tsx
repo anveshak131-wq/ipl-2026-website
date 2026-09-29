@@ -4971,10 +4971,19 @@ function AdminPlayersWorkspace() {
                         teamId: formData.teamId,
                         league: formData.league,
                         isActiveInSquad: formData.isActiveInSquad,
+                        squadStatus: formData.squadStatus,
                       }}
                       teams={teams}
                       editingPlayerId={editingPlayer?.id}
-                      onChange={(patch) => setFormData({ ...formData, ...patch })}
+                      onChange={(patch) => {
+                        const nextIsActive = patch.isActiveInSquad !== undefined ? patch.isActiveInSquad : formData.isActiveInSquad;
+                        const isReleasedOrInactive = patch.squadStatus === "released" || patch.squadStatus === "inactive" || patch.squadStatus === "auction" || !nextIsActive;
+                        setFormData({
+                          ...formData,
+                          ...patch,
+                          ...(isReleasedOrInactive ? { teamId: "", isActiveInSquad: false, squadExitReason: formData.squadExitReason || "released" } : {})
+                        });
+                      }}
                       onAllrounderTypeChange={(value) =>
                         setFormData((prev) => ({ ...prev, allrounderType: value as typeof prev.allrounderType }))
                       }

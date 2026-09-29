@@ -220,10 +220,12 @@ export default function AdminPlayerBasicInfoSection({
           <CustomSelect
             value={formData.squadStatus || (formData.isActiveInSquad ? 'retained' : 'released')}
             onChange={(newStatus) => {
-              const status = newStatus as 'active' | 'inactive' | 'retained' | 'released' | 'auction';
+              const status = newStatus as "active" | "inactive" | "retained" | "released" | "auction";
+              const isActive = status === "retained" || status === "active";
               onChange({
                 squadStatus: status,
-                isActiveInSquad: status === 'retained' || status === 'active',
+                isActiveInSquad: isActive,
+                ...(!isActive ? { teamId: "" } : {})
               });
             }}
             options={[
