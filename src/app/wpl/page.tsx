@@ -535,8 +535,8 @@ export default function WPLHomePage() {
                       })}
                     </div>
 
-                    <div className="mt-6 rounded-lg border border-pink-300/20 bg-pink-300/[0.08] p-4">
-                      <div className="flex items-center gap-2 text-pink-100">
+                    <div className="mt-6 rounded-lg border border-amber-400/20 bg-amber-400/[0.06] p-4">
+                      <div className="flex items-center gap-2 text-amber-200">
                         <Star className="h-4 w-4" />
                         <p className="text-xs font-black uppercase tracking-[0.16em]">Final Storyline</p>
                       </div>
@@ -705,7 +705,19 @@ export default function WPLHomePage() {
         {isLoading ? (
           <TeamsSkeleton />
         ) : teams.filter(t => !isPlaceholderTeam(t)).length > 0 ? (
-          <section className="relative py-24">
+          <section className="relative py-28 overflow-hidden">
+            {/* Rich Stadium Aura & Ambient Glows */}
+            <div className="absolute inset-0 pointer-events-none -z-10">
+              <div className="absolute top-1/2 left-1/4 -translate-y-1/2 w-[550px] h-[350px] bg-sky-600/[0.07] blur-[150px]" />
+              <div className="absolute top-1/2 right-1/4 -translate-y-1/2 w-[550px] h-[350px] bg-amber-500/[0.07] blur-[150px]" />
+              <div 
+                className="absolute inset-0 opacity-[0.03]"
+                style={{
+                  backgroundImage: 'radial-gradient(circle at 50% 50%, #ffffff 1px, transparent 1px)',
+                  backgroundSize: '36px 36px',
+                }}
+              />
+            </div>
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
               <motion.div
                 initial={{ opacity: 0, y: 30 }}
@@ -716,28 +728,19 @@ export default function WPLHomePage() {
               >
                 <div>
                   <motion.div
-                    className="inline-flex items-center gap-2 mb-6 px-6 py-3 rounded-lg backdrop-blur-sm"
-                    style={{
-                      background: WPLColors.purpleRGBA[20],
-                      border: `1px solid ${WPLColors.purpleRGBA[30]}`,
-                    }}
+                    className="inline-flex items-center gap-2 mb-4 px-4 py-1.5 rounded-full bg-amber-400/10 border border-amber-400/30 text-amber-300 text-xs font-black uppercase tracking-wider backdrop-blur-md shadow-lg shadow-amber-400/5"
                     whileHover={{ scale: 1.05 }}
                   >
-                    <Users className="w-5 h-5" style={{ color: WPLColors.purple }} />
-                    <span className="text-xs font-bold uppercase tracking-wider" style={{ color: WPLColors.textPrimary }}>Elite Franchises</span>
+                    <Users className="w-4 h-4 text-amber-400" />
+                    <span>5 Elite Franchises</span>
                   </motion.div>
                   <h2 className="text-5xl md:text-7xl font-black" style={{ color: WPLColors.textPrimary }}>
-                    WPL <GradientText gradient="from-purple-400 to-pink-400" animate>Teams</GradientText>
+                    WPL <GradientText gradient="from-amber-300 via-yellow-400 to-amber-500" animate>Teams</GradientText>
                   </h2>
                 </div>
                 <Link
                   href="/wpl/teams"
-                  className="group flex items-center gap-2 px-8 py-4 rounded-xl border transition-all duration-300 hover:scale-105"
-                  style={{
-                    background: WPLColors.purpleRGBA[10],
-                    borderColor: WPLColors.purpleRGBA[30],
-                    color: WPLColors.purple,
-                  }}
+                  className="group flex items-center gap-2 px-6 py-3 rounded-xl border border-white/10 bg-white/[0.04] hover:bg-white/[0.1] text-slate-200 hover:text-white font-bold text-xs uppercase tracking-wider transition-all duration-300 hover:scale-105 hover:border-amber-400/40 hover:shadow-[0_0_25px_rgba(245,158,11,0.2)]"
                   onMouseEnter={(e) => {
                     e.currentTarget.style.background = WPLColors.purpleRGBA[20];
                     e.currentTarget.style.color = WPLColors.textPrimary;
@@ -825,7 +828,19 @@ export default function WPLHomePage() {
 
         {/* Stats Section - Enhanced */}
         {!isLoading && (
-          <section className="relative py-24">
+          <section className="relative py-28 overflow-hidden">
+            {/* Rich Stadium Aura & Ambient Glows */}
+            <div className="absolute inset-0 pointer-events-none -z-10">
+              <div className="absolute top-1/2 left-1/4 -translate-y-1/2 w-[550px] h-[350px] bg-sky-600/[0.07] blur-[150px]" />
+              <div className="absolute top-1/2 right-1/4 -translate-y-1/2 w-[550px] h-[350px] bg-amber-500/[0.07] blur-[150px]" />
+              <div 
+                className="absolute inset-0 opacity-[0.03]"
+                style={{
+                  backgroundImage: 'radial-gradient(circle at 50% 50%, #ffffff 1px, transparent 1px)',
+                  backgroundSize: '36px 36px',
+                }}
+              />
+            </div>
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
               <motion.div
                 initial={{ opacity: 0, y: 30 }}
@@ -1041,7 +1056,19 @@ export default function WPLHomePage() {
 
         {/* WPL tools showcase */}
         {!isLoading && (
-          <section className="relative py-24">
+          <section className="relative py-28 overflow-hidden">
+            {/* Rich Stadium Aura & Ambient Glows */}
+            <div className="absolute inset-0 pointer-events-none -z-10">
+              <div className="absolute top-1/2 left-1/4 -translate-y-1/2 w-[550px] h-[350px] bg-sky-600/[0.07] blur-[150px]" />
+              <div className="absolute top-1/2 right-1/4 -translate-y-1/2 w-[550px] h-[350px] bg-amber-500/[0.07] blur-[150px]" />
+              <div 
+                className="absolute inset-0 opacity-[0.03]"
+                style={{
+                  backgroundImage: 'radial-gradient(circle at 50% 50%, #ffffff 1px, transparent 1px)',
+                  backgroundSize: '36px 36px',
+                }}
+              />
+            </div>
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
               <motion.div
                 initial={{ opacity: 0, y: 30 }}

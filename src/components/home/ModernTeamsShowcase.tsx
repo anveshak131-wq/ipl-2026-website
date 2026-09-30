@@ -2,10 +2,9 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { motion } from 'framer-motion';
-import AnimatedCard from '@/components/ui/AnimatedCard';
-import { getAnimatedLogoPath, getLogoPath } from '@/lib/logoUtils';
-import { isPlaceholderTeam } from '@/lib/playoffUtils';
+import { Trophy, ArrowUpRight } from 'lucide-react';
 import type { Team } from '@/types';
 
 interface ModernTeamsShowcaseProps {
@@ -13,164 +12,181 @@ interface ModernTeamsShowcaseProps {
   isLoading?: boolean;
 }
 
+const WPL_FRANCHISE_DETAILS: Record<string, {
+  shortName: string;
+  name: string;
+  logo: string;
+  primary: string;
+  glow: string;
+  border: string;
+  titles: string[];
+}> = {
+  rcb: {
+    shortName: 'RCB-W',
+    name: 'Royal Challengers Bengaluru',
+    logo: '/logos/wpl_rcb_logo_modern.svg',
+    primary: '#DC2626',
+    glow: 'rgba(220, 38, 38, 0.35)',
+    border: 'group-hover:border-red-500/60',
+    titles: ['2024', '2026'],
+  },
+  mi: {
+    shortName: 'MI-W',
+    name: 'Mumbai Indians',
+    logo: '/logos/wpl_mi_logo_modern.svg',
+    primary: '#2563EB',
+    glow: 'rgba(37, 99, 235, 0.35)',
+    border: 'group-hover:border-blue-500/60',
+    titles: ['2023', '2025'],
+  },
+  dc: {
+    shortName: 'DC-W',
+    name: 'Delhi Capitals',
+    logo: '/logos/wpl_dc_logo_modern.svg',
+    primary: '#0284C7',
+    glow: 'rgba(2, 132, 199, 0.35)',
+    border: 'group-hover:border-sky-500/60',
+    titles: [],
+  },
+  gg: {
+    shortName: 'GG',
+    name: 'Gujarat Giants',
+    logo: '/logos/wpl_gg_logo_modern.svg',
+    primary: '#EA580C',
+    glow: 'rgba(234, 88, 12, 0.35)',
+    border: 'group-hover:border-orange-500/60',
+    titles: [],
+  },
+  upw: {
+    shortName: 'UPW',
+    name: 'UP Warriorz',
+    logo: '/logos/wpl_upw_logo_modern.svg',
+    primary: '#9333EA',
+    glow: 'rgba(147, 51, 234, 0.35)',
+    border: 'group-hover:border-purple-500/60',
+    titles: [],
+  },
+};
+
+function getTeamMeta(team: Team) {
+  const key = (team.shortName || team.id || team.name || '').toLowerCase();
+  if (key.includes('rcb') || key.includes('bangalore') || key.includes('bengaluru')) return WPL_FRANCHISE_DETAILS.rcb;
+  if (key.includes('mi') || key.includes('mumbai')) return WPL_FRANCHISE_DETAILS.mi;
+  if (key.includes('dc') || key.includes('delhi')) return WPL_FRANCHISE_DETAILS.dc;
+  if (key.includes('gg') || key.includes('gujarat')) return WPL_FRANCHISE_DETAILS.gg;
+  if (key.includes('up') || key.includes('warrior')) return WPL_FRANCHISE_DETAILS.upw;
+
+  return {
+    shortName: team.shortName || 'WPL',
+    name: team.name,
+    logo: team.logo || '/logos/tba_logo.svg',
+    primary: '#38BDF8',
+    glow: 'rgba(56, 189, 248, 0.25)',
+    border: 'group-hover:border-sky-400/50',
+    titles: [],
+  };
+}
+
 export default function ModernTeamsShowcase({ teams, isLoading = false }: ModernTeamsShowcaseProps) {
-  const [hoveredTeam, setHoveredTeam] = useState<string | null>(null);
+  const [hoveredId, setHoveredId] = useState<string | null>(null);
 
   if (isLoading) {
     return (
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-        {[...Array(10)].map((_, i) => (
-          <div key={i} className="h-48 bg-white/5 rounded-xl animate-pulse" />
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-5">
+        {[...Array(5)].map((_, i) => (
+          <div key={i} className="h-64 bg-white/[0.03] rounded-3xl animate-pulse border border-white/5" />
         ))}
       </div>
     );
   }
 
-  // Filter out placeholder teams
-  const realTeams = teams.filter(team => !isPlaceholderTeam(team));
+  // Ensure all 5 official WPL teams are represented
+  const displayTeams = teams.length >= 5 ? teams.slice(0, 5) : teams;
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 px-4 md:px-0">
-      {realTeams.map((team, idx) => (
-        <div
-          key={team.id}
-          onMouseEnter={() => setHoveredTeam(team.id)}
-          onMouseLeave={() => setHoveredTeam(null)}
-        >
-          <Link href={team.league === 'wpl' ? `/wpl/teams/${team.id}` : `/teams/${team.id}`}>
-            <AnimatedCard
-              delay={idx}
-              hover="scale"
-              className="h-48 p-4 flex flex-col items-center justify-center text-center cursor-pointer relative overflow-hidden group"
-            >
-              {/* Background gradient based on team colors */}
-              <motion.div
-                className="absolute inset-0 opacity-0 group-hover:opacity-20 transition-opacity duration-500"
-                style={{ 
-                  background: `linear-gradient(135deg, ${team.colors?.primary || '#3b82f6'}40, ${team.colors?.secondary || '#8b5cf6'}40)`
-                }}
-                animate={hoveredTeam === team.id ? {
-                  opacity: [0.1, 0.25, 0.1]
-                } : {}}
-                transition={{ duration: 2, repeat: Infinity }}
-              />
-              
-              {/* Animated border on hover */}
-              <motion.div
-                className="absolute inset-0 rounded-xl border-2 opacity-0 group-hover:opacity-100"
-                style={{ 
-                  borderColor: team.colors?.primary || '#3b82f6',
-                  boxShadow: `0 0 20px ${team.colors?.primary || '#3b82f6'}40`
-                }}
-                initial={{ scale: 1 }}
-                whileHover={{ scale: 1.02 }}
-                transition={{ duration: 0.3 }}
-              />
+    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-5">
+      {displayTeams.map((team, idx) => {
+        const meta = getTeamMeta(team);
+        const isHovered = hoveredId === team.id;
+        const linkHref = team.league === 'wpl' ? `/wpl/teams/${team.id}` : `/teams/${team.id}`;
 
-            {/* Content */}
-            <div className="relative z-10 flex flex-col items-center justify-center h-full">
-              {/* Interactive Team Logo */}
-              <motion.div 
-                className="relative w-20 h-20 mb-4 flex items-center justify-center"
-                initial={{ scale: 1, rotate: 0 }}
-                whileHover={{ scale: 1.2, rotate: 5 }}
-                transition={{ duration: 0.3, type: "spring", stiffness: 300 }}
-              >
-                {/* Glowing background on hover */}
-                <motion.div
-                  className="absolute inset-0 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-                  style={{
-                    background: `linear-gradient(135deg, ${team.colors?.primary || '#3b82f6'}40, ${team.colors?.secondary || '#8b5cf6'}40)`
-                  }}
-                  animate={hoveredTeam === team.id ? {
-                    scale: [1, 1.3, 1],
-                    opacity: [0.3, 0.6, 0.3]
-                  } : {}}
-                  transition={{ duration: 2, repeat: Infinity }}
-                />
-                
-                {/* Pulse ring on hover */}
-                {hoveredTeam === team.id && (
-                  <motion.div
-                    className="absolute inset-0 rounded-full border-2"
-                    style={{ borderColor: team.colors?.primary || '#3b82f6' }}
-                    initial={{ scale: 1, opacity: 0.8 }}
-                    animate={{ scale: 1.5, opacity: 0 }}
-                    transition={{ duration: 1.5, repeat: Infinity }}
-                  />
-                )}
-                
-                {/* Actual Logo - Modern Animated */}
-                <div className="relative z-10 w-full h-full flex items-center justify-center">
-                  {(() => {
-                    const animatedPath = getAnimatedLogoPath(team.id, team.shortName, team.league);
-                    const fallbackPath = getLogoPath(team.id);
-                    
-                    // Skip JSON files (Lottie animations)
-                    if (animatedPath.endsWith('.json')) {
-                      return null;
-                    }
-                    
-                    return (
-                      <motion.img
-                        src={animatedPath}
-                        alt={`${team.shortName} logo`}
-                        className="w-full h-full object-contain drop-shadow-2xl"
-                        onError={(e) => {
-                          (e.target as HTMLImageElement).src = fallbackPath;
-                        }}
-                        whileHover={{ 
-                          scale: 1.15,
-                          rotate: [0, -5, 5, -5, 0],
-                          filter: "brightness(1.2)"
-                        }}
-                        transition={{ duration: 0.5 }}
-                      />
-                    );
-                  })()}
-                </div>
-              </motion.div>
-
-              {/* Team name with gradient on hover */}
-              <motion.h3 
-                className="font-bold text-sm md:text-base mb-1 transition-colors"
+        return (
+          <motion.div
+            key={team.id || idx}
+            initial={{ opacity: 0, y: 24 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: idx * 0.08, duration: 0.5 }}
+            onMouseEnter={() => setHoveredId(team.id)}
+            onMouseLeave={() => setHoveredId(null)}
+            className="group relative"
+          >
+            <Link href={linkHref} className="block h-full">
+              <div
+                className={`relative h-64 p-5 rounded-3xl bg-[#090c15]/90 border border-white/10 ${meta.border} backdrop-blur-xl overflow-hidden transition-all duration-500 flex flex-col items-center justify-between text-center`}
                 style={{
-                  color: hoveredTeam === team.id ? team.colors?.primary || '#fbbf24' : '#ffffff'
+                  boxShadow: isHovered
+                    ? `0 20px 45px -10px ${meta.glow}, 0 0 0 1px ${meta.primary}40`
+                    : '0 10px 30px -15px rgba(0,0,0,0.6)',
+                  transform: isHovered ? 'translateY(-6px)' : 'none',
                 }}
-                animate={hoveredTeam === team.id ? {
-                  scale: [1, 1.05, 1]
-                } : {}}
-                transition={{ duration: 0.5 }}
               >
-                {team.shortName}
-              </motion.h3>
+                {/* Dynamic radial ambient glow behind logo */}
+                <div
+                  className="absolute -top-10 left-1/2 -translate-x-1/2 w-36 h-36 rounded-full blur-3xl opacity-20 pointer-events-none transition-opacity duration-500 group-hover:opacity-60"
+                  style={{ backgroundColor: meta.primary }}
+                />
 
-              {/* Full name */}
-              <p className="text-xs text-gray-400 line-clamp-2">{team.name}</p>
-
-              {/* Enhanced stats on hover */}
-              {hoveredTeam === team.id && (
-                <motion.div 
-                  className="mt-3 pt-3 border-t border-white/10 text-xs text-gray-300"
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  <p className="font-semibold">Players: {team.players?.length || 0}</p>
-                  {team.trophies && team.trophies.length > 0 && (
-                    <p className="text-ipl-gold mt-1">🏆 {team.trophies.length} Title{team.trophies.length > 1 ? 's' : ''}</p>
+                {/* Top Badge: Championship Star or Status */}
+                <div className="w-full flex items-center justify-between z-10">
+                  {meta.titles.length > 0 ? (
+                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-400/15 border border-amber-400/30 text-amber-300 text-[10px] font-black uppercase tracking-wider">
+                      <Trophy className="w-3 h-3 text-amber-400" />
+                      {meta.titles.length}x
+                    </span>
+                  ) : (
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                      Contender
+                    </span>
                   )}
-                </motion.div>
-              )}
-            </div>
+                  <ArrowUpRight className="w-4 h-4 text-slate-500 group-hover:text-white group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
+                </div>
 
-              {/* Glow effect */}
-              <div className="absolute inset-0 rounded-xl bg-gradient-to-t from-ipl-gold/0 to-ipl-gold/0 group-hover:from-ipl-gold/10 group-hover:to-ipl-gold/5 transition-all duration-300 pointer-events-none" />
-            </AnimatedCard>
-          </Link>
-        </div>
-      ))}
+                {/* Center: Modern Logo with 3D Float Animation */}
+                <div className="relative my-auto flex items-center justify-center">
+                  <motion.div
+                    className="relative w-20 h-20 sm:w-24 sm:h-24 flex items-center justify-center p-2 rounded-2xl bg-black/30 border border-white/5 shadow-inner"
+                    animate={isHovered ? { scale: 1.12, rotate: [0, -3, 3, 0] } : { scale: 1, rotate: 0 }}
+                    transition={{ duration: 0.4, ease: 'easeOut' }}
+                  >
+                    <Image
+                      src={meta.logo}
+                      alt={`${meta.name} crest`}
+                      width={80}
+                      height={80}
+                      className="w-full h-full object-contain filter drop-shadow-[0_8px_16px_rgba(0,0,0,0.6)]"
+                      priority={idx < 3}
+                    />
+                  </motion.div>
+                </div>
+
+                {/* Bottom: Team Titles & Typography */}
+                <div className="w-full z-10 pt-2 border-t border-white/5">
+                  <h3 className="font-black text-base sm:text-lg text-white tracking-tight group-hover:text-amber-300 transition-colors">
+                    {meta.shortName}
+                  </h3>
+                  <p className="text-[11px] font-semibold text-slate-400 truncate w-full mt-0.5">
+                    {meta.name}
+                  </p>
+                </div>
+
+                {/* Hover rim shine highlight */}
+                <div className="absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-transparent via-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              </div>
+            </Link>
+          </motion.div>
+        );
+      })}
     </div>
   );
 }
