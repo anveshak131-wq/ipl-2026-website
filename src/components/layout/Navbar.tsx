@@ -73,7 +73,7 @@ export default function Navbar() {
   const primaryNavItems: NavItem[] = [
     // Real-time & Core Features (Highest Priority)
     { href: liveScoreHref, label: 'Live Score', emoji: 'lightning' },
-    { href: '/feed', label: 'Feed', emoji: 'sparkles' },
+    ...(currentLeague === 'wpl' ? [] : [{ href: '/feed', label: 'Feed', emoji: 'sparkles' as NavEmojiName }]),
     { href: getLeagueAwareHref('/matches'), label: 'Matches', emoji: 'cricket-bat' },
     // Explore & Discover
     { href: getLeagueAwareHref('/teams'), label: 'Teams', emoji: 'trophy' },
