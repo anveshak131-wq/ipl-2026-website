@@ -1,3 +1,26 @@
+
+function deduplicatePlayers(players) {
+  if (!Array.isArray(players)) return [];
+  const seenIds = new Set();
+  const seenNameLeague = new Set();
+  const unique = [];
+
+  for (const p of players) {
+    if (!p || !p.id) continue;
+    const idKey = String(p.id).trim();
+    const nameLeagueKey = `${(p.name || '').toLowerCase().trim()}::${(p.league || 'ipl').toLowerCase()}`;
+
+    // Skip if ID was already seen OR if exact same player name in the same league was already added
+    if (seenIds.has(idKey) || (p.name && seenNameLeague.has(nameLeagueKey))) {
+      continue;
+    }
+
+    seenIds.add(idKey);
+    if (p.name) seenNameLeague.add(nameLeagueKey);
+    unique.push(p);
+  }
+  return unique;
+}
 /**
  * Cloudflare Pages Function for /api/players
  * Handles player CRUD operations
@@ -456,6 +479,11 @@ export const onRequest = async (context) => {
         console.log(`Filtered inactive players: ${before} -> ${players.length}`);
       }
       
+      const originalLen = players.length;
+      players = deduplicatePlayers(players);
+      if (players.length < originalLen && env.IPL_CACHE) {
+        context.waitUntil(env.IPL_CACHE.put('players', JSON.stringify(players)));
+      }
       return new Response(JSON.stringify(players), {
         status: 200,
         headers: { 'Content-Type': 'application/json', ...corsHeaders },
@@ -672,7 +700,19 @@ export const onRequest = async (context) => {
 
       const playersData = await env.IPL_CACHE.get('players', 'json');
       const players = playersData || [];
-      const index = players.findIndex((p) => p.id === updatedPlayer.id);
+      // Normalize ID matching to handle both string and number representations
+      const targetId = String(updatedPlayer.id).trim();
+      let index = players.findIndex((p) => String(p.id).trim() === targetId);
+
+      // Fallback: match by name and league if ID shifted
+      if (index === -1 && updatedPlayer.name) {
+        const targetName = updatedPlayer.name.toLowerCase().trim();
+        const targetLeague = (updatedPlayer.league || 'ipl').toLowerCase();
+        index = players.findIndex((p) => 
+          (p.name || '').toLowerCase().trim() === targetName && 
+          ((p.league || 'ipl').toLowerCase() === targetLeague)
+        );
+      }
       if (index === -1) {
         return new Response(JSON.stringify({ error: 'Player not found' }), {
           status: 404,
@@ -683,7 +723,7 @@ export const onRequest = async (context) => {
       // Check for duplicate player when updating team or name
       const playerLeague = updatedPlayer.league || players[index].league || 'ipl';
       const duplicatePlayer = players.find(p => 
-        p.id !== updatedPlayer.id && // Exclude the current player
+        String(p.id).trim() !== targetId && // Exclude the current player
         (p.league || 'ipl') === playerLeague &&
         p.name.toLowerCase().trim() === updatedPlayer.name.toLowerCase().trim()
       );
