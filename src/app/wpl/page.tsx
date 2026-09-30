@@ -75,7 +75,7 @@ const SEASON_PULSE_CARDS = [
     value: 'Awaiting Kickoff',
     detail: 'The 2027 championship narrative begins once the tournament gets underway.',
     icon: Star,
-    accent: 'from-pink-400 to-rose-500',
+    accent: 'from-amber-400 to-yellow-500',
   },
 ] as const;
 
@@ -102,7 +102,7 @@ const WPL_TOOLS = [
     title: 'Prediction checks',
     description: 'Use toss, venue, form, and innings tempo to predict winners, top run-scorers, wicket-takers, and Player of the Match.',
     icon: Target,
-    accent: 'from-pink-400 to-rose-500',
+    accent: 'from-amber-400 to-yellow-500',
   },
   {
     title: 'Match alerts',
@@ -387,6 +387,7 @@ export default function WPLHomePage() {
             className="absolute inset-0 -z-30 bg-cover bg-center md:bg-[center_right]"
             style={{
               backgroundImage: `linear-gradient(90deg, rgba(5,8,22,0.98) 0%, rgba(5,8,22,0.82) 42%, rgba(5,8,22,0.36) 72%, rgba(5,8,22,0.78) 100%), url('${HERO_BACKGROUND_IMAGE}')`,
+              filter: 'hue-rotate(185deg) saturate(1.15) brightness(0.95)',
             }}
             animate={prefersReducedMotion ? undefined : { scale: [1.02, 1.06, 1.02] }}
             transition={{ duration: 40, repeat: Infinity, ease: 'easeInOut' }}
@@ -404,7 +405,7 @@ export default function WPLHomePage() {
             style={{
               x: springX,
               y: springY,
-              background: 'linear-gradient(90deg, rgba(34,211,238,0.20), rgba(236,72,153,0.18), rgba(251,191,36,0.10), transparent)',
+              background: 'linear-gradient(90deg, rgba(34,211,238,0.20), rgba(56,189,248,0.15), rgba(251,191,36,0.10), transparent)',
             }}
             animate={prefersReducedMotion ? undefined : { opacity: [0.35, 0.62, 0.35] }}
             transition={{ duration: 14, repeat: Infinity, ease: 'easeInOut' }}
@@ -503,14 +504,14 @@ export default function WPLHomePage() {
                 transition={{ duration: 0.75, delay: 0.22, type: 'spring', stiffness: 90 }}
                 className="relative hidden lg:block"
               >
-                <div className="absolute inset-0 translate-x-4 translate-y-4 rounded-lg bg-gradient-to-br from-pink-500/18 via-cyan-400/10 to-amber-300/10 blur-xl" />
+                <div className="absolute inset-0 translate-x-4 translate-y-4 rounded-lg bg-gradient-to-br from-cyan-500/15 via-blue-500/10 to-amber-300/10 blur-xl" />
                 <div className="relative overflow-hidden rounded-lg border border-white/10 bg-slate-950/58 p-5 sm:p-6 backdrop-blur-2xl shadow-[0_24px_90px_rgba(0,0,0,0.42)]">
                   <div className="absolute inset-0 opacity-[0.10]" style={{ backgroundImage: `url('${HERO_BACKGROUND_IMAGE}')`, backgroundSize: 'cover', backgroundPosition: 'center right' }} />
                   <div className="absolute inset-0 bg-gradient-to-b from-slate-950/40 via-slate-950/78 to-slate-950/95" />
                   <div className="relative">
                     <div className="flex items-center justify-between gap-4 border-b border-white/10 pb-4">
                       <div>
-                        <p className="text-xs font-black uppercase tracking-[0.18em] text-pink-200">Season Snapshot</p>
+                        <p className="text-xs font-black uppercase tracking-[0.18em] text-amber-300">Season Snapshot</p>
                         <h2 className="mt-2 text-2xl font-black text-white">WPL 2027 Season Preview</h2>
                       </div>
                       <div className="flex h-12 w-12 items-center justify-center rounded-lg border border-white/10 bg-white/[0.08]">
