@@ -706,7 +706,8 @@ export default function WPLHomePage() {
         {isLoading ? (
           <TeamsSkeleton />
         ) : teams.filter(t => !isPlaceholderTeam(t)).length > 0 ? (
-          <section className="relative py-28 overflow-hidden bg-[#05070d]">
+          <section className="relative py-28 overflow-hidden">
+            <StadiumNightCanvas variant="teams" />
             {/* Multi-layered Night Stadium Lighting & Perspective Pitch Grid */}
             <div className="absolute inset-0 pointer-events-none -z-10 overflow-hidden">
               {/* Stadium Floodlight Overhead Beams */}
