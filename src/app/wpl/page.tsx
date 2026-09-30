@@ -437,7 +437,7 @@ export default function WPLHomePage() {
                   transition={{ duration: 0.55, delay: 0.1 }}
                   className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg border border-white/10 bg-white/[0.08] backdrop-blur-2xl shadow-[0_20px_80px_rgba(0,0,0,0.32)]"
                 >
-                  <Sparkles className="w-5 h-5" style={{ color: WPLColors.pink }} />
+                  <Sparkles className="w-5 h-5" className="text-amber-400" />
                   <span className="text-xs sm:text-sm font-black uppercase tracking-[0.2em] text-white">
                     Women's Premier League Season Hub
                   </span>
@@ -452,7 +452,7 @@ export default function WPLHomePage() {
                   <span className="block bg-gradient-to-r from-white via-cyan-100 to-pink-100 bg-clip-text text-transparent">
                     WPL
                   </span>
-                  <span className="block bg-gradient-to-r from-pink-300 via-violet-300 to-amber-200 bg-clip-text text-transparent">
+                  <span className="block bg-gradient-to-r from-amber-200 via-yellow-400 to-amber-500 bg-clip-text text-transparent">
                     {selectedSeason}
                   </span>
                 </motion.h1>
@@ -474,8 +474,7 @@ export default function WPLHomePage() {
                 >
                   <Link
                     href="/wpl/matches"
-                    className="group inline-flex items-center gap-2 rounded-lg px-5 py-3 text-sm font-black text-white shadow-[0_18px_60px_rgba(236,72,153,0.28)] transition-transform duration-300 hover:-translate-y-0.5"
-                    style={{ background: `linear-gradient(135deg, ${WPLColors.pink}, ${WPLColors.violet})` }}
+                    className="group inline-flex items-center gap-2 rounded-lg px-5 py-3 text-sm font-black text-slate-950 bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 shadow-[0_18px_60px_rgba(245,158,11,0.35)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_20px_65px_rgba(245,158,11,0.5)]"
                   >
                     <Play className="w-4 h-4" />
                     View WPL Scorecards
@@ -785,12 +784,12 @@ export default function WPLHomePage() {
                     }}
                     whileHover={{ scale: 1.05 }}
                   >
-                    <Calendar className="w-5 h-5" style={{ color: WPLColors.pink }} />
+                    <Calendar className="w-5 h-5" className="text-amber-400" />
                     <span className="text-xs font-bold uppercase tracking-wider" style={{ color: WPLColors.textPrimary }}>{matchesSectionKicker}</span>
                   </motion.div>
                   <h2 className="text-5xl md:text-7xl font-black leading-none" style={{ color: WPLColors.textPrimary }}>
                     {matchesSectionTitle.split(' ')[0]}{' '}
-                    <GradientText gradient="from-pink-400 to-rose-400" animate>
+                    <GradientText gradient="from-amber-400 to-rose-400" animate>
                       {matchesSectionTitle.split(' ').slice(1).join(' ') || 'Fixtures'}
                     </GradientText>
                   </h2>
@@ -913,7 +912,7 @@ export default function WPLHomePage() {
                     <span className="text-xs font-bold uppercase tracking-wider" style={{ color: WPLColors.textPrimary }}>Breaking News</span>
                   </motion.div>
                   <h2 className="text-5xl md:text-7xl font-black" style={{ color: WPLColors.textPrimary }}>
-                    Latest <GradientText gradient="from-pink-400 to-purple-400" animate>News</GradientText>
+                    Latest <GradientText gradient="from-amber-400 to-purple-400" animate>News</GradientText>
                   </h2>
                 </div>
                 <Link
@@ -980,11 +979,11 @@ export default function WPLHomePage() {
                       border: `1px solid ${WPLColors.pinkRGBA[40]}`,
                     }}
                   >
-                    <Target className="w-5 h-5" style={{ color: WPLColors.pink }} />
+                    <Target className="w-5 h-5" className="text-amber-400" />
                     <span className="text-sm font-bold uppercase tracking-wider" style={{ color: WPLColors.textPrimary }}>Match Predictions</span>
                   </motion.div>
                   <h2 className="text-4xl md:text-5xl font-black mb-4" style={{ color: WPLColors.textPrimary }}>
-                    Predict & <GradientText gradient="from-pink-400 to-rose-400" animate>Win</GradientText>
+                    Predict & <GradientText gradient="from-amber-400 to-rose-400" animate>Win</GradientText>
                   </h2>
                   <p className="text-lg mb-6 leading-relaxed" style={{ color: WPLColors.textSecondary }}>
                     Use toss calls, venue conditions, powerplay starts, death-over form, and player roles to make sharper WPL predictions and climb the leaderboard.
@@ -1004,10 +1003,10 @@ export default function WPLHomePage() {
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   {[
-                    { label: 'Match Winner', icon: Trophy, color: 'from-pink-500 to-rose-500' },
+                    { label: 'Match Winner', icon: Trophy, color: 'from-amber-500 to-rose-500' },
                     { label: 'Top Run-Scorer', icon: Star, color: 'from-rose-500 to-purple-500' },
-                    { label: 'Most Wickets', icon: Activity, color: 'from-purple-500 to-pink-500' },
-                    { label: 'Player of the Match', icon: Target, color: 'from-pink-500 to-rose-500' },
+                    { label: 'Most Wickets', icon: Activity, color: 'from-purple-500 to-amber-500' },
+                    { label: 'Player of the Match', icon: Target, color: 'from-amber-500 to-rose-500' },
                   ].map((feature, idx) => (
                     <motion.div
                       key={feature.label}

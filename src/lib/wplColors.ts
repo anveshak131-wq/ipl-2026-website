@@ -15,10 +15,10 @@ export const WPLColors = {
   
   // Team-Specific Colors - Enhanced Visibility
   purple: '#8B5CF6',       // RCB Purple - Enhanced
-  pink: '#EC4899',         // Bright Pink - High Contrast
-  rose: '#F43F5E',         // Rose Red - Vibrant
+  pink: '#F59E0B',         // Bright Pink - High Contrast
+  rose: '#EAB308',         // Rose Red - Vibrant
   violet: '#7C3AED',       // Deep Violet - Rich
-  fuchsia: '#D946EF',      // Fuchsia - Bold
+  fuchsia: '#38BDF8',      // Fuchsia - Bold
   orange: '#FB923C',       // Orange - Warm
   blue: '#3B82F6',         // Blue - Clear
   green: '#10B981',        // Green - Fresh
@@ -54,20 +54,20 @@ export const WPLColors = {
     50: 'rgba(139, 92, 246, 0.5)',
   },
   pinkRGBA: {
-    10: 'rgba(236, 72, 153, 0.1)',
-    15: 'rgba(236, 72, 153, 0.15)',
-    20: 'rgba(236, 72, 153, 0.2)',
-    30: 'rgba(236, 72, 153, 0.3)',
-    40: 'rgba(236, 72, 153, 0.4)',
-    50: 'rgba(236, 72, 153, 0.5)',
+    10: 'rgba(245, 158, 11, 0.1)',
+    15: 'rgba(245, 158, 11, 0.15)',
+    20: 'rgba(245, 158, 11, 0.2)',
+    30: 'rgba(245, 158, 11, 0.3)',
+    40: 'rgba(245, 158, 11, 0.4)',
+    50: 'rgba(245, 158, 11, 0.5)',
   },
   roseRGBA: {
-    10: 'rgba(244, 63, 94, 0.1)',
-    15: 'rgba(244, 63, 94, 0.15)',
-    20: 'rgba(244, 63, 94, 0.2)',
-    30: 'rgba(244, 63, 94, 0.3)',
-    40: 'rgba(244, 63, 94, 0.4)',
-    50: 'rgba(244, 63, 94, 0.5)',
+    10: 'rgba(234, 179, 8, 0.1)',
+    15: 'rgba(234, 179, 8, 0.15)',
+    20: 'rgba(234, 179, 8, 0.2)',
+    30: 'rgba(234, 179, 8, 0.3)',
+    40: 'rgba(234, 179, 8, 0.4)',
+    50: 'rgba(234, 179, 8, 0.5)',
   },
   violetRGBA: {
     10: 'rgba(124, 58, 237, 0.1)',
