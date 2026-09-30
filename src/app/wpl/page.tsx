@@ -8,6 +8,7 @@ import Footer from '@/components/layout/Footer';
 import AuroraBackground from '@/components/ui/AuroraBackground';
 import TermsAcceptanceModal from '@/components/legal/TermsAcceptanceModal';
 import ModernTeamsShowcase from '@/components/home/ModernTeamsShowcase';
+import StadiumNightCanvas from '@/components/wpl/StadiumNightCanvas';
 import ModernMatchesGrid from '@/components/home/ModernMatchesGrid';
 import ModernNewsSection from '@/components/home/ModernNewsSection';
 import ModernStatsSection from '@/components/home/ModernStatsSection';
@@ -778,7 +779,8 @@ export default function WPLHomePage() {
         {isLoading ? (
           <MatchesSkeleton />
         ) : (
-          <section className="relative py-24 overflow-hidden">
+          <section className="relative py-28 overflow-hidden">
+            <StadiumNightCanvas glowColor="gold" showPitchGrid={true} />
             <div 
               className="absolute inset-0"
               style={{
@@ -910,7 +912,8 @@ export default function WPLHomePage() {
         {isLoading ? (
           <NewsSkeleton />
         ) : news.length > 0 ? (
-          <section className="relative py-24 overflow-hidden">
+          <section className="relative py-28 overflow-hidden">
+            <StadiumNightCanvas glowColor="gold" showPitchGrid={true} />
             <div 
               className="absolute inset-0"
               style={{
