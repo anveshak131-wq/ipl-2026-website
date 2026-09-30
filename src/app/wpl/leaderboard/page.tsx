@@ -889,22 +889,26 @@ export default function WPLLeaderboardPage() {
                       className="mt-8 p-4 rounded-xl"
                       style={{ ...getWPLGlassmorphism(), border: '1px solid #ffffff10' }}
                     >
-                      <div className="flex flex-wrap items-center justify-center gap-4 text-sm">
-                        <div className="flex items-center gap-2">
-                          <div className="w-3 h-3 rounded-full bg-gradient-to-br from-amber-400 to-yellow-500"></div>
-                          <span className="text-gray-400">League Leader</span>
+                      <div className="space-y-3">
+                        <div className="text-xs font-bold text-center text-gray-400 uppercase tracking-widest">
+                          WPL 2027 Playoff Qualification System
                         </div>
-                        <div className="flex items-center gap-2">
-                          <div className="w-3 h-3 rounded-full bg-gradient-to-br from-green-400 to-emerald-500"></div>
-                          <span className="text-gray-400">Playoff Qualification</span>
+                        <div className="flex flex-wrap items-center justify-center gap-6 text-xs sm:text-sm">
+                          <div className="flex items-center gap-2">
+                            <div className="w-3.5 h-3.5 rounded-full bg-gradient-to-br from-amber-400 to-yellow-500 ring-2 ring-amber-400/30"></div>
+                            <span className="text-gray-300 font-semibold">Rank 1: Direct to Final</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <div className="w-3.5 h-3.5 rounded-full bg-gradient-to-br from-purple-400 to-indigo-500 ring-2 ring-purple-400/30"></div>
+                            <span className="text-gray-300 font-semibold">Ranks 2 & 3: Eliminator</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <div className="w-3.5 h-3.5 rounded-full bg-white/20"></div>
+                            <span className="text-gray-400">Ranks 4 & 5: League Stage</span>
+                          </div>
                         </div>
-                        <div className="flex items-center gap-2">
-                          <ArrowUp size={14} className="text-green-400" />
-                          <span className="text-gray-400">Positive NRR</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <ArrowDown size={14} className="text-red-400" />
-                          <span className="text-gray-400">Negative NRR</span>
+                        <div className="text-[11px] text-center text-gray-500 pt-1">
+                          Season 2027 standings are currently reset. Live rankings and NRR tiebreakers activate on Matchday 1.
                         </div>
                       </div>
                     </motion.div>
