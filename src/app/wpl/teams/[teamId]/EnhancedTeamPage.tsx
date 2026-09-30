@@ -11,11 +11,12 @@ import {
   Flame, 
   ArrowLeft, 
   Search, 
-  Sparkles, 
   Calendar,
   ChevronRight,
   Star,
-  Award
+  Award,
+  Zap,
+  Target
 } from 'lucide-react';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
@@ -28,43 +29,55 @@ interface TeamTheme {
   glow: string;
   gradient: string;
   borderGlow: string;
+  shieldGradient: string;
+  metallicText: string;
 }
 
 const TEAM_THEMES: Record<string, TeamTheme> = {
   'rcb': {
     primary: '#E01E37',
     secondary: '#FFB703',
-    glow: 'rgba(224, 30, 55, 0.35)',
+    glow: 'rgba(224, 30, 55, 0.4)',
     gradient: 'from-[#42040c] via-[#12080a] to-[#05070f]',
-    borderGlow: 'hover:border-red-500/50'
+    borderGlow: 'hover:border-red-500/60',
+    shieldGradient: 'from-amber-400 via-rose-500 to-red-800',
+    metallicText: 'bg-gradient-to-br from-amber-200 via-amber-400 to-yellow-600',
   },
   'mi': {
     primary: '#004BA0',
     secondary: '#D1AB3E',
-    glow: 'rgba(0, 75, 160, 0.35)',
+    glow: 'rgba(0, 75, 160, 0.4)',
     gradient: 'from-[#031d44] via-[#050e1f] to-[#05070f]',
-    borderGlow: 'hover:border-blue-500/50'
+    borderGlow: 'hover:border-blue-500/60',
+    shieldGradient: 'from-blue-400 via-indigo-500 to-blue-900',
+    metallicText: 'bg-gradient-to-br from-amber-100 via-amber-300 to-yellow-500',
   },
   'dc': {
     primary: '#0047AB',
     secondary: '#DC143C',
-    glow: 'rgba(220, 20, 60, 0.35)',
+    glow: 'rgba(220, 20, 60, 0.4)',
     gradient: 'from-[#170a2c] via-[#0b0c1c] to-[#05070f]',
-    borderGlow: 'hover:border-indigo-500/50'
+    borderGlow: 'hover:border-indigo-500/60',
+    shieldGradient: 'from-red-500 via-blue-600 to-slate-900',
+    metallicText: 'bg-gradient-to-br from-slate-100 via-red-200 to-rose-400',
   },
   'gg': {
     primary: '#F36F21',
     secondary: '#00A896',
-    glow: 'rgba(243, 111, 33, 0.35)',
+    glow: 'rgba(243, 111, 33, 0.4)',
     gradient: 'from-[#3a1a05] via-[#170e0a] to-[#05070f]',
-    borderGlow: 'hover:border-orange-500/50'
+    borderGlow: 'hover:border-orange-500/60',
+    shieldGradient: 'from-orange-400 via-amber-500 to-teal-800',
+    metallicText: 'bg-gradient-to-br from-orange-100 via-amber-300 to-yellow-500',
   },
   'upw': {
     primary: '#6A1B9A',
     secondary: '#FFD600',
-    glow: 'rgba(106, 27, 154, 0.35)',
+    glow: 'rgba(106, 27, 154, 0.4)',
     gradient: 'from-[#2e0854] via-[#130624] to-[#05070f]',
-    borderGlow: 'hover:border-purple-500/50'
+    borderGlow: 'hover:border-purple-500/60',
+    shieldGradient: 'from-purple-500 via-fuchsia-600 to-yellow-600',
+    metallicText: 'bg-gradient-to-br from-yellow-100 via-yellow-300 to-amber-500',
   },
 };
 
@@ -78,10 +91,20 @@ const getTeamTheme = (shortName?: string, name?: string): TeamTheme => {
   return {
     primary: '#EC4899',
     secondary: '#A855F7',
-    glow: 'rgba(236, 72, 153, 0.35)',
+    glow: 'rgba(236, 72, 153, 0.4)',
     gradient: 'from-[#2c0827] via-[#120718] to-[#05070f]',
-    borderGlow: 'hover:border-pink-500/50'
+    borderGlow: 'hover:border-pink-500/60',
+    shieldGradient: 'from-pink-400 via-rose-500 to-purple-800',
+    metallicText: 'bg-gradient-to-br from-pink-100 via-rose-300 to-amber-300',
   };
+};
+
+const getInitials = (name: string): string => {
+  if (!name) return 'WPL';
+  const clean = name.trim().replace(/\s+/g, ' ');
+  const parts = clean.split(' ');
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
 };
 
 const getTeamVariations = (team: any, paramId: string): string[] => {
@@ -105,7 +128,6 @@ const getTeamVariations = (team: any, paramId: string): string[] => {
   return Array.from(set);
 };
 
-// Helper for fast fetch with strict timeout
 async function fetchWithTimeout<T>(promise: Promise<T>, ms = 2000, fallback: T): Promise<T> {
   let timer: any;
   const timeoutPromise = new Promise<T>((resolve) => {
@@ -126,10 +148,9 @@ export default function EnhancedWPLTeamPage({ teamId }: { teamId: string }) {
   const [selectedRole, setSelectedRole] = useState<'all' | 'batsman' | 'all-rounder' | 'bowler' | 'wicketkeeper'>('all');
   const [activeTab, setActiveTab] = useState<'squad' | 'fixtures'>('squad');
 
-  // Priority 1: Load Team + Players Fast
+  // Priority 1: Load Core Team + Players fast
   useEffect(() => {
     let isMounted = true;
-
     async function loadCoreData() {
       setLoading(true);
       try {
@@ -169,7 +190,7 @@ export default function EnhancedWPLTeamPage({ teamId }: { teamId: string }) {
     return () => { isMounted = false; };
   }, [teamId]);
 
-  // Priority 2: Lazy-load Matches in background
+  // Priority 2: Lazy load Matches in background
   useEffect(() => {
     if (!team || matches.length > 0) return;
     let isMounted = true;
@@ -223,7 +244,7 @@ export default function EnhancedWPLTeamPage({ teamId }: { teamId: string }) {
           <div className="h-64 rounded-3xl bg-white/[0.05] border border-white/10" />
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
             {[...Array(8)].map((_, i) => (
-              <div key={i} className="h-72 rounded-2xl bg-white/[0.04] border border-white/5" />
+              <div key={i} className="h-80 rounded-2xl bg-white/[0.04] border border-white/5" />
             ))}
           </div>
         </div>
@@ -257,9 +278,9 @@ export default function EnhancedWPLTeamPage({ teamId }: { teamId: string }) {
       <Navbar />
 
       <main className="flex-1 pb-24 relative overflow-hidden">
-        {/* Ambient Top Glow */}
+        {/* Dynamic Top Ambient Aura */}
         <div 
-          className="pointer-events-none absolute -top-40 left-1/2 -translate-x-1/2 w-[900px] h-[500px] rounded-full blur-[140px] opacity-25"
+          className="pointer-events-none absolute -top-40 left-1/2 -translate-x-1/2 w-[1000px] h-[550px] rounded-full blur-[150px] opacity-25"
           style={{ background: `radial-gradient(circle, ${theme.primary}, ${theme.secondary}, transparent 70%)` }}
         />
 
@@ -303,7 +324,7 @@ export default function EnhancedWPLTeamPage({ teamId }: { teamId: string }) {
           <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid grid-cols-1 lg:grid-cols-[200px_1fr_300px] gap-8 items-center">
               
-              {/* Crest Frame */}
+              {/* Franchise Crest Frame */}
               <div className="flex justify-center">
                 <div 
                   className="relative w-44 h-44 rounded-3xl p-6 flex items-center justify-center bg-black/60 border border-white/15 backdrop-blur-2xl shadow-2xl"
@@ -344,19 +365,19 @@ export default function EnhancedWPLTeamPage({ teamId }: { teamId: string }) {
 
                 <div className="flex flex-wrap items-center justify-center lg:justify-start gap-2.5 pt-1">
                   {team.homeVenue && (
-                    <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-black/40 border border-white/10 text-xs text-gray-300">
+                    <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-black/40 border border-white/10 text-xs font-medium text-gray-300">
                       <MapPin className="w-3.5 h-3.5 text-pink-400" />
                       <span>{team.homeVenue}</span>
                     </div>
                   )}
                   {team.captain && (
-                    <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-black/40 border border-white/10 text-xs text-gray-300">
+                    <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-black/40 border border-white/10 text-xs font-medium text-gray-300">
                       <Star className="w-3.5 h-3.5 text-amber-400" />
                       <span>Captain: <strong className="text-white">{team.captain}</strong></span>
                     </div>
                   )}
                   {team.coach && (
-                    <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-black/40 border border-white/10 text-xs text-gray-300">
+                    <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-black/40 border border-white/10 text-xs font-medium text-gray-300">
                       <Award className="w-3.5 h-3.5 text-cyan-400" />
                       <span>Coach: <strong className="text-white">{team.coach}</strong></span>
                     </div>
@@ -372,7 +393,7 @@ export default function EnhancedWPLTeamPage({ teamId }: { teamId: string }) {
                     <Users className="w-4 h-4 text-cyan-400" />
                   </div>
                   <span className="text-3xl font-black text-white">{players.length}</span>
-                  <span className="block text-[11px] text-gray-400 mt-0.5">Players</span>
+                  <span className="block text-[11px] text-gray-400 mt-0.5">Athletes</span>
                 </div>
 
                 <div className="p-4 rounded-2xl bg-black/40 border border-white/10 backdrop-blur-xl">
@@ -386,13 +407,13 @@ export default function EnhancedWPLTeamPage({ teamId }: { teamId: string }) {
 
                 <div className="p-4 rounded-2xl bg-black/40 border border-white/10 backdrop-blur-xl col-span-2">
                   <div className="flex items-center justify-between text-gray-400 mb-1">
-                    <span className="text-[11px] font-bold uppercase tracking-wider">Titles</span>
+                    <span className="text-[11px] font-bold uppercase tracking-wider">Championship Record</span>
                     <Trophy className="w-4 h-4 text-amber-400" />
                   </div>
                   <span className="text-base font-black text-amber-300">
                     {team.shortName?.toLowerCase() === 'rcb-w' || team.shortName?.toLowerCase() === 'rcb' ? '1 WPL Championship (2026)' :
                      team.shortName?.toLowerCase() === 'mi-w' || team.shortName?.toLowerCase() === 'mi' ? '1 WPL Championship (2023)' :
-                     'Chasing Title Glory'}
+                     'Contender for 2027 Title'}
                   </span>
                 </div>
               </div>
@@ -441,7 +462,7 @@ export default function EnhancedWPLTeamPage({ teamId }: { teamId: string }) {
                     type="text"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Search player..."
+                    placeholder="Search player name..."
                     className="w-full pl-9 pr-4 py-1.5 rounded-xl bg-white/[0.05] border border-white/10 text-xs sm:text-sm text-white placeholder-gray-400 focus:outline-none focus:border-pink-500"
                   />
                 </div>
@@ -480,40 +501,72 @@ export default function EnhancedWPLTeamPage({ teamId }: { teamId: string }) {
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                   {filteredSquad.map((player) => {
+                    const initials = getInitials(player.name);
                     const runs = player.stats?.runs ?? (player as any).runs ?? 0;
                     const wickets = player.stats?.wickets ?? (player as any).wickets ?? 0;
                     const matchesCount = player.stats?.matches ?? (player as any).matches ?? 0;
+                    const jerseyNumber = (player as any).jerseyNumber || (player as any).jerseyNo || null;
 
                     return (
                       <div
                         key={player.id}
-                        className={`group relative rounded-2xl border border-white/10 bg-gradient-to-b from-white/[0.06] to-white/[0.01] p-5 backdrop-blur-xl transition-all duration-200 hover:-translate-y-1 hover:shadow-xl ${theme.borderGlow}`}
+                        className={`group relative rounded-2xl border border-white/10 bg-gradient-to-b from-white/[0.07] to-white/[0.01] p-5 backdrop-blur-xl transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl ${theme.borderGlow}`}
                       >
-                        <div className="relative h-48 w-full rounded-xl bg-gradient-to-t from-black/90 via-black/40 to-transparent flex items-end justify-center overflow-hidden mb-4 border border-white/5">
-                          {player.image ? (
-                            <img
-                              src={player.image}
-                              alt={player.name}
-                              loading="lazy"
-                              className="max-h-full object-contain filter drop-shadow-[0_8px_16px_rgba(0,0,0,0.8)]"
-                            />
-                          ) : (
-                            <Users className="w-16 h-16 text-white/20 mb-8" />
-                          )}
+                        {/* Monogram Crest Container */}
+                        <div className="relative h-48 w-full rounded-xl bg-gradient-to-b from-black/80 via-black/50 to-black/90 flex items-center justify-center overflow-hidden mb-4 border border-white/10">
+                          
+                          {/* Ambient Pulsing Aura Rings */}
+                          <div 
+                            className="absolute w-32 h-32 rounded-full blur-2xl opacity-30 group-hover:opacity-80 transition-opacity duration-500 scale-90 group-hover:scale-125"
+                            style={{ background: `radial-gradient(circle, ${theme.primary}, ${theme.secondary}, transparent)` }}
+                          />
 
+                          {/* Subtle Circular Tech Ring */}
+                          <div className="absolute inset-0 m-auto w-36 h-36 rounded-full border border-dashed border-white/10 group-hover:border-white/25 transition-all duration-700 group-hover:rotate-45" />
+
+                          {/* Angled Heraldic Monogram Shield */}
+                          <div className="relative z-10 flex flex-col items-center justify-center">
+                            <div 
+                              className="relative w-24 h-28 rounded-2xl p-[2px] bg-gradient-to-b from-white/30 via-white/10 to-transparent shadow-2xl transition-transform duration-500 group-hover:scale-110"
+                            >
+                              <div className="w-full h-full rounded-[14px] bg-[#080b18] flex flex-col items-center justify-center p-3 relative overflow-hidden">
+                                
+                                {/* Metallic Sheen Stripe */}
+                                <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+
+                                {/* Monogram Typography */}
+                                <span className={`text-3xl font-black tracking-tighter bg-clip-text text-transparent ${theme.metallicText} drop-shadow-md select-none`}>
+                                  {initials}
+                                </span>
+
+                                {/* Jersey Number or Role Glyph */}
+                                {jerseyNumber ? (
+                                  <span className="mt-1 text-[11px] font-black tracking-widest text-gray-400 group-hover:text-amber-400 transition-colors">
+                                    #{jerseyNumber}
+                                  </span>
+                                ) : (
+                                  <span className="mt-1.5 w-6 h-[2px] rounded-full bg-white/20 group-hover:bg-amber-400 transition-colors" />
+                                )}
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Country Badge */}
                           {player.country && (
-                            <span className="absolute top-2.5 right-2.5 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-black/70 text-gray-200 border border-white/10">
+                            <span className="absolute top-2.5 right-2.5 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-black/80 text-gray-200 border border-white/15 backdrop-blur-md">
                               {player.country}
                             </span>
                           )}
 
+                          {/* Captain Badge */}
                           {player.isCaptain && (
-                            <span className="absolute top-2.5 left-2.5 px-2 py-0.5 rounded-full text-[10px] font-black uppercase bg-amber-400 text-slate-950">
+                            <span className="absolute top-2.5 left-2.5 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-400 text-slate-950 shadow-lg">
                               Captain
                             </span>
                           )}
                         </div>
 
+                        {/* Player Meta Info */}
                         <div className="space-y-1">
                           <span 
                             className="inline-block text-[11px] font-black uppercase tracking-widest"
@@ -529,18 +582,19 @@ export default function EnhancedWPLTeamPage({ teamId }: { teamId: string }) {
                           </p>
                         </div>
 
+                        {/* Stats Dashboard Grid */}
                         <div className="grid grid-cols-3 gap-2 mt-4 pt-3 border-t border-white/10 text-center">
                           <div className="rounded-lg bg-black/40 py-2 border border-white/5">
                             <span className="block text-xs font-black text-white">{runs}</span>
-                            <span className="block text-[9px] font-bold text-gray-400 uppercase">Runs</span>
+                            <span className="block text-[9px] font-bold text-gray-400 uppercase tracking-wider">Runs</span>
                           </div>
                           <div className="rounded-lg bg-black/40 py-2 border border-white/5">
                             <span className="block text-xs font-black text-white">{wickets}</span>
-                            <span className="block text-[9px] font-bold text-gray-400 uppercase">Wkts</span>
+                            <span className="block text-[9px] font-bold text-gray-400 uppercase tracking-wider">Wkts</span>
                           </div>
                           <div className="rounded-lg bg-black/40 py-2 border border-white/5">
                             <span className="block text-xs font-black text-white">{matchesCount}</span>
-                            <span className="block text-[9px] font-bold text-gray-400 uppercase">Mat</span>
+                            <span className="block text-[9px] font-bold text-gray-400 uppercase tracking-wider">Mat</span>
                           </div>
                         </div>
                       </div>
