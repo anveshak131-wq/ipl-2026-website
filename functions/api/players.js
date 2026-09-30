@@ -665,6 +665,7 @@ export const onRequest = async (context) => {
     }
 
     if (request.method === 'PUT') {
+      try {
       const updatedPlayer = await request.json();
       
       // Force update Ellyse Perry to RCB-W if requested
@@ -898,6 +899,16 @@ export const onRequest = async (context) => {
         headers: { 'Content-Type': 'application/json', ...corsHeaders },
       });
     }
+
+          } catch (putErr) {
+        console.error('Unhandled error in PUT /api/players:', putErr);
+        return new Response(JSON.stringify({ 
+          error: 'Failed to update player: ' + (putErr?.message || String(putErr)) 
+        }), {
+          status: 500,
+          headers: { 'Content-Type': 'application/json', ...corsHeaders },
+        });
+      }
 
     if (request.method === 'DELETE') {
       if (!(await verifyAdminToken(request, env))) {
