@@ -168,7 +168,7 @@ export default function WPLHomePage() {
     ? 'Follow upcoming toss times, venues, squad news, and live scorecard links for the next WPL fixtures.'
     : completedMatchCount > 0
     ? 'Review completed WPL 2027 fixtures with scorecards, results, venues, and match context.'
-    : 'WPL fixtures will appear here as soon as they are added to the schedule.';
+    : 'Comprehensive matchday fixtures, toss updates, and ball-by-ball scorecards will be published once the tournament schedule is officially released.';
 
   const featuredLiveMatch = useMemo(() => {
     return matches.find(m => m.status === 'live') || null;
@@ -795,19 +795,15 @@ export default function WPLHomePage() {
               >
                 <div>
                   <motion.div
-                    className="inline-flex items-center gap-2 mb-6 px-6 py-3 rounded-lg backdrop-blur-sm"
-                    style={{
-                      background: WPLColors.pinkRGBA[20],
-                      border: `1px solid ${WPLColors.pinkRGBA[30]}`,
-                    }}
+                    className="inline-flex items-center gap-2 mb-4 px-4 py-1.5 rounded-full bg-amber-400/10 border border-amber-400/30 text-amber-300 text-xs font-black uppercase tracking-wider backdrop-blur-md shadow-lg shadow-amber-400/5"
                     whileHover={{ scale: 1.05 }}
                   >
-                    <Calendar className="w-5 h-5" className="text-amber-400" />
-                    <span className="text-xs font-bold uppercase tracking-wider" style={{ color: WPLColors.textPrimary }}>{matchesSectionKicker}</span>
+                    <Calendar className="w-4 h-4 text-amber-400" />
+                    <span>{matchesSectionKicker}</span>
                   </motion.div>
                   <h2 className="text-5xl md:text-7xl font-black leading-none" style={{ color: WPLColors.textPrimary }}>
                     {matchesSectionTitle.split(' ')[0]}{' '}
-                    <GradientText gradient="from-amber-400 to-rose-400" animate>
+                    <GradientText gradient="from-amber-300 via-yellow-400 to-amber-500" animate>
                       {matchesSectionTitle.split(' ').slice(1).join(' ') || 'Fixtures'}
                     </GradientText>
                   </h2>
@@ -1013,7 +1009,7 @@ export default function WPLHomePage() {
                     <span className="text-sm font-bold uppercase tracking-wider" style={{ color: WPLColors.textPrimary }}>Match Predictions</span>
                   </motion.div>
                   <h2 className="text-4xl md:text-5xl font-black mb-4" style={{ color: WPLColors.textPrimary }}>
-                    Predict & <GradientText gradient="from-amber-400 to-rose-400" animate>Win</GradientText>
+                    Predict & <GradientText gradient="from-amber-300 via-yellow-400 to-amber-500" animate>Win</GradientText>
                   </h2>
                   <p className="text-lg mb-6 leading-relaxed" style={{ color: WPLColors.textSecondary }}>
                     Use toss calls, venue conditions, powerplay starts, death-over form, and player roles to make sharper WPL predictions and climb the leaderboard.

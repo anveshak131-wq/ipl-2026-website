@@ -333,8 +333,8 @@ export default function ModernMatchesGrid({ matches, isLoading = false, initialF
             })}
           </div>
         </div>
-        <div className="mt-3 text-center text-xs text-slate-400/80">
-          Only <span className="font-semibold text-slate-200">2026</span> fixtures are shown here.
+        <div className="mt-3 text-center text-xs text-slate-400/90 font-medium">
+          Fixtures and start times synchronize automatically upon official league release.
         </div>
       </div>
 
@@ -379,18 +379,20 @@ export default function ModernMatchesGrid({ matches, isLoading = false, initialF
                 ? 'When play starts, this tab lights up automatically.'
                 : selectedFilter === 'completed'
                 ? 'Results show here after matches are marked completed.'
-                : 'Add fixtures in the admin panel to populate this section.'}
+                : 'Official season schedule and match timings are awaiting release.'}
             </p>
 
-            <div className="mt-6 flex items-center justify-center gap-3">
-              <Link
-                href={viewAllHref}
-                className="group inline-flex items-center gap-2 px-6 py-3 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 text-white font-black tracking-normal transition-all duration-300"
-              >
-                View full schedule
-                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-              </Link>
-            </div>
+            {matches.length > 0 && (
+              <div className="mt-6 flex items-center justify-center gap-3">
+                <Link
+                  href={viewAllHref}
+                  className="group inline-flex items-center gap-2 px-6 py-3 rounded-xl border border-white/10 bg-white/[0.06] hover:bg-white/[0.12] hover:border-amber-400/40 text-white font-bold text-xs uppercase tracking-wider transition-all duration-300 shadow-lg"
+                >
+                  <span>View Full Schedule</span>
+                  <ArrowRight className="w-4 h-4 text-amber-400 group-hover:translate-x-1 transition-transform" />
+                </Link>
+              </div>
+            )}
           </div>
         </div>
       ) : (
