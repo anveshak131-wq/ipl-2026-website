@@ -705,19 +705,34 @@ export default function WPLHomePage() {
         {isLoading ? (
           <TeamsSkeleton />
         ) : teams.filter(t => !isPlaceholderTeam(t)).length > 0 ? (
-          <section className="relative py-28 overflow-hidden">
-            {/* Rich Stadium Aura & Ambient Glows */}
-            <div className="absolute inset-0 pointer-events-none -z-10">
-              <div className="absolute top-1/2 left-1/4 -translate-y-1/2 w-[550px] h-[350px] bg-sky-600/[0.07] blur-[150px]" />
-              <div className="absolute top-1/2 right-1/4 -translate-y-1/2 w-[550px] h-[350px] bg-amber-500/[0.07] blur-[150px]" />
+          <section className="relative py-28 overflow-hidden bg-[#05070d]">
+            {/* Multi-layered Night Stadium Lighting & Perspective Pitch Grid */}
+            <div className="absolute inset-0 pointer-events-none -z-10 overflow-hidden">
+              {/* Stadium Floodlight Overhead Beams */}
+              <div className="absolute -top-40 left-1/2 -translate-x-1/2 w-[1100px] h-[550px] bg-[radial-gradient(ellipse_at_top,rgba(56,189,248,0.18)_0%,rgba(245,158,11,0.08)_40%,transparent_75%)] blur-2xl" />
+              
+              {/* Left & Right Corner Floodlight Flares */}
+              <div className="absolute -top-20 -left-20 w-[450px] h-[450px] bg-red-600/[0.14] rounded-full blur-[130px]" />
+              <div className="absolute -top-20 -right-20 w-[450px] h-[450px] bg-blue-600/[0.14] rounded-full blur-[130px]" />
+              <div className="absolute -bottom-24 left-1/3 w-[500px] h-[350px] bg-amber-500/[0.08] rounded-full blur-[140px]" />
+
+              {/* Perspective 3D Stadium Turf & Boundary Grid */}
               <div 
-                className="absolute inset-0 opacity-[0.03]"
+                className="absolute inset-x-0 bottom-0 h-[85%] opacity-[0.07] origin-bottom"
                 style={{
-                  backgroundImage: 'radial-gradient(circle at 50% 50%, #ffffff 1px, transparent 1px)',
-                  backgroundSize: '36px 36px',
+                  backgroundImage: 'linear-gradient(rgba(255,255,255,0.4) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.4) 1px, transparent 1px)',
+                  backgroundSize: '48px 48px',
+                  maskImage: 'linear-gradient(to top, rgba(0,0,0,1) 10%, transparent 90%)',
+                  WebkitMaskImage: 'linear-gradient(to top, rgba(0,0,0,1) 10%, transparent 90%)',
+                  transform: 'perspective(600px) rotateX(25deg)',
                 }}
               />
+
+              {/* Stadium Boundary Rings */}
+              <div className="absolute left-1/2 bottom-[-150px] -translate-x-1/2 w-[1200px] h-[360px] rounded-[100%] border border-white/[0.07] opacity-60 pointer-events-none" />
+              <div className="absolute left-1/2 bottom-[-220px] -translate-x-1/2 w-[1500px] h-[450px] rounded-[100%] border border-amber-400/[0.08] opacity-50 pointer-events-none" />
             </div>
+
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
               <motion.div
                 initial={{ opacity: 0, y: 30 }}
