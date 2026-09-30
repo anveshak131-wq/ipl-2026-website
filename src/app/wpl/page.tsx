@@ -387,7 +387,7 @@ export default function WPLHomePage() {
             className="absolute inset-0 -z-30 bg-cover bg-center md:bg-[center_right]"
             style={{
               backgroundImage: `linear-gradient(90deg, rgba(5,8,22,0.98) 0%, rgba(5,8,22,0.82) 42%, rgba(5,8,22,0.36) 72%, rgba(5,8,22,0.78) 100%), url('${HERO_BACKGROUND_IMAGE}')`,
-              filter: 'hue-rotate(185deg) saturate(1.15) brightness(0.95)',
+              filter: 'hue-rotate(230deg) saturate(1.35) brightness(0.85) contrast(1.08)',
             }}
             animate={prefersReducedMotion ? undefined : { scale: [1.02, 1.06, 1.02] }}
             transition={{ duration: 40, repeat: Infinity, ease: 'easeInOut' }}
@@ -438,7 +438,7 @@ export default function WPLHomePage() {
                   className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg border border-white/10 bg-white/[0.08] backdrop-blur-2xl shadow-[0_20px_80px_rgba(0,0,0,0.32)]"
                 >
                   <Sparkles className="w-5 h-5" className="text-amber-400" />
-                  <span className="text-xs sm:text-sm font-black uppercase tracking-[0.2em] text-white">
+                  <span className="text-xs sm:text-sm font-black uppercase tracking-[0.2em] text-amber-300 font-bold">
                     Women's Premier League Season Hub
                   </span>
                 </motion.div>
@@ -449,10 +449,10 @@ export default function WPLHomePage() {
                   transition={{ duration: 0.7, delay: 0.18, type: 'spring', stiffness: 90 }}
                   className="mt-5 text-5xl sm:text-6xl md:text-7xl lg:text-7xl font-black leading-none tracking-normal"
                 >
-                  <span className="block bg-gradient-to-r from-white via-cyan-100 to-pink-100 bg-clip-text text-transparent">
+                  <span className="block text-white font-black tracking-tight drop-shadow-[0_4px_12px_rgba(0,0,0,0.8)]">
                     WPL
                   </span>
-                  <span className="block bg-gradient-to-r from-amber-200 via-yellow-400 to-amber-500 bg-clip-text text-transparent">
+                  <span className="block text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-yellow-400 to-amber-500 font-black tracking-tight drop-shadow-[0_4px_24px_rgba(245,158,11,0.4)]">
                     {selectedSeason}
                   </span>
                 </motion.h1>
