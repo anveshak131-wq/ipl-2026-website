@@ -209,10 +209,10 @@ export default function WPLStatsPage() {
                 </span>
               </div>
               <h1 className="text-5xl md:text-6xl font-black text-white mb-4 tracking-tight">
-                WPL 2026 <GradientText gradient="from-purple-400 via-pink-400 to-rose-400" animate>Statistics</GradientText>
+                WPL 2027 <GradientText gradient="from-purple-400 via-pink-400 to-rose-400" animate>Statistics</GradientText>
               </h1>
               <p className="text-slate-200 text-lg max-w-2xl leading-relaxed">
-                Comprehensive statistics and leaderboards for the Women's Premier League 2026 season
+                Franchise statistics and official leaderboards preparing for the Women's Premier League 2027 championship
               </p>
             </div>
           </AnimatedSection>

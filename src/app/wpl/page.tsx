@@ -45,7 +45,7 @@ import { formatMatchTime } from '@/lib/timeUtils';
 import PublicLiveMatchStrip from '@/components/live-score/PublicLiveMatchStrip';
 import WPLSeasonHeader from '@/components/wpl/WPLSeasonHeader';
 
-const TARGET_SEASON_YEAR = 2026;
+const TARGET_SEASON_YEAR = 2027;
 const HERO_BACKGROUND_IMAGE = '/images/wpl-oil-stadium-hero.webp';
 
 const SEASON_PULSE_CARDS = [
@@ -167,7 +167,7 @@ export default function WPLHomePage() {
   const matchesSectionCopy = upcomingMatchCount > 0
     ? 'Follow upcoming toss times, venues, squad news, and live scorecard links for the next WPL fixtures.'
     : completedMatchCount > 0
-    ? 'Review completed WPL 2026 fixtures with scorecards, results, venues, and match context.'
+    ? 'Review completed WPL 2027 fixtures with scorecards, results, venues, and match context.'
     : 'WPL fixtures will appear here as soon as they are added to the schedule.';
 
   const featuredLiveMatch = useMemo(() => {
@@ -511,7 +511,7 @@ export default function WPLHomePage() {
                     <div className="flex items-center justify-between gap-4 border-b border-white/10 pb-4">
                       <div>
                         <p className="text-xs font-black uppercase tracking-[0.18em] text-pink-200">Season Snapshot</p>
-                        <h2 className="mt-2 text-2xl font-black text-white">WPL 2026 at a glance</h2>
+                        <h2 className="mt-2 text-2xl font-black text-white">WPL 2027 Season Preview</h2>
                       </div>
                       <div className="flex h-12 w-12 items-center justify-center rounded-lg border border-white/10 bg-white/[0.08]">
                         <Trophy className="h-6 w-6 text-amber-200" />

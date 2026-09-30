@@ -27,7 +27,7 @@ export default function WPLPointsTablePage() {
   const [showFilters, setShowFilters] = useState(false);
   const [favorites, setFavorites] = useState<string[]>([]);
   const [showFavoritesFirst, setShowFavoritesFirst] = useState(false);
-  const [selectedYear, setSelectedYear] = useState<number>(2026);
+  const [selectedYear, setSelectedYear] = useState<number>(2027);
   const [availableYears, setAvailableYears] = useState<number[]>([]);
 
   // Load favorites from localStorage
@@ -211,7 +211,7 @@ export default function WPLPointsTablePage() {
               >
                 <Trophy className="w-5 h-5 text-pink-400" />
                 <span className="text-sm font-black uppercase tracking-widest bg-gradient-to-r from-purple-400 via-pink-400 to-purple-400 bg-clip-text text-transparent">
-                  WPL 2026 POINTS TABLE
+                  WPL 2027 POINTS TABLE (PRE-SEASON)
                 </span>
               </motion.span>
             </motion.div>

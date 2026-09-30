@@ -288,13 +288,13 @@ export default function WPLLeaderboardPage() {
               }}
             >
               <Sparkles size={16} className="text-pink-400" />
-              <span className="text-sm font-semibold text-gray-300">Season 2026</span>
+              <span className="text-sm font-semibold text-gray-300">Season 2027</span>
             </motion.div>
             <h1 className="text-4xl md:text-6xl font-bold mb-3">
               <GradientText>WPL Leaderboard</GradientText>
             </h1>
             <p className="text-lg md:text-xl text-gray-300 max-w-2xl mx-auto">
-              Live stats & standings for Women's Premier League 2026
+              Live stats & standings for Women's Premier League 2027 (Pre-Season)
             </p>
           </div>
         </AnimatedSection>
