@@ -3,13 +3,13 @@
 import { useState, useEffect, useMemo, Suspense } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useSearchParams } from 'next/navigation';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import ModernTeamLogo from '@/components/ui/ModernTeamLogo';
 import { Team, Player } from '@/types';
 import { api } from '@/lib/data';
-import { wplTeams } from '@/data/wpl-teams';
 import { useLeague } from '@/contexts/LeagueContext';
 import { isPlaceholderTeam } from '@/lib/playoffUtils';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
@@ -23,10 +23,11 @@ import {
   List, 
   ShieldCheck, 
   ChevronRight,
-  Flame
+  Flame,
+  Award
 } from 'lucide-react';
 
-// Authentic franchise identity map
+// Official WPL Franchise visual tokens and title records
 const WPL_THEMES: Record<string, {
   accent: string;
   secondary: string;
@@ -35,6 +36,7 @@ const WPL_THEMES: Record<string, {
   badge: string;
   championships: string[];
   captain: string;
+  logo: string;
 }> = {
   'rcb': {
     accent: '#DC2626',
@@ -42,8 +44,9 @@ const WPL_THEMES: Record<string, {
     glow: 'rgba(220, 38, 38, 0.28)',
     border: 'border-red-500/30 hover:border-red-500/60',
     badge: 'bg-red-500/15 text-red-300 border-red-500/30',
-    championships: ['2024'],
+    championships: ['2024', '2026'],
     captain: 'Smriti Mandhana',
+    logo: '/logos/wpl_rcb_logo_modern.svg',
   },
   'mi': {
     accent: '#2563EB',
@@ -51,8 +54,9 @@ const WPL_THEMES: Record<string, {
     glow: 'rgba(37, 99, 235, 0.28)',
     border: 'border-blue-500/30 hover:border-blue-500/60',
     badge: 'bg-blue-500/15 text-blue-300 border-blue-500/30',
-    championships: ['2023'],
+    championships: ['2023', '2025'],
     captain: 'Harmanpreet Kaur',
+    logo: '/logos/wpl_mi_logo_modern.svg',
   },
   'dc': {
     accent: '#0284C7',
@@ -62,6 +66,7 @@ const WPL_THEMES: Record<string, {
     badge: 'bg-sky-500/15 text-sky-300 border-sky-500/30',
     championships: [],
     captain: 'Meg Lanning',
+    logo: '/logos/wpl_dc_logo_modern.svg',
   },
   'gg': {
     accent: '#EA580C',
@@ -71,6 +76,7 @@ const WPL_THEMES: Record<string, {
     badge: 'bg-orange-500/15 text-orange-300 border-orange-500/30',
     championships: [],
     captain: 'Beth Mooney',
+    logo: '/logos/wpl_gg_logo_modern.svg',
   },
   'upw': {
     accent: '#9333EA',
@@ -80,6 +86,7 @@ const WPL_THEMES: Record<string, {
     badge: 'bg-purple-500/15 text-purple-300 border-purple-500/30',
     championships: [],
     captain: 'Alyssa Healy',
+    logo: '/logos/wpl_upw_logo_modern.svg',
   },
 };
 
@@ -91,6 +98,7 @@ const DEFAULT_THEME = {
   badge: 'bg-slate-800 text-slate-300 border-slate-700',
   championships: [],
   captain: 'Team Captain',
+  logo: '/logos/tba_logo.svg',
 };
 
 function getFranchiseTheme(team: Team) {
@@ -103,35 +111,70 @@ function getFranchiseTheme(team: Team) {
   return DEFAULT_THEME;
 }
 
-// Canonical list of all 5 WPL Teams to guarantee 100% presence
-const FALLBACK_WPL_TEAMS: Team[] = (wplTeams || []).map((t, idx) => {
-  const sName = t.shortName.toLowerCase();
-  let id = sName;
-  if (sName.includes('rcb')) id = 'rcb-w';
-  else if (sName.includes('mi')) id = 'mi-w';
-  else if (sName.includes('dc')) id = 'dc-w';
-  else if (sName.includes('gg')) id = 'gg';
-  else if (sName.includes('up')) id = 'upw';
-
-  return {
-    id,
+// Canonical 5 WPL Teams with verified details and dedicated logos
+const CANONICAL_WPL_TEAMS: Team[] = [
+  {
+    id: 'rcb-w',
     league: 'wpl',
-    name: t.name,
-    shortName: t.shortName,
-    logo: t.logo,
-    colors: t.colors,
-    venue: t.homeGrounds?.[0] || 'Home Venue TBA',
-    captain: '',
+    name: 'Royal Challengers Bengaluru (WPL)',
+    shortName: 'RCB-W',
+    logo: '/logos/wpl_rcb_logo_modern.svg',
+    venue: 'M. Chinnaswamy Stadium, Bengaluru',
+    captain: 'Smriti Mandhana',
     players: [],
-    trophies: (t as any).trophies || [],
-  } as unknown as Team;
-});
+    trophies: [{ year: 2024, type: 'championship', league: 'wpl' }, { year: 2026, type: 'championship', league: 'wpl' }] as any,
+  } as unknown as Team,
+  {
+    id: 'mi-w',
+    league: 'wpl',
+    name: 'Mumbai Indians (WPL)',
+    shortName: 'MI-W',
+    logo: '/logos/wpl_mi_logo_modern.svg',
+    venue: 'Wankhede Stadium, Mumbai',
+    captain: 'Harmanpreet Kaur',
+    players: [],
+    trophies: [{ year: 2023, type: 'championship', league: 'wpl' }, { year: 2025, type: 'championship', league: 'wpl' }] as any,
+  } as unknown as Team,
+  {
+    id: 'dc-w',
+    league: 'wpl',
+    name: 'Delhi Capitals (WPL)',
+    shortName: 'DC-W',
+    logo: '/logos/wpl_dc_logo_modern.svg',
+    venue: 'Arun Jaitley Stadium, Delhi',
+    captain: 'Meg Lanning',
+    players: [],
+    trophies: [],
+  } as unknown as Team,
+  {
+    id: 'gg',
+    league: 'wpl',
+    name: 'Gujarat Giants',
+    shortName: 'GG',
+    logo: '/logos/wpl_gg_logo_modern.svg',
+    venue: 'Narendra Modi Stadium, Ahmedabad',
+    captain: 'Beth Mooney',
+    players: [],
+    trophies: [],
+  } as unknown as Team,
+  {
+    id: 'upw',
+    league: 'wpl',
+    name: 'UP Warriorz',
+    shortName: 'UPW',
+    logo: '/logos/wpl_upw_logo_modern.svg',
+    venue: 'BRSABV Ekana Cricket Stadium, Lucknow',
+    captain: 'Alyssa Healy',
+    players: [],
+    trophies: [],
+  } as unknown as Team,
+];
 
 function WPLTeamsContent() {
   const searchParams = useSearchParams();
   const { currentLeague, setCurrentLeague } = useLeague();
 
-  const [teams, setTeams] = useState<Team[]>([]);
+  const [teams, setTeams] = useState<Team[]>(CANONICAL_WPL_TEAMS);
   const [players, setPlayers] = useState<Player[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [search, setSearch] = useState(searchParams?.get('search') || '');
@@ -155,34 +198,42 @@ function WPLTeamsContent() {
 
         const validApiTeams = (teamsData || []).filter((t: Team) => !isPlaceholderTeam(t.name));
 
-        // Merge API teams with Fallback Teams to guarantee all 5 franchises always exist
         const mergedMap = new Map<string, Team>();
-        
-        // 1. Seed with canonical 5 WPL franchises
-        FALLBACK_WPL_TEAMS.forEach((ft) => {
-          const key = ft.shortName.toLowerCase().replace(/[^a-z]/g, '');
-          mergedMap.set(key, ft);
+        CANONICAL_WPL_TEAMS.forEach((ct) => {
+          mergedMap.set(ct.id, ct);
         });
 
-        // 2. Overlay live API teams if present
         validApiTeams.forEach((at: Team) => {
-          const key = (at.shortName || at.name || '').toLowerCase().replace(/[^a-z]/g, '');
-          const existing = mergedMap.get(key);
-          mergedMap.set(key, { ...existing, ...at });
+          const key = (at.shortName || at.name || '').toLowerCase();
+          let targetId = at.id;
+          if (key.includes('rcb') || key.includes('bangalore') || key.includes('bengaluru')) targetId = 'rcb-w';
+          else if (key.includes('mi') || key.includes('mumbai')) targetId = 'mi-w';
+          else if (key.includes('dc') || key.includes('delhi')) targetId = 'dc-w';
+          else if (key.includes('gg') || key.includes('gujarat')) targetId = 'gg';
+          else if (key.includes('up') || key.includes('warrior')) targetId = 'upw';
+
+          const existing = mergedMap.get(targetId);
+          if (existing) {
+            mergedMap.set(targetId, {
+              ...existing,
+              ...at,
+              id: targetId,
+              logo: existing.logo,
+            });
+          }
         });
 
         setTeams(Array.from(mergedMap.values()));
         setPlayers(playersData || []);
       } catch (err) {
         console.error('Failed to load WPL teams:', err);
-        setTeams(FALLBACK_WPL_TEAMS);
+        setTeams(CANONICAL_WPL_TEAMS);
       } finally {
         setIsLoading(false);
       }
     })();
   }, []);
 
-  // Players mapping by team
   const playersByTeam = useMemo(() => {
     const map = new Map<string, Player[]>();
     for (const p of players) {
@@ -193,7 +244,6 @@ function WPLTeamsContent() {
     return map;
   }, [players]);
 
-  // Unique venues
   const uniqueVenues = useMemo(() => {
     const set = new Set<string>();
     teams.forEach((t) => {
@@ -202,7 +252,6 @@ function WPLTeamsContent() {
     return Array.from(set);
   }, [teams]);
 
-  // Filtered teams
   const filteredTeams = useMemo(() => {
     return teams.filter((team) => {
       const matchSearch =
@@ -237,7 +286,6 @@ function WPLTeamsContent() {
         <div className="absolute top-1/3 right-1/4 w-[600px] h-[500px] bg-indigo-500/[0.04] blur-[150px]" />
         <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[800px] h-[300px] bg-amber-500/[0.03] blur-[120px]" />
         
-        {/* Subtle Pitch Grid Canvas */}
         <div 
           className="absolute inset-0 opacity-[0.03]"
           style={{
@@ -348,6 +396,7 @@ function WPLTeamsContent() {
                 const teamRoster = playersByTeam.get(String(team.id).toLowerCase()) || [];
                 const isHovered = activeHoverId === team.id;
                 const captainName = team.captain || theme.captain;
+                const championships = theme.championships;
 
                 return (
                   <motion.div
@@ -379,10 +428,10 @@ function WPLTeamsContent() {
                             {team.shortName || 'WPL'}
                           </span>
 
-                          {theme.championships.length > 0 ? (
+                          {championships.length > 0 ? (
                             <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 text-[11px] font-bold">
                               <Trophy className="w-3 h-3 text-amber-400" />
-                              <span>{theme.championships.join(', ')} Champions</span>
+                              <span>{championships.length}x Champions ({championships.join(', ')})</span>
                             </div>
                           ) : (
                             <span className="text-[11px] text-slate-500 font-semibold tracking-wider uppercase">
@@ -391,10 +440,17 @@ function WPLTeamsContent() {
                           )}
                         </div>
 
-                        {/* Team Identity */}
+                        {/* Team Identity with Direct Logo Render */}
                         <div className="flex items-center gap-4 mb-6">
                           <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-black/40 border border-white/10 p-2.5 flex items-center justify-center shrink-0 shadow-inner group-hover:scale-105 transition-transform duration-300">
-                            <ModernTeamLogo team={team} size="lg" />
+                            <Image
+                              src={theme.logo}
+                              alt={`${team.name} Logo`}
+                              width={72}
+                              height={72}
+                              className="object-contain w-full h-full"
+                              priority
+                            />
                           </div>
 
                           <div className="space-y-1">
@@ -446,6 +502,7 @@ function WPLTeamsContent() {
               {filteredTeams.map((team, index) => {
                 const theme = getFranchiseTheme(team);
                 const captainName = team.captain || theme.captain;
+                const championships = theme.championships;
 
                 return (
                   <motion.div
@@ -457,7 +514,13 @@ function WPLTeamsContent() {
                   >
                     <div className="flex items-center gap-4">
                       <div className="w-12 h-12 rounded-xl bg-black/40 border border-white/10 p-2 flex items-center justify-center shrink-0">
-                        <ModernTeamLogo team={team} size="md" />
+                        <Image
+                          src={theme.logo}
+                          alt={`${team.name} Logo`}
+                          width={44}
+                          height={44}
+                          className="object-contain w-full h-full"
+                        />
                       </div>
                       <div>
                         <div className="flex items-center gap-2">
@@ -473,10 +536,10 @@ function WPLTeamsContent() {
                     </div>
 
                     <div className="flex items-center justify-between sm:justify-end gap-4 border-t sm:border-t-0 pt-3 sm:pt-0 border-white/5">
-                      {theme.championships.length > 0 && (
+                      {championships.length > 0 && (
                         <span className="text-xs text-amber-300 font-bold flex items-center gap-1">
                           <Trophy className="w-3.5 h-3.5 text-amber-400" />
-                          {theme.championships.join(', ')} Champions
+                          {championships.length}x Champions ({championships.join(', ')})
                         </span>
                       )}
                       <Link
