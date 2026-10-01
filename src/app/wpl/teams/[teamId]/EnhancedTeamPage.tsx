@@ -145,6 +145,7 @@ export default function EnhancedWPLTeamPage({ teamId }: { teamId: string }) {
   const [matchesLoading, setMatchesLoading] = useState(false);
 
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
   const [selectedRole, setSelectedRole] = useState<'all' | 'batsman' | 'all-rounder' | 'bowler' | 'wicketkeeper'>('all');
   const [activeTab, setActiveTab] = useState<'squad' | 'fixtures'>('squad');
 
@@ -221,8 +222,43 @@ export default function EnhancedWPLTeamPage({ teamId }: { teamId: string }) {
 
   const theme = useMemo(() => getTeamTheme(team?.shortName, team?.name), [team]);
 
+  const getRoleBadgeStyle = (p: Player) => {
+    const priority = getRolePriority(p);
+    switch (priority) {
+      case 1:
+        return { label: 'Batter', bg: 'bg-rose-500/10 text-rose-400 border-rose-500/30 ring-rose-500/20' };
+      case 2:
+        return { label: 'Wicket-Keeper', bg: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/30 ring-cyan-500/20' };
+      case 3:
+        return { label: 'Batting All-Rounder', bg: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30 ring-emerald-500/20' };
+      case 4:
+        return { label: 'Bowling All-Rounder', bg: 'bg-teal-500/10 text-teal-400 border-teal-500/30 ring-teal-500/20' };
+      case 5:
+        return { label: 'All-Rounder', bg: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30 ring-emerald-500/20' };
+      case 6:
+        return { label: 'Bowler', bg: 'bg-purple-500/10 text-purple-400 border-purple-500/30 ring-purple-500/20' };
+      default:
+        return { label: p.role || 'Player', bg: 'bg-gray-500/10 text-gray-400 border-gray-500/30 ring-gray-500/20' };
+    }
+  };
+
+
+  const getRolePriority = (p: Player) => {
+    const role = (p.role || '').toLowerCase();
+    const arType = (p.allrounderType || '').toLowerCase();
+    if (role.includes('bat') && !role.includes('all')) return 1; // Batters
+    if (role.includes('keeper') || role.includes('wk')) return 2; // Wicketkeepers
+    if (role.includes('all') || role.includes('rounder')) {
+      if (arType.includes('bat')) return 3; // Batting All-rounder
+      if (arType.includes('bowl')) return 4; // Bowling All-rounder
+      return 5; // General All-rounder
+    }
+    if (role.includes('bowl')) return 6; // Bowlers
+    return 7;
+  };
+
   const filteredSquad = useMemo(() => {
-    return players.filter(p => {
+    const list = players.filter(p => {
       const q = searchQuery.toLowerCase().trim();
       const nameMatch = (p.name || '').toLowerCase().includes(q);
       const role = (p.role || '').toLowerCase();
@@ -232,6 +268,13 @@ export default function EnhancedWPLTeamPage({ teamId }: { teamId: string }) {
       else if (selectedRole === 'all-rounder') roleMatch = role.includes('all') || role.includes('rounder');
       else if (selectedRole === 'wicketkeeper') roleMatch = role.includes('keeper') || role.includes('wk');
       return nameMatch && roleMatch;
+    });
+
+    return list.sort((a, b) => {
+      const pA = getRolePriority(a);
+      const pB = getRolePriority(b);
+      if (pA !== pB) return pA - pB;
+      return (a.name || '').localeCompare(b.name || '');
     });
   }, [players, searchQuery, selectedRole]);
 
@@ -248,7 +291,224 @@ export default function EnhancedWPLTeamPage({ teamId }: { teamId: string }) {
             ))}
           </div>
         </div>
-        <Footer />
+        
+      {/* PUBLIC PLAYER DETAIL MODAL (CRICBUZZ STANDARD) */}
+      {selectedPlayer && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fadeIn"
+          onClick={() => setSelectedPlayer(null)}
+        >
+          <div 
+            className="relative w-full max-w-3xl max-h-[90vh] overflow-y-auto rounded-3xl bg-[#0a0f1d] border border-white/15 p-6 shadow-2xl text-white"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header / Dismiss */}
+            <button
+              onClick={() => setSelectedPlayer(null)}
+              className="absolute top-5 right-5 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            {/* Profile Bar */}
+            <div className="flex flex-col sm:flex-row items-center gap-5 pb-6 border-b border-white/10">
+              <div className="relative w-24 h-24 rounded-2xl overflow-hidden bg-gradient-to-tr from-pink-600/30 to-purple-600/30 border border-white/20 shrink-0">
+                <img
+                  src={selectedPlayer.photoUrl || `https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?w=200&fit=crop`}
+                  alt={selectedPlayer.name}
+                  className="w-full h-full object-cover"
+                />
+                {selectedPlayer.jerseyNumber && (
+                  <span className="absolute bottom-1 right-1 px-1.5 py-0.5 rounded bg-black/80 text-[10px] font-black">
+                    #{selectedPlayer.jerseyNumber}
+                  </span>
+                )}
+              </div>
+              <div className="text-center sm:text-left space-y-1">
+                <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
+                  <h3 className="text-2xl font-black text-white">{selectedPlayer.name}</h3>
+                  {selectedPlayer.isCaptain && (
+                    <span className="px-2 py-0.5 rounded bg-amber-400 text-slate-950 font-black text-[10px] uppercase">
+                      Captain
+                    </span>
+                  )}
+                </div>
+                <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 pt-1">
+                  {(() => {
+                    const badge = getRoleBadgeStyle(selectedPlayer);
+                    return (
+                      <span className={`px-2.5 py-0.5 rounded text-xs font-black uppercase tracking-wider border ring-1 ${badge.bg}`}>
+                        {badge.label}
+                      </span>
+                    );
+                  })()}
+                  {selectedPlayer.nationality && (
+                    <span className="px-2 py-0.5 rounded bg-white/10 text-xs font-semibold text-gray-300">
+                      {selectedPlayer.nationality}
+                    </span>
+                  )}
+                  {selectedPlayer.dateOfBirth && (
+                    <span className="text-xs text-gray-400">
+                      DOB: {selectedPlayer.dateOfBirth} ({selectedPlayer.age ? `${selectedPlayer.age} yrs` : ''})
+                    </span>
+                  )}
+                </div>
+                <p className="text-xs text-gray-400 pt-1">
+                  Batting: <span className="text-gray-200">{selectedPlayer.battingStyle || 'Right Handed'}</span> • Bowling: <span className="text-gray-200">{selectedPlayer.bowlingStyle || 'None'}</span>
+                </p>
+              </div>
+            </div>
+
+            {/* BATTING CAREER SUMMARY */}
+            <div className="mt-6">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <TrendingUp className="w-4 h-4 text-emerald-400" />
+                  <h4 className="text-sm font-black uppercase tracking-wider text-emerald-400">Batting Career Summary</h4>
+                </div>
+                <span className="text-[11px] font-bold text-gray-400 uppercase">WPL Tournament</span>
+              </div>
+              <div className="overflow-x-auto rounded-xl border border-white/10 bg-white/[0.02]">
+                <table className="w-full text-center text-xs">
+                  <thead className="bg-white/5 text-gray-400 font-bold uppercase text-[10px]">
+                    <tr>
+                      <th className="py-2.5 px-3 text-left">Format</th>
+                      <th className="py-2.5 px-2">M</th>
+                      <th className="py-2.5 px-2">Inn</th>
+                      <th className="py-2.5 px-2">NO</th>
+                      <th className="py-2.5 px-2">Runs</th>
+                      <th className="py-2.5 px-2">Balls</th>
+                      <th className="py-2.5 px-2">HS</th>
+                      <th className="py-2.5 px-2">Avg</th>
+                      <th className="py-2.5 px-2">SR</th>
+                      <th className="py-2.5 px-2">4s</th>
+                      <th className="py-2.5 px-2">6s</th>
+                      <th className="py-2.5 px-2">50s</th>
+                      <th className="py-2.5 px-2">100s</th>
+                      <th className="py-2.5 px-2">Ducks</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-white/5 font-semibold text-gray-200">
+                    {(() => {
+                      const s = selectedPlayer.stats || ({} as any);
+                      const m = s.matches || 0;
+                      const inn = s.battingInnings || 0;
+                      const no = s.notOuts || 0;
+                      const runs = s.runs || 0;
+                      const bf = s.ballsFaced || 0;
+                      const hs = s.highest || 0;
+                      const hsDisplay = s.highestNotOut ? `${hs}*` : `${hs}`;
+                      const dismissals = Math.max(0, inn - no);
+                      const avg = s.average ? Number(s.average).toFixed(2) : (dismissals > 0 && runs > 0 ? (runs / dismissals).toFixed(2) : (runs > 0 ? runs.toFixed(2) : '-'));
+                      const sr = s.strikeRate ? Number(s.strikeRate).toFixed(2) : (bf > 0 && runs > 0 ? ((runs * 100) / bf).toFixed(2) : '-');
+                      return (
+                        <tr className="hover:bg-white/[0.04]">
+                          <td className="py-3 px-3 text-left font-black text-white">WPL</td>
+                          <td className="py-3 px-2">{m}</td>
+                          <td className="py-3 px-2">{inn}</td>
+                          <td className="py-3 px-2">{no}</td>
+                          <td className="py-3 px-2 font-black text-emerald-400">{runs}</td>
+                          <td className="py-3 px-2">{bf}</td>
+                          <td className="py-3 px-2 font-bold">{hsDisplay}</td>
+                          <td className="py-3 px-2 font-bold text-cyan-400">{avg}</td>
+                          <td className="py-3 px-2 font-bold text-amber-400">{sr}</td>
+                          <td className="py-3 px-2">{s.fours || 0}</td>
+                          <td className="py-3 px-2">{s.sixes || 0}</td>
+                          <td className="py-3 px-2">{s.fifties || 0}</td>
+                          <td className="py-3 px-2">{s.hundreds || 0}</td>
+                          <td className="py-3 px-2 text-rose-400">{s.ducks ?? 0}</td>
+                        </tr>
+                      );
+                    })()}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {/* BOWLING CAREER SUMMARY */}
+            <div className="mt-6">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <Target className="w-4 h-4 text-teal-400" />
+                  <h4 className="text-sm font-black uppercase tracking-wider text-teal-400">Bowling Career Summary</h4>
+                </div>
+                <span className="text-[11px] font-bold text-gray-400 uppercase">WPL Tournament</span>
+              </div>
+              <div className="overflow-x-auto rounded-xl border border-white/10 bg-white/[0.02]">
+                <table className="w-full text-center text-xs">
+                  <thead className="bg-white/5 text-gray-400 font-bold uppercase text-[10px]">
+                    <tr>
+                      <th className="py-2.5 px-3 text-left">Format</th>
+                      <th className="py-2.5 px-2">M</th>
+                      <th className="py-2.5 px-2">Inn</th>
+                      <th className="py-2.5 px-2">Balls</th>
+                      <th className="py-2.5 px-2">Runs</th>
+                      <th className="py-2.5 px-2">Maidens</th>
+                      <th className="py-2.5 px-2">Wkts</th>
+                      <th className="py-2.5 px-2">Avg</th>
+                      <th className="py-2.5 px-2">Eco</th>
+                      <th className="py-2.5 px-2">SR</th>
+                      <th className="py-2.5 px-2">BBI</th>
+                      <th className="py-2.5 px-2">4w</th>
+                      <th className="py-2.5 px-2">5w</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-white/5 font-semibold text-gray-200">
+                    {(() => {
+                      const s = selectedPlayer.stats || ({} as any);
+                      const m = s.matches || 0;
+                      const inn = s.bowlingInnings || 0;
+                      const oversRaw = parseFloat(s.balls || '0') || 0;
+                      const fullOvers = Math.floor(oversRaw);
+                      const remBalls = Math.round((oversRaw - fullOvers) * 10);
+                      const totalBalls = fullOvers * 6 + remBalls;
+                      const runsConceded = s.runsConceded || 0;
+                      const wkts = s.wickets || 0;
+                      const econ = s.economy ? Number(s.economy).toFixed(2) : (totalBalls > 0 ? ((runsConceded * 6) / totalBalls).toFixed(2) : '-');
+                      const bAvg = s.bowlingAverage ? Number(s.bowlingAverage).toFixed(2) : (wkts > 0 && runsConceded > 0 ? (runsConceded / wkts).toFixed(2) : '-');
+                      const bSR = s.bowlingStrikeRate ? Number(s.bowlingStrikeRate).toFixed(1) : (wkts > 0 && totalBalls > 0 ? (totalBalls / wkts).toFixed(1) : '-');
+                      return (
+                        <tr className="hover:bg-white/[0.04]">
+                          <td className="py-3 px-3 text-left font-black text-white">WPL</td>
+                          <td className="py-3 px-2">{m}</td>
+                          <td className="py-3 px-2">{inn}</td>
+                          <td className="py-3 px-2">{totalBalls > 0 ? totalBalls : (s.balls || 0)}</td>
+                          <td className="py-3 px-2">{runsConceded}</td>
+                          <td className="py-3 px-2">{s.maidens || 0}</td>
+                          <td className="py-3 px-2 font-black text-teal-400">{wkts}</td>
+                          <td className="py-3 px-2 font-bold text-purple-400">{bAvg}</td>
+                          <td className="py-3 px-2 font-bold text-amber-400">{econ}</td>
+                          <td className="py-3 px-2 font-bold text-rose-400">{bSR}</td>
+                          <td className="py-3 px-2">{s.bestBowling || '-/-'}</td>
+                          <td className="py-3 px-2">{s.fourWickets || 0}</td>
+                          <td className="py-3 px-2">{s.fiveWickets || 0}</td>
+                        </tr>
+                      );
+                    })()}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {/* FIELDING / KEEPING */}
+            {(() => {
+              const s = selectedPlayer.stats || ({} as any);
+              if (s.catches || s.stumpings) {
+                return (
+                  <div className="mt-5 p-3 rounded-xl bg-white/[0.03] border border-white/10 flex items-center gap-6 justify-center text-xs">
+                    <span className="text-gray-400">Fielding:</span>
+                    <span><strong className="text-white">{s.catches || 0}</strong> Catches</span>
+                    <span><strong className="text-white">{s.stumpings || 0}</strong> Stumpings</span>
+                  </div>
+                );
+              }
+              return null;
+            })()}
+          </div>
+        </div>
+      )}
+
+      <Footer />
       </div>
     );
   }
@@ -268,7 +528,224 @@ export default function EnhancedWPLTeamPage({ teamId }: { teamId: string }) {
             <ArrowLeft className="w-4 h-4" /> Return to WPL Teams
           </Link>
         </div>
-        <Footer />
+        
+      {/* PUBLIC PLAYER DETAIL MODAL (CRICBUZZ STANDARD) */}
+      {selectedPlayer && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fadeIn"
+          onClick={() => setSelectedPlayer(null)}
+        >
+          <div 
+            className="relative w-full max-w-3xl max-h-[90vh] overflow-y-auto rounded-3xl bg-[#0a0f1d] border border-white/15 p-6 shadow-2xl text-white"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header / Dismiss */}
+            <button
+              onClick={() => setSelectedPlayer(null)}
+              className="absolute top-5 right-5 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            {/* Profile Bar */}
+            <div className="flex flex-col sm:flex-row items-center gap-5 pb-6 border-b border-white/10">
+              <div className="relative w-24 h-24 rounded-2xl overflow-hidden bg-gradient-to-tr from-pink-600/30 to-purple-600/30 border border-white/20 shrink-0">
+                <img
+                  src={selectedPlayer.photoUrl || `https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?w=200&fit=crop`}
+                  alt={selectedPlayer.name}
+                  className="w-full h-full object-cover"
+                />
+                {selectedPlayer.jerseyNumber && (
+                  <span className="absolute bottom-1 right-1 px-1.5 py-0.5 rounded bg-black/80 text-[10px] font-black">
+                    #{selectedPlayer.jerseyNumber}
+                  </span>
+                )}
+              </div>
+              <div className="text-center sm:text-left space-y-1">
+                <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
+                  <h3 className="text-2xl font-black text-white">{selectedPlayer.name}</h3>
+                  {selectedPlayer.isCaptain && (
+                    <span className="px-2 py-0.5 rounded bg-amber-400 text-slate-950 font-black text-[10px] uppercase">
+                      Captain
+                    </span>
+                  )}
+                </div>
+                <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 pt-1">
+                  {(() => {
+                    const badge = getRoleBadgeStyle(selectedPlayer);
+                    return (
+                      <span className={`px-2.5 py-0.5 rounded text-xs font-black uppercase tracking-wider border ring-1 ${badge.bg}`}>
+                        {badge.label}
+                      </span>
+                    );
+                  })()}
+                  {selectedPlayer.nationality && (
+                    <span className="px-2 py-0.5 rounded bg-white/10 text-xs font-semibold text-gray-300">
+                      {selectedPlayer.nationality}
+                    </span>
+                  )}
+                  {selectedPlayer.dateOfBirth && (
+                    <span className="text-xs text-gray-400">
+                      DOB: {selectedPlayer.dateOfBirth} ({selectedPlayer.age ? `${selectedPlayer.age} yrs` : ''})
+                    </span>
+                  )}
+                </div>
+                <p className="text-xs text-gray-400 pt-1">
+                  Batting: <span className="text-gray-200">{selectedPlayer.battingStyle || 'Right Handed'}</span> • Bowling: <span className="text-gray-200">{selectedPlayer.bowlingStyle || 'None'}</span>
+                </p>
+              </div>
+            </div>
+
+            {/* BATTING CAREER SUMMARY */}
+            <div className="mt-6">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <TrendingUp className="w-4 h-4 text-emerald-400" />
+                  <h4 className="text-sm font-black uppercase tracking-wider text-emerald-400">Batting Career Summary</h4>
+                </div>
+                <span className="text-[11px] font-bold text-gray-400 uppercase">WPL Tournament</span>
+              </div>
+              <div className="overflow-x-auto rounded-xl border border-white/10 bg-white/[0.02]">
+                <table className="w-full text-center text-xs">
+                  <thead className="bg-white/5 text-gray-400 font-bold uppercase text-[10px]">
+                    <tr>
+                      <th className="py-2.5 px-3 text-left">Format</th>
+                      <th className="py-2.5 px-2">M</th>
+                      <th className="py-2.5 px-2">Inn</th>
+                      <th className="py-2.5 px-2">NO</th>
+                      <th className="py-2.5 px-2">Runs</th>
+                      <th className="py-2.5 px-2">Balls</th>
+                      <th className="py-2.5 px-2">HS</th>
+                      <th className="py-2.5 px-2">Avg</th>
+                      <th className="py-2.5 px-2">SR</th>
+                      <th className="py-2.5 px-2">4s</th>
+                      <th className="py-2.5 px-2">6s</th>
+                      <th className="py-2.5 px-2">50s</th>
+                      <th className="py-2.5 px-2">100s</th>
+                      <th className="py-2.5 px-2">Ducks</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-white/5 font-semibold text-gray-200">
+                    {(() => {
+                      const s = selectedPlayer.stats || ({} as any);
+                      const m = s.matches || 0;
+                      const inn = s.battingInnings || 0;
+                      const no = s.notOuts || 0;
+                      const runs = s.runs || 0;
+                      const bf = s.ballsFaced || 0;
+                      const hs = s.highest || 0;
+                      const hsDisplay = s.highestNotOut ? `${hs}*` : `${hs}`;
+                      const dismissals = Math.max(0, inn - no);
+                      const avg = s.average ? Number(s.average).toFixed(2) : (dismissals > 0 && runs > 0 ? (runs / dismissals).toFixed(2) : (runs > 0 ? runs.toFixed(2) : '-'));
+                      const sr = s.strikeRate ? Number(s.strikeRate).toFixed(2) : (bf > 0 && runs > 0 ? ((runs * 100) / bf).toFixed(2) : '-');
+                      return (
+                        <tr className="hover:bg-white/[0.04]">
+                          <td className="py-3 px-3 text-left font-black text-white">WPL</td>
+                          <td className="py-3 px-2">{m}</td>
+                          <td className="py-3 px-2">{inn}</td>
+                          <td className="py-3 px-2">{no}</td>
+                          <td className="py-3 px-2 font-black text-emerald-400">{runs}</td>
+                          <td className="py-3 px-2">{bf}</td>
+                          <td className="py-3 px-2 font-bold">{hsDisplay}</td>
+                          <td className="py-3 px-2 font-bold text-cyan-400">{avg}</td>
+                          <td className="py-3 px-2 font-bold text-amber-400">{sr}</td>
+                          <td className="py-3 px-2">{s.fours || 0}</td>
+                          <td className="py-3 px-2">{s.sixes || 0}</td>
+                          <td className="py-3 px-2">{s.fifties || 0}</td>
+                          <td className="py-3 px-2">{s.hundreds || 0}</td>
+                          <td className="py-3 px-2 text-rose-400">{s.ducks ?? 0}</td>
+                        </tr>
+                      );
+                    })()}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {/* BOWLING CAREER SUMMARY */}
+            <div className="mt-6">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <Target className="w-4 h-4 text-teal-400" />
+                  <h4 className="text-sm font-black uppercase tracking-wider text-teal-400">Bowling Career Summary</h4>
+                </div>
+                <span className="text-[11px] font-bold text-gray-400 uppercase">WPL Tournament</span>
+              </div>
+              <div className="overflow-x-auto rounded-xl border border-white/10 bg-white/[0.02]">
+                <table className="w-full text-center text-xs">
+                  <thead className="bg-white/5 text-gray-400 font-bold uppercase text-[10px]">
+                    <tr>
+                      <th className="py-2.5 px-3 text-left">Format</th>
+                      <th className="py-2.5 px-2">M</th>
+                      <th className="py-2.5 px-2">Inn</th>
+                      <th className="py-2.5 px-2">Balls</th>
+                      <th className="py-2.5 px-2">Runs</th>
+                      <th className="py-2.5 px-2">Maidens</th>
+                      <th className="py-2.5 px-2">Wkts</th>
+                      <th className="py-2.5 px-2">Avg</th>
+                      <th className="py-2.5 px-2">Eco</th>
+                      <th className="py-2.5 px-2">SR</th>
+                      <th className="py-2.5 px-2">BBI</th>
+                      <th className="py-2.5 px-2">4w</th>
+                      <th className="py-2.5 px-2">5w</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-white/5 font-semibold text-gray-200">
+                    {(() => {
+                      const s = selectedPlayer.stats || ({} as any);
+                      const m = s.matches || 0;
+                      const inn = s.bowlingInnings || 0;
+                      const oversRaw = parseFloat(s.balls || '0') || 0;
+                      const fullOvers = Math.floor(oversRaw);
+                      const remBalls = Math.round((oversRaw - fullOvers) * 10);
+                      const totalBalls = fullOvers * 6 + remBalls;
+                      const runsConceded = s.runsConceded || 0;
+                      const wkts = s.wickets || 0;
+                      const econ = s.economy ? Number(s.economy).toFixed(2) : (totalBalls > 0 ? ((runsConceded * 6) / totalBalls).toFixed(2) : '-');
+                      const bAvg = s.bowlingAverage ? Number(s.bowlingAverage).toFixed(2) : (wkts > 0 && runsConceded > 0 ? (runsConceded / wkts).toFixed(2) : '-');
+                      const bSR = s.bowlingStrikeRate ? Number(s.bowlingStrikeRate).toFixed(1) : (wkts > 0 && totalBalls > 0 ? (totalBalls / wkts).toFixed(1) : '-');
+                      return (
+                        <tr className="hover:bg-white/[0.04]">
+                          <td className="py-3 px-3 text-left font-black text-white">WPL</td>
+                          <td className="py-3 px-2">{m}</td>
+                          <td className="py-3 px-2">{inn}</td>
+                          <td className="py-3 px-2">{totalBalls > 0 ? totalBalls : (s.balls || 0)}</td>
+                          <td className="py-3 px-2">{runsConceded}</td>
+                          <td className="py-3 px-2">{s.maidens || 0}</td>
+                          <td className="py-3 px-2 font-black text-teal-400">{wkts}</td>
+                          <td className="py-3 px-2 font-bold text-purple-400">{bAvg}</td>
+                          <td className="py-3 px-2 font-bold text-amber-400">{econ}</td>
+                          <td className="py-3 px-2 font-bold text-rose-400">{bSR}</td>
+                          <td className="py-3 px-2">{s.bestBowling || '-/-'}</td>
+                          <td className="py-3 px-2">{s.fourWickets || 0}</td>
+                          <td className="py-3 px-2">{s.fiveWickets || 0}</td>
+                        </tr>
+                      );
+                    })()}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {/* FIELDING / KEEPING */}
+            {(() => {
+              const s = selectedPlayer.stats || ({} as any);
+              if (s.catches || s.stumpings) {
+                return (
+                  <div className="mt-5 p-3 rounded-xl bg-white/[0.03] border border-white/10 flex items-center gap-6 justify-center text-xs">
+                    <span className="text-gray-400">Fielding:</span>
+                    <span><strong className="text-white">{s.catches || 0}</strong> Catches</span>
+                    <span><strong className="text-white">{s.stumpings || 0}</strong> Stumpings</span>
+                  </div>
+                );
+              }
+              return null;
+            })()}
+          </div>
+        </div>
+      )}
+
+      <Footer />
       </div>
     );
   }
@@ -568,12 +1045,14 @@ export default function EnhancedWPLTeamPage({ teamId }: { teamId: string }) {
 
                         {/* Player Meta Info */}
                         <div className="space-y-1">
-                          <span 
-                            className="inline-block text-[11px] font-black uppercase tracking-widest"
-                            style={{ color: theme.secondary }}
-                          >
-                            {player.role || 'Player'}
-                          </span>
+                          {(() => {
+                            const badge = getRoleBadgeStyle(player);
+                            return (
+                              <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider border ring-1 ${badge.bg}`}>
+                                {badge.label}
+                              </span>
+                            );
+                          })()}
                           <h4 className="text-base font-extrabold text-white group-hover:text-pink-300 transition-colors line-clamp-1">
                             {player.name}
                           </h4>
@@ -653,6 +1132,223 @@ export default function EnhancedWPLTeamPage({ teamId }: { teamId: string }) {
           )}
         </section>
       </main>
+
+      
+      {/* PUBLIC PLAYER DETAIL MODAL (CRICBUZZ STANDARD) */}
+      {selectedPlayer && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fadeIn"
+          onClick={() => setSelectedPlayer(null)}
+        >
+          <div 
+            className="relative w-full max-w-3xl max-h-[90vh] overflow-y-auto rounded-3xl bg-[#0a0f1d] border border-white/15 p-6 shadow-2xl text-white"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header / Dismiss */}
+            <button
+              onClick={() => setSelectedPlayer(null)}
+              className="absolute top-5 right-5 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            {/* Profile Bar */}
+            <div className="flex flex-col sm:flex-row items-center gap-5 pb-6 border-b border-white/10">
+              <div className="relative w-24 h-24 rounded-2xl overflow-hidden bg-gradient-to-tr from-pink-600/30 to-purple-600/30 border border-white/20 shrink-0">
+                <img
+                  src={selectedPlayer.photoUrl || `https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?w=200&fit=crop`}
+                  alt={selectedPlayer.name}
+                  className="w-full h-full object-cover"
+                />
+                {selectedPlayer.jerseyNumber && (
+                  <span className="absolute bottom-1 right-1 px-1.5 py-0.5 rounded bg-black/80 text-[10px] font-black">
+                    #{selectedPlayer.jerseyNumber}
+                  </span>
+                )}
+              </div>
+              <div className="text-center sm:text-left space-y-1">
+                <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
+                  <h3 className="text-2xl font-black text-white">{selectedPlayer.name}</h3>
+                  {selectedPlayer.isCaptain && (
+                    <span className="px-2 py-0.5 rounded bg-amber-400 text-slate-950 font-black text-[10px] uppercase">
+                      Captain
+                    </span>
+                  )}
+                </div>
+                <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 pt-1">
+                  {(() => {
+                    const badge = getRoleBadgeStyle(selectedPlayer);
+                    return (
+                      <span className={`px-2.5 py-0.5 rounded text-xs font-black uppercase tracking-wider border ring-1 ${badge.bg}`}>
+                        {badge.label}
+                      </span>
+                    );
+                  })()}
+                  {selectedPlayer.nationality && (
+                    <span className="px-2 py-0.5 rounded bg-white/10 text-xs font-semibold text-gray-300">
+                      {selectedPlayer.nationality}
+                    </span>
+                  )}
+                  {selectedPlayer.dateOfBirth && (
+                    <span className="text-xs text-gray-400">
+                      DOB: {selectedPlayer.dateOfBirth} ({selectedPlayer.age ? `${selectedPlayer.age} yrs` : ''})
+                    </span>
+                  )}
+                </div>
+                <p className="text-xs text-gray-400 pt-1">
+                  Batting: <span className="text-gray-200">{selectedPlayer.battingStyle || 'Right Handed'}</span> • Bowling: <span className="text-gray-200">{selectedPlayer.bowlingStyle || 'None'}</span>
+                </p>
+              </div>
+            </div>
+
+            {/* BATTING CAREER SUMMARY */}
+            <div className="mt-6">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <TrendingUp className="w-4 h-4 text-emerald-400" />
+                  <h4 className="text-sm font-black uppercase tracking-wider text-emerald-400">Batting Career Summary</h4>
+                </div>
+                <span className="text-[11px] font-bold text-gray-400 uppercase">WPL Tournament</span>
+              </div>
+              <div className="overflow-x-auto rounded-xl border border-white/10 bg-white/[0.02]">
+                <table className="w-full text-center text-xs">
+                  <thead className="bg-white/5 text-gray-400 font-bold uppercase text-[10px]">
+                    <tr>
+                      <th className="py-2.5 px-3 text-left">Format</th>
+                      <th className="py-2.5 px-2">M</th>
+                      <th className="py-2.5 px-2">Inn</th>
+                      <th className="py-2.5 px-2">NO</th>
+                      <th className="py-2.5 px-2">Runs</th>
+                      <th className="py-2.5 px-2">Balls</th>
+                      <th className="py-2.5 px-2">HS</th>
+                      <th className="py-2.5 px-2">Avg</th>
+                      <th className="py-2.5 px-2">SR</th>
+                      <th className="py-2.5 px-2">4s</th>
+                      <th className="py-2.5 px-2">6s</th>
+                      <th className="py-2.5 px-2">50s</th>
+                      <th className="py-2.5 px-2">100s</th>
+                      <th className="py-2.5 px-2">Ducks</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-white/5 font-semibold text-gray-200">
+                    {(() => {
+                      const s = selectedPlayer.stats || ({} as any);
+                      const m = s.matches || 0;
+                      const inn = s.battingInnings || 0;
+                      const no = s.notOuts || 0;
+                      const runs = s.runs || 0;
+                      const bf = s.ballsFaced || 0;
+                      const hs = s.highest || 0;
+                      const hsDisplay = s.highestNotOut ? `${hs}*` : `${hs}`;
+                      const dismissals = Math.max(0, inn - no);
+                      const avg = s.average ? Number(s.average).toFixed(2) : (dismissals > 0 && runs > 0 ? (runs / dismissals).toFixed(2) : (runs > 0 ? runs.toFixed(2) : '-'));
+                      const sr = s.strikeRate ? Number(s.strikeRate).toFixed(2) : (bf > 0 && runs > 0 ? ((runs * 100) / bf).toFixed(2) : '-');
+                      return (
+                        <tr className="hover:bg-white/[0.04]">
+                          <td className="py-3 px-3 text-left font-black text-white">WPL</td>
+                          <td className="py-3 px-2">{m}</td>
+                          <td className="py-3 px-2">{inn}</td>
+                          <td className="py-3 px-2">{no}</td>
+                          <td className="py-3 px-2 font-black text-emerald-400">{runs}</td>
+                          <td className="py-3 px-2">{bf}</td>
+                          <td className="py-3 px-2 font-bold">{hsDisplay}</td>
+                          <td className="py-3 px-2 font-bold text-cyan-400">{avg}</td>
+                          <td className="py-3 px-2 font-bold text-amber-400">{sr}</td>
+                          <td className="py-3 px-2">{s.fours || 0}</td>
+                          <td className="py-3 px-2">{s.sixes || 0}</td>
+                          <td className="py-3 px-2">{s.fifties || 0}</td>
+                          <td className="py-3 px-2">{s.hundreds || 0}</td>
+                          <td className="py-3 px-2 text-rose-400">{s.ducks ?? 0}</td>
+                        </tr>
+                      );
+                    })()}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {/* BOWLING CAREER SUMMARY */}
+            <div className="mt-6">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <Target className="w-4 h-4 text-teal-400" />
+                  <h4 className="text-sm font-black uppercase tracking-wider text-teal-400">Bowling Career Summary</h4>
+                </div>
+                <span className="text-[11px] font-bold text-gray-400 uppercase">WPL Tournament</span>
+              </div>
+              <div className="overflow-x-auto rounded-xl border border-white/10 bg-white/[0.02]">
+                <table className="w-full text-center text-xs">
+                  <thead className="bg-white/5 text-gray-400 font-bold uppercase text-[10px]">
+                    <tr>
+                      <th className="py-2.5 px-3 text-left">Format</th>
+                      <th className="py-2.5 px-2">M</th>
+                      <th className="py-2.5 px-2">Inn</th>
+                      <th className="py-2.5 px-2">Balls</th>
+                      <th className="py-2.5 px-2">Runs</th>
+                      <th className="py-2.5 px-2">Maidens</th>
+                      <th className="py-2.5 px-2">Wkts</th>
+                      <th className="py-2.5 px-2">Avg</th>
+                      <th className="py-2.5 px-2">Eco</th>
+                      <th className="py-2.5 px-2">SR</th>
+                      <th className="py-2.5 px-2">BBI</th>
+                      <th className="py-2.5 px-2">4w</th>
+                      <th className="py-2.5 px-2">5w</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-white/5 font-semibold text-gray-200">
+                    {(() => {
+                      const s = selectedPlayer.stats || ({} as any);
+                      const m = s.matches || 0;
+                      const inn = s.bowlingInnings || 0;
+                      const oversRaw = parseFloat(s.balls || '0') || 0;
+                      const fullOvers = Math.floor(oversRaw);
+                      const remBalls = Math.round((oversRaw - fullOvers) * 10);
+                      const totalBalls = fullOvers * 6 + remBalls;
+                      const runsConceded = s.runsConceded || 0;
+                      const wkts = s.wickets || 0;
+                      const econ = s.economy ? Number(s.economy).toFixed(2) : (totalBalls > 0 ? ((runsConceded * 6) / totalBalls).toFixed(2) : '-');
+                      const bAvg = s.bowlingAverage ? Number(s.bowlingAverage).toFixed(2) : (wkts > 0 && runsConceded > 0 ? (runsConceded / wkts).toFixed(2) : '-');
+                      const bSR = s.bowlingStrikeRate ? Number(s.bowlingStrikeRate).toFixed(1) : (wkts > 0 && totalBalls > 0 ? (totalBalls / wkts).toFixed(1) : '-');
+                      return (
+                        <tr className="hover:bg-white/[0.04]">
+                          <td className="py-3 px-3 text-left font-black text-white">WPL</td>
+                          <td className="py-3 px-2">{m}</td>
+                          <td className="py-3 px-2">{inn}</td>
+                          <td className="py-3 px-2">{totalBalls > 0 ? totalBalls : (s.balls || 0)}</td>
+                          <td className="py-3 px-2">{runsConceded}</td>
+                          <td className="py-3 px-2">{s.maidens || 0}</td>
+                          <td className="py-3 px-2 font-black text-teal-400">{wkts}</td>
+                          <td className="py-3 px-2 font-bold text-purple-400">{bAvg}</td>
+                          <td className="py-3 px-2 font-bold text-amber-400">{econ}</td>
+                          <td className="py-3 px-2 font-bold text-rose-400">{bSR}</td>
+                          <td className="py-3 px-2">{s.bestBowling || '-/-'}</td>
+                          <td className="py-3 px-2">{s.fourWickets || 0}</td>
+                          <td className="py-3 px-2">{s.fiveWickets || 0}</td>
+                        </tr>
+                      );
+                    })()}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {/* FIELDING / KEEPING */}
+            {(() => {
+              const s = selectedPlayer.stats || ({} as any);
+              if (s.catches || s.stumpings) {
+                return (
+                  <div className="mt-5 p-3 rounded-xl bg-white/[0.03] border border-white/10 flex items-center gap-6 justify-center text-xs">
+                    <span className="text-gray-400">Fielding:</span>
+                    <span><strong className="text-white">{s.catches || 0}</strong> Catches</span>
+                    <span><strong className="text-white">{s.stumpings || 0}</strong> Stumpings</span>
+                  </div>
+                );
+              }
+              return null;
+            })()}
+          </div>
+        </div>
+      )}
 
       <Footer />
     </div>
