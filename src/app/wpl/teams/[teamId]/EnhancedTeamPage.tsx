@@ -716,6 +716,23 @@ useEffect(() => {
 
             {/* Quick Search Input */}
             {activeTab === 'squad' && (
+              <div className="relative w-full md:w-64">
+                <input
+                  type="text"
+                  placeholder="Search player name..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2 pl-9 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-pink-500 transition-colors"
+                />
+                <Search className="w-4 h-4 text-gray-500 absolute left-3 top-1/2 -translate-y-1/2" />
+              </div>
+            )}
+          </div>
+        </section>
+
+        {/* Content Area */}
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+          {activeTab === 'squad' && (
             <div className="space-y-10">
               {/* === FEATURED HERO SPOTLIGHT STAGE === */}
               {activeHeroPlayer && (() => {
