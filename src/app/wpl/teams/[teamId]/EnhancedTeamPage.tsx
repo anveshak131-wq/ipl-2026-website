@@ -156,11 +156,12 @@ export default function EnhancedWPLTeamPage({ teamId }: { teamId: string }) {
   // Priority 1: Load Core Team + Players fast
     // Initialize Hero Spotlight Player
   useEffect(() => {
-    if (squad && squad.length > 0 && !activeHeroPlayer) {
-      const captain = squad.find((p: any) => p.isCaptain);
-      setActiveHeroPlayer(captain || squad[0]);
+    const list = (team && (team.squad || team.players)) || filteredSquad || [];
+    if (list.length > 0 && !activeHeroPlayer) {
+      const captain = list.find((p: any) => p.isCaptain);
+      setActiveHeroPlayer(captain || list[0]);
     }
-  }, [squad, activeHeroPlayer]);
+  }, [team, filteredSquad, activeHeroPlayer]);
 
 useEffect(() => {
     let isMounted = true;
