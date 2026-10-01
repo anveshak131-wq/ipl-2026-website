@@ -338,13 +338,16 @@ export default function EnhancedWPLTeamPage({ teamId }: { teamId: string }) {
     };
   };
 
+    // Role Color & Visual Card Aesthetics
   const getRoleDesign = (role?: string) => {
     const r = (role || '').toLowerCase();
     if (r.includes('wicket') || r.includes('keeper') || r.includes('wk')) {
       return {
         badgeBg: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30',
-        cardBorder: 'hover:border-emerald-500/50',
-        glow: 'from-emerald-600/20 via-transparent to-transparent',
+        borderHover: 'hover:border-emerald-500/60 hover:shadow-emerald-500/20',
+        aura: 'from-emerald-500/20 via-emerald-500/5 to-transparent',
+        accentText: 'text-emerald-400',
+        ring: 'border-emerald-500/30',
         label: 'Wicket-Keeper'
       };
     }
@@ -352,31 +355,39 @@ export default function EnhancedWPLTeamPage({ teamId }: { teamId: string }) {
       if (r.includes('bowl')) {
         return {
           badgeBg: 'bg-purple-500/15 text-purple-400 border-purple-500/30',
-          cardBorder: 'hover:border-purple-500/50',
-          glow: 'from-purple-600/20 via-transparent to-transparent',
+          borderHover: 'hover:border-purple-500/60 hover:shadow-purple-500/20',
+          aura: 'from-purple-500/20 via-purple-500/5 to-transparent',
+          accentText: 'text-purple-400',
+          ring: 'border-purple-500/30',
           label: 'Bowling All-Rounder'
         };
       }
       return {
-        badgeBg: 'bg-indigo-500/15 text-indigo-400 border-indigo-500/30',
-        cardBorder: 'hover:border-indigo-500/50',
-        glow: 'from-indigo-600/20 via-transparent to-transparent',
+        badgeBg: 'bg-violet-500/15 text-violet-400 border-violet-500/30',
+        borderHover: 'hover:border-violet-500/60 hover:shadow-violet-500/20',
+        aura: 'from-violet-500/20 via-violet-500/5 to-transparent',
+        accentText: 'text-violet-400',
+        ring: 'border-violet-500/30',
         label: 'All-Rounder'
       };
     }
     if (r.includes('bowl')) {
       return {
         badgeBg: 'bg-cyan-500/15 text-cyan-400 border-cyan-500/30',
-        cardBorder: 'hover:border-cyan-500/50',
-        glow: 'from-cyan-600/20 via-transparent to-transparent',
+        borderHover: 'hover:border-cyan-500/60 hover:shadow-cyan-500/20',
+        aura: 'from-cyan-500/20 via-cyan-500/5 to-transparent',
+        accentText: 'text-cyan-400',
+        ring: 'border-cyan-500/30',
         label: 'Bowler'
       };
     }
     // Default Batter
     return {
       badgeBg: 'bg-amber-500/15 text-amber-400 border-amber-500/30',
-      cardBorder: 'hover:border-amber-500/50',
-      glow: 'from-amber-600/20 via-transparent to-transparent',
+      borderHover: 'hover:border-amber-500/60 hover:shadow-amber-500/20',
+      aura: 'from-amber-500/20 via-amber-500/5 to-transparent',
+      accentText: 'text-amber-400',
+      ring: 'border-amber-500/30',
       label: 'Batter'
     };
   };
@@ -714,66 +725,113 @@ export default function EnhancedWPLTeamPage({ teamId }: { teamId: string }) {
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                 {visibleSquad.map((player) => {
                   const s = player.stats || ({} as any);
-                  const runs = s.runs || 0;
-                  const wickets = s.wickets || 0;
-                  const matchesCount = s.matches || 0;
+                  const runs = s.runs ?? 0;
+                  const wickets = s.wickets ?? 0;
+                  const matchesCount = s.matches ?? 0;
                   const roleTheme = getRoleDesign(player.role);
+                  const initials = (player.name || 'P')
+                    .split(' ')
+                    .map((n: string) => n[0])
+                    .slice(0, 2)
+                    .join('')
+                    .toUpperCase();
 
                   return (
                     <div
                       key={player.id || player.name}
                       onClick={() => setSelectedPlayer(player)}
-                      className={`group cursor-pointer relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] hover:bg-white/[0.08] ${roleTheme.cardBorder} transition-all duration-300 hover:-translate-y-1 shadow-lg flex flex-col justify-between`}
+                      className={`group relative flex flex-col justify-between overflow-hidden rounded-3xl border border-white/[0.08] bg-gradient-to-b from-[#131625]/90 via-[#0d101d]/90 to-[#080a14] p-5 cursor-pointer backdrop-blur-xl transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl ${roleTheme.borderHover}`}
                     >
-                      <div className={`absolute inset-0 bg-gradient-to-b ${roleTheme.glow} opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none`} />
+                      {/* Ambient Role Glow Aura */}
+                      <div
+                        className={`absolute -top-24 -right-24 w-48 h-48 rounded-full bg-gradient-to-br ${roleTheme.aura} blur-3xl opacity-40 group-hover:opacity-100 group-hover:scale-125 transition-all duration-500 pointer-events-none`}
+                      />
 
-                      <div className="relative h-48 w-full bg-gradient-to-b from-white/10 to-transparent flex items-center justify-center overflow-hidden">
-                        {player.image ? (
-                          <img
-                            src={player.image}
-                            alt={player.name}
-                            className="w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-105"
-                          />
+                      {/* Foil Holographic Light Sweep on Hover */}
+                      <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/[0.04] to-transparent pointer-events-none" />
+
+                      {/* Top Header: Captain & Role Badges */}
+                      <div className="flex items-center justify-between gap-2 z-10 mb-4">
+                        {player.isCaptain ? (
+                          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-gradient-to-r from-amber-400 to-amber-500 text-slate-950 shadow-lg shadow-amber-500/20">
+                            ★ Captain
+                          </span>
                         ) : (
-                          <div className="w-20 h-20 rounded-full bg-white/10 border border-white/20 flex items-center justify-center text-white/40">
-                            <Users className="w-10 h-10" />
-                          </div>
-                        )}
-
-                        {player.isCaptain && (
-                          <span className="absolute top-3 left-3 px-2 py-0.5 rounded-md text-[10px] font-black bg-amber-400 text-slate-950 uppercase tracking-wider shadow">
-                            Captain
+                          <span className="text-[10px] font-bold text-gray-400 tracking-wider">
+                            WPL SQUAD
                           </span>
                         )}
 
-                        <span className={`absolute top-3 right-3 px-2.5 py-0.5 rounded-md text-[10px] font-bold border backdrop-blur-md uppercase tracking-wider ${roleTheme.badgeBg}`}>
+                        <span
+                          className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border backdrop-blur-md transition-colors ${roleTheme.badgeBg}`}
+                        >
                           {roleTheme.label}
                         </span>
                       </div>
 
-                      <div className="p-4 flex-1 flex flex-col justify-between relative z-10">
-                        <div>
-                          <h3 className="text-base font-black text-white group-hover:text-pink-400 transition-colors line-clamp-1">
-                            {player.name}
-                          </h3>
-                          <p className="text-xs text-gray-400 capitalize mt-0.5">
-                            {player.battingStyle || player.role || 'Player'}
-                          </p>
-                        </div>
+                      {/* Center Media Section: Stylized Avatar or Image */}
+                      <div className="relative my-2 py-4 flex items-center justify-center z-10">
+                        {/* Large Background Watermark Monogram */}
+                        <span className="absolute text-7xl font-black text-white/[0.03] select-none pointer-events-none group-hover:scale-110 group-hover:text-white/[0.05] transition-all duration-500">
+                          {initials}
+                        </span>
 
-                        <div className="mt-4 pt-3 border-t border-white/10 grid grid-cols-3 gap-2 text-center">
-                          <div className="rounded-lg bg-black/40 py-2 border border-white/5">
-                            <span className="block text-xs font-black text-white">{runs}</span>
-                            <span className="block text-[9px] font-bold text-gray-400 uppercase tracking-wider">Runs</span>
+                        {player.image ? (
+                          <div className="relative w-28 h-28 rounded-2xl overflow-hidden border border-white/10 shadow-2xl group-hover:scale-105 transition-transform duration-300">
+                            <img
+                              src={player.image}
+                              alt={player.name}
+                              className="w-full h-full object-cover object-top"
+                            />
                           </div>
-                          <div className="rounded-lg bg-black/40 py-2 border border-white/5">
-                            <span className="block text-xs font-black text-white">{wickets}</span>
-                            <span className="block text-[9px] font-bold text-gray-400 uppercase tracking-wider">Wkts</span>
+                        ) : (
+                          <div
+                            className={`relative w-24 h-24 rounded-2xl flex items-center justify-center border ${roleTheme.ring} bg-white/[0.03] shadow-inner group-hover:scale-105 transition-transform duration-300`}
+                          >
+                            {/* Inner Radial Glow */}
+                            <div className={`absolute inset-0 rounded-2xl bg-gradient-to-br ${roleTheme.aura} opacity-50`} />
+                            <span className="relative z-10 text-2xl font-black text-white/90 tracking-tight">
+                              {initials}
+                            </span>
                           </div>
-                          <div className="rounded-lg bg-black/40 py-2 border border-white/5">
-                            <span className="block text-xs font-black text-white">{matchesCount}</span>
-                            <span className="block text-[9px] font-bold text-gray-400 uppercase tracking-wider">Mat</span>
-                          </div>
+                        )}
+                      </div>
+
+                      {/* Player Identity Information */}
+                      <div className="mt-2 text-center z-10">
+                        <h3 className="text-base font-black text-white group-hover:text-pink-300 transition-colors line-clamp-1">
+                          {player.name}
+                        </h3>
+                        <p className="text-[11px] font-semibold text-gray-400 capitalize mt-0.5">
+                          {player.battingStyle || player.role || 'Professional'}
+                        </p>
+                      </div>
+
+                      {/* High-Tech Horizontal Stats Bar */}
+                      <div className="mt-5 pt-3.5 border-t border-white/[0.07] grid grid-cols-3 gap-2 text-center z-10">
+                        <div className="rounded-xl bg-white/[0.02] py-2 px-1 border border-white/[0.04] group-hover:border-white/10 transition-colors">
+                          <span className="block text-sm font-black text-white">
+                            {runs}
+                          </span>
+                          <span className="block text-[9px] font-bold text-gray-400 uppercase tracking-widest mt-0.5">
+                            Runs
+                          </span>
+                        </div>
+                        <div className="rounded-xl bg-white/[0.02] py-2 px-1 border border-white/[0.04] group-hover:border-white/10 transition-colors">
+                          <span className={`block text-sm font-black ${roleTheme.accentText}`}>
+                            {wickets}
+                          </span>
+                          <span className="block text-[9px] font-bold text-gray-400 uppercase tracking-widest mt-0.5">
+                            Wkts
+                          </span>
+                        </div>
+                        <div className="rounded-xl bg-white/[0.02] py-2 px-1 border border-white/[0.04] group-hover:border-white/10 transition-colors">
+                          <span className="block text-sm font-black text-white">
+                            {matchesCount}
+                          </span>
+                          <span className="block text-[9px] font-bold text-gray-400 uppercase tracking-widest mt-0.5">
+                            Mat
+                          </span>
                         </div>
                       </div>
                     </div>
