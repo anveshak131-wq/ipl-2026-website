@@ -79,6 +79,9 @@ export interface Player {
     bestBowling: string; // Format: "wickets/runs" e.g., "4/21", "3/45"
     fourWickets?: number; // Number of 4-wicket hauls
     fiveWickets?: number; // Number of 5-wicket hauls
+    highestNotOut?: boolean; // Whether the highest score was not out (e.g. 90*)
+    catches?: number; // Total catches taken
+    stumpings?: number; // Total stumpings made
   };
   // Transfer and auction metadata (optional)
   transferInfo?: {
