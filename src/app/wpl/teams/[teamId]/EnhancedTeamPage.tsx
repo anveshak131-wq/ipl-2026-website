@@ -2,9 +2,24 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
-import { motion } from 'framer-motion';
 import {
-  ArrowLeft, Award, BarChart3, Calendar, ChevronRight, Filter, Flame, MapPin, Search, Shield, Star, Target, TrendingUp, Trophy, Users, X, Zap, }
+  ArrowLeft,
+  Award,
+  BarChart3,
+  Calendar,
+  ChevronRight,
+  Filter,
+  Flame,
+  MapPin,
+  Search,
+  Shield,
+  Star,
+  Target,
+  TrendingUp,
+  Trophy,
+  Users,
+  X,
+  Zap
 } from 'lucide-react';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
