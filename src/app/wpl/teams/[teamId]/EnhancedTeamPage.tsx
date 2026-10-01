@@ -154,14 +154,15 @@ export default function EnhancedWPLTeamPage({ teamId }: { teamId: string }) {
   const [activeTab, setActiveTab] = useState<'squad' | 'fixtures'>('squad');
 
   // Priority 1: Load Core Team + Players fast
-    // Initialize Hero Spotlight Player
+  // Initialize Hero Spotlight Player
   useEffect(() => {
-    const list = (team && (team.squad || team.players)) || filteredSquad || [];
-    if (list.length > 0 && !activeHeroPlayer) {
+    if (activeHeroPlayer) return;
+    const list = (team && (team.squad || team.players)) || [];
+    if (list.length > 0) {
       const captain = list.find((p: any) => p.isCaptain);
       setActiveHeroPlayer(captain || list[0]);
     }
-  }, [team, filteredSquad, activeHeroPlayer]);
+  }, [team, activeHeroPlayer]);
 
 useEffect(() => {
     let isMounted = true;
