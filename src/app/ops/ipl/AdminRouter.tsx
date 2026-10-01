@@ -11,7 +11,6 @@ import AdminDatasets from './datasets/page';
 import AdminDatasetManager from './dataset-manager/page';
 import AdminMlLabPage from './ml-lab/page';
 import AdminEngagement from './engagement/page';
-import AdminTestLiveScore from './test-live-score/page';
 import AdminKeyPlayers from './key-players/page';
 import AdminPlaying11 from './playing-11/page';
 import AdminNews from './news/page';
@@ -187,7 +186,6 @@ export default function AdminRouter() {
       return <AdminLegalPage />;
     } else if (pathname === '/ops/ipl/engagement') {
       return <AdminEngagement />;
-    } else if (pathname === '/ops/ipl/test-live-score') {
       return <AdminTestLiveScore />;
     } else if (pathname === '/ops/ipl/key-players') {
       return <AdminKeyPlayers />;
