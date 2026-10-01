@@ -149,6 +149,7 @@ export default function EnhancedWPLTeamPage({ teamId }: { teamId: string }) {
 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
+  const [activeHeroPlayer, setActiveHeroPlayer] = useState<any>(null);
   const [isSquadExpanded, setIsSquadExpanded] = useState(false);
   const [selectedRole, setSelectedRole] = useState<'all' | 'batsman' | 'all-rounder' | 'bowler' | 'wicketkeeper'>('all');
   const [activeTab, setActiveTab] = useState<'squad' | 'fixtures'>('squad');
@@ -157,12 +158,14 @@ export default function EnhancedWPLTeamPage({ teamId }: { teamId: string }) {
   // Initialize Hero Spotlight Player
   useEffect(() => {
     if (activeHeroPlayer) return;
-    const list = (team && (team.squad || team.players)) || [];
+    const list = (players && players.length > 0)
+      ? players
+      : (team && (team.squad || team.players)) || [];
     if (list.length > 0) {
       const captain = list.find((p: any) => p.isCaptain);
       setActiveHeroPlayer(captain || list[0]);
     }
-  }, [team, activeHeroPlayer]);
+  }, [players, team, activeHeroPlayer]);
 
 useEffect(() => {
     let isMounted = true;
