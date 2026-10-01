@@ -249,26 +249,27 @@ export default function EnhancedWPLTeamPage({ teamId }: { teamId: string }) {
 
     // Role Color Palette Helper
     // Franchise Historical Data (2023-2026)
-  const getFranchiseStats = (shortName?: string) => {
-    const s = (shortName || '').toLowerCase();
-    if (s.includes('rcb')) {
+    // Franchise Historical Data (2023-2026)
+  const getFranchiseStats = (teamName?: string, shortName?: string) => {
+    const s = ((shortName || '') + ' ' + (teamName || '')).toLowerCase();
+    if (s.includes('rcb') || s.includes('bangalore') || s.includes('bengaluru')) {
       return {
         played: '35',
         wins: '18',
-        losses: '17',
-        winRate: '51.4%',
+        losses: '16',
+        winRate: '52.9%',
         trophyText: '2 Titles (2024, 2026)',
         highestTotal: '213/10',
         highestTotalOpponent: 'vs UPW (March 2025)',
-        biggestWin: 'Chased 204/4 in 2026 Final (Vadodara)',
+        biggestWin: 'Chased 204/4 in 2026 Final',
         lowestDefended: '135/6 vs MI (Eliminator 2024)',
         ppRPO: '8.45',
         deathRPO: '10.82',
         bat1stWinRate: '50.0%',
-        chasingWinRate: '52.6%'
+        chasingWinRate: '55.0%'
       };
     }
-    if (s.includes('mi')) {
+    if (s.includes('mi') || s.includes('mumbai')) {
       return {
         played: '37',
         wins: '23',
@@ -277,23 +278,23 @@ export default function EnhancedWPLTeamPage({ teamId }: { teamId: string }) {
         trophyText: '2 Titles (2023, 2025)',
         highestTotal: '213/4',
         highestTotalOpponent: 'vs GG (March 2025)',
-        biggestWin: '143 Runs vs GG (Inaugural Match)',
-        lowestDefended: '129 vs DC (2023)',
+        biggestWin: '143 Runs vs GG (DY Patil)',
+        lowestDefended: '129 vs DC (Brabourne 2023)',
         ppRPO: '8.62',
         deathRPO: '11.10',
         bat1stWinRate: '66.7%',
         chasingWinRate: '59.1%'
       };
     }
-    if (s.includes('dc')) {
+    if (s.includes('dc') || s.includes('delhi')) {
       return {
-        played: '36',
-        wins: '21',
+        played: '37',
+        wins: '22',
         losses: '15',
-        winRate: '58.3%',
-        trophyText: '4x Finalists',
+        winRate: '59.5%',
+        trophyText: '4x Finalists (2023-2026)',
         highestTotal: '223/2',
-        highestTotalOpponent: 'vs RCB (March 2023)',
+        highestTotalOpponent: 'vs RCB (Brabourne 2023)',
         biggestWin: '60 Runs vs RCB / 10 Wickets vs GG',
         lowestDefended: '138 vs UPW',
         ppRPO: '8.90',
@@ -302,13 +303,13 @@ export default function EnhancedWPLTeamPage({ teamId }: { teamId: string }) {
         chasingWinRate: '56.5%'
       };
     }
-    if (s.includes('gg')) {
+    if (s.includes('gg') || s.includes('gujarat')) {
       return {
-        played: '33',
-        wins: '11',
-        losses: '22',
-        winRate: '33.3%',
-        trophyText: 'Challenger',
+        played: '34',
+        wins: '13',
+        losses: '21',
+        winRate: '38.2%',
+        trophyText: '2x Eliminator (2025, 2026)',
         highestTotal: '209/10',
         highestTotalOpponent: 'vs DC (Jan 2026)',
         biggestWin: '19 Runs vs RCB',
@@ -322,10 +323,10 @@ export default function EnhancedWPLTeamPage({ teamId }: { teamId: string }) {
     // Default UPW
     return {
       played: '33',
-      wins: '12',
+      wins: '11',
       losses: '21',
-      winRate: '36.4%',
-      trophyText: 'Playoff Contender',
+      winRate: '34.8%',
+      trophyText: 'Eliminator (2023)',
       highestTotal: '225/5 (WPL Record)',
       highestTotalOpponent: 'vs RCB (March 2025)',
       biggestWin: '33 Runs vs GG',
@@ -598,9 +599,13 @@ export default function EnhancedWPLTeamPage({ teamId }: { teamId: string }) {
                     <Trophy className="w-4 h-4 text-amber-400" />
                   </div>
                   <span className="text-base font-black text-amber-300">
-                    {team.shortName?.toLowerCase() === 'rcb-w' || team.shortName?.toLowerCase() === 'rcb' ? '1 WPL Championship (2026)' :
-                     team.shortName?.toLowerCase() === 'mi-w' || team.shortName?.toLowerCase() === 'mi' ? '1 WPL Championship (2023)' :
-                     'Contender for 2027 Title'}
+                    {(() => {
+                      const name = (team.shortName || team.name || '').toLowerCase();
+                      if (name.includes('rcb')) return '2 WPL Championships (2024, 2026)';
+                      if (name.includes('mi')) return '2 WPL Championships (2023, 2025)';
+                      if (name.includes('dc')) return '4x WPL Finalist (2023–2026)';
+                      return 'Contender for 2027 Title';
+                    })()}
                   </span>
                 </div>
               </div>
@@ -862,7 +867,7 @@ export default function EnhancedWPLTeamPage({ teamId }: { teamId: string }) {
 
           {/* Team Stats & Records Tab */}
           {activeTab === 'stats' && (() => {
-            const fs = getFranchiseStats(team.shortName);
+            const fs = getFranchiseStats(team.name, team.shortName);
             return (
               <div className="space-y-8 max-w-6xl mx-auto">
                 {/* Overall Performance Banners */}
