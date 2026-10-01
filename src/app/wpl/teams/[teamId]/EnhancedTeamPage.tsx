@@ -339,55 +339,61 @@ export default function EnhancedWPLTeamPage({ teamId }: { teamId: string }) {
   };
 
     // Role Color & Visual Card Aesthetics
+    // Role Color & Visual Holo-Aesthetics
   const getRoleDesign = (role?: string) => {
     const r = (role || '').toLowerCase();
     if (r.includes('wicket') || r.includes('keeper') || r.includes('wk')) {
       return {
-        badgeBg: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30',
-        borderHover: 'hover:border-emerald-500/60 hover:shadow-emerald-500/20',
-        aura: 'from-emerald-500/20 via-emerald-500/5 to-transparent',
+        badgeBg: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40',
+        borderHover: 'hover:border-emerald-400 hover:shadow-[0_0_30px_rgba(16,185,129,0.3)]',
+        cardGradient: 'from-emerald-950/40 via-[#0a0f1d]/90 to-[#050814]',
+        aura: 'from-emerald-500/30 to-teal-500/5',
+        ringGlow: 'border-emerald-500/40 shadow-[0_0_20px_rgba(16,185,129,0.25)]',
         accentText: 'text-emerald-400',
-        ring: 'border-emerald-500/30',
         label: 'Wicket-Keeper'
       };
     }
     if (r.includes('all-rounder') || r.includes('allrounder') || r.includes('all rounder')) {
       if (r.includes('bowl')) {
         return {
-          badgeBg: 'bg-purple-500/15 text-purple-400 border-purple-500/30',
-          borderHover: 'hover:border-purple-500/60 hover:shadow-purple-500/20',
-          aura: 'from-purple-500/20 via-purple-500/5 to-transparent',
+          badgeBg: 'bg-purple-500/20 text-purple-300 border-purple-500/40',
+          borderHover: 'hover:border-purple-400 hover:shadow-[0_0_30px_rgba(168,85,247,0.3)]',
+          cardGradient: 'from-purple-950/40 via-[#0a0f1d]/90 to-[#050814]',
+          aura: 'from-purple-500/30 to-pink-500/5',
+          ringGlow: 'border-purple-500/40 shadow-[0_0_20px_rgba(168,85,247,0.25)]',
           accentText: 'text-purple-400',
-          ring: 'border-purple-500/30',
           label: 'Bowling All-Rounder'
         };
       }
       return {
-        badgeBg: 'bg-violet-500/15 text-violet-400 border-violet-500/30',
-        borderHover: 'hover:border-violet-500/60 hover:shadow-violet-500/20',
-        aura: 'from-violet-500/20 via-violet-500/5 to-transparent',
+        badgeBg: 'bg-violet-500/20 text-violet-300 border-violet-500/40',
+        borderHover: 'hover:border-violet-400 hover:shadow-[0_0_30px_rgba(139,92,246,0.3)]',
+        cardGradient: 'from-violet-950/40 via-[#0a0f1d]/90 to-[#050814]',
+        aura: 'from-violet-500/30 to-indigo-500/5',
+        ringGlow: 'border-violet-500/40 shadow-[0_0_20px_rgba(139,92,246,0.25)]',
         accentText: 'text-violet-400',
-        ring: 'border-violet-500/30',
         label: 'All-Rounder'
       };
     }
     if (r.includes('bowl')) {
       return {
-        badgeBg: 'bg-cyan-500/15 text-cyan-400 border-cyan-500/30',
-        borderHover: 'hover:border-cyan-500/60 hover:shadow-cyan-500/20',
-        aura: 'from-cyan-500/20 via-cyan-500/5 to-transparent',
+        badgeBg: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/40',
+        borderHover: 'hover:border-cyan-400 hover:shadow-[0_0_30px_rgba(6,182,212,0.3)]',
+        cardGradient: 'from-cyan-950/40 via-[#0a0f1d]/90 to-[#050814]',
+        aura: 'from-cyan-500/30 to-blue-500/5',
+        ringGlow: 'border-cyan-500/40 shadow-[0_0_20px_rgba(6,182,212,0.25)]',
         accentText: 'text-cyan-400',
-        ring: 'border-cyan-500/30',
         label: 'Bowler'
       };
     }
     // Default Batter
     return {
-      badgeBg: 'bg-amber-500/15 text-amber-400 border-amber-500/30',
-      borderHover: 'hover:border-amber-500/60 hover:shadow-amber-500/20',
-      aura: 'from-amber-500/20 via-amber-500/5 to-transparent',
+      badgeBg: 'bg-amber-500/20 text-amber-300 border-amber-500/40',
+      borderHover: 'hover:border-amber-400 hover:shadow-[0_0_30px_rgba(245,158,11,0.3)]',
+      cardGradient: 'from-amber-950/40 via-[#0a0f1d]/90 to-[#050814]',
+      aura: 'from-amber-500/30 to-orange-500/5',
+      ringGlow: 'border-amber-500/40 shadow-[0_0_20px_rgba(245,158,11,0.25)]',
       accentText: 'text-amber-400',
-      ring: 'border-amber-500/30',
       label: 'Batter'
     };
   };
@@ -476,7 +482,35 @@ export default function EnhancedWPLTeamPage({ teamId }: { teamId: string }) {
     <div className="min-h-screen bg-[#05070f] text-slate-100 flex flex-col selection:bg-pink-500 selection:text-white">
       <Navbar />
 
-      <main className="flex-1 pb-24 relative overflow-hidden">
+      <main className="flex-1 pb-24 relative overflow-hidden bg-[#04060d]">
+        {/* Dynamic Stadium Mesh & Dual Nebula Background */}
+        <div className="absolute inset-0 pointer-events-none z-0">
+          {/* Ambient Franchise Glow Orbs */}
+          <div 
+            className="absolute -top-40 -left-40 w-[650px] h-[650px] rounded-full blur-[140px] opacity-25 mix-blend-screen transition-all duration-1000"
+            style={{ background: theme.primary }}
+          />
+          <div 
+            className="absolute top-1/3 -right-40 w-[550px] h-[550px] rounded-full blur-[140px] opacity-20 mix-blend-screen transition-all duration-1000"
+            style={{ background: theme.secondary || '#ec4899' }}
+          />
+          <div 
+            className="absolute bottom-10 left-1/3 w-[600px] h-[600px] rounded-full blur-[160px] opacity-15 mix-blend-screen"
+            style={{ background: theme.primary }}
+          />
+
+          {/* Isometric Stadium Tech Grid Overlay */}
+          <div 
+            className="absolute inset-0 opacity-[0.07]"
+            style={{
+              backgroundImage: `radial-gradient(rgba(255, 255, 255, 0.4) 1px, transparent 1px)`,
+              backgroundSize: '28px 28px'
+            }}
+          />
+
+          {/* Vignette Depth Mask */}
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#04060d]/50 to-[#04060d]" />
+        </div>
         {/* Dynamic Top Ambient Aura */}
         <div 
           className="pointer-events-none absolute -top-40 left-1/2 -translate-x-1/2 w-[1000px] h-[550px] rounded-full blur-[150px] opacity-25"
@@ -723,7 +757,7 @@ export default function EnhancedWPLTeamPage({ teamId }: { teamId: string }) {
 
               {/* Squad Grid with Role-based Badges */}
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                {visibleSquad.map((player) => {
+                {visibleSquad.map((player, idx) => {
                   const s = player.stats || ({} as any);
                   const runs = s.runs ?? 0;
                   const wickets = s.wickets ?? 0;
@@ -735,49 +769,53 @@ export default function EnhancedWPLTeamPage({ teamId }: { teamId: string }) {
                     .slice(0, 2)
                     .join('')
                     .toUpperCase();
+                  const battingStyle = (player.battingStyle || '').toLowerCase().includes('left') ? 'LHB' : 'RHB';
 
                   return (
                     <div
                       key={player.id || player.name}
                       onClick={() => setSelectedPlayer(player)}
-                      className={`group relative flex flex-col justify-between overflow-hidden rounded-3xl border border-white/[0.08] bg-gradient-to-b from-[#131625]/90 via-[#0d101d]/90 to-[#080a14] p-5 cursor-pointer backdrop-blur-xl transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl ${roleTheme.borderHover}`}
+                      className={`group relative flex flex-col justify-between overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-b ${roleTheme.cardGradient} p-5 cursor-pointer backdrop-blur-2xl transition-all duration-500 hover:-translate-y-2 hover:scale-[1.02] shadow-2xl ${roleTheme.borderHover}`}
                     >
-                      {/* Ambient Role Glow Aura */}
+                      {/* Top Holographic Sheen Sweep on Hover */}
+                      <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/10 to-transparent pointer-events-none" />
+
+                      {/* Ambient Role Neon Halo */}
                       <div
-                        className={`absolute -top-24 -right-24 w-48 h-48 rounded-full bg-gradient-to-br ${roleTheme.aura} blur-3xl opacity-40 group-hover:opacity-100 group-hover:scale-125 transition-all duration-500 pointer-events-none`}
+                        className={`absolute -top-20 -right-20 w-44 h-44 rounded-full bg-gradient-to-br ${roleTheme.aura} blur-2xl opacity-40 group-hover:opacity-100 group-hover:scale-125 transition-all duration-700 pointer-events-none`}
                       />
 
-                      {/* Foil Holographic Light Sweep on Hover */}
-                      <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/[0.04] to-transparent pointer-events-none" />
-
-                      {/* Top Header: Captain & Role Badges */}
-                      <div className="flex items-center justify-between gap-2 z-10 mb-4">
+                      {/* Header Badge Row */}
+                      <div className="flex items-center justify-between gap-2 z-10 mb-2">
                         {player.isCaptain ? (
-                          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-gradient-to-r from-amber-400 to-amber-500 text-slate-950 shadow-lg shadow-amber-500/20">
+                          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-gradient-to-r from-amber-400 via-amber-300 to-yellow-500 text-slate-950 shadow-lg shadow-amber-500/25">
                             ★ Captain
                           </span>
                         ) : (
-                          <span className="text-[10px] font-bold text-gray-400 tracking-wider">
-                            WPL SQUAD
-                          </span>
+                          <div className="flex items-center gap-1.5">
+                            <span className="w-1.5 h-1.5 rounded-full bg-pink-500 animate-pulse" />
+                            <span className="text-[10px] font-extrabold uppercase tracking-widest text-gray-400">
+                              #{idx + 1 < 10 ? `0${idx + 1}` : idx + 1}
+                            </span>
+                          </div>
                         )}
 
                         <span
-                          className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border backdrop-blur-md transition-colors ${roleTheme.badgeBg}`}
+                          className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border backdrop-blur-md shadow-sm transition-colors ${roleTheme.badgeBg}`}
                         >
                           {roleTheme.label}
                         </span>
                       </div>
 
-                      {/* Center Media Section: Stylized Avatar or Image */}
-                      <div className="relative my-2 py-4 flex items-center justify-center z-10">
-                        {/* Large Background Watermark Monogram */}
-                        <span className="absolute text-7xl font-black text-white/[0.03] select-none pointer-events-none group-hover:scale-110 group-hover:text-white/[0.05] transition-all duration-500">
+                      {/* Futuristic Holographic Avatar Stage */}
+                      <div className="relative my-3 py-2 flex items-center justify-center z-10">
+                        {/* Background Monogram Stencil Watermark */}
+                        <span className="absolute text-8xl font-black text-white/[0.04] select-none pointer-events-none group-hover:text-white/[0.08] group-hover:scale-110 transition-all duration-500 tracking-tighter">
                           {initials}
                         </span>
 
                         {player.image ? (
-                          <div className="relative w-28 h-28 rounded-2xl overflow-hidden border border-white/10 shadow-2xl group-hover:scale-105 transition-transform duration-300">
+                          <div className="relative w-28 h-28 rounded-2xl overflow-hidden border-2 border-white/15 shadow-2xl group-hover:scale-105 transition-transform duration-500">
                             <img
                               src={player.image}
                               alt={player.name}
@@ -786,30 +824,39 @@ export default function EnhancedWPLTeamPage({ teamId }: { teamId: string }) {
                           </div>
                         ) : (
                           <div
-                            className={`relative w-24 h-24 rounded-2xl flex items-center justify-center border ${roleTheme.ring} bg-white/[0.03] shadow-inner group-hover:scale-105 transition-transform duration-300`}
+                            className={`relative w-24 h-24 rounded-2xl flex items-center justify-center border-2 ${roleTheme.ringGlow} bg-[#0c1122]/80 group-hover:scale-105 transition-all duration-500`}
                           >
-                            {/* Inner Radial Glow */}
-                            <div className={`absolute inset-0 rounded-2xl bg-gradient-to-br ${roleTheme.aura} opacity-50`} />
-                            <span className="relative z-10 text-2xl font-black text-white/90 tracking-tight">
+                            {/* Inner Radial Glow Layer */}
+                            <div className={`absolute inset-0 rounded-2xl bg-gradient-to-br ${roleTheme.aura} opacity-60`} />
+                            
+                            {/* Monogram Badge */}
+                            <span className="relative z-10 text-2xl font-black text-white drop-shadow-md tracking-wider">
                               {initials}
                             </span>
                           </div>
                         )}
                       </div>
 
-                      {/* Player Identity Information */}
-                      <div className="mt-2 text-center z-10">
+                      {/* Player Identity Block */}
+                      <div className="text-center z-10">
                         <h3 className="text-base font-black text-white group-hover:text-pink-300 transition-colors line-clamp-1">
                           {player.name}
                         </h3>
-                        <p className="text-[11px] font-semibold text-gray-400 capitalize mt-0.5">
-                          {player.battingStyle || player.role || 'Professional'}
-                        </p>
+
+                        {/* Tactical Style Micro-Badges */}
+                        <div className="flex items-center justify-center gap-2 mt-1.5">
+                          <span className="px-2 py-0.5 rounded-md bg-white/[0.06] border border-white/10 text-[10px] font-bold text-gray-300 uppercase tracking-wider">
+                            {battingStyle}
+                          </span>
+                          <span className="px-2 py-0.5 rounded-md bg-white/[0.06] border border-white/10 text-[10px] font-bold text-gray-300 uppercase tracking-wider">
+                            {player.bowlingStyle ? player.bowlingStyle.slice(0, 10) : player.role ? player.role.slice(0, 10) : 'Core'}
+                          </span>
+                        </div>
                       </div>
 
-                      {/* High-Tech Horizontal Stats Bar */}
-                      <div className="mt-5 pt-3.5 border-t border-white/[0.07] grid grid-cols-3 gap-2 text-center z-10">
-                        <div className="rounded-xl bg-white/[0.02] py-2 px-1 border border-white/[0.04] group-hover:border-white/10 transition-colors">
+                      {/* Upgraded Glassmorphic Stats Strip */}
+                      <div className="mt-5 pt-3.5 border-t border-white/[0.08] grid grid-cols-3 gap-2 text-center z-10">
+                        <div className="rounded-xl bg-black/40 py-2 border border-white/[0.06] group-hover:border-white/15 transition-colors">
                           <span className="block text-sm font-black text-white">
                             {runs}
                           </span>
@@ -817,7 +864,7 @@ export default function EnhancedWPLTeamPage({ teamId }: { teamId: string }) {
                             Runs
                           </span>
                         </div>
-                        <div className="rounded-xl bg-white/[0.02] py-2 px-1 border border-white/[0.04] group-hover:border-white/10 transition-colors">
+                        <div className="rounded-xl bg-black/40 py-2 border border-white/[0.06] group-hover:border-white/15 transition-colors">
                           <span className={`block text-sm font-black ${roleTheme.accentText}`}>
                             {wickets}
                           </span>
@@ -825,7 +872,7 @@ export default function EnhancedWPLTeamPage({ teamId }: { teamId: string }) {
                             Wkts
                           </span>
                         </div>
-                        <div className="rounded-xl bg-white/[0.02] py-2 px-1 border border-white/[0.04] group-hover:border-white/10 transition-colors">
+                        <div className="rounded-xl bg-black/40 py-2 border border-white/[0.06] group-hover:border-white/15 transition-colors">
                           <span className="block text-sm font-black text-white">
                             {matchesCount}
                           </span>
