@@ -282,7 +282,8 @@ function AdminPlayersWorkspace() {
     for (const player of players) {
       const raw = computeRoleRawScore(player);
       const matches = Number(player.stats?.matches || 0);
-      const score = Math.round(applyReliability(raw, matches));
+      const league = player.league || currentLeague || 'wpl';
+      const score = Math.round(applyReliability(raw, matches, league));
       const league = player.league || currentLeague || 'ipl';
       const grade = gradeFromPercentile(score, player.role, league, players);
 
@@ -328,7 +329,8 @@ function AdminPlayersWorkspace() {
 
     const raw = computeRoleRawScore(player);
     const matches = Number(player.stats?.matches || 0);
-    const score = Math.round(applyReliability(raw, matches));
+    const league = player.league || currentLeague || 'wpl';
+      const score = Math.round(applyReliability(raw, matches, league));
     const league = player.league || currentLeague || 'ipl';
     const grade = gradeFromPercentile(score, player.role, league, players.length > 0 ? players : [player]);
 
