@@ -248,6 +248,95 @@ export default function EnhancedWPLTeamPage({ teamId }: { teamId: string }) {
 
 
     // Role Color Palette Helper
+    // Franchise Historical Data (2023-2026)
+  const getFranchiseStats = (shortName?: string) => {
+    const s = (shortName || '').toLowerCase();
+    if (s.includes('rcb')) {
+      return {
+        played: '35',
+        wins: '18',
+        losses: '17',
+        winRate: '51.4%',
+        trophyText: '2 Titles (2024, 2026)',
+        highestTotal: '213/10',
+        highestTotalOpponent: 'vs UPW (March 2025)',
+        biggestWin: 'Chased 204/4 in 2026 Final (Vadodara)',
+        lowestDefended: '135/6 vs MI (Eliminator 2024)',
+        ppRPO: '8.45',
+        deathRPO: '10.82',
+        bat1stWinRate: '50.0%',
+        chasingWinRate: '52.6%'
+      };
+    }
+    if (s.includes('mi')) {
+      return {
+        played: '37',
+        wins: '23',
+        losses: '14',
+        winRate: '62.2%',
+        trophyText: '2 Titles (2023, 2025)',
+        highestTotal: '213/4',
+        highestTotalOpponent: 'vs GG (March 2025)',
+        biggestWin: '143 Runs vs GG (Inaugural Match)',
+        lowestDefended: '129 vs DC (2023)',
+        ppRPO: '8.62',
+        deathRPO: '11.10',
+        bat1stWinRate: '66.7%',
+        chasingWinRate: '59.1%'
+      };
+    }
+    if (s.includes('dc')) {
+      return {
+        played: '36',
+        wins: '21',
+        losses: '15',
+        winRate: '58.3%',
+        trophyText: '4x Finalists',
+        highestTotal: '223/2',
+        highestTotalOpponent: 'vs RCB (March 2023)',
+        biggestWin: '60 Runs vs RCB / 10 Wickets vs GG',
+        lowestDefended: '138 vs UPW',
+        ppRPO: '8.90',
+        deathRPO: '10.20',
+        bat1stWinRate: '61.5%',
+        chasingWinRate: '56.5%'
+      };
+    }
+    if (s.includes('gg')) {
+      return {
+        played: '33',
+        wins: '11',
+        losses: '22',
+        winRate: '33.3%',
+        trophyText: 'Challenger',
+        highestTotal: '209/10',
+        highestTotalOpponent: 'vs DC (Jan 2026)',
+        biggestWin: '19 Runs vs RCB',
+        lowestDefended: '152 vs UPW',
+        ppRPO: '7.80',
+        deathRPO: '9.45',
+        bat1stWinRate: '35.7%',
+        chasingWinRate: '31.6%'
+      };
+    }
+    // Default UPW
+    return {
+      played: '33',
+      wins: '12',
+      losses: '21',
+      winRate: '36.4%',
+      trophyText: 'Playoff Contender',
+      highestTotal: '225/5 (WPL Record)',
+      highestTotalOpponent: 'vs RCB (March 2025)',
+      biggestWin: '33 Runs vs GG',
+      lowestDefended: '138 vs RCB',
+      ppRPO: '7.95',
+      deathRPO: '10.15',
+      bat1stWinRate: '38.5%',
+      chasingWinRate: '35.0%'
+    };
+  };
+
   const getRoleDesign = (role?: string) => {
     const r = (role || '').toLowerCase();
     if (r.includes('wicket') || r.includes('keeper') || r.includes('wk')) {
@@ -772,132 +861,112 @@ export default function EnhancedWPLTeamPage({ teamId }: { teamId: string }) {
           )}
 
           {/* Team Stats & Records Tab */}
-          {activeTab === 'stats' && (
-            <div className="space-y-8 max-w-6xl mx-auto">
-              
-              {/* Overall Performance Banners */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="p-5 rounded-2xl bg-white/[0.03] border border-white/10 text-center">
-                  <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Matches Played</span>
-                  <div className="text-2xl font-black text-white mt-1">35</div>
-                  <span className="text-[10px] text-gray-500">WPL 2023–2026</span>
-                </div>
-                <div className="p-5 rounded-2xl bg-white/[0.03] border border-white/10 text-center">
-                  <span className="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">Win Rate</span>
-                  <div className="text-2xl font-black text-emerald-300 mt-1">54.2%</div>
-                  <span className="text-[10px] text-gray-500">19 Wins / 16 Losses</span>
-                </div>
-                <div className="p-5 rounded-2xl bg-white/[0.03] border border-white/10 text-center">
-                  <span className="text-[11px] font-bold text-pink-400 uppercase tracking-wider">Highest Total</span>
-                  <div className="text-2xl font-black text-pink-300 mt-1">213/4</div>
-                  <span className="text-[10px] text-gray-500">vs UPW (Lucknow)</span>
-                </div>
-                <div className="p-5 rounded-2xl bg-white/[0.03] border border-white/10 text-center">
-                  <span className="text-[11px] font-bold text-amber-400 uppercase tracking-wider">Championships</span>
-                  <div className="text-2xl font-black text-amber-300 mt-1">
-                    {team.shortName?.toLowerCase().includes('rcb') || team.shortName?.toLowerCase().includes('mi') ? '1 Title' : 'Finalist'}
+          {activeTab === 'stats' && (() => {
+            const fs = getFranchiseStats(team.shortName);
+            return (
+              <div className="space-y-8 max-w-6xl mx-auto">
+                {/* Overall Performance Banners */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className="p-5 rounded-2xl bg-white/[0.03] border border-white/10 text-center">
+                    <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Matches Played</span>
+                    <div className="text-2xl font-black text-white mt-1">{fs.played}</div>
+                    <span className="text-[10px] text-gray-500">WPL 2023–2026</span>
                   </div>
-                  <span className="text-[10px] text-gray-500">Trophy Cabinet</span>
-                </div>
-              </div>
-
-              {/* Franchise Highs & Lows Matrix */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="p-6 rounded-3xl bg-white/[0.02] border border-white/10 space-y-4">
-                  <div className="flex items-center gap-2 border-b border-white/10 pb-3">
-                    <Trophy className="w-5 h-5 text-amber-400" />
-                    <h3 className="text-base font-bold text-white">Record Highs & Big Wins</h3>
+                  <div className="p-5 rounded-2xl bg-white/[0.03] border border-white/10 text-center">
+                    <span className="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">Win Rate</span>
+                    <div className="text-2xl font-black text-emerald-300 mt-1">{fs.winRate}</div>
+                    <span className="text-[10px] text-gray-500">{fs.wins}W / {fs.losses}L</span>
                   </div>
-
-                  <div className="space-y-3 text-xs">
-                    <div className="flex justify-between items-center py-2 border-b border-white/5">
-                      <span className="text-gray-400">Biggest Win (by Runs)</span>
-                      <strong className="text-white">61 Runs <span className="text-gray-500 font-normal">vs GG (Vadodara)</span></strong>
-                    </div>
-                    <div className="flex justify-between items-center py-2 border-b border-white/5">
-                      <span className="text-gray-400">Biggest Win (by Wickets)</span>
-                      <strong className="text-white">9 Wickets <span className="text-gray-500 font-normal">vs UPW (DY Patil)</span></strong>
-                    </div>
-                    <div className="flex justify-between items-center py-2 border-b border-white/5">
-                      <span className="text-gray-400">Highest Successful Chase</span>
-                      <strong className="text-white">204/4 <span className="text-gray-500 font-normal">Target: 204 vs DC</span></strong>
-                    </div>
-                    <div className="flex justify-between items-center py-2">
-                      <span className="text-gray-400">Lowest Score Defended</span>
-                      <strong className="text-white">136/6 <span className="text-gray-500 font-normal">Defending 135 vs MI</span></strong>
-                    </div>
+                  <div className="p-5 rounded-2xl bg-white/[0.03] border border-white/10 text-center">
+                    <span className="text-[11px] font-bold text-pink-400 uppercase tracking-wider">Highest Total</span>
+                    <div className="text-2xl font-black text-pink-300 mt-1">{fs.highestTotal}</div>
+                    <span className="text-[10px] text-gray-500">{fs.highestTotalOpponent}</span>
+                  </div>
+                  <div className="p-5 rounded-2xl bg-white/[0.03] border border-white/10 text-center">
+                    <span className="text-[11px] font-bold text-amber-400 uppercase tracking-wider">Championships</span>
+                    <div className="text-2xl font-black text-amber-300 mt-1">{fs.trophyText}</div>
+                    <span className="text-[10px] text-gray-500">Trophy Cabinet</span>
                   </div>
                 </div>
 
-                {/* Phase Performance Breakdown */}
-                <div className="p-6 rounded-3xl bg-white/[0.02] border border-white/10 space-y-4">
-                  <div className="flex items-center gap-2 border-b border-white/10 pb-3">
-                    <Zap className="w-5 h-5 text-pink-400" />
-                    <h3 className="text-base font-bold text-white">Phase Performance (T20 Splits)</h3>
+                {/* Franchise Highs & Lows Matrix */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="p-6 rounded-3xl bg-white/[0.02] border border-white/10 space-y-4">
+                    <div className="flex items-center gap-2 border-b border-white/10 pb-3">
+                      <Trophy className="w-5 h-5 text-amber-400" />
+                      <h3 className="text-base font-bold text-white">Record Highs & Big Wins</h3>
+                    </div>
+
+                    <div className="space-y-3 text-xs">
+                      <div className="flex justify-between items-center py-2 border-b border-white/5">
+                        <span className="text-gray-400">Signature Victory</span>
+                        <strong className="text-white text-right">{fs.biggestWin}</strong>
+                      </div>
+                      <div className="flex justify-between items-center py-2 border-b border-white/5">
+                        <span className="text-gray-400">Lowest Score Defended</span>
+                        <strong className="text-white text-right">{fs.lowestDefended}</strong>
+                      </div>
+                      <div className="flex justify-between items-center py-2">
+                        <span className="text-gray-400">Peak Total</span>
+                        <strong className="text-white">{fs.highestTotal}</strong>
+                      </div>
+                    </div>
                   </div>
 
-                  <div className="space-y-4 text-xs">
-                    <div>
-                      <div className="flex justify-between mb-1">
-                        <span className="text-gray-300 font-semibold">Powerplay (Overs 1–6)</span>
-                        <span className="text-pink-400 font-bold">8.42 RPO</span>
-                      </div>
-                      <div className="w-full bg-white/5 h-2 rounded-full overflow-hidden">
-                        <div className="bg-pink-500 h-full rounded-full" style={{ width: '84%' }} />
-                      </div>
+                  {/* Phase Performance Breakdown */}
+                  <div className="p-6 rounded-3xl bg-white/[0.02] border border-white/10 space-y-4">
+                    <div className="flex items-center gap-2 border-b border-white/10 pb-3">
+                      <Zap className="w-5 h-5 text-pink-400" />
+                      <h3 className="text-base font-bold text-white">Phase Scoring Rate (RPO)</h3>
                     </div>
 
-                    <div>
-                      <div className="flex justify-between mb-1">
-                        <span className="text-gray-300 font-semibold">Middle Overs (Overs 7–15)</span>
-                        <span className="text-indigo-400 font-bold">7.85 RPO</span>
+                    <div className="space-y-4 text-xs">
+                      <div>
+                        <div className="flex justify-between mb-1">
+                          <span className="text-gray-300 font-semibold">Powerplay (Overs 1–6)</span>
+                          <span className="text-pink-400 font-bold">{fs.ppRPO} RPO</span>
+                        </div>
+                        <div className="w-full bg-white/5 h-2 rounded-full overflow-hidden">
+                          <div className="bg-pink-500 h-full rounded-full" style={{ width: '85%' }} />
+                        </div>
                       </div>
-                      <div className="w-full bg-white/5 h-2 rounded-full overflow-hidden">
-                        <div className="bg-indigo-500 h-full rounded-full" style={{ width: '78%' }} />
-                      </div>
-                    </div>
 
-                    <div>
-                      <div className="flex justify-between mb-1">
-                        <span className="text-gray-300 font-semibold">Death Overs (Overs 16–20)</span>
-                        <span className="text-amber-400 font-bold">10.65 RPO</span>
-                      </div>
-                      <div className="w-full bg-white/5 h-2 rounded-full overflow-hidden">
-                        <div className="bg-amber-400 h-full rounded-full" style={{ width: '92%' }} />
+                      <div>
+                        <div className="flex justify-between mb-1">
+                          <span className="text-gray-300 font-semibold">Death Overs (Overs 16–20)</span>
+                          <span className="text-amber-400 font-bold">{fs.deathRPO} RPO</span>
+                        </div>
+                        <div className="w-full bg-white/5 h-2 rounded-full overflow-hidden">
+                          <div className="bg-amber-400 h-full rounded-full" style={{ width: '92%' }} />
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
-              </div>
 
-              {/* Head-to-Head Win Ratios */}
-              <div className="p-6 rounded-3xl bg-white/[0.02] border border-white/10">
-                <div className="flex items-center gap-2 border-b border-white/10 pb-3 mb-4">
-                  <TrendingUp className="w-5 h-5 text-emerald-400" />
-                  <h3 className="text-base font-bold text-white">Toss & Pitch Breakdown</h3>
-                </div>
+                {/* Toss & Pitch Breakdown */}
+                <div className="p-6 rounded-3xl bg-white/[0.02] border border-white/10">
+                  <div className="flex items-center gap-2 border-b border-white/10 pb-3 mb-4">
+                    <TrendingUp className="w-5 h-5 text-emerald-400" />
+                    <h3 className="text-base font-bold text-white">Batting 1st vs Chasing Split</h3>
+                  </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 text-center">
-                  <div className="p-4 rounded-xl bg-white/[0.03] border border-white/5">
-                    <span className="text-xs text-gray-400 block mb-1">Batting 1st Win Rate</span>
-                    <span className="text-xl font-black text-white">57.1%</span>
-                    <span className="text-[10px] text-emerald-400 block mt-0.5">8 wins out of 14</span>
-                  </div>
-                  <div className="p-4 rounded-xl bg-white/[0.03] border border-white/5">
-                    <span className="text-xs text-gray-400 block mb-1">Chasing Win Rate</span>
-                    <span className="text-xl font-black text-white">52.4%</span>
-                    <span className="text-[10px] text-pink-400 block mt-0.5">11 wins out of 21</span>
-                  </div>
-                  <div className="p-4 rounded-xl bg-white/[0.03] border border-white/5">
-                    <span className="text-xs text-gray-400 block mb-1">Average 1st Innings Score</span>
-                    <span className="text-xl font-black text-amber-300">168</span>
-                    <span className="text-[10px] text-gray-400 block mt-0.5">Above tournament par (162)</span>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-center">
+                    <div className="p-4 rounded-xl bg-white/[0.03] border border-white/5">
+                      <span className="text-xs text-gray-400 block mb-1">Batting 1st Win Rate</span>
+                      <span className="text-xl font-black text-white">{fs.bat1stWinRate}</span>
+                      <span className="text-[10px] text-emerald-400 block mt-0.5">Defending Target</span>
+                    </div>
+                    <div className="p-4 rounded-xl bg-white/[0.03] border border-white/5">
+                      <span className="text-xs text-gray-400 block mb-1">Chasing Win Rate</span>
+                      <span className="text-xl font-black text-white">{fs.chasingWinRate}</span>
+                      <span className="text-[10px] text-pink-400 block mt-0.5">Chasing Target</span>
+                    </div>
                   </div>
                 </div>
               </div>
-
-            </div>
-          )}
+            );
+          })()}
         </section>
       </main>
 
