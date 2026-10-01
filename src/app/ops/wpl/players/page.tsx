@@ -567,6 +567,7 @@ function AdminPlayersWorkspace() {
       runsConceded: string;
       bowlingAverage: string;
       bowlingStrikeRate: string;
+      fourWickets: string;
       fiveWickets: string;
       bestBowling: string;
     };
@@ -619,6 +620,7 @@ function AdminPlayersWorkspace() {
       maidens: '',
       runsConceded: '',
       bowlingStrikeRate: '',
+      fourWickets: '',
       fiveWickets: ''
     }
   });
@@ -3111,7 +3113,8 @@ function AdminPlayersWorkspace() {
         maidens: '',
         runsConceded: '',
         bowlingStrikeRate: '',
-        fiveWickets: ''
+        fourWickets: '',
+      fiveWickets: ''
       }
     });
     setShowForm(true);
@@ -3210,7 +3213,8 @@ function AdminPlayersWorkspace() {
         maidens: player.stats.maidens > 0 ? player.stats.maidens.toString() : '',
         runsConceded: player.stats.runsConceded > 0 ? player.stats.runsConceded.toString() : '',
         bowlingStrikeRate: player.stats.bowlingStrikeRate && player.stats.bowlingStrikeRate !== '0' && player.stats.bowlingStrikeRate !== '-' ? player.stats.bowlingStrikeRate : '',
-        fiveWickets: player.stats.fiveWickets > 0 ? player.stats.fiveWickets.toString() : ''
+        fourWickets: (player.stats.fourWickets || 0) > 0 ? (player.stats.fourWickets || 0).toString() : '',
+        fiveWickets: (player.stats.fiveWickets || 0) > 0 ? (player.stats.fiveWickets || 0).toString() : ''
       }
     });
     setShowForm(true);
@@ -3345,6 +3349,7 @@ function AdminPlayersWorkspace() {
           maidens: formData.stats.maidens ? parseInt(formData.stats.maidens) || 0 : 0,
           runsConceded: formData.stats.runsConceded ? parseInt(formData.stats.runsConceded) || 0 : 0,
           bowlingStrikeRate: formData.stats.bowlingStrikeRate && formData.stats.bowlingStrikeRate.trim() !== '' ? formData.stats.bowlingStrikeRate : '',
+          fourWickets: formData.stats.fourWickets ? parseInt(formData.stats.fourWickets) || 0 : 0,
           fiveWickets: formData.stats.fiveWickets ? parseInt(formData.stats.fiveWickets) || 0 : 0,
       };
 
@@ -5775,7 +5780,7 @@ function AdminPlayersWorkspace() {
                                 />
                               </div>
                             </div>
-                            <div className="group md:col-span-3">
+                            <div className="group">
                               <label className="block text-xs font-semibold text-gray-300 mb-1.5">Best Bowling (BBI)</label>
                               <div className="oil-modal-input-wrap">
                                 <input
@@ -5784,6 +5789,30 @@ function AdminPlayersWorkspace() {
                                   onChange={(e) => setFormData({...formData, stats: {...formData.stats, bestBowling: e.target.value}})}
                                   className="oil-modal-input w-full"
                                   placeholder="e.g. -/- or 3/19"
+                                />
+                              </div>
+                            </div>
+                            <div className="group">
+                              <label className="block text-xs font-semibold text-gray-300 mb-1.5">4-Wicket Hauls (4w)</label>
+                              <div className="oil-modal-input-wrap">
+                                <input
+                                  type="number"
+                                  value={formData.stats.fourWickets}
+                                  onChange={(e) => setFormData({...formData, stats: {...formData.stats, fourWickets: e.target.value}})}
+                                  className="oil-modal-input w-full"
+                                  placeholder="e.g. 0"
+                                />
+                              </div>
+                            </div>
+                            <div className="group">
+                              <label className="block text-xs font-semibold text-gray-300 mb-1.5">5-Wicket Hauls (5w)</label>
+                              <div className="oil-modal-input-wrap">
+                                <input
+                                  type="number"
+                                  value={formData.stats.fiveWickets}
+                                  onChange={(e) => setFormData({...formData, stats: {...formData.stats, fiveWickets: e.target.value}})}
+                                  className="oil-modal-input w-full"
+                                  placeholder="e.g. 0"
                                 />
                               </div>
                             </div>
