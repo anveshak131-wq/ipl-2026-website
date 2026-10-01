@@ -493,185 +493,76 @@ useEffect(() => {
   }
 
   return (
-    <div className="min-h-screen bg-[#05070f] text-slate-100 flex flex-col selection:bg-pink-500 selection:text-white">
+    <div className="min-h-screen bg-[#070a14] text-slate-100 flex flex-col selection:bg-pink-500 selection:text-white relative overflow-hidden">
       <Navbar />
 
-      <main className="flex-1 pb-24 relative overflow-hidden bg-[#04060d]">
-        {/* Dynamic Stadium Mesh & Dual Nebula Background */}
-        <div className="absolute inset-0 pointer-events-none z-0">
-          {/* Ambient Franchise Glow Orbs */}
+      <main className="flex-1 pb-24 relative overflow-hidden bg-[#060813]">
+        {/* =====================================================================
+            VIBRANT STADIUM BROADCAST CANVAS BACKGROUND 
+           ===================================================================== */}
+        <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden select-none">
+          {/* Primary Team Floodlight (Top-Left Stadium Ray) */}
           <div 
-            className="absolute -top-40 -left-40 w-[650px] h-[650px] rounded-full blur-[140px] opacity-25 mix-blend-screen transition-all duration-1000"
-            style={{ background: theme.primary }}
-          />
-          <div 
-            className="absolute top-1/3 -right-40 w-[550px] h-[550px] rounded-full blur-[140px] opacity-20 mix-blend-screen transition-all duration-1000"
-            style={{ background: theme.secondary || '#ec4899' }}
-          />
-          <div 
-            className="absolute bottom-10 left-1/3 w-[600px] h-[600px] rounded-full blur-[160px] opacity-15 mix-blend-screen"
-            style={{ background: theme.primary }}
-          />
-
-          {/* Isometric Stadium Tech Grid Overlay */}
-          <div 
-            className="absolute inset-0 opacity-[0.07]"
-            style={{
-              backgroundImage: `radial-gradient(rgba(255, 255, 255, 0.4) 1px, transparent 1px)`,
-              backgroundSize: '28px 28px'
+            className="absolute -top-40 -left-40 w-[850px] h-[850px] rounded-full blur-[110px] opacity-45 mix-blend-screen transition-all duration-1000 animate-pulse"
+            style={{ 
+              background: `radial-gradient(circle, ${theme?.primary || '#e11d48'} 0%, rgba(225,29,72,0.15) 50%, transparent 75%)` 
             }}
           />
 
-          {/* Vignette Depth Mask */}
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#04060d]/50 to-[#04060d]" />
-        </div>
-        {/* Dynamic Top Ambient Aura */}
-        <div 
-          className="pointer-events-none absolute -top-40 left-1/2 -translate-x-1/2 w-[1000px] h-[550px] rounded-full blur-[150px] opacity-25"
-          style={{ background: `radial-gradient(circle, ${theme.primary}, ${theme.secondary}, transparent 70%)` }}
-        />
+          {/* Secondary Team Spotlight (Top-Right High Arc Light) */}
+          <div 
+            className="absolute -top-20 -right-40 w-[800px] h-[800px] rounded-full blur-[120px] opacity-35 mix-blend-screen transition-all duration-1000"
+            style={{ 
+              background: `radial-gradient(circle, ${theme?.secondary || '#eab308'} 0%, rgba(234,179,8,0.15) 50%, transparent 75%)` 
+            }}
+          />
 
-        {/* Top Breadcrumb & Switcher */}
-        <div className="relative z-10 border-b border-white/[0.08] bg-black/40 backdrop-blur-md">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex flex-wrap items-center justify-between gap-4">
-            <div className="flex items-center gap-2 text-xs font-semibold text-gray-400">
-              <Link href="/wpl" className="hover:text-white transition-colors">WPL</Link>
-              <ChevronRight className="w-3.5 h-3.5 text-gray-600" />
-              <Link href="/wpl/teams" className="hover:text-white transition-colors">Franchises</Link>
-              <ChevronRight className="w-3.5 h-3.5 text-gray-600" />
-              <span className="text-pink-400 font-bold">{team.shortName || team.name}</span>
-            </div>
+          {/* Center Pitch Ground Lighting */}
+          <div 
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1100px] h-[700px] rounded-full blur-[160px] opacity-25 mix-blend-screen pointer-events-none"
+            style={{ 
+              background: `radial-gradient(ellipse, ${theme?.primary || '#ec4899'} 0%, transparent 70%)` 
+            }}
+          />
 
-            {/* Quick Franchise Navigation */}
-            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 scrollbar-none">
-              {allTeams.map((t) => {
-                const isCurrent = t.id === team.id || t.shortName === team.shortName;
-                const tTheme = getTeamTheme(t.shortName, t.name);
-                return (
-                  <Link
-                    key={t.id}
-                    href={`/wpl/teams/${(t.shortName || t.id).toLowerCase()}`}
-                    className={`px-3 py-1 rounded-lg text-xs font-black uppercase tracking-wider transition-all shrink-0 ${
-                      isCurrent
-                        ? 'bg-white/20 text-white border border-white/30'
-                        : 'bg-white/[0.04] text-gray-400 hover:text-white hover:bg-white/[0.08]'
-                    }`}
-                  >
-                    <span className="inline-block w-2 h-2 rounded-full mr-1.5" style={{ backgroundColor: tTheme.primary }} />
-                    {t.shortName || t.name}
-                  </Link>
-                );
-              })}
-            </div>
+          {/* Bottom Stadium Baseline Ambience */}
+          <div 
+            className="absolute -bottom-40 left-1/3 w-[800px] h-[600px] rounded-full blur-[140px] opacity-30 mix-blend-screen"
+            style={{ 
+              background: `radial-gradient(circle, ${theme?.secondary || '#06b6d4'} 0%, transparent 70%)` 
+            }}
+          />
+
+          {/* Giant Stadium Watermark Typography */}
+          <div className="absolute top-24 inset-x-0 flex flex-col items-center justify-center opacity-[0.05] pointer-events-none select-none">
+            <span className="text-[17vw] font-black uppercase tracking-tighter leading-none whitespace-nowrap text-white font-mono">
+              {team?.shortName || 'WPL 2026'}
+            </span>
+            <span className="text-[7vw] font-black uppercase tracking-[0.3em] leading-none text-white/50 -mt-6">
+              CHAMPIONSHIP ARENA
+            </span>
           </div>
+
+          {/* High-Contrast Diagonal Stadium Floodlight Beams */}
+          <div 
+            className="absolute inset-0 opacity-25"
+            style={{
+              backgroundImage: 'repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.03) 0px, rgba(255, 255, 255, 0.03) 2px, transparent 2px, transparent 40px)'
+            }}
+          />
+
+          {/* Stadium Pitch Hex/Carbon Grid Texture */}
+          <div 
+            className="absolute inset-0 opacity-20"
+            style={{
+              backgroundImage: `linear-gradient(to right, rgba(255, 255, 255, 0.12) 1px, transparent 1px), linear-gradient(to bottom, rgba(255, 255, 255, 0.12) 1px, transparent 1px)`,
+              backgroundSize: '48px 48px'
+            }}
+          />
+
+          {/* Soft Grounding Gradient Overlay */}
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#060813]/30 to-[#060813] pointer-events-none" />
         </div>
-
-        {/* Hero Section */}
-        <section className={`relative pt-12 pb-14 border-b border-white/[0.08] bg-gradient-to-b ${theme.gradient}`}>
-          <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="grid grid-cols-1 lg:grid-cols-[200px_1fr_300px] gap-8 items-center">
-              
-              {/* Franchise Crest Frame */}
-              <div className="flex justify-center">
-                <div 
-                  className="relative w-44 h-44 rounded-3xl p-6 flex items-center justify-center bg-black/60 border border-white/15 backdrop-blur-2xl shadow-2xl"
-                  style={{ boxShadow: `0 20px 60px -15px ${theme.glow}` }}
-                >
-                  {team.logo ? (
-                    <img
-                      src={team.logo}
-                      alt={team.name}
-                      className="max-h-full max-w-full object-contain filter drop-shadow-[0_12px_24px_rgba(0,0,0,0.8)]"
-                    />
-                  ) : (
-                    <Shield className="w-20 h-20 text-white/50" />
-                  )}
-                  <div 
-                    className="absolute -bottom-3 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest text-slate-950 shadow-md"
-                    style={{ backgroundColor: theme.secondary }}
-                  >
-                    WPL 2027
-                  </div>
-                </div>
-              </div>
-
-              {/* Title & Metadata */}
-              <div className="space-y-3.5 text-center lg:text-left">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.08] border border-white/10 text-xs font-bold uppercase tracking-wider">
-                  <Flame className="w-3.5 h-3.5" style={{ color: theme.secondary }} />
-                  <span>Championship Roster</span>
-                </div>
-
-                <h1 className="text-4xl sm:text-5xl font-black tracking-tight text-white leading-none">
-                  {team.name}
-                </h1>
-
-                <p className="text-gray-300 text-sm max-w-xl leading-relaxed mx-auto lg:mx-0">
-                  {team.description || `${team.name} confirmed squad for the Women's Premier League 2027 season.`}
-                </p>
-
-                <div className="flex flex-wrap items-center justify-center lg:justify-start gap-2.5 pt-1">
-                  {team.homeVenue && (
-                    <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-black/40 border border-white/10 text-xs font-medium text-gray-300">
-                      <MapPin className="w-3.5 h-3.5 text-pink-400" />
-                      <span>{team.homeVenue}</span>
-                    </div>
-                  )}
-                  {team.captain && (
-                    <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-black/40 border border-white/10 text-xs font-medium text-gray-300">
-                      <Star className="w-3.5 h-3.5 text-amber-400" />
-                      <span>Captain: <strong className="text-white">{team.captain}</strong></span>
-                    </div>
-                  )}
-                  {team.coach && (
-                    <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-black/40 border border-white/10 text-xs font-medium text-gray-300">
-                      <Award className="w-3.5 h-3.5 text-cyan-400" />
-                      <span>Coach: <strong className="text-white">{team.coach}</strong></span>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Quick Metrics */}
-              <div className="grid grid-cols-2 gap-3">
-                <div className="p-4 rounded-2xl bg-black/40 border border-white/10 backdrop-blur-xl">
-                  <div className="flex items-center justify-between text-gray-400 mb-2">
-                    <span className="text-[11px] font-bold uppercase tracking-wider">Squad</span>
-                    <Users className="w-4 h-4 text-cyan-400" />
-                  </div>
-                  <span className="text-3xl font-black text-white">{players.length}</span>
-                  <span className="block text-[11px] text-gray-400 mt-0.5">Athletes</span>
-                </div>
-
-                <div className="p-4 rounded-2xl bg-black/40 border border-white/10 backdrop-blur-xl">
-                  <div className="flex items-center justify-between text-gray-400 mb-2">
-                    <span className="text-[11px] font-bold uppercase tracking-wider">Window</span>
-                    <Calendar className="w-4 h-4 text-pink-400" />
-                  </div>
-                  <span className="text-xl font-black text-white">2027</span>
-                  <span className="block text-[10px] text-pink-400 font-bold mt-1">Jan 9 – Feb 5</span>
-                </div>
-
-                <div className="p-4 rounded-2xl bg-black/40 border border-white/10 backdrop-blur-xl col-span-2">
-                  <div className="flex items-center justify-between text-gray-400 mb-1">
-                    <span className="text-[11px] font-bold uppercase tracking-wider">Championship Record</span>
-                    <Trophy className="w-4 h-4 text-amber-400" />
-                  </div>
-                  <span className="text-base font-black text-amber-300">
-                    {(() => {
-                      const name = (team.shortName || team.name || '').toLowerCase();
-                      if (name.includes('rcb')) return '2 WPL Championships (2024, 2026)';
-                      if (name.includes('mi')) return '2 WPL Championships (2023, 2025)';
-                      if (name.includes('dc')) return '4x WPL Finalist (2023–2026)';
-                      return 'Contender for 2027 Title';
-                    })()}
-                  </span>
-                </div>
-              </div>
-
-            </div>
-          </div>
-        </section>
 
         {/* Tab & Controls */}
         <section className="sticky top-16 z-30 bg-[#05070f]/90 backdrop-blur-xl border-b border-white/[0.08]">
