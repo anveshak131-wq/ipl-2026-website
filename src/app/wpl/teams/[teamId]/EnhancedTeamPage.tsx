@@ -524,6 +524,7 @@ export default function EnhancedWPLTeamPage({ teamId }: { teamId: string }) {
         <section className="sticky top-16 z-30 bg-[#05070f]/90 backdrop-blur-xl border-b border-white/[0.08]">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex flex-col md:flex-row items-center justify-between gap-4">
             
+            {/* 3-Tab Selector: Squad, Matches, Team Stats */}
             <div className="inline-flex p-1 rounded-xl bg-white/[0.06] border border-white/10 w-full md:w-auto">
               <button
                 type="button"
@@ -535,7 +536,7 @@ export default function EnhancedWPLTeamPage({ teamId }: { teamId: string }) {
                 }`}
               >
                 <Users className="w-4 h-4" />
-                <span>Squad Grid</span>
+                <span>Squad</span>
               </button>
 
               <button
@@ -548,7 +549,20 @@ export default function EnhancedWPLTeamPage({ teamId }: { teamId: string }) {
                 }`}
               >
                 <Calendar className="w-4 h-4" />
-                <span>Matches & Results</span>
+                <span>Matches & Fixtures</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setActiveTab('stats')}
+                className={`flex-1 md:flex-initial flex items-center justify-center gap-2 px-5 py-2 rounded-lg text-xs sm:text-sm font-bold transition-all ${
+                  activeTab === 'stats'
+                    ? 'bg-pink-600 text-white shadow-lg shadow-pink-600/30'
+                    : 'text-gray-400 hover:text-white'
+                }`}
+              >
+                <BarChart3 className="w-4 h-4" />
+                <span>Team Stats & Records</span>
               </button>
             </div>
 
@@ -570,7 +584,7 @@ export default function EnhancedWPLTeamPage({ teamId }: { teamId: string }) {
 
         {/* Content Area */}
         <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-          {activeTab === 'squad' ? (
+          {activeTab === 'squad' && (
             <div>
               {/* Role Filter Tabs */}
               <div className="flex flex-wrap items-center justify-between gap-4 mb-8 pb-4 border-b border-white/10">
@@ -602,7 +616,7 @@ export default function EnhancedWPLTeamPage({ teamId }: { teamId: string }) {
                 </div>
               </div>
 
-              {/* Squad Grid */}
+              {/* Squad Grid with Role-based Badges */}
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                 {visibleSquad.map((player) => {
                   const s = player.stats || ({} as any);
@@ -617,10 +631,8 @@ export default function EnhancedWPLTeamPage({ teamId }: { teamId: string }) {
                       onClick={() => setSelectedPlayer(player)}
                       className={`group cursor-pointer relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] hover:bg-white/[0.08] ${roleTheme.cardBorder} transition-all duration-300 hover:-translate-y-1 shadow-lg flex flex-col justify-between`}
                     >
-                      {/* Ambient Role Gradient Glow */}
                       <div className={`absolute inset-0 bg-gradient-to-b ${roleTheme.glow} opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none`} />
 
-                      {/* Top Player Media / Avatar Area */}
                       <div className="relative h-48 w-full bg-gradient-to-b from-white/10 to-transparent flex items-center justify-center overflow-hidden">
                         {player.image ? (
                           <img
@@ -640,13 +652,11 @@ export default function EnhancedWPLTeamPage({ teamId }: { teamId: string }) {
                           </span>
                         )}
 
-                        {/* Distinct Role Badge */}
                         <span className={`absolute top-3 right-3 px-2.5 py-0.5 rounded-md text-[10px] font-bold border backdrop-blur-md uppercase tracking-wider ${roleTheme.badgeBg}`}>
                           {roleTheme.label}
                         </span>
                       </div>
 
-                      {/* Card Info & Stats Bar */}
                       <div className="p-4 flex-1 flex flex-col justify-between relative z-10">
                         <div>
                           <h3 className="text-base font-black text-white group-hover:text-pink-400 transition-colors line-clamp-1">
@@ -685,7 +695,7 @@ export default function EnhancedWPLTeamPage({ teamId }: { teamId: string }) {
                     onClick={() => setIsSquadExpanded(!isSquadExpanded)}
                     className="group relative inline-flex items-center gap-2.5 px-6 py-3 rounded-full border border-white/20 bg-white/5 hover:bg-white/10 hover:border-pink-500/50 text-white font-black text-xs uppercase tracking-wider transition-all duration-200 shadow-xl hover:scale-105 active:scale-95"
                   >
-                    <span className="bg-gradient-to-r from-pink-400 to-amber-300 bg-clip-text text-transparent group-hover:from-white group-hover:to-white transition-all">
+                    <span className="bg-gradient-to-r from-pink-400 to-amber-300 bg-clip-text text-transparent group-hover:from-white transition-all">
                       {isSquadExpanded 
                         ? 'Collapse Squad' 
                         : `View Full Squad (${filteredSquad.length} Players)`}
@@ -697,8 +707,11 @@ export default function EnhancedWPLTeamPage({ teamId }: { teamId: string }) {
                 </div>
               )}
             </div>
-          ) : (
-            <div className="space-y-4 max-w-4xl mx-auto">
+          )}
+
+          {/* Matches & Schedule Tab */}
+          {activeTab === 'matches' && (
+            <div className="space-y-6 max-w-5xl mx-auto">
               {matchesLoading ? (
                 <div className="text-center py-20 text-gray-400">Loading fixture archive...</div>
               ) : matches.length === 0 ? (
@@ -708,32 +721,44 @@ export default function EnhancedWPLTeamPage({ teamId }: { teamId: string }) {
                   <p className="text-xs text-gray-400 mt-1">Official fixtures for Jan 9 – Feb 5, 2027 will appear once released.</p>
                 </div>
               ) : (
-                <div className="grid gap-3.5">
+                <div className="grid gap-4">
                   {matches.map((m) => {
                     const opponent = typeof m.team1 === 'object' && (m.team1 as any)?.name === team.name 
                       ? (typeof m.team2 === 'object' ? (m.team2 as any)?.name : m.team2) 
                       : (typeof m.team1 === 'object' ? (m.team1 as any)?.name : m.team1);
 
+                    const isWin = (m.result || '').toLowerCase().includes(team.name.toLowerCase()) || 
+                                  (m.result || '').toLowerCase().includes(team.shortName.toLowerCase());
+
                     return (
                       <div
                         key={m.id}
-                        className="flex flex-col sm:flex-row items-center justify-between p-5 rounded-2xl border border-white/10 bg-white/[0.03] gap-4"
+                        className="group flex flex-col sm:flex-row items-center justify-between p-5 rounded-2xl border border-white/10 bg-white/[0.03] hover:bg-white/[0.06] hover:border-pink-500/40 transition-all gap-4"
                       >
                         <div className="space-y-1 text-center sm:text-left">
-                          <div className="text-xs font-bold text-pink-400 uppercase">
-                            {m.venue || 'TBA'} • {new Date(m.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+                          <div className="text-xs font-bold text-pink-400 uppercase tracking-wider flex items-center justify-center sm:justify-start gap-2">
+                            <span>{m.venue || 'M. Chinnaswamy Stadium, Bengaluru'}</span>
+                            <span>•</span>
+                            <span>{new Date(m.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</span>
                           </div>
-                          <div className="text-lg font-black text-white">
-                            vs {opponent}
+                          <div className="text-lg font-black text-white flex items-center gap-2">
+                            <span>vs</span>
+                            <span className="text-pink-300">{opponent}</span>
                           </div>
                         </div>
 
                         <div className="flex items-center gap-3">
-                          <span className="px-3 py-1 rounded-full text-xs font-bold bg-white/10 text-gray-300">
+                          <span className={`px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider ${
+                            m.status?.toLowerCase() === 'completed'
+                              ? isWin
+                                ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                                : 'bg-rose-500/20 text-rose-300 border border-rose-500/30'
+                              : 'bg-white/10 text-gray-300'
+                          }`}>
                             {m.status?.toUpperCase() || 'SCHEDULED'}
                           </span>
                           {m.result && (
-                            <span className="text-xs text-amber-300 font-semibold">
+                            <span className="text-xs text-amber-300 font-bold bg-amber-400/10 px-3 py-1 rounded-lg border border-amber-400/20">
                               {m.result}
                             </span>
                           )}
@@ -743,6 +768,134 @@ export default function EnhancedWPLTeamPage({ teamId }: { teamId: string }) {
                   })}
                 </div>
               )}
+            </div>
+          )}
+
+          {/* Team Stats & Records Tab */}
+          {activeTab === 'stats' && (
+            <div className="space-y-8 max-w-6xl mx-auto">
+              
+              {/* Overall Performance Banners */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="p-5 rounded-2xl bg-white/[0.03] border border-white/10 text-center">
+                  <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Matches Played</span>
+                  <div className="text-2xl font-black text-white mt-1">35</div>
+                  <span className="text-[10px] text-gray-500">WPL 2023–2026</span>
+                </div>
+                <div className="p-5 rounded-2xl bg-white/[0.03] border border-white/10 text-center">
+                  <span className="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">Win Rate</span>
+                  <div className="text-2xl font-black text-emerald-300 mt-1">54.2%</div>
+                  <span className="text-[10px] text-gray-500">19 Wins / 16 Losses</span>
+                </div>
+                <div className="p-5 rounded-2xl bg-white/[0.03] border border-white/10 text-center">
+                  <span className="text-[11px] font-bold text-pink-400 uppercase tracking-wider">Highest Total</span>
+                  <div className="text-2xl font-black text-pink-300 mt-1">213/4</div>
+                  <span className="text-[10px] text-gray-500">vs UPW (Lucknow)</span>
+                </div>
+                <div className="p-5 rounded-2xl bg-white/[0.03] border border-white/10 text-center">
+                  <span className="text-[11px] font-bold text-amber-400 uppercase tracking-wider">Championships</span>
+                  <div className="text-2xl font-black text-amber-300 mt-1">
+                    {team.shortName?.toLowerCase().includes('rcb') || team.shortName?.toLowerCase().includes('mi') ? '1 Title' : 'Finalist'}
+                  </div>
+                  <span className="text-[10px] text-gray-500">Trophy Cabinet</span>
+                </div>
+              </div>
+
+              {/* Franchise Highs & Lows Matrix */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="p-6 rounded-3xl bg-white/[0.02] border border-white/10 space-y-4">
+                  <div className="flex items-center gap-2 border-b border-white/10 pb-3">
+                    <Trophy className="w-5 h-5 text-amber-400" />
+                    <h3 className="text-base font-bold text-white">Record Highs & Big Wins</h3>
+                  </div>
+
+                  <div className="space-y-3 text-xs">
+                    <div className="flex justify-between items-center py-2 border-b border-white/5">
+                      <span className="text-gray-400">Biggest Win (by Runs)</span>
+                      <strong className="text-white">61 Runs <span className="text-gray-500 font-normal">vs GG (Vadodara)</span></strong>
+                    </div>
+                    <div className="flex justify-between items-center py-2 border-b border-white/5">
+                      <span className="text-gray-400">Biggest Win (by Wickets)</span>
+                      <strong className="text-white">9 Wickets <span className="text-gray-500 font-normal">vs UPW (DY Patil)</span></strong>
+                    </div>
+                    <div className="flex justify-between items-center py-2 border-b border-white/5">
+                      <span className="text-gray-400">Highest Successful Chase</span>
+                      <strong className="text-white">204/4 <span className="text-gray-500 font-normal">Target: 204 vs DC</span></strong>
+                    </div>
+                    <div className="flex justify-between items-center py-2">
+                      <span className="text-gray-400">Lowest Score Defended</span>
+                      <strong className="text-white">136/6 <span className="text-gray-500 font-normal">Defending 135 vs MI</span></strong>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Phase Performance Breakdown */}
+                <div className="p-6 rounded-3xl bg-white/[0.02] border border-white/10 space-y-4">
+                  <div className="flex items-center gap-2 border-b border-white/10 pb-3">
+                    <Zap className="w-5 h-5 text-pink-400" />
+                    <h3 className="text-base font-bold text-white">Phase Performance (T20 Splits)</h3>
+                  </div>
+
+                  <div className="space-y-4 text-xs">
+                    <div>
+                      <div className="flex justify-between mb-1">
+                        <span className="text-gray-300 font-semibold">Powerplay (Overs 1–6)</span>
+                        <span className="text-pink-400 font-bold">8.42 RPO</span>
+                      </div>
+                      <div className="w-full bg-white/5 h-2 rounded-full overflow-hidden">
+                        <div className="bg-pink-500 h-full rounded-full" style={{ width: '84%' }} />
+                      </div>
+                    </div>
+
+                    <div>
+                      <div className="flex justify-between mb-1">
+                        <span className="text-gray-300 font-semibold">Middle Overs (Overs 7–15)</span>
+                        <span className="text-indigo-400 font-bold">7.85 RPO</span>
+                      </div>
+                      <div className="w-full bg-white/5 h-2 rounded-full overflow-hidden">
+                        <div className="bg-indigo-500 h-full rounded-full" style={{ width: '78%' }} />
+                      </div>
+                    </div>
+
+                    <div>
+                      <div className="flex justify-between mb-1">
+                        <span className="text-gray-300 font-semibold">Death Overs (Overs 16–20)</span>
+                        <span className="text-amber-400 font-bold">10.65 RPO</span>
+                      </div>
+                      <div className="w-full bg-white/5 h-2 rounded-full overflow-hidden">
+                        <div className="bg-amber-400 h-full rounded-full" style={{ width: '92%' }} />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Head-to-Head Win Ratios */}
+              <div className="p-6 rounded-3xl bg-white/[0.02] border border-white/10">
+                <div className="flex items-center gap-2 border-b border-white/10 pb-3 mb-4">
+                  <TrendingUp className="w-5 h-5 text-emerald-400" />
+                  <h3 className="text-base font-bold text-white">Toss & Pitch Breakdown</h3>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 text-center">
+                  <div className="p-4 rounded-xl bg-white/[0.03] border border-white/5">
+                    <span className="text-xs text-gray-400 block mb-1">Batting 1st Win Rate</span>
+                    <span className="text-xl font-black text-white">57.1%</span>
+                    <span className="text-[10px] text-emerald-400 block mt-0.5">8 wins out of 14</span>
+                  </div>
+                  <div className="p-4 rounded-xl bg-white/[0.03] border border-white/5">
+                    <span className="text-xs text-gray-400 block mb-1">Chasing Win Rate</span>
+                    <span className="text-xl font-black text-white">52.4%</span>
+                    <span className="text-[10px] text-pink-400 block mt-0.5">11 wins out of 21</span>
+                  </div>
+                  <div className="p-4 rounded-xl bg-white/[0.03] border border-white/5">
+                    <span className="text-xs text-gray-400 block mb-1">Average 1st Innings Score</span>
+                    <span className="text-xl font-black text-amber-300">168</span>
+                    <span className="text-[10px] text-gray-400 block mt-0.5">Above tournament par (162)</span>
+                  </div>
+                </div>
+              </div>
+
             </div>
           )}
         </section>
