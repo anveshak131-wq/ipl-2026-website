@@ -5522,6 +5522,7 @@ function AdminPlayersWorkspace() {
                           </div>
                           <span className="oil-chip">Step 5</span>
                         </div>
+
                         {/* Live Auto-Calculated Cricbuzz Derived Metrics */}
                         {(() => {
                           const runs = parseInt(formData.stats.runs) || 0;
@@ -5531,20 +5532,23 @@ function AdminPlayersWorkspace() {
                           const dismissals = Math.max(0, inn - notOuts);
                           const liveBattingAvg = dismissals > 0 && runs > 0 ? (runs / dismissals).toFixed(2) : (runs > 0 ? runs.toFixed(2) : "-");
                           const liveBattingSR = ballsFaced > 0 && runs > 0 ? ((runs * 100) / ballsFaced).toFixed(2) : "-";
+
                           const oversRaw = parseFloat(formData.stats.balls || "0") || 0;
                           const fullOvers = Math.floor(oversRaw);
                           const remBalls = Math.round((oversRaw - fullOvers) * 10);
                           const totalBalls = fullOvers * 6 + remBalls;
                           const runsConceded = parseInt(formData.stats.runsConceded) || 0;
                           const wickets = parseInt(formData.stats.wickets) || 0;
+
                           const liveBowlingEcon = totalBalls > 0 ? ((runsConceded * 6) / totalBalls).toFixed(2) : "-";
                           const liveBowlingAvg = wickets > 0 && runsConceded > 0 ? (runsConceded / wickets).toFixed(2) : "-";
                           const liveBowlingSR = wickets > 0 && totalBalls > 0 ? (totalBalls / wickets).toFixed(1) : "-";
+
                           return (
-                            <div className="mb-5 p-4 rounded-xl bg-gradient-to-r from-blue-950/40 via-indigo-950/30 to-purple-950/40 border border-blue-500/30 backdrop-blur-md">
+                            <div className="mb-6 p-4 rounded-xl bg-gradient-to-r from-blue-950/40 via-indigo-950/30 to-purple-950/40 border border-blue-500/30 backdrop-blur-md">
                               <div className="flex items-center justify-between mb-2">
-                                <span className="text-xs font-bold uppercase tracking-wider text-blue-400">⚡ Real-Time Auto Calculations (Cricbuzz Standard)</span>
-                                <span className="text-[11px] text-gray-400">Auto-derived live from entered raw values</span>
+                                <span className="text-xs font-bold uppercase tracking-wider text-blue-400">⚡ Live Cricbuzz Derived Metrics</span>
+                                <span className="text-[11px] text-gray-400">Auto-derived live from raw counts below</span>
                               </div>
                               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
                                 <div className="bg-white/5 rounded-lg p-2.5 border border-white/10 text-center">
@@ -5552,7 +5556,7 @@ function AdminPlayersWorkspace() {
                                   <p className="text-lg font-black text-emerald-400">{liveBattingAvg}</p>
                                 </div>
                                 <div className="bg-white/5 rounded-lg p-2.5 border border-white/10 text-center">
-                                  <p className="text-[10px] uppercase font-semibold text-gray-400">Strike Rate</p>
+                                  <p className="text-[10px] uppercase font-semibold text-gray-400">Batting SR</p>
                                   <p className="text-lg font-black text-cyan-400">{liveBattingSR}</p>
                                 </div>
                                 <div className="bg-white/5 rounded-lg p-2.5 border border-white/10 text-center">
@@ -5571,269 +5575,219 @@ function AdminPlayersWorkspace() {
                             </div>
                           );
                         })()}
-                        {/* Live Auto-Calculated Derived Metrics */}
-                        {(() => {
-                          const runs = parseInt(formData.stats.runs) || 0;
-                          const ballsFaced = parseInt(formData.stats.ballsFaced) || 0;
-                          const inn = parseInt(formData.stats.battingInnings) || 0;
-                          const notOuts = parseInt(formData.stats.notOuts) || 0;
-                          const dismissals = Math.max(0, inn - notOuts);
-                          const liveBattingAvg = dismissals > 0 && runs > 0 ? (runs / dismissals).toFixed(2) : (runs > 0 ? runs.toFixed(2) : "-");
-                          const liveBattingSR = ballsFaced > 0 && runs > 0 ? ((runs * 100) / ballsFaced).toFixed(2) : "-";
-                          const oversRaw = parseFloat(formData.stats.balls || "0") || 0;
-                          const fullOvers = Math.floor(oversRaw);
-                          const remBalls = Math.round((oversRaw - fullOvers) * 10);
-                          const totalBalls = fullOvers * 6 + remBalls;
-                          const runsConceded = parseInt(formData.stats.runsConceded) || 0;
-                          const wickets = parseInt(formData.stats.wickets) || 0;
-                          const liveBowlingEcon = totalBalls > 0 ? ((runsConceded * 6) / totalBalls).toFixed(2) : "-";
-                          const liveBowlingAvg = wickets > 0 && runsConceded > 0 ? (runsConceded / wickets).toFixed(2) : "-";
-                          const liveBowlingSR = wickets > 0 && totalBalls > 0 ? (totalBalls / wickets).toFixed(1) : "-";
-                          return (
-                            <div className="mb-5 p-4 rounded-xl bg-gradient-to-r from-blue-950/40 via-indigo-950/30 to-purple-950/40 border border-blue-500/30 backdrop-blur-md">
-                              <div className="flex items-center justify-between mb-2">
-                                <span className="text-xs font-bold uppercase tracking-wider text-blue-400">⚡ Real-Time Auto Calculations</span>
-                                <span className="text-[11px] text-gray-400">Derived from current raw inputs</span>
-                              </div>
-                              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
-                                <div className="bg-white/5 rounded-lg p-2.5 border border-white/10 text-center">
-                                  <p className="text-[10px] uppercase font-semibold text-gray-400">Batting Avg</p>
-                                  <p className="text-lg font-black text-emerald-400">{liveBattingAvg}</p>
-                                </div>
-                                <div className="bg-white/5 rounded-lg p-2.5 border border-white/10 text-center">
-                                  <p className="text-[10px] uppercase font-semibold text-gray-400">Strike Rate</p>
-                                  <p className="text-lg font-black text-cyan-400">{liveBattingSR}</p>
-                                </div>
-                                <div className="bg-white/5 rounded-lg p-2.5 border border-white/10 text-center">
-                                  <p className="text-[10px] uppercase font-semibold text-gray-400">Economy</p>
-                                  <p className="text-lg font-black text-amber-400">{liveBowlingEcon}</p>
-                                </div>
-                                <div className="bg-white/5 rounded-lg p-2.5 border border-white/10 text-center">
-                                  <p className="text-[10px] uppercase font-semibold text-gray-400">Bowling Avg</p>
-                                  <p className="text-lg font-black text-purple-400">{liveBowlingAvg}</p>
-                                </div>
-                                <div className="bg-white/5 rounded-lg p-2.5 border border-white/10 text-center">
-                                  <p className="text-[10px] uppercase font-semibold text-gray-400">Bowling SR</p>
-                                  <p className="text-lg font-black text-rose-400">{liveBowlingSR}</p>
-                                </div>
+
+                        {/* BATTING CAREER SUMMARY */}
+                        <div className="mb-6">
+                          <div className="flex items-center gap-2 mb-3 pb-2 border-b border-white/10">
+                            <TrendingUp className="w-4 h-4 text-emerald-400" />
+                            <h4 className="text-sm font-bold uppercase tracking-wider text-emerald-400">Batting Career Summary</h4>
+                            <span className="text-xs text-white/40 ml-auto">Avg & SR auto-compute</span>
+                          </div>
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <div className="group">
+                              <label className="block text-xs font-semibold text-gray-300 mb-1.5">Matches (M)</label>
+                              <div className="oil-modal-input-wrap">
+                                <input
+                                  type="number"
+                                  value={formData.stats.matches}
+                                  onChange={(e) => setFormData({...formData, stats: {...formData.stats, matches: e.target.value}})}
+                                  className="oil-modal-input w-full"
+                                  placeholder="e.g. 35"
+                                />
                               </div>
                             </div>
-                          );
-                        })()}
-                        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                             <div className="group">
-                              <label className="block text-sm font-semibold text-gray-200 mb-2.5 flex items-center gap-2">
-                                <BarChart3 className="w-4 h-4 text-emerald-400" />
-                            Matches
-                          </label>
+                              <label className="block text-xs font-semibold text-gray-300 mb-1.5">Innings (Inn)</label>
                               <div className="oil-modal-input-wrap">
-                          <input
-                            type="number"
-                            value={formData.stats.matches}
-                            onChange={(e) => setFormData({...formData, stats: {...formData.stats, matches: e.target.value}})}
-                                  className="oil-modal-input oil-modal-input--icon w-full"
-                            placeholder="Matches"
-                          />
-                                <BarChart3 className="oil-modal-input-icon text-white/40" />
-                        </div>
-                        </div>
-                            <div className="group">
-                              <label className="block text-sm font-semibold text-gray-200 mb-2.5 flex items-center gap-2">
-                                <TrendingUp className="w-4 h-4 text-emerald-400" />
-                            Runs
-                          </label>
-                              <div className="oil-modal-input-wrap">
-                          <input
-                            type="number"
-                            value={formData.stats.runs}
-                            onChange={(e) => setFormData({...formData, stats: {...formData.stats, runs: e.target.value}})}
-                                  className="oil-modal-input oil-modal-input--icon w-full"
-                            placeholder="Runs"
-                          />
-                                <TrendingUp className="oil-modal-input-icon text-white/40" />
-                        </div>
-                            </div>
-                            <div className="group">
-                              <label className="block text-sm font-semibold text-gray-200 mb-2.5 flex items-center gap-2">
-                                <Target className="w-4 h-4 text-teal-400" />
-                            Wickets
-                          </label>
-                              <div className="oil-modal-input-wrap">
-                          <input
-                            type="number"
-                            value={formData.stats.wickets}
-                            onChange={(e) => setFormData({...formData, stats: {...formData.stats, wickets: e.target.value}})}
-                                  className="oil-modal-input oil-modal-input--icon w-full"
-                            placeholder="Wickets"
-                          />
-                                <Target className="oil-modal-input-icon text-white/40" />
-                        </div>
-                            </div>
-                            <div className="group">
-                              <label className="block text-sm font-semibold text-gray-200 mb-2.5 flex items-center gap-2">
-                                <BarChart3 className="w-4 h-4 text-cyan-400" />
-                            Batting Average
-                          </label>
-                              <div className="oil-modal-input-wrap">
-                          <input
-                            type="number"
-                            step="0.01"
-                            value={formData.stats.average}
-                            onChange={(e) => setFormData({...formData, stats: {...formData.stats, average: e.target.value}})}
-                                  className="oil-modal-input oil-modal-input--icon w-full"
-                            placeholder="e.g., 45.67"
-                          />
-                                <BarChart3 className="oil-modal-input-icon text-white/40" />
-                        </div>
-                            </div>
-                            <div className="group">
-                              <label className="block text-sm font-semibold text-gray-200 mb-2.5 flex items-center gap-2">
-                                <Target className="w-4 h-4 text-teal-400" />
-                            Bowling Average
-                          </label>
-                              <div className="oil-modal-input-wrap">
-                          <input
-                            type="number"
-                            step="0.01"
-                            value={formData.stats.bowlingAverage}
-                            onChange={(e) => setFormData({...formData, stats: {...formData.stats, bowlingAverage: e.target.value}})}
-                                  className="oil-modal-input oil-modal-input--icon w-full"
-                            placeholder="e.g., 25.50"
-                          />
-                                <Target className="oil-modal-input-icon text-white/40" />
-                        </div>
-                              <p className="text-xs text-gray-400 mt-2">Runs conceded per wicket</p>
-                            </div>
-                            <div className="group">
-                              <label className="block text-sm font-semibold text-gray-200 mb-2.5 flex items-center gap-2">
-                                <Zap className="w-4 h-4 text-cyan-400" />
-                            Strike Rate
-                          </label>
-                              <div className="oil-modal-input-wrap">
-                          <input
-                            type="number"
-                            step="0.01"
-                            value={formData.stats.strikeRate}
-                            onChange={(e) => setFormData({...formData, stats: {...formData.stats, strikeRate: e.target.value}})}
-                                  className="oil-modal-input oil-modal-input--icon w-full"
-                            placeholder="e.g., 145.50"
-                          />
-                                <Zap className="oil-modal-input-icon text-white/40" />
-                        </div>
-                            </div>
-                            <div className="group">
-                              <label className="block text-sm font-semibold text-gray-200 mb-2.5 flex items-center gap-2">
-                                <Activity className="w-4 h-4 text-teal-400" />
-                            Economy
-                          </label>
-                              <div className="oil-modal-input-wrap">
-                          <input
-                            type="number"
-                            step="0.01"
-                            value={formData.stats.economy}
-                            onChange={(e) => setFormData({...formData, stats: {...formData.stats, economy: e.target.value}})}
-                                  className="oil-modal-input oil-modal-input--icon w-full"
-                            placeholder="e.g., 8.50"
-                          />
-                                <Activity className="oil-modal-input-icon text-white/40" />
-                        </div>
-                            </div>
-                            <div className="group">
-                              <label className="block text-sm font-semibold text-gray-200 mb-2.5 flex items-center gap-2">
-                                <Award className="w-4 h-4 text-emerald-400" />
-                            Highest Score
-                          </label>
-                              <div className="oil-modal-input-wrap">
-                          <input
-                            type="number"
-                            value={formData.stats.highest}
-                            onChange={(e) => setFormData({...formData, stats: {...formData.stats, highest: e.target.value}})}
-                                  className="oil-modal-input oil-modal-input--icon w-full"
-                            placeholder="Highest Score"
-                          />
-                                <Award className="oil-modal-input-icon text-white/40" />
-                        </div>
-                            </div>
-                            <div className="group">
-                              <label className="block text-sm font-semibold text-gray-200 mb-2.5 flex items-center gap-2">
-                                <BarChart3 className="w-4 h-4 text-cyan-400" />
-                            Fours
-                          </label>
-                              <div className="oil-modal-input-wrap">
-                          <input
-                            type="number"
-                            value={formData.stats.fours}
-                            onChange={(e) => setFormData({...formData, stats: {...formData.stats, fours: e.target.value}})}
-                                  className="oil-modal-input oil-modal-input--icon w-full"
-                            placeholder="Fours"
-                          />
-                                <BarChart3 className="oil-modal-input-icon text-white/40" />
-                        </div>
-                            </div>
-                            <div className="group">
-                              <label className="block text-sm font-semibold text-gray-200 mb-2.5 flex items-center gap-2">
-                                <Zap className="w-4 h-4 text-teal-400" />
-                            Sixes
-                          </label>
-                              <div className="oil-modal-input-wrap">
-                          <input
-                            type="number"
-                            value={formData.stats.sixes}
-                            onChange={(e) => setFormData({...formData, stats: {...formData.stats, sixes: e.target.value}})}
-                                  className="oil-modal-input oil-modal-input--icon w-full"
-                            placeholder="Sixes"
-                          />
-                                <Zap className="oil-modal-input-icon text-white/40" />
-                        </div>
-                            </div>
-                            <div className="group">
-                              <label className="block text-sm font-semibold text-gray-200 mb-2.5 flex items-center gap-2">
-                                <Award className="w-4 h-4 text-emerald-400" />
-                            Fifties (50s)
-                          </label>
-                              <div className="oil-modal-input-wrap">
-                          <input
-                            type="number"
-                            value={formData.stats.fifties}
-                            onChange={(e) => setFormData({...formData, stats: {...formData.stats, fifties: e.target.value}})}
-                                  className="oil-modal-input oil-modal-input--icon w-full"
-                            placeholder="Fifties"
-                          />
-                                <Award className="oil-modal-input-icon text-white/40" />
-                        </div>
-                            </div>
-                            <div className="group">
-                              <label className="block text-sm font-semibold text-gray-200 mb-2.5 flex items-center gap-2">
-                                <Star className="w-4 h-4 text-cyan-400" />
-                            Hundreds (100s)
-                          </label>
-                              <div className="oil-modal-input-wrap">
-                          <input
-                            type="number"
-                            value={formData.stats.hundreds}
-                            onChange={(e) => setFormData({...formData, stats: {...formData.stats, hundreds: e.target.value}})}
-                                  className="oil-modal-input oil-modal-input--icon w-full"
-                            placeholder="Hundreds"
-                          />
-                                <Star className="oil-modal-input-icon text-white/40" />
-                        </div>
-                            </div>
-                            <div className="group md:col-span-2">
-                              <label className="block text-sm font-semibold text-gray-200 mb-2.5 flex items-center gap-2">
-                                <Target className="w-4 h-4 text-teal-400" />
-                            Best Bowling (BBM)
-                          </label>
-                              <div className="oil-modal-input-wrap">
-                          <input
-                            type="text"
-                            value={formData.stats.bestBowling}
-                            onChange={(e) => setFormData({...formData, stats: {...formData.stats, bestBowling: e.target.value}})}
-                                  className="oil-modal-input oil-modal-input--icon w-full"
-                            placeholder="e.g., 4/21 or 3/45"
-                          />
-                                <Target className="oil-modal-input-icon text-white/40" />
+                                <input
+                                  type="number"
+                                  value={formData.stats.battingInnings}
+                                  onChange={(e) => setFormData({...formData, stats: {...formData.stats, battingInnings: e.target.value}})}
+                                  className="oil-modal-input w-full"
+                                  placeholder="e.g. 33"
+                                />
                               </div>
                             </div>
+                            <div className="group">
+                              <label className="block text-xs font-semibold text-gray-300 mb-1.5">Not Out (NO)</label>
+                              <div className="oil-modal-input-wrap">
+                                <input
+                                  type="number"
+                                  value={formData.stats.notOuts}
+                                  onChange={(e) => setFormData({...formData, stats: {...formData.stats, notOuts: e.target.value}})}
+                                  className="oil-modal-input w-full"
+                                  placeholder="e.g. 9"
+                                />
+                              </div>
+                            </div>
+                            <div className="group">
+                              <label className="block text-xs font-semibold text-gray-300 mb-1.5">Runs</label>
+                              <div className="oil-modal-input-wrap">
+                                <input
+                                  type="number"
+                                  value={formData.stats.runs}
+                                  onChange={(e) => setFormData({...formData, stats: {...formData.stats, runs: e.target.value}})}
+                                  className="oil-modal-input w-full"
+                                  placeholder="e.g. 814"
+                                />
+                              </div>
+                            </div>
+                            <div className="group">
+                              <label className="block text-xs font-semibold text-gray-300 mb-1.5">Balls Faced</label>
+                              <div className="oil-modal-input-wrap">
+                                <input
+                                  type="number"
+                                  value={formData.stats.ballsFaced}
+                                  onChange={(e) => setFormData({...formData, stats: {...formData.stats, ballsFaced: e.target.value}})}
+                                  className="oil-modal-input w-full"
+                                  placeholder="e.g. 539"
+                                />
+                              </div>
+                            </div>
+                            <div className="group">
+                              <label className="block text-xs font-semibold text-gray-300 mb-1.5">Highest Score (HS)</label>
+                              <div className="oil-modal-input-wrap">
+                                <input
+                                  type="number"
+                                  value={formData.stats.highest}
+                                  onChange={(e) => setFormData({...formData, stats: {...formData.stats, highest: e.target.value}})}
+                                  className="oil-modal-input w-full"
+                                  placeholder="e.g. 90"
+                                />
+                              </div>
+                            </div>
+                            <div className="group">
+                              <label className="block text-xs font-semibold text-gray-300 mb-1.5">Fours (4s)</label>
+                              <div className="oil-modal-input-wrap">
+                                <input
+                                  type="number"
+                                  value={formData.stats.fours}
+                                  onChange={(e) => setFormData({...formData, stats: {...formData.stats, fours: e.target.value}})}
+                                  className="oil-modal-input w-full"
+                                  placeholder="e.g. 88"
+                                />
+                              </div>
+                            </div>
+                            <div className="group">
+                              <label className="block text-xs font-semibold text-gray-300 mb-1.5">Sixes (6s)</label>
+                              <div className="oil-modal-input-wrap">
+                                <input
+                                  type="number"
+                                  value={formData.stats.sixes}
+                                  onChange={(e) => setFormData({...formData, stats: {...formData.stats, sixes: e.target.value}})}
+                                  className="oil-modal-input w-full"
+                                  placeholder="e.g. 41"
+                                />
+                              </div>
+                            </div>
+                            <div className="group">
+                              <label className="block text-xs font-semibold text-gray-300 mb-1.5">Fifties (50s)</label>
+                              <div className="oil-modal-input-wrap">
+                                <input
+                                  type="number"
+                                  value={formData.stats.fifties}
+                                  onChange={(e) => setFormData({...formData, stats: {...formData.stats, fifties: e.target.value}})}
+                                  className="oil-modal-input w-full"
+                                  placeholder="e.g. 5"
+                                />
+                              </div>
+                            </div>
+                            <div className="group">
+                              <label className="block text-xs font-semibold text-gray-300 mb-1.5">Hundreds (100s)</label>
+                              <div className="oil-modal-input-wrap">
+                                <input
+                                  type="number"
+                                  value={formData.stats.hundreds}
+                                  onChange={(e) => setFormData({...formData, stats: {...formData.stats, hundreds: e.target.value}})}
+                                  className="oil-modal-input w-full"
+                                  placeholder="e.g. 0"
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* BOWLING CAREER SUMMARY */}
+                        <div>
+                          <div className="flex items-center gap-2 mb-3 pb-2 border-b border-white/10">
+                            <Target className="w-4 h-4 text-teal-400" />
+                            <h4 className="text-sm font-bold uppercase tracking-wider text-teal-400">Bowling Career Summary</h4>
+                            <span className="text-xs text-white/40 ml-auto">Econ, Avg & SR auto-compute</span>
+                          </div>
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <div className="group">
+                              <label className="block text-xs font-semibold text-gray-300 mb-1.5">Bowling Innings</label>
+                              <div className="oil-modal-input-wrap">
+                                <input
+                                  type="number"
+                                  value={formData.stats.bowlingInnings}
+                                  onChange={(e) => setFormData({...formData, stats: {...formData.stats, bowlingInnings: e.target.value}})}
+                                  className="oil-modal-input w-full"
+                                  placeholder="e.g. 0"
+                                />
+                              </div>
+                            </div>
+                            <div className="group">
+                              <label className="block text-xs font-semibold text-gray-300 mb-1.5">Balls / Overs Bowled</label>
+                              <div className="oil-modal-input-wrap">
+                                <input
+                                  type="text"
+                                  value={formData.stats.balls}
+                                  onChange={(e) => setFormData({...formData, stats: {...formData.stats, balls: e.target.value}})}
+                                  className="oil-modal-input w-full"
+                                  placeholder="e.g. 4.0 or 24"
+                                />
+                              </div>
+                            </div>
+                            <div className="group">
+                              <label className="block text-xs font-semibold text-gray-300 mb-1.5">Runs Conceded</label>
+                              <div className="oil-modal-input-wrap">
+                                <input
+                                  type="number"
+                                  value={formData.stats.runsConceded}
+                                  onChange={(e) => setFormData({...formData, stats: {...formData.stats, runsConceded: e.target.value}})}
+                                  className="oil-modal-input w-full"
+                                  placeholder="e.g. 0"
+                                />
+                              </div>
+                            </div>
+                            <div className="group">
+                              <label className="block text-xs font-semibold text-gray-300 mb-1.5">Maidens</label>
+                              <div className="oil-modal-input-wrap">
+                                <input
+                                  type="number"
+                                  value={formData.stats.maidens}
+                                  onChange={(e) => setFormData({...formData, stats: {...formData.stats, maidens: e.target.value}})}
+                                  className="oil-modal-input w-full"
+                                  placeholder="e.g. 0"
+                                />
+                              </div>
+                            </div>
+                            <div className="group">
+                              <label className="block text-xs font-semibold text-gray-300 mb-1.5">Wickets</label>
+                              <div className="oil-modal-input-wrap">
+                                <input
+                                  type="number"
+                                  value={formData.stats.wickets}
+                                  onChange={(e) => setFormData({...formData, stats: {...formData.stats, wickets: e.target.value}})}
+                                  className="oil-modal-input w-full"
+                                  placeholder="e.g. 0"
+                                />
+                              </div>
+                            </div>
+                            <div className="group md:col-span-3">
+                              <label className="block text-xs font-semibold text-gray-300 mb-1.5">Best Bowling (BBI)</label>
+                              <div className="oil-modal-input-wrap">
+                                <input
+                                  type="text"
+                                  value={formData.stats.bestBowling}
+                                  onChange={(e) => setFormData({...formData, stats: {...formData.stats, bestBowling: e.target.value}})}
+                                  className="oil-modal-input w-full"
+                                  placeholder="e.g. -/- or 3/19"
+                                />
+                              </div>
+                            </div>
+                          </div>
                         </div>
                       </section>
                     )}
