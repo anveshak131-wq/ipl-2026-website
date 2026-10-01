@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { 
+import { X, 
   Trophy, 
   MapPin, 
   Users, 
