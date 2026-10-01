@@ -315,17 +315,24 @@ export default function EnhancedWPLTeamPage({ teamId }: { teamId: string }) {
 
             {/* Profile Bar */}
             <div className="flex flex-col sm:flex-row items-center gap-5 pb-6 border-b border-white/10">
-              <div className="relative w-24 h-24 rounded-2xl overflow-hidden bg-gradient-to-tr from-pink-600/30 to-purple-600/30 border border-white/20 shrink-0">
-                <img
-                  src={selectedPlayer.photoUrl || `https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?w=200&fit=crop`}
-                  alt={selectedPlayer.name}
-                  className="w-full h-full object-cover"
+              <div className="relative w-24 h-24 rounded-2xl overflow-hidden bg-gradient-to-br from-white/10 via-black/70 to-black/95 border border-white/20 shrink-0 flex flex-col items-center justify-center shadow-xl">
+                {/* Ambient Dynamic Role/Theme Glow */}
+                <div 
+                  className="absolute inset-0 opacity-40 blur-lg pointer-events-none"
+                  style={{ background: `radial-gradient(circle, ${theme.primary}, transparent)` }}
                 />
-                {selectedPlayer.jerseyNumber && (
-                  <span className="absolute bottom-1 right-1 px-1.5 py-0.5 rounded bg-black/80 text-[10px] font-black">
-                    #{selectedPlayer.jerseyNumber}
-                  </span>
-                )}
+
+                {/* Metallic Tech Ring Motif */}
+                <div className="absolute inset-1 rounded-xl border border-dashed border-white/15 pointer-events-none" />
+
+                {/* Jersey Number or Initials */}
+                <span className="relative z-10 text-3xl font-black tracking-tight text-white drop-shadow-md">
+                  {selectedPlayer.jerseyNumber ? `#${selectedPlayer.jerseyNumber}` : getInitials(selectedPlayer.name)}
+                </span>
+
+                <span className="relative z-10 text-[9px] font-bold uppercase tracking-widest text-gray-400 mt-0.5">
+                  {selectedPlayer.role ? selectedPlayer.role.slice(0, 10) : 'Player'}
+                </span>
               </div>
               <div className="text-center sm:text-left space-y-1">
                 <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
@@ -552,17 +559,24 @@ export default function EnhancedWPLTeamPage({ teamId }: { teamId: string }) {
 
             {/* Profile Bar */}
             <div className="flex flex-col sm:flex-row items-center gap-5 pb-6 border-b border-white/10">
-              <div className="relative w-24 h-24 rounded-2xl overflow-hidden bg-gradient-to-tr from-pink-600/30 to-purple-600/30 border border-white/20 shrink-0">
-                <img
-                  src={selectedPlayer.photoUrl || `https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?w=200&fit=crop`}
-                  alt={selectedPlayer.name}
-                  className="w-full h-full object-cover"
+              <div className="relative w-24 h-24 rounded-2xl overflow-hidden bg-gradient-to-br from-white/10 via-black/70 to-black/95 border border-white/20 shrink-0 flex flex-col items-center justify-center shadow-xl">
+                {/* Ambient Dynamic Role/Theme Glow */}
+                <div 
+                  className="absolute inset-0 opacity-40 blur-lg pointer-events-none"
+                  style={{ background: `radial-gradient(circle, ${theme.primary}, transparent)` }}
                 />
-                {selectedPlayer.jerseyNumber && (
-                  <span className="absolute bottom-1 right-1 px-1.5 py-0.5 rounded bg-black/80 text-[10px] font-black">
-                    #{selectedPlayer.jerseyNumber}
-                  </span>
-                )}
+
+                {/* Metallic Tech Ring Motif */}
+                <div className="absolute inset-1 rounded-xl border border-dashed border-white/15 pointer-events-none" />
+
+                {/* Jersey Number or Initials */}
+                <span className="relative z-10 text-3xl font-black tracking-tight text-white drop-shadow-md">
+                  {selectedPlayer.jerseyNumber ? `#${selectedPlayer.jerseyNumber}` : getInitials(selectedPlayer.name)}
+                </span>
+
+                <span className="relative z-10 text-[9px] font-bold uppercase tracking-widest text-gray-400 mt-0.5">
+                  {selectedPlayer.role ? selectedPlayer.role.slice(0, 10) : 'Player'}
+                </span>
               </div>
               <div className="text-center sm:text-left space-y-1">
                 <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
@@ -1158,17 +1172,24 @@ export default function EnhancedWPLTeamPage({ teamId }: { teamId: string }) {
 
             {/* Profile Bar */}
             <div className="flex flex-col sm:flex-row items-center gap-5 pb-6 border-b border-white/10">
-              <div className="relative w-24 h-24 rounded-2xl overflow-hidden bg-gradient-to-tr from-pink-600/30 to-purple-600/30 border border-white/20 shrink-0">
-                <img
-                  src={selectedPlayer.photoUrl || `https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?w=200&fit=crop`}
-                  alt={selectedPlayer.name}
-                  className="w-full h-full object-cover"
+              <div className="relative w-24 h-24 rounded-2xl overflow-hidden bg-gradient-to-br from-white/10 via-black/70 to-black/95 border border-white/20 shrink-0 flex flex-col items-center justify-center shadow-xl">
+                {/* Ambient Dynamic Role/Theme Glow */}
+                <div 
+                  className="absolute inset-0 opacity-40 blur-lg pointer-events-none"
+                  style={{ background: `radial-gradient(circle, ${theme.primary}, transparent)` }}
                 />
-                {selectedPlayer.jerseyNumber && (
-                  <span className="absolute bottom-1 right-1 px-1.5 py-0.5 rounded bg-black/80 text-[10px] font-black">
-                    #{selectedPlayer.jerseyNumber}
-                  </span>
-                )}
+
+                {/* Metallic Tech Ring Motif */}
+                <div className="absolute inset-1 rounded-xl border border-dashed border-white/15 pointer-events-none" />
+
+                {/* Jersey Number or Initials */}
+                <span className="relative z-10 text-3xl font-black tracking-tight text-white drop-shadow-md">
+                  {selectedPlayer.jerseyNumber ? `#${selectedPlayer.jerseyNumber}` : getInitials(selectedPlayer.name)}
+                </span>
+
+                <span className="relative z-10 text-[9px] font-bold uppercase tracking-widest text-gray-400 mt-0.5">
+                  {selectedPlayer.role ? selectedPlayer.role.slice(0, 10) : 'Player'}
+                </span>
               </div>
               <div className="text-center sm:text-left space-y-1">
                 <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
@@ -1376,17 +1397,24 @@ export default function EnhancedWPLTeamPage({ teamId }: { teamId: string }) {
 
             {/* Profile Bar */}
             <div className="flex flex-col sm:flex-row items-center gap-5 pb-6 border-b border-white/10">
-              <div className="relative w-24 h-24 rounded-2xl overflow-hidden bg-gradient-to-tr from-pink-600/30 to-purple-600/30 border border-white/20 shrink-0">
-                <img
-                  src={selectedPlayer.photoUrl || `https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?w=200&fit=crop`}
-                  alt={selectedPlayer.name}
-                  className="w-full h-full object-cover"
+              <div className="relative w-24 h-24 rounded-2xl overflow-hidden bg-gradient-to-br from-white/10 via-black/70 to-black/95 border border-white/20 shrink-0 flex flex-col items-center justify-center shadow-xl">
+                {/* Ambient Dynamic Role/Theme Glow */}
+                <div 
+                  className="absolute inset-0 opacity-40 blur-lg pointer-events-none"
+                  style={{ background: `radial-gradient(circle, ${theme.primary}, transparent)` }}
                 />
-                {selectedPlayer.jerseyNumber && (
-                  <span className="absolute bottom-1 right-1 px-1.5 py-0.5 rounded bg-black/80 text-[10px] font-black">
-                    #{selectedPlayer.jerseyNumber}
-                  </span>
-                )}
+
+                {/* Metallic Tech Ring Motif */}
+                <div className="absolute inset-1 rounded-xl border border-dashed border-white/15 pointer-events-none" />
+
+                {/* Jersey Number or Initials */}
+                <span className="relative z-10 text-3xl font-black tracking-tight text-white drop-shadow-md">
+                  {selectedPlayer.jerseyNumber ? `#${selectedPlayer.jerseyNumber}` : getInitials(selectedPlayer.name)}
+                </span>
+
+                <span className="relative z-10 text-[9px] font-bold uppercase tracking-widest text-gray-400 mt-0.5">
+                  {selectedPlayer.role ? selectedPlayer.role.slice(0, 10) : 'Player'}
+                </span>
               </div>
               <div className="text-center sm:text-left space-y-1">
                 <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
