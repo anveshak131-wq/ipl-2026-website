@@ -561,12 +561,6 @@ export default function EnhancedWPLTeamPage({ teamId }: { teamId: string }) {
               {/* Squad Grid */}
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                 {visibleSquad.map((player) => {
-                  const initials = (player.name || '')
-                    .split(' ')
-                    .map((n: string) => n[0])
-                    .slice(0, 2)
-                    .join('')
-                    .toUpperCase();
                   const s = player.stats || ({} as any);
                   const runs = s.runs || 0;
                   const wickets = s.wickets || 0;
@@ -576,46 +570,57 @@ export default function EnhancedWPLTeamPage({ teamId }: { teamId: string }) {
                     <div
                       key={player.id || player.name}
                       onClick={() => setSelectedPlayer(player)}
-                      className="group cursor-pointer rounded-2xl border border-white/10 bg-white/[0.03] hover:bg-white/[0.08] hover:border-pink-500/50 p-5 transition-all duration-300 hover:-translate-y-1 shadow-lg flex flex-col justify-between"
+                      className="group cursor-pointer relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] hover:bg-white/[0.08] hover:border-pink-500/50 transition-all duration-300 hover:-translate-y-1 shadow-lg flex flex-col justify-between"
                     >
-                      <div>
-                        <div className="flex items-start justify-between mb-4">
-                          <div
-                            className="w-14 h-14 rounded-2xl flex items-center justify-center text-base font-black border border-white/20 shadow-inner"
-                            style={{
-                              background: `linear-gradient(135deg, ${theme.primary}, ${theme.secondary})`,
-                              color: '#fff'
-                            }}
-                          >
-                            {initials}
+                      {/* Original Top Image / Avatar Section */}
+                      <div className="relative h-48 w-full bg-gradient-to-b from-white/10 to-transparent flex items-center justify-center overflow-hidden">
+                        {player.image ? (
+                          <img
+                            src={player.image}
+                            alt={player.name}
+                            className="w-full h-full object-cover object-top transition-transform duration-500 group-hover:scale-105"
+                          />
+                        ) : (
+                          <div className="w-20 h-20 rounded-full bg-white/10 border border-white/20 flex items-center justify-center text-white/40">
+                            <Users className="w-10 h-10" />
                           </div>
-                          {player.isCaptain && (
-                            <span className="px-2 py-0.5 rounded-md text-[10px] font-black bg-amber-400/20 text-amber-300 border border-amber-400/30 uppercase tracking-wider">
-                              Captain
-                            </span>
-                          )}
-                        </div>
+                        )}
 
-                        <h3 className="text-base font-black text-white group-hover:text-pink-400 transition-colors">
-                          {player.name}
-                        </h3>
-                        <p className="text-xs text-gray-400 capitalize mt-0.5">
+                        {player.isCaptain && (
+                          <span className="absolute top-3 left-3 px-2 py-0.5 rounded-md text-[10px] font-black bg-amber-400 text-slate-950 uppercase tracking-wider shadow">
+                            Captain
+                          </span>
+                        )}
+
+                        <span className="absolute top-3 right-3 px-2 py-0.5 rounded-md text-[10px] font-bold bg-black/60 backdrop-blur-md text-gray-300 border border-white/10 uppercase tracking-wider">
                           {player.role || 'Player'}
-                        </p>
+                        </span>
                       </div>
 
-                      <div className="mt-5 pt-4 border-t border-white/10 grid grid-cols-3 gap-2 text-center">
-                        <div className="rounded-lg bg-black/40 py-2 border border-white/5">
-                          <span className="block text-xs font-black text-white">{runs}</span>
-                          <span className="block text-[9px] font-bold text-gray-400 uppercase tracking-wider">Runs</span>
+                      {/* Original Card Info & Stat Bar */}
+                      <div className="p-4 flex-1 flex flex-col justify-between">
+                        <div>
+                          <h3 className="text-base font-black text-white group-hover:text-pink-400 transition-colors line-clamp-1">
+                            {player.name}
+                          </h3>
+                          <p className="text-xs text-gray-400 capitalize mt-0.5">
+                            {player.battingStyle || player.role || 'All-Rounder'}
+                          </p>
                         </div>
-                        <div className="rounded-lg bg-black/40 py-2 border border-white/5">
-                          <span className="block text-xs font-black text-white">{wickets}</span>
-                          <span className="block text-[9px] font-bold text-gray-400 uppercase tracking-wider">Wkts</span>
-                        </div>
-                        <div className="rounded-lg bg-black/40 py-2 border border-white/5">
-                          <span className="block text-xs font-black text-white">{matchesCount}</span>
-                          <span className="block text-[9px] font-bold text-gray-400 uppercase tracking-wider">Mat</span>
+
+                        <div className="mt-4 pt-3 border-t border-white/10 grid grid-cols-3 gap-2 text-center">
+                          <div className="rounded-lg bg-black/40 py-2 border border-white/5">
+                            <span className="block text-xs font-black text-white">{runs}</span>
+                            <span className="block text-[9px] font-bold text-gray-400 uppercase tracking-wider">Runs</span>
+                          </div>
+                          <div className="rounded-lg bg-black/40 py-2 border border-white/5">
+                            <span className="block text-xs font-black text-white">{wickets}</span>
+                            <span className="block text-[9px] font-bold text-gray-400 uppercase tracking-wider">Wkts</span>
+                          </div>
+                          <div className="rounded-lg bg-black/40 py-2 border border-white/5">
+                            <span className="block text-xs font-black text-white">{matchesCount}</span>
+                            <span className="block text-[9px] font-bold text-gray-400 uppercase tracking-wider">Mat</span>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -623,7 +628,7 @@ export default function EnhancedWPLTeamPage({ teamId }: { teamId: string }) {
                 })}
               </div>
 
-              {/* Squad Expand / Collapse Toggle Button */}
+              {/* View Full Squad Toggle Button */}
               {!isFiltering && filteredSquad.length > 4 && (
                 <div className="mt-8 flex justify-center">
                   <button
@@ -631,7 +636,7 @@ export default function EnhancedWPLTeamPage({ teamId }: { teamId: string }) {
                     onClick={() => setIsSquadExpanded(!isSquadExpanded)}
                     className="group relative inline-flex items-center gap-2.5 px-6 py-3 rounded-full border border-white/20 bg-white/5 hover:bg-white/10 hover:border-pink-500/50 text-white font-black text-xs uppercase tracking-wider transition-all duration-200 shadow-xl hover:scale-105 active:scale-95"
                   >
-                    <span className="bg-gradient-to-r from-pink-400 to-amber-300 bg-clip-text text-transparent group-hover:from-white transition-all">
+                    <span className="bg-gradient-to-r from-pink-400 to-amber-300 bg-clip-text text-transparent group-hover:from-white group-hover:to-white transition-all">
                       {isSquadExpanded 
                         ? 'Collapse Squad' 
                         : `View Full Squad (${filteredSquad.length} Players)`}
