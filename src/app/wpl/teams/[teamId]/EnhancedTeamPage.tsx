@@ -247,6 +247,50 @@ export default function EnhancedWPLTeamPage({ teamId }: { teamId: string }) {
   };
 
 
+    // Role Color Palette Helper
+  const getRoleDesign = (role?: string) => {
+    const r = (role || '').toLowerCase();
+    if (r.includes('wicket') || r.includes('keeper') || r.includes('wk')) {
+      return {
+        badgeBg: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30',
+        cardBorder: 'hover:border-emerald-500/50',
+        glow: 'from-emerald-600/20 via-transparent to-transparent',
+        label: 'Wicket-Keeper'
+      };
+    }
+    if (r.includes('all-rounder') || r.includes('allrounder') || r.includes('all rounder')) {
+      if (r.includes('bowl')) {
+        return {
+          badgeBg: 'bg-purple-500/15 text-purple-400 border-purple-500/30',
+          cardBorder: 'hover:border-purple-500/50',
+          glow: 'from-purple-600/20 via-transparent to-transparent',
+          label: 'Bowling All-Rounder'
+        };
+      }
+      return {
+        badgeBg: 'bg-indigo-500/15 text-indigo-400 border-indigo-500/30',
+        cardBorder: 'hover:border-indigo-500/50',
+        glow: 'from-indigo-600/20 via-transparent to-transparent',
+        label: 'All-Rounder'
+      };
+    }
+    if (r.includes('bowl')) {
+      return {
+        badgeBg: 'bg-cyan-500/15 text-cyan-400 border-cyan-500/30',
+        cardBorder: 'hover:border-cyan-500/50',
+        glow: 'from-cyan-600/20 via-transparent to-transparent',
+        label: 'Bowler'
+      };
+    }
+    // Default Batter
+    return {
+      badgeBg: 'bg-amber-500/15 text-amber-400 border-amber-500/30',
+      cardBorder: 'hover:border-amber-500/50',
+      glow: 'from-amber-600/20 via-transparent to-transparent',
+      label: 'Batter'
+    };
+  };
+
   const getRolePriority = (p: Player) => {
     const role = (p.role || '').toLowerCase();
     const arType = (p.allrounderType || '').toLowerCase();
@@ -565,14 +609,18 @@ export default function EnhancedWPLTeamPage({ teamId }: { teamId: string }) {
                   const runs = s.runs || 0;
                   const wickets = s.wickets || 0;
                   const matchesCount = s.matches || 0;
+                  const roleTheme = getRoleDesign(player.role);
 
                   return (
                     <div
                       key={player.id || player.name}
                       onClick={() => setSelectedPlayer(player)}
-                      className="group cursor-pointer relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] hover:bg-white/[0.08] hover:border-pink-500/50 transition-all duration-300 hover:-translate-y-1 shadow-lg flex flex-col justify-between"
+                      className={`group cursor-pointer relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] hover:bg-white/[0.08] ${roleTheme.cardBorder} transition-all duration-300 hover:-translate-y-1 shadow-lg flex flex-col justify-between`}
                     >
-                      {/* Original Top Image / Avatar Section */}
+                      {/* Ambient Role Gradient Glow */}
+                      <div className={`absolute inset-0 bg-gradient-to-b ${roleTheme.glow} opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none`} />
+
+                      {/* Top Player Media / Avatar Area */}
                       <div className="relative h-48 w-full bg-gradient-to-b from-white/10 to-transparent flex items-center justify-center overflow-hidden">
                         {player.image ? (
                           <img
@@ -592,19 +640,20 @@ export default function EnhancedWPLTeamPage({ teamId }: { teamId: string }) {
                           </span>
                         )}
 
-                        <span className="absolute top-3 right-3 px-2 py-0.5 rounded-md text-[10px] font-bold bg-black/60 backdrop-blur-md text-gray-300 border border-white/10 uppercase tracking-wider">
-                          {player.role || 'Player'}
+                        {/* Distinct Role Badge */}
+                        <span className={`absolute top-3 right-3 px-2.5 py-0.5 rounded-md text-[10px] font-bold border backdrop-blur-md uppercase tracking-wider ${roleTheme.badgeBg}`}>
+                          {roleTheme.label}
                         </span>
                       </div>
 
-                      {/* Original Card Info & Stat Bar */}
-                      <div className="p-4 flex-1 flex flex-col justify-between">
+                      {/* Card Info & Stats Bar */}
+                      <div className="p-4 flex-1 flex flex-col justify-between relative z-10">
                         <div>
                           <h3 className="text-base font-black text-white group-hover:text-pink-400 transition-colors line-clamp-1">
                             {player.name}
                           </h3>
                           <p className="text-xs text-gray-400 capitalize mt-0.5">
-                            {player.battingStyle || player.role || 'All-Rounder'}
+                            {player.battingStyle || player.role || 'Player'}
                           </p>
                         </div>
 
