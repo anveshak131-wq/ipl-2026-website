@@ -3231,8 +3231,16 @@ function AdminPlayersWorkspace() {
         return;
       }
 
-      if (formData.isActiveInSquad && !formData.teamId) {
-        alert('Active squad players must have a team selected.');
+      if (!formData.name || formData.name.trim() === "") {
+        alert("Player name is required.");
+        return;
+      }
+      if (!formData.dateOfBirth || formData.dateOfBirth.trim() === "") {
+        alert("Date of Birth is required.");
+        return;
+      }
+      if (formData.league !== "wpl" && formData.isActiveInSquad && !formData.teamId) {
+        alert("Active squad players must have a team selected.");
         return;
       }
 
@@ -5514,6 +5522,55 @@ function AdminPlayersWorkspace() {
                           </div>
                           <span className="oil-chip">Step 5</span>
                         </div>
+                        {/* Live Auto-Calculated Derived Metrics */}
+                        {(() => {
+                          const runs = parseInt(formData.stats.runs) || 0;
+                          const ballsFaced = parseInt(formData.stats.ballsFaced) || 0;
+                          const inn = parseInt(formData.stats.battingInnings) || 0;
+                          const notOuts = parseInt(formData.stats.notOuts) || 0;
+                          const dismissals = Math.max(0, inn - notOuts);
+                          const liveBattingAvg = dismissals > 0 && runs > 0 ? (runs / dismissals).toFixed(2) : (runs > 0 ? runs.toFixed(2) : "-");
+                          const liveBattingSR = ballsFaced > 0 && runs > 0 ? ((runs * 100) / ballsFaced).toFixed(2) : "-";
+                          const oversRaw = parseFloat(formData.stats.balls || "0") || 0;
+                          const fullOvers = Math.floor(oversRaw);
+                          const remBalls = Math.round((oversRaw - fullOvers) * 10);
+                          const totalBalls = fullOvers * 6 + remBalls;
+                          const runsConceded = parseInt(formData.stats.runsConceded) || 0;
+                          const wickets = parseInt(formData.stats.wickets) || 0;
+                          const liveBowlingEcon = totalBalls > 0 ? ((runsConceded * 6) / totalBalls).toFixed(2) : "-";
+                          const liveBowlingAvg = wickets > 0 && runsConceded > 0 ? (runsConceded / wickets).toFixed(2) : "-";
+                          const liveBowlingSR = wickets > 0 && totalBalls > 0 ? (totalBalls / wickets).toFixed(1) : "-";
+                          return (
+                            <div className="mb-5 p-4 rounded-xl bg-gradient-to-r from-blue-950/40 via-indigo-950/30 to-purple-950/40 border border-blue-500/30 backdrop-blur-md">
+                              <div className="flex items-center justify-between mb-2">
+                                <span className="text-xs font-bold uppercase tracking-wider text-blue-400">⚡ Real-Time Auto Calculations</span>
+                                <span className="text-[11px] text-gray-400">Derived from current raw inputs</span>
+                              </div>
+                              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
+                                <div className="bg-white/5 rounded-lg p-2.5 border border-white/10 text-center">
+                                  <p className="text-[10px] uppercase font-semibold text-gray-400">Batting Avg</p>
+                                  <p className="text-lg font-black text-emerald-400">{liveBattingAvg}</p>
+                                </div>
+                                <div className="bg-white/5 rounded-lg p-2.5 border border-white/10 text-center">
+                                  <p className="text-[10px] uppercase font-semibold text-gray-400">Strike Rate</p>
+                                  <p className="text-lg font-black text-cyan-400">{liveBattingSR}</p>
+                                </div>
+                                <div className="bg-white/5 rounded-lg p-2.5 border border-white/10 text-center">
+                                  <p className="text-[10px] uppercase font-semibold text-gray-400">Economy</p>
+                                  <p className="text-lg font-black text-amber-400">{liveBowlingEcon}</p>
+                                </div>
+                                <div className="bg-white/5 rounded-lg p-2.5 border border-white/10 text-center">
+                                  <p className="text-[10px] uppercase font-semibold text-gray-400">Bowling Avg</p>
+                                  <p className="text-lg font-black text-purple-400">{liveBowlingAvg}</p>
+                                </div>
+                                <div className="bg-white/5 rounded-lg p-2.5 border border-white/10 text-center">
+                                  <p className="text-[10px] uppercase font-semibold text-gray-400">Bowling SR</p>
+                                  <p className="text-lg font-black text-rose-400">{liveBowlingSR}</p>
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })()}
                         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                             <div className="group">
                               <label className="block text-sm font-semibold text-gray-200 mb-2.5 flex items-center gap-2">
