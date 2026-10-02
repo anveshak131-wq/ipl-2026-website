@@ -935,107 +935,147 @@ useEffect(() => {
             const fs = getFranchiseStats(team.name, team.shortName);
             return (
               <div className="space-y-8 max-w-6xl mx-auto">
-                {/* Overall Performance Banners */}
+                {/* 1. Overall Performance Banners (Solid Cards, Crisp White & Color Accents) */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <div className="p-5 rounded-2xl bg-white/[0.03] border border-white/10 text-center">
-                    <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Matches Played</span>
-                    <div className="text-2xl font-black text-white mt-1">{fs.played}</div>
-                    <span className="text-[10px] text-gray-500">WPL 2023–2026</span>
+                  <div className="p-5 rounded-2xl bg-[#0f1424] border-2 border-white/20 shadow-xl text-center">
+                    <span className="text-xs font-black text-slate-300 uppercase tracking-wider block">
+                      Matches Played
+                    </span>
+                    <div className="text-3xl sm:text-4xl font-black text-white mt-1">
+                      {fs.played}
+                    </div>
+                    <span className="text-xs font-bold text-slate-400 mt-0.5 block">
+                      WPL 2023–2026
+                    </span>
                   </div>
-                  <div className="p-5 rounded-2xl bg-white/[0.03] border border-white/10 text-center">
-                    <span className="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">Win Rate</span>
-                    <div className="text-2xl font-black text-emerald-300 mt-1">{fs.winRate}</div>
-                    <span className="text-[10px] text-gray-500">{fs.wins}W / {fs.losses}L</span>
+
+                  <div className="p-5 rounded-2xl bg-[#0f1424] border-2 border-emerald-500/30 shadow-xl text-center">
+                    <span className="text-xs font-black text-emerald-400 uppercase tracking-wider block">
+                      Win Rate
+                    </span>
+                    <div className="text-3xl sm:text-4xl font-black text-emerald-300 mt-1">
+                      {fs.winRate}
+                    </div>
+                    <span className="text-xs font-bold text-slate-300 mt-0.5 block">
+                      {fs.wins}W / {fs.losses}L
+                    </span>
                   </div>
-                  <div className="p-5 rounded-2xl bg-white/[0.03] border border-white/10 text-center">
-                    <span className="text-[11px] font-bold text-pink-400 uppercase tracking-wider">Highest Total</span>
-                    <div className="text-2xl font-black text-pink-300 mt-1">{fs.highestTotal}</div>
-                    <span className="text-[10px] text-gray-500">{fs.highestTotalOpponent}</span>
+
+                  <div className="p-5 rounded-2xl bg-[#0f1424] border-2 border-pink-500/30 shadow-xl text-center">
+                    <span className="text-xs font-black text-pink-400 uppercase tracking-wider block">
+                      Highest Total
+                    </span>
+                    <div className="text-3xl sm:text-4xl font-black text-pink-300 mt-1">
+                      {fs.highestTotal}
+                    </div>
+                    <span className="text-xs font-bold text-slate-300 mt-0.5 block">
+                      {fs.highestTotalOpponent}
+                    </span>
                   </div>
-                  <div className="p-5 rounded-2xl bg-white/[0.03] border border-white/10 text-center">
-                    <span className="text-[11px] font-bold text-amber-400 uppercase tracking-wider">Championships</span>
-                    <div className="text-2xl font-black text-amber-300 mt-1">{fs.trophyText}</div>
-                    <span className="text-[10px] text-gray-500">Trophy Cabinet</span>
+
+                  <div className="p-5 rounded-2xl bg-[#0f1424] border-2 border-amber-500/30 shadow-xl text-center">
+                    <span className="text-xs font-black text-amber-400 uppercase tracking-wider block">
+                      Championships
+                    </span>
+                    <div className="text-3xl sm:text-4xl font-black text-amber-300 mt-1">
+                      {fs.trophyText}
+                    </div>
+                    <span className="text-xs font-bold text-slate-300 mt-0.5 block">
+                      Trophy Cabinet
+                    </span>
                   </div>
                 </div>
 
-                {/* Franchise Highs & Lows Matrix */}
+                {/* 2. Franchise Highs & Lows Matrix */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="p-6 rounded-3xl bg-white/[0.02] border border-white/10 space-y-4">
-                    <div className="flex items-center gap-2 border-b border-white/10 pb-3">
+                  {/* Record Highs */}
+                  <div className="p-6 rounded-3xl bg-[#0d1120] border-2 border-white/20 shadow-2xl space-y-4">
+                    <div className="flex items-center gap-2.5 border-b border-white/15 pb-3">
                       <Trophy className="w-5 h-5 text-amber-400" />
-                      <h3 className="text-base font-bold text-white">Record Highs & Big Wins</h3>
+                      <h3 className="text-lg font-black text-white tracking-wide">Record Highs & Big Wins</h3>
                     </div>
 
-                    <div className="space-y-3 text-xs">
-                      <div className="flex justify-between items-center py-2 border-b border-white/5">
-                        <span className="text-gray-400">Signature Victory</span>
-                        <strong className="text-white text-right">{fs.biggestWin}</strong>
+                    <div className="space-y-3 text-sm">
+                      <div className="flex justify-between items-center py-2.5 border-b border-white/10">
+                        <span className="text-slate-300 font-bold">Signature Victory</span>
+                        <strong className="text-white text-right font-black text-base">{fs.biggestWin}</strong>
                       </div>
-                      <div className="flex justify-between items-center py-2 border-b border-white/5">
-                        <span className="text-gray-400">Lowest Score Defended</span>
-                        <strong className="text-white text-right">{fs.lowestDefended}</strong>
+                      <div className="flex justify-between items-center py-2.5 border-b border-white/10">
+                        <span className="text-slate-300 font-bold">Lowest Score Defended</span>
+                        <strong className="text-white text-right font-black text-base">{fs.lowestDefended}</strong>
                       </div>
-                      <div className="flex justify-between items-center py-2">
-                        <span className="text-gray-400">Peak Total</span>
-                        <strong className="text-white">{fs.highestTotal}</strong>
+                      <div className="flex justify-between items-center py-2.5">
+                        <span className="text-slate-300 font-bold">Peak Total</span>
+                        <strong className="text-amber-300 font-black text-base">{fs.highestTotal}</strong>
                       </div>
                     </div>
                   </div>
 
                   {/* Phase Performance Breakdown */}
-                  <div className="p-6 rounded-3xl bg-white/[0.02] border border-white/10 space-y-4">
-                    <div className="flex items-center gap-2 border-b border-white/10 pb-3">
+                  <div className="p-6 rounded-3xl bg-[#0d1120] border-2 border-white/20 shadow-2xl space-y-4">
+                    <div className="flex items-center gap-2.5 border-b border-white/15 pb-3">
                       <Zap className="w-5 h-5 text-pink-400" />
-                      <h3 className="text-base font-bold text-white">Phase Scoring Rate (RPO)</h3>
+                      <h3 className="text-lg font-black text-white tracking-wide">Phase Scoring Rate (RPO)</h3>
                     </div>
 
-                    <div className="space-y-4 text-xs">
+                    <div className="space-y-4 text-sm">
                       <div>
-                        <div className="flex justify-between mb-1">
-                          <span className="text-gray-300 font-semibold">Powerplay (Overs 1–6)</span>
-                          <span className="text-pink-400 font-bold">{fs.ppRPO} RPO</span>
+                        <div className="flex justify-between mb-1.5">
+                          <span className="text-slate-200 font-bold">Powerplay (Overs 1–6)</span>
+                          <span className="text-pink-400 font-black text-base">{fs.ppRPO} RPO</span>
                         </div>
-                        <div className="w-full bg-white/5 h-2 rounded-full overflow-hidden">
-                          <div className="bg-pink-500 h-full rounded-full" style={{ width: '85%' }} />
+                        <div className="w-full bg-black/60 h-2.5 rounded-full overflow-hidden border border-white/10">
+                          <div className="bg-gradient-to-r from-pink-500 to-pink-400 h-full rounded-full shadow-[0_0_12px_rgba(236,72,153,0.6)]" style={{ width: '85%' }} />
                         </div>
                       </div>
 
                       <div>
-                        <div className="flex justify-between mb-1">
-                          <span className="text-gray-300 font-semibold">Death Overs (Overs 16–20)</span>
-                          <span className="text-amber-400 font-bold">{fs.deathRPO} RPO</span>
+                        <div className="flex justify-between mb-1.5">
+                          <span className="text-slate-200 font-bold">Death Overs (Overs 16–20)</span>
+                          <span className="text-amber-400 font-black text-base">{fs.deathRPO} RPO</span>
                         </div>
-                        <div className="w-full bg-white/5 h-2 rounded-full overflow-hidden">
-                          <div className="bg-amber-400 h-full rounded-full" style={{ width: '92%' }} />
+                        <div className="w-full bg-black/60 h-2.5 rounded-full overflow-hidden border border-white/10">
+                          <div className="bg-gradient-to-r from-amber-500 to-amber-400 h-full rounded-full shadow-[0_0_12px_rgba(245,158,11,0.6)]" style={{ width: '92%' }} />
                         </div>
                       </div>
                     </div>
                   </div>
                 </div>
 
-                {/* Toss & Pitch Breakdown */}
-                <div className="p-6 rounded-3xl bg-white/[0.02] border border-white/10">
-                  <div className="flex items-center gap-2 border-b border-white/10 pb-3 mb-4">
+                {/* 3. Toss & Pitch Breakdown */}
+                <div className="p-6 rounded-3xl bg-[#0d1120] border-2 border-white/20 shadow-2xl">
+                  <div className="flex items-center gap-2.5 border-b border-white/15 pb-3 mb-4">
                     <TrendingUp className="w-5 h-5 text-emerald-400" />
-                    <h3 className="text-base font-bold text-white">Batting 1st vs Chasing Split</h3>
+                    <h3 className="text-lg font-black text-white tracking-wide">Batting 1st vs Chasing Split</h3>
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-center">
-                    <div className="p-4 rounded-xl bg-white/[0.03] border border-white/5">
-                      <span className="text-xs text-gray-400 block mb-1">Batting 1st Win Rate</span>
-                      <span className="text-xl font-black text-white">{fs.bat1stWinRate}</span>
-                      <span className="text-[10px] text-emerald-400 block mt-0.5">Defending Target</span>
+                    <div className="p-5 rounded-2xl bg-black/50 border border-white/15">
+                      <span className="text-xs text-slate-300 font-black uppercase tracking-wider block mb-1">
+                        Batting 1st Win Rate
+                      </span>
+                      <span className="text-2xl font-black text-white block">
+                        {fs.bat1stWinRate}
+                      </span>
+                      <span className="text-xs text-emerald-400 font-bold block mt-1">
+                        Defending Target
+                      </span>
                     </div>
-                    <div className="p-4 rounded-xl bg-white/[0.03] border border-white/5">
-                      <span className="text-xs text-gray-400 block mb-1">Chasing Win Rate</span>
-                      <span className="text-xl font-black text-white">{fs.chasingWinRate}</span>
-                      <span className="text-[10px] text-pink-400 block mt-0.5">Chasing Target</span>
+
+                    <div className="p-5 rounded-2xl bg-black/50 border border-white/15">
+                      <span className="text-xs text-slate-300 font-black uppercase tracking-wider block mb-1">
+                        Chasing Win Rate
+                      </span>
+                      <span className="text-2xl font-black text-white block">
+                        {fs.chasingWinRate}
+                      </span>
+                      <span className="text-xs text-pink-400 font-bold block mt-1">
+                        Chasing Target
+                      </span>
                     </div>
                   </div>
                 </div>
-              </div>
-            );
+              </div>            );
           })()}
         </section>
       </main>
