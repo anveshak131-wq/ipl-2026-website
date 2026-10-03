@@ -256,7 +256,7 @@ export function getGoogleRedirectUri(request, env) {
   );
 }
 
-export function sanitizeReturnTo(value, fallback = '/ipl-admin-2026/dashboard') {
+export function sanitizeReturnTo(value, fallback = '/ops/ipl/dashboard') {
   if (!value || typeof value !== 'string') {
     return fallback;
   }
@@ -264,7 +264,7 @@ export function sanitizeReturnTo(value, fallback = '/ipl-admin-2026/dashboard') 
   try {
     const parsed = new URL(value, 'https://admin.local');
     const returnTo = `${parsed.pathname}${parsed.search}${parsed.hash}`;
-    const allowedPrefixes = ['/ipl-admin-2026', '/wpl-admin-2026', '/admin'];
+    const allowedPrefixes = ['/ops', '/ipl-admin-2026', '/wpl-admin-2026', '/admin'];
 
     if (allowedPrefixes.some((prefix) => returnTo === prefix || returnTo.startsWith(`${prefix}/`))) {
       return returnTo;
