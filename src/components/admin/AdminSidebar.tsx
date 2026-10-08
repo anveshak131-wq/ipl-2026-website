@@ -33,6 +33,8 @@ export default function AdminSidebar({ currentPage = '', onLogout }: AdminSideba
   const router = useRouter();
   const pathname = usePathname();
   const { currentLeague } = useLeague();
+  const opsLeague = pathname?.includes('/ops/wpl') || pathname?.includes('/wpl-admin-2026') || currentLeague === 'wpl' ? 'wpl' : 'ipl';
+  const opsBase = '/ops/' + opsLeague;
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [adminName, setAdminName] = useState('Admin User');
@@ -336,7 +338,7 @@ export default function AdminSidebar({ currentPage = '', onLogout }: AdminSideba
   const baseMenuGroups: { [key: string]: MenuItem[] } = useMemo(() => ({
     Main: [
       {
-        href: '/ops/ipl/dashboard',
+        href: opsBase + '/dashboard',
         label: 'Dashboard',
         icon: (
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -347,7 +349,7 @@ export default function AdminSidebar({ currentPage = '', onLogout }: AdminSideba
         shortcut: 'D',
       },
       {
-        href: '/ops/ipl/teams',
+        href: opsBase + '/teams',
         label: 'Teams',
         icon: (
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -358,7 +360,7 @@ export default function AdminSidebar({ currentPage = '', onLogout }: AdminSideba
         shortcut: 'T',
       },
       {
-        href: '/ops/ipl/matches',
+        href: opsBase + '/matches',
         label: 'Matches',
         icon: (
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -369,7 +371,7 @@ export default function AdminSidebar({ currentPage = '', onLogout }: AdminSideba
         shortcut: 'M',
       },
       {
-        href: '/ops/ipl/points-table',
+        href: opsBase + '/points-table',
         label: 'Points Table',
         icon: (
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -380,7 +382,7 @@ export default function AdminSidebar({ currentPage = '', onLogout }: AdminSideba
         shortcut: 'P',
       },
       {
-        href: '/ops/ipl/players',
+        href: opsBase + '/players',
         label: 'Players',
         icon: (
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -391,7 +393,7 @@ export default function AdminSidebar({ currentPage = '', onLogout }: AdminSideba
         shortcut: 'Y',
       },
       {
-        href: '/ops/ipl/achievements',
+        href: opsBase + '/achievements',
         label: 'Achievements',
         icon: (
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -402,7 +404,7 @@ export default function AdminSidebar({ currentPage = '', onLogout }: AdminSideba
         shortcut: 'A',
       },
       {
-        href: '/ops/ipl/batting-stats',
+        href: opsBase + '/batting-stats',
         label: 'Batting Stats',
         icon: (
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -413,7 +415,7 @@ export default function AdminSidebar({ currentPage = '', onLogout }: AdminSideba
         shortcut: 'B',
       },
       {
-        href: '/ops/ipl/bowling-stats',
+        href: opsBase + '/bowling-stats',
         label: 'Bowling Stats',
         icon: (
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -424,7 +426,7 @@ export default function AdminSidebar({ currentPage = '', onLogout }: AdminSideba
         shortcut: 'W',
       },
       {
-        href: '/ops/ipl/scorecard',
+        href: opsBase + '/scorecard',
         label: 'Scorecard',
         icon: (
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -437,7 +439,7 @@ export default function AdminSidebar({ currentPage = '', onLogout }: AdminSideba
     ],
     Content: [
       {
-        href: '/ops/ipl/content',
+        href: opsBase + '/content',
         label: 'Content',
         icon: (
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -448,7 +450,7 @@ export default function AdminSidebar({ currentPage = '', onLogout }: AdminSideba
         shortcut: 'C',
       },
       {
-        href: '/ops/ipl/news',
+        href: opsBase + '/news',
         label: 'News',
         icon: (
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -459,7 +461,7 @@ export default function AdminSidebar({ currentPage = '', onLogout }: AdminSideba
         shortcut: 'N',
       },
       {
-        href: '/ops/ipl/social',
+        href: opsBase + '/social',
         label: 'Social Studio',
         icon: (
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -470,7 +472,7 @@ export default function AdminSidebar({ currentPage = '', onLogout }: AdminSideba
         shortcut: 'S',
       },
       {
-        href: '/ops/ipl/matchday',
+        href: opsBase + '/matchday',
         label: 'Match Day',
         icon: (
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -481,7 +483,7 @@ export default function AdminSidebar({ currentPage = '', onLogout }: AdminSideba
         shortcut: 'X',
       },
       {
-        href: '/ops/ipl/stories',
+        href: opsBase + '/stories',
         label: 'Fan Stories',
         icon: (
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -493,7 +495,7 @@ export default function AdminSidebar({ currentPage = '', onLogout }: AdminSideba
       },
       // Statistics - only show for IPL, not WPL
       ...(currentLeague !== 'wpl' ? [{
-        href: '/ops/ipl/stats',
+        href: opsBase + '/stats',
         label: 'Statistics',
         icon: (
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -504,7 +506,7 @@ export default function AdminSidebar({ currentPage = '', onLogout }: AdminSideba
         shortcut: 'I',
       }] : []),
       {
-        href: '/ops/ipl/predictions',
+        href: opsBase + '/predictions',
         label: 'Predictions',
         icon: (
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -517,7 +519,7 @@ export default function AdminSidebar({ currentPage = '', onLogout }: AdminSideba
     ],
     Tools: [
       {
-        href: '/ops/ipl/players/upload',
+        href: opsBase + '/players/upload',
         label: 'Upload Players CSV',
         icon: (
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -527,7 +529,7 @@ export default function AdminSidebar({ currentPage = '', onLogout }: AdminSideba
         group: 'Tools',
       },
       {
-        href: '/ops/ipl/live-score',
+        href: opsBase + '/live-score',
         label: 'Live Score',
         icon: (
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -538,7 +540,7 @@ export default function AdminSidebar({ currentPage = '', onLogout }: AdminSideba
         shortcut: 'V',
       },
       {
-        href: '/ops/ipl/live-score-fast',
+        href: opsBase + '/live-score-fast',
         label: 'Live Score Fast',
         icon: (
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -549,7 +551,7 @@ export default function AdminSidebar({ currentPage = '', onLogout }: AdminSideba
         shortcut: 'F',
       },
       {
-        href: '/ops/ipl/playing-11',
+        href: opsBase + '/playing-11',
         label: 'Playing 11 & Impact Player',
         icon: (
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -560,7 +562,7 @@ export default function AdminSidebar({ currentPage = '', onLogout }: AdminSideba
         shortcut: '1',
       },
       {
-        href: '/ops/ipl/moderation',
+        href: opsBase + '/moderation',
         label: 'Moderation',
         icon: (
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -571,7 +573,7 @@ export default function AdminSidebar({ currentPage = '', onLogout }: AdminSideba
         badge: pendingCounts.moderation,
       },
       {
-        href: '/ops/ipl/dataset-manager',
+        href: opsBase + '/dataset-manager',
         label: 'Data Lab',
         icon: (
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -581,7 +583,7 @@ export default function AdminSidebar({ currentPage = '', onLogout }: AdminSideba
         group: 'Tools',
       },
       {
-        href: '/ops/ipl/ml-lab',
+        href: opsBase + '/ml-lab',
         label: 'ML Lab',
         icon: (
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -591,7 +593,7 @@ export default function AdminSidebar({ currentPage = '', onLogout }: AdminSideba
         group: 'Tools',
       },
       {
-        href: '/ops/ipl/datasets',
+        href: opsBase + '/datasets',
         label: 'Datasets',
         icon: (
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -603,7 +605,7 @@ export default function AdminSidebar({ currentPage = '', onLogout }: AdminSideba
     ],
     Settings: [
       {
-        href: '/ops/ipl/analytics',
+        href: opsBase + '/analytics',
         label: 'Analytics',
         icon: (
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -614,7 +616,7 @@ export default function AdminSidebar({ currentPage = '', onLogout }: AdminSideba
         shortcut: 'A',
       },
       {
-        href: '/ops/ipl/support',
+        href: opsBase + '/support',
         label: 'Support',
         icon: (
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -625,7 +627,7 @@ export default function AdminSidebar({ currentPage = '', onLogout }: AdminSideba
         shortcut: 'H',
       },
       {
-        href: '/ops/ipl/settings',
+        href: opsBase + '/settings',
         label: 'Settings',
         icon: (
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -637,7 +639,7 @@ export default function AdminSidebar({ currentPage = '', onLogout }: AdminSideba
         shortcut: 'S',
       },
       {
-        href: '/ops/ipl/email-notifications',
+        href: opsBase + '/email-notifications',
         label: 'Email Notifications',
         icon: (
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -647,7 +649,7 @@ export default function AdminSidebar({ currentPage = '', onLogout }: AdminSideba
         group: 'Settings',
       },
       {
-        href: '/ops/ipl/legal',
+        href: opsBase + '/legal',
         label: 'Legal',
         icon: (
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -657,7 +659,7 @@ export default function AdminSidebar({ currentPage = '', onLogout }: AdminSideba
         group: 'Settings',
       },
       {
-        href: '/ops/ipl/admins',
+        href: opsBase + '/admins',
         label: 'Admin Users',
         icon: (
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -667,7 +669,7 @@ export default function AdminSidebar({ currentPage = '', onLogout }: AdminSideba
         group: 'Settings',
       },
       {
-        href: '/ops/ipl/setup',
+        href: opsBase + '/setup',
         label: 'Setup',
         icon: (
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -678,7 +680,7 @@ export default function AdminSidebar({ currentPage = '', onLogout }: AdminSideba
         group: 'Settings',
       },
       {
-        href: '/ops/ipl/engagement',
+        href: opsBase + '/engagement',
         label: 'Engagement',
         icon: (
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -1,5 +1,6 @@
 'use client';
 
+import { usePathname } from 'next/navigation';
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { League } from '@/types';
 
@@ -16,8 +17,21 @@ const LeagueContext = createContext<LeagueContextType | undefined>(undefined);
 const LEAGUE_STORAGE_KEY = 'sportsup99_current_league';
 
 export function LeagueProvider({ children }: { children: ReactNode }) {
-  const [currentLeague, setCurrentLeagueState] = useState<League>('ipl');
+  const pathname = usePathname();
+  const [currentLeague, setCurrentLeagueState] = useState<League>("ipl");
   const [initialized, setInitialized] = useState(false);
+
+  // Sync state whenever the URL route changes
+  useEffect(() => {
+    if (!pathname) return;
+    if (pathname.includes("/wpl-admin-2026") || pathname.includes("/ops/wpl") || pathname.startsWith("/wpl")) {
+      setCurrentLeagueState("wpl");
+      if (typeof window !== "undefined") localStorage.setItem(LEAGUE_STORAGE_KEY, "wpl");
+    } else if (pathname.includes("/ipl-admin-2026") || pathname.includes("/ops/ipl") || pathname.startsWith("/ipl")) {
+      setCurrentLeagueState("ipl");
+      if (typeof window !== "undefined") localStorage.setItem(LEAGUE_STORAGE_KEY, "ipl");
+    }
+  }, [pathname]);
 
   // Initialize league on mount only
   useEffect(() => {
@@ -83,4 +97,3 @@ export function useLeague() {
   }
   return context;
 }
-

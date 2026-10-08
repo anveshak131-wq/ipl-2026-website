@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { useLeague } from '@/contexts/LeagueContext';
 import { Trophy, Sparkles } from 'lucide-react';
 
