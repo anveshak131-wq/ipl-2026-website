@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from 'react';
 import { api as dataApi } from '@/lib/data';
 import { syncScorecardToPlayers } from '@/lib/scorecard-stats-sync';
-import WPLAdminSidebarNew from '@/components/admin/WPLAdminSidebarNew';
 
 interface Match {
   id: string;
@@ -2142,7 +2141,6 @@ export default function ScorecardAdminPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 text-white">
-      <WPLAdminSidebarNew />
       <div className="lg:ml-64 p-4 md:p-8">
       <div className="max-w-7xl mx-auto">
         <h1 className="text-4xl font-bold mb-2">IPL Scorecard Admin</h1>

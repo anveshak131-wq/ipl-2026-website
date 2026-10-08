@@ -6,7 +6,6 @@ import { Heart, MessageCircle, Eye, Edit, Trash2, Plus, Save, X, Filter, Search,
 import AuroraBackground from '@/components/ui/AuroraBackground';
 import GradientText from '@/components/ui/GradientText';
 import AnimatedSection from '@/components/ui/AnimatedSection';
-import WPLAdminSidebarNew from '@/components/admin/WPLAdminSidebarNew';
 
 interface FanStory {
   id: string;
@@ -150,7 +149,6 @@ export default function WPLStoriesAdmin() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-pink-900 to-purple-900">
-      <WPLAdminSidebarNew />
       <AuroraBackground />
       <div className="relative z-10 lg:ml-64">
         <div className="max-w-7xl mx-auto px-4 py-8">

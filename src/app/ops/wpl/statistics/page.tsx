@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import WPLAdminSidebarNew from '@/components/admin/WPLAdminSidebarNew';
 import { Trophy, TrendingUp, Award, Users, BarChart3, Target } from 'lucide-react';
 import type { 
   PlayerBattingStats, 
@@ -54,7 +53,6 @@ export default function WPLStatsPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-pink-900 to-purple-900">
-      <WPLAdminSidebarNew />
       <div className="lg:ml-64 p-6">
         <div className="mb-8">
           <div className="flex items-center justify-between">

@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import AnimatedSection from '@/components/ui/AnimatedSection';
 import GradientText from '@/components/ui/GradientText';
-import WPLAdminSidebarNew from '@/components/admin/WPLAdminSidebarNew';
 
 interface Team {
   id: string;
@@ -46,7 +45,6 @@ export default function WPLTeamsPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-pink-900 to-purple-900">
-      <WPLAdminSidebarNew />
       <div className="lg:ml-64 p-6">
       <AnimatedSection>
         <h1 className="text-4xl font-bold mb-8 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">

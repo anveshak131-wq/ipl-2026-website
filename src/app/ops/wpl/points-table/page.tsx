@@ -9,7 +9,6 @@ import { Team, Match } from '@/types';
 import { useLeague } from '@/contexts/LeagueContext';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import GradientText from '@/components/ui/GradientText';
-import WPLAdminSidebarNew from '@/components/admin/WPLAdminSidebarNew';
 
 export default function WPLAdminPointsTablePage() {
   const router = useRouter();
@@ -317,7 +316,6 @@ export default function WPLAdminPointsTablePage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-950 via-pink-900 to-black flex">
-      <WPLAdminSidebarNew />
       
       <main className="flex-1 relative z-10">
         {/* Header */}

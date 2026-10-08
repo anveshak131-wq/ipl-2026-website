@@ -3,7 +3,8 @@
 import { motion } from 'framer-motion';
 import { CSSProperties } from 'react';
 
-export type EmojiType = 
+export type EmojiType =
+  | 'checkmark' 
   | 'trophy' 
   | 'cricket' 
   | 'fire' 

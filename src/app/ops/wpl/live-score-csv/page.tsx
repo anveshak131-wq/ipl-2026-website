@@ -20,7 +20,6 @@ const HARDCODED_PLAYERS: { [team: string]: string[] } = {
 import { useState, useEffect, useMemo } from 'react';
 import comprehensivePlayers from '../../../../../comprehensive-players.json';
 import type { SaveStatus } from './saveStatus';
-import WPLAdminSidebarNew from '@/components/admin/WPLAdminSidebarNew';
 import { api as dataApi } from '@/lib/data';
 import { Match } from '@/types';
 
@@ -1301,7 +1300,6 @@ export default function LiveScoreCSVPage() {
       </div>
 
       <div className="relative z-10">
-        <WPLAdminSidebarNew />
         <main className="p-8 lg:ml-64">
           <div className="max-w-7xl mx-auto">
             {/* Enhanced Header */}

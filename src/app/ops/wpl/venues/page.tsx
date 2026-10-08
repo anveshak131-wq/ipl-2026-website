@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react';
 import { Search, MapPin, Plus, Trash2, Edit3, Loader2, Check, X } from 'lucide-react';
 import AuroraBackground from '@/components/ui/AuroraBackground';
 import AnimatedSection from '@/components/ui/AnimatedSection';
-import WPLAdminSidebarNew from '@/components/admin/WPLAdminSidebarNew';
 
 interface Venue {
   id: string;
@@ -269,7 +268,6 @@ export default function VenuesAdmin() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-pink-900 to-purple-900">
-      <WPLAdminSidebarNew />
       <div className="lg:ml-64">
       <AuroraBackground />
       <div className="relative z-10">

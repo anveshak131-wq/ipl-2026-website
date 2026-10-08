@@ -5,7 +5,6 @@ import { api } from '@/lib/data';
 import { useLeague } from '@/contexts/LeagueContext';
 import type { Match, Poll } from '@/types';
 import { Target, Trophy, BarChart3, Users, MessageSquare } from 'lucide-react';
-import WPLAdminSidebarNew from '@/components/admin/WPLAdminSidebarNew';
 
 export default function WPLAdminPredictionsPage() {
   const { currentLeague } = useLeague();
@@ -85,7 +84,6 @@ export default function WPLAdminPredictionsPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-pink-900 to-purple-900">
-      <WPLAdminSidebarNew />
       <div className="lg:ml-64 p-6">
       <div className="mb-6">
         <h1 className="text-3xl font-bold text-white mb-2 flex items-center gap-3">
