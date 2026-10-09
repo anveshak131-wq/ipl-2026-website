@@ -1,3 +1,4 @@
+import Link from 'next/link';
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
@@ -252,14 +253,71 @@ export default function AdminLayout({
             {userRole !== 'players_admin' && (
               <div className="sticky top-0 z-10 bg-slate-900/95 backdrop-blur-sm border-b border-white/10">
                 <div className="px-6 py-3">
-                  <div className="flex items-center justify-between">
-                    <div className="w-full max-w-md">
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-2 overflow-x-auto py-1 scrollbar-thin">
+                      <Link
+                        href="/ops/wpl/dashboard"
+                        className={`px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-colors ${pathname === '/ops/wpl/dashboard' ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white' : 'text-gray-300 hover:text-white hover:bg-white/10'}`}
+                      >
+                        Dashboard
+                      </Link>
+                      <Link
+                        href="/ops/wpl/teams"
+                        className={`px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-colors ${pathname?.startsWith('/ops/wpl/teams') ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white' : 'text-gray-300 hover:text-white hover:bg-white/10'}`}
+                      >
+                        Teams
+                      </Link>
+                      <Link
+                        href="/ops/wpl/matches"
+                        className={`px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-colors ${pathname?.startsWith('/ops/wpl/matches') ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white' : 'text-gray-300 hover:text-white hover:bg-white/10'}`}
+                      >
+                        Matches
+                      </Link>
+                      <Link
+                        href="/ops/wpl/points-table"
+                        className={`px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-colors ${pathname?.startsWith('/ops/wpl/points-table') ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white' : 'text-gray-300 hover:text-white hover:bg-white/10'}`}
+                      >
+                        Points Table
+                      </Link>
+                      <Link
+                        href="/ops/wpl/news"
+                        className={`px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-colors ${pathname?.startsWith('/ops/wpl/news') ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white' : 'text-gray-300 hover:text-white hover:bg-white/10'}`}
+                      >
+                        News
+                      </Link>
+                      <Link
+                        href="/ops/wpl/content"
+                        className={`px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-colors ${pathname?.startsWith('/ops/wpl/content') ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white' : 'text-gray-300 hover:text-white hover:bg-white/10'}`}
+                      >
+                        Content
+                      </Link>
+                      <Link
+                        href="/ops/wpl/coaches"
+                        className={`px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-colors ${pathname?.startsWith('/ops/wpl/coaches') ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white' : 'text-gray-300 hover:text-white hover:bg-white/10'}`}
+                      >
+                        Coaches
+                      </Link>
+                      <Link
+                        href="/ops/wpl/achievements"
+                        className={`px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-colors ${pathname?.startsWith('/ops/wpl/achievements') ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white' : 'text-gray-300 hover:text-white hover:bg-white/10'}`}
+                      >
+                        Achievements
+                      </Link>
+                      <Link
+                        href="/ops/wpl/admins"
+                        className={`px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-colors ${pathname?.startsWith('/ops/wpl/admins') ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white' : 'text-gray-300 hover:text-white hover:bg-white/10'}`}
+                      >
+                        Admins
+                      </Link>
+                    </div>
+
+                    <div className="w-48 flex-shrink-0">
                       <button
                         onClick={() => setIsSearchOpen(true)}
-                        className="w-full flex items-center gap-3 px-4 py-2 bg-slate-800 border border-slate-600 rounded-lg text-gray-300 hover:bg-slate-700 transition-colors"
+                        className="w-full flex items-center gap-2 px-3 py-1.5 bg-slate-800 border border-slate-700 rounded-lg text-gray-400 hover:text-gray-200 hover:bg-slate-700/80 transition-colors text-xs"
                       >
-                        <Search size={18} />
-                        <span className="text-sm">Search (⌘K)</span>
+                        <Search size={14} />
+                        <span>Search (⌘K)</span>
                       </button>
                     </div>
                   </div>
