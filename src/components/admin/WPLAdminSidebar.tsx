@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
-import { Users, Shield, Award, BarChart3, Upload, ChevronRight, LogOut } from 'lucide-react';
+import { Users, Shield, MapPin, Award, BarChart3, Upload, ChevronRight, LogOut } from 'lucide-react';
 import AdminLeagueSwitcher from './AdminLeagueSwitcher';
 
 interface WPLAdminSidebarProps {
@@ -30,6 +30,7 @@ export default function WPLAdminSidebar({ currentPage = '', onLogout }: WPLAdmin
 
   const navItems = [
     { href: '/ops/wpl/teams', label: 'Teams', icon: Shield },
+    { href: '/ops/wpl/venues', label: 'Venues & Grounds', icon: MapPin },
     { href: '/ops/wpl/players', label: 'Players', icon: Users },
     { href: '/ops/wpl/batting-stats', label: 'Batting Stats', icon: Award },
     { href: '/ops/wpl/bowling-stats', label: 'Bowling Stats', icon: BarChart3 },
