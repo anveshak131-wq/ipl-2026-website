@@ -774,7 +774,7 @@ export default function AdminSidebar({ currentPage = '', onLogout }: AdminSideba
             ]
       ),
     };
-  }, [baseMenuGroups]);
+  }, [baseMenuGroups, opsBase, opsLeague]);
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -1024,11 +1024,11 @@ export default function AdminSidebar({ currentPage = '', onLogout }: AdminSideba
             return null;
           }
           
-          const isExpanded = expandedGroups.has(groupName) || hasActiveItem;
           const hasActiveItem = items.some(
             (item) =>
               currentPage === item.href || (!!currentPage && currentPage.startsWith(item.href + '/'))
           );
+          const isExpanded = expandedGroups.has(groupName) || hasActiveItem;
 
           // Keep Overview visible as the dashboard anchor.
           if (groupName === 'Overview') {
