@@ -35,6 +35,11 @@ export default function AdminSidebar({ currentPage = '', onLogout }: AdminSideba
   const { currentLeague } = useLeague();
   const opsLeague = pathname?.includes('/ops/wpl') || pathname?.includes('/wpl-admin-2026') || currentLeague === 'wpl' ? 'wpl' : 'ipl';
   const opsBase = '/ops/' + opsLeague;
+  const isWPLItemAllowed = (href: string) => {
+    if (opsLeague !== 'wpl') return true;
+    const slug = href.replace('/ops/wpl/', '').split('/')[0];
+    return ["dashboard","teams","matches","points-table","scorecard","live-score","matchday","playing-11","content","news","stories","coaches","achievements","predictions","venues","analytics","settings","admins"].includes(slug);
+  };
 
   // Render strictly the designated non-player WPL pages
   const isItemSupported = (itemHref: string) => {
