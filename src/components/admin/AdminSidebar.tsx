@@ -716,48 +716,75 @@ export default function AdminSidebar({ currentPage = '', onLogout }: AdminSideba
 
     return {
       Overview: pick([
-        '/ops/ipl/dashboard',
-        '/ops/ipl/analytics',
+        opsBase + '/dashboard',
+        opsBase + '/analytics',
       ]),
       'Live Ops': pick([
-        '/ops/ipl/matches',
-        '/ops/ipl/live-score',
-        '/ops/ipl/live-score-fast',
-        '/ops/ipl/playing-11',
-        '/ops/ipl/scorecard',
-        '/ops/ipl/matchday',
-        '/ops/ipl/points-table',
+        opsBase + '/matches',
+        opsBase + '/live-score',
+        opsBase + '/playing-11',
+        opsBase + '/scorecard',
+        opsBase + '/matchday',
+        opsBase + '/points-table',
       ]),
-      'League Data': pick([
-        '/ops/ipl/teams',
-        '/ops/ipl/players',
-        '/ops/ipl/achievements',
-        '/ops/ipl/coaches',
-      ]),
-      Content: pick([
-        '/ops/ipl/content',
-        '/ops/ipl/news',
-        '/ops/ipl/social',
-        '/ops/ipl/stories',
-        '/ops/ipl/predictions',
-        '/ops/ipl/moderation',
-        '/ops/ipl/engagement',
-        '/ops/ipl/stats',
-      ]),
-      'Data & AI': pick([
-        '/ops/ipl/players/upload',
-        '/ops/ipl/dataset-manager',
-        '/ops/ipl/datasets',
-        '/ops/ipl/ml-lab',
-      ]),
-      Settings: pick([
-        '/ops/ipl/settings',
-        '/ops/ipl/email-notifications',
-        '/ops/ipl/admins',
-        '/ops/ipl/legal',
-        '/ops/ipl/support',
-        '/ops/ipl/setup',
-      ]),
+      'League Data': pick(
+        opsLeague === 'wpl'
+          ? [
+              opsBase + '/teams',
+              opsBase + '/coaches',
+              opsBase + '/achievements',
+            ]
+          : [
+              opsBase + '/teams',
+              opsBase + '/players',
+              opsBase + '/achievements',
+              opsBase + '/coaches',
+            ]
+      ),
+      Content: pick(
+        opsLeague === 'wpl'
+          ? [
+              opsBase + '/content',
+              opsBase + '/news',
+              opsBase + '/stories',
+              opsBase + '/predictions',
+            ]
+          : [
+              opsBase + '/content',
+              opsBase + '/news',
+              opsBase + '/social',
+              opsBase + '/stories',
+              opsBase + '/predictions',
+              opsBase + '/moderation',
+              opsBase + '/engagement',
+              opsBase + '/stats',
+            ]
+      ),
+      'Data & AI': pick(
+        opsLeague === 'wpl'
+          ? []
+          : [
+              opsBase + '/players/upload',
+              opsBase + '/dataset-manager',
+              opsBase + '/datasets',
+              opsBase + '/ml-lab',
+            ]
+      ),
+      Settings: pick(
+        opsLeague === 'wpl'
+          ? [
+              opsBase + '/settings',
+              opsBase + '/admins',
+            ]
+          : [
+              opsBase + '/settings',
+              opsBase + '/email-notifications',
+              opsBase + '/admins',
+              opsBase + '/legal',
+              opsBase + '/support',
+              opsBase + '/setup',
+            ]
+      ),
     };
   }, [baseMenuGroups]);
 
