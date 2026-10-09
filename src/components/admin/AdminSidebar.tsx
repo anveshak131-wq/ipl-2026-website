@@ -37,19 +37,7 @@ export default function AdminSidebar({ currentPage = '', onLogout }: AdminSideba
   const opsBase = '/ops/' + opsLeague;
   const isWPLItemAllowed = (href: string) => {
     if (opsLeague !== 'wpl') return true;
-    const slug = href.replace('/ops/wpl/', '').split('/')[0];
-    return ["dashboard","teams","matches","points-table","scorecard","live-score","matchday","playing-11","content","news","stories","coaches","achievements","predictions","venues","analytics","settings","admins"].includes(slug);
-  };
-
-  // Render strictly the designated non-player WPL pages
-  const isItemSupported = (itemHref: string) => {
-    if (opsLeague !== 'wpl') return true;
-    const parts = itemHref.replace('/ops/wpl/', '').split('/');
-    const slug = parts[0];
-    return ["dashboard","teams","matches","points-table","scorecard","live-score","matchday","playing-11","content","news","stories","coaches","achievements","predictions","venues","analytics","settings","admins"].includes(slug);
-  };
-
-  const [collapsed, setCollapsed] = useState(false);
+    const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [adminName, setAdminName] = useState('Admin User');
   const [adminEmail, setAdminEmail] = useState('admin@ipl2026.com');
@@ -1030,13 +1018,13 @@ export default function AdminSidebar({ currentPage = '', onLogout }: AdminSideba
 
       {/* Navigation - Redesigned with admin classes */}
       <nav className="flex-1 px-4 py-4 space-y-4 overflow-y-auto">
-        {Object.entries(filteredMenuGroups).map(([groupName, items]) => {
+        {Object.entries(filteredMenuGroups).filter(([_, items]) => items && items.length > 0).map(([groupName, items]) => {
           if (!Array.isArray(items)) {
             console.warn(`Menu group ${groupName} is not an array`);
             return null;
           }
           
-          const isExpanded = expandedGroups.has(groupName);
+          const isExpanded = expandedGroups.has(groupName) || hasActiveItem;
           const hasActiveItem = items.some(
             (item) =>
               currentPage === item.href || (!!currentPage && currentPage.startsWith(item.href + '/'))
