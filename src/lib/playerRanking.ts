@@ -1,24 +1,10 @@
-import { League, Player } from '@/types';
+import { League, Player } from "@/types";
 
-export type PlayerGrade = 'A' | 'B' | 'C' | 'D';
-
-const MIN_SAMPLE_FOR_PERCENTILES = 6;
-const RELIABILITY_BASELINE = 50;
+export type PlayerGrade = "A" | "B" | "C" | "D";
 
 function clamp(value: number, min = 0, max = 100): number {
+  if (!Number.isFinite(value)) return min;
   return Math.max(min, Math.min(max, value));
-}
-
-function normalizeHigherBetter(value: number, min: number, max: number): number {
-  if (!Number.isFinite(value)) return 0;
-  if (max <= min) return 0;
-  return clamp(((value - min) / (max - min)) * 100);
-}
-
-function normalizeLowerBetter(value: number, max: number, min: number): number {
-  if (!Number.isFinite(value)) return 0;
-  if (max <= min) return 0;
-  return clamp(((max - value) / (max - min)) * 100);
 }
 
 function quantile(values: number[], p: number): number {
@@ -36,201 +22,148 @@ function quantile(values: number[], p: number): number {
   return sorted[low] + (sorted[high] - sorted[low]) * weight;
 }
 
-// Calibrated League Standards
-const BENCHMARKS = {
-  wpl: {
-    batting: {
-      minRunsPerMatch: 8,
-      maxRunsPerMatch: 42,
-      minSR: 95,
-      maxSR: 155,
-      minAvg: 14,
-      maxAvg: 44,
-      minMilestoneRate: 0.05,
-      maxMilestoneRate: 0.30,
-    },
-    bowling: {
-      minWicketsPerMatch: 0.25,
-      maxWicketsPerMatch: 1.8,
-      maxEcon: 9.4,
-      minEcon: 5.6,
-      maxBowlingAvg: 38,
-      minBowlingAvg: 15,
-      maxBowlingSR: 28,
-      minBowlingSR: 11,
-    },
-    reliabilityK: 4, // 8-match tournament standard
-  },
-  ipl: {
-    batting: {
-      minRunsPerMatch: 10,
-      maxRunsPerMatch: 55,
-      minSR: 110,
-      maxSR: 180,
-      minAvg: 18,
-      maxAvg: 50,
-      minMilestoneRate: 0.05,
-      maxMilestoneRate: 0.35,
-    },
-    bowling: {
-      minWicketsPerMatch: 0.3,
-      maxWicketsPerMatch: 2.0,
-      maxEcon: 10.0,
-      minEcon: 6.2,
-      maxBowlingAvg: 40,
-      minBowlingAvg: 16,
-      maxBowlingSR: 28,
-      minBowlingSR: 10,
-    },
-    reliabilityK: 8, // 14-match tournament standard
-  },
-};
+/**
+ * Batting Impact Engine
+ * Tailored for WPL standards (2023-2026), accounting for boundary rate and strike rate leverage.
+ */
+export function computeWPLBattingScore(player: Player): number {
+  const stats = (player.stats || {}) as Record<string, any>;
+  const runs = Number(stats.runs || 0);
+  const matches = Number(stats.matches || 0);
+  const innings = Number(stats.innings || matches || 1);
+  const sr = Number(stats.strikeRate || 100);
+  const avg = Number(stats.average || (runs > 0 ? runs / Math.max(1, innings) : 20));
+  const fours = Number(stats.fours || 0);
+  const sixes = Number(stats.sixes || 0);
 
-function getBattingSubscore(player: Player): number {
-  const stats = player.stats;
-  const leagueKey = (player.league || 'ipl').toLowerCase() === 'wpl' ? 'wpl' : 'ipl';
-  const cfg = BENCHMARKS[leagueKey].batting;
+  if (runs === 0 && matches === 0) return 40; // Default baseline for unplayed squad members
 
-  const matches = Math.max(0, Number(stats?.matches || 0));
-  const runs = Math.max(0, Number(stats?.runs || 0));
-  const strikeRate = Math.max(0, Number(stats?.strikeRate || 0));
-  const battingAverage = Math.max(0, Number(stats?.average || 0));
-  const fifties = Math.max(0, Number(stats?.fifties || 0));
-  const hundreds = Math.max(0, Number(stats?.hundreds || 0));
+  const boundaryRuns = fours * 4 + sixes * 6;
+  const boundaryPct = runs > 0 ? (boundaryRuns / runs) * 100 : 35;
 
-  if (matches <= 0 && runs <= 0) return 40; // Neutral baseline for uncapped/unplayed players
+  // Calibrated ranges for WPL top performers
+  const runsPerInningsNorm = clamp(((runs / Math.max(1, innings) - 10) / (45 - 10)) * 100);
+  const srNorm = clamp(((sr - 100) / (165 - 100)) * 100);
+  const avgNorm = clamp(((avg - 14) / (48 - 14)) * 100);
+  const boundaryNorm = clamp(((boundaryPct - 30) / (72 - 30)) * 100);
 
-  const effectiveMatches = Math.max(matches, 1);
-  const runsPerMatch = runs / effectiveMatches;
-  const milestoneRate = (fifties + 2 * hundreds) / effectiveMatches;
-
-  const runsScore = normalizeHigherBetter(runsPerMatch, cfg.minRunsPerMatch, cfg.maxRunsPerMatch);
-  const strikeRateScore = normalizeHigherBetter(strikeRate, cfg.minSR, cfg.maxSR);
-  const averageScore = normalizeHigherBetter(battingAverage, cfg.minAvg, cfg.maxAvg);
-  const milestoneScore = normalizeHigherBetter(milestoneRate, cfg.minMilestoneRate, cfg.maxMilestoneRate);
-
-  return clamp(
-    runsScore * 0.35 +
-    strikeRateScore * 0.30 +
-    averageScore * 0.25 +
-    milestoneScore * 0.10
+  const rawBat = (
+    runsPerInningsNorm * 0.30 +
+    srNorm * 0.35 +
+    boundaryNorm * 0.20 +
+    avgNorm * 0.15
   );
-}
 
-function getBowlingSubscore(player: Player): number {
-  const stats = player.stats;
-  const leagueKey = (player.league || 'ipl').toLowerCase() === 'wpl' ? 'wpl' : 'ipl';
-  const cfg = BENCHMARKS[leagueKey].bowling;
-
-  const matches = Math.max(0, Number(stats?.matches || 0));
-  const wickets = Math.max(0, Number(stats?.wickets || 0));
-  const economy = Math.max(0, Number(stats?.economy || 0));
-
-  if (matches <= 0 && wickets <= 0) return 40;
-
-  const effectiveMatches = Math.max(matches, 1);
-  const wicketsPerMatch = wickets / effectiveMatches;
-
-  const bowlingAverageFromStats = Number(stats?.bowlingAverage || 0);
-  const derivedBowlingAverage = wickets > 0 && economy > 0 ? (economy * 4 * effectiveMatches) / wickets : 0;
-  const bowlingAverage = bowlingAverageFromStats > 0 ? bowlingAverageFromStats : derivedBowlingAverage;
-  const bowlingStrikeRateProxy = wickets > 0 ? (effectiveMatches * 24) / wickets : 999;
-
-  const wicketScore = normalizeHigherBetter(wicketsPerMatch, cfg.minWicketsPerMatch, cfg.maxWicketsPerMatch);
-  const economyScore = normalizeLowerBetter(economy, cfg.maxEcon, cfg.minEcon);
-  const averageScore = normalizeLowerBetter(bowlingAverage, cfg.maxBowlingAvg, cfg.minBowlingAvg);
-  const strikeRateScore = normalizeLowerBetter(bowlingStrikeRateProxy, cfg.maxBowlingSR, cfg.minBowlingSR);
-
-  return clamp(
-    wicketScore * 0.35 +
-    economyScore * 0.30 +
-    averageScore * 0.20 +
-    strikeRateScore * 0.15
-  );
+  // Opportunity damping (needs ~3.5 innings of sample size)
+  const confidence = innings / (innings + 3.5);
+  return Math.round(rawBat * confidence + 50 * (1 - confidence));
 }
 
 /**
- * Computes role-aware and league-calibrated raw score in [0, 100].
+ * Bowling Impact Engine
+ * Calibrated against WPL pace and spin economies, strike rates, and wicket hauls.
+ */
+export function computeWPLBowlingScore(player: Player): number {
+  const stats = (player.stats || {}) as Record<string, any>;
+  const wickets = Number(stats.wickets || 0);
+  const matches = Number(stats.matches || 0);
+  const overs = Number(stats.overs || matches * 2.5);
+  const econ = Number(stats.economy || 8.0);
+  const bowlingAvg = Number(stats.bowlingAverage || (wickets > 0 ? (overs * 6) / wickets : 32));
+
+  if (overs < 1.5 && wickets === 0) return 40;
+
+  const wktPerOver = wickets / Math.max(1, overs);
+  const wktNorm = clamp(((wktPerOver - 0.10) / (0.60 - 0.10)) * 100);
+  const econNorm = clamp(((9.6 - econ) / (9.6 - 5.8)) * 100);
+  const avgNorm = clamp(((36 - bowlingAvg) / (36 - 16)) * 100);
+
+  const rawBowl = (
+    wktNorm * 0.40 +
+    econNorm * 0.35 +
+    avgNorm * 0.25
+  );
+
+  // Damping: needs ~10 overs bowled to establish true baseline
+  const confidence = overs / (overs + 10);
+  return Math.round(rawBowl * confidence + 50 * (1 - confidence));
+}
+
+/**
+ * Computes the role-adjusted performance raw score for any player
  */
 export function computeRoleRawScore(player: Player): number {
-  if (!player || !player.stats) return 45;
+  const role = (player.role || "").toLowerCase();
+  const batScore = computeWPLBattingScore(player);
+  const bowlScore = computeWPLBowlingScore(player);
 
-  const role = (player.role || '').toLowerCase();
-
-  if (role.includes('bat') || role.includes('keeper')) {
-    return getBattingSubscore(player);
+  if (role.includes("all-rounder") || role.includes("allrounder")) {
+    // Primary skill takes 65%, secondary takes 35% with a synergy bonus
+    const high = Math.max(batScore, bowlScore);
+    const low = Math.min(batScore, bowlScore);
+    return Math.min(99, Math.round(high * 0.65 + low * 0.35 + 5));
   }
 
-  if (role.includes('bowl')) {
-    return getBowlingSubscore(player);
+  if (role.includes("bowler")) {
+    // Frontline bowlers: 85% bowling impact, 15% batting lower-order value
+    return Math.round(bowlScore * 0.85 + batScore * 0.15);
   }
 
-  // All-rounder: balanced blend of batting and bowling
-  const batting = getBattingSubscore(player);
-  const bowling = getBowlingSubscore(player);
-  const balance = 1 - Math.min(1, Math.abs(batting - bowling) / 100);
+  if (role.includes("keeper") || role.includes("wicket")) {
+    // Wicketkeepers: 85% batting impact + glovework standard baseline
+    return Math.min(99, Math.round(batScore * 0.85 + 12));
+  }
 
-  return clamp(batting * 0.45 + bowling * 0.45 + balance * 10);
+  // Pure Batters
+  return batScore;
 }
 
 /**
- * Shrinks raw score toward baseline using league-specific sample calibration.
+ * Reliability damping wrapper across tournament editions
  */
-export function applyReliability(raw: number, matches: number, league: League = 'ipl'): number {
-  const safeRaw = clamp(Number(raw) || 0);
-  const safeMatches = Math.max(0, Number(matches) || 0);
-
-  if (safeMatches <= 0) {
-    return 40; // Clean baseline for squad players awaiting debut
-  }
-
-  const leagueKey = String(league).toLowerCase() === 'wpl' ? 'wpl' : 'ipl';
-  const k = BENCHMARKS[leagueKey].reliabilityK;
-
-  const reliability = safeMatches / (safeMatches + k);
-  return clamp(reliability * safeRaw + (1 - reliability) * RELIABILITY_BASELINE);
+export function applyReliability(rawScore: number, sampleUnits: number, league: League = "wpl"): number {
+  const k = league === "wpl" ? 4 : 5;
+  const baseline = 50;
+  const factor = sampleUnits / (sampleUnits + k);
+  return rawScore * factor + baseline * (1 - factor);
 }
 
 /**
- * Assigns A/B/C/D using league and role calibrated percentile distribution.
+ * Derives A / B / C / D letter grade comparing against role peer percentiles
  */
 export function gradeFromPercentile(
   score: number,
-  role: Player['role'],
-  league: League,
-  allPlayers: Player[]
+  playerRole: string,
+  _league: League,
+  allPlayers: Player[] = []
 ): PlayerGrade {
-  const safeScore = clamp(Number(score) || 0);
+  const roleLower = (playerRole || "").toLowerCase();
+  
+  // Extract scores of cohort peers sharing the same broad role
+  const peerScores = allPlayers
+    .filter((p) => {
+      const pRole = (p.role || "").toLowerCase();
+      if (roleLower.includes("all-rounder")) return pRole.includes("all-rounder");
+      if (roleLower.includes("bowler")) return pRole.includes("bowler");
+      if (roleLower.includes("keeper")) return pRole.includes("keeper");
+      return !pRole.includes("bowler") && !pRole.includes("all-rounder");
+    })
+    .map((p) => computeRoleRawScore(p));
 
-  if (safeScore <= 0) {
-    return 'D';
+  if (peerScores.length >= 5) {
+    const p80 = quantile(peerScores, 0.80);
+    const p55 = quantile(peerScores, 0.55);
+    const p25 = quantile(peerScores, 0.25);
+
+    if (score >= p80) return "A";
+    if (score >= p55) return "B";
+    if (score >= p25) return "C";
+    return "D";
   }
 
-  const peers = allPlayers.filter(
-    (p) => (p?.role || '').toLowerCase() === (role || '').toLowerCase() && 
-           (p?.league || 'ipl').toLowerCase() === (league || 'ipl').toLowerCase() && 
-           p?.stats
-  );
-
-  if (peers.length < MIN_SAMPLE_FOR_PERCENTILES) {
-    if (safeScore >= 75) return 'A';
-    if (safeScore >= 60) return 'B';
-    if (safeScore >= 45) return 'C';
-    return 'D';
-  }
-
-  const peerScores = peers.map((p) => {
-    const raw = computeRoleRawScore(p);
-    const matches = Number(p.stats?.matches || 0);
-    return applyReliability(raw, matches, league);
-  });
-
-  const thresholdA = quantile(peerScores, 0.78);
-  const thresholdB = quantile(peerScores, 0.50);
-  const thresholdC = quantile(peerScores, 0.22);
-
-  if (safeScore >= thresholdA) return 'A';
-  if (safeScore >= thresholdB) return 'B';
-  if (safeScore >= thresholdC) return 'C';
-  return 'D';
+  // Fallback absolute score thresholds
+  if (score >= 82) return "A";
+  if (score >= 68) return "B";
+  if (score >= 50) return "C";
+  return "D";
 }
