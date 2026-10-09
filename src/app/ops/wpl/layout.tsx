@@ -1,6 +1,6 @@
-import Link from 'next/link';
 'use client';
 
+import Link from 'next/link';
 import { useState, useEffect, useRef } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { Search } from 'lucide-react';

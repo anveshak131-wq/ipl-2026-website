@@ -1295,3 +1295,4 @@ export default function AdminSidebar({ currentPage = '', onLogout }: AdminSideba
     </>
   );
 }
+}
