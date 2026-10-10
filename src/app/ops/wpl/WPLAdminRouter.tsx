@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { LeagueProvider } from '@/contexts/LeagueContext';
-import WPLAdminSidebar from '@/components/admin/WPLAdminSidebar';
+import WPLAdminSidebarNew from '@/components/admin/WPLAdminSidebarNew';
 import WPLPointsTable from './points-table/page';
 import GlobalSearch from '@/components/admin/GlobalSearch';
 import WPLAdminDashboard from './dashboard/page';
@@ -38,7 +38,7 @@ export default function WPLAdminRouter() {
     if (pathname.includes('/matchday')) {
       return (
         <div>
-          <WPLAdminSidebar currentPage="matchday" />
+          <WPLAdminSidebarNew />
           <div className="ml-64">
             <GlobalSearch />
             <div className="p-6">
@@ -52,7 +52,7 @@ export default function WPLAdminRouter() {
     if (pathname.includes('/venues')) {
       return (
         <div>
-          <WPLAdminSidebar currentPage="venues" />
+          <WPLAdminSidebarNew />
           <div className="ml-64">
             <GlobalSearch />
             <div className="p-6">
@@ -66,7 +66,7 @@ export default function WPLAdminRouter() {
     if (pathname.includes('/stories')) {
       return (
         <div>
-          <WPLAdminSidebar currentPage="stories" />
+          <WPLAdminSidebarNew />
           <div className="ml-64">
             <GlobalSearch />
             <div className="p-6">
@@ -80,7 +80,7 @@ export default function WPLAdminRouter() {
     if (pathname.includes('/live-score')) {
       return (
         <div>
-          <WPLAdminSidebar currentPage="live-score" />
+          <WPLAdminSidebarNew />
           <div className="ml-64">
             <GlobalSearch />
             <div className="p-6">
@@ -94,7 +94,7 @@ export default function WPLAdminRouter() {
     if (pathname.includes('/predictions')) {
       return (
         <div>
-          <WPLAdminSidebar currentPage="predictions" />
+          <WPLAdminSidebarNew />
           <div className="ml-64">
             <GlobalSearch />
             <div className="p-6">
@@ -108,7 +108,7 @@ export default function WPLAdminRouter() {
     if (pathname.includes('/points-table')) {
       return (
         <div>
-          <WPLAdminSidebar currentPage="points-table" />
+          <WPLAdminSidebarNew />
           <div className="ml-64">
             <GlobalSearch />
             <div className="p-6">
@@ -122,7 +122,7 @@ export default function WPLAdminRouter() {
     if (pathname.includes('/batting-stats')) {
       return (
         <div>
-          <WPLAdminSidebar currentPage="batting-stats" />
+          <WPLAdminSidebarNew />
           <div className="ml-64">
             <GlobalSearch />
             <div className="p-6">
@@ -136,7 +136,7 @@ export default function WPLAdminRouter() {
     if (pathname.includes('/bowling-stats')) {
       return (
         <div>
-          <WPLAdminSidebar currentPage="bowling-stats" />
+          <WPLAdminSidebarNew />
           <div className="ml-64">
             <GlobalSearch />
             <div className="p-6">
@@ -150,7 +150,7 @@ export default function WPLAdminRouter() {
     if (pathname.includes('/playing-11')) {
       return (
         <div>
-          <WPLAdminSidebar currentPage="playing-11" />
+          <WPLAdminSidebarNew />
           <div className="ml-64">
             <GlobalSearch />
             <div className="p-6">
@@ -164,7 +164,7 @@ export default function WPLAdminRouter() {
     if (pathname.includes('/scorecard')) {
       return (
         <div>
-          <WPLAdminSidebar currentPage="scorecard" />
+          <WPLAdminSidebarNew />
           <div className="ml-64">
             <GlobalSearch />
             <div className="p-6">
@@ -178,7 +178,7 @@ export default function WPLAdminRouter() {
     if (pathname.includes('/players')) {
       return (
         <div>
-          <WPLAdminSidebar currentPage="players" />
+          <WPLAdminSidebarNew />
           <div className="ml-64">
             <GlobalSearch />
             <div className="p-6">
@@ -192,7 +192,7 @@ export default function WPLAdminRouter() {
     if (pathname.includes('/teams')) {
       return (
         <div>
-          <WPLAdminSidebar currentPage="teams" />
+          <WPLAdminSidebarNew />
           <div className="ml-64">
             <GlobalSearch />
             <div className="p-6">
@@ -206,7 +206,7 @@ export default function WPLAdminRouter() {
     if (pathname.includes('/matches')) {
       return (
         <div>
-          <WPLAdminSidebar currentPage="matches" />
+          <WPLAdminSidebarNew />
           <div className="ml-64">
             <GlobalSearch />
             <div className="p-6">
@@ -220,7 +220,7 @@ export default function WPLAdminRouter() {
     // Default dashboard
     return (
       <div>
-        <WPLAdminSidebar currentPage="dashboard" />
+        <WPLAdminSidebarNew />
         <div className="ml-64">
           <GlobalSearch />
           <WPLAdminDashboard />
