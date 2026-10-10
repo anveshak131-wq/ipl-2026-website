@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -17,6 +17,10 @@ import {
   Edit2,
   Trash2,
   Zap,
+  CheckSquare,
+  Square,
+  CheckCheck,
+  FolderOpen,
 } from "lucide-react";
 import { WplMatch, TeamRef, VenueRef, MatchStage } from "@/types/match";
 import { generateWpl2027SeasonDraft } from "@/lib/round-robin-engine";
@@ -37,13 +41,39 @@ export const WPL_VENUES: VenueRef[] = [
   { id: "v-vadodara", name: "Kotambi Stadium", city: "Vadodara" },
 ];
 
+const STORAGE_KEY = "wpl_matches_fixtures_v2027";
+
 export default function WplMatchesManagementPage() {
-  const [matches, setMatches] = useState<WplMatch[]>(() =>
-    generateWpl2027SeasonDraft(WPL_TEAMS, WPL_VENUES)
-  );
+  // Empty by default — 2026 matches removed, awaiting official 2027 BCCI release
+  const [matches, setMatches] = useState<WplMatch[]>([]);
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        setMatches(JSON.parse(saved));
+      }
+    } catch (e) {
+      console.error("Failed to load matches from storage", e);
+    }
+    setIsLoaded(true);
+  }, []);
+
+  const saveMatches = (updated: WplMatch[]) => {
+    setMatches(updated);
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+    } catch (e) {
+      console.error("Failed to save matches", e);
+    }
+  };
 
   const [completedResults] = useState<MatchResultPayload[]>([]);
   const [stageFilter, setStageFilter] = useState<"ALL" | "LEAGUE" | "PLAYOFFS" | "STANDINGS">("ALL");
+
+  // Selection & Batch Action State
+  const [selectedMatchIds, setSelectedMatchIds] = useState<Set<string>>(new Set());
 
   const [isManualModalOpen, setIsManualModalOpen] = useState(false);
   const [editingMatch, setEditingMatch] = useState<WplMatch | null>(null);
@@ -60,96 +90,107 @@ export default function WplMatchesManagementPage() {
     return calculateWplStandings(WPL_TEAMS, completedResults);
   }, [completedResults]);
 
-  const leagueCompletedCount = useMemo(() => {
-    return matches.filter((m) => m.stage === "LEAGUE" && m.status === "COMPLETED").length;
-  }, [matches]);
+  const filteredMatches = useMemo(() => {
+    return matches.filter((m) => {
+      if (stageFilter === "LEAGUE") return m.stage === "LEAGUE";
+      if (stageFilter === "PLAYOFFS") return m.stage === "ELIMINATOR" || m.stage === "FINAL";
+      return true;
+    });
+  }, [matches, stageFilter]);
 
-  const canAutoSeedPlayoffs = leagueCompletedCount === 20;
-
-  const handleApplyAutoSeed = () => {
-    const rank1 = standings[0];
-    const rank2 = standings[1];
-    const rank3 = standings[2];
-
-    setMatches((prev) =>
-      prev.map((m) => {
-        if (m.stage === "ELIMINATOR") {
-          return {
-            ...m,
-            teamAId: rank2.teamId,
-            teamBId: rank3.teamId,
-            isResolved: true,
-            status: "READY_FOR_TOSS",
-            overrideNote: "Points Table Qualified: #2 " + rank2.shortName + " vs #3 " + rank3.shortName,
-          };
-        }
-        if (m.stage === "FINAL") {
-          return {
-            ...m,
-            teamAId: rank1.teamId,
-            overrideNote: "Direct Finalist: #1 " + rank1.shortName,
-          };
-        }
-        return m;
-      })
-    );
+  // Bulk Selection Handlers
+  const handleToggleSelectMatch = (id: string) => {
+    setSelectedMatchIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
   };
 
-  const handleSavePlayoffOverride = () => {
-    if (!overrideModalMatch || !selectedTeamA || !selectedTeamB) return;
-    setMatches((prev) =>
-      prev.map((m) => {
-        if (m.id === overrideModalMatch.id) {
-          return {
-            ...m,
-            teamAId: selectedTeamA,
-            teamBId: selectedTeamB,
-            isResolved: true,
-            isManualOverride: true,
-            overrideNote: overrideReason || "Manual Seed Assignment",
-            status: "READY_FOR_TOSS",
-          };
-        }
-        return m;
-      })
-    );
-    setOverrideModalMatch(null);
+  const handleSelectAllVisible = () => {
+    if (selectedMatchIds.size === filteredMatches.length && filteredMatches.length > 0) {
+      setSelectedMatchIds(new Set());
+    } else {
+      setSelectedMatchIds(new Set(filteredMatches.map((m) => m.id)));
+    }
   };
 
+  // Batch delete selected matches
+  const handleBatchDelete = () => {
+    if (selectedMatchIds.size === 0) return;
+    const confirmMsg = "Permanently delete " + selectedMatchIds.size + " selected fixture(s)?";
+    if (!window.confirm(confirmMsg)) return;
+
+    const remaining = matches.filter((m) => !selectedMatchIds.has(m.id));
+    saveMatches(remaining);
+    setSelectedMatchIds(new Set());
+  };
+
+  // Purge all matches (wipe entire slate)
+  const handlePurgeAllMatches = () => {
+    if (matches.length === 0) return;
+    if (!window.confirm("Are you sure you want to delete ALL " + matches.length + " matches? This action cannot be undone.")) return;
+    saveMatches([]);
+    setSelectedMatchIds(new Set());
+  };
+
+  // Single delete
+  const handleDeleteSingleMatch = (id: string, matchNum: number) => {
+    if (!window.confirm("Delete Match #" + matchNum + "?")) return;
+    const remaining = matches.filter((m) => m.id !== id);
+    saveMatches(remaining);
+    setSelectedMatchIds((prev) => {
+      const next = new Set(prev);
+      next.delete(id);
+      return next;
+    });
+  };
+
+  // Admin load official 2027 draft generator
+  const handleGenerate2027Draft = () => {
+    if (matches.length > 0 && !window.confirm("Existing fixtures will be replaced by the 2027 schedule matrix. Continue?")) {
+      return;
+    }
+    const draft = generateWpl2027SeasonDraft(WPL_TEAMS, WPL_VENUES);
+    saveMatches(draft);
+    setSelectedMatchIds(new Set());
+  };
+
+  // Manual fixture creation / editing
   const handleSaveManualMatch = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
-    const matchNumber = Number(formData.get("matchNumber"));
+    const matchNumber = Number(formData.get("matchNumber")) || (matches.length + 1);
     const stage = formData.get("stage") as MatchStage;
     const teamAId = (formData.get("teamAId") as string) || null;
     const teamBId = (formData.get("teamBId") as string) || null;
-    const venueId = formData.get("venueId") as string;
+    const venueId = (formData.get("venueId") as string) || WPL_VENUES[0].id;
     const date = formData.get("date") as string;
-    const time = formData.get("time") as string;
+    const time = (formData.get("time") as string) || "19:30";
 
-    const scheduledStartTime = new Date(date + "T" + time + ":00+05:30").toISOString();
+    const scheduledStartTime = date ? new Date(date + "T" + time + ":00+05:30").toISOString() : new Date().toISOString();
     const isPlayoff = stage === "ELIMINATOR" || stage === "FINAL";
 
     if (editingMatch) {
-      setMatches((prev) =>
-        prev.map((m) =>
-          m.id === editingMatch.id
-            ? {
-                ...m,
-                matchNumber,
-                stage,
-                teamAId,
-                teamBId,
-                venueId,
-                scheduledStartTime,
-                isResolved: !isPlayoff || Boolean(teamAId && teamBId),
-              }
-            : m
-        )
+      const updated = matches.map((m) =>
+        m.id === editingMatch.id
+          ? {
+              ...m,
+              matchNumber,
+              stage,
+              teamAId,
+              teamBId,
+              venueId,
+              scheduledStartTime,
+              isResolved: !isPlayoff || Boolean(teamAId && teamBId),
+            }
+          : m
       );
+      saveMatches(updated);
     } else {
       const newMatch: WplMatch = {
-        id: "wpl-custom-" + Date.now(),
+        id: "wpl-2027-m" + String(matchNumber).padStart(2, "0"),
         matchNumber,
         stage,
         teamAId,
@@ -172,18 +213,33 @@ export default function WplMatchesManagementPage() {
             ? { label: "Winner of Eliminator", sourceType: "MATCH_WINNER", sourceMatchNumber: 21 }
             : undefined,
       };
-      setMatches((prev) => [...prev, newMatch].sort((a, b) => a.matchNumber - b.matchNumber));
+      const updated = [...matches, newMatch].sort((a, b) => a.matchNumber - b.matchNumber);
+      saveMatches(updated);
     }
 
     setIsManualModalOpen(false);
     setEditingMatch(null);
   };
 
-  const filteredMatches = matches.filter((m) => {
-    if (stageFilter === "LEAGUE") return m.stage === "LEAGUE";
-    if (stageFilter === "PLAYOFFS") return m.stage === "ELIMINATOR" || m.stage === "FINAL";
-    return true;
-  });
+  const handleSavePlayoffOverride = () => {
+    if (!overrideModalMatch || !selectedTeamA || !selectedTeamB) return;
+    const updated = matches.map((m) => {
+      if (m.id === overrideModalMatch.id) {
+        return {
+          ...m,
+          teamAId: selectedTeamA,
+          teamBId: selectedTeamB,
+          isResolved: true,
+          isManualOverride: true,
+          overrideNote: overrideReason || "Manual Seed Assignment",
+          status: "READY_FOR_TOSS" as const,
+        };
+      }
+      return m;
+    });
+    saveMatches(updated);
+    setOverrideModalMatch(null);
+  };
 
   return (
     <div className="relative min-h-screen bg-[#07080E] text-neutral-100 p-6 md:p-10 font-sans selection:bg-purple-500/30">
@@ -199,21 +255,31 @@ export default function WplMatchesManagementPage() {
                 <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-cyan-500"></span>
               </span>
               <span className="text-xs font-mono uppercase tracking-widest text-cyan-400 font-semibold">
-                WPL Match Operations &bull; 2027 Season
+                WPL Operations &bull; Season 2027 Console
               </span>
             </div>
             <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight bg-gradient-to-r from-white via-neutral-200 to-neutral-400 bg-clip-text text-transparent">
-              Fixtures & Operations Central
+              Fixtures & Operations Hub
             </h1>
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
+            {matches.length > 0 && (
+              <button
+                onClick={handlePurgeAllMatches}
+                className="flex items-center space-x-2 px-3.5 py-2.5 rounded-xl text-xs font-semibold bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 border border-rose-500/30 transition cursor-pointer"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                <span>Delete All Matches ({matches.length})</span>
+              </button>
+            )}
+
             <button
-              onClick={() => setMatches(generateWpl2027SeasonDraft(WPL_TEAMS, WPL_VENUES))}
-              className="flex items-center space-x-2 px-3.5 py-2.5 rounded-xl text-xs font-semibold bg-white/5 hover:bg-white/10 border border-white/10 transition"
+              onClick={handleGenerate2027Draft}
+              className="flex items-center space-x-2 px-3.5 py-2.5 rounded-xl text-xs font-semibold bg-white/5 hover:bg-white/10 border border-white/10 transition cursor-pointer"
             >
               <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-              <span>Regenerate 22-Match Matrix</span>
+              <span>Load 2027 Double Round-Robin Matrix</span>
             </button>
 
             <button
@@ -224,60 +290,83 @@ export default function WplMatchesManagementPage() {
               className="flex items-center space-x-2 px-4 py-2.5 rounded-xl text-xs font-semibold bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 hover:opacity-95 shadow-lg shadow-purple-500/25 transition cursor-pointer"
             >
               <Plus className="w-4 h-4" />
-              <span>New Fixture</span>
+              <span>Add 2027 Fixture</span>
             </button>
           </div>
         </header>
 
-        {canAutoSeedPlayoffs && (
-          <div className="p-4 rounded-2xl border border-emerald-500/40 bg-emerald-950/30 flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <Zap className="w-5 h-5 text-emerald-400 animate-pulse" />
-              <div>
-                <h4 className="text-sm font-bold text-white">All 20 League Matches Completed!</h4>
-                <p className="text-xs text-neutral-300">
-                  Ready to auto-populate Eliminator (#2 {standings[1]?.shortName} vs #3 {standings[2]?.shortName}) and Final (#1 {standings[0]?.shortName}).
-                </p>
-              </div>
-            </div>
-            <button
-              onClick={handleApplyAutoSeed}
-              className="px-4 py-2 rounded-xl text-xs font-bold bg-emerald-500 text-black hover:bg-emerald-400 transition cursor-pointer"
-            >
-              Apply Playoff Standings
-            </button>
-          </div>
-        )}
-
+        {/* Filter & Batch Actions Bar */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="flex items-center p-1 rounded-xl bg-white/5 border border-white/10 backdrop-blur-md w-fit">
-            {(["ALL", "LEAGUE", "PLAYOFFS", "STANDINGS"] as const).map((stage) => (
+          <div className="flex items-center space-x-3">
+            <div className="flex items-center p-1 rounded-xl bg-white/5 border border-white/10 backdrop-blur-md w-fit">
+              {(["ALL", "LEAGUE", "PLAYOFFS", "STANDINGS"] as const).map((stage) => (
+                <button
+                  key={stage}
+                  onClick={() => setStageFilter(stage)}
+                  className={"relative px-4 py-1.5 rounded-lg text-xs font-semibold transition " + (stageFilter === stage ? "text-white" : "text-neutral-400 hover:text-neutral-200")}
+                >
+                  {stageFilter === stage && (
+                    <motion.div
+                      layoutId="filterPillMatches"
+                      className="absolute inset-0 rounded-lg bg-gradient-to-r from-indigo-600/80 to-purple-600/80 border border-purple-400/30 shadow-md"
+                      transition={{ type: "spring", bounce: 0.2, duration: 0.4 }}
+                    />
+                  )}
+                  <span className="relative z-10">
+                    {stage === "ALL"
+                      ? "All (" + matches.length + ")"
+                      : stage === "LEAGUE"
+                      ? "League"
+                      : stage === "PLAYOFFS"
+                      ? "Playoffs"
+                      : "Standings"}
+                  </span>
+                </button>
+              ))}
+            </div>
+
+            {stageFilter !== "STANDINGS" && filteredMatches.length > 0 && (
               <button
-                key={stage}
-                onClick={() => setStageFilter(stage)}
-                className={"relative px-4 py-1.5 rounded-lg text-xs font-semibold transition " + (stageFilter === stage ? "text-white" : "text-neutral-400 hover:text-neutral-200")}
+                onClick={handleSelectAllVisible}
+                className="flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs font-medium border border-white/10 bg-white/5 hover:bg-white/10 text-neutral-300 transition cursor-pointer"
               >
-                {stageFilter === stage && (
-                  <motion.div
-                    layoutId="filterPillMatches"
-                    className="absolute inset-0 rounded-lg bg-gradient-to-r from-indigo-600/80 to-purple-600/80 border border-purple-400/30 shadow-md"
-                    transition={{ type: "spring", bounce: 0.2, duration: 0.4 }}
-                  />
+                {selectedMatchIds.size === filteredMatches.length ? (
+                  <CheckCheck className="w-3.5 h-3.5 text-cyan-400" />
+                ) : (
+                  <Square className="w-3.5 h-3.5 text-neutral-400" />
                 )}
-                <span className="relative z-10">
-                  {stage === "ALL"
-                    ? "All Matches (" + matches.length + ")"
-                    : stage === "LEAGUE"
-                    ? "League (20)"
-                    : stage === "PLAYOFFS"
-                    ? "Playoffs (2)"
-                    : "Live Standings"}
+                <span>
+                  {selectedMatchIds.size === filteredMatches.length ? "Deselect All" : "Select All"}
                 </span>
               </button>
-            ))}
+            )}
           </div>
+
+          {selectedMatchIds.size > 0 && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="flex items-center space-x-3 p-2 px-4 rounded-xl bg-rose-950/40 border border-rose-500/40 text-rose-300 text-xs shadow-lg"
+            >
+              <span className="font-bold">{selectedMatchIds.size} Selected</span>
+              <button
+                onClick={handleBatchDelete}
+                className="flex items-center space-x-1 px-3 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-500 text-white font-bold transition shadow-md shadow-rose-600/20 cursor-pointer"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                <span>Delete Selected</span>
+              </button>
+              <button
+                onClick={() => setSelectedMatchIds(new Set())}
+                className="text-neutral-400 hover:text-white transition cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </motion.div>
+          )}
         </div>
 
+        {/* Content Section */}
         {stageFilter === "STANDINGS" ? (
           <div className="rounded-2xl border border-white/10 bg-[#0E101D]/80 backdrop-blur-xl overflow-hidden shadow-2xl">
             <table className="w-full text-left border-collapse">
@@ -309,6 +398,36 @@ export default function WplMatchesManagementPage() {
               </tbody>
             </table>
           </div>
+        ) : filteredMatches.length === 0 ? (
+          /* Empty Slate State */
+          <div className="flex flex-col items-center justify-center p-16 rounded-3xl border border-dashed border-white/10 bg-[#0E101D]/50 text-center space-y-4">
+            <div className="w-16 h-16 rounded-2xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400">
+              <FolderOpen className="w-8 h-8" />
+            </div>
+            <div className="space-y-1">
+              <h3 className="text-lg font-bold text-white">No 2027 Fixtures Loaded</h3>
+              <p className="text-xs text-neutral-400 max-w-md mx-auto">
+                2026 matches have been purged. When BCCI releases the official 2027 schedule, click &quot;Add 2027 Fixture&quot; to enter matches manually or load the draft matrix.
+              </p>
+            </div>
+            <div className="flex items-center space-x-3 pt-2">
+              <button
+                onClick={() => {
+                  setEditingMatch(null);
+                  setIsManualModalOpen(true);
+                }}
+                className="px-4 py-2 rounded-xl text-xs font-bold bg-white text-black hover:bg-neutral-200 transition cursor-pointer"
+              >
+                + Add First 2027 Match
+              </button>
+              <button
+                onClick={handleGenerate2027Draft}
+                className="px-4 py-2 rounded-xl text-xs font-semibold bg-white/5 hover:bg-white/10 border border-white/10 text-neutral-300 transition cursor-pointer"
+              >
+                Load 22-Match Matrix
+              </button>
+            </div>
+          </div>
         ) : (
           <div className="grid grid-cols-1 gap-4">
             <AnimatePresence>
@@ -317,6 +436,7 @@ export default function WplMatchesManagementPage() {
                 const teamB = match.teamBId ? teamMap.get(match.teamBId) : null;
                 const venue = venueMap.get(match.venueId);
                 const isPlayoff = match.stage === "ELIMINATOR" || match.stage === "FINAL";
+                const isSelected = selectedMatchIds.has(match.id);
 
                 return (
                   <motion.div
@@ -325,10 +445,22 @@ export default function WplMatchesManagementPage() {
                     initial={{ opacity: 0, y: 12 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.98 }}
-                    className={"relative rounded-2xl border transition-all backdrop-blur-xl " + (isPlayoff ? "bg-gradient-to-r from-purple-950/20 via-[#111322] to-[#0D0F1B] border-purple-500/30" : "bg-[#0E101D]/70 border-white/10 hover:border-white/20")}
+                    className={"relative rounded-2xl border transition-all backdrop-blur-xl " + (isSelected ? "border-cyan-500/60 bg-cyan-950/20 shadow-lg shadow-cyan-500/10 " : isPlayoff ? "bg-gradient-to-r from-purple-950/20 via-[#111322] to-[#0D0F1B] border-purple-500/30 " : "bg-[#0E101D]/70 border-white/10 hover:border-white/20 ")}
                   >
                     <div className="p-5 md:p-6 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
                       <div className="flex items-start md:items-center space-x-4">
+                        <button
+                          type="button"
+                          onClick={() => handleToggleSelectMatch(match.id)}
+                          className="mt-1 md:mt-0 p-1 text-neutral-400 hover:text-white transition cursor-pointer"
+                        >
+                          {isSelected ? (
+                            <CheckSquare className="w-5 h-5 text-cyan-400" />
+                          ) : (
+                            <Square className="w-5 h-5 text-neutral-600" />
+                          )}
+                        </button>
+
                         <div className="flex flex-col items-center justify-center h-14 w-14 rounded-xl bg-white/5 border border-white/10 font-mono">
                           <span className="text-[10px] text-neutral-400 uppercase">Match</span>
                           <span className="text-lg font-bold text-white">{match.matchNumber}</span>
@@ -347,7 +479,7 @@ export default function WplMatchesManagementPage() {
                             )}
                           </div>
                           <p className="text-xs text-neutral-400 font-mono">
-                            {new Date(match.scheduledStartTime).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })} IST &bull; {venue?.name}
+                            {new Date(match.scheduledStartTime).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })} IST &bull; {venue?.name || "TBA"}
                           </p>
                         </div>
                       </div>
@@ -355,13 +487,13 @@ export default function WplMatchesManagementPage() {
                       <div className="flex items-center space-x-6">
                         <div className="text-right">
                           <span className="font-bold text-sm text-white">
-                            {teamA ? teamA.name : <span className="text-purple-300/70 italic">{match.placeholderA?.label}</span>}
+                            {teamA ? teamA.name : <span className="text-purple-300/70 italic">{match.placeholderA?.label || "TBA"}</span>}
                           </span>
                         </div>
                         <span className="text-xs font-mono text-neutral-500 uppercase">VS</span>
                         <div>
                           <span className="font-bold text-sm text-white">
-                            {teamB ? teamB.name : <span className="text-purple-300/70 italic">{match.placeholderB?.label}</span>}
+                            {teamB ? teamB.name : <span className="text-purple-300/70 italic">{match.placeholderB?.label || "TBA"}</span>}
                           </span>
                         </div>
                       </div>
@@ -382,19 +514,22 @@ export default function WplMatchesManagementPage() {
                           </button>
                         )}
 
-                        {match.isResolved ? (
-                          <Link
-                            href={"/ops/wpl/fixtures/" + match.id + "/lineups"}
-                            className="flex items-center space-x-2 px-4 py-2 rounded-xl text-xs font-semibold bg-white hover:bg-neutral-200 text-black transition shadow-sm"
-                          >
-                            <span>Toss & Lineups</span>
-                            <ArrowRight className="w-3.5 h-3.5" />
-                          </Link>
-                        ) : (
-                          <span className="text-xs font-mono text-neutral-500 bg-neutral-900 border border-white/5 px-3 py-2 rounded-xl">
-                            Awaiting Teams
-                          </span>
-                        )}
+                        <Link
+                          href={"/ops/wpl/fixtures/" + match.id + "/lineups"}
+                          className="flex items-center space-x-2 px-4 py-2 rounded-xl text-xs font-semibold bg-white hover:bg-neutral-200 text-black transition shadow-sm"
+                        >
+                          <span>Toss & Lineups</span>
+                          <ArrowRight className="w-3.5 h-3.5" />
+                        </Link>
+
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteSingleMatch(match.id, match.matchNumber)}
+                          className="p-2 text-neutral-500 hover:text-rose-400 hover:bg-rose-500/10 rounded-xl transition cursor-pointer"
+                          title="Delete Match"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
                       </div>
                     </div>
                   </motion.div>
@@ -405,6 +540,111 @@ export default function WplMatchesManagementPage() {
         )}
       </div>
 
+      {/* Manual Fixture Entry Modal for Admins */}
+      <AnimatePresence>
+        {isManualModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <div className="absolute inset-0 bg-black/70 backdrop-blur-md" onClick={() => setIsManualModalOpen(false)} />
+            <form
+              onSubmit={handleSaveManualMatch}
+              className="relative w-full max-w-lg rounded-3xl bg-[#111322] border border-white/10 p-6 md:p-8 text-neutral-100 z-10 space-y-4"
+            >
+              <h3 className="text-lg font-bold">Add / Schedule WPL 2027 Fixture</h3>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-xs text-neutral-400 block mb-1">Match Number</label>
+                  <input
+                    name="matchNumber"
+                    type="number"
+                    defaultValue={matches.length + 1}
+                    className="w-full p-2.5 rounded-xl bg-white/5 border border-white/10 text-white"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="text-xs text-neutral-400 block mb-1">Stage</label>
+                  <select name="stage" className="w-full p-2.5 rounded-xl bg-white/5 border border-white/10 text-white">
+                    <option value="LEAGUE" className="bg-[#111322]">League Match</option>
+                    <option value="ELIMINATOR" className="bg-[#111322]">Eliminator</option>
+                    <option value="FINAL" className="bg-[#111322]">Final</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-xs text-neutral-400 block mb-1">Team A</label>
+                  <select name="teamAId" className="w-full p-2.5 rounded-xl bg-white/5 border border-white/10 text-white">
+                    <option value="">Select Team</option>
+                    {WPL_TEAMS.map((t) => (
+                      <option key={t.id} value={t.id} className="bg-[#111322]">{t.name} ({t.short})</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="text-xs text-neutral-400 block mb-1">Team B</label>
+                  <select name="teamBId" className="w-full p-2.5 rounded-xl bg-white/5 border border-white/10 text-white">
+                    <option value="">Select Team</option>
+                    {WPL_TEAMS.map((t) => (
+                      <option key={t.id} value={t.id} className="bg-[#111322]">{t.name} ({t.short})</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-xs text-neutral-400 block mb-1">Venue</label>
+                  <select name="venueId" className="w-full p-2.5 rounded-xl bg-white/5 border border-white/10 text-white">
+                    {WPL_VENUES.map((v) => (
+                      <option key={v.id} value={v.id} className="bg-[#111322]">{v.name} ({v.city})</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="text-xs text-neutral-400 block mb-1">Date</label>
+                  <input
+                    name="date"
+                    type="date"
+                    defaultValue="2027-02-12"
+                    className="w-full p-2.5 rounded-xl bg-white/5 border border-white/10 text-white"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="text-xs text-neutral-400 block mb-1">Time (IST)</label>
+                <input
+                  name="time"
+                  type="time"
+                  defaultValue="19:30"
+                  className="w-full p-2.5 rounded-xl bg-white/5 border border-white/10 text-white"
+                />
+              </div>
+
+              <div className="mt-6 flex justify-end space-x-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setIsManualModalOpen(false)}
+                  className="px-4 py-2 text-xs font-semibold text-neutral-400 cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 text-xs font-semibold bg-purple-600 hover:bg-purple-500 text-white rounded-xl cursor-pointer"
+                >
+                  Save Fixture
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Manual Seed Modal */}
       <AnimatePresence>
         {overrideModalMatch && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
