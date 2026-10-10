@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import React, { useState, useMemo } from 'react';
-import Link from 'next/link';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useState, useMemo } from "react";
+import Link from "next/link";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   Calendar,
   Clock,
@@ -16,26 +16,25 @@ import {
   SlidersHorizontal,
   Edit2,
   Trash2,
-  Trophy,
   Zap,
-} from 'lucide-react';
-import { WplMatch, TeamRef, VenueRef, MatchStage } from '@/types/match';
-import { generateWpl2027SeasonDraft } from '@/lib/round-robin-engine';
-import { calculateWplStandings, MatchResultPayload } from '@/lib/standings-engine';
+} from "lucide-react";
+import { WplMatch, TeamRef, VenueRef, MatchStage } from "@/types/match";
+import { generateWpl2027SeasonDraft } from "@/lib/round-robin-engine";
+import { calculateWplStandings, MatchResultPayload } from "@/lib/standings-engine";
 
 export const WPL_TEAMS: TeamRef[] = [
-  { id: 'rcb', name: 'Royal Challengers Bengaluru', short: 'RCB', accent: '#E21D24', badgeBg: 'bg-red-500/20 text-red-400 border-red-500/30' },
-  { id: 'mi', name: 'Mumbai Indians', short: 'MI', accent: '#004BA0', badgeBg: 'bg-blue-500/20 text-blue-400 border-blue-500/30' },
-  { id: 'dc', name: 'Delhi Capitals', short: 'DC', accent: '#2563EB', badgeBg: 'bg-cyan-500/20 text-cyan-400 border-cyan-500/30' },
-  { id: 'gg', name: 'Gujarat Giants', short: 'GG', accent: '#F97316', badgeBg: 'bg-orange-500/20 text-orange-400 border-orange-500/30' },
-  { id: 'upw', name: 'UP Warriorz', short: 'UPW', accent: '#EAB308', badgeBg: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30' },
+  { id: "rcb", name: "Royal Challengers Bengaluru", short: "RCB", accent: "#E21D24", badgeBg: "bg-red-500/20 text-red-400 border-red-500/30" },
+  { id: "mi", name: "Mumbai Indians", short: "MI", accent: "#004BA0", badgeBg: "bg-blue-500/20 text-blue-400 border-blue-500/30" },
+  { id: "dc", name: "Delhi Capitals", short: "DC", accent: "#2563EB", badgeBg: "bg-cyan-500/20 text-cyan-400 border-cyan-500/30" },
+  { id: "gg", name: "Gujarat Giants", short: "GG", accent: "#F97316", badgeBg: "bg-orange-500/20 text-orange-400 border-orange-500/30" },
+  { id: "upw", name: "UP Warriorz", short: "UPW", accent: "#EAB308", badgeBg: "bg-yellow-500/20 text-yellow-400 border-yellow-500/30" },
 ];
 
 export const WPL_VENUES: VenueRef[] = [
-  { id: 'v-bengaluru', name: 'M. Chinnaswamy Stadium', city: 'Bengaluru' },
-  { id: 'v-delhi', name: 'Arun Jaitley Stadium', city: 'Delhi' },
-  { id: 'v-mumbai', name: 'DY Patil Stadium', city: 'Navi Mumbai' },
-  { id: 'v-vadodara', name: 'Kotambi Stadium', city: 'Vadodara' },
+  { id: "v-bengaluru", name: "M. Chinnaswamy Stadium", city: "Bengaluru" },
+  { id: "v-delhi", name: "Arun Jaitley Stadium", city: "Delhi" },
+  { id: "v-mumbai", name: "DY Patil Stadium", city: "Navi Mumbai" },
+  { id: "v-vadodara", name: "Kotambi Stadium", city: "Vadodara" },
 ];
 
 export default function WplMatchesManagementPage() {
@@ -43,16 +42,16 @@ export default function WplMatchesManagementPage() {
     generateWpl2027SeasonDraft(WPL_TEAMS, WPL_VENUES)
   );
 
-  const [completedResults, setCompletedResults] = useState<MatchResultPayload[]>([]);
-  const [stageFilter, setStageFilter] = useState<'ALL' | 'LEAGUE' | 'PLAYOFFS' | 'STANDINGS'>('ALL');
+  const [completedResults] = useState<MatchResultPayload[]>([]);
+  const [stageFilter, setStageFilter] = useState<"ALL" | "LEAGUE" | "PLAYOFFS" | "STANDINGS">("ALL");
 
   const [isManualModalOpen, setIsManualModalOpen] = useState(false);
   const [editingMatch, setEditingMatch] = useState<WplMatch | null>(null);
 
   const [overrideModalMatch, setOverrideModalMatch] = useState<WplMatch | null>(null);
-  const [selectedTeamA, setSelectedTeamA] = useState('');
-  const [selectedTeamB, setSelectedTeamB] = useState('');
-  const [overrideReason, setOverrideReason] = useState('');
+  const [selectedTeamA, setSelectedTeamA] = useState("");
+  const [selectedTeamB, setSelectedTeamB] = useState("");
+  const [overrideReason, setOverrideReason] = useState("");
 
   const teamMap = useMemo(() => new Map(WPL_TEAMS.map((t) => [t.id, t])), []);
   const venueMap = useMemo(() => new Map(WPL_VENUES.map((v) => [v.id, v])), []);
@@ -62,7 +61,7 @@ export default function WplMatchesManagementPage() {
   }, [completedResults]);
 
   const leagueCompletedCount = useMemo(() => {
-    return matches.filter((m) => m.stage === 'LEAGUE' && m.status === 'COMPLETED').length;
+    return matches.filter((m) => m.stage === "LEAGUE" && m.status === "COMPLETED").length;
   }, [matches]);
 
   const canAutoSeedPlayoffs = leagueCompletedCount === 20;
@@ -74,21 +73,21 @@ export default function WplMatchesManagementPage() {
 
     setMatches((prev) =>
       prev.map((m) => {
-        if (m.stage === 'ELIMINATOR') {
+        if (m.stage === "ELIMINATOR") {
           return {
             ...m,
             teamAId: rank2.teamId,
             teamBId: rank3.teamId,
             isResolved: true,
-            status: 'READY_FOR_TOSS',
-            overrideNote: `Points Table Qualified: #2 ${rank2.shortName} vs #3 ${rank3.shortName}`,
+            status: "READY_FOR_TOSS",
+            overrideNote: "Points Table Qualified: #2 " + rank2.shortName + " vs #3 " + rank3.shortName,
           };
         }
-        if (m.stage === 'FINAL') {
+        if (m.stage === "FINAL") {
           return {
             ...m,
             teamAId: rank1.teamId,
-            overrideNote: `Direct Finalist: #1 ${rank1.shortName}`,
+            overrideNote: "Direct Finalist: #1 " + rank1.shortName,
           };
         }
         return m;
@@ -107,8 +106,8 @@ export default function WplMatchesManagementPage() {
             teamBId: selectedTeamB,
             isResolved: true,
             isManualOverride: true,
-            overrideNote: overrideReason || 'Manual Seed Assignment',
-            status: 'READY_FOR_TOSS',
+            overrideNote: overrideReason || "Manual Seed Assignment",
+            status: "READY_FOR_TOSS",
           };
         }
         return m;
@@ -120,16 +119,16 @@ export default function WplMatchesManagementPage() {
   const handleSaveManualMatch = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
-    const matchNumber = Number(formData.get('matchNumber'));
-    const stage = formData.get('stage') as MatchStage;
-    const teamAId = (formData.get('teamAId') as string) || null;
-    const teamBId = (formData.get('teamBId') as string) || null;
-    const venueId = formData.get('venueId') as string;
-    const date = formData.get('date') as string;
-    const time = formData.get('time') as string;
+    const matchNumber = Number(formData.get("matchNumber"));
+    const stage = formData.get("stage") as MatchStage;
+    const teamAId = (formData.get("teamAId") as string) || null;
+    const teamBId = (formData.get("teamBId") as string) || null;
+    const venueId = formData.get("venueId") as string;
+    const date = formData.get("date") as string;
+    const time = formData.get("time") as string;
 
-    const scheduledStartTime = new Date(`${date}T${time}:00+05:30`).toISOString();
-    const isPlayoff = stage === 'ELIMINATOR' || stage === 'FINAL';
+    const scheduledStartTime = new Date(date + "T" + time + ":00+05:30").toISOString();
+    const isPlayoff = stage === "ELIMINATOR" || stage === "FINAL";
 
     if (editingMatch) {
       setMatches((prev) =>
@@ -150,27 +149,27 @@ export default function WplMatchesManagementPage() {
       );
     } else {
       const newMatch: WplMatch = {
-        id: `wpl-custom-${Date.now()}`,
+        id: "wpl-custom-" + Date.now(),
         matchNumber,
         stage,
         teamAId,
         teamBId,
         venueId,
         scheduledStartTime,
-        status: 'SCHEDULED',
+        status: "SCHEDULED",
         isResolved: !isPlayoff || Boolean(teamAId && teamBId),
-        lineupStatus: 'PENDING',
+        lineupStatus: "PENDING",
         placeholderA:
-          stage === 'ELIMINATOR'
-            ? { label: 'Rank 2 (Points Table)', sourceType: 'POINTS_TABLE_RANK', sourceRank: 2 }
-            : stage === 'FINAL'
-            ? { label: 'Rank 1 (Points Table)', sourceType: 'POINTS_TABLE_RANK', sourceRank: 1 }
+          stage === "ELIMINATOR"
+            ? { label: "Rank 2 (Points Table)", sourceType: "POINTS_TABLE_RANK", sourceRank: 2 }
+            : stage === "FINAL"
+            ? { label: "Rank 1 (Points Table)", sourceType: "POINTS_TABLE_RANK", sourceRank: 1 }
             : undefined,
         placeholderB:
-          stage === 'ELIMINATOR'
-            ? { label: 'Rank 3 (Points Table)', sourceType: 'POINTS_TABLE_RANK', sourceRank: 3 }
-            : stage === 'FINAL'
-            ? { label: 'Winner of Eliminator', sourceType: 'MATCH_WINNER', sourceMatchNumber: 21 }
+          stage === "ELIMINATOR"
+            ? { label: "Rank 3 (Points Table)", sourceType: "POINTS_TABLE_RANK", sourceRank: 3 }
+            : stage === "FINAL"
+            ? { label: "Winner of Eliminator", sourceType: "MATCH_WINNER", sourceMatchNumber: 21 }
             : undefined,
       };
       setMatches((prev) => [...prev, newMatch].sort((a, b) => a.matchNumber - b.matchNumber));
@@ -181,8 +180,8 @@ export default function WplMatchesManagementPage() {
   };
 
   const filteredMatches = matches.filter((m) => {
-    if (stageFilter === 'LEAGUE') return m.stage === 'LEAGUE';
-    if (stageFilter === 'PLAYOFFS') return m.stage === 'ELIMINATOR' || m.stage === 'FINAL';
+    if (stageFilter === "LEAGUE") return m.stage === "LEAGUE";
+    if (stageFilter === "PLAYOFFS") return m.stage === "ELIMINATOR" || m.stage === "FINAL";
     return true;
   });
 
@@ -192,7 +191,7 @@ export default function WplMatchesManagementPage() {
       <div className="pointer-events-none fixed top-1/2 -right-40 h-[600px] w-[600px] rounded-full bg-gradient-to-tl from-cyan-600/10 via-pink-600/10 to-transparent blur-[140px]" />
 
       <div className="relative mx-auto max-w-7xl space-y-8">
-        <header className="flex flex-col md:flex-row md:items-center justify-between gap-6 border-b border-white/10 pb-6 backdrop-blur-xs">
+        <header className="flex flex-col md:flex-row md:items-center justify-between gap-6 border-b border-white/10 pb-6">
           <div className="space-y-1">
             <div className="flex items-center space-x-3">
               <span className="flex h-2.5 w-2.5 relative">
@@ -200,11 +199,11 @@ export default function WplMatchesManagementPage() {
                 <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-cyan-500"></span>
               </span>
               <span className="text-xs font-mono uppercase tracking-widest text-cyan-400 font-semibold">
-                WPL Match Operations Hub &bull; 2027 Season
+                WPL Match Operations &bull; 2027 Season
               </span>
             </div>
             <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight bg-gradient-to-r from-white via-neutral-200 to-neutral-400 bg-clip-text text-transparent">
-              Fixtures & Standings Central
+              Fixtures & Operations Central
             </h1>
           </div>
 
@@ -222,7 +221,7 @@ export default function WplMatchesManagementPage() {
                 setEditingMatch(null);
                 setIsManualModalOpen(true);
               }}
-              className="flex items-center space-x-2 px-4 py-2.5 rounded-xl text-xs font-semibold bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 hover:opacity-95 shadow-lg shadow-purple-500/25 transition"
+              className="flex items-center space-x-2 px-4 py-2.5 rounded-xl text-xs font-semibold bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 hover:opacity-95 shadow-lg shadow-purple-500/25 transition cursor-pointer"
             >
               <Plus className="w-4 h-4" />
               <span>New Fixture</span>
@@ -237,13 +236,13 @@ export default function WplMatchesManagementPage() {
               <div>
                 <h4 className="text-sm font-bold text-white">All 20 League Matches Completed!</h4>
                 <p className="text-xs text-neutral-300">
-                  Ready to auto-populate Eliminator (#2 {standings[1].shortName} vs #3 {standings[2].shortName}) and Final (#1 {standings[0].shortName}).
+                  Ready to auto-populate Eliminator (#2 {standings[1]?.shortName} vs #3 {standings[2]?.shortName}) and Final (#1 {standings[0]?.shortName}).
                 </p>
               </div>
             </div>
             <button
               onClick={handleApplyAutoSeed}
-              className="px-4 py-2 rounded-xl text-xs font-bold bg-emerald-500 text-black hover:bg-emerald-400 transition"
+              className="px-4 py-2 rounded-xl text-xs font-bold bg-emerald-500 text-black hover:bg-emerald-400 transition cursor-pointer"
             >
               Apply Playoff Standings
             </button>
@@ -252,36 +251,34 @@ export default function WplMatchesManagementPage() {
 
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-center p-1 rounded-xl bg-white/5 border border-white/10 backdrop-blur-md w-fit">
-            {(['ALL', 'LEAGUE', 'PLAYOFFS', 'STANDINGS'] as const).map((stage) => (
+            {(["ALL", "LEAGUE", "PLAYOFFS", "STANDINGS"] as const).map((stage) => (
               <button
                 key={stage}
                 onClick={() => setStageFilter(stage)}
-                className={`relative px-4 py-1.5 rounded-lg text-xs font-semibold transition ${
-                  stageFilter === stage ? 'text-white' : 'text-neutral-400 hover:text-neutral-200'
-                }`}
+                className={"relative px-4 py-1.5 rounded-lg text-xs font-semibold transition " + (stageFilter === stage ? "text-white" : "text-neutral-400 hover:text-neutral-200")}
               >
                 {stageFilter === stage && (
                   <motion.div
-                    layoutId="filterPill"
+                    layoutId="filterPillMatches"
                     className="absolute inset-0 rounded-lg bg-gradient-to-r from-indigo-600/80 to-purple-600/80 border border-purple-400/30 shadow-md"
-                    transition={{ type: 'spring', bounce: 0.2, duration: 0.4 }}
+                    transition={{ type: "spring", bounce: 0.2, duration: 0.4 }}
                   />
                 )}
                 <span className="relative z-10">
-                  {stage === 'ALL'
-                    ? `All Matches (${matches.length})`
-                    : stage === 'LEAGUE'
-                    ? 'League (20)'
-                    : stage === 'PLAYOFFS'
-                    ? 'Playoffs (2)'
-                    : 'Live Standings'}
+                  {stage === "ALL"
+                    ? "All Matches (" + matches.length + ")"
+                    : stage === "LEAGUE"
+                    ? "League (20)"
+                    : stage === "PLAYOFFS"
+                    ? "Playoffs (2)"
+                    : "Live Standings"}
                 </span>
               </button>
             ))}
           </div>
         </div>
 
-        {stageFilter === 'STANDINGS' ? (
+        {stageFilter === "STANDINGS" ? (
           <div className="rounded-2xl border border-white/10 bg-[#0E101D]/80 backdrop-blur-xl overflow-hidden shadow-2xl">
             <table className="w-full text-left border-collapse">
               <thead>
@@ -305,7 +302,7 @@ export default function WplMatchesManagementPage() {
                     <td className="py-3 px-4 text-center font-mono text-rose-400">{team.lost}</td>
                     <td className="py-3 px-4 text-right font-mono font-bold text-white">{team.points}</td>
                     <td className="py-3 px-4 text-right font-mono text-neutral-300">
-                      {team.nrr > 0 ? `+${team.nrr.toFixed(3)}` : team.nrr.toFixed(3)}
+                      {team.nrr > 0 ? "+" + team.nrr.toFixed(3) : team.nrr.toFixed(3)}
                     </td>
                   </tr>
                 ))}
@@ -319,7 +316,7 @@ export default function WplMatchesManagementPage() {
                 const teamA = match.teamAId ? teamMap.get(match.teamAId) : null;
                 const teamB = match.teamBId ? teamMap.get(match.teamBId) : null;
                 const venue = venueMap.get(match.venueId);
-                const isPlayoff = match.stage === 'ELIMINATOR' || match.stage === 'FINAL';
+                const isPlayoff = match.stage === "ELIMINATOR" || match.stage === "FINAL";
 
                 return (
                   <motion.div
@@ -328,11 +325,7 @@ export default function WplMatchesManagementPage() {
                     initial={{ opacity: 0, y: 12 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.98 }}
-                    className={`relative rounded-2xl border transition-all backdrop-blur-xl ${
-                      isPlayoff
-                        ? 'bg-gradient-to-r from-purple-950/20 via-[#111322] to-[#0D0F1B] border-purple-500/30'
-                        : 'bg-[#0E101D]/70 border-white/10 hover:border-white/20'
-                    }`}
+                    className={"relative rounded-2xl border transition-all backdrop-blur-xl " + (isPlayoff ? "bg-gradient-to-r from-purple-950/20 via-[#111322] to-[#0D0F1B] border-purple-500/30" : "bg-[#0E101D]/70 border-white/10 hover:border-white/20")}
                   >
                     <div className="p-5 md:p-6 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
                       <div className="flex items-start md:items-center space-x-4">
@@ -354,7 +347,7 @@ export default function WplMatchesManagementPage() {
                             )}
                           </div>
                           <p className="text-xs text-neutral-400 font-mono">
-                            {new Date(match.scheduledStartTime).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })} IST &bull; {venue?.name}
+                            {new Date(match.scheduledStartTime).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })} IST &bull; {venue?.name}
                           </p>
                         </div>
                       </div>
@@ -378,21 +371,21 @@ export default function WplMatchesManagementPage() {
                           <button
                             onClick={() => {
                               setOverrideModalMatch(match);
-                              setSelectedTeamA(match.teamAId || '');
-                              setSelectedTeamB(match.teamBId || '');
-                              setOverrideReason(match.overrideNote || '');
+                              setSelectedTeamA(match.teamAId || "");
+                              setSelectedTeamB(match.teamBId || "");
+                              setOverrideReason(match.overrideNote || "");
                             }}
-                            className="flex items-center space-x-1.5 px-3 py-2 rounded-xl text-xs font-semibold border border-purple-500/30 bg-purple-500/10 text-purple-300 hover:bg-purple-500/20"
+                            className="flex items-center space-x-1.5 px-3 py-2 rounded-xl text-xs font-semibold border border-purple-500/30 bg-purple-500/10 text-purple-300 hover:bg-purple-500/20 cursor-pointer"
                           >
                             <SlidersHorizontal className="w-3.5 h-3.5" />
-                            <span>{match.isResolved ? 'Edit Seed' : 'Fail-Safe Assign'}</span>
+                            <span>{match.isResolved ? "Edit Seed" : "Fail-Safe Assign"}</span>
                           </button>
                         )}
 
                         {match.isResolved ? (
                           <Link
-                            href={`/ops/wpl/fixtures/${match.id}/lineups`}
-                            className="flex items-center space-x-2 px-4 py-2 rounded-xl text-xs font-semibold bg-white hover:bg-neutral-200 text-black transition"
+                            href={"/ops/wpl/fixtures/" + match.id + "/lineups"}
+                            className="flex items-center space-x-2 px-4 py-2 rounded-xl text-xs font-semibold bg-white hover:bg-neutral-200 text-black transition shadow-sm"
                           >
                             <span>Toss & Lineups</span>
                             <ArrowRight className="w-3.5 h-3.5" />
@@ -459,13 +452,13 @@ export default function WplMatchesManagementPage() {
               <div className="mt-6 flex justify-end space-x-2">
                 <button
                   onClick={() => setOverrideModalMatch(null)}
-                  className="px-4 py-2 text-xs font-semibold text-neutral-400"
+                  className="px-4 py-2 text-xs font-semibold text-neutral-400 cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleSavePlayoffOverride}
-                  className="px-4 py-2 text-xs font-semibold bg-purple-600 hover:bg-purple-500 text-white rounded-xl"
+                  className="px-4 py-2 text-xs font-semibold bg-purple-600 hover:bg-purple-500 text-white rounded-xl cursor-pointer"
                 >
                   Confirm Teams
                 </button>
