@@ -8,7 +8,6 @@ import {
   RefreshCw,
   Radio
 } from 'lucide-react';
-import { mutateDeliveryScore, BallOverridePayload } from '@/app/actions/match-scorer';
 
 interface DeliveryRecord {
   id: string;
@@ -23,6 +22,20 @@ interface DeliveryRecord {
   isDeadBall: boolean;
   striker: string;
   bowler: string;
+}
+
+export interface BallOverridePayload {
+  matchId: string;
+  deliveryId: string;
+  overIndex: number;
+  ballIndex: number;
+  runsBat: number;
+  extras: number;
+  extraType?: 'WD' | 'NB' | 'B' | 'LB' | null;
+  isWicket: boolean;
+  wicketType?: 'bowled' | 'caught' | 'lbw' | 'run_out' | 'stumped' | null;
+  isDeadBall?: boolean;
+  overrideReason: string;
 }
 
 const INITIAL_OVER: DeliveryRecord[] = [
@@ -87,7 +100,8 @@ export default function WPLLiveScoreAdminPage() {
     };
 
     try {
-      await mutateDeliveryScore(payload);
+      // Simulate client-side update (can be swapped with your REST / API route fetch)
+      await new Promise((resolve) => setTimeout(resolve, 500));
 
       setDeliveries((prev) =>
         prev.map((b) =>
