@@ -1,178 +1,215 @@
-import AdminLeagueSwitcher from './AdminLeagueSwitcher';
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { 
-  Home, Calendar, MapPin, FileText, Target, Activity, 
-  Users, Shield, BarChart3, TrendingUp, Menu, X, ChevronRight, Award, Settings
-, ShieldCheck } from 'lucide-react';
+import AdminLeagueSwitcher from './AdminLeagueSwitcher';
+import {
+  Home,
+  Calendar,
+  MapPin,
+  FileText,
+  Target,
+  Activity,
+  Users,
+  Shield,
+  BarChart3,
+  TrendingUp,
+  Award,
+  Settings,
+  Search,
+  ChevronDown,
+  ChevronRight,
+  ShieldCheck,
+  Radio,
+} from 'lucide-react';
 
-const menuSections = [
-  {
-    label: 'Overview',
-    items: [
-      { href: '/ops/wpl/dashboard', label: 'Dashboard', icon: Home },
-      { href: '/ops/wpl/statistics', label: 'Statistics', icon: Award },
-    ],
-  },
-  {
-    label: 'Live Ops',
-    items: [
-      { href: '/ops/wpl/matches', label: 'Matches', icon: Calendar },
-      { href: '/ops/wpl/fixtures/wpl-2027-m01/lineups', label: 'Toss & Lineups', icon: ShieldCheck },
-      { href: '/ops/wpl/live-score-ai', label: 'Live Score', icon: Activity },
-      { href: '/ops/wpl/live-score-csv', label: 'Live Score CSV', icon: FileText },
-      { href: '/ops/wpl/playing-11', label: 'Playing 11', icon: Users },
-      { href: '/ops/wpl/scorecard', label: 'Scorecard', icon: FileText },
-      { href: '/ops/wpl/matchday', label: 'Match Day', icon: Activity },
-      { href: '/ops/wpl/points-table', label: 'Points Table', icon: BarChart3 },
-    ],
-  },
-  {
-    label: 'League Data',
-    items: [
-      { href: '/ops/wpl/teams', label: 'Teams', icon: Shield },
-      { href: '/ops/wpl/players', label: 'Players', icon: Users },
-      { href: '/ops/wpl/batting-stats', label: 'Batting Stats', icon: TrendingUp },
-      { href: '/ops/wpl/bowling-stats', label: 'Bowling Stats', icon: TrendingUp },
-      { href: '/ops/wpl/venues', label: 'Venues', icon: MapPin },
-    ],
-  },
-  {
-    label: 'Content',
-    items: [
-      { href: '/ops/wpl/stories', label: 'Stories', icon: FileText },
-      { href: '/ops/wpl/predictions', label: 'Predictions', icon: Target },
-    ],
-  },
-  {
-    label: 'System',
-    items: [
-      { href: '/ops/wpl/settings', label: 'Settings', icon: Settings },
-    ],
-  },
+interface MenuItem {
+  href: string;
+  label: string;
+  icon: React.ReactNode;
+  group: string;
+}
+
+const menuItems: MenuItem[] = [
+  { href: '/ops/wpl/dashboard', label: 'Dashboard', icon: <Home className="w-4 h-4" />, group: 'Overview' },
+  { href: '/ops/wpl/statistics', label: 'Statistics', icon: <Award className="w-4 h-4" />, group: 'Overview' },
+  { href: '/ops/wpl/analytics', label: 'Analytics', icon: <TrendingUp className="w-4 h-4" />, group: 'Overview' },
+
+  { href: '/ops/wpl/matches', label: 'Matches & Fixtures', icon: <Calendar className="w-4 h-4" />, group: 'Live Ops' },
+  { href: '/ops/wpl/fixtures/wpl-2027-m01/lineups', label: 'Toss & Lineups', icon: <ShieldCheck className="w-4 h-4" />, group: 'Live Ops' },
+  { href: '/ops/wpl/points-table', label: 'Points Table', icon: <BarChart3 className="w-4 h-4" />, group: 'Live Ops' },
+  { href: '/ops/wpl/live-score-ai', label: 'Live Score AI', icon: <Radio className="w-4 h-4" />, group: 'Live Ops' },
+  { href: '/ops/wpl/live-score-csv', label: 'Live Score CSV', icon: <FileText className="w-4 h-4" />, group: 'Live Ops' },
+  { href: '/ops/wpl/playing-11', label: 'Playing 11', icon: <Users className="w-4 h-4" />, group: 'Live Ops' },
+  { href: '/ops/wpl/scorecard', label: 'Scorecard', icon: <FileText className="w-4 h-4" />, group: 'Live Ops' },
+  { href: '/ops/wpl/matchday', label: 'Match Day', icon: <Activity className="w-4 h-4" />, group: 'Live Ops' },
+
+  { href: '/ops/wpl/teams', label: 'Teams', icon: <Shield className="w-4 h-4" />, group: 'League Data' },
+  { href: '/ops/wpl/players', label: 'Players', icon: <Users className="w-4 h-4" />, group: 'League Data' },
+  { href: '/ops/wpl/batting-stats', label: 'Batting Stats', icon: <TrendingUp className="w-4 h-4" />, group: 'League Data' },
+  { href: '/ops/wpl/bowling-stats', label: 'Bowling Stats', icon: <TrendingUp className="w-4 h-4" />, group: 'League Data' },
+  { href: '/ops/wpl/venues', label: 'Venues', icon: <MapPin className="w-4 h-4" />, group: 'League Data' },
+
+  { href: '/ops/wpl/stories', label: 'Stories', icon: <FileText className="w-4 h-4" />, group: 'Content' },
+  { href: '/ops/wpl/predictions', label: 'Predictions', icon: <Target className="w-4 h-4" />, group: 'Content' },
+  { href: '/ops/wpl/settings', label: 'Settings', icon: <Settings className="w-4 h-4" />, group: 'System' },
 ];
 
 export default function WPLAdminSidebarNew() {
-  const [isOpen, setIsOpen] = useState(false);
-  const [collapsed, setCollapsed] = useState(false);
   const pathname = usePathname();
-  const router = useRouter();
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(
+    new Set(['Overview', 'Live Ops', 'League Data', 'Content', 'System'])
+  );
 
-  const isActive = (href: string) => pathname === href || pathname.startsWith(href + '/');
+  const toggleGroup = (group: string) => {
+    setExpandedGroups((prev) => {
+      const next = new Set(prev);
+      if (next.has(group)) next.delete(group);
+      else next.add(group);
+      return next;
+    });
+  };
+
+  const filteredItems = useMemo(() => {
+    if (!searchQuery.trim()) return menuItems;
+    const q = searchQuery.toLowerCase();
+    return menuItems.filter(
+      (item) => item.label.toLowerCase().includes(q) || item.group.toLowerCase().includes(q)
+    );
+  }, [searchQuery]);
+
+  const groups = useMemo(() => {
+    const list: string[] = [];
+    filteredItems.forEach((i) => {
+      if (!list.includes(i.group)) list.push(i.group);
+    });
+    return list;
+  }, [filteredItems]);
+
+  const SidebarContent = () => (
+    <div className="flex flex-col h-full text-neutral-200 select-none">
+      <div className="p-4 border-b border-white/10 flex items-center justify-between">
+        <div className="flex items-center space-x-2.5">
+          <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-purple-600 to-pink-500 flex items-center justify-center font-black text-white text-xs tracking-wider shadow-md shadow-purple-500/20">
+            WPL
+          </div>
+          <div>
+            <span className="font-extrabold text-sm tracking-tight text-white block">
+              SportsUp Admin
+            </span>
+            <span className="text-[10px] text-purple-400 font-mono tracking-wider uppercase block">
+              WPL Operations
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div className="px-3 py-2.5 border-b border-white/10 bg-black/20">
+        <AdminLeagueSwitcher />
+      </div>
+
+      <div className="p-3 border-b border-white/10">
+        <div className="relative">
+          <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400" />
+          <input
+            type="text"
+            placeholder="Search WPL ops..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full bg-white/5 border border-white/10 rounded-lg pl-8 pr-3 py-1.5 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-purple-500/50"
+          />
+        </div>
+      </div>
+
+      <div className="flex-1 overflow-y-auto px-2 py-3 space-y-4">
+        {groups.map((group) => {
+          const isExpanded = expandedGroups.has(group);
+          const items = filteredItems.filter((i) => i.group === group);
+
+          return (
+            <div key={group} className="space-y-1">
+              <button
+                type="button"
+                onClick={() => toggleGroup(group)}
+                className="w-full flex items-center justify-between px-2 py-1 text-[11px] font-semibold text-neutral-400 uppercase tracking-wider hover:text-white transition"
+              >
+                <span>{group}</span>
+                {isExpanded ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
+              </button>
+
+              {isExpanded && (
+                <div className="space-y-0.5">
+                  {items.map((item) => {
+                    const isActive =
+                      pathname === item.href ||
+                      (item.href !== '/ops/wpl/dashboard' && pathname?.startsWith(item.href));
+
+                    return (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        onClick={() => setMobileOpen(false)}
+                        className={
+                          "flex items-center space-x-2.5 px-2.5 py-2 rounded-xl text-xs font-medium transition-colors " +
+                          (isActive
+                            ? "bg-purple-600 text-white font-semibold shadow-md shadow-purple-600/30"
+                            : "text-neutral-400 hover:text-white hover:bg-white/5")
+                        }
+                      >
+                        <span className={isActive ? "text-white" : "text-neutral-400"}>
+                          {item.icon}
+                        </span>
+                        <span>{item.label}</span>
+                      </Link>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      <div className="p-3 border-t border-white/10 text-[10px] text-neutral-500 font-mono text-center">
+        WPL Ops &bull; v2027.1
+      </div>
+    </div>
+  );
 
   return (
     <>
-      {/* Mobile Menu Button */}
       <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="wpl-admin-fab fixed top-4 left-4 z-50 lg:hidden"
-        aria-label={isOpen ? 'Close navigation' : 'Open navigation'}
+        type="button"
+        onClick={() => setMobileOpen(!mobileOpen)}
+        className="md:hidden fixed top-3.5 left-4 z-50 p-2 rounded-lg bg-[#12171D] border border-white/10 text-white hover:bg-white/10"
       >
-        {isOpen ? <X size={24} /> : <Menu size={24} />}
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={mobileOpen ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16M4 18h16"} />
+        </svg>
       </button>
 
-      {/* Overlay for mobile */}
-      {isOpen && (
+      {mobileOpen && (
         <div
-          className="fixed inset-0 bg-slate-950/60 backdrop-blur-[2px] z-40 lg:hidden"
-          onClick={() => setIsOpen(false)}
+          className="md:hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-40"
+          onClick={() => setMobileOpen(false)}
         />
       )}
 
-      {/* Sidebar */}
       <aside
-        className={`wpl-admin-sidebar fixed top-0 left-0 h-screen z-50 transition-all duration-300 ease-in-out flex flex-col ${
-          collapsed ? 'w-20' : 'w-72'
-        } ${isOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0`}
+        className={
+          "md:hidden fixed top-0 left-0 h-screen z-50 w-72 bg-[#0B0E17] border-r border-white/10 flex flex-col transition-transform duration-300 ease-in-out " +
+          (mobileOpen ? "translate-x-0" : "-translate-x-full")
+        }
       >
-        {/* Header */}
-        <div className="p-6 flex-shrink-0 border-b border-white/10">
-          <div className="flex items-center justify-between">
-            {!collapsed && (
-              <div className="space-y-2">
-                <div className="wpl-admin-brand">
-                  <span className="wpl-admin-brand-dot" />
-                  <span>WPL Command</span>
-                </div>
-                <div className="flex items-center gap-2 text-xs text-slate-200/80">
-                  <span className="wpl-admin-pill">2026 Season</span>
-                  <span className="wpl-admin-pill wpl-admin-pill-muted">Live Ops</span>
-                </div>
-              </div>
-            )}
-            <button
-              onClick={() => setCollapsed(!collapsed)}
-              className="wpl-admin-icon-btn hidden lg:flex"
-              title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-              aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-            >
-              <ChevronRight 
-                size={20} 
-                className={`transform transition-transform ${collapsed ? '' : 'rotate-180'}`}
-              />
-            </button>
-          </div>
-        </div>
-
-        {/* Navigation */}
-        <nav className="flex-1 overflow-y-auto px-4 py-5 scrollbar-thin scrollbar-thumb-indigo-500/60 scrollbar-track-transparent">
-          <div className={`mb-3 ${collapsed ? 'hidden' : 'block'}`}>
-            <p className="text-[11px] uppercase tracking-[0.2em] text-slate-400/80">
-              Navigation
-            </p>
-          </div>
-          <div className="space-y-5">
-            {menuSections.map((section) => (
-              <div key={section.label} className="space-y-1.5">
-                {!collapsed && (
-                  <p className="px-2 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400/70">
-                    {section.label}
-                  </p>
-                )}
-                {section.items.map((item) => {
-                  const Icon = item.icon;
-                  const active = isActive(item.href);
-
-                  return (
-                    <Link
-                      key={item.href}
-                      href={item.href}
-                      onClick={() => setIsOpen(false)}
-                      className={`wpl-admin-nav-item ${active ? 'active' : ''} ${collapsed ? 'is-collapsed' : ''}`}
-                      aria-current={active ? 'page' : undefined}
-                      title={collapsed ? item.label : undefined}
-                    >
-                      <Icon size={20} className="flex-shrink-0 text-slate-100/80" />
-                      {!collapsed && (
-                        <span className="font-medium tracking-tight">{item.label}</span>
-                      )}
-                    </Link>
-                  );
-                })}
-              </div>
-            ))}
-          </div>
-        </nav>
-
-        {/* Footer */}
-        {!collapsed && (
-          <div className="p-4 border-t border-white/10 flex-shrink-0">
-            <div className="wpl-admin-footer">
-              <div>
-                <p className="text-sm font-semibold text-white/90">Women's Premier League</p>
-                <p className="text-xs text-slate-300/80">Admin Console v2</p>
-              </div>
-              <span className="wpl-admin-status">Online</span>
-            </div>
-          </div>
-        )}
+        <SidebarContent />
       </aside>
 
-      {/* Spacer for content */}
-      <div className={`${collapsed ? 'lg:ml-20' : 'lg:ml-72'} transition-all duration-300`} />
+      <aside className="hidden md:flex sticky top-0 left-0 h-screen z-40 bg-[#0B0E17] border-r border-white/10 flex-col w-64">
+        <SidebarContent />
+      </aside>
     </>
   );
 }
