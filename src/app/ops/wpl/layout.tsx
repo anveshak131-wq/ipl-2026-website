@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import AdminLogin from '@/components/admin/AdminLogin';
-import WPLAdminSidebar from '@/components/admin/WPLAdminSidebar';
+import WPLAdminSidebarNew from '@/components/admin/WPLAdminSidebarNew';
 import { LeagueProvider } from '@/contexts/LeagueContext';
 import { AdminDataProvider } from '@/contexts/AdminDataContext';
 
@@ -50,7 +50,7 @@ export default function WPLOpsLayout({ children }: { children: React.ReactNode }
     <LeagueProvider>
       <AdminDataProvider>
         <div className="flex min-h-screen bg-[#0B0E14] text-white">
-          <WPLAdminSidebar currentPage={pathname} onLogout={handleLogout} />
+          <WPLAdminSidebarNew />
           <main className="flex-1 min-w-0 p-4 md:p-8 overflow-y-auto">
             {children}
           </main>
