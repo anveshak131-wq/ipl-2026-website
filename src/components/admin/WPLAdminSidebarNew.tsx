@@ -1,3 +1,4 @@
+import AdminLeagueSwitcher from './AdminLeagueSwitcher';
 'use client';
 
 import { useState } from 'react';
