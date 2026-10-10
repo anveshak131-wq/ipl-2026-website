@@ -1,16 +1,13 @@
 'use client';
 
-import { useState, useMemo } from 'react';
-import { useRouter, usePathname } from 'next/navigation';
-import Link from 'next/link';
-import AdminLeagueSwitcher from './AdminLeagueSwitcher';
+import { useState, useMemo } from "react";
+import { usePathname } from "next/navigation";
+import Link from "next/link";
+import AdminLeagueSwitcher from "./AdminLeagueSwitcher";
 import {
   Home,
   Calendar,
   MapPin,
-  FileText,
-  Target,
-  Activity,
   Users,
   Shield,
   BarChart3,
@@ -21,8 +18,7 @@ import {
   ChevronDown,
   ChevronRight,
   ShieldCheck,
-  Radio,
-} from 'lucide-react';
+} from "lucide-react";
 
 interface MenuItem {
   href: string;
@@ -32,36 +28,33 @@ interface MenuItem {
 }
 
 const menuItems: MenuItem[] = [
-  { href: '/ops/wpl/dashboard', label: 'Dashboard', icon: <Home className="w-4 h-4" />, group: 'Overview' },
-  { href: '/ops/wpl/statistics', label: 'Statistics', icon: <Award className="w-4 h-4" />, group: 'Overview' },
-  { href: '/ops/wpl/analytics', label: 'Analytics', icon: <TrendingUp className="w-4 h-4" />, group: 'Overview' },
+  // Overview
+  { href: "/ops/wpl/dashboard", label: "Dashboard", icon: <Home className="w-4 h-4" />, group: "Overview" },
+  { href: "/ops/wpl/statistics", label: "Statistics", icon: <Award className="w-4 h-4" />, group: "Overview" },
+  { href: "/ops/wpl/analytics", label: "Analytics", icon: <TrendingUp className="w-4 h-4" />, group: "Overview" },
 
-  { href: '/ops/wpl/matches', label: 'Matches & Fixtures', icon: <Calendar className="w-4 h-4" />, group: 'Live Ops' },
-  { href: '/ops/wpl/fixtures/wpl-2027-m01/lineups', label: 'Toss & Lineups', icon: <ShieldCheck className="w-4 h-4" />, group: 'Live Ops' },
-  { href: '/ops/wpl/points-table', label: 'Points Table', icon: <BarChart3 className="w-4 h-4" />, group: 'Live Ops' },
-  { href: '/ops/wpl/live-score-ai', label: 'Live Score AI', icon: <Radio className="w-4 h-4" />, group: 'Live Ops' },
-  { href: '/ops/wpl/live-score-csv', label: 'Live Score CSV', icon: <FileText className="w-4 h-4" />, group: 'Live Ops' },
-  { href: '/ops/wpl/playing-11', label: 'Playing 11', icon: <Users className="w-4 h-4" />, group: 'Live Ops' },
-  { href: '/ops/wpl/scorecard', label: 'Scorecard', icon: <FileText className="w-4 h-4" />, group: 'Live Ops' },
-  { href: '/ops/wpl/matchday', label: 'Match Day', icon: <Activity className="w-4 h-4" />, group: 'Live Ops' },
+  // Live Ops
+  { href: "/ops/wpl/matches", label: "Matches & Fixtures", icon: <Calendar className="w-4 h-4" />, group: "Live Ops" },
+  { href: "/ops/wpl/fixtures/wpl-2027-m01/lineups", label: "Toss & Lineups", icon: <ShieldCheck className="w-4 h-4" />, group: "Live Ops" },
+  { href: "/ops/wpl/points-table", label: "Points Table", icon: <BarChart3 className="w-4 h-4" />, group: "Live Ops" },
 
-  { href: '/ops/wpl/teams', label: 'Teams', icon: <Shield className="w-4 h-4" />, group: 'League Data' },
-  { href: '/ops/wpl/players', label: 'Players', icon: <Users className="w-4 h-4" />, group: 'League Data' },
-  { href: '/ops/wpl/batting-stats', label: 'Batting Stats', icon: <TrendingUp className="w-4 h-4" />, group: 'League Data' },
-  { href: '/ops/wpl/bowling-stats', label: 'Bowling Stats', icon: <TrendingUp className="w-4 h-4" />, group: 'League Data' },
-  { href: '/ops/wpl/venues', label: 'Venues', icon: <MapPin className="w-4 h-4" />, group: 'League Data' },
+  // League Data
+  { href: "/ops/wpl/teams", label: "Teams", icon: <Shield className="w-4 h-4" />, group: "League Data" },
+  { href: "/ops/wpl/players", label: "Players", icon: <Users className="w-4 h-4" />, group: "League Data" },
+  { href: "/ops/wpl/batting-stats", label: "Batting Stats", icon: <TrendingUp className="w-4 h-4" />, group: "League Data" },
+  { href: "/ops/wpl/bowling-stats", label: "Bowling Stats", icon: <TrendingUp className="w-4 h-4" />, group: "League Data" },
+  { href: "/ops/wpl/venues", label: "Venues", icon: <MapPin className="w-4 h-4" />, group: "League Data" },
 
-  { href: '/ops/wpl/stories', label: 'Stories', icon: <FileText className="w-4 h-4" />, group: 'Content' },
-  { href: '/ops/wpl/predictions', label: 'Predictions', icon: <Target className="w-4 h-4" />, group: 'Content' },
-  { href: '/ops/wpl/settings', label: 'Settings', icon: <Settings className="w-4 h-4" />, group: 'System' },
+  // System
+  { href: "/ops/wpl/settings", label: "Settings", icon: <Settings className="w-4 h-4" />, group: "System" },
 ];
 
 export default function WPLAdminSidebarNew() {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(
-    new Set(['Overview', 'Live Ops', 'League Data', 'Content', 'System'])
+    new Set(["Overview", "Live Ops", "League Data", "System"])
   );
 
   const toggleGroup = (group: string) => {
@@ -145,7 +138,7 @@ export default function WPLAdminSidebarNew() {
                   {items.map((item) => {
                     const isActive =
                       pathname === item.href ||
-                      (item.href !== '/ops/wpl/dashboard' && pathname?.startsWith(item.href));
+                      (item.href !== "/ops/wpl/dashboard" && pathname?.startsWith(item.href));
 
                     return (
                       <Link
