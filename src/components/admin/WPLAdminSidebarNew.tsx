@@ -35,8 +35,7 @@ const menuItems: MenuItem[] = [
 
   // Live Ops
   { href: "/ops/wpl/matches", label: "Matches & Fixtures", icon: <Calendar className="w-4 h-4" />, group: "Live Ops" },
-  { href: "/ops/wpl/fixtures/wpl-2027-m01/lineups", label: "Toss & Lineups", icon: <ShieldCheck className="w-4 h-4" />, group: "Live Ops" },
-  { href: "/ops/wpl/points-table", label: "Points Table", icon: <BarChart3 className="w-4 h-4" />, group: "Live Ops" },
+    { href: "/ops/wpl/points-table", label: "Points Table", icon: <BarChart3 className="w-4 h-4" />, group: "Live Ops" },
 
   // League Data
   { href: "/ops/wpl/teams", label: "Teams", icon: <Shield className="w-4 h-4" />, group: "League Data" },
