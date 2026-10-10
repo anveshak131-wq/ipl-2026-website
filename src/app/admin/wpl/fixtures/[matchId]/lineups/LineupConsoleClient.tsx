@@ -1,85 +1,80 @@
-'use client';
+"use client";
 
-import React, { useState, useMemo } from 'react';
-import Link from 'next/link';
-import { useParams } from 'next/navigation';
-import { ArrowLeft, CheckCircle2, AlertTriangle, ShieldCheck } from 'lucide-react';
-import { PlayerSummary, SelectedPlayer } from '@/types/match';
-import { validateWplTeamLineup } from '@/lib/wpl-lineup-rules';
+import React, { useState, useMemo } from "react";
+import Link from "next/link";
+import { ArrowLeft, ShieldCheck } from "lucide-react";
+import { PlayerSummary, SelectedPlayer } from "@/types/match";
+import { validateWplTeamLineup } from "@/lib/wpl-lineup-rules";
 
-// Standard 15-player franchise squad templates for WPL
 const SAMPLE_SQUAD_TEAM_A: PlayerSummary[] = [
-  { id: 'p1', name: 'Smriti Mandhana', role: 'BATTER', isOverseas: false },
-  { id: 'p2', name: 'Ellyse Perry', role: 'ALL_ROUNDER', isOverseas: true },
-  { id: 'p3', name: 'Richa Ghosh', role: 'WICKET_KEEPER', isOverseas: false },
-  { id: 'p4', name: 'Sophie Devine', role: 'ALL_ROUNDER', isOverseas: true },
-  { id: 'p5', name: 'Renuka Singh Thakur', role: 'BOWLER', isOverseas: false },
-  { id: 'p6', name: 'Shreyanka Patil', role: 'ALL_ROUNDER', isOverseas: false },
-  { id: 'p7', name: 'Georgia Wareham', role: 'BOWLER', isOverseas: true },
-  { id: 'p8', name: 'Asha Sobhana', role: 'BOWLER', isOverseas: false },
-  { id: 'p9', name: 'Kanika Ahuja', role: 'ALL_ROUNDER', isOverseas: false },
-  { id: 'p10', name: 'Ekta Bisht', role: 'BOWLER', isOverseas: false },
-  { id: 'p11', name: 'Sabbhineni Meghana', role: 'BATTER', isOverseas: false },
-  { id: 'p12', name: 'Disha Kasat', role: 'BATTER', isOverseas: false },
-  { id: 'p13', name: 'Simran Bahadur', role: 'ALL_ROUNDER', isOverseas: false },
-  { id: 'p14', name: 'Kate Cross', role: 'BOWLER', isOverseas: true },
-  { id: 'p15', name: 'Tara Norris', role: 'BOWLER', isOverseas: true, isAssociateNation: true },
+  { id: "p1", name: "Smriti Mandhana", role: "BATTER", isOverseas: false },
+  { id: "p2", name: "Ellyse Perry", role: "ALL_ROUNDER", isOverseas: true },
+  { id: "p3", name: "Richa Ghosh", role: "WICKET_KEEPER", isOverseas: false },
+  { id: "p4", name: "Sophie Devine", role: "ALL_ROUNDER", isOverseas: true },
+  { id: "p5", name: "Renuka Singh Thakur", role: "BOWLER", isOverseas: false },
+  { id: "p6", name: "Shreyanka Patil", role: "ALL_ROUNDER", isOverseas: false },
+  { id: "p7", name: "Georgia Wareham", role: "BOWLER", isOverseas: true },
+  { id: "p8", name: "Asha Sobhana", role: "BOWLER", isOverseas: false },
+  { id: "p9", name: "Kanika Ahuja", role: "ALL_ROUNDER", isOverseas: false },
+  { id: "p10", name: "Ekta Bisht", role: "BOWLER", isOverseas: false },
+  { id: "p11", name: "Sabbhineni Meghana", role: "BATTER", isOverseas: false },
+  { id: "p12", name: "Disha Kasat", role: "BATTER", isOverseas: false },
+  { id: "p13", name: "Simran Bahadur", role: "ALL_ROUNDER", isOverseas: false },
+  { id: "p14", name: "Kate Cross", role: "BOWLER", isOverseas: true },
+  { id: "p15", name: "Tara Norris", role: "BOWLER", isOverseas: true, isAssociateNation: true },
 ];
 
 const SAMPLE_SQUAD_TEAM_B: PlayerSummary[] = [
-  { id: 'pb1', name: 'Harmanpreet Kaur', role: 'BATTER', isOverseas: false },
-  { id: 'pb2', name: 'Nat Sciver-Brunt', role: 'ALL_ROUNDER', isOverseas: true },
-  { id: 'pb3', name: 'Yastika Bhatia', role: 'WICKET_KEEPER', isOverseas: false },
-  { id: 'pb4', name: 'Hayley Matthews', role: 'ALL_ROUNDER', isOverseas: true },
-  { id: 'pb5', name: 'Amelia Kerr', role: 'ALL_ROUNDER', isOverseas: true },
-  { id: 'pb6', name: 'Pooja Vastrakar', role: 'ALL_ROUNDER', isOverseas: false },
-  { id: 'pb7', name: 'Saika Ishaque', role: 'BOWLER', isOverseas: false },
-  { id: 'pb8', name: 'Amanjot Kaur', role: 'ALL_ROUNDER', isOverseas: false },
-  { id: 'pb9', name: 'Issy Wong', role: 'BOWLER', isOverseas: true },
-  { id: 'pb10', name: 'Jintimani Kalita', role: 'ALL_ROUNDER', isOverseas: false },
-  { id: 'pb11', name: 'Humaira Kazi', role: 'BATTER', isOverseas: false },
-  { id: 'pb12', name: 'Sajeevan Sajana', role: 'ALL_ROUNDER', isOverseas: false },
-  { id: 'pb13', name: 'Amandeep Kaur', role: 'BOWLER', isOverseas: false },
-  { id: 'pb14', name: 'Fatima Jaffer', role: 'BOWLER', isOverseas: false },
-  { id: 'pb15', name: 'Chloe Tryon', role: 'ALL_ROUNDER', isOverseas: true },
+  { id: "pb1", name: "Harmanpreet Kaur", role: "BATTER", isOverseas: false },
+  { id: "pb2", name: "Nat Sciver-Brunt", role: "ALL_ROUNDER", isOverseas: true },
+  { id: "pb3", name: "Yastika Bhatia", role: "WICKET_KEEPER", isOverseas: false },
+  { id: "pb4", name: "Hayley Matthews", role: "ALL_ROUNDER", isOverseas: true },
+  { id: "pb5", name: "Amelia Kerr", role: "ALL_ROUNDER", isOverseas: true },
+  { id: "pb6", name: "Pooja Vastrakar", role: "ALL_ROUNDER", isOverseas: false },
+  { id: "pb7", name: "Saika Ishaque", role: "BOWLER", isOverseas: false },
+  { id: "pb8", name: "Amanjot Kaur", role: "ALL_ROUNDER", isOverseas: false },
+  { id: "pb9", name: "Issy Wong", role: "BOWLER", isOverseas: true },
+  { id: "pb10", name: "Jintimani Kalita", role: "ALL_ROUNDER", isOverseas: false },
+  { id: "pb11", name: "Humaira Kazi", role: "BATTER", isOverseas: false },
+  { id: "pb12", name: "Sajeevan Sajana", role: "ALL_ROUNDER", isOverseas: false },
+  { id: "pb13", name: "Amandeep Kaur", role: "BOWLER", isOverseas: false },
+  { id: "pb14", name: "Fatima Jaffer", role: "BOWLER", isOverseas: false },
+  { id: "pb15", name: "Chloe Tryon", role: "ALL_ROUNDER", isOverseas: true },
 ];
 
-export default function MatchTossAndLineupConsolePage() {
-  const params = useParams();
-  const matchId = (params?.matchId as string) || 'wpl-m01';
-
-  const [tossWinnerId, setTossWinnerId] = useState<string>('team-a');
-  const [tossDecision, setTossDecision] = useState<'BAT' | 'BOWL'>('BAT');
+export default function LineupConsoleClient({ matchId }: { matchId: string }) {
+  const [tossWinnerId, setTossWinnerId] = useState<string>("team-a");
+  const [tossDecision, setTossDecision] = useState<"BAT" | "BOWL">("BAT");
 
   const [teamAXI, setTeamAXI] = useState<SelectedPlayer[]>([
-    { playerId: 'p1', isCaptain: true, isWicketKeeper: false },
-    { playerId: 'p2', isCaptain: false, isWicketKeeper: false },
-    { playerId: 'p3', isCaptain: false, isWicketKeeper: true },
-    { playerId: 'p4', isCaptain: false, isWicketKeeper: false },
-    { playerId: 'p5', isCaptain: false, isWicketKeeper: false },
-    { playerId: 'p6', isCaptain: false, isWicketKeeper: false },
-    { playerId: 'p7', isCaptain: false, isWicketKeeper: false },
-    { playerId: 'p8', isCaptain: false, isWicketKeeper: false },
-    { playerId: 'p9', isCaptain: false, isWicketKeeper: false },
-    { playerId: 'p10', isCaptain: false, isWicketKeeper: false },
-    { playerId: 'p11', isCaptain: false, isWicketKeeper: false },
+    { playerId: "p1", isCaptain: true, isWicketKeeper: false },
+    { playerId: "p2", isCaptain: false, isWicketKeeper: false },
+    { playerId: "p3", isCaptain: false, isWicketKeeper: true },
+    { playerId: "p4", isCaptain: false, isWicketKeeper: false },
+    { playerId: "p5", isCaptain: false, isWicketKeeper: false },
+    { playerId: "p6", isCaptain: false, isWicketKeeper: false },
+    { playerId: "p7", isCaptain: false, isWicketKeeper: false },
+    { playerId: "p8", isCaptain: false, isWicketKeeper: false },
+    { playerId: "p9", isCaptain: false, isWicketKeeper: false },
+    { playerId: "p10", isCaptain: false, isWicketKeeper: false },
+    { playerId: "p11", isCaptain: false, isWicketKeeper: false },
   ]);
-  const [teamASubs, setTeamASubs] = useState<string[]>(['p12', 'p13']);
+  const [teamASubs, setTeamASubs] = useState<string[]>(["p12", "p13"]);
 
   const [teamBXI, setTeamBXI] = useState<SelectedPlayer[]>([
-    { playerId: 'pb1', isCaptain: true, isWicketKeeper: false },
-    { playerId: 'pb2', isCaptain: false, isWicketKeeper: false },
-    { playerId: 'pb3', isCaptain: false, isWicketKeeper: true },
-    { playerId: 'pb4', isCaptain: false, isWicketKeeper: false },
-    { playerId: 'pb5', isCaptain: false, isWicketKeeper: false },
-    { playerId: 'pb6', isCaptain: false, isWicketKeeper: false },
-    { playerId: 'pb7', isCaptain: false, isWicketKeeper: false },
-    { playerId: 'pb8', isCaptain: false, isWicketKeeper: false },
-    { playerId: 'pb10', isCaptain: false, isWicketKeeper: false },
-    { playerId: 'pb11', isCaptain: false, isWicketKeeper: false },
-    { playerId: 'pb12', isCaptain: false, isWicketKeeper: false },
+    { playerId: "pb1", isCaptain: true, isWicketKeeper: false },
+    { playerId: "pb2", isCaptain: false, isWicketKeeper: false },
+    { playerId: "pb3", isCaptain: false, isWicketKeeper: true },
+    { playerId: "pb4", isCaptain: false, isWicketKeeper: false },
+    { playerId: "pb5", isCaptain: false, isWicketKeeper: false },
+    { playerId: "pb6", isCaptain: false, isWicketKeeper: false },
+    { playerId: "pb7", isCaptain: false, isWicketKeeper: false },
+    { playerId: "pb8", isCaptain: false, isWicketKeeper: false },
+    { playerId: "pb10", isCaptain: false, isWicketKeeper: false },
+    { playerId: "pb11", isCaptain: false, isWicketKeeper: false },
+    { playerId: "pb12", isCaptain: false, isWicketKeeper: false },
   ]);
-  const [teamBSubs, setTeamBSubs] = useState<string[]>(['pb13', 'pb14']);
+  const [teamBSubs, setTeamBSubs] = useState<string[]>(["pb13", "pb14"]);
 
   const [isPublished, setIsPublished] = useState(false);
 
@@ -91,8 +86,8 @@ export default function MatchTossAndLineupConsolePage() {
 
   const canPublish = valA.isValid && valB.isValid;
 
-  const handleTogglePlayer = (teamKey: 'A' | 'B', playerId: string, target: 'XI' | 'SUB') => {
-    const isA = teamKey === 'A';
+  const handleTogglePlayer = (teamKey: "A" | "B", playerId: string, target: "XI" | "SUB") => {
+    const isA = teamKey === "A";
     const xi = isA ? teamAXI : teamBXI;
     const setXI = isA ? setTeamAXI : setTeamBXI;
     const subs = isA ? teamASubs : teamBSubs;
@@ -106,23 +101,23 @@ export default function MatchTossAndLineupConsolePage() {
     } else if (inSubs) {
       setSubs(subs.filter((id) => id !== playerId));
     } else {
-      if (target === 'XI' && xi.length < 11) {
+      if (target === "XI" && xi.length < 11) {
         const squadMap = isA ? squadMapA : squadMapB;
         const p = squadMap.get(playerId);
-        setXI([...xi, { playerId, isCaptain: false, isWicketKeeper: p?.role === 'WICKET_KEEPER' }]);
-      } else if (target === 'SUB' && subs.length < 5) {
+        setXI([...xi, { playerId, isCaptain: false, isWicketKeeper: p?.role === "WICKET_KEEPER" }]);
+      } else if (target === "SUB" && subs.length < 5) {
         setSubs([...subs, playerId]);
       }
     }
   };
 
-  const handleToggleCaptain = (teamKey: 'A' | 'B', playerId: string) => {
-    const setXI = teamKey === 'A' ? setTeamAXI : setTeamBXI;
+  const handleToggleCaptain = (teamKey: "A" | "B", playerId: string) => {
+    const setXI = teamKey === "A" ? setTeamAXI : setTeamBXI;
     setXI((prev) => prev.map((p) => ({ ...p, isCaptain: p.playerId === playerId ? !p.isCaptain : false })));
   };
 
-  const handleToggleKeeper = (teamKey: 'A' | 'B', playerId: string) => {
-    const setXI = teamKey === 'A' ? setTeamAXI : setTeamBXI;
+  const handleToggleKeeper = (teamKey: "A" | "B", playerId: string) => {
+    const setXI = teamKey === "A" ? setTeamAXI : setTeamBXI;
     setXI((prev) => prev.map((p) => (p.playerId === playerId ? { ...p, isWicketKeeper: !p.isWicketKeeper } : p)));
   };
 
@@ -149,18 +144,18 @@ export default function MatchTossAndLineupConsolePage() {
             onClick={() => {
               if (canPublish) {
                 setIsPublished(true);
-                alert('Toss result & Official Lineups verified and published!');
+                alert("Toss result & Official Lineups verified and published!");
               }
             }}
             disabled={!canPublish}
             className={`flex items-center space-x-2 px-6 py-2.5 rounded-xl font-bold text-xs transition shadow-lg ${
               canPublish
-                ? 'bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 text-black shadow-emerald-500/20'
-                : 'bg-neutral-800 text-neutral-500 cursor-not-allowed'
+                ? "bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 text-black shadow-emerald-500/20 cursor-pointer"
+                : "bg-neutral-800 text-neutral-500 cursor-not-allowed"
             }`}
           >
             <ShieldCheck className="w-4 h-4" />
-            <span>{isPublished ? 'Lineups Published & Live' : 'Verify & Publish Lineups'}</span>
+            <span>{isPublished ? "Lineups Published & Live" : "Verify & Publish Lineups"}</span>
           </button>
         </div>
 
@@ -173,22 +168,22 @@ export default function MatchTossAndLineupConsolePage() {
               <div className="grid grid-cols-2 gap-3">
                 <button
                   type="button"
-                  onClick={() => setTossWinnerId('team-a')}
+                  onClick={() => setTossWinnerId("team-a")}
                   className={`p-3 rounded-xl border text-xs font-bold transition ${
-                    tossWinnerId === 'team-a'
-                      ? 'border-purple-500 bg-purple-500/20 text-white'
-                      : 'border-white/10 bg-white/5 text-neutral-400 hover:bg-white/10'
+                    tossWinnerId === "team-a"
+                      ? "border-purple-500 bg-purple-500/20 text-white"
+                      : "border-white/10 bg-white/5 text-neutral-400 hover:bg-white/10"
                   }`}
                 >
                   Royal Challengers Bengaluru
                 </button>
                 <button
                   type="button"
-                  onClick={() => setTossWinnerId('team-b')}
+                  onClick={() => setTossWinnerId("team-b")}
                   className={`p-3 rounded-xl border text-xs font-bold transition ${
-                    tossWinnerId === 'team-b'
-                      ? 'border-purple-500 bg-purple-500/20 text-white'
-                      : 'border-white/10 bg-white/5 text-neutral-400 hover:bg-white/10'
+                    tossWinnerId === "team-b"
+                      ? "border-purple-500 bg-purple-500/20 text-white"
+                      : "border-white/10 bg-white/5 text-neutral-400 hover:bg-white/10"
                   }`}
                 >
                   Mumbai Indians
@@ -201,22 +196,22 @@ export default function MatchTossAndLineupConsolePage() {
               <div className="grid grid-cols-2 gap-3">
                 <button
                   type="button"
-                  onClick={() => setTossDecision('BAT')}
+                  onClick={() => setTossDecision("BAT")}
                   className={`p-3 rounded-xl border text-xs font-bold transition ${
-                    tossDecision === 'BAT'
-                      ? 'border-cyan-500 bg-cyan-500/20 text-white'
-                      : 'border-white/10 bg-white/5 text-neutral-400 hover:bg-white/10'
+                    tossDecision === "BAT"
+                      ? "border-cyan-500 bg-cyan-500/20 text-white"
+                      : "border-white/10 bg-white/5 text-neutral-400 hover:bg-white/10"
                   }`}
                 >
                   Elected to Bat First
                 </button>
                 <button
                   type="button"
-                  onClick={() => setTossDecision('BOWL')}
+                  onClick={() => setTossDecision("BOWL")}
                   className={`p-3 rounded-xl border text-xs font-bold transition ${
-                    tossDecision === 'BOWL'
-                      ? 'border-cyan-500 bg-cyan-500/20 text-white'
-                      : 'border-white/10 bg-white/5 text-neutral-400 hover:bg-white/10'
+                    tossDecision === "BOWL"
+                      ? "border-cyan-500 bg-cyan-500/20 text-white"
+                      : "border-white/10 bg-white/5 text-neutral-400 hover:bg-white/10"
                   }`}
                 >
                   Elected to Bowl First
@@ -228,13 +223,13 @@ export default function MatchTossAndLineupConsolePage() {
 
         {/* Squad Selection Columns */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {(['A', 'B'] as const).map((key) => {
-            const isA = key === 'A';
+          {(["A", "B"] as const).map((key) => {
+            const isA = key === "A";
             const squad = isA ? SAMPLE_SQUAD_TEAM_A : SAMPLE_SQUAD_TEAM_B;
             const xi = isA ? teamAXI : teamBXI;
             const subs = isA ? teamASubs : teamBSubs;
             const val = isA ? valA : valB;
-            const teamTitle = isA ? 'Royal Challengers Bengaluru' : 'Mumbai Indians';
+            const teamTitle = isA ? "Royal Challengers Bengaluru" : "Mumbai Indians";
 
             return (
               <div key={key} className="bg-[#111322] border border-white/10 rounded-2xl p-6 space-y-4">
@@ -295,7 +290,7 @@ export default function MatchTossAndLineupConsolePage() {
                                 type="button"
                                 onClick={() => handleToggleCaptain(key, player.id)}
                                 className={`px-2 py-0.5 rounded font-black font-mono text-[10px] ${
-                                  xiEntry.isCaptain ? 'bg-amber-400 text-black' : 'bg-white/5 text-neutral-400'
+                                  xiEntry.isCaptain ? "bg-amber-400 text-black" : "bg-white/5 text-neutral-400"
                                 }`}
                               >
                                 C
@@ -304,14 +299,14 @@ export default function MatchTossAndLineupConsolePage() {
                                 type="button"
                                 onClick={() => handleToggleKeeper(key, player.id)}
                                 className={`px-2 py-0.5 rounded font-black font-mono text-[10px] ${
-                                  xiEntry.isWicketKeeper ? 'bg-blue-400 text-black' : 'bg-white/5 text-neutral-400'
+                                  xiEntry.isWicketKeeper ? "bg-blue-400 text-black" : "bg-white/5 text-neutral-400"
                                 }`}
                               >
                                 WK
                               </button>
                               <button
                                 type="button"
-                                onClick={() => handleTogglePlayer(key, player.id, 'XI')}
+                                onClick={() => handleTogglePlayer(key, player.id, "XI")}
                                 className="px-2.5 py-1 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-semibold"
                               >
                                 In XI &times;
@@ -320,7 +315,7 @@ export default function MatchTossAndLineupConsolePage() {
                           ) : isSub ? (
                             <button
                               type="button"
-                              onClick={() => handleTogglePlayer(key, player.id, 'SUB')}
+                              onClick={() => handleTogglePlayer(key, player.id, "SUB")}
                               className="px-2.5 py-1 rounded bg-purple-500/20 text-purple-300 border border-purple-500/30 font-semibold"
                             >
                               Sub &times;
@@ -329,7 +324,7 @@ export default function MatchTossAndLineupConsolePage() {
                             <>
                               <button
                                 type="button"
-                                onClick={() => handleTogglePlayer(key, player.id, 'XI')}
+                                onClick={() => handleTogglePlayer(key, player.id, "XI")}
                                 disabled={xi.length >= 11}
                                 className="px-2 py-1 rounded bg-white/5 hover:bg-white/10 text-neutral-300 disabled:opacity-30"
                               >
@@ -337,7 +332,7 @@ export default function MatchTossAndLineupConsolePage() {
                               </button>
                               <button
                                 type="button"
-                                onClick={() => handleTogglePlayer(key, player.id, 'SUB')}
+                                onClick={() => handleTogglePlayer(key, player.id, "SUB")}
                                 disabled={subs.length >= 5}
                                 className="px-2 py-1 rounded bg-white/5 hover:bg-white/10 text-neutral-300 disabled:opacity-30"
                               >
