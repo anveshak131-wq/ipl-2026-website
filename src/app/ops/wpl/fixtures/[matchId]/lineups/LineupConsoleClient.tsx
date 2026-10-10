@@ -127,7 +127,7 @@ export default function LineupConsoleClient({ matchId }: { matchId: string }) {
         <div className="flex items-center justify-between border-b border-white/10 pb-6">
           <div className="flex items-center space-x-4">
             <Link
-              href="/admin/wpl/matches"
+              href="/ops/wpl/matches"
               className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-neutral-400 hover:text-white transition"
             >
               <ArrowLeft className="w-5 h-5" />

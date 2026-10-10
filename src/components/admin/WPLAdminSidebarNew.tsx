@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { 
   Home, Calendar, MapPin, FileText, Target, Activity, 
   Users, Shield, BarChart3, TrendingUp, Menu, X, ChevronRight, Award, Settings
-} from 'lucide-react';
+, ShieldCheck } from 'lucide-react';
 
 const menuSections = [
   {
@@ -20,6 +20,7 @@ const menuSections = [
     label: 'Live Ops',
     items: [
       { href: '/ops/wpl/matches', label: 'Matches', icon: Calendar },
+      { href: '/ops/wpl/fixtures/wpl-2027-m01/lineups', label: 'Toss & Lineups', icon: ShieldCheck },
       { href: '/ops/wpl/live-score-ai', label: 'Live Score', icon: Activity },
       { href: '/ops/wpl/live-score-csv', label: 'Live Score CSV', icon: FileText },
       { href: '/ops/wpl/playing-11', label: 'Playing 11', icon: Users },
