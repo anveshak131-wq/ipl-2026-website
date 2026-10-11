@@ -561,7 +561,7 @@ useEffect(() => {
           />
 
           {/* Soft Grounding Gradient Overlay */}
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#060813]/30 to-[#060813] pointer-events-none" />
+          <div className="absolute inset-0 bg-transparent pointer-events-none" />
         </div>
 
         {/* Tab & Controls */}
@@ -937,7 +937,7 @@ useEffect(() => {
               <div className="space-y-8 max-w-6xl mx-auto">
                 {/* 1. Overall Performance Banners (Solid Cards, Crisp White & Color Accents) */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <div className="p-5 rounded-2xl bg-[#0f1424] border-2 border-white/20 shadow-xl text-center">
+                  <div className="p-5 rounded-2xl bg-[#141b2d] border-2 border-slate-600/80 border-2 border-white/20 shadow-xl text-center">
                     <span className="text-xs font-black text-slate-300 uppercase tracking-wider block">
                       Matches Played
                     </span>
@@ -949,7 +949,7 @@ useEffect(() => {
                     </span>
                   </div>
 
-                  <div className="p-5 rounded-2xl bg-[#0f1424] border-2 border-emerald-500/30 shadow-xl text-center">
+                  <div className="p-5 rounded-2xl bg-[#141b2d] border-2 border-slate-600/80 border-2 border-emerald-500/30 shadow-xl text-center">
                     <span className="text-xs font-black text-emerald-400 uppercase tracking-wider block">
                       Win Rate
                     </span>
@@ -961,7 +961,7 @@ useEffect(() => {
                     </span>
                   </div>
 
-                  <div className="p-5 rounded-2xl bg-[#0f1424] border-2 border-pink-500/30 shadow-xl text-center">
+                  <div className="p-5 rounded-2xl bg-[#141b2d] border-2 border-slate-600/80 border-2 border-pink-500/30 shadow-xl text-center">
                     <span className="text-xs font-black text-pink-400 uppercase tracking-wider block">
                       Highest Total
                     </span>
@@ -973,7 +973,7 @@ useEffect(() => {
                     </span>
                   </div>
 
-                  <div className="p-5 rounded-2xl bg-[#0f1424] border-2 border-amber-500/30 shadow-xl text-center">
+                  <div className="p-5 rounded-2xl bg-[#141b2d] border-2 border-slate-600/80 border-2 border-amber-500/30 shadow-xl text-center">
                     <span className="text-xs font-black text-amber-400 uppercase tracking-wider block">
                       Championships
                     </span>
@@ -989,7 +989,7 @@ useEffect(() => {
                 {/* 2. Franchise Highs & Lows Matrix */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {/* Record Highs */}
-                  <div className="p-6 rounded-3xl bg-[#0d1120] border-2 border-white/20 shadow-2xl space-y-4">
+                  <div className="p-6 rounded-3xl bg-[#141b2d] border-2 border-slate-600/80 border-2 border-white/20 shadow-2xl space-y-4">
                     <div className="flex items-center gap-2.5 border-b border-white/15 pb-3">
                       <Trophy className="w-5 h-5 text-amber-400" />
                       <h3 className="text-lg font-black text-white tracking-wide">Record Highs & Big Wins</h3>
@@ -1012,7 +1012,7 @@ useEffect(() => {
                   </div>
 
                   {/* Phase Performance Breakdown */}
-                  <div className="p-6 rounded-3xl bg-[#0d1120] border-2 border-white/20 shadow-2xl space-y-4">
+                  <div className="p-6 rounded-3xl bg-[#141b2d] border-2 border-slate-600/80 border-2 border-white/20 shadow-2xl space-y-4">
                     <div className="flex items-center gap-2.5 border-b border-white/15 pb-3">
                       <Zap className="w-5 h-5 text-pink-400" />
                       <h3 className="text-lg font-black text-white tracking-wide">Phase Scoring Rate (RPO)</h3>
@@ -1043,7 +1043,7 @@ useEffect(() => {
                 </div>
 
                 {/* 3. Toss & Pitch Breakdown */}
-                <div className="p-6 rounded-3xl bg-[#0d1120] border-2 border-white/20 shadow-2xl">
+                <div className="p-6 rounded-3xl bg-[#141b2d] border-2 border-slate-600/80 border-2 border-white/20 shadow-2xl">
                   <div className="flex items-center gap-2.5 border-b border-white/15 pb-3 mb-4">
                     <TrendingUp className="w-5 h-5 text-emerald-400" />
                     <h3 className="text-lg font-black text-white tracking-wide">Batting 1st vs Chasing Split</h3>
