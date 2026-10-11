@@ -565,7 +565,7 @@ useEffect(() => {
         </div>
 
         {/* Tab & Controls */}
-        <section className="sticky top-16 z-30 bg-[#05070f]/90 backdrop-blur-xl border-b border-white/[0.08]">
+        <section className="sticky top-16 z-30 bg-[#0b0f19] border-b border-slate-800 border-b border-white/[0.08]">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex flex-col md:flex-row items-center justify-between gap-4">
             
             {/* 3-Tab Selector: Squad, Matches, Team Stats */}
@@ -576,7 +576,7 @@ useEffect(() => {
                 className={`flex-1 md:flex-initial flex items-center justify-center gap-2 px-5 py-2 rounded-lg text-xs sm:text-sm font-bold transition-all ${
                   activeTab === 'squad'
                     ? 'bg-pink-600 text-white shadow-lg shadow-pink-600/30'
-                    : 'text-zinc-100 hover:text-white bg-white/10 hover:bg-white/15 border border-white/10'
+                    : 'text-white font-bold bg-[#181d2f] hover:bg-[#232942] border border-slate-600/80 shadow-sm'
                 }`}
               >
                 <Users className="w-4 h-4" />
@@ -589,7 +589,7 @@ useEffect(() => {
                 className={`flex-1 md:flex-initial flex items-center justify-center gap-2 px-5 py-2 rounded-lg text-xs sm:text-sm font-bold transition-all ${
                   activeTab === 'matches'
                     ? 'bg-pink-600 text-white shadow-lg shadow-pink-600/30'
-                    : 'text-zinc-100 hover:text-white bg-white/10 hover:bg-white/15 border border-white/10'
+                    : 'text-white font-bold bg-[#181d2f] hover:bg-[#232942] border border-slate-600/80 shadow-sm'
                 }`}
               >
                 <Calendar className="w-4 h-4" />
@@ -602,7 +602,7 @@ useEffect(() => {
                 className={`flex-1 md:flex-initial flex items-center justify-center gap-2 px-5 py-2 rounded-lg text-xs sm:text-sm font-bold transition-all ${
                   activeTab === 'stats'
                     ? 'bg-pink-600 text-white shadow-lg shadow-pink-600/30'
-                    : 'text-zinc-100 hover:text-white bg-white/10 hover:bg-white/15 border border-white/10'
+                    : 'text-white font-bold bg-[#181d2f] hover:bg-[#232942] border border-slate-600/80 shadow-sm'
                 }`}
               >
                 <BarChart3 className="w-4 h-4" />
