@@ -255,7 +255,7 @@ useEffect(() => {
       case 6:
         return { label: 'Bowler', bg: 'bg-purple-500/10 text-purple-400 border-purple-500/30 ring-purple-500/20' };
       default:
-        return { label: p.role || 'Player', bg: 'bg-gray-500/10 text-gray-400 border-gray-500/30 ring-gray-500/20' };
+        return { label: p.role || 'Player', bg: 'bg-gray-500/10 text-zinc-200 border-gray-500/30 ring-gray-500/20' };
     }
   };
 
@@ -478,7 +478,7 @@ useEffect(() => {
         <div className="max-w-2xl mx-auto px-4 py-32 text-center">
           <Shield className="w-16 h-16 mx-auto text-pink-500 mb-6 opacity-70" />
           <h2 className="text-3xl font-black">Franchise Portal Unavailable</h2>
-          <p className="mt-2 text-sm text-gray-400">Could not locate team records for "{teamId}".</p>
+          <p className="mt-2 text-sm text-zinc-200">Could not locate team records for "{teamId}".</p>
           <Link
             href="/wpl/teams"
             className="inline-flex items-center gap-2 mt-8 px-6 py-3 rounded-xl bg-pink-600 hover:bg-pink-500 text-white font-bold transition-all shadow-lg"
@@ -538,7 +538,7 @@ useEffect(() => {
             <span className="text-[17vw] font-black uppercase tracking-tighter leading-none whitespace-nowrap text-white font-mono">
               {team?.shortName || 'WPL 2026'}
             </span>
-            <span className="text-[7vw] font-black uppercase tracking-[0.3em] leading-none text-white/50 -mt-6">
+            <span className="text-[7vw] font-black uppercase tracking-[0.3em] leading-none text-zinc-200 -mt-6">
               CHAMPIONSHIP ARENA
             </span>
           </div>
@@ -576,7 +576,7 @@ useEffect(() => {
                 className={`flex-1 md:flex-initial flex items-center justify-center gap-2 px-5 py-2 rounded-lg text-xs sm:text-sm font-bold transition-all ${
                   activeTab === 'squad'
                     ? 'bg-pink-600 text-white shadow-lg shadow-pink-600/30'
-                    : 'text-gray-400 hover:text-white'
+                    : 'text-zinc-100 hover:text-white bg-white/10 hover:bg-white/15 border border-white/10'
                 }`}
               >
                 <Users className="w-4 h-4" />
@@ -589,7 +589,7 @@ useEffect(() => {
                 className={`flex-1 md:flex-initial flex items-center justify-center gap-2 px-5 py-2 rounded-lg text-xs sm:text-sm font-bold transition-all ${
                   activeTab === 'matches'
                     ? 'bg-pink-600 text-white shadow-lg shadow-pink-600/30'
-                    : 'text-gray-400 hover:text-white'
+                    : 'text-zinc-100 hover:text-white bg-white/10 hover:bg-white/15 border border-white/10'
                 }`}
               >
                 <Calendar className="w-4 h-4" />
@@ -602,7 +602,7 @@ useEffect(() => {
                 className={`flex-1 md:flex-initial flex items-center justify-center gap-2 px-5 py-2 rounded-lg text-xs sm:text-sm font-bold transition-all ${
                   activeTab === 'stats'
                     ? 'bg-pink-600 text-white shadow-lg shadow-pink-600/30'
-                    : 'text-gray-400 hover:text-white'
+                    : 'text-zinc-100 hover:text-white bg-white/10 hover:bg-white/15 border border-white/10'
                 }`}
               >
                 <BarChart3 className="w-4 h-4" />
@@ -620,7 +620,7 @@ useEffect(() => {
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2 pl-9 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-pink-500 transition-colors"
                 />
-                <Search className="w-4 h-4 text-gray-500 absolute left-3 top-1/2 -translate-y-1/2" />
+                <Search className="w-4 h-4 text-zinc-300 absolute left-3 top-1/2 -translate-y-1/2" />
               </div>
             )}
           </div>
@@ -673,7 +673,7 @@ useEffect(() => {
                           <h2 className="text-3xl sm:text-5xl font-black text-white tracking-tight">
                             {hero.name}
                           </h2>
-                          <p className="text-sm font-semibold text-gray-400 mt-1">
+                          <p className="text-sm font-semibold text-zinc-200 mt-1">
                             {hero.bowlingStyle || hero.role || 'Franchise Athlete'}
                           </p>
                         </div>
@@ -688,7 +688,7 @@ useEffect(() => {
                             <span>Full Cricbuzz Dossier</span>
                             <ChevronRight className="w-4 h-4" />
                           </button>
-                          <span className="text-[11px] text-gray-400">
+                          <span className="text-[11px] text-zinc-200">
                             Hover or click any squad member below to switch spotlight
                           </span>
                         </div>
@@ -706,7 +706,7 @@ useEffect(() => {
                                 <span className="text-5xl font-black text-white tracking-tighter drop-shadow-md">
                                   {heroInitials}
                                 </span>
-                                <span className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">
+                                <span className="block text-[10px] font-bold text-zinc-200 uppercase tracking-widest mt-1">
                                   {heroRole.abbr}
                                 </span>
                               </div>
@@ -721,17 +721,17 @@ useEffect(() => {
                           <div className="p-4 rounded-2xl bg-black/40 border border-white/10 text-center">
                             <span className="text-[10px] font-black text-amber-400 uppercase tracking-wider block">Runs</span>
                             <span className="text-2xl font-black text-white mt-1 block">{hs.runs ?? 0}</span>
-                            <span className="text-[9px] text-gray-500 uppercase font-bold">WPL Career</span>
+                            <span className="text-[9px] text-zinc-300 uppercase font-bold">WPL Career</span>
                           </div>
                           <div className="p-4 rounded-2xl bg-black/40 border border-white/10 text-center">
                             <span className={`text-[10px] font-black ${heroRole.accentText} uppercase tracking-wider block`}>Wickets</span>
                             <span className="text-2xl font-black text-white mt-1 block">{hs.wickets ?? 0}</span>
-                            <span className="text-[9px] text-gray-500 uppercase font-bold">WPL Career</span>
+                            <span className="text-[9px] text-zinc-300 uppercase font-bold">WPL Career</span>
                           </div>
                           <div className="p-4 rounded-2xl bg-black/40 border border-white/10 text-center">
                             <span className="text-[10px] font-black text-pink-400 uppercase tracking-wider block">Matches</span>
                             <span className="text-2xl font-black text-white mt-1 block">{hs.matches ?? 0}</span>
-                            <span className="text-[9px] text-gray-500 uppercase font-bold">Caps</span>
+                            <span className="text-[9px] text-zinc-300 uppercase font-bold">Caps</span>
                           </div>
                         </div>
                       </div>
@@ -759,7 +759,7 @@ useEffect(() => {
                         className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all ${
                           selectedRole === role.id
                             ? 'bg-pink-600 text-white shadow-lg shadow-pink-600/30 scale-105'
-                            : 'bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white'
+                            : 'bg-white/5 text-zinc-200 hover:bg-white/10 hover:text-white'
                         }`}
                       >
                         {role.label}
@@ -767,7 +767,7 @@ useEffect(() => {
                     ))}
                   </div>
 
-                  <div className="text-xs text-gray-400 font-bold uppercase tracking-wider">
+                  <div className="text-xs text-zinc-200 font-bold uppercase tracking-wider">
                     Dugout: <span className="text-white">{visibleSquad.length}</span> / {filteredSquad.length} Athletes
                   </div>
                 </div>
@@ -818,7 +818,7 @@ useEffect(() => {
                               <span className={`text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded border ${roleTheme.badgeBg}`}>
                                 {roleTheme.abbr}
                               </span>
-                              <span className="text-[10px] text-gray-500 font-mono ml-auto">
+                              <span className="text-[10px] text-zinc-300 font-mono ml-auto">
                                 #{idx + 1 < 10 ? `0${idx + 1}` : idx + 1}
                               </span>
                             </div>
@@ -828,13 +828,13 @@ useEffect(() => {
                             </h4>
 
                             <div className="flex items-center gap-3 mt-1.5 text-[11px] font-bold">
-                              <span className="text-gray-400">
+                              <span className="text-zinc-200">
                                 <strong className="text-white">{s.runs ?? 0}</strong> R
                               </span>
-                              <span className="text-gray-400">
+                              <span className="text-zinc-200">
                                 <strong className={roleTheme.accentText}>{s.wickets ?? 0}</strong> W
                               </span>
-                              <span className="text-gray-400">
+                              <span className="text-zinc-200">
                                 <strong className="text-gray-300">{s.matches ?? 0}</strong> M
                               </span>
                             </div>
@@ -872,12 +872,12 @@ useEffect(() => {
           {activeTab === 'matches' && (
             <div className="space-y-6 max-w-5xl mx-auto">
               {matchesLoading ? (
-                <div className="text-center py-20 text-gray-400">Loading fixture archive...</div>
+                <div className="text-center py-20 text-zinc-200">Loading fixture archive...</div>
               ) : matches.length === 0 ? (
                 <div className="text-center py-24 rounded-3xl border border-white/10 bg-white/[0.02]">
                   <Calendar className="w-12 h-12 mx-auto text-gray-600 mb-3" />
                   <h3 className="text-lg font-bold text-white">2027 Schedule Pending</h3>
-                  <p className="text-xs text-gray-400 mt-1">Official fixtures for Jan 9 – Feb 5, 2027 will appear once released.</p>
+                  <p className="text-xs text-zinc-200 mt-1">Official fixtures for Jan 9 – Feb 5, 2027 will appear once released.</p>
                 </div>
               ) : (
                 <div className="grid gap-4">
@@ -944,7 +944,7 @@ useEffect(() => {
                     <div className="text-3xl sm:text-4xl font-black text-white mt-1">
                       {fs.played}
                     </div>
-                    <span className="text-xs font-bold text-slate-400 mt-0.5 block">
+                    <span className="text-xs font-bold text-zinc-200 mt-0.5 block">
                       WPL 2023–2026
                     </span>
                   </div>
@@ -1115,7 +1115,7 @@ useEffect(() => {
                   {selectedPlayer.jerseyNumber ? `#${selectedPlayer.jerseyNumber}` : getInitials(selectedPlayer.name)}
                 </span>
 
-                <span className="relative z-10 text-[9px] font-bold uppercase tracking-widest text-gray-400 mt-0.5">
+                <span className="relative z-10 text-[9px] font-bold uppercase tracking-widest text-zinc-200 mt-0.5">
                   {selectedPlayer.role ? selectedPlayer.role.slice(0, 10) : 'Player'}
                 </span>
               </div>
@@ -1143,12 +1143,12 @@ useEffect(() => {
                     </span>
                   )}
                   {selectedPlayer.dateOfBirth && (
-                    <span className="text-xs text-gray-400">
+                    <span className="text-xs text-zinc-200">
                       DOB: {selectedPlayer.dateOfBirth} ({selectedPlayer.age ? `${selectedPlayer.age} yrs` : ''})
                     </span>
                   )}
                 </div>
-                <p className="text-xs text-gray-400 pt-1">
+                <p className="text-xs text-zinc-200 pt-1">
                   Batting: <span className="text-gray-200">{selectedPlayer.battingStyle || 'Right Handed'}</span> • Bowling: <span className="text-gray-200">{selectedPlayer.bowlingStyle || 'None'}</span>
                 </p>
               </div>
@@ -1161,11 +1161,11 @@ useEffect(() => {
                   <TrendingUp className="w-4 h-4 text-emerald-400" />
                   <h4 className="text-sm font-black uppercase tracking-wider text-emerald-400">Batting Career Summary</h4>
                 </div>
-                <span className="text-[11px] font-bold text-gray-400 uppercase">WPL Tournament</span>
+                <span className="text-[11px] font-bold text-zinc-200 uppercase">WPL Tournament</span>
               </div>
               <div className="overflow-x-auto rounded-xl border border-white/10 bg-white/[0.02]">
                 <table className="w-full text-center text-xs">
-                  <thead className="bg-white/5 text-gray-400 font-bold uppercase text-[10px]">
+                  <thead className="bg-white/5 text-zinc-200 font-bold uppercase text-[10px]">
                     <tr>
                       <th className="py-2.5 px-3 text-left">Format</th>
                       <th className="py-2.5 px-2">M</th>
@@ -1227,11 +1227,11 @@ useEffect(() => {
                   <Target className="w-4 h-4 text-teal-400" />
                   <h4 className="text-sm font-black uppercase tracking-wider text-teal-400">Bowling Career Summary</h4>
                 </div>
-                <span className="text-[11px] font-bold text-gray-400 uppercase">WPL Tournament</span>
+                <span className="text-[11px] font-bold text-zinc-200 uppercase">WPL Tournament</span>
               </div>
               <div className="overflow-x-auto rounded-xl border border-white/10 bg-white/[0.02]">
                 <table className="w-full text-center text-xs">
-                  <thead className="bg-white/5 text-gray-400 font-bold uppercase text-[10px]">
+                  <thead className="bg-white/5 text-zinc-200 font-bold uppercase text-[10px]">
                     <tr>
                       <th className="py-2.5 px-3 text-left">Format</th>
                       <th className="py-2.5 px-2">M</th>
@@ -1291,7 +1291,7 @@ useEffect(() => {
               if (s.catches || s.stumpings) {
                 return (
                   <div className="mt-5 p-3 rounded-xl bg-white/[0.03] border border-white/10 flex items-center gap-6 justify-center text-xs">
-                    <span className="text-gray-400">Fielding:</span>
+                    <span className="text-zinc-200">Fielding:</span>
                     <span><strong className="text-white">{s.catches || 0}</strong> Catches</span>
                     <span><strong className="text-white">{s.stumpings || 0}</strong> Stumpings</span>
                   </div>
@@ -1340,7 +1340,7 @@ useEffect(() => {
                   {selectedPlayer.jerseyNumber ? `#${selectedPlayer.jerseyNumber}` : getInitials(selectedPlayer.name)}
                 </span>
 
-                <span className="relative z-10 text-[9px] font-bold uppercase tracking-widest text-gray-400 mt-0.5">
+                <span className="relative z-10 text-[9px] font-bold uppercase tracking-widest text-zinc-200 mt-0.5">
                   {selectedPlayer.role ? selectedPlayer.role.slice(0, 10) : 'Player'}
                 </span>
               </div>
@@ -1368,12 +1368,12 @@ useEffect(() => {
                     </span>
                   )}
                   {selectedPlayer.dateOfBirth && (
-                    <span className="text-xs text-gray-400">
+                    <span className="text-xs text-zinc-200">
                       DOB: {selectedPlayer.dateOfBirth} ({selectedPlayer.age ? `${selectedPlayer.age} yrs` : ''})
                     </span>
                   )}
                 </div>
-                <p className="text-xs text-gray-400 pt-1">
+                <p className="text-xs text-zinc-200 pt-1">
                   Batting: <span className="text-gray-200">{selectedPlayer.battingStyle || 'Right Handed'}</span> • Bowling: <span className="text-gray-200">{selectedPlayer.bowlingStyle || 'None'}</span>
                 </p>
               </div>
@@ -1386,11 +1386,11 @@ useEffect(() => {
                   <TrendingUp className="w-4 h-4 text-emerald-400" />
                   <h4 className="text-sm font-black uppercase tracking-wider text-emerald-400">Batting Career Summary</h4>
                 </div>
-                <span className="text-[11px] font-bold text-gray-400 uppercase">WPL Tournament</span>
+                <span className="text-[11px] font-bold text-zinc-200 uppercase">WPL Tournament</span>
               </div>
               <div className="overflow-x-auto rounded-xl border border-white/10 bg-white/[0.02]">
                 <table className="w-full text-center text-xs">
-                  <thead className="bg-white/5 text-gray-400 font-bold uppercase text-[10px]">
+                  <thead className="bg-white/5 text-zinc-200 font-bold uppercase text-[10px]">
                     <tr>
                       <th className="py-2.5 px-3 text-left">Format</th>
                       <th className="py-2.5 px-2">M</th>
@@ -1452,11 +1452,11 @@ useEffect(() => {
                   <Target className="w-4 h-4 text-teal-400" />
                   <h4 className="text-sm font-black uppercase tracking-wider text-teal-400">Bowling Career Summary</h4>
                 </div>
-                <span className="text-[11px] font-bold text-gray-400 uppercase">WPL Tournament</span>
+                <span className="text-[11px] font-bold text-zinc-200 uppercase">WPL Tournament</span>
               </div>
               <div className="overflow-x-auto rounded-xl border border-white/10 bg-white/[0.02]">
                 <table className="w-full text-center text-xs">
-                  <thead className="bg-white/5 text-gray-400 font-bold uppercase text-[10px]">
+                  <thead className="bg-white/5 text-zinc-200 font-bold uppercase text-[10px]">
                     <tr>
                       <th className="py-2.5 px-3 text-left">Format</th>
                       <th className="py-2.5 px-2">M</th>
@@ -1516,7 +1516,7 @@ useEffect(() => {
               if (s.catches || s.stumpings) {
                 return (
                   <div className="mt-5 p-3 rounded-xl bg-white/[0.03] border border-white/10 flex items-center gap-6 justify-center text-xs">
-                    <span className="text-gray-400">Fielding:</span>
+                    <span className="text-zinc-200">Fielding:</span>
                     <span><strong className="text-white">{s.catches || 0}</strong> Catches</span>
                     <span><strong className="text-white">{s.stumpings || 0}</strong> Stumpings</span>
                   </div>
