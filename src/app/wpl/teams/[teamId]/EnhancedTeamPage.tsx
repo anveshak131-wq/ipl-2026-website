@@ -569,7 +569,7 @@ useEffect(() => {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex flex-col md:flex-row items-center justify-between gap-4">
             
             {/* 3-Tab Selector: Squad, Matches, Team Stats */}
-            <div className="inline-flex p-1 rounded-xl bg-white/[0.06] border border-white/10 w-full md:w-auto">
+            <div className="inline-flex p-1 rounded-xl bg-[#101524] border-2 border-slate-600/60 w-full md:w-auto">
               <button
                 type="button"
                 onClick={() => setActiveTab('squad')}
@@ -997,15 +997,15 @@ useEffect(() => {
 
                     <div className="space-y-3 text-sm">
                       <div className="flex justify-between items-center py-2.5 border-b border-white/10">
-                        <span className="text-slate-300 font-bold">Signature Victory</span>
+                        <span className="text-zinc-100 font-black">Signature Victory</span>
                         <strong className="text-white text-right font-black text-base">{fs.biggestWin}</strong>
                       </div>
                       <div className="flex justify-between items-center py-2.5 border-b border-white/10">
-                        <span className="text-slate-300 font-bold">Lowest Score Defended</span>
+                        <span className="text-zinc-100 font-black">Lowest Score Defended</span>
                         <strong className="text-white text-right font-black text-base">{fs.lowestDefended}</strong>
                       </div>
                       <div className="flex justify-between items-center py-2.5">
-                        <span className="text-slate-300 font-bold">Peak Total</span>
+                        <span className="text-zinc-100 font-black">Peak Total</span>
                         <strong className="text-amber-300 font-black text-base">{fs.highestTotal}</strong>
                       </div>
                     </div>
@@ -1051,7 +1051,7 @@ useEffect(() => {
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-center">
                     <div className="p-5 rounded-2xl bg-black/50 border border-white/15">
-                      <span className="text-xs text-slate-300 font-black uppercase tracking-wider block mb-1">
+                      <span className="text-xs text-white font-black uppercase tracking-wider block mb-1">
                         Batting 1st Win Rate
                       </span>
                       <span className="text-2xl font-black text-white block">
@@ -1063,7 +1063,7 @@ useEffect(() => {
                     </div>
 
                     <div className="p-5 rounded-2xl bg-black/50 border border-white/15">
-                      <span className="text-xs text-slate-300 font-black uppercase tracking-wider block mb-1">
+                      <span className="text-xs text-white font-black uppercase tracking-wider block mb-1">
                         Chasing Win Rate
                       </span>
                       <span className="text-2xl font-black text-white block">
