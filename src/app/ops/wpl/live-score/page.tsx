@@ -1,5 +1,23 @@
 'use client';
 
+const WPL_TEAM_NAMES: Record<string, string> = {
+  "rcb-w": "RCB-W",
+  "dc-w": "DC-W",
+  "mi-w": "MI-W",
+  "gg-w": "GG-W",
+  "upw": "UPW",
+  "upw-w": "UPW",
+  "gg": "GG-W",
+};
+
+function formatWplTeam(team: any, fallbackId?: string): string {
+  if (!team && !fallbackId) return "TBD";
+  if (typeof team === "string") return WPL_TEAM_NAMES[team.toLowerCase()] || team.toUpperCase();
+  const name = team?.shortName || team?.name || team?.code || fallbackId || "";
+  return WPL_TEAM_NAMES[name.toLowerCase()] || name || "TBD";
+}
+
+
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { api } from '@/lib/data';
 import {
@@ -360,11 +378,25 @@ export default function IPLAdminLiveScoreTablePage() {
     [matches, selectedMatchId]
   );
   const selectedMatch = matchDetails || selectedMatchFromList;
-  const availableSeasonYears = useMemo(() => getAvailableSeasonYears(matches), [matches]);
-  const visibleMatches = useMemo(
-    () => sortMatchesForAdmin(filterMatchesBySeason(matches, seasonYear)),
-    [matches, seasonYear]
-  );
+  const availableSeasonYears = useMemo(() => {
+    const raw = getAvailableSeasonYears(matches);
+    const wplYears = [2026, 2025, 2024, 2023];
+    const filtered = raw.filter((y) => wplYears.includes(y));
+    return filtered.length ? filtered : wplYears;
+  }, [matches]);
+  const visibleMatches = useMemo(() => {
+    // Keep only WPL matches
+    const wplOnly = matches.filter((m: any) => {
+      const isWplLeague = !m.league || m.league.toLowerCase() === "wpl";
+      const t1 = String(m.team1?.id || m.team1?.shortName || m.team1 || "").toLowerCase();
+      const t2 = String(m.team2?.id || m.team2?.shortName || m.team2 || "").toLowerCase();
+      const hasWplTeam = t1.includes("-w") || t2.includes("-w") || t1.includes("upw") || t2.includes("upw") || t1.includes("gg") || t2.includes("gg");
+      return isWplLeague && (hasWplTeam || (m as any).tournament === "wpl");
+    });
+
+    const seasonFiltered = filterMatchesBySeason(wplOnly.length > 0 ? wplOnly : matches, seasonYear);
+    return sortMatchesForAdmin(seasonFiltered);
+  }, [matches, seasonYear]);
 
   // Reset Playing XI (WPL Max 5 with Associate) forms when switching matches
   useEffect(() => {
@@ -3464,7 +3496,7 @@ export default function IPLAdminLiveScoreTablePage() {
         <div className="max-w-3xl">
           <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-[#d7a85b]/30 bg-[#d7a85b]/10 px-3 py-1 text-xs font-semibold text-[#f2d39a]">
             <span className="ipl-live-pulse h-2 w-2 rounded-full bg-[#4cc39a]" />
-            IPL 2026 scoring console
+            WPL 2026 scoring console
           </div>
           <div className="flex items-center gap-3">
             <Activity className="h-7 w-7 text-[#d7a85b]" />
@@ -3542,7 +3574,7 @@ export default function IPLAdminLiveScoreTablePage() {
                 <option value="">Select match to score...</option>
                 {visibleMatches.map((m) => (
                   <option key={m.id} value={m.id}>
-                    {m.team1?.shortName || m.team1?.name} vs {m.team2?.shortName || m.team2?.name}
+                    {`${formatWplTeam(m.team1, (m as any).team1Id)} vs ${formatWplTeam(m.team2, (m as any).team2Id)} (Match ${m.matchNumber || m.id})`}
                   </option>
                 ))}
               </select>
