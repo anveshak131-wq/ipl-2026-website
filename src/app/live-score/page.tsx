@@ -1386,9 +1386,24 @@ export default function LiveScorePage() {
       matchId,
       withCommentary: withCommentary ? '1' : '0',
     });
+    const etagKey = `live_etag_${matchId}`;
+    const cachedEtag = typeof window !== "undefined" ? sessionStorage.getItem(etagKey) : null;
+    const headers: Record<string, string> = {};
+    if (cachedEtag) headers["If-None-Match"] = cachedEtag;
+
     const resp = await fetch(`/api/${selectedLeague}-live-score/save?${params.toString()}`, {
-      cache: 'no-store',
+      cache: "no-store",
+      headers,
     });
+
+    if (resp.status === 304) {
+      return null; // Content unchanged, skip re-parse
+    }
+
+    const newEtag = resp.headers.get("ETag");
+    if (newEtag && typeof window !== "undefined") {
+      sessionStorage.setItem(etagKey, newEtag);
+    }
     if (!resp.ok) throw new Error(`Failed to fetch live score rows (${resp.status})`);
     const data = await resp.json();
 
@@ -1507,21 +1522,35 @@ export default function LiveScorePage() {
     selectedMatchId,
   ]);
 
+  // Adaptive Polling: 2s active play, 8s over-breaks, 30s innings-breaks, 0s tab hidden
   const pollIntervalMs = useMemo(() => {
+    if (!isPageVisible) return 0; // 0 signals complete freeze
     if (!selectedMatch) return 15000;
-    if (!isPageVisible) return 60000;
-    if (selectedMatch.status === 'live') return 5000;
+    if (selectedMatch.status === "live") {
+      // Over break / strategic timeout check
+      const currentBallStr = String(displayBalls || "");
+      if (currentBallStr.endsWith(".0") || currentBallStr.endsWith(".6")) {
+        return 8000;
+      }
+      return 2000;
+    }
+    if (selectedMatch.status === "innings_break") return 30000;
     return 30000;
-  }, [isPageVisible, selectedMatch]);
+  }, [isPageVisible, selectedMatch, displayBalls]);
 
   useEffect(() => {
     if (!selectedMatchId) return;
 
+    // Freeze completely when tab is backgrounded
+    if (pollIntervalMs === 0 || !isPageVisible) {
+      return;
+    }
+
     let cancelled = false;
 
     const tick = async () => {
-      if (cancelled) return;
-      await refresh('auto');
+      if (cancelled || document.hidden) return;
+      await refresh("auto");
     };
 
     tick();
@@ -1531,7 +1560,7 @@ export default function LiveScorePage() {
       cancelled = true;
       clearInterval(interval);
     };
-  }, [pollIntervalMs, refresh, selectedMatchId]);
+  }, [pollIntervalMs, isPageVisible, refresh, selectedMatchId]);
 
   const computedResultText = useMemo(() => {
     if (!selectedMatch) return '';
