@@ -501,8 +501,10 @@ export const api = {
       if (league) params.set('league', league);
       if (includeInactive) params.set('includeInactive', 'true');
       const url = params.toString() ? `/api/players?${params.toString()}` : '/api/players';
+      const adminToken = getAdminAuthToken();
+      const headers: Record<string, string> = adminToken ? { Authorization: `Bearer ${adminToken}` } : {};
       console.log('API: Fetching players from:', url);
-      const response = await fetch(url);
+      const response = await fetch(url, { headers });
       console.log('API: Players response status:', response.status, response.ok);
       
       if (!response.ok) {

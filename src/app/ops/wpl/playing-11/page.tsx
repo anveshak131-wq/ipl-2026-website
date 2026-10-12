@@ -16,13 +16,10 @@ import {
 
 const FIXTURES_STORAGE_KEY = 'wpl_matches_fixtures_v2027';
 
-// Canonical team ID normalizer based on src/lib/data.ts mockTeams & KV
-// 11 = MI-W | 12 = RCB-W | 13 = DC-W | 14 = GG | 15 = UPW
 function resolveCanonicalWplTeamId(raw: any, teams: Team[]): string {
   if (!raw) return '';
   const str = String(typeof raw === 'object' ? (raw.id || raw.name || raw.shortName || '') : raw).trim().toLowerCase();
 
-  // Direct check against loaded teams
   const found = teams.find(
     (t) =>
       String(t.id).toLowerCase() === str ||
@@ -31,7 +28,6 @@ function resolveCanonicalWplTeamId(raw: any, teams: Team[]): string {
   );
   if (found) return String(found.id);
 
-  // Match common WPL patterns
   if (str.includes('rcb') || str.includes('bengaluru') || str.includes('bangalore') || str === '12') return '12';
   if (str.includes('gg') || str.includes('gujarat') || str.includes('giants') || str === '14') return '14';
   if (str.includes('mi') || str.includes('mumbai') || str === '11') return '11';
@@ -49,17 +45,14 @@ export default function WplPlaying11ConfirmationPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
 
-  // Admin custom added players saved to localStorage
   const [customPlayers, setCustomPlayers] = useState<Record<string, Array<{ id: string; name: string; role: string; teamId: string }>>>({});
   const [removedPlayerIds, setRemovedPlayerIds] = useState<Record<string, string[]>>({});
 
-  // Quick-add input states
   const [newPlayerName1, setNewPlayerName1] = useState('');
   const [newPlayerRole1, setNewPlayerRole1] = useState('Batter');
   const [newPlayerName2, setNewPlayerName2] = useState('');
   const [newPlayerRole2, setNewPlayerRole2] = useState('Batter');
 
-  // Playing 11 Selections
   const [team1Lineup, setTeam1Lineup] = useState<string[]>([]);
   const [team2Lineup, setTeam2Lineup] = useState<string[]>([]);
   const [team1Captain, setTeam1Captain] = useState<string>('');
@@ -75,6 +68,27 @@ export default function WplPlaying11ConfirmationPage() {
         api.getPlayers(undefined, 'wpl', { includeInactive: true }).catch(() => []),
         api.getTeams('wpl').catch(() => []),
       ]);
+
+      let allPlayers = [...apiPlayers];
+
+      // Check localStorage player caches if API returned empty
+      if (allPlayers.length === 0) {
+        try {
+          const cacheKeys = ['wpl_players_cache', 'admin_players_cache', 'players_cache'];
+          for (const k of cacheKeys) {
+            const raw = localStorage.getItem(k);
+            if (raw) {
+              const parsed = JSON.parse(raw);
+              if (Array.isArray(parsed) && parsed.length > 0) {
+                allPlayers = parsed;
+                break;
+              }
+            }
+          }
+        } catch (e) {
+          console.warn('LocalStorage player cache parse error', e);
+        }
+      }
 
       let localFixtures: any[] = [];
       try {
@@ -102,7 +116,7 @@ export default function WplPlaying11ConfirmationPage() {
       });
 
       setMatches(combinedMatches);
-      setPlayers(apiPlayers);
+      setPlayers(allPlayers);
       setTeams(apiTeams);
 
       if (combinedMatches.length > 0) {
@@ -123,7 +137,6 @@ export default function WplPlaying11ConfirmationPage() {
     return matches.find((m) => String(m.id) === String(selectedMatchId)) || null;
   }, [matches, selectedMatchId]);
 
-  // Load existing lineups when match selection changes
   useEffect(() => {
     if (!selectedMatch) return;
     const p11 = selectedMatch.playing11;
@@ -156,7 +169,6 @@ export default function WplPlaying11ConfirmationPage() {
     return resolveCanonicalWplTeamId(selectedMatch.team2?.id || selectedMatch.team2Id || selectedMatch.team2?.name, teams);
   }, [selectedMatch, teams]);
 
-  // Squad 1: strictly matching team players from database + admin custom additions
   const team1Squad = useMemo(() => {
     if (!team1CanonicalId) return [];
     const removed = removedPlayerIds[team1CanonicalId] || [];
@@ -170,7 +182,6 @@ export default function WplPlaying11ConfirmationPage() {
     return [...dbPlayers, ...customs].filter((p) => !removed.includes(p.id));
   }, [team1CanonicalId, players, teams, customPlayers, removedPlayerIds]);
 
-  // Squad 2: strictly matching team players from database + admin custom additions
   const team2Squad = useMemo(() => {
     if (!team2CanonicalId) return [];
     const removed = removedPlayerIds[team2CanonicalId] || [];
