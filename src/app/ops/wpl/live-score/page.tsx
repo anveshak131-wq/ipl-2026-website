@@ -2428,6 +2428,81 @@ export default function IPLAdminLiveScoreTablePage() {
   const getAdminAuthToken = () =>
     localStorage.getItem('adminToken') || localStorage.getItem('auth_token') || '';
 
+  // --- 2-Ball Batching & Cloudflare Quota Protection ---
+  const pendingBallsCountRef = React.useRef<number>(0);
+  const batchFlushTimerRef = React.useRef<NodeJS.Timeout | null>(null);
+  const lastCommittedPayloadRef = React.useRef<any>(null);
+
+  const persistToLocal = React.useCallback((payload: any) => {
+    if (!payload?.matchId) return;
+    try {
+      localStorage.setItem(`wpl_live_state_${payload.matchId}`, JSON.stringify({
+        payload,
+        savedAt: Date.now(),
+        version: payload.version || Date.now()
+      }));
+    } catch (e) {
+      console.warn("Local-first storage failed", e);
+    }
+  }, []);
+
+  const flushBatchedWrites = React.useCallback(async (reason: string = "batch_limit") => {
+    if (batchFlushTimerRef.current) {
+      clearTimeout(batchFlushTimerRef.current);
+      batchFlushTimerRef.current = null;
+    }
+
+    const payload = buildLiveScorePayload();
+    const token = getAdminAuthToken();
+    if (!payload || !token) return;
+
+    persistToLocal(payload);
+    pendingBallsCountRef.current = 0;
+    lastCommittedPayloadRef.current = payload;
+
+    try {
+      setSaveStatus("saving");
+      const resp = await fetch("/api/live-score", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+          "X-Flush-Reason": reason,
+        },
+        body: JSON.stringify(payload),
+      });
+      if (!resp.ok) throw new Error("Failed to flush live score");
+      setSaveStatus("success");
+    } catch (err) {
+      console.error("Batch write failed", err);
+      setSaveStatus("error");
+    }
+  }, [buildLiveScorePayload, persistToLocal]);
+
+  const queueDeliveryWrite = React.useCallback((ballEvent?: { runs?: number; isWicket?: boolean; ballNumber?: number }) => {
+    const payload = buildLiveScorePayload();
+    if (payload) persistToLocal(payload);
+
+    pendingBallsCountRef.current += 1;
+
+    const isBoundary = ballEvent?.runs === 4 || ballEvent?.runs === 6;
+    const isWicket = Boolean(ballEvent?.isWicket);
+    const isOverEnd = (ballEvent?.ballNumber ?? 0) % 6 === 0 && (ballEvent?.ballNumber ?? 0) > 0;
+    const isBatchFull = pendingBallsCountRef.current >= 2;
+
+    if (isWicket || isBoundary || isOverEnd || isBatchFull) {
+      const reason = isWicket ? "wicket" : isBoundary ? "boundary" : isOverEnd ? "over_end" : "2_ball_batch";
+      flushBatchedWrites(reason);
+      return;
+    }
+
+    if (batchFlushTimerRef.current) clearTimeout(batchFlushTimerRef.current);
+    batchFlushTimerRef.current = setTimeout(() => {
+      flushBatchedWrites("inactivity_timeout");
+    }, 12000);
+  }, [buildLiveScorePayload, flushBatchedWrites, persistToLocal]);
+  // -----------------------------------------------------
+
   const saveMatchResult = async () => {
     try {
       if (!selectedMatchId || !selectedMatch) return;
