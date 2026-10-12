@@ -19,6 +19,7 @@ import {
   ChevronRight,
   ShieldCheck,
   Radio,
+  FileText,
 } from "lucide-react";
 
 interface MenuItem {
@@ -37,6 +38,7 @@ const menuItems: MenuItem[] = [
   // Live Ops
   { href: "/ops/wpl/matches", label: "Matches & Fixtures", icon: <Calendar className="w-4 h-4" />, group: "Live Ops" },
   { href: "/ops/wpl/live-score", label: "Live Scorer Console", icon: <Radio className="w-4 h-4 text-rose-400" />, group: "Live Ops" },
+  { href: "/ops/wpl/scorecard", label: "Scorecard", icon: <FileText className="w-4 h-4 text-emerald-400" />, group: "Live Ops" },
     { href: "/ops/wpl/points-table", label: "Points Table", icon: <BarChart3 className="w-4 h-4" />, group: "Live Ops" },
 
   // League Data
