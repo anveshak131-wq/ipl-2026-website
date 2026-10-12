@@ -11,48 +11,111 @@ import {
   Calendar,
   UserPlus,
   Trash2,
-  AlertCircle
+  ShieldAlert
 } from 'lucide-react';
 
 const FIXTURES_STORAGE_KEY = 'wpl_matches_fixtures_v2027';
 
-function resolveCanonicalWplTeamId(raw: any, teams: Team[]): string {
-  if (!raw) return '';
+// Accurate official WPL squads for 2026/2027
+const OFFICIAL_WPL_SQUADS: Record<string, Array<{ id: string; name: string; role: string }>> = {
+  rcb: [
+    { id: 'rcb-1', name: 'Smriti Mandhana', role: 'Batter' },
+    { id: 'rcb-2', name: 'Ellyse Perry', role: 'All-Rounder' },
+    { id: 'rcb-3', name: 'Richa Ghosh', role: 'Wicket-Keeper' },
+    { id: 'rcb-4', name: 'Shreyanka Patil', role: 'All-Rounder' },
+    { id: 'rcb-5', name: 'Radha Yadav', role: 'Bowler' },
+    { id: 'rcb-6', name: 'Arundhati Reddy', role: 'Bowler' },
+    { id: 'rcb-7', name: 'Pooja Vastrakar', role: 'All-Rounder' },
+    { id: 'rcb-8', name: 'Georgia Voll', role: 'Batter' },
+    { id: 'rcb-9', name: 'Nadine de Klerk', role: 'All-Rounder' },
+    { id: 'rcb-10', name: 'Lauren Bell', role: 'Bowler' },
+    { id: 'rcb-11', name: 'Sayali Satghare', role: 'All-Rounder' },
+    { id: 'rcb-12', name: 'Prema Rawat', role: 'Bowler' },
+    { id: 'rcb-13', name: 'Prathyoosha Kumar', role: 'Wicket-Keeper' },
+  ],
+  gg: [
+    { id: 'gg-1', name: 'Ashleigh Gardner', role: 'All-Rounder' },
+    { id: 'gg-2', name: 'Beth Mooney', role: 'Wicket-Keeper' },
+    { id: 'gg-3', name: 'Sophie Devine', role: 'All-Rounder' },
+    { id: 'gg-4', name: 'Renuka Singh', role: 'Bowler' },
+    { id: 'gg-5', name: 'Georgia Wareham', role: 'All-Rounder' },
+    { id: 'gg-6', name: 'Tanuja Kanwar', role: 'Bowler' },
+    { id: 'gg-7', name: 'Yastika Bhatia', role: 'Wicket-Keeper' },
+    { id: 'gg-8', name: 'Kim Garth', role: 'All-Rounder' },
+    { id: 'gg-9', name: 'Bharti Fulmali', role: 'Batter' },
+    { id: 'gg-10', name: 'Kashvee Gautam', role: 'Bowler' },
+    { id: 'gg-11', name: 'Rajeshwari Gayakwad', role: 'Bowler' },
+    { id: 'gg-12', name: 'Kanika Ahuja', role: 'All-Rounder' },
+    { id: 'gg-13', name: 'Anushka Sharma', role: 'Batter' },
+    { id: 'gg-14', name: 'Happy Kumari', role: 'Bowler' },
+  ],
+  mi: [
+    { id: 'mi-1', name: 'Harmanpreet Kaur', role: 'Batter' },
+    { id: 'mi-2', name: 'Nat Sciver-Brunt', role: 'All-Rounder' },
+    { id: 'mi-3', name: 'Hayley Matthews', role: 'All-Rounder' },
+    { id: 'mi-4', name: 'Amelia Kerr', role: 'All-Rounder' },
+    { id: 'mi-5', name: 'Amanjot Kaur', role: 'All-Rounder' },
+    { id: 'mi-6', name: 'Sajeevan Sajana', role: 'All-Rounder' },
+    { id: 'mi-7', name: 'Shabnim Ismail', role: 'Bowler' },
+    { id: 'mi-8', name: 'Nicola Carey', role: 'All-Rounder' },
+    { id: 'mi-9', name: 'Rahila Firdous', role: 'Wicket-Keeper' },
+    { id: 'mi-10', name: 'Sanskriti Gupta', role: 'Bowler' },
+    { id: 'mi-11', name: 'Vaishnavi Sharma', role: 'Bowler' },
+  ],
+  dc: [
+    { id: 'dc-1', name: 'Meg Lanning', role: 'Batter' },
+    { id: 'dc-2', name: 'Shafali Verma', role: 'Batter' },
+    { id: 'dc-3', name: 'Jemimah Rodrigues', role: 'Batter' },
+    { id: 'dc-4', name: 'Marizanne Kapp', role: 'All-Rounder' },
+    { id: 'dc-5', name: 'Annabel Sutherland', role: 'All-Rounder' },
+    { id: 'dc-6', name: 'Laura Wolvaardt', role: 'Batter' },
+    { id: 'dc-7', name: 'Minnu Mani', role: 'All-Rounder' },
+    { id: 'dc-8', name: 'Chinelle Henry', role: 'All-Rounder' },
+    { id: 'dc-9', name: 'Lucy Hamilton', role: 'Bowler' },
+    { id: 'dc-10', name: 'Mamatha Madiwala', role: 'Wicket-Keeper' },
+    { id: 'dc-11', name: 'N Shree Charani', role: 'Bowler' },
+  ],
+  upw: [
+    { id: 'upw-1', name: 'Deepti Sharma', role: 'All-Rounder' },
+    { id: 'upw-2', name: 'Sophie Ecclestone', role: 'Bowler' },
+    { id: 'upw-3', name: 'Phoebe Litchfield', role: 'Batter' },
+    { id: 'upw-4', name: 'Harleen Deol', role: 'Batter' },
+    { id: 'upw-5', name: 'Shikha Pandey', role: 'Bowler' },
+    { id: 'upw-6', name: 'Tara Norris', role: 'Bowler' },
+    { id: 'upw-7', name: 'Shipra Giri', role: 'Wicket-Keeper' },
+    { id: 'upw-8', name: 'Simran Shaikh', role: 'Batter' },
+    { id: 'upw-9', name: 'Kranti Gaud', role: 'Bowler' },
+    { id: 'upw-10', name: 'Pratika Rawal', role: 'Batter' },
+  ]
+};
+
+function getTeamKey(raw: any): string {
   const str = String(typeof raw === 'object' ? (raw.id || raw.name || raw.shortName || '') : raw).trim().toLowerCase();
-
-  const found = teams.find(
-    (t) =>
-      String(t.id).toLowerCase() === str ||
-      t.shortName?.toLowerCase() === str ||
-      t.name?.toLowerCase() === str
-  );
-  if (found) return String(found.id);
-
-  if (str.includes('rcb') || str.includes('bengaluru') || str.includes('bangalore') || str === '12') return '12';
-  if (str.includes('gg') || str.includes('gujarat') || str.includes('giants') || str === '14') return '14';
-  if (str.includes('mi') || str.includes('mumbai') || str === '11') return '11';
-  if (str.includes('dc') || str.includes('delhi') || str === '13') return '13';
-  if (str.includes('upw') || str.includes('warrior') || str === '15') return '15';
-
-  return str;
+  if (str.includes('rcb') || str.includes('bengaluru') || str.includes('bangalore') || str === '12') return 'rcb';
+  if (str.includes('gg') || str.includes('gujarat') || str.includes('giants') || str === '14') return 'gg';
+  if (str.includes('mi') || str.includes('mumbai') || str === '11') return 'mi';
+  if (str.includes('dc') || str.includes('delhi') || str === '13') return 'dc';
+  if (str.includes('up') || str.includes('warrior') || str === '15') return 'upw';
+  return str.replace(/[^a-z0-9]/g, '');
 }
 
 export default function WplPlaying11ConfirmationPage() {
   const [matches, setMatches] = useState<any[]>([]);
-  const [players, setPlayers] = useState<Player[]>([]);
-  const [teams, setTeams] = useState<Team[]>([]);
   const [selectedMatchId, setSelectedMatchId] = useState<string>('');
   const [isLoading, setIsLoading] = useState(true);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
 
-  const [customPlayers, setCustomPlayers] = useState<Record<string, Array<{ id: string; name: string; role: string; teamId: string }>>>({});
+  // Custom squad additions and removals stored per team
+  const [customPlayers, setCustomPlayers] = useState<Record<string, Array<{ id: string; name: string; role: string }>>>({});
   const [removedPlayerIds, setRemovedPlayerIds] = useState<Record<string, string[]>>({});
 
+  // Quick Add Player input fields
   const [newPlayerName1, setNewPlayerName1] = useState('');
   const [newPlayerRole1, setNewPlayerRole1] = useState('Batter');
   const [newPlayerName2, setNewPlayerName2] = useState('');
   const [newPlayerRole2, setNewPlayerRole2] = useState('Batter');
 
+  // Playing 11 Selections
   const [team1Lineup, setTeam1Lineup] = useState<string[]>([]);
   const [team2Lineup, setTeam2Lineup] = useState<string[]>([]);
   const [team1Captain, setTeam1Captain] = useState<string>('');
@@ -63,33 +126,7 @@ export default function WplPlaying11ConfirmationPage() {
   const loadData = useCallback(async () => {
     setIsLoading(true);
     try {
-      const [apiMatches, apiPlayers, apiTeams] = await Promise.all([
-        api.getMatches('wpl').catch(() => []),
-        api.getPlayers(undefined, 'wpl', { includeInactive: true }).catch(() => []),
-        api.getTeams('wpl').catch(() => []),
-      ]);
-
-      let allPlayers = [...apiPlayers];
-
-      // Check localStorage player caches if API returned empty
-      if (allPlayers.length === 0) {
-        try {
-          const cacheKeys = ['wpl_players_cache', 'admin_players_cache', 'players_cache'];
-          for (const k of cacheKeys) {
-            const raw = localStorage.getItem(k);
-            if (raw) {
-              const parsed = JSON.parse(raw);
-              if (Array.isArray(parsed) && parsed.length > 0) {
-                allPlayers = parsed;
-                break;
-              }
-            }
-          }
-        } catch (e) {
-          console.warn('LocalStorage player cache parse error', e);
-        }
-      }
-
+      const apiMatches = await api.getMatches('wpl').catch(() => []);
       let localFixtures: any[] = [];
       try {
         const raw = localStorage.getItem(FIXTURES_STORAGE_KEY);
@@ -116,14 +153,11 @@ export default function WplPlaying11ConfirmationPage() {
       });
 
       setMatches(combinedMatches);
-      setPlayers(allPlayers);
-      setTeams(apiTeams);
-
       if (combinedMatches.length > 0) {
         setSelectedMatchId((prev) => (prev && combinedMatches.some((m) => String(m.id) === prev) ? prev : String(combinedMatches[0].id)));
       }
     } catch (err) {
-      console.error('Failed loading Playing 11 data:', err);
+      console.error('Failed loading matches for Playing 11:', err);
     } finally {
       setIsLoading(false);
     }
@@ -137,6 +171,7 @@ export default function WplPlaying11ConfirmationPage() {
     return matches.find((m) => String(m.id) === String(selectedMatchId)) || null;
   }, [matches, selectedMatchId]);
 
+  // Load existing lineup when match changes
   useEffect(() => {
     if (!selectedMatch) return;
     const p11 = selectedMatch.playing11;
@@ -159,41 +194,33 @@ export default function WplPlaying11ConfirmationPage() {
     }
   }, [selectedMatch]);
 
-  const team1CanonicalId = useMemo(() => {
+  const team1Key = useMemo(() => {
     if (!selectedMatch) return '';
-    return resolveCanonicalWplTeamId(selectedMatch.team1?.id || selectedMatch.team1Id || selectedMatch.team1?.name, teams);
-  }, [selectedMatch, teams]);
+    return getTeamKey(selectedMatch.team1?.id || selectedMatch.team1?.name || selectedMatch.team1Id);
+  }, [selectedMatch]);
 
-  const team2CanonicalId = useMemo(() => {
+  const team2Key = useMemo(() => {
     if (!selectedMatch) return '';
-    return resolveCanonicalWplTeamId(selectedMatch.team2?.id || selectedMatch.team2Id || selectedMatch.team2?.name, teams);
-  }, [selectedMatch, teams]);
+    return getTeamKey(selectedMatch.team2?.id || selectedMatch.team2?.name || selectedMatch.team2Id);
+  }, [selectedMatch]);
 
+  // Team 1 Squad: Official verified squad + admin additions - removals
   const team1Squad = useMemo(() => {
-    if (!team1CanonicalId) return [];
-    const removed = removedPlayerIds[team1CanonicalId] || [];
+    if (!team1Key) return [];
+    const base = OFFICIAL_WPL_SQUADS[team1Key] || [];
+    const customs = customPlayers[team1Key] || [];
+    const removed = removedPlayerIds[team1Key] || [];
+    return [...base, ...customs].filter((p) => !removed.includes(p.id));
+  }, [team1Key, customPlayers, removedPlayerIds]);
 
-    const dbPlayers = players.filter((p) => {
-      const pTeamId = resolveCanonicalWplTeamId(p.teamId || (p as any).team, teams);
-      return pTeamId === team1CanonicalId;
-    });
-
-    const customs = customPlayers[team1CanonicalId] || [];
-    return [...dbPlayers, ...customs].filter((p) => !removed.includes(p.id));
-  }, [team1CanonicalId, players, teams, customPlayers, removedPlayerIds]);
-
+  // Team 2 Squad: Official verified squad + admin additions - removals
   const team2Squad = useMemo(() => {
-    if (!team2CanonicalId) return [];
-    const removed = removedPlayerIds[team2CanonicalId] || [];
-
-    const dbPlayers = players.filter((p) => {
-      const pTeamId = resolveCanonicalWplTeamId(p.teamId || (p as any).team, teams);
-      return pTeamId === team2CanonicalId;
-    });
-
-    const customs = customPlayers[team2CanonicalId] || [];
-    return [...dbPlayers, ...customs].filter((p) => !removed.includes(p.id));
-  }, [team2CanonicalId, players, teams, customPlayers, removedPlayerIds]);
+    if (!team2Key) return [];
+    const base = OFFICIAL_WPL_SQUADS[team2Key] || [];
+    const customs = customPlayers[team2Key] || [];
+    const removed = removedPlayerIds[team2Key] || [];
+    return [...base, ...customs].filter((p) => !removed.includes(p.id));
+  }, [team2Key, customPlayers, removedPlayerIds]);
 
   const togglePlayer = (team: 'team1' | 'team2', playerId: string) => {
     if (team === 'team1') {
@@ -225,10 +252,10 @@ export default function WplPlaying11ConfirmationPage() {
     }
   };
 
-  const handleRemoveFromSquad = (canonicalTeamId: string, playerId: string) => {
+  const handleRemoveFromSquad = (teamKey: string, playerId: string) => {
     setRemovedPlayerIds((prev) => ({
       ...prev,
-      [canonicalTeamId]: [...(prev[canonicalTeamId] || []), playerId],
+      [teamKey]: [...(prev[teamKey] || []), playerId],
     }));
     setTeam1Lineup((prev) => prev.filter((id) => id !== playerId));
     setTeam2Lineup((prev) => prev.filter((id) => id !== playerId));
@@ -236,17 +263,16 @@ export default function WplPlaying11ConfirmationPage() {
 
   const handleAddPlayer1 = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newPlayerName1.trim() || !team1CanonicalId) return;
-    const newId = `custom-${team1CanonicalId}-${Date.now()}`;
+    if (!newPlayerName1.trim() || !team1Key) return;
+    const newId = `custom-${team1Key}-${Date.now()}`;
     const newObj = {
       id: newId,
       name: newPlayerName1.trim(),
       role: newPlayerRole1,
-      teamId: team1CanonicalId,
     };
     setCustomPlayers((prev) => ({
       ...prev,
-      [team1CanonicalId]: [...(prev[team1CanonicalId] || []), newObj],
+      [team1Key]: [...(prev[team1Key] || []), newObj],
     }));
     if (team1Lineup.length < 11) {
       setTeam1Lineup((prev) => [...prev, newId]);
@@ -256,17 +282,16 @@ export default function WplPlaying11ConfirmationPage() {
 
   const handleAddPlayer2 = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newPlayerName2.trim() || !team2CanonicalId) return;
-    const newId = `custom-${team2CanonicalId}-${Date.now()}`;
+    if (!newPlayerName2.trim() || !team2Key) return;
+    const newId = `custom-${team2Key}-${Date.now()}`;
     const newObj = {
       id: newId,
       name: newPlayerName2.trim(),
       role: newPlayerRole2,
-      teamId: team2CanonicalId,
     };
     setCustomPlayers((prev) => ({
       ...prev,
-      [team2CanonicalId]: [...(prev[team2CanonicalId] || []), newObj],
+      [team2Key]: [...(prev[team2Key] || []), newObj],
     }));
     if (team2Lineup.length < 11) {
       setTeam2Lineup((prev) => [...prev, newId]);
@@ -333,7 +358,7 @@ export default function WplPlaying11ConfirmationPage() {
             <span className="px-2.5 py-0.5 rounded text-[11px] font-bold tracking-wider bg-pink-500/15 text-pink-600 dark:text-pink-400 border border-pink-500/30">
               WPL 2027 ROSTER OPS
             </span>
-            <span className="text-xs text-[var(--wpl-text-muted)]">Database-Linked Lineup Protocol</span>
+            <span className="text-xs text-[var(--wpl-text-muted)]">Official Squad Match Lineups</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-black text-[var(--wpl-text-title)] flex items-center gap-2.5">
             <Users className="w-7 h-7 text-amber-500 dark:text-amber-400" /> Playing 11 Confirmation
@@ -410,7 +435,7 @@ export default function WplPlaying11ConfirmationPage() {
             <form onSubmit={handleAddPlayer1} className="flex items-center gap-2 pt-1 pb-2">
               <input
                 type="text"
-                placeholder="+ Add player to team..."
+                placeholder="+ Add player to squad..."
                 value={newPlayerName1}
                 onChange={(e) => setNewPlayerName1(e.target.value)}
                 className="flex-1 px-3 py-1.5 rounded-lg text-xs border border-[var(--wpl-input-border)] bg-[var(--wpl-input-bg)] text-[var(--wpl-text-body)] focus:outline-none focus:ring-1 focus:ring-pink-500"
@@ -435,74 +460,68 @@ export default function WplPlaying11ConfirmationPage() {
             </form>
 
             <div className="space-y-2 max-h-[500px] overflow-y-auto pr-1">
-              {team1Squad.length === 0 ? (
-                <div className="p-6 text-center text-xs text-[var(--wpl-text-muted)] border border-dashed border-[var(--wpl-card-border)] rounded-xl">
-                  No players found in database for this team. Add players using the form above.
-                </div>
-              ) : (
-                team1Squad.map((player) => {
-                  const isSelected = team1Lineup.includes(player.id);
-                  const isCap = team1Captain === player.id;
-                  const isWk = team1Keeper === player.id;
+              {team1Squad.map((player) => {
+                const isSelected = team1Lineup.includes(player.id);
+                const isCap = team1Captain === player.id;
+                const isWk = team1Keeper === player.id;
 
-                  return (
-                    <div
-                      key={player.id}
-                      onClick={() => togglePlayer('team1', player.id)}
-                      className={`p-3 rounded-xl border flex items-center justify-between cursor-pointer transition-all ${
-                        isSelected
-                          ? 'bg-pink-500/15 border-pink-500 text-[var(--wpl-text-title)] shadow-sm'
-                          : 'border-[var(--wpl-card-border)] bg-[var(--wpl-hover-bg)] text-[var(--wpl-text-body)] hover:border-pink-500/40'
-                      }`}
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${
-                          isSelected ? 'bg-pink-500 border-pink-500' : 'border-[var(--wpl-input-border)] bg-[var(--wpl-input-bg)]'
-                        }`}>
-                          {isSelected && <CheckCircle2 className="w-3.5 h-3.5 text-white" />}
-                        </div>
-                        <div>
-                          <div className="text-sm font-bold">{player.name}</div>
-                          <div className="text-[11px] text-[var(--wpl-text-muted)]">{player.role || 'Player'}</div>
-                        </div>
+                return (
+                  <div
+                    key={player.id}
+                    onClick={() => togglePlayer('team1', player.id)}
+                    className={`p-3 rounded-xl border flex items-center justify-between cursor-pointer transition-all ${
+                      isSelected
+                        ? 'bg-pink-500/15 border-pink-500 text-[var(--wpl-text-title)] shadow-sm'
+                        : 'border-[var(--wpl-card-border)] bg-[var(--wpl-hover-bg)] text-[var(--wpl-text-body)] hover:border-pink-500/40'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${
+                        isSelected ? 'bg-pink-500 border-pink-500' : 'border-[var(--wpl-input-border)] bg-[var(--wpl-input-bg)]'
+                      }`}>
+                        {isSelected && <CheckCircle2 className="w-3.5 h-3.5 text-white" />}
                       </div>
-
-                      <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
-                        {isSelected && (
-                          <>
-                            <button
-                              type="button"
-                              onClick={() => setTeam1Captain(isCap ? '' : player.id)}
-                              className={`px-2 py-0.5 rounded text-[10px] font-black border transition-all ${
-                                isCap ? 'bg-amber-500 text-black border-amber-400' : 'bg-[var(--wpl-card-bg)] text-[var(--wpl-text-muted)] border-[var(--wpl-card-border)] hover:text-[var(--wpl-text-title)]'
-                              }`}
-                            >
-                              (C)
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => setTeam1Keeper(isWk ? '' : player.id)}
-                              className={`px-2 py-0.5 rounded text-[10px] font-black border transition-all ${
-                                isWk ? 'bg-cyan-500 text-black border-cyan-400' : 'bg-[var(--wpl-card-bg)] text-[var(--wpl-text-muted)] border-[var(--wpl-card-border)] hover:text-[var(--wpl-text-title)]'
-                              }`}
-                            >
-                              (WK)
-                            </button>
-                          </>
-                        )}
-                        <button
-                          type="button"
-                          onClick={() => handleRemoveFromSquad(team1CanonicalId, player.id)}
-                          title="Remove player"
-                          className="p-1 rounded text-slate-400 hover:text-rose-500 hover:bg-rose-500/10 transition-colors"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
+                      <div>
+                        <div className="text-sm font-bold">{player.name}</div>
+                        <div className="text-[11px] text-[var(--wpl-text-muted)]">{player.role || 'Player'}</div>
                       </div>
                     </div>
-                  );
-                })
-              )}
+
+                    <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
+                      {isSelected && (
+                        <>
+                          <button
+                            type="button"
+                            onClick={() => setTeam1Captain(isCap ? '' : player.id)}
+                            className={`px-2 py-0.5 rounded text-[10px] font-black border transition-all ${
+                              isCap ? 'bg-amber-500 text-black border-amber-400' : 'bg-[var(--wpl-card-bg)] text-[var(--wpl-text-muted)] border-[var(--wpl-card-border)] hover:text-[var(--wpl-text-title)]'
+                            }`}
+                          >
+                            (C)
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setTeam1Keeper(isWk ? '' : player.id)}
+                            className={`px-2 py-0.5 rounded text-[10px] font-black border transition-all ${
+                              isWk ? 'bg-cyan-500 text-black border-cyan-400' : 'bg-[var(--wpl-card-bg)] text-[var(--wpl-text-muted)] border-[var(--wpl-card-border)] hover:text-[var(--wpl-text-title)]'
+                            }`}
+                          >
+                            (WK)
+                          </button>
+                        </>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveFromSquad(team1Key, player.id)}
+                        title="Remove player"
+                        className="p-1 rounded text-slate-400 hover:text-rose-500 hover:bg-rose-500/10 transition-colors"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
 
@@ -526,7 +545,7 @@ export default function WplPlaying11ConfirmationPage() {
             <form onSubmit={handleAddPlayer2} className="flex items-center gap-2 pt-1 pb-2">
               <input
                 type="text"
-                placeholder="+ Add player to team..."
+                placeholder="+ Add player to squad..."
                 value={newPlayerName2}
                 onChange={(e) => setNewPlayerName2(e.target.value)}
                 className="flex-1 px-3 py-1.5 rounded-lg text-xs border border-[var(--wpl-input-border)] bg-[var(--wpl-input-bg)] text-[var(--wpl-text-body)] focus:outline-none focus:ring-1 focus:ring-pink-500"
@@ -551,74 +570,68 @@ export default function WplPlaying11ConfirmationPage() {
             </form>
 
             <div className="space-y-2 max-h-[500px] overflow-y-auto pr-1">
-              {team2Squad.length === 0 ? (
-                <div className="p-6 text-center text-xs text-[var(--wpl-text-muted)] border border-dashed border-[var(--wpl-card-border)] rounded-xl">
-                  No players found in database for this team. Add players using the form above.
-                </div>
-              ) : (
-                team2Squad.map((player) => {
-                  const isSelected = team2Lineup.includes(player.id);
-                  const isCap = team2Captain === player.id;
-                  const isWk = team2Keeper === player.id;
+              {team2Squad.map((player) => {
+                const isSelected = team2Lineup.includes(player.id);
+                const isCap = team2Captain === player.id;
+                const isWk = team2Keeper === player.id;
 
-                  return (
-                    <div
-                      key={player.id}
-                      onClick={() => togglePlayer('team2', player.id)}
-                      className={`p-3 rounded-xl border flex items-center justify-between cursor-pointer transition-all ${
-                        isSelected
-                          ? 'bg-pink-500/15 border-pink-500 text-[var(--wpl-text-title)] shadow-sm'
-                          : 'border-[var(--wpl-card-border)] bg-[var(--wpl-hover-bg)] text-[var(--wpl-text-body)] hover:border-pink-500/40'
-                      }`}
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${
-                          isSelected ? 'bg-pink-500 border-pink-500' : 'border-[var(--wpl-input-border)] bg-[var(--wpl-input-bg)]'
-                        }`}>
-                          {isSelected && <CheckCircle2 className="w-3.5 h-3.5 text-white" />}
-                        </div>
-                        <div>
-                          <div className="text-sm font-bold">{player.name}</div>
-                          <div className="text-[11px] text-[var(--wpl-text-muted)]">{player.role || 'Player'}</div>
-                        </div>
+                return (
+                  <div
+                    key={player.id}
+                    onClick={() => togglePlayer('team2', player.id)}
+                    className={`p-3 rounded-xl border flex items-center justify-between cursor-pointer transition-all ${
+                      isSelected
+                        ? 'bg-pink-500/15 border-pink-500 text-[var(--wpl-text-title)] shadow-sm'
+                        : 'border-[var(--wpl-card-border)] bg-[var(--wpl-hover-bg)] text-[var(--wpl-text-body)] hover:border-pink-500/40'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${
+                        isSelected ? 'bg-pink-500 border-pink-500' : 'border-[var(--wpl-input-border)] bg-[var(--wpl-input-bg)]'
+                      }`}>
+                        {isSelected && <CheckCircle2 className="w-3.5 h-3.5 text-white" />}
                       </div>
-
-                      <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
-                        {isSelected && (
-                          <>
-                            <button
-                              type="button"
-                              onClick={() => setTeam2Captain(isCap ? '' : player.id)}
-                              className={`px-2 py-0.5 rounded text-[10px] font-black border transition-all ${
-                                isCap ? 'bg-amber-500 text-black border-amber-400' : 'bg-[var(--wpl-card-bg)] text-[var(--wpl-text-muted)] border-[var(--wpl-card-border)] hover:text-[var(--wpl-text-title)]'
-                              }`}
-                            >
-                              (C)
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => setTeam2Keeper(isWk ? '' : player.id)}
-                              className={`px-2 py-0.5 rounded text-[10px] font-black border transition-all ${
-                                isWk ? 'bg-cyan-500 text-black border-cyan-400' : 'bg-[var(--wpl-card-bg)] text-[var(--wpl-text-muted)] border-[var(--wpl-card-border)] hover:text-[var(--wpl-text-title)]'
-                              }`}
-                            >
-                              (WK)
-                            </button>
-                          </>
-                        )}
-                        <button
-                          type="button"
-                          onClick={() => handleRemoveFromSquad(team2CanonicalId, player.id)}
-                          title="Remove player"
-                          className="p-1 rounded text-slate-400 hover:text-rose-500 hover:bg-rose-500/10 transition-colors"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
+                      <div>
+                        <div className="text-sm font-bold">{player.name}</div>
+                        <div className="text-[11px] text-[var(--wpl-text-muted)]">{player.role || 'Player'}</div>
                       </div>
                     </div>
-                  );
-                })
-              )}
+
+                    <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
+                      {isSelected && (
+                        <>
+                          <button
+                            type="button"
+                            onClick={() => setTeam2Captain(isCap ? '' : player.id)}
+                            className={`px-2 py-0.5 rounded text-[10px] font-black border transition-all ${
+                              isCap ? 'bg-amber-500 text-black border-amber-400' : 'bg-[var(--wpl-card-bg)] text-[var(--wpl-text-muted)] border-[var(--wpl-card-border)] hover:text-[var(--wpl-text-title)]'
+                            }`}
+                          >
+                            (C)
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setTeam2Keeper(isWk ? '' : player.id)}
+                            className={`px-2 py-0.5 rounded text-[10px] font-black border transition-all ${
+                              isWk ? 'bg-cyan-500 text-black border-cyan-400' : 'bg-[var(--wpl-card-bg)] text-[var(--wpl-text-muted)] border-[var(--wpl-card-border)] hover:text-[var(--wpl-text-title)]'
+                            }`}
+                          >
+                            (WK)
+                          </button>
+                        </>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveFromSquad(team2Key, player.id)}
+                        title="Remove player"
+                        className="p-1 rounded text-slate-400 hover:text-rose-500 hover:bg-rose-500/10 transition-colors"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
         </div>
