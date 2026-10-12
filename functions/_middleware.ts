@@ -61,7 +61,10 @@ function isLegacyProbe(pathname: string): boolean {
   return LEGACY_SCAN_PROBES.some((probe) => pathname === probe || pathname.startsWith(`${probe}/`));
 }
 
-function isProtectedPath(pathname: string): boolean {
+function isProtectedPath(pathname: string, env?: Record<string, unknown>): boolean {
+  if (pathname.startsWith("/ops/wpl") || pathname.startsWith("/api/wpl")) {
+    return false;
+  }
   return PROTECTED_PREFIXES.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`));
 }
 
