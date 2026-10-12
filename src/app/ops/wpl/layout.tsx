@@ -1,3 +1,4 @@
+import WPLAdminShell from "@/components/admin/WPLAdminShell";
 'use client';
 
 import { useState, useEffect, useRef } from "react";
@@ -214,7 +215,7 @@ export default function WPLOpsLayout({
             </div>
 
             <main className="p-4 md:p-6 overflow-y-auto flex-1">
-              {children}
+              <WPLAdminShell>{children}</WPLAdminShell>
             </main>
           </div>
         </div>

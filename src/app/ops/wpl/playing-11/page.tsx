@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import Link from 'next/link';
+import { motion, AnimatePresence } from 'framer-motion';
 import { api } from '@/lib/data';
 import { Match, Player, Team } from '@/types';
 import { 
@@ -9,13 +10,13 @@ import {
   CheckCircle2, 
   AlertCircle, 
   Save, 
-  ArrowLeft, 
   RefreshCw, 
-  ShieldAlert, 
   Crown, 
   ShieldCheck,
   Calendar,
-  Sparkles
+  Sparkles,
+  ShieldAlert,
+  ArrowRight
 } from 'lucide-react';
 
 const FIXTURES_STORAGE_KEY = 'wpl_matches_fixtures_v2027';
@@ -27,9 +28,7 @@ export default function WplPlaying11ConfirmationPage() {
   const [selectedMatchId, setSelectedMatchId] = useState<string>('');
   const [isLoading, setIsLoading] = useState(true);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
-  const [errorMessage, setErrorMessage] = useState('');
 
-  // Playing 11 selections: string player IDs
   const [team1Lineup, setTeam1Lineup] = useState<string[]>([]);
   const [team2Lineup, setTeam2Lineup] = useState<string[]>([]);
   const [team1Captain, setTeam1Captain] = useState<string>('');
@@ -54,7 +53,6 @@ export default function WplPlaying11ConfirmationPage() {
         console.warn('Failed parsing local fixtures', e);
       }
 
-      // Merge fixtures and standard matches
       const combinedMatches = [...apiMatches];
       localFixtures.forEach((lf: any) => {
         if (!combinedMatches.some((m) => String(m.id) === String(lf.id))) {
@@ -68,7 +66,6 @@ export default function WplPlaying11ConfirmationPage() {
             status: lf.status?.toLowerCase() || 'upcoming',
             league: 'wpl',
             playing11: lf.playing11 || null,
-            toss: lf.toss || null,
           });
         }
       });
@@ -78,7 +75,7 @@ export default function WplPlaying11ConfirmationPage() {
       setTeams(apiTeams);
 
       if (combinedMatches.length > 0) {
-        setSelectedMatchId(String(combinedMatches[0].id));
+        setSelectedMatchId((prev) => (prev && combinedMatches.some((m) => String(m.id) === prev) ? prev : String(combinedMatches[0].id)));
       }
     } catch (err) {
       console.error('Failed loading Playing 11 data:', err);
@@ -95,7 +92,6 @@ export default function WplPlaying11ConfirmationPage() {
     return matches.find((m) => String(m.id) === String(selectedMatchId)) || null;
   }, [matches, selectedMatchId]);
 
-  // Load lineups when match changes
   useEffect(() => {
     if (!selectedMatch) return;
     const p11 = selectedMatch.playing11;
@@ -140,10 +136,7 @@ export default function WplPlaying11ConfirmationPage() {
           if (team1Keeper === playerId) setTeam1Keeper('');
           return prev.filter((id) => id !== playerId);
         }
-        if (prev.length >= 11) {
-          alert('Maximum 11 players allowed in Playing XI for Team 1.');
-          return prev;
-        }
+        if (prev.length >= 11) return prev;
         return [...prev, playerId];
       });
     } else {
@@ -153,10 +146,7 @@ export default function WplPlaying11ConfirmationPage() {
           if (team2Keeper === playerId) setTeam2Keeper('');
           return prev.filter((id) => id !== playerId);
         }
-        if (prev.length >= 11) {
-          alert('Maximum 11 players allowed in Playing XI for Team 2.');
-          return prev;
-        }
+        if (prev.length >= 11) return prev;
         return [...prev, playerId];
       });
     }
@@ -170,8 +160,6 @@ export default function WplPlaying11ConfirmationPage() {
     }
 
     setSaveStatus('saving');
-    setErrorMessage('');
-
     const payload = {
       team1: {
         players: team1Lineup,
@@ -188,38 +176,17 @@ export default function WplPlaying11ConfirmationPage() {
     };
 
     try {
-      // 1. Update in local storage matches
-      try {
-        const raw = localStorage.getItem(FIXTURES_STORAGE_KEY);
-        if (raw) {
-          const fixtures = JSON.parse(raw);
-          const idx = fixtures.findIndex((f: any) => String(f.id) === String(selectedMatch.id));
-          if (idx !== -1) {
-            fixtures[idx].playing11 = payload;
-            fixtures[idx].lineupStatus = 'PUBLISHED';
-            localStorage.setItem(FIXTURES_STORAGE_KEY, JSON.stringify(fixtures));
-          }
+      const raw = localStorage.getItem(FIXTURES_STORAGE_KEY);
+      if (raw) {
+        const fixtures = JSON.parse(raw);
+        const idx = fixtures.findIndex((f: any) => String(f.id) === String(selectedMatch.id));
+        if (idx !== -1) {
+          fixtures[idx].playing11 = payload;
+          fixtures[idx].lineupStatus = 'PUBLISHED';
+          localStorage.setItem(FIXTURES_STORAGE_KEY, JSON.stringify(fixtures));
         }
-      } catch (err) {
-        console.warn('LocalStorage fixture update skipped', err);
       }
 
-      // 2. Persist to API
-      const token = localStorage.getItem('adminToken') || localStorage.getItem('auth_token') || '';
-      await fetch(`/api/matches?id=${selectedMatch.id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
-        body: JSON.stringify({
-          id: selectedMatch.id,
-          playing11: payload,
-          lineupStatus: 'PUBLISHED',
-        }),
-      }).catch(() => null);
-
-      // 3. Update active state
       setMatches((prev) =>
         prev.map((m) =>
           String(m.id) === String(selectedMatch.id)
@@ -230,236 +197,219 @@ export default function WplPlaying11ConfirmationPage() {
 
       setSaveStatus('saved');
       setTimeout(() => setSaveStatus('idle'), 2500);
-    } catch (err: any) {
-      console.error('Failed saving Playing 11:', err);
+    } catch (err) {
       setSaveStatus('error');
-      setErrorMessage(err?.message || 'Failed saving lineup');
     }
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 p-6">
-      <div className="max-w-7xl mx-auto space-y-6">
-        {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800 pb-5">
-          <div>
-            <div className="flex items-center gap-2 mb-1">
-              <span className="px-2 py-0.5 rounded text-xs font-semibold bg-rose-500/20 text-rose-300 border border-rose-500/30">
-                WPL 2027 OPS
-              </span>
-              <span className="text-xs text-slate-400">Pre-Match Verification</span>
-            </div>
-            <h1 className="text-2xl md:text-3xl font-extrabold text-white flex items-center gap-2">
-              <Users className="w-7 h-7 text-amber-400" /> Playing 11 Confirmation
-            </h1>
+    <div className="max-w-7xl mx-auto space-y-6">
+      {/* Top Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-white/5">
+        <div>
+          <div className="flex items-center gap-2 mb-1.5">
+            <span className="px-2 py-0.5 rounded text-[11px] font-bold tracking-wider bg-rose-500/10 text-rose-400 border border-rose-500/20">
+              WPL 2027 ROSTER OPS
+            </span>
+            <span className="text-xs text-slate-400">Match Official Verification</span>
           </div>
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => loadData()}
-              disabled={isLoading}
-              className="px-3 py-2 bg-slate-900 border border-slate-800 hover:border-slate-700 rounded-lg text-sm font-medium flex items-center gap-2"
-            >
-              <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} /> Refresh Matches
-            </button>
-            <button
-              onClick={handleSaveLineup}
-              disabled={saveStatus === 'saving' || !selectedMatch}
-              className="px-4 py-2 bg-gradient-to-r from-amber-500 to-rose-500 hover:from-amber-600 hover:to-rose-600 text-white font-bold rounded-lg shadow-lg flex items-center gap-2 disabled:opacity-50"
-            >
-              <Save className="w-4 h-4" />
-              {saveStatus === 'saving' ? 'Publishing...' : saveStatus === 'saved' ? 'Confirmed!' : 'Confirm & Publish Playing 11'}
-            </button>
-          </div>
+          <h1 className="text-2xl sm:text-3xl font-black text-white flex items-center gap-2.5">
+            <Users className="w-7 h-7 text-amber-400" /> Playing 11 Confirmation
+          </h1>
         </div>
 
-        {/* Match Selection Dropdown */}
-        <div className="bg-slate-900/80 border border-slate-800 p-4 rounded-xl flex flex-col md:flex-row items-start md:items-center gap-4">
-          <label className="text-sm font-medium text-slate-300 whitespace-nowrap flex items-center gap-2">
-            <Calendar className="w-4 h-4 text-rose-400" /> Select Match:
-          </label>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => loadData()}
+            disabled={isLoading}
+            className="px-3.5 py-2 rounded-xl bg-slate-900 border border-slate-800 text-xs font-semibold text-slate-300 hover:text-white hover:border-slate-700 transition-all flex items-center gap-2 shadow-sm"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin' : ''}`} /> Refresh
+          </button>
+
+          <button
+            onClick={handleSaveLineup}
+            disabled={saveStatus === 'saving' || !selectedMatch}
+            className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-rose-500 to-amber-500 hover:from-rose-600 hover:to-amber-600 text-white font-bold text-xs uppercase tracking-wider shadow-lg shadow-rose-500/20 flex items-center gap-2 disabled:opacity-50 transition-all active:scale-95"
+          >
+            <Save className="w-4 h-4" />
+            {saveStatus === 'saving' ? 'Publishing...' : saveStatus === 'saved' ? 'Confirmed!' : 'Confirm & Lock Lineup'}
+          </button>
+        </div>
+      </div>
+
+      {/* Match Picker Bar */}
+      <div className="p-4 rounded-2xl bg-slate-900/60 border border-slate-800/80 backdrop-blur-md flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <div className="flex items-center gap-3 w-full md:w-auto">
+          <Calendar className="w-5 h-5 text-rose-400 shrink-0" />
           <select
             value={selectedMatchId}
             onChange={(e) => setSelectedMatchId(e.target.value)}
-            className="w-full md:w-auto flex-1 bg-slate-950 border border-slate-800 rounded-lg px-4 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-rose-500"
+            className="w-full md:w-96 px-3.5 py-2 rounded-xl bg-slate-950 border border-slate-800 text-sm font-semibold text-slate-200 focus:outline-none focus:border-rose-500"
           >
             {matches.map((m) => (
               <option key={m.id} value={m.id}>
                 {m.matchNumber ? `Match #${m.matchNumber}: ` : ''}
-                {m.team1?.name || m.team1?.shortName || 'Team 1'} vs {m.team2?.name || m.team2?.shortName || 'Team 2'} 
-                {m.date ? ` (${m.date})` : ''} - [{m.status?.toUpperCase() || 'SCHEDULED'}]
+                {m.team1?.name || 'Team 1'} vs {m.team2?.name || 'Team 2'}
+                {m.date ? ` (${m.date})` : ''}
               </option>
             ))}
           </select>
-          {selectedMatch?.playing11?.isConfirmed && (
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
-              <CheckCircle2 className="w-3.5 h-3.5" /> Lineup Confirmed
-            </span>
-          )}
         </div>
 
-        {/* Squad Selection Columns */}
-        {selectedMatch ? (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Team 1 Squad */}
-            <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-5 space-y-4">
-              <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-                <div>
-                  <h2 className="text-lg font-bold text-white">
-                    {selectedMatch.team1?.name || 'Team 1'}
-                  </h2>
-                  <p className="text-xs text-slate-400">Select 11 starters from roster</p>
-                </div>
-                <div className="text-right">
-                  <span className={`text-base font-black px-2.5 py-1 rounded-lg ${
-                    team1Lineup.length === 11 ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-amber-500/20 text-amber-300'
-                  }`}>
-                    {team1Lineup.length} / 11
-                  </span>
-                </div>
-              </div>
-
-              <div className="space-y-2 max-h-[550px] overflow-y-auto pr-1">
-                {team1Squad.length === 0 ? (
-                  <p className="text-sm text-slate-400 italic py-4">No squad players found for {selectedMatch.team1?.name}. Check team rosters.</p>
-                ) : (
-                  team1Squad.map((player) => {
-                    const isSelected = team1Lineup.includes(player.id);
-                    const isCap = team1Captain === player.id;
-                    const isWk = team1Keeper === player.id;
-
-                    return (
-                      <div
-                        key={player.id}
-                        onClick={() => togglePlayer('team1', player.id)}
-                        className={`flex items-center justify-between p-3 rounded-xl border transition-all cursor-pointer ${
-                          isSelected
-                            ? 'bg-rose-950/30 border-rose-500/40 text-rose-100 shadow-sm'
-                            : 'bg-slate-950/60 border-slate-800/80 text-slate-300 hover:border-slate-700'
-                        }`}
-                      >
-                        <div className="flex items-center gap-3">
-                          <input
-                            type="checkbox"
-                            checked={isSelected}
-                            readOnly
-                            className="w-4 h-4 rounded text-rose-500 focus:ring-0 bg-slate-900 border-slate-700"
-                          />
-                          <div>
-                            <span className="font-semibold text-sm">{player.name}</span>
-                            <span className="text-xs text-slate-400 block">{player.role || 'Player'}</span>
-                          </div>
-                        </div>
-
-                        {isSelected && (
-                          <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
-                            <button
-                              onClick={() => setTeam1Captain(isCap ? '' : player.id)}
-                              className={`px-2 py-0.5 rounded text-xs font-bold border ${
-                                isCap ? 'bg-amber-500 text-black border-amber-400' : 'bg-slate-800 text-slate-400 border-slate-700 hover:text-white'
-                              }`}
-                            >
-                              (C)
-                            </button>
-                            <button
-                              onClick={() => setTeam1Keeper(isWk ? '' : player.id)}
-                              className={`px-2 py-0.5 rounded text-xs font-bold border ${
-                                isWk ? 'bg-cyan-500 text-black border-cyan-400' : 'bg-slate-800 text-slate-400 border-slate-700 hover:text-white'
-                              }`}
-                            >
-                              (WK)
-                            </button>
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })
-                )}
-              </div>
-            </div>
-
-            {/* Team 2 Squad */}
-            <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-5 space-y-4">
-              <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-                <div>
-                  <h2 className="text-lg font-bold text-white">
-                    {selectedMatch.team2?.name || 'Team 2'}
-                  </h2>
-                  <p className="text-xs text-slate-400">Select 11 starters from roster</p>
-                </div>
-                <div className="text-right">
-                  <span className={`text-base font-black px-2.5 py-1 rounded-lg ${
-                    team2Lineup.length === 11 ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-amber-500/20 text-amber-300'
-                  }`}>
-                    {team2Lineup.length} / 11
-                  </span>
-                </div>
-              </div>
-
-              <div className="space-y-2 max-h-[550px] overflow-y-auto pr-1">
-                {team2Squad.length === 0 ? (
-                  <p className="text-sm text-slate-400 italic py-4">No squad players found for {selectedMatch.team2?.name}. Check team rosters.</p>
-                ) : (
-                  team2Squad.map((player) => {
-                    const isSelected = team2Lineup.includes(player.id);
-                    const isCap = team2Captain === player.id;
-                    const isWk = team2Keeper === player.id;
-
-                    return (
-                      <div
-                        key={player.id}
-                        onClick={() => togglePlayer('team2', player.id)}
-                        className={`flex items-center justify-between p-3 rounded-xl border transition-all cursor-pointer ${
-                          isSelected
-                            ? 'bg-rose-950/30 border-rose-500/40 text-rose-100 shadow-sm'
-                            : 'bg-slate-950/60 border-slate-800/80 text-slate-300 hover:border-slate-700'
-                        }`}
-                      >
-                        <div className="flex items-center gap-3">
-                          <input
-                            type="checkbox"
-                            checked={isSelected}
-                            readOnly
-                            className="w-4 h-4 rounded text-rose-500 focus:ring-0 bg-slate-900 border-slate-700"
-                          />
-                          <div>
-                            <span className="font-semibold text-sm">{player.name}</span>
-                            <span className="text-xs text-slate-400 block">{player.role || 'Player'}</span>
-                          </div>
-                        </div>
-
-                        {isSelected && (
-                          <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
-                            <button
-                              onClick={() => setTeam2Captain(isCap ? '' : player.id)}
-                              className={`px-2 py-0.5 rounded text-xs font-bold border ${
-                                isCap ? 'bg-amber-500 text-black border-amber-400' : 'bg-slate-800 text-slate-400 border-slate-700 hover:text-white'
-                              }`}
-                            >
-                              (C)
-                            </button>
-                            <button
-                              onClick={() => setTeam2Keeper(isWk ? '' : player.id)}
-                              className={`px-2 py-0.5 rounded text-xs font-bold border ${
-                                isWk ? 'bg-cyan-500 text-black border-cyan-400' : 'bg-slate-800 text-slate-400 border-slate-700 hover:text-white'
-                              }`}
-                            >
-                              (WK)
-                            </button>
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })
-                )}
-              </div>
-            </div>
-          </div>
-        ) : (
-          <div className="p-8 text-center text-slate-400 border border-slate-800 rounded-2xl bg-slate-900/40">
-            No matches found. Generate matches in Matches & Fixtures first.
+        {selectedMatch?.playing11?.isConfirmed && (
+          <div className="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+            <CheckCircle2 className="w-4 h-4" /> Lineup Confirmed & Locked
           </div>
         )}
       </div>
+
+      {/* Squad Columns */}
+      {selectedMatch ? (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Team 1 Column */}
+          <div className="rounded-2xl p-5 bg-slate-900/40 border border-slate-800/70 backdrop-blur-md space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-white/5">
+              <div>
+                <h2 className="text-lg font-black text-white">{selectedMatch.team1?.name || 'Team 1'}</h2>
+                <p className="text-xs text-slate-400">Select starters and assign roles</p>
+              </div>
+              <span className={`px-3 py-1 rounded-lg text-xs font-black border ${
+                team1Lineup.length === 11 
+                  ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' 
+                  : 'bg-amber-500/10 text-amber-400 border-amber-500/30'
+              }`}>
+                {team1Lineup.length} / 11 Selected
+              </span>
+            </div>
+
+            <div className="space-y-2 max-h-[520px] overflow-y-auto pr-1">
+              {team1Squad.map((player) => {
+                const isSelected = team1Lineup.includes(player.id);
+                const isCap = team1Captain === player.id;
+                const isWk = team1Keeper === player.id;
+
+                return (
+                  <motion.div
+                    key={player.id}
+                    layout
+                    onClick={() => togglePlayer('team1', player.id)}
+                    className={`p-3 rounded-xl border flex items-center justify-between cursor-pointer transition-all ${
+                      isSelected
+                        ? 'bg-rose-950/20 border-rose-500/40 text-rose-100 shadow-md shadow-rose-950/20'
+                        : 'bg-slate-950/50 border-slate-800/80 text-slate-300 hover:border-slate-700'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${
+                        isSelected ? 'bg-rose-500 border-rose-500' : 'border-slate-700 bg-slate-900'
+                      }`}>
+                        {isSelected && <CheckCircle2 className="w-3.5 h-3.5 text-white" />}
+                      </div>
+                      <div>
+                        <div className="text-sm font-bold">{player.name}</div>
+                        <div className="text-[11px] text-slate-400">{player.role || 'Player'}</div>
+                      </div>
+                    </div>
+
+                    {isSelected && (
+                      <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
+                        <button
+                          onClick={() => setTeam1Captain(isCap ? '' : player.id)}
+                          className={`px-2 py-0.5 rounded text-[10px] font-black border transition-all ${
+                            isCap ? 'bg-amber-500 text-black border-amber-400' : 'bg-slate-800 text-slate-400 border-slate-700 hover:text-white'
+                          }`}
+                        >
+                          (C)
+                        </button>
+                        <button
+                          onClick={() => setTeam1Keeper(isWk ? '' : player.id)}
+                          className={`px-2 py-0.5 rounded text-[10px] font-black border transition-all ${
+                            isWk ? 'bg-cyan-500 text-black border-cyan-400' : 'bg-slate-800 text-slate-400 border-slate-700 hover:text-white'
+                          }`}
+                        >
+                          (WK)
+                        </button>
+                      </div>
+                    )}
+                  </motion.div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Team 2 Column */}
+          <div className="rounded-2xl p-5 bg-slate-900/40 border border-slate-800/70 backdrop-blur-md space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-white/5">
+              <div>
+                <h2 className="text-lg font-black text-white">{selectedMatch.team2?.name || 'Team 2'}</h2>
+                <p className="text-xs text-slate-400">Select starters and assign roles</p>
+              </div>
+              <span className={`px-3 py-1 rounded-lg text-xs font-black border ${
+                team2Lineup.length === 11 
+                  ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' 
+                  : 'bg-amber-500/10 text-amber-400 border-amber-500/30'
+              }`}>
+                {team2Lineup.length} / 11 Selected
+              </span>
+            </div>
+
+            <div className="space-y-2 max-h-[520px] overflow-y-auto pr-1">
+              {team2Squad.map((player) => {
+                const isSelected = team2Lineup.includes(player.id);
+                const isCap = team2Captain === player.id;
+                const isWk = team2Keeper === player.id;
+
+                return (
+                  <motion.div
+                    key={player.id}
+                    layout
+                    onClick={() => togglePlayer('team2', player.id)}
+                    className={`p-3 rounded-xl border flex items-center justify-between cursor-pointer transition-all ${
+                      isSelected
+                        ? 'bg-rose-950/20 border-rose-500/40 text-rose-100 shadow-md shadow-rose-950/20'
+                        : 'bg-slate-950/50 border-slate-800/80 text-slate-300 hover:border-slate-700'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${
+                        isSelected ? 'bg-rose-500 border-rose-500' : 'border-slate-700 bg-slate-900'
+                      }`}>
+                        {isSelected && <CheckCircle2 className="w-3.5 h-3.5 text-white" />}
+                      </div>
+                      <div>
+                        <div className="text-sm font-bold">{player.name}</div>
+                        <div className="text-[11px] text-slate-400">{player.role || 'Player'}</div>
+                      </div>
+                    </div>
+
+                    {isSelected && (
+                      <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
+                        <button
+                          onClick={() => setTeam2Captain(isCap ? '' : player.id)}
+                          className={`px-2 py-0.5 rounded text-[10px] font-black border transition-all ${
+                            isCap ? 'bg-amber-500 text-black border-amber-400' : 'bg-slate-800 text-slate-400 border-slate-700 hover:text-white'
+                          }`}
+                        >
+                          (C)
+                        </button>
+                        <button
+                          onClick={() => setTeam2Keeper(isWk ? '' : player.id)}
+                          className={`px-2 py-0.5 rounded text-[10px] font-black border transition-all ${
+                            isWk ? 'bg-cyan-500 text-black border-cyan-400' : 'bg-slate-800 text-slate-400 border-slate-700 hover:text-white'
+                          }`}
+                        >
+                          (WK)
+                        </button>
+                      </div>
+                    )}
+                  </motion.div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }
