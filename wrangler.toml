@@ -16,6 +16,7 @@ ADMIN_PLAYERS_ADMIN_EMAILS = "anvesh.ak.131@gmail.com"
 
 [env.preview.vars]
   ENVIRONMENT = "development"
+  ADMIN_AUTH_DISABLED = "true"
   ADMIN_ALLOWED_EMAILS = "anveshkoganti54@gmail.com"
   ADMIN_PLAYERS_ADMIN_EMAILS = "anvesh.ak.131@gmail.com"
 
