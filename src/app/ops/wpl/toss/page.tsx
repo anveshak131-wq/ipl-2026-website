@@ -11,7 +11,8 @@ import {
   RefreshCw, 
   Calendar, 
   ShieldCheck,
-  AlertTriangle 
+  Zap,
+  Sparkles
 } from 'lucide-react';
 
 const FIXTURES_STORAGE_KEY = 'wpl_matches_fixtures_v2027';
@@ -22,7 +23,6 @@ export default function WplTossSubmissionPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
 
-  // Toss states
   const [tossWinnerTeamId, setTossWinnerTeamId] = useState<string>('');
   const [tossDecision, setTossDecision] = useState<'bat' | 'bowl'>('bat');
 
@@ -74,7 +74,6 @@ export default function WplTossSubmissionPage() {
     return matches.find((m) => String(m.id) === String(selectedMatchId)) || null;
   }, [matches, selectedMatchId]);
 
-  // Load existing toss when match changes
   useEffect(() => {
     if (!selectedMatch) return;
     if (selectedMatch.toss) {
@@ -96,11 +95,9 @@ export default function WplTossSubmissionPage() {
   const battingFirstTeam = useMemo(() => {
     if (!selectedMatch || !tossWinnerTeamId) return null;
     const isTeam1Winner = String(selectedMatch.team1?.id) === String(tossWinnerTeamId);
-    if (tossDecision === 'bat') {
-      return isTeam1Winner ? selectedMatch.team1 : selectedMatch.team2;
-    } else {
-      return isTeam1Winner ? selectedMatch.team2 : selectedMatch.team1;
-    }
+    return tossDecision === 'bat'
+      ? (isTeam1Winner ? selectedMatch.team1 : selectedMatch.team2)
+      : (isTeam1Winner ? selectedMatch.team2 : selectedMatch.team1);
   }, [selectedMatch, tossWinnerTeamId, tossDecision]);
 
   const bowlingFirstTeam = useMemo(() => {
@@ -133,7 +130,6 @@ export default function WplTossSubmissionPage() {
     };
 
     try {
-      // 1. Update localStorage fixtures
       try {
         const raw = localStorage.getItem(FIXTURES_STORAGE_KEY);
         if (raw) {
@@ -149,7 +145,6 @@ export default function WplTossSubmissionPage() {
         console.warn('LocalStorage fixture update skipped', err);
       }
 
-      // 2. Persist to API
       const token = localStorage.getItem('adminToken') || localStorage.getItem('auth_token') || '';
       await fetch(`/api/matches?id=${selectedMatch.id}`, {
         method: 'PUT',
@@ -164,7 +159,6 @@ export default function WplTossSubmissionPage() {
         }),
       }).catch(() => null);
 
-      // 3. Update active state
       setMatches((prev) =>
         prev.map((m) =>
           String(m.id) === String(selectedMatch.id)
@@ -176,145 +170,153 @@ export default function WplTossSubmissionPage() {
       setSaveStatus('saved');
       setTimeout(() => setSaveStatus('idle'), 2500);
     } catch (err) {
-      console.error('Failed saving toss:', err);
       setSaveStatus('error');
     }
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 p-6">
-      <div className="max-w-4xl mx-auto space-y-6">
-        {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800 pb-5">
-          <div>
-            <div className="flex items-center gap-2 mb-1">
-              <span className="px-2 py-0.5 rounded text-xs font-semibold bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
-                WPL 2027 OPS
-              </span>
-              <span className="text-xs text-slate-400">Match Official Handover</span>
-            </div>
-            <h1 className="text-2xl md:text-3xl font-extrabold text-white flex items-center gap-2">
-              <Coins className="w-7 h-7 text-cyan-400" /> Toss Submission
-            </h1>
+    <div className="max-w-4xl mx-auto space-y-6">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-white/10">
+        <div>
+          <div className="flex items-center gap-2 mb-1.5">
+            <span className="px-2 py-0.5 rounded text-[11px] font-bold tracking-wider bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
+              WPL 2027 MATCH OFFICIALS
+            </span>
+            <span className="text-xs text-slate-400">Pre-Match Toss Protocol</span>
           </div>
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => loadMatches()}
-              disabled={isLoading}
-              className="px-3 py-2 bg-slate-900 border border-slate-800 hover:border-slate-700 rounded-lg text-sm font-medium flex items-center gap-2"
-            >
-              <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} /> Refresh
-            </button>
-            <button
-              onClick={handleSaveToss}
-              disabled={saveStatus === 'saving' || !selectedMatch}
-              className="px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white font-bold rounded-lg shadow-lg flex items-center gap-2 disabled:opacity-50"
-            >
-              <Save className="w-4 h-4" />
-              {saveStatus === 'saving' ? 'Submitting...' : saveStatus === 'saved' ? 'Toss Saved!' : 'Submit Toss Result'}
-            </button>
-          </div>
+          <h1 className="text-2xl sm:text-3xl font-black flex items-center gap-2.5">
+            <Coins className="w-7 h-7 text-cyan-400" /> Toss Submission
+          </h1>
         </div>
 
-        {/* Match Selector */}
-        <div className="bg-slate-900/80 border border-slate-800 p-4 rounded-xl flex flex-col md:flex-row items-start md:items-center gap-4">
-          <label className="text-sm font-medium text-slate-300 whitespace-nowrap flex items-center gap-2">
-            <Calendar className="w-4 h-4 text-cyan-400" /> Select Match:
-          </label>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => loadMatches()}
+            disabled={isLoading}
+            className="px-3.5 py-2 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 text-xs font-semibold transition-all flex items-center gap-2 shadow-sm"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin' : ''}`} /> Refresh
+          </button>
+          <button
+            onClick={handleSaveToss}
+            disabled={saveStatus === 'saving' || !selectedMatch}
+            className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white font-bold text-xs uppercase tracking-wider shadow-lg shadow-cyan-500/20 flex items-center gap-2 disabled:opacity-50 transition-all active:scale-95"
+          >
+            <Save className="w-4 h-4" />
+            {saveStatus === 'saving' ? 'Submitting...' : saveStatus === 'saved' ? 'Toss Saved!' : 'Submit Toss'}
+          </button>
+        </div>
+      </div>
+
+      {/* Match Selector */}
+      <div className="p-4 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex items-center gap-3 w-full sm:w-auto">
+          <Calendar className="w-5 h-5 text-cyan-400 shrink-0" />
           <select
             value={selectedMatchId}
             onChange={(e) => setSelectedMatchId(e.target.value)}
-            className="w-full md:w-auto flex-1 bg-slate-950 border border-slate-800 rounded-lg px-4 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-cyan-500"
+            className="w-full sm:w-96 px-3.5 py-2 rounded-xl bg-black/40 border border-white/10 text-sm font-semibold focus:outline-none focus:border-cyan-500"
           >
             {matches.map((m) => (
-              <option key={m.id} value={m.id}>
+              <option key={m.id} value={m.id} className="bg-slate-900 text-white">
                 {m.matchNumber ? `Match #${m.matchNumber}: ` : ''}
-                {m.team1?.name || 'Team 1'} vs {m.team2?.name || 'Team 2'} 
+                {m.team1?.name || 'Team 1'} vs {m.team2?.name || 'Team 2'}
                 {m.date ? ` (${m.date})` : ''} - [{m.status?.toUpperCase() || 'SCHEDULED'}]
               </option>
             ))}
           </select>
         </div>
 
-        {/* Toss Decision Card */}
-        {selectedMatch && (
-          <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-6 space-y-6">
-            <div>
-              <label className="text-sm font-semibold text-slate-300 uppercase tracking-wider block mb-3">
-                1. Which team won the toss?
-              </label>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {[selectedMatch.team1, selectedMatch.team2].map((team) => {
-                  const isWinner = String(team?.id) === String(tossWinnerTeamId);
-                  return (
-                    <button
-                      key={team?.id}
-                      type="button"
-                      onClick={() => setTossWinnerTeamId(team?.id)}
-                      className={`p-4 rounded-xl border text-left flex items-center justify-between transition-all ${
-                        isWinner
-                          ? 'bg-cyan-950/40 border-cyan-500 text-white shadow-md'
-                          : 'bg-slate-950/80 border-slate-800 text-slate-300 hover:border-slate-700'
-                      }`}
-                    >
-                      <span className="font-bold text-base">{team?.name || 'Team'}</span>
-                      {isWinner && <ShieldCheck className="w-5 h-5 text-cyan-400" />}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            <div>
-              <label className="text-sm font-semibold text-slate-300 uppercase tracking-wider block mb-3">
-                2. What did they elect to do?
-              </label>
-              <div className="grid grid-cols-2 gap-4">
-                <button
-                  type="button"
-                  onClick={() => setTossDecision('bat')}
-                  className={`p-4 rounded-xl border text-center font-bold text-base transition-all ${
-                    tossDecision === 'bat'
-                      ? 'bg-amber-950/40 border-amber-500 text-amber-200 shadow-md'
-                      : 'bg-slate-950/80 border-slate-800 text-slate-400 hover:border-slate-700'
-                  }`}
-                >
-                  🏏 Elected to BAT
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setTossDecision('bowl')}
-                  className={`p-4 rounded-xl border text-center font-bold text-base transition-all ${
-                    tossDecision === 'bowl'
-                      ? 'bg-blue-950/40 border-blue-500 text-blue-200 shadow-md'
-                      : 'bg-slate-950/80 border-slate-800 text-slate-400 hover:border-slate-700'
-                  }`}
-                >
-                  ⚾ Elected to BOWL
-                </button>
-              </div>
-            </div>
-
-            {/* Innings Order Preview */}
-            <div className="bg-slate-950 border border-slate-800/80 rounded-xl p-4">
-              <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
-                Derived Innings Schedule
-              </h3>
-              <div className="text-sm space-y-1">
-                <p className="text-slate-200">
-                  <span className="text-amber-400 font-bold">Innings 1:</span> {battingFirstTeam?.name || '---'} (Batting) vs {bowlingFirstTeam?.name || '---'} (Bowling)
-                </p>
-                <p className="text-slate-200">
-                  <span className="text-cyan-400 font-bold">Innings 2:</span> {bowlingFirstTeam?.name || '---'} (Batting) vs {battingFirstTeam?.name || '---'} (Bowling)
-                </p>
-              </div>
-              <p className="text-xs text-slate-400 mt-3 pt-3 border-t border-slate-800/60 italic">
-                Broadcast String: &ldquo;{winnerName} won the toss and elected to {tossDecision}&rdquo;
-              </p>
-            </div>
+        {selectedMatch?.toss && (
+          <div className="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+            <CheckCircle2 className="w-4 h-4" /> Toss Recorded
           </div>
         )}
       </div>
+
+      {/* Toss Controls */}
+      {selectedMatch ? (
+        <div className="p-6 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md space-y-6">
+          <div>
+            <label className="text-xs font-bold uppercase tracking-wider text-slate-400 block mb-3">
+              1. Which Team Won the Toss?
+            </label>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {[selectedMatch.team1, selectedMatch.team2].map((team) => {
+                const isWinner = String(team?.id) === String(tossWinnerTeamId);
+                return (
+                  <button
+                    key={team?.id}
+                    type="button"
+                    onClick={() => setTossWinnerTeamId(team?.id)}
+                    className={`p-4 rounded-xl border text-left flex items-center justify-between transition-all ${
+                      isWinner
+                        ? 'bg-cyan-500/20 border-cyan-400 text-white shadow-lg shadow-cyan-500/10 scale-[1.01]'
+                        : 'bg-black/20 border-white/10 text-slate-300 hover:border-white/20'
+                    }`}
+                  >
+                    <span className="font-bold text-base">{team?.name || 'Team'}</span>
+                    {isWinner && <ShieldCheck className="w-5 h-5 text-cyan-400" />}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          <div>
+            <label className="text-xs font-bold uppercase tracking-wider text-slate-400 block mb-3">
+              2. What Did They Elect to Do?
+            </label>
+            <div className="grid grid-cols-2 gap-4">
+              <button
+                type="button"
+                onClick={() => setTossDecision('bat')}
+                className={`p-4 rounded-xl border text-center font-bold text-base transition-all ${
+                  tossDecision === 'bat'
+                    ? 'bg-amber-500/20 border-amber-400 text-amber-300 shadow-lg shadow-amber-500/10 scale-[1.01]'
+                    : 'bg-black/20 border-white/10 text-slate-400 hover:border-white/20'
+                }`}
+              >
+                🏏 Elected to BAT
+              </button>
+              <button
+                type="button"
+                onClick={() => setTossDecision('bowl')}
+                className={`p-4 rounded-xl border text-center font-bold text-base transition-all ${
+                  tossDecision === 'bowl'
+                    ? 'bg-blue-500/20 border-blue-400 text-blue-300 shadow-lg shadow-blue-500/10 scale-[1.01]'
+                    : 'bg-black/20 border-white/10 text-slate-400 hover:border-white/20'
+                }`}
+              >
+                ⚾ Elected to BOWL
+              </button>
+            </div>
+          </div>
+
+          {/* Derived Order */}
+          <div className="p-4 rounded-xl border border-white/10 bg-black/30 space-y-2">
+            <div className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">
+              Derived Match Schedule
+            </div>
+            <div className="text-sm space-y-1">
+              <p>
+                <span className="text-amber-400 font-bold">Innings 1:</span> {battingFirstTeam?.name || '---'} (Batting) vs {bowlingFirstTeam?.name || '---'} (Bowling)
+              </p>
+              <p>
+                <span className="text-cyan-400 font-bold">Innings 2:</span> {bowlingFirstTeam?.name || '---'} (Batting) vs {battingFirstTeam?.name || '---'} (Bowling)
+              </p>
+            </div>
+            <div className="text-xs text-slate-400 italic pt-2 border-t border-white/10">
+              Broadcast Statement: &ldquo;{winnerName} won the toss and elected to {tossDecision}&rdquo;
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div className="p-8 text-center text-slate-400 border border-white/10 rounded-2xl bg-white/5">
+          No matches loaded. Create or refresh fixtures to proceed.
+        </div>
+      )}
     </div>
   );
 }

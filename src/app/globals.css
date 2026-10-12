@@ -2584,3 +2584,31 @@
     scrollbar-color: rgba(71, 85, 105, 0.6) rgba(15, 23, 42, 0.5);
   }
 }
+
+
+/* --- WPL Ops Dynamic Theme Tokens --- */
+.wpl-theme-dark {
+  --wpl-surface-bg: #07080E;
+  --wpl-card-bg: rgba(15, 17, 28, 0.75);
+  --wpl-card-border: rgba(255, 255, 255, 0.08);
+  --wpl-card-hover: rgba(255, 255, 255, 0.04);
+  --wpl-text-primary: #f8fafc;
+  --wpl-text-secondary: #94a3b8;
+  --wpl-text-muted: #64748b;
+  --wpl-header-bg: rgba(11, 14, 23, 0.85);
+  --wpl-badge-bg: rgba(236, 72, 153, 0.15);
+  --wpl-badge-text: #f472b6;
+}
+
+.wpl-theme-light {
+  --wpl-surface-bg: #f8fafc;
+  --wpl-card-bg: rgba(255, 255, 255, 0.95);
+  --wpl-card-border: rgba(203, 213, 225, 0.8);
+  --wpl-card-hover: rgba(241, 245, 249, 0.9);
+  --wpl-text-primary: #0f172a;
+  --wpl-text-secondary: #475569;
+  --wpl-text-muted: #94a3b8;
+  --wpl-header-bg: rgba(255, 255, 255, 0.9);
+  --wpl-badge-bg: rgba(219, 39, 119, 0.1);
+  --wpl-badge-text: #db2777;
+}

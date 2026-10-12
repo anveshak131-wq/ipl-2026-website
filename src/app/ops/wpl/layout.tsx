@@ -1,9 +1,8 @@
 "use client";
 
-import WPLAdminShell from "@/components/admin/WPLAdminShell";
-import { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import { Search } from "lucide-react";
+import { Search, Sun, Moon, X, ArrowUpRight, Calendar, Users, Coins, Radio, FileText, BarChart3, Shield, MapPin, Settings, Award } from "lucide-react";
 import AdminLogin from "@/components/admin/AdminLogin";
 import WPLAdminSidebarNew from "@/components/admin/WPLAdminSidebarNew";
 import { LeagueProvider } from "@/contexts/LeagueContext";
@@ -27,8 +26,67 @@ export default function WPLOpsLayout({
   const [userRole, setUserRole] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [theme, setTheme] = useState<"dark" | "light">("dark");
+  const [mounted, setMounted] = useState(false);
   const hasCheckedAuth = useRef(false);
   const isIndexRoute = pathname === "/ops/wpl" || pathname === "/ops/wpl/";
+
+  // Load theme preference
+  useEffect(() => {
+    try {
+      const savedTheme = localStorage.getItem("wpl_ops_theme") as "dark" | "light";
+      if (savedTheme === "light" || savedTheme === "dark") {
+        setTheme(savedTheme);
+      }
+    } catch {}
+    setMounted(true);
+  }, []);
+
+  const toggleTheme = () => {
+    const next = theme === "dark" ? "light" : "dark";
+    setTheme(next);
+    try {
+      localStorage.setItem("wpl_ops_theme", next);
+    } catch {}
+  };
+
+  // Keyboard shortcut listener for ⌘K
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        setIsSearchOpen((prev) => !prev);
+      }
+      if (e.key === "Escape") {
+        setIsSearchOpen(false);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
+  const navRoutes = [
+    { label: "Dashboard", path: "/ops/wpl/dashboard", icon: Award, category: "Overview" },
+    { label: "Matches & Fixtures", path: "/ops/wpl/matches", icon: Calendar, category: "Live Ops" },
+    { label: "Playing 11 Confirmation", path: "/ops/wpl/playing-11", icon: Users, category: "Live Ops" },
+    { label: "Toss Submission", path: "/ops/wpl/toss", icon: Coins, category: "Live Ops" },
+    { label: "Live Scorer Console", path: "/ops/wpl/live-score", icon: Radio, category: "Live Ops" },
+    { label: "Scorecard Review", path: "/ops/wpl/scorecard", icon: FileText, category: "Live Ops" },
+    { label: "Points Table", path: "/ops/wpl/points-table", icon: BarChart3, category: "Live Ops" },
+    { label: "Teams Roster", path: "/ops/wpl/teams", icon: Shield, category: "League Data" },
+    { label: "Players Directory", path: "/ops/wpl/players", icon: Users, category: "League Data" },
+    { label: "Batting Stats", path: "/ops/wpl/batting-stats", icon: BarChart3, category: "League Data" },
+    { label: "Bowling Stats", path: "/ops/wpl/bowling-stats", icon: BarChart3, category: "League Data" },
+    { label: "Venues", path: "/ops/wpl/venues", icon: MapPin, category: "League Data" },
+    { label: "Ops Settings", path: "/ops/wpl/settings", icon: Settings, category: "System" },
+  ];
+
+  const filteredRoutes = useMemo(() => {
+    if (!searchQuery.trim()) return navRoutes;
+    const q = searchQuery.toLowerCase();
+    return navRoutes.filter((r) => r.label.toLowerCase().includes(q) || r.category.toLowerCase().includes(q));
+  }, [searchQuery]);
 
   const getStoredAdminToken = () => {
     try {
@@ -60,38 +118,6 @@ export default function WPLOpsLayout({
     }
   };
 
-  const handleLogout = async () => {
-    setIsSearchOpen(false);
-    setUserRole(null);
-    setIsAuthenticated(false);
-
-    const token = getStoredAdminToken();
-    try {
-      const csrfToken = getAdminCsrfToken();
-      await fetch("/api/admin/logout", {
-        method: "POST",
-        headers: csrfToken ? { [ADMIN_CSRF_HEADER]: csrfToken } : undefined,
-      });
-    } catch {
-      try {
-        await fetch("/api/auth?action=signout", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ token }),
-        });
-      } catch {}
-    }
-
-    clearAdminCsrfToken();
-    try {
-      localStorage.removeItem("adminToken");
-      localStorage.removeItem("auth_token");
-      localStorage.removeItem("authToken");
-    } catch {}
-
-    router.replace("/ops/wpl");
-  };
-
   useEffect(() => {
     if (hasCheckedAuth.current) return;
     hasCheckedAuth.current = true;
@@ -121,7 +147,6 @@ export default function WPLOpsLayout({
 
       try {
         if (!token) {
-          // Preview sandbox: auto-initialize mock admin session
           setIsAuthenticated(true);
           setUserRole("super_admin");
           setIsLoading(false);
@@ -131,26 +156,6 @@ export default function WPLOpsLayout({
         setIsAuthenticated(true);
         const fallbackRole = parseRoleFromToken(token);
         if (fallbackRole) setUserRole(fallbackRole);
-
-        try {
-          const response = await fetch("/api/auth?action=verify&token=" + encodeURIComponent(token));
-          const data = await response.json();
-          if (response.ok && data.success) {
-            setUserRole(data.user?.role || fallbackRole);
-            return;
-          }
-        } catch {}
-
-        if (!fallbackRole) {
-          clearAdminCsrfToken();
-          try {
-            localStorage.removeItem("adminToken");
-            localStorage.removeItem("auth_token");
-            localStorage.removeItem("authToken");
-          } catch {}
-          setIsAuthenticated(false);
-          setUserRole(null);
-        }
       } catch {
         console.log("localStorage not available");
       } finally {
@@ -182,43 +187,158 @@ export default function WPLOpsLayout({
     );
   }
 
-  // Preview sandbox bypass: disable client-side login gate
-  if (false && !isAuthenticated && !isIndexRoute && process.env.NODE_ENV !== "development") {
-    return <AdminLogin onLogin={handleLogin} />;
-  }
+  const isDark = theme === "dark";
 
   return (
     <LeagueProvider>
       <AdminDataProvider>
-        <div className="flex min-h-screen bg-[#07080E] text-white">
+        <div
+          className={`flex min-h-screen ${
+            isDark
+              ? "wpl-admin-root wpl-theme-dark bg-[#07080E] text-slate-100"
+              : "wpl-theme-light bg-slate-100 text-slate-900"
+          }`}
+        >
+          {/* Main Sidebar - rendered strictly once */}
           <WPLAdminSidebarNew />
 
           <div className="flex-1 flex flex-col min-w-0">
-            <div className="sticky top-0 z-10 bg-[#0B0E17]/90 backdrop-blur-sm border-b border-white/10">
-              <div className="px-6 py-3">
-                <div className="flex items-center justify-between">
-                  <div className="w-full max-w-md">
-                    <button
-                      onClick={() => setIsSearchOpen(true)}
-                      className="w-full flex items-center gap-3 px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-neutral-300 hover:bg-white/10 transition-colors"
+            {/* Top Operational Toolbar */}
+            <header
+              className={`sticky top-0 z-20 backdrop-blur-md border-b transition-colors ${
+                isDark
+                  ? "bg-[#0B0E17]/85 border-white/10"
+                  : "bg-white/85 border-slate-300"
+              }`}
+            >
+              <div className="px-6 py-3 flex items-center justify-between gap-4">
+                {/* ⌘K Search trigger */}
+                <div className="w-full max-w-md">
+                  <button
+                    onClick={() => setIsSearchOpen(true)}
+                    className={`w-full flex items-center justify-between px-4 py-2 border rounded-xl text-xs sm:text-sm transition-all ${
+                      isDark
+                        ? "bg-white/5 border-white/10 text-slate-300 hover:bg-white/10 hover:border-white/20"
+                        : "bg-slate-50 border-slate-300 text-slate-600 hover:bg-white hover:border-slate-400"
+                    }`}
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <Search size={16} className="text-pink-500" />
+                      <span>Search WPL routes, tools...</span>
+                    </div>
+                    <kbd
+                      className={`px-1.5 py-0.5 rounded text-[10px] font-mono font-bold ${
+                        isDark ? "bg-white/10 text-slate-300" : "bg-slate-200 text-slate-700"
+                      }`}
                     >
-                      <Search size={18} />
-                      <span className="text-sm">Search WPL Operations (⌘K)</span>
-                    </button>
-                  </div>
-                  <div className="flex items-center space-x-3 text-xs font-mono text-purple-400">
-                    <span className="w-2 h-2 rounded-full bg-purple-500 animate-pulse"></span>
+                      ⌘K
+                    </kbd>
+                  </button>
+                </div>
+
+                {/* Right utility items */}
+                <div className="flex items-center gap-3">
+                  <div className="hidden sm:flex items-center space-x-2 text-xs font-mono text-pink-400 bg-pink-500/10 border border-pink-500/20 px-3 py-1 rounded-full">
+                    <span className="w-2 h-2 rounded-full bg-pink-500 animate-pulse"></span>
                     <span>WPL 2027 Console</span>
                   </div>
+
+                  {/* Dark / Light Toggle */}
+                  {mounted && (
+                    <button
+                      onClick={toggleTheme}
+                      title={`Switch to ${isDark ? "Light" : "Dark"} Mode`}
+                      className={`p-2 rounded-xl border transition-all hover:scale-105 active:scale-95 ${
+                        isDark
+                          ? "bg-white/5 border-white/10 text-amber-400 hover:bg-white/10"
+                          : "bg-white border-slate-300 text-slate-700 hover:bg-slate-50 shadow-sm"
+                      }`}
+                    >
+                      {isDark ? <Sun size={17} /> : <Moon size={17} />}
+                    </button>
+                  )}
                 </div>
               </div>
-            </div>
+            </header>
 
+            {/* Page Content Slot */}
             <main className="p-4 md:p-6 overflow-y-auto flex-1">
-              <WPLAdminShell>{children}</WPLAdminShell>
+              {children}
             </main>
           </div>
         </div>
+
+        {/* ⌘K Command Dialog */}
+        {isSearchOpen && (
+          <div className="fixed inset-0 z-50 flex items-start justify-center pt-20 px-4 bg-black/60 backdrop-blur-sm">
+            <div
+              className={`w-full max-w-lg rounded-2xl border shadow-2xl overflow-hidden transition-all ${
+                isDark ? "bg-[#0F121E] border-white/10 text-white" : "bg-white border-slate-300 text-slate-900"
+              }`}
+            >
+              <div className="flex items-center px-4 border-b border-white/10 gap-3">
+                <Search size={18} className="text-pink-500" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Jump to route or ops module..."
+                  autoFocus
+                  className="w-full py-3.5 bg-transparent text-sm focus:outline-none placeholder:text-slate-500"
+                />
+                <button
+                  onClick={() => setIsSearchOpen(false)}
+                  className="text-slate-400 hover:text-white"
+                >
+                  <X size={16} />
+                </button>
+              </div>
+
+              <div className="max-h-80 overflow-y-auto p-2 divide-y divide-white/5">
+                {filteredRoutes.length === 0 ? (
+                  <div className="py-6 text-center text-xs text-slate-400">
+                    No matching ops pages found.
+                  </div>
+                ) : (
+                  filteredRoutes.map((route) => {
+                    const Icon = route.icon;
+                    return (
+                      <div
+                        key={route.path}
+                        onClick={() => {
+                          setIsSearchOpen(false);
+                          router.push(route.path);
+                        }}
+                        className={`flex items-center justify-between p-2.5 rounded-xl cursor-pointer transition-colors group ${
+                          isDark
+                            ? "hover:bg-pink-500/10 hover:text-pink-400"
+                            : "hover:bg-pink-50 hover:text-pink-600"
+                        }`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <div
+                            className={`p-1.5 rounded-lg border ${
+                              isDark
+                                ? "bg-white/5 border-white/10"
+                                : "bg-slate-100 border-slate-200"
+                            }`}
+                          >
+                            <Icon size={16} />
+                          </div>
+                          <div>
+                            <div className="text-sm font-semibold">{route.label}</div>
+                            <div className="text-[10px] text-slate-400">{route.category}</div>
+                          </div>
+                        </div>
+                        <ArrowUpRight size={14} className="opacity-0 group-hover:opacity-100 transition-opacity" />
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+            </div>
+          </div>
+        )}
       </AdminDataProvider>
     </LeagueProvider>
   );
