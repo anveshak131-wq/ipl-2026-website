@@ -28,7 +28,7 @@ ENVIRONMENT = "production"
 ADMIN_ALLOWED_EMAILS = "anveshkoganti54@gmail.com"
 ADMIN_PLAYERS_ADMIN_EMAILS = "anvesh.ak.131@gmail.com"
 
-[env.development.vars]
+[env.preview.vars]
   ENVIRONMENT = "development"
   ADMIN_ALLOWED_EMAILS = "anveshkoganti54@gmail.com"
   ADMIN_PLAYERS_ADMIN_EMAILS = "anvesh.ak.131@gmail.com"
@@ -42,25 +42,25 @@ ADMIN_PLAYERS_ADMIN_EMAILS = "anvesh.ak.131@gmail.com"
 
 # Scheduled event for email reminders
 # This cron job runs every 5 minutes to check for matches starting in 30 minutes
-[[triggers.crons]]
-cron = "*/5 * * * *"  # Run every 5 minutes
-path = "/api/admin/match-reminders"
-
-# Scheduled event for weather updates
-# This cron job runs twice daily at 6 AM and 6 PM UTC to update weather for WPL stadiums
-[[triggers.crons]]
-cron = "0 6 * * *"  # Run daily at 6 AM UTC
-path = "/cron/weather-update"
-
-[[triggers.crons]]
-cron = "0 18 * * *"  # Run daily at 6 PM UTC
-path = "/cron/weather-update"
-
-# Email service environment variables
-# Uncomment and set your email service credentials:
-# RESEND_API_KEY = "your-resend-api-key"
-# OR
-# SENDGRID_API_KEY = "your-sendgrid-api-key"
-# OR
-# MAILGUN_API_KEY = "your-mailgun-api-key"
-# MAILGUN_DOMAIN = "your-mailgun-domain"
+# [[triggers.crons]]
+# cron = "*/5 * * * *"  # Run every 5 minutes
+# path = "/api/admin/match-reminders"
+# 
+# # Scheduled event for weather updates
+# # This cron job runs twice daily at 6 AM and 6 PM UTC to update weather for WPL stadiums
+# [[triggers.crons]]
+# cron = "0 6 * * *"  # Run daily at 6 AM UTC
+# path = "/cron/weather-update"
+# 
+# [[triggers.crons]]
+# cron = "0 18 * * *"  # Run daily at 6 PM UTC
+# path = "/cron/weather-update"
+# 
+# # Email service environment variables
+# # Uncomment and set your email service credentials:
+# # RESEND_API_KEY = "your-resend-api-key"
+# # OR
+# # SENDGRID_API_KEY = "your-sendgrid-api-key"
+# # OR
+# # MAILGUN_API_KEY = "your-mailgun-api-key"
+# # MAILGUN_DOMAIN = "your-mailgun-domain"
