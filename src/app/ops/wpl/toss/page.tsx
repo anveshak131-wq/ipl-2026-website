@@ -1,18 +1,15 @@
 'use client';
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import Link from 'next/link';
 import { api } from '@/lib/data';
 import { 
   Coins, 
   CheckCircle2, 
-  ArrowRight, 
   Save, 
   RefreshCw, 
   Calendar, 
   ShieldCheck,
-  Zap,
-  Sparkles
+  ChevronDown
 } from 'lucide-react';
 
 const FIXTURES_STORAGE_KEY = 'wpl_matches_fixtures_v2027';
@@ -177,16 +174,16 @@ export default function WplTossSubmissionPage() {
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-white/10">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[var(--wpl-card-border,rgba(255,255,255,0.1))]">
         <div>
           <div className="flex items-center gap-2 mb-1.5">
-            <span className="px-2 py-0.5 rounded text-[11px] font-bold tracking-wider bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
+            <span className="px-2.5 py-0.5 rounded text-[11px] font-bold tracking-wider bg-cyan-500/15 text-cyan-600 dark:text-cyan-400 border border-cyan-500/30">
               WPL 2027 MATCH OFFICIALS
             </span>
-            <span className="text-xs text-slate-400">Pre-Match Toss Protocol</span>
+            <span className="text-xs text-[var(--wpl-text-muted)]">Pre-Match Toss Protocol</span>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-black flex items-center gap-2.5">
-            <Coins className="w-7 h-7 text-cyan-400" /> Toss Submission
+          <h1 className="text-2xl sm:text-3xl font-black text-[var(--wpl-text-title)] flex items-center gap-2.5">
+            <Coins className="w-7 h-7 text-cyan-500 dark:text-cyan-400" /> Toss Submission
           </h1>
         </div>
 
@@ -194,14 +191,14 @@ export default function WplTossSubmissionPage() {
           <button
             onClick={() => loadMatches()}
             disabled={isLoading}
-            className="px-3.5 py-2 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 text-xs font-semibold transition-all flex items-center gap-2 shadow-sm"
+            className="px-3.5 py-2 rounded-xl border border-[var(--wpl-card-border)] bg-[var(--wpl-card-bg)] hover:bg-[var(--wpl-hover-bg)] text-xs font-semibold text-[var(--wpl-text-body)] transition-all flex items-center gap-2 shadow-sm"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin' : ''}`} /> Refresh
           </button>
           <button
             onClick={handleSaveToss}
             disabled={saveStatus === 'saving' || !selectedMatch}
-            className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white font-bold text-xs uppercase tracking-wider shadow-lg shadow-cyan-500/20 flex items-center gap-2 disabled:opacity-50 transition-all active:scale-95"
+            className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 text-white font-bold text-xs uppercase tracking-wider shadow-lg shadow-cyan-500/20 flex items-center gap-2 disabled:opacity-50 transition-all active:scale-95"
           >
             <Save className="w-4 h-4" />
             {saveStatus === 'saving' ? 'Submitting...' : saveStatus === 'saved' ? 'Toss Saved!' : 'Submit Toss'}
@@ -209,27 +206,29 @@ export default function WplTossSubmissionPage() {
         </div>
       </div>
 
-      {/* Match Selector */}
-      <div className="p-4 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      {/* Match Picker Bar */}
+      <div className="p-4 rounded-2xl border border-[var(--wpl-card-border)] bg-[var(--wpl-card-bg)] shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-3 w-full sm:w-auto">
-          <Calendar className="w-5 h-5 text-cyan-400 shrink-0" />
-          <select
-            value={selectedMatchId}
-            onChange={(e) => setSelectedMatchId(e.target.value)}
-            className="w-full sm:w-96 px-3.5 py-2 rounded-xl bg-black/40 border border-white/10 text-sm font-semibold focus:outline-none focus:border-cyan-500"
-          >
-            {matches.map((m) => (
-              <option key={m.id} value={m.id} className="bg-slate-900 text-white">
-                {m.matchNumber ? `Match #${m.matchNumber}: ` : ''}
-                {m.team1?.name || 'Team 1'} vs {m.team2?.name || 'Team 2'}
-                {m.date ? ` (${m.date})` : ''} - [{m.status?.toUpperCase() || 'SCHEDULED'}]
-              </option>
-            ))}
-          </select>
+          <Calendar className="w-5 h-5 text-cyan-500 dark:text-cyan-400 shrink-0" />
+          <div className="relative flex-1 sm:w-96">
+            <select
+              value={selectedMatchId}
+              onChange={(e) => setSelectedMatchId(e.target.value)}
+              className="w-full px-4 py-2.5 rounded-xl border border-[var(--wpl-input-border)] bg-[var(--wpl-input-bg)] text-[var(--wpl-text-body)] text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-cyan-500"
+            >
+              {matches.map((m) => (
+                <option key={m.id} value={m.id}>
+                  {m.matchNumber ? `Match #${m.matchNumber}: ` : ''}
+                  {m.team1?.name || 'Team 1'} vs {m.team2?.name || 'Team 2'}
+                  {m.date ? ` (${m.date})` : ''} - [{m.status?.toUpperCase() || 'SCHEDULED'}]
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
 
         {selectedMatch?.toss && (
-          <div className="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+          <div className="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
             <CheckCircle2 className="w-4 h-4" /> Toss Recorded
           </div>
         )}
@@ -237,9 +236,9 @@ export default function WplTossSubmissionPage() {
 
       {/* Toss Controls */}
       {selectedMatch ? (
-        <div className="p-6 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md space-y-6">
+        <div className="p-6 rounded-2xl border border-[var(--wpl-card-border)] bg-[var(--wpl-card-bg)] shadow-sm space-y-6">
           <div>
-            <label className="text-xs font-bold uppercase tracking-wider text-slate-400 block mb-3">
+            <label className="text-xs font-bold uppercase tracking-wider text-[var(--wpl-text-muted)] block mb-3">
               1. Which Team Won the Toss?
             </label>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -252,12 +251,12 @@ export default function WplTossSubmissionPage() {
                     onClick={() => setTossWinnerTeamId(team?.id)}
                     className={`p-4 rounded-xl border text-left flex items-center justify-between transition-all ${
                       isWinner
-                        ? 'bg-cyan-500/20 border-cyan-400 text-white shadow-lg shadow-cyan-500/10 scale-[1.01]'
-                        : 'bg-black/20 border-white/10 text-slate-300 hover:border-white/20'
+                        ? 'bg-cyan-500/15 border-cyan-500 text-[var(--wpl-text-title)] shadow-md'
+                        : 'border-[var(--wpl-card-border)] bg-[var(--wpl-hover-bg)] text-[var(--wpl-text-body)] hover:border-cyan-500/40'
                     }`}
                   >
                     <span className="font-bold text-base">{team?.name || 'Team'}</span>
-                    {isWinner && <ShieldCheck className="w-5 h-5 text-cyan-400" />}
+                    {isWinner && <ShieldCheck className="w-5 h-5 text-cyan-500" />}
                   </button>
                 );
               })}
@@ -265,7 +264,7 @@ export default function WplTossSubmissionPage() {
           </div>
 
           <div>
-            <label className="text-xs font-bold uppercase tracking-wider text-slate-400 block mb-3">
+            <label className="text-xs font-bold uppercase tracking-wider text-[var(--wpl-text-muted)] block mb-3">
               2. What Did They Elect to Do?
             </label>
             <div className="grid grid-cols-2 gap-4">
@@ -274,8 +273,8 @@ export default function WplTossSubmissionPage() {
                 onClick={() => setTossDecision('bat')}
                 className={`p-4 rounded-xl border text-center font-bold text-base transition-all ${
                   tossDecision === 'bat'
-                    ? 'bg-amber-500/20 border-amber-400 text-amber-300 shadow-lg shadow-amber-500/10 scale-[1.01]'
-                    : 'bg-black/20 border-white/10 text-slate-400 hover:border-white/20'
+                    ? 'bg-amber-500/15 border-amber-500 text-amber-600 dark:text-amber-300 shadow-md'
+                    : 'border-[var(--wpl-card-border)] bg-[var(--wpl-hover-bg)] text-[var(--wpl-text-muted)] hover:border-amber-500/40'
                 }`}
               >
                 🏏 Elected to BAT
@@ -285,8 +284,8 @@ export default function WplTossSubmissionPage() {
                 onClick={() => setTossDecision('bowl')}
                 className={`p-4 rounded-xl border text-center font-bold text-base transition-all ${
                   tossDecision === 'bowl'
-                    ? 'bg-blue-500/20 border-blue-400 text-blue-300 shadow-lg shadow-blue-500/10 scale-[1.01]'
-                    : 'bg-black/20 border-white/10 text-slate-400 hover:border-white/20'
+                    ? 'bg-blue-500/15 border-blue-500 text-blue-600 dark:text-blue-300 shadow-md'
+                    : 'border-[var(--wpl-card-border)] bg-[var(--wpl-hover-bg)] text-[var(--wpl-text-muted)] hover:border-blue-500/40'
                 }`}
               >
                 ⚾ Elected to BOWL
@@ -295,25 +294,25 @@ export default function WplTossSubmissionPage() {
           </div>
 
           {/* Derived Order */}
-          <div className="p-4 rounded-xl border border-white/10 bg-black/30 space-y-2">
-            <div className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">
+          <div className="p-4 rounded-xl border border-[var(--wpl-card-border)] bg-[var(--wpl-hover-bg)] space-y-2">
+            <div className="text-xs font-bold uppercase tracking-wider text-[var(--wpl-text-muted)] mb-2">
               Derived Match Schedule
             </div>
-            <div className="text-sm space-y-1">
+            <div className="text-sm space-y-1 text-[var(--wpl-text-body)]">
               <p>
-                <span className="text-amber-400 font-bold">Innings 1:</span> {battingFirstTeam?.name || '---'} (Batting) vs {bowlingFirstTeam?.name || '---'} (Bowling)
+                <span className="text-amber-500 dark:text-amber-400 font-bold">Innings 1:</span> {battingFirstTeam?.name || '---'} (Batting) vs {bowlingFirstTeam?.name || '---'} (Bowling)
               </p>
               <p>
-                <span className="text-cyan-400 font-bold">Innings 2:</span> {bowlingFirstTeam?.name || '---'} (Batting) vs {battingFirstTeam?.name || '---'} (Bowling)
+                <span className="text-cyan-600 dark:text-cyan-400 font-bold">Innings 2:</span> {bowlingFirstTeam?.name || '---'} (Batting) vs {battingFirstTeam?.name || '---'} (Bowling)
               </p>
             </div>
-            <div className="text-xs text-slate-400 italic pt-2 border-t border-white/10">
+            <div className="text-xs text-[var(--wpl-text-muted)] italic pt-2 border-t border-[var(--wpl-card-border)]">
               Broadcast Statement: &ldquo;{winnerName} won the toss and elected to {tossDecision}&rdquo;
             </div>
           </div>
         </div>
       ) : (
-        <div className="p-8 text-center text-slate-400 border border-white/10 rounded-2xl bg-white/5">
+        <div className="p-8 text-center text-[var(--wpl-text-muted)] border border-[var(--wpl-card-border)] rounded-2xl bg-[var(--wpl-card-bg)]">
           No matches loaded. Create or refresh fixtures to proceed.
         </div>
       )}

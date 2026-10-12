@@ -90,8 +90,8 @@ export default function WPLAdminSidebarNew() {
   }, [filteredItems]);
 
   const SidebarContent = () => (
-    <div className="flex flex-col h-full text-neutral-200 select-none">
-      <div className="p-4 border-b border-white/10 flex items-center justify-between">
+    <div className="flex flex-col h-full select-none text-[var(--wpl-text-body,#e2e8f0)]">
+      <div className="p-4 border-b border-[var(--wpl-card-border,rgba(255,255,255,0.1))] flex items-center justify-between">
         <div className="flex items-center space-x-2.5">
           <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-purple-600 to-pink-500 flex items-center justify-center font-black text-white text-xs tracking-wider shadow-md shadow-purple-500/20">
             WPL
@@ -107,11 +107,11 @@ export default function WPLAdminSidebarNew() {
         </div>
       </div>
 
-      <div className="px-3 py-2.5 border-b border-white/10 bg-black/20">
+      <div className="px-3 py-2.5 border-b border-[var(--wpl-card-border,rgba(255,255,255,0.1))] bg-[var(--wpl-hover-bg,rgba(0,0,0,0.15))]">
         <AdminLeagueSwitcher />
       </div>
 
-      <div className="p-3 border-b border-white/10">
+      <div className="p-3 border-b border-[var(--wpl-card-border,rgba(255,255,255,0.1))]">
         <div className="relative">
           <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400" />
           <input
@@ -119,7 +119,7 @@ export default function WPLAdminSidebarNew() {
             placeholder="Search WPL ops..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-white/5 border border-white/10 rounded-lg pl-8 pr-3 py-1.5 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-purple-500/50"
+            className="w-full bg-[var(--wpl-input-bg,rgba(255,255,255,0.05))] border border-[var(--wpl-input-border,rgba(255,255,255,0.1))] rounded-lg pl-8 pr-3 py-1.5 text-xs text-[var(--wpl-text-title,#fff)] placeholder-[var(--wpl-text-muted,#888)] focus:outline-none focus:border-purple-500/50"
           />
         </div>
       </div>
@@ -156,7 +156,7 @@ export default function WPLAdminSidebarNew() {
                           "flex items-center space-x-2.5 px-2.5 py-2 rounded-xl text-xs font-medium transition-colors " +
                           (isActive
                             ? "bg-purple-600 text-white font-semibold shadow-md shadow-purple-600/30"
-                            : "text-neutral-400 hover:text-white hover:bg-white/5")
+                            : "text-[var(--wpl-text-muted,#94a3b8)] hover:text-[var(--wpl-text-title,#fff)] hover:bg-[var(--wpl-hover-bg,rgba(255,255,255,0.05))]")
                         }
                       >
                         <span className={isActive ? "text-white" : "text-neutral-400"}>
@@ -173,7 +173,7 @@ export default function WPLAdminSidebarNew() {
         })}
       </div>
 
-      <div className="p-3 border-t border-white/10 text-[10px] text-neutral-500 font-mono text-center">
+      <div className="p-3 border-t border-[var(--wpl-card-border,rgba(255,255,255,0.1))] text-[10px] text-[var(--wpl-text-muted,#888)] font-mono text-center">
         WPL Ops &bull; v2027.1
       </div>
     </div>
@@ -200,14 +200,14 @@ export default function WPLAdminSidebarNew() {
 
       <aside
         className={
-          "md:hidden fixed top-0 left-0 h-screen z-50 w-72 bg-[#0B0E17] border-r border-white/10 flex flex-col transition-transform duration-300 ease-in-out " +
+          "md:hidden fixed top-0 left-0 h-screen z-50 w-72 bg-[var(--wpl-sidebar-bg,#0B0E17)] border-r border-[var(--wpl-card-border,rgba(255,255,255,0.1))] transition-colors flex flex-col transition-transform duration-300 ease-in-out " +
           (mobileOpen ? "translate-x-0" : "-translate-x-full")
         }
       >
         <SidebarContent />
       </aside>
 
-      <aside className="hidden md:flex sticky top-0 left-0 h-screen z-40 bg-[#0B0E17] border-r border-white/10 flex-col w-64">
+      <aside className="hidden md:flex sticky top-0 left-0 h-screen z-40 bg-[var(--wpl-sidebar-bg,#0B0E17)] border-r border-[var(--wpl-card-border,rgba(255,255,255,0.1))] transition-colors flex-col w-64">
         <SidebarContent />
       </aside>
     </>

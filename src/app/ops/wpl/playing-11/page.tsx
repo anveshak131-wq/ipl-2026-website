@@ -1,17 +1,14 @@
 'use client';
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import Link from 'next/link';
 import { api } from '@/lib/data';
-import { Match, Player, Team } from '@/types';
+import { Player, Team } from '@/types';
 import { 
   Users, 
   CheckCircle2, 
   Save, 
   RefreshCw, 
-  Calendar,
-  Sparkles,
-  ShieldAlert
+  Calendar
 } from 'lucide-react';
 
 const FIXTURES_STORAGE_KEY = 'wpl_matches_fixtures_v2027';
@@ -200,16 +197,16 @@ export default function WplPlaying11ConfirmationPage() {
   return (
     <div className="max-w-7xl mx-auto space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-white/10">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[var(--wpl-card-border,rgba(255,255,255,0.1))]">
         <div>
           <div className="flex items-center gap-2 mb-1.5">
-            <span className="px-2 py-0.5 rounded text-[11px] font-bold tracking-wider bg-pink-500/10 text-pink-400 border border-pink-500/20">
+            <span className="px-2.5 py-0.5 rounded text-[11px] font-bold tracking-wider bg-pink-500/15 text-pink-600 dark:text-pink-400 border border-pink-500/30">
               WPL 2027 ROSTER OPS
             </span>
-            <span className="text-xs text-slate-400">Pre-Match Verification</span>
+            <span className="text-xs text-[var(--wpl-text-muted)]">Pre-Match Verification</span>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-black flex items-center gap-2.5">
-            <Users className="w-7 h-7 text-amber-400" /> Playing 11 Confirmation
+          <h1 className="text-2xl sm:text-3xl font-black text-[var(--wpl-text-title)] flex items-center gap-2.5">
+            <Users className="w-7 h-7 text-amber-500 dark:text-amber-400" /> Playing 11 Confirmation
           </h1>
         </div>
 
@@ -217,14 +214,14 @@ export default function WplPlaying11ConfirmationPage() {
           <button
             onClick={() => loadData()}
             disabled={isLoading}
-            className="px-3.5 py-2 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 text-xs font-semibold transition-all flex items-center gap-2 shadow-sm"
+            className="px-3.5 py-2 rounded-xl border border-[var(--wpl-card-border)] bg-[var(--wpl-card-bg)] hover:bg-[var(--wpl-hover-bg)] text-xs font-semibold text-[var(--wpl-text-body)] transition-all flex items-center gap-2 shadow-sm"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin' : ''}`} /> Refresh
           </button>
           <button
             onClick={handleSaveLineup}
             disabled={saveStatus === 'saving' || !selectedMatch}
-            className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-pink-500 to-amber-500 hover:from-pink-600 hover:to-amber-600 text-white font-bold text-xs uppercase tracking-wider shadow-lg shadow-pink-500/20 flex items-center gap-2 disabled:opacity-50 transition-all active:scale-95"
+            className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-pink-600 to-amber-500 hover:from-pink-700 hover:to-amber-600 text-white font-bold text-xs uppercase tracking-wider shadow-lg shadow-pink-500/20 flex items-center gap-2 disabled:opacity-50 transition-all active:scale-95"
           >
             <Save className="w-4 h-4" />
             {saveStatus === 'saving' ? 'Publishing...' : saveStatus === 'saved' ? 'Confirmed!' : 'Confirm Lineup'}
@@ -233,26 +230,28 @@ export default function WplPlaying11ConfirmationPage() {
       </div>
 
       {/* Match Picker */}
-      <div className="p-4 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="p-4 rounded-2xl border border-[var(--wpl-card-border)] bg-[var(--wpl-card-bg)] shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-3 w-full sm:w-auto">
-          <Calendar className="w-5 h-5 text-pink-400 shrink-0" />
-          <select
-            value={selectedMatchId}
-            onChange={(e) => setSelectedMatchId(e.target.value)}
-            className="w-full sm:w-96 px-3.5 py-2 rounded-xl bg-black/40 border border-white/10 text-sm font-semibold focus:outline-none focus:border-pink-500"
-          >
-            {matches.map((m) => (
-              <option key={m.id} value={m.id} className="bg-slate-900 text-white">
-                {m.matchNumber ? `Match #${m.matchNumber}: ` : ''}
-                {m.team1?.name || 'Team 1'} vs {m.team2?.name || 'Team 2'}
-                {m.date ? ` (${m.date})` : ''}
-              </option>
-            ))}
-          </select>
+          <Calendar className="w-5 h-5 text-pink-500 dark:text-pink-400 shrink-0" />
+          <div className="relative flex-1 sm:w-96">
+            <select
+              value={selectedMatchId}
+              onChange={(e) => setSelectedMatchId(e.target.value)}
+              className="w-full px-4 py-2.5 rounded-xl border border-[var(--wpl-input-border)] bg-[var(--wpl-input-bg)] text-[var(--wpl-text-body)] text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-pink-500"
+            >
+              {matches.map((m) => (
+                <option key={m.id} value={m.id}>
+                  {m.matchNumber ? `Match #${m.matchNumber}: ` : ''}
+                  {m.team1?.name || 'Team 1'} vs {m.team2?.name || 'Team 2'}
+                  {m.date ? ` (${m.date})` : ''}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
 
         {selectedMatch?.playing11?.isConfirmed && (
-          <div className="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+          <div className="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
             <CheckCircle2 className="w-4 h-4" /> Lineup Confirmed
           </div>
         )}
@@ -262,16 +261,16 @@ export default function WplPlaying11ConfirmationPage() {
       {selectedMatch ? (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Team 1 Squad */}
-          <div className="rounded-2xl p-5 border border-white/10 bg-white/5 backdrop-blur-md space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-white/10">
+          <div className="rounded-2xl p-5 border border-[var(--wpl-card-border)] bg-[var(--wpl-card-bg)] shadow-sm space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-[var(--wpl-card-border)]">
               <div>
-                <h2 className="text-lg font-black">{selectedMatch.team1?.name || 'Team 1'}</h2>
-                <p className="text-xs text-slate-400">Select 11 starters and assign roles</p>
+                <h2 className="text-lg font-black text-[var(--wpl-text-title)]">{selectedMatch.team1?.name || 'Team 1'}</h2>
+                <p className="text-xs text-[var(--wpl-text-muted)]">Select 11 starters and assign roles</p>
               </div>
               <span className={`px-3 py-1 rounded-lg text-xs font-black border ${
                 team1Lineup.length === 11 
-                  ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' 
-                  : 'bg-amber-500/10 text-amber-400 border-amber-500/30'
+                  ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30' 
+                  : 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/30'
               }`}>
                 {team1Lineup.length} / 11
               </span>
@@ -289,19 +288,19 @@ export default function WplPlaying11ConfirmationPage() {
                     onClick={() => togglePlayer('team1', player.id)}
                     className={`p-3 rounded-xl border flex items-center justify-between cursor-pointer transition-all ${
                       isSelected
-                        ? 'bg-pink-500/15 border-pink-500/40 text-pink-100 shadow-sm'
-                        : 'bg-black/20 border-white/10 text-slate-300 hover:border-white/20'
+                        ? 'bg-pink-500/15 border-pink-500 text-[var(--wpl-text-title)] shadow-sm'
+                        : 'border-[var(--wpl-card-border)] bg-[var(--wpl-hover-bg)] text-[var(--wpl-text-body)] hover:border-pink-500/40'
                     }`}
                   >
                     <div className="flex items-center gap-3">
                       <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${
-                        isSelected ? 'bg-pink-500 border-pink-500' : 'border-slate-700 bg-slate-900'
+                        isSelected ? 'bg-pink-500 border-pink-500' : 'border-[var(--wpl-input-border)] bg-[var(--wpl-input-bg)]'
                       }`}>
                         {isSelected && <CheckCircle2 className="w-3.5 h-3.5 text-white" />}
                       </div>
                       <div>
                         <div className="text-sm font-bold">{player.name}</div>
-                        <div className="text-[11px] text-slate-400">{player.role || 'Player'}</div>
+                        <div className="text-[11px] text-[var(--wpl-text-muted)]">{player.role || 'Player'}</div>
                       </div>
                     </div>
 
@@ -310,7 +309,7 @@ export default function WplPlaying11ConfirmationPage() {
                         <button
                           onClick={() => setTeam1Captain(isCap ? '' : player.id)}
                           className={`px-2 py-0.5 rounded text-[10px] font-black border transition-all ${
-                            isCap ? 'bg-amber-500 text-black border-amber-400' : 'bg-white/10 text-slate-400 border-white/10 hover:text-white'
+                            isCap ? 'bg-amber-500 text-black border-amber-400' : 'bg-[var(--wpl-card-bg)] text-[var(--wpl-text-muted)] border-[var(--wpl-card-border)] hover:text-[var(--wpl-text-title)]'
                           }`}
                         >
                           (C)
@@ -318,7 +317,7 @@ export default function WplPlaying11ConfirmationPage() {
                         <button
                           onClick={() => setTeam1Keeper(isWk ? '' : player.id)}
                           className={`px-2 py-0.5 rounded text-[10px] font-black border transition-all ${
-                            isWk ? 'bg-cyan-500 text-black border-cyan-400' : 'bg-white/10 text-slate-400 border-white/10 hover:text-white'
+                            isWk ? 'bg-cyan-500 text-black border-cyan-400' : 'bg-[var(--wpl-card-bg)] text-[var(--wpl-text-muted)] border-[var(--wpl-card-border)] hover:text-[var(--wpl-text-title)]'
                           }`}
                         >
                           (WK)
@@ -332,16 +331,16 @@ export default function WplPlaying11ConfirmationPage() {
           </div>
 
           {/* Team 2 Squad */}
-          <div className="rounded-2xl p-5 border border-white/10 bg-white/5 backdrop-blur-md space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-white/10">
+          <div className="rounded-2xl p-5 border border-[var(--wpl-card-border)] bg-[var(--wpl-card-bg)] shadow-sm space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-[var(--wpl-card-border)]">
               <div>
-                <h2 className="text-lg font-black">{selectedMatch.team2?.name || 'Team 2'}</h2>
-                <p className="text-xs text-slate-400">Select 11 starters and assign roles</p>
+                <h2 className="text-lg font-black text-[var(--wpl-text-title)]">{selectedMatch.team2?.name || 'Team 2'}</h2>
+                <p className="text-xs text-[var(--wpl-text-muted)]">Select 11 starters and assign roles</p>
               </div>
               <span className={`px-3 py-1 rounded-lg text-xs font-black border ${
                 team2Lineup.length === 11 
-                  ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' 
-                  : 'bg-amber-500/10 text-amber-400 border-amber-500/30'
+                  ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30' 
+                  : 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/30'
               }`}>
                 {team2Lineup.length} / 11
               </span>
@@ -359,19 +358,19 @@ export default function WplPlaying11ConfirmationPage() {
                     onClick={() => togglePlayer('team2', player.id)}
                     className={`p-3 rounded-xl border flex items-center justify-between cursor-pointer transition-all ${
                       isSelected
-                        ? 'bg-pink-500/15 border-pink-500/40 text-pink-100 shadow-sm'
-                        : 'bg-black/20 border-white/10 text-slate-300 hover:border-white/20'
+                        ? 'bg-pink-500/15 border-pink-500 text-[var(--wpl-text-title)] shadow-sm'
+                        : 'border-[var(--wpl-card-border)] bg-[var(--wpl-hover-bg)] text-[var(--wpl-text-body)] hover:border-pink-500/40'
                     }`}
                   >
                     <div className="flex items-center gap-3">
                       <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${
-                        isSelected ? 'bg-pink-500 border-pink-500' : 'border-slate-700 bg-slate-900'
+                        isSelected ? 'bg-pink-500 border-pink-500' : 'border-[var(--wpl-input-border)] bg-[var(--wpl-input-bg)]'
                       }`}>
                         {isSelected && <CheckCircle2 className="w-3.5 h-3.5 text-white" />}
                       </div>
                       <div>
                         <div className="text-sm font-bold">{player.name}</div>
-                        <div className="text-[11px] text-slate-400">{player.role || 'Player'}</div>
+                        <div className="text-[11px] text-[var(--wpl-text-muted)]">{player.role || 'Player'}</div>
                       </div>
                     </div>
 
@@ -380,7 +379,7 @@ export default function WplPlaying11ConfirmationPage() {
                         <button
                           onClick={() => setTeam2Captain(isCap ? '' : player.id)}
                           className={`px-2 py-0.5 rounded text-[10px] font-black border transition-all ${
-                            isCap ? 'bg-amber-500 text-black border-amber-400' : 'bg-white/10 text-slate-400 border-white/10 hover:text-white'
+                            isCap ? 'bg-amber-500 text-black border-amber-400' : 'bg-[var(--wpl-card-bg)] text-[var(--wpl-text-muted)] border-[var(--wpl-card-border)] hover:text-[var(--wpl-text-title)]'
                           }`}
                         >
                           (C)
@@ -388,7 +387,7 @@ export default function WplPlaying11ConfirmationPage() {
                         <button
                           onClick={() => setTeam2Keeper(isWk ? '' : player.id)}
                           className={`px-2 py-0.5 rounded text-[10px] font-black border transition-all ${
-                            isWk ? 'bg-cyan-500 text-black border-cyan-400' : 'bg-white/10 text-slate-400 border-white/10 hover:text-white'
+                            isWk ? 'bg-cyan-500 text-black border-cyan-400' : 'bg-[var(--wpl-card-bg)] text-[var(--wpl-text-muted)] border-[var(--wpl-card-border)] hover:text-[var(--wpl-text-title)]'
                           }`}
                         >
                           (WK)

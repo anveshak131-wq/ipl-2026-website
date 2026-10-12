@@ -2612,3 +2612,55 @@
   --wpl-badge-bg: rgba(219, 39, 119, 0.1);
   --wpl-badge-text: #db2777;
 }
+
+
+/* --- WPL Ops Dynamic Theme Tokens --- */
+.wpl-theme-dark {
+  --wpl-canvas-bg: #07080E;
+  --wpl-sidebar-bg: #0B0E17;
+  --wpl-header-bg: rgba(11, 14, 23, 0.85);
+  --wpl-card-bg: rgba(255, 255, 255, 0.04);
+  --wpl-card-solid: #111422;
+  --wpl-card-border: rgba(255, 255, 255, 0.08);
+  --wpl-input-bg: rgba(0, 0, 0, 0.45);
+  --wpl-input-border: rgba(255, 255, 255, 0.12);
+  --wpl-text-title: #ffffff;
+  --wpl-text-body: #e2e8f0;
+  --wpl-text-muted: #94a3b8;
+  --wpl-hover-bg: rgba(255, 255, 255, 0.06);
+}
+
+.wpl-theme-light {
+  --wpl-canvas-bg: #f1f5f9;
+  --wpl-sidebar-bg: #ffffff;
+  --wpl-header-bg: rgba(255, 255, 255, 0.92);
+  --wpl-card-bg: #ffffff;
+  --wpl-card-solid: #ffffff;
+  --wpl-card-border: #cbd5e1;
+  --wpl-input-bg: #ffffff;
+  --wpl-input-border: #cbd5e1;
+  --wpl-text-title: #0f172a;
+  --wpl-text-body: #1e293b;
+  --wpl-text-muted: #64748b;
+  --wpl-hover-bg: #f8fafc;
+}
+
+.wpl-theme-light .wpl-card {
+  background-color: var(--wpl-card-bg);
+  border-color: var(--wpl-card-border);
+  color: var(--wpl-text-body);
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+}
+
+.wpl-theme-light input, 
+.wpl-theme-light select, 
+.wpl-theme-light textarea {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  border-color: #cbd5e1 !important;
+}
+
+.wpl-theme-light input::placeholder, 
+.wpl-theme-light select::placeholder {
+  color: #94a3b8 !important;
+}
