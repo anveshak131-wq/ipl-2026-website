@@ -1,3 +1,4 @@
+pages_build_output_dir = "out"
 # Cloudflare Pages configuration
 name = "ipl-2026-website"
 compatibility_date = "2024-01-01"
