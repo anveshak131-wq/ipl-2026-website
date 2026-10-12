@@ -151,21 +151,55 @@ export default function ScorecardAdminPage() {
     }
   }, [activeTab]);
 
-  const getPlayersByTeam = (teamId: number): Player[] => {
-    return players.filter(player => player.teamId === teamId.toString());
+  const getPlayersByTeam = (teamId: any): Player[] => {
+    const target = String(teamId || "").toLowerCase();
+    return players.filter(player => {
+      const pTeam = String(player.teamId || (player as any).team || "").toLowerCase();
+      return pTeam === target || (target === "12" && (pTeam.includes("rcb") || pTeam === "12")) || (target === "14" && (pTeam.includes("gg") || pTeam === "14")) || (target === "11" && (pTeam.includes("mi") || pTeam === "11")) || (target === "13" && (pTeam.includes("dc") || pTeam === "13")) || (target === "15" && (pTeam.includes("up") || pTeam === "15"));
+    });
   };
 
   const fetchMatches = async () => {
     try {
-      const data = await dataApi.getMatches('wpl');
-      console.log('Fetched WPL matches:', data);
+      let data = await dataApi.getMatches('wpl').catch(() => []);
+      
+      // Merge with local WPL fixtures
+      try {
+        const raw = localStorage.getItem("wpl_matches_fixtures_v2027");
+        if (raw) {
+          const localFixtures = JSON.parse(raw);
+          const combined = [...(data || [])];
+          localFixtures.forEach((lf: any) => {
+            if (!combined.some((m) => String(m.id) === String(lf.id))) {
+              combined.push({
+                id: lf.id,
+                matchNumber: lf.matchNumber,
+                date: lf.scheduledStartTime ? lf.scheduledStartTime.split("T")[0] : "2027-02-12",
+                time: lf.scheduledStartTime ? lf.scheduledStartTime.split("T")[1]?.slice(0, 5) : "19:30",
+                team1: { id: lf.teamAId || "12", name: lf.teamAId?.toUpperCase() || "RCB", shortName: lf.teamAId?.toUpperCase() || "RCB" },
+                team2: { id: lf.teamBId || "14", name: lf.teamBId?.toUpperCase() || "GG", shortName: lf.teamBId?.toUpperCase() || "GG" },
+                status: lf.status?.toLowerCase() || "upcoming",
+                league: "wpl",
+                venue: lf.venue || "M. Chinnaswamy Stadium, Bengaluru"
+              });
+            }
+          });
+          data = combined;
+        }
+      } catch (e) {
+        console.warn("Local fixture parse error in scorecard:", e);
+      }
+
+      console.log("Final WPL matches for scorecard:", data);
       setMatches(data || []);
       if (!data || data.length === 0) {
-        setMessage('⚠ No WPL matches found. Please check Cloudflare KV data.');
+        setMessage("⚠ No WPL matches found. Please verify fixtures.");
+      } else {
+        setMessage("");
       }
     } catch (err) {
-      console.error('Error fetching matches:', err);
-      setMessage('❌ Error fetching WPL matches');
+      console.error("Error fetching matches:", err);
+      setMessage("❌ Error fetching WPL matches");
     }
   };
 
