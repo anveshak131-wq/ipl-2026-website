@@ -14,7 +14,12 @@ export const onRequest = async (context) => {
     return new Response(
       JSON.stringify({
         error: 'Google admin login is not configured',
-        required: ['GOOGLE_CLIENT_ID', 'GOOGLE_CLIENT_SECRET', 'ADMIN_SESSION_SECRET'],
+        missing: [
+          !clientId && 'GOOGLE_CLIENT_ID',
+          !clientSecret && 'GOOGLE_CLIENT_SECRET',
+          !sessionSecret && 'ADMIN_SESSION_SECRET'
+        ].filter(Boolean),
+        available_env_keys: Object.keys(env || {}),
       }),
       {
         status: 500,
