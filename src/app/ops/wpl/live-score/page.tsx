@@ -384,17 +384,35 @@ export default function IPLAdminLiveScoreTablePage() {
     const filtered = raw.filter((y) => wplYears.includes(y));
     return filtered.length ? filtered : wplYears;
   }, [matches]);
-  const visibleMatches = useMemo(() => {
-    // Keep only WPL matches
-    const wplOnly = matches.filter((m: any) => {
-      const isWplLeague = !m.league || m.league.toLowerCase() === "wpl";
-      const t1 = String(m.team1?.id || m.team1?.shortName || m.team1 || "").toLowerCase();
-      const t2 = String(m.team2?.id || m.team2?.shortName || m.team2 || "").toLowerCase();
-      const hasWplTeam = t1.includes("-w") || t2.includes("-w") || t1.includes("upw") || t2.includes("upw") || t1.includes("gg") || t2.includes("gg");
-      return isWplLeague && (hasWplTeam || (m as any).tournament === "wpl");
-    });
+  const isRealWplMatch = (m: any): boolean => {
+    if (!m) return false;
+    
+    // Check league/tournament
+    const league = String(m.league || m.tournament || "").toLowerCase();
+    const t1Name = String(m.team1?.name || m.team1?.shortName || m.team1Id || m.team1 || "").toLowerCase();
+    const t2Name = String(m.team2?.name || m.team2?.shortName || m.team2Id || m.team2 || "").toLowerCase();
 
-    const seasonFiltered = filterMatchesBySeason(wplOnly.length > 0 ? wplOnly : matches, seasonYear);
+    // Reject placeholder / TBD matches completely
+    if (t1Name.includes("tbd") || t2Name.includes("tbd") || !t1Name || !t2Name) return false;
+    if (t1Name === t2Name) return false;
+
+    // Must be a recognized WPL team
+    const wplKeywords = ["rcb-w", "mi-w", "dc-w", "gg", "upw", "warriorz", "giants"];
+    const isT1Wpl = wplKeywords.some((k) => t1Name.includes(k));
+    const isT2Wpl = wplKeywords.some((k) => t2Name.includes(k));
+
+    return (league === "wpl" || (isT1Wpl && isT2Wpl)) && !m.isPlaceholder;
+  };
+
+  const visibleMatches = useMemo(() => {
+    // Only genuine created WPL matches
+    const realMatches = matches.filter(isRealWplMatch);
+    if (!realMatches.length) return [];
+    
+    const seasonFiltered = seasonYear
+      ? realMatches.filter((m: any) => Number(m.season || m.year) === Number(seasonYear))
+      : realMatches;
+      
     return sortMatchesForAdmin(seasonFiltered);
   }, [matches, seasonYear]);
 
@@ -3571,7 +3589,9 @@ export default function IPLAdminLiveScoreTablePage() {
                 className={`w-full ${fieldClass}`}
                 disabled={!visibleMatches.length}
               >
-                <option value="">Select match to score...</option>
+                <option value="">
+                  {visibleMatches.length === 0 ? "No matches created for this season yet" : "Select match to score..."}
+                </option>
                 {visibleMatches.map((m) => (
                   <option key={m.id} value={m.id}>
                     {`${formatWplTeam(m.team1, (m as any).team1Id)} vs ${formatWplTeam(m.team2, (m as any).team2Id)} (Match ${m.matchNumber || m.id})`}
