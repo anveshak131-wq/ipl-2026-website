@@ -16,14 +16,24 @@ import {
 
 const FIXTURES_STORAGE_KEY = 'wpl_matches_fixtures_v2027';
 
-// Default starter squads for WPL teams if API returns unlinked players
-const DEFAULT_WPL_ROSTERS: Record<string, Array<{ name: string; role: string }>> = {
+// Canonical team mappings matching functions/api/players.js
+// 11 = MI-W | 12 = RCB-W | 13 = DC-W | 14 = GG | 15 = UPW
+const TEAM_ALIAS_MAP: Record<string, string[]> = {
+  rcb: ['12', 'rcb', 'rcb-w', 'royal challengers bangalore', 'royal challengers bengaluru'],
+  gg: ['14', 'gg', 'gg-w', 'gujarat giants', 'gujarat'],
+  mi: ['11', 'mi', 'mi-w', 'mumbai indians'],
+  dc: ['13', 'dc', 'dc-w', 'delhi capitals'],
+  upw: ['15', 'upw', 'up warriorz', 'up-warriorz']
+};
+
+// Verified WPL rosters based on functions/api/players.js corrections
+const VERIFIED_WPL_ROSTERS: Record<string, Array<{ name: string; role: string }>> = {
   rcb: [
     { name: 'Smriti Mandhana', role: 'Batter' },
     { name: 'Ellyse Perry', role: 'All-Rounder' },
     { name: 'Richa Ghosh', role: 'Wicket-Keeper' },
-    { name: 'Sophie Devine', role: 'All-Rounder' },
-    { name: 'Renuka Singh Thakur', role: 'Bowler' },
+    { name: 'Pooja Vastrakar', role: 'All-Rounder' },
+    { name: 'Renuka Singh', role: 'Bowler' },
     { name: 'Shreyanka Patil', role: 'All-Rounder' },
     { name: 'Asha Sobhana', role: 'Bowler' },
     { name: 'Georgia Wareham', role: 'All-Rounder' },
@@ -35,11 +45,13 @@ const DEFAULT_WPL_ROSTERS: Record<string, Array<{ name: string; role: string }>>
     { name: 'Indrani Roy', role: 'Wicket-Keeper' },
   ],
   gg: [
-    { name: 'Beth Mooney', role: 'Wicket-Keeper' },
+    { name: 'Sophie Devine', role: 'All-Rounder' }, // Gujarat Giants per functions/api/players.js
     { name: 'Ashleigh Gardner', role: 'All-Rounder' },
-    { name: 'Dayalan Hemalatha', role: 'Batter' },
+    { name: 'Beth Mooney', role: 'Wicket-Keeper' },
     { name: 'Harleen Deol', role: 'Batter' },
+    { name: 'Dayalan Hemalatha', role: 'Batter' },
     { name: 'Laura Wolvaardt', role: 'Batter' },
+    { name: 'Devika Vaidya', role: 'All-Rounder' },
     { name: 'Sneh Rana', role: 'All-Rounder' },
     { name: 'Tanuja Kanwar', role: 'Bowler' },
     { name: 'Shabnam Shakil', role: 'Bowler' },
@@ -47,26 +59,25 @@ const DEFAULT_WPL_ROSTERS: Record<string, Array<{ name: string; role: string }>>
     { name: 'Mannat Kashyap', role: 'Bowler' },
     { name: 'Meghna Singh', role: 'Bowler' },
     { name: 'Sayali Satghare', role: 'All-Rounder' },
-    { name: 'Tarannum Pathan', role: 'All-Rounder' },
   ],
   mi: [
     { name: 'Harmanpreet Kaur', role: 'Batter' },
+    { name: 'Alyssa Healy', role: 'Wicket-Keeper' }, // per functions/api/players.js
     { name: 'Nat Sciver-Brunt', role: 'All-Rounder' },
     { name: 'Hayley Matthews', role: 'All-Rounder' },
     { name: 'Yastika Bhatia', role: 'Wicket-Keeper' },
     { name: 'Amelia Kerr', role: 'All-Rounder' },
-    { name: 'Pooja Vastrakar', role: 'All-Rounder' },
     { name: 'Saika Ishaque', role: 'Bowler' },
     { name: 'Issy Wong', role: 'Bowler' },
     { name: 'Amanjot Kaur', role: 'All-Rounder' },
     { name: 'Sajeevan Sajana', role: 'All-Rounder' },
     { name: 'Jintimani Kalita', role: 'All-Rounder' },
-    { name: 'Amandeep Kaur', role: 'Bowler' },
   ],
   dc: [
     { name: 'Meg Lanning', role: 'Batter' },
     { name: 'Shafali Verma', role: 'Batter' },
     { name: 'Jemimah Rodrigues', role: 'Batter' },
+    { name: 'Deepti Sharma', role: 'All-Rounder' }, // per functions/api/players.js
     { name: 'Alice Capsey', role: 'All-Rounder' },
     { name: 'Marizanne Kapp', role: 'All-Rounder' },
     { name: 'Radha Yadav', role: 'Bowler' },
@@ -74,14 +85,10 @@ const DEFAULT_WPL_ROSTERS: Record<string, Array<{ name: string; role: string }>>
     { name: 'Arundhati Reddy', role: 'Bowler' },
     { name: 'Taniya Bhatia', role: 'Wicket-Keeper' },
     { name: 'Jess Jonassen', role: 'All-Rounder' },
-    { name: 'Minnie Joshi', role: 'Bowler' },
-    { name: 'Sneha Deepthi', role: 'Batter' },
   ],
   upw: [
-    { name: 'Alyssa Healy', role: 'Wicket-Keeper' },
-    { name: 'Chamari Athapaththu', role: 'All-Rounder' },
-    { name: 'Deepti Sharma', role: 'All-Rounder' },
     { name: 'Grace Harris', role: 'All-Rounder' },
+    { name: 'Chamari Athapaththu', role: 'All-Rounder' },
     { name: 'Sophie Ecclestone', role: 'Bowler' },
     { name: 'Shweta Sehrawat', role: 'Batter' },
     { name: 'Kiran Navgire', role: 'Batter' },
@@ -93,14 +100,13 @@ const DEFAULT_WPL_ROSTERS: Record<string, Array<{ name: string; role: string }>>
   ]
 };
 
-// Flexible team normalizer: maps "rcb", "rcb-w", "royal challengers bangalore" -> "rcb"
 function getCanonicalTeamKey(raw: any): string {
   const str = String(raw || '').toLowerCase().trim();
-  if (str.includes('rcb') || str.includes('bangalore') || str.includes('bengaluru')) return 'rcb';
-  if (str.includes('gg') || str.includes('gujarat') || str.includes('giants')) return 'gg';
-  if (str.includes('mi') || str.includes('mumbai') || str.includes('indians')) return 'mi';
-  if (str.includes('dc') || str.includes('delhi') || str.includes('capitals')) return 'dc';
-  if (str.includes('up') || str.includes('warriorz')) return 'upw';
+  for (const [key, aliases] of Object.entries(TEAM_ALIAS_MAP)) {
+    if (aliases.some((alias) => str === alias || str.includes(alias))) {
+      return key;
+    }
+  }
   return str.replace(/[^a-z0-9]/g, '');
 }
 
@@ -111,8 +117,9 @@ export default function WplPlaying11ConfirmationPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
 
-  // Custom added squad players per team (in-memory & local fallback)
+  // Custom added or removed squad players
   const [customPlayers, setCustomPlayers] = useState<Record<string, Array<{ id: string; name: string; role: string; teamId: string }>>>({});
+  const [removedPlayerIds, setRemovedPlayerIds] = useState<Record<string, string[]>>({});
 
   // Form states for adding custom player
   const [newPlayerName1, setNewPlayerName1] = useState('');
@@ -133,7 +140,7 @@ export default function WplPlaying11ConfirmationPage() {
     try {
       const [apiMatches, apiPlayers] = await Promise.all([
         api.getMatches('wpl').catch(() => []),
-        api.getPlayers(undefined, 'wpl').catch(() => []),
+        api.getPlayers(undefined, 'wpl', { includeInactive: true }).catch(() => []),
       ]);
 
       let localFixtures: any[] = [];
@@ -215,20 +222,21 @@ export default function WplPlaying11ConfirmationPage() {
     return getCanonicalTeamKey(selectedMatch.team2?.id || selectedMatch.team2?.name || selectedMatch.team2?.shortName);
   }, [selectedMatch]);
 
-  // Squad 1: Merge API players with defaults & custom-added players
+  // Team 1 Squad: strict canonical match + verified roster
   const team1Squad = useMemo(() => {
     if (!team1Key) return [];
+    const removed = removedPlayerIds[team1Key] || [];
     
-    // 1. From API players matching team
+    // Match from API players
+    const aliases = TEAM_ALIAS_MAP[team1Key] || [team1Key];
     const matched = players.filter((p) => {
-      const pKey = getCanonicalTeamKey(p.teamId || (p as any).team || (p as any).teamShortName);
-      return pKey === team1Key;
+      const rawId = String(p.teamId || (p as any).team || '').toLowerCase().trim();
+      return aliases.some((a) => rawId === a || rawId.includes(a));
     });
 
-    // 2. Fallback to default roster if API returned no players for this team
     let baseList = [...matched];
-    if (baseList.length === 0 && DEFAULT_WPL_ROSTERS[team1Key]) {
-      baseList = DEFAULT_WPL_ROSTERS[team1Key].map((p, idx) => ({
+    if (baseList.length === 0 && VERIFIED_WPL_ROSTERS[team1Key]) {
+      baseList = VERIFIED_WPL_ROSTERS[team1Key].map((p, idx) => ({
         id: `${team1Key}-${idx + 1}`,
         name: p.name,
         role: p.role,
@@ -236,25 +244,24 @@ export default function WplPlaying11ConfirmationPage() {
       } as any));
     }
 
-    // 3. Append any admin-added custom players
     const customs = customPlayers[team1Key] || [];
-    return [...baseList, ...customs];
-  }, [team1Key, players, customPlayers]);
+    return [...baseList, ...customs].filter((p) => !removed.includes(p.id));
+  }, [team1Key, players, customPlayers, removedPlayerIds]);
 
-  // Squad 2: Merge API players with defaults & custom-added players
+  // Team 2 Squad: strict canonical match + verified roster
   const team2Squad = useMemo(() => {
     if (!team2Key) return [];
+    const removed = removedPlayerIds[team2Key] || [];
     
-    // 1. From API players matching team
+    const aliases = TEAM_ALIAS_MAP[team2Key] || [team2Key];
     const matched = players.filter((p) => {
-      const pKey = getCanonicalTeamKey(p.teamId || (p as any).team || (p as any).teamShortName);
-      return pKey === team2Key;
+      const rawId = String(p.teamId || (p as any).team || '').toLowerCase().trim();
+      return aliases.some((a) => rawId === a || rawId.includes(a));
     });
 
-    // 2. Fallback to default roster if API returned no players for this team
     let baseList = [...matched];
-    if (baseList.length === 0 && DEFAULT_WPL_ROSTERS[team2Key]) {
-      baseList = DEFAULT_WPL_ROSTERS[team2Key].map((p, idx) => ({
+    if (baseList.length === 0 && VERIFIED_WPL_ROSTERS[team2Key]) {
+      baseList = VERIFIED_WPL_ROSTERS[team2Key].map((p, idx) => ({
         id: `${team2Key}-${idx + 1}`,
         name: p.name,
         role: p.role,
@@ -262,10 +269,9 @@ export default function WplPlaying11ConfirmationPage() {
       } as any));
     }
 
-    // 3. Append any admin-added custom players
     const customs = customPlayers[team2Key] || [];
-    return [...baseList, ...customs];
-  }, [team2Key, players, customPlayers]);
+    return [...baseList, ...customs].filter((p) => !removed.includes(p.id));
+  }, [team2Key, players, customPlayers, removedPlayerIds]);
 
   const togglePlayer = (team: 'team1' | 'team2', playerId: string) => {
     if (team === 'team1') {
@@ -297,7 +303,15 @@ export default function WplPlaying11ConfirmationPage() {
     }
   };
 
-  // Add custom player to Team 1
+  const handleRemoveFromSquad = (teamKey: string, playerId: string) => {
+    setRemovedPlayerIds((prev) => ({
+      ...prev,
+      [teamKey]: [...(prev[teamKey] || []), playerId],
+    }));
+    setTeam1Lineup((prev) => prev.filter((id) => id !== playerId));
+    setTeam2Lineup((prev) => prev.filter((id) => id !== playerId));
+  };
+
   const handleAddPlayer1 = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newPlayerName1.trim() || !team1Key) return;
@@ -312,14 +326,12 @@ export default function WplPlaying11ConfirmationPage() {
       ...prev,
       [team1Key]: [...(prev[team1Key] || []), newObj],
     }));
-    // Automatically select in 11 if slot is available
     if (team1Lineup.length < 11) {
       setTeam1Lineup((prev) => [...prev, newId]);
     }
     setNewPlayerName1('');
   };
 
-  // Add custom player to Team 2
   const handleAddPlayer2 = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newPlayerName2.trim() || !team2Key) return;
@@ -334,7 +346,6 @@ export default function WplPlaying11ConfirmationPage() {
       ...prev,
       [team2Key]: [...(prev[team2Key] || []), newObj],
     }));
-    // Automatically select in 11 if slot is available
     if (team2Lineup.length < 11) {
       setTeam2Lineup((prev) => [...prev, newId]);
     }
@@ -426,7 +437,7 @@ export default function WplPlaying11ConfirmationPage() {
         </div>
       </div>
 
-      {/* Match Picker Bar */}
+      {/* Match Picker */}
       <div className="p-4 rounded-2xl border border-[var(--wpl-card-border)] bg-[var(--wpl-card-bg)] shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-3 w-full sm:w-auto">
           <Calendar className="w-5 h-5 text-pink-500 dark:text-pink-400 shrink-0" />
@@ -457,7 +468,7 @@ export default function WplPlaying11ConfirmationPage() {
       {/* Squad Columns */}
       {selectedMatch ? (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Team 1 Column */}
+          {/* Team 1 Squad */}
           <div className="rounded-2xl p-5 border border-[var(--wpl-card-border)] bg-[var(--wpl-card-bg)] shadow-sm space-y-4">
             <div className="flex items-center justify-between pb-3 border-b border-[var(--wpl-card-border)]">
               <div>
@@ -473,7 +484,7 @@ export default function WplPlaying11ConfirmationPage() {
               </span>
             </div>
 
-            {/* Quick Add Player to Squad 1 */}
+            {/* Quick Add Player Form */}
             <form onSubmit={handleAddPlayer1} className="flex items-center gap-2 pt-1 pb-2">
               <input
                 type="text"
@@ -529,33 +540,45 @@ export default function WplPlaying11ConfirmationPage() {
                       </div>
                     </div>
 
-                    {isSelected && (
-                      <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
-                        <button
-                          onClick={() => setTeam1Captain(isCap ? '' : player.id)}
-                          className={`px-2 py-0.5 rounded text-[10px] font-black border transition-all ${
-                            isCap ? 'bg-amber-500 text-black border-amber-400' : 'bg-[var(--wpl-card-bg)] text-[var(--wpl-text-muted)] border-[var(--wpl-card-border)] hover:text-[var(--wpl-text-title)]'
-                          }`}
-                        >
-                          (C)
-                        </button>
-                        <button
-                          onClick={() => setTeam1Keeper(isWk ? '' : player.id)}
-                          className={`px-2 py-0.5 rounded text-[10px] font-black border transition-all ${
-                            isWk ? 'bg-cyan-500 text-black border-cyan-400' : 'bg-[var(--wpl-card-bg)] text-[var(--wpl-text-muted)] border-[var(--wpl-card-border)] hover:text-[var(--wpl-text-title)]'
-                          }`}
-                        >
-                          (WK)
-                        </button>
-                      </div>
-                    )}
+                    <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
+                      {isSelected && (
+                        <>
+                          <button
+                            type="button"
+                            onClick={() => setTeam1Captain(isCap ? '' : player.id)}
+                            className={`px-2 py-0.5 rounded text-[10px] font-black border transition-all ${
+                              isCap ? 'bg-amber-500 text-black border-amber-400' : 'bg-[var(--wpl-card-bg)] text-[var(--wpl-text-muted)] border-[var(--wpl-card-border)] hover:text-[var(--wpl-text-title)]'
+                            }`}
+                          >
+                            (C)
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setTeam1Keeper(isWk ? '' : player.id)}
+                            className={`px-2 py-0.5 rounded text-[10px] font-black border transition-all ${
+                              isWk ? 'bg-cyan-500 text-black border-cyan-400' : 'bg-[var(--wpl-card-bg)] text-[var(--wpl-text-muted)] border-[var(--wpl-card-border)] hover:text-[var(--wpl-text-title)]'
+                            }`}
+                          >
+                            (WK)
+                          </button>
+                        </>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveFromSquad(team1Key, player.id)}
+                        title="Remove player from squad"
+                        className="p-1 rounded text-slate-400 hover:text-rose-500 hover:bg-rose-500/10 transition-colors"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
                   </div>
                 );
               })}
             </div>
           </div>
 
-          {/* Team 2 Column */}
+          {/* Team 2 Squad */}
           <div className="rounded-2xl p-5 border border-[var(--wpl-card-border)] bg-[var(--wpl-card-bg)] shadow-sm space-y-4">
             <div className="flex items-center justify-between pb-3 border-b border-[var(--wpl-card-border)]">
               <div>
@@ -571,7 +594,7 @@ export default function WplPlaying11ConfirmationPage() {
               </span>
             </div>
 
-            {/* Quick Add Player to Squad 2 */}
+            {/* Quick Add Player Form */}
             <form onSubmit={handleAddPlayer2} className="flex items-center gap-2 pt-1 pb-2">
               <input
                 type="text"
@@ -627,26 +650,38 @@ export default function WplPlaying11ConfirmationPage() {
                       </div>
                     </div>
 
-                    {isSelected && (
-                      <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
-                        <button
-                          onClick={() => setTeam2Captain(isCap ? '' : player.id)}
-                          className={`px-2 py-0.5 rounded text-[10px] font-black border transition-all ${
-                            isCap ? 'bg-amber-500 text-black border-amber-400' : 'bg-[var(--wpl-card-bg)] text-[var(--wpl-text-muted)] border-[var(--wpl-card-border)] hover:text-[var(--wpl-text-title)]'
-                          }`}
-                        >
-                          (C)
-                        </button>
-                        <button
-                          onClick={() => setTeam2Keeper(isWk ? '' : player.id)}
-                          className={`px-2 py-0.5 rounded text-[10px] font-black border transition-all ${
-                            isWk ? 'bg-cyan-500 text-black border-cyan-400' : 'bg-[var(--wpl-card-bg)] text-[var(--wpl-text-muted)] border-[var(--wpl-card-border)] hover:text-[var(--wpl-text-title)]'
-                          }`}
-                        >
-                          (WK)
-                        </button>
-                      </div>
-                    )}
+                    <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
+                      {isSelected && (
+                        <>
+                          <button
+                            type="button"
+                            onClick={() => setTeam2Captain(isCap ? '' : player.id)}
+                            className={`px-2 py-0.5 rounded text-[10px] font-black border transition-all ${
+                              isCap ? 'bg-amber-500 text-black border-amber-400' : 'bg-[var(--wpl-card-bg)] text-[var(--wpl-text-muted)] border-[var(--wpl-card-border)] hover:text-[var(--wpl-text-title)]'
+                            }`}
+                          >
+                            (C)
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setTeam2Keeper(isWk ? '' : player.id)}
+                            className={`px-2 py-0.5 rounded text-[10px] font-black border transition-all ${
+                              isWk ? 'bg-cyan-500 text-black border-cyan-400' : 'bg-[var(--wpl-card-bg)] text-[var(--wpl-text-muted)] border-[var(--wpl-card-border)] hover:text-[var(--wpl-text-title)]'
+                            }`}
+                          >
+                            (WK)
+                          </button>
+                        </>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveFromSquad(team2Key, player.id)}
+                        title="Remove player from squad"
+                        className="p-1 rounded text-slate-400 hover:text-rose-500 hover:bg-rose-500/10 transition-colors"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
                   </div>
                 );
               })}
