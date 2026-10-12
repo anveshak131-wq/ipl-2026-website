@@ -464,11 +464,57 @@ export default function IPLAdminLiveScoreTablePage() {
     (async () => {
       try {
         const [matchesData, playersData] = await Promise.all([
-          api.getMatches(LEAGUE, { includeAll: true, nocache: true }),
-          api.getPlayers(undefined, LEAGUE),
+          api.getMatches(LEAGUE, { includeAll: true, nocache: true }).catch(() => []),
+          api.getPlayers(undefined, LEAGUE).catch(() => []),
         ]);
 
-        const nextMatches = (matchesData || []) as Match[];
+        let combinedMatches = [...((matchesData || []) as Match[])];
+
+        // Merge matches configured in /ops/wpl/matches
+        try {
+          const raw = localStorage.getItem("wpl_matches_fixtures_v2027");
+          if (raw) {
+            const localFixtures = JSON.parse(raw);
+            localFixtures.forEach((lf: any) => {
+              if (!combinedMatches.some((m) => String(m.id) === String(lf.id))) {
+                const teamAName = lf.teamAId?.toUpperCase() || "TEAM 1";
+                const teamBName = lf.teamBId?.toUpperCase() || "TEAM 2";
+                const startTime = lf.scheduledStartTime || "2027-02-12T19:30:00Z";
+                const matchDate = startTime.split("T")[0];
+                const matchTime = startTime.split("T")[1]?.slice(0, 5) || "19:30";
+
+                combinedMatches.push({
+                  id: String(lf.id),
+                  matchNumber: lf.matchNumber || 1,
+                  date: matchDate,
+                  time: matchTime,
+                  dateTimeGMT: startTime,
+                  venue: lf.venue || "M. Chinnaswamy Stadium, Bengaluru",
+                  team1: {
+                    id: lf.teamAId || "rcb",
+                    name: teamAName,
+                    shortName: teamAName,
+                  },
+                  team2: {
+                    id: lf.teamBId || "gg",
+                    name: teamBName,
+                    shortName: teamBName,
+                  },
+                  team1Score: { runs: 0, wickets: 0, overs: 0 },
+                  team2Score: { runs: 0, wickets: 0, overs: 0 },
+                  status: lf.status?.toLowerCase() || "upcoming",
+                  league: "wpl",
+                  toss: lf.toss || null,
+                  playing11: lf.playing11 || null,
+                } as unknown as Match);
+              }
+            });
+          }
+        } catch (err) {
+          console.warn("Failed merging wpl_matches_fixtures_v2027 in live score:", err);
+        }
+
+        const nextMatches = combinedMatches;
         setMatches(nextMatches);
         setPlayers((playersData || []) as Player[]);
         setSeasonYear((prev) => {
