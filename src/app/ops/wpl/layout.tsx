@@ -1,6 +1,6 @@
-import WPLAdminShell from "@/components/admin/WPLAdminShell";
-'use client';
+"use client";
 
+import WPLAdminShell from "@/components/admin/WPLAdminShell";
 import { useState, useEffect, useRef } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { Search } from "lucide-react";
