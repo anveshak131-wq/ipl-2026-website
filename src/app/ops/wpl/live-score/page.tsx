@@ -18,7 +18,7 @@ function formatWplTeam(team: any, fallbackId?: string): string {
 }
 
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState, useCallback } from 'react';
 import { api } from '@/lib/data';
 import {
   filterMatchesBySeason,
