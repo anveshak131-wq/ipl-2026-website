@@ -1,3 +1,8 @@
+
+function getAuthKV(env) {
+  return env?.SPORTS_KV || env?.IPL_CACHE || env?.KV || null;
+}
+
 const ADMIN_SESSION_COOKIE = 'sportsup_admin_session';
 const OAUTH_STATE_COOKIE = 'sportsup_admin_oauth_state';
 const ADMIN_CSRF_HEADER = 'X-CSRF-Token';
@@ -501,14 +506,25 @@ export async function verifyGoogleIdToken(idToken, env) {
 }
 
 export async function upsertGoogleAdminUser(env, googleUser) {
-  if (!env?.SPORTS_KV) {
-    throw new Error('SPORTS_KV is required for admin sessions');
+  const kv = getAuthKV(env);
+  const email = String(googleUser.email || "").toLowerCase();
+  const nowIso = new Date().toISOString();
+  const token = randomToken(32);
+  let existingUser = {};
+
+  if (kv) {
+    try {
+      const existingRaw = await kv.get(`user:${email}`);
+      if (existingRaw) existingUser = JSON.parse(existingRaw);
+    } catch {
+      existingUser = {};
+    }
   }
 
   const email = String(googleUser.email || '').toLowerCase();
   const nowIso = new Date().toISOString();
   const token = randomToken(32);
-  const existingRaw = await env.SPORTS_KV.get(`user:${email}`);
+  // Handled above via getAuthKV
   let existingUser = {};
 
   if (existingRaw) {
@@ -542,21 +558,26 @@ export async function upsertGoogleAdminUser(env, googleUser) {
     isBlocked: false,
   };
 
-  await env.SPORTS_KV.put(`user:${email}`, JSON.stringify(user), {
-    expirationTtl: 365 * 24 * 60 * 60,
-  });
-
-  await env.SPORTS_KV.put(
-    `token:${token}`,
-    JSON.stringify({
-      userId: user.id,
-      email,
-      role,
-      createdAt: nowIso,
-      provider: 'google',
-    }),
-    { expirationTtl: ADMIN_SESSION_MAX_AGE_SECONDS },
-  );
+  if (kv) {
+    try {
+      await kv.put(`user:${email}`, JSON.stringify(user), {
+        expirationTtl: 365 * 24 * 60 * 60,
+      });
+      await kv.put(
+        `token:${token}`,
+        JSON.stringify({
+          userId: user.id,
+          email,
+          role,
+          createdAt: nowIso,
+          provider: "google",
+        }),
+        { expirationTtl: ADMIN_SESSION_MAX_AGE_SECONDS }
+      );
+    } catch (e) {
+      console.warn("KV write warning during admin auth:", e);
+    }
+  }
 
   return {
     email,
@@ -568,8 +589,13 @@ export async function upsertGoogleAdminUser(env, googleUser) {
 }
 
 export async function revokeAdminSessionToken(env, token) {
-  if (env?.SPORTS_KV && token) {
-    await env.SPORTS_KV.delete(`token:${token}`);
+  const kv = getAuthKV(env);
+  if (kv && token) {
+    try {
+      await kv.delete(`token:${token}`);
+    } catch (e) {
+      console.warn("KV delete warning:", e);
+    }
   }
 }
 
