@@ -515,28 +515,16 @@ export async function upsertGoogleAdminUser(env, googleUser) {
   if (kv) {
     try {
       const existingRaw = await kv.get(`user:${email}`);
-      if (existingRaw) existingUser = JSON.parse(existingRaw);
-    } catch {
-      existingUser = {};
-    }
-  }
-
-  const email = String(googleUser.email || '').toLowerCase();
-  const nowIso = new Date().toISOString();
-  const token = randomToken(32);
-  // Handled above via getAuthKV
-  let existingUser = {};
-
-  if (existingRaw) {
-    try {
-      existingUser = JSON.parse(existingRaw);
+      if (existingRaw) {
+        existingUser = JSON.parse(existingRaw);
+      }
     } catch {
       existingUser = {};
     }
   }
 
   if (existingUser.isBlocked) {
-    throw new Error('This admin account is blocked');
+    throw new Error("This admin account is blocked");
   }
 
   const role = getAdminRoleForEmail(env, email, existingUser.role);
@@ -547,10 +535,10 @@ export async function upsertGoogleAdminUser(env, googleUser) {
     username: email,
     email,
     name: googleUser.name || existingUser.name || email,
-    picture: googleUser.picture || existingUser.picture || '',
+    picture: googleUser.picture || existingUser.picture || "",
     role,
     token,
-    authProvider: 'google',
+    authProvider: "google",
     emailVerified: true,
     lastLogin: nowIso,
     updatedAt: nowIso,
@@ -572,7 +560,7 @@ export async function upsertGoogleAdminUser(env, googleUser) {
           createdAt: nowIso,
           provider: "google",
         }),
-        { expirationTtl: ADMIN_SESSION_MAX_AGE_SECONDS }
+        { expirationTtl: ADMIN_SESSION_MAX_AGE_SECONDS },
       );
     } catch (e) {
       console.warn("KV write warning during admin auth:", e);
