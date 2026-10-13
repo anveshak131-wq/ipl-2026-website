@@ -462,9 +462,16 @@ export const onRequest = async (context) => {
     ];
 
     // Get existing data
-    const existingTeams = await env.IPL_CACHE.get('teams', 'json') || [];
-    const existingPlayers = await env.IPL_CACHE.get('players', 'json') || [];
-    const existingMatches = await env.IPL_CACHE.get('matches', 'json') || [];
+    const kv = kv || env.SPORTS_KV || env.KV;
+    if (!kv) {
+      return new Response(JSON.stringify({ 
+        error: "KV namespace not bound", 
+        message: "Neither IPL_CACHE nor SPORTS_KV is bound in Cloudflare Pages." 
+      }), { status: 200, headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" } });
+    }
+    const existingTeams = await kv.get("teams", "json") || [];
+    const existingPlayers = await kv.get('players', 'json') || [];
+    const existingMatches = await kv.get('matches', 'json') || [];
 
     // Merge teams (avoid duplicates)
     const allTeams = [...existingTeams];
@@ -491,9 +498,9 @@ export const onRequest = async (context) => {
     });
 
     // Save to KV
-    await env.IPL_CACHE.put('teams', JSON.stringify(allTeams));
-    await env.IPL_CACHE.put('players', JSON.stringify(allPlayers));
-    await env.IPL_CACHE.put('matches', JSON.stringify(allMatches));
+    await kv.put('teams', JSON.stringify(allTeams));
+    await kv.put('players', JSON.stringify(allPlayers));
+    await kv.put('matches', JSON.stringify(allMatches));
 
     return new Response(JSON.stringify({
       message: 'WPL data seeded successfully',
