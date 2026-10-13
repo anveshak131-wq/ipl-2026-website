@@ -23,7 +23,8 @@ export default function GlobalErrorHandler({
   return (
     <div className="min-h-[50vh] flex flex-col items-center justify-center p-6 text-center text-white">
       <h2 className="text-xl font-bold mb-2">Something went wrong</h2>
-      <p className="text-sm text-zinc-400 mb-4">A fresh version of this page is loading...</p>
+      <p className="text-sm text-zinc-400 mb-2">A fresh version of this page is loading...</p>
+      <pre className="text-xs text-rose-300 bg-black/60 p-3 rounded max-w-xl overflow-auto text-left mb-4">{error?.message || String(error)}</pre>
       <button
         type="button"
         onClick={() => window.location.reload()}

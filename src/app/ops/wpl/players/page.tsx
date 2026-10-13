@@ -1,5 +1,34 @@
 'use client';
 
+import { Suspense, useState, useEffect, useMemo, ReactNode } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useLeague } from '@/contexts/LeagueContext';
+import ModernDialog from '@/components/admin/ModernDialog';
+import LeagueSwitch from '@/components/admin/LeagueSwitch';
+import PlayersStatsSubNav from '@/components/admin/PlayersStatsSubNav';
+import WPLTeamsManager from '@/components/admin/WPLTeamsManager';
+import { Player, Team } from '@/types';
+import { api } from '@/lib/data';
+import { sortPlayersByRoleAndAge } from '@/lib/playerSort';
+import { computeRoleRawScore, applyReliability, gradeFromPercentile } from '@/lib/playerRanking';
+import { parseDateDDMMYYYY, calculateAge, isValidDate, formatDateMonthDDYYYY, parseDateMonthDDYYYY, isValidDateForLeague } from '@/lib/dateUtils';
+import { CustomEmoji } from '@/components/emoji/Emoji';
+import FlagImage from '@/components/ui/FlagImage';
+import CustomSelect from '@/components/ui/CustomSelect';
+import { jsPDF, GState } from 'jspdf';
+import autoTable, { type Styles } from 'jspdf-autotable';
+import * as ExcelJS from 'exceljs';
+import { Search, Filter, Edit2, X, Users, TrendingUp, Award, Target, Zap, ChevronDown, ChevronUp, SortAsc, SortDesc, User, Shirt, Calendar, BarChart3, Plus, Trash2, Download, Upload, Shield, Activity, Hash, Grid3x3, List, Eye, Star, Copy, History, FileSpreadsheet, FileText, FileDown, Database, DatabaseBackup } from 'lucide-react';
+import AdminPlayersTable from '@/components/admin/players/AdminPlayersTable';
+import AdminPlayerDetailsModal from '@/components/admin/players/AdminPlayerDetailsModal';
+import AdminPlayersGridPanel from '@/components/admin/players/AdminPlayersGridPanel';
+import AdminPlayerBasicInfoSection from '@/components/admin/players/AdminPlayerBasicInfoSection';
+import AdminPlayerFormProgress from '@/components/admin/players/AdminPlayerFormProgress';
+import BattingStatsPage from '@/components/admin/player-stats/BattingStatsWorkspace';
+import BowlingStatsPage from '@/components/admin/player-stats/BowlingStatsWorkspace';
+import { getQuickFilterCounts, PLAYER_QUICK_FILTERS, playerMatchesQuickFilter, PlayerQuickFilterId } from '@/lib/admin/playerQuickFilters';
+import '@/styles/flags.css';
+
 const OFFICIAL_WPL_FALLBACK_PLAYERS = [
   {
     "id": "wpl-rcb-1",
@@ -813,34 +842,6 @@ const OFFICIAL_WPL_FALLBACK_PLAYERS = [
   }
 ];
 
-import { Suspense, useState, useEffect, useMemo, ReactNode } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { useLeague } from '@/contexts/LeagueContext';
-import ModernDialog from '@/components/admin/ModernDialog';
-import LeagueSwitch from '@/components/admin/LeagueSwitch';
-import PlayersStatsSubNav from '@/components/admin/PlayersStatsSubNav';
-import WPLTeamsManager from '@/components/admin/WPLTeamsManager';
-import { Player, Team } from '@/types';
-import { api } from '@/lib/data';
-import { sortPlayersByRoleAndAge } from '@/lib/playerSort';
-import { computeRoleRawScore, applyReliability, gradeFromPercentile } from '@/lib/playerRanking';
-import { parseDateDDMMYYYY, calculateAge, isValidDate, formatDateMonthDDYYYY, parseDateMonthDDYYYY, isValidDateForLeague } from '@/lib/dateUtils';
-import { CustomEmoji } from '@/components/emoji/Emoji';
-import FlagImage from '@/components/ui/FlagImage';
-import CustomSelect from '@/components/ui/CustomSelect';
-import { jsPDF, GState } from 'jspdf';
-import autoTable, { type Styles } from 'jspdf-autotable';
-import * as ExcelJS from 'exceljs';
-import { Search, Filter, Edit2, X, Users, TrendingUp, Award, Target, Zap, ChevronDown, ChevronUp, SortAsc, SortDesc, User, Shirt, Calendar, BarChart3, Plus, Trash2, Download, Upload, Shield, Activity, Hash, Grid3x3, List, Eye, Star, Copy, History, FileSpreadsheet, FileText, FileDown, Database, DatabaseBackup } from 'lucide-react';
-import AdminPlayersTable from '@/components/admin/players/AdminPlayersTable';
-import AdminPlayerDetailsModal from '@/components/admin/players/AdminPlayerDetailsModal';
-import AdminPlayersGridPanel from '@/components/admin/players/AdminPlayersGridPanel';
-import AdminPlayerBasicInfoSection from '@/components/admin/players/AdminPlayerBasicInfoSection';
-import AdminPlayerFormProgress from '@/components/admin/players/AdminPlayerFormProgress';
-import BattingStatsPage from '@/components/admin/player-stats/BattingStatsWorkspace';
-import BowlingStatsPage from '@/components/admin/player-stats/BowlingStatsWorkspace';
-import { getQuickFilterCounts, PLAYER_QUICK_FILTERS, playerMatchesQuickFilter, PlayerQuickFilterId } from '@/lib/admin/playerQuickFilters';
-import '@/styles/flags.css';
 
 // Data Integrity Helper Functions
 const findDuplicatePlayers = (players: Player[]): Array<{player: Player; reason: string}> => {
