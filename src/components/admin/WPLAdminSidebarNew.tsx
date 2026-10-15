@@ -47,7 +47,7 @@ const menuItems: MenuItem[] = [
 
   // League Data
   { href: "/ops/wpl/teams", label: "Teams", icon: <Shield className="w-4 h-4" />, group: "League Data" },
-  { href: "/ops/wpl/players", label: "Players", icon: <Users className="w-4 h-4" />, group: "League Data" },
+  { href: "/ops/wpl/squads", label: "Players", icon: <Users className="w-4 h-4" />, group: "League Data" },
   { href: "/ops/wpl/batting-stats", label: "Batting Stats", icon: <TrendingUp className="w-4 h-4" />, group: "League Data" },
   { href: "/ops/wpl/bowling-stats", label: "Bowling Stats", icon: <TrendingUp className="w-4 h-4" />, group: "League Data" },
   { href: "/ops/wpl/venues", label: "Venues", icon: <MapPin className="w-4 h-4" />, group: "League Data" },
