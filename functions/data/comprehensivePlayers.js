@@ -5,7 +5,7 @@ export const fallbackIplPlayers = [
     "role": "Batsman",
     "allRounderType": "",
     "teamId": "2",
-    "team": "Mumbai Indians",
+    "team": "2",
     "teamShortName": "MI",
     "league": "ipl",
     "age": 38,
@@ -46,15 +46,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "189",
     "name": "Ajinkya Rahane",
     "role": "Batsman",
     "allRounderType": "",
-    "teamId": "9",
-    "team": "Kolkata Knight Riders",
+    "teamId": "4",
+    "team": "4",
     "teamShortName": "KKR",
     "league": "ipl",
     "age": 37,
@@ -95,15 +96,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "78",
     "name": "Virat Kohli",
     "role": "Batsman",
     "allRounderType": "",
-    "teamId": "1",
-    "team": "Royal Challengers Bangalore",
+    "teamId": "3",
+    "team": "3",
     "teamShortName": "RCB",
     "league": "ipl",
     "age": 37,
@@ -144,15 +146,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "21",
     "name": "David Miller",
     "role": "Batsman",
     "allRounderType": "",
-    "teamId": "6",
-    "team": "Delhi Capitals",
+    "teamId": "10",
+    "team": "10",
     "teamShortName": "DC",
     "league": "ipl",
     "age": 36,
@@ -193,15 +196,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "221",
     "name": "Manish Pandey",
     "role": "Batsman",
     "allRounderType": "",
-    "teamId": "9",
-    "team": "Kolkata Knight Riders",
+    "teamId": "4",
+    "team": "4",
     "teamShortName": "KKR",
     "league": "ipl",
     "age": 36,
@@ -242,7 +246,8 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "82",
@@ -250,7 +255,7 @@ export const fallbackIplPlayers = [
     "role": "Batsman",
     "allRounderType": "",
     "teamId": "2",
-    "team": "Mumbai Indians",
+    "team": "2",
     "teamShortName": "MI",
     "league": "ipl",
     "age": 35,
@@ -291,15 +296,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "43",
     "name": "Rahul Tripathi",
     "role": "Batsman",
     "allRounderType": "",
-    "teamId": "9",
-    "team": "Kolkata Knight Riders",
+    "teamId": "1",
+    "team": "1",
     "teamShortName": "KKR",
     "league": "ipl",
     "age": 35,
@@ -340,15 +346,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "155",
     "name": "Karun Nair",
     "role": "Batsman",
     "allRounderType": "",
-    "teamId": "6",
-    "team": "Delhi Capitals",
+    "teamId": "5",
+    "team": "5",
     "teamShortName": "DC",
     "league": "ipl",
     "age": 34,
@@ -389,15 +396,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "79",
     "name": "Rajat Patidar",
     "role": "Batsman",
     "allRounderType": "",
-    "teamId": "1",
-    "team": "Royal Challengers Bangalore",
+    "teamId": "3",
+    "team": "3",
     "teamShortName": "RCB",
     "league": "ipl",
     "age": 32,
@@ -438,15 +446,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "188",
     "name": "Rovman Powell",
     "role": "Batsman",
     "allRounderType": "",
-    "teamId": "9",
-    "team": "Kolkata Knight Riders",
+    "teamId": "4",
+    "team": "4",
     "teamShortName": "KKR",
     "league": "ipl",
     "age": 32,
@@ -487,15 +496,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "193",
     "name": "Nitish Rana",
     "role": "Batsman",
     "allRounderType": "",
-    "teamId": "6",
-    "team": "Delhi Capitals",
+    "teamId": "7",
+    "team": "7",
     "teamShortName": "DC",
     "league": "ipl",
     "age": 32,
@@ -536,15 +546,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "89",
     "name": "Travis Head",
     "role": "Batsman",
     "allRounderType": "",
-    "teamId": "3",
-    "team": "Sunrisers Hyderabad",
+    "teamId": "8",
+    "team": "8",
     "teamShortName": "SRH",
     "league": "ipl",
     "age": 32,
@@ -585,15 +596,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "205",
     "name": "Shubham Dubey",
     "role": "Batsman",
     "allRounderType": "",
-    "teamId": "8",
-    "team": "Rajasthan Royals",
+    "teamId": "7",
+    "team": "7",
     "teamShortName": "RR",
     "league": "ipl",
     "age": 31,
@@ -634,7 +646,8 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "134",
@@ -642,7 +655,7 @@ export const fallbackIplPlayers = [
     "role": "Batsman",
     "allRounderType": "",
     "teamId": "7",
-    "team": "Lucknow Super Giants",
+    "team": "7",
     "teamShortName": "LSG",
     "league": "ipl",
     "age": 31,
@@ -683,7 +696,8 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "26",
@@ -691,7 +705,7 @@ export const fallbackIplPlayers = [
     "role": "Batsman",
     "allRounderType": "",
     "teamId": "6",
-    "team": "Delhi Capitals",
+    "team": "6",
     "teamShortName": "DC",
     "league": "ipl",
     "age": 31,
@@ -732,15 +746,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "122",
     "name": "Shreyas Iyer",
     "role": "Batsman",
     "allRounderType": "",
-    "teamId": "5",
-    "team": "Punjab Kings",
+    "teamId": "6",
+    "team": "6",
     "teamShortName": "PBKS",
     "league": "ipl",
     "age": 31,
@@ -781,7 +796,8 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "314",
@@ -789,7 +805,7 @@ export const fallbackIplPlayers = [
     "role": "Batsman",
     "allRounderType": "",
     "teamId": "10",
-    "team": "Chennai Super Kings",
+    "team": "10",
     "teamShortName": "CSK",
     "league": "ipl",
     "age": 30,
@@ -830,15 +846,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "225",
     "name": "Tim David",
     "role": "Batsman",
     "allRounderType": "",
-    "teamId": "1",
-    "team": "Royal Challengers Bangalore",
+    "teamId": "3",
+    "team": "3",
     "teamShortName": "RCB",
     "league": "ipl",
     "age": 29,
@@ -879,7 +896,8 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "51",
@@ -887,7 +905,7 @@ export const fallbackIplPlayers = [
     "role": "Batsman",
     "allRounderType": "",
     "teamId": "9",
-    "team": "Kolkata Knight Riders",
+    "team": "9",
     "teamShortName": "KKR",
     "league": "ipl",
     "age": 29,
@@ -928,15 +946,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "207",
     "name": "Himmat Singh",
     "role": "Batsman",
     "allRounderType": "",
-    "teamId": "7",
-    "team": "Lucknow Super Giants",
+    "teamId": "10",
+    "team": "10",
     "teamShortName": "LSG",
     "league": "ipl",
     "age": 29,
@@ -977,15 +996,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "109",
     "name": "Shimron Hetmyer",
     "role": "Batsman",
     "allRounderType": "",
-    "teamId": "8",
-    "team": "Rajasthan Royals",
+    "teamId": "7",
+    "team": "7",
     "teamShortName": "RR",
     "league": "ipl",
     "age": 29,
@@ -1026,15 +1046,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "91",
     "name": "Ruturaj Gaikwad",
     "role": "Batsman",
     "allRounderType": "",
-    "teamId": "10",
-    "team": "Chennai Super Kings",
+    "teamId": "1",
+    "team": "1",
     "teamShortName": "CSK",
     "league": "ipl",
     "age": 28,
@@ -1075,22 +1096,23 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "99",
     "name": "Rinku Singh",
     "role": "Batsman",
     "allRounderType": "",
-    "teamId": "9",
-    "team": "Kolkata Knight Riders",
+    "teamId": "4",
+    "team": "4",
     "teamShortName": "KKR",
     "league": "ipl",
     "age": 28,
     "dateOfBirth": "1997-10-12",
     "nationality": "India",
     "jerseyNumber": 35,
-    "isCaptain": false,
+    "isCaptain": true,
     "battingStyle": "Left-handed bat",
     "bowlingStyle": "Right-arm off-break",
     "transferAcquiredVia": "auction",
@@ -1124,7 +1146,8 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "41",
@@ -1132,7 +1155,7 @@ export const fallbackIplPlayers = [
     "role": "Batsman",
     "allRounderType": "",
     "teamId": "10",
-    "team": "Chennai Super Kings",
+    "team": "10",
     "teamShortName": "CSK",
     "league": "ipl",
     "age": 28,
@@ -1173,7 +1196,8 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "14",
@@ -1181,7 +1205,7 @@ export const fallbackIplPlayers = [
     "role": "Batsman",
     "allRounderType": "",
     "teamId": "6",
-    "team": "Delhi Capitals",
+    "team": "6",
     "teamShortName": "DC",
     "league": "ipl",
     "age": 27,
@@ -1222,7 +1246,8 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "29",
@@ -1230,7 +1255,7 @@ export const fallbackIplPlayers = [
     "role": "Batsman",
     "allRounderType": "",
     "teamId": "9",
-    "team": "Kolkata Knight Riders",
+    "team": "9",
     "teamShortName": "KKR",
     "league": "ipl",
     "age": 26,
@@ -1271,15 +1296,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "111",
     "name": "Shubman Gill",
     "role": "Batsman",
     "allRounderType": "",
-    "teamId": "4",
-    "team": "Gujarat Titans",
+    "teamId": "9",
+    "team": "9",
     "teamShortName": "GT",
     "league": "ipl",
     "age": 26,
@@ -1320,7 +1346,8 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "42",
@@ -1328,7 +1355,7 @@ export const fallbackIplPlayers = [
     "role": "Batsman",
     "allRounderType": "",
     "teamId": "6",
-    "team": "Delhi Capitals",
+    "team": "6",
     "teamShortName": "DC",
     "league": "ipl",
     "age": 26,
@@ -1369,7 +1396,8 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "160",
@@ -1377,7 +1405,7 @@ export const fallbackIplPlayers = [
     "role": "Batsman",
     "allRounderType": "",
     "teamId": "2",
-    "team": "Mumbai Indians",
+    "team": "2",
     "teamShortName": "MI",
     "league": "ipl",
     "age": 26,
@@ -1418,15 +1446,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "300",
     "name": "Jack Edwards",
     "role": "Batsman",
     "allRounderType": "",
-    "teamId": "3",
-    "team": "Sunrisers Hyderabad",
+    "teamId": "8",
+    "team": "8",
     "teamShortName": "SRH",
     "league": "ipl",
     "age": 25,
@@ -1467,15 +1496,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "135",
     "name": "Devdutt Padikkal",
     "role": "Batsman",
     "allRounderType": "",
-    "teamId": "1",
-    "team": "Royal Challengers Bangalore",
+    "teamId": "3",
+    "team": "3",
     "teamShortName": "RCB",
     "league": "ipl",
     "age": 25,
@@ -1516,7 +1546,8 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "279",
@@ -1524,7 +1555,7 @@ export const fallbackIplPlayers = [
     "role": "Batsman",
     "allRounderType": "",
     "teamId": "5",
-    "team": "Punjab Kings",
+    "team": "5",
     "teamShortName": "PBKS",
     "league": "ipl",
     "age": 25,
@@ -1565,15 +1596,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "158",
     "name": "Nehal Wadhera",
     "role": "Batsman",
     "allRounderType": "",
-    "teamId": "5",
-    "team": "Punjab Kings",
+    "teamId": "6",
+    "team": "6",
     "teamShortName": "PBKS",
     "league": "ipl",
     "age": 25,
@@ -1614,15 +1646,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "253",
     "name": "Priyansh Arya",
     "role": "Batsman",
     "allRounderType": "",
-    "teamId": "5",
-    "team": "Punjab Kings",
+    "teamId": "6",
+    "team": "6",
     "teamShortName": "PBKS",
     "league": "ipl",
     "age": 24,
@@ -1663,15 +1696,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "112",
     "name": "Sai Sudharsan",
     "role": "Batsman",
     "allRounderType": "",
-    "teamId": "4",
-    "team": "Gujarat Titans",
+    "teamId": "9",
+    "team": "9",
     "teamShortName": "GT",
     "league": "ipl",
     "age": 24,
@@ -1712,15 +1746,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "106",
     "name": "Yashasvi Jaiswal",
     "role": "Batsman",
     "allRounderType": "",
-    "teamId": "8",
-    "team": "Rajasthan Royals",
+    "teamId": "7",
+    "team": "7",
     "teamShortName": "RR",
     "league": "ipl",
     "age": 24,
@@ -1761,15 +1796,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "267",
     "name": "Aniket Verma",
     "role": "Batsman",
     "allRounderType": "",
-    "teamId": "3",
-    "team": "Sunrisers Hyderabad",
+    "teamId": "8",
+    "team": "8",
     "teamShortName": "SRH",
     "league": "ipl",
     "age": 24,
@@ -1810,7 +1846,8 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "85",
@@ -1818,7 +1855,7 @@ export const fallbackIplPlayers = [
     "role": "Batsman",
     "allRounderType": "",
     "teamId": "2",
-    "team": "Mumbai Indians",
+    "team": "2",
     "teamShortName": "MI",
     "league": "ipl",
     "age": 23,
@@ -1859,15 +1896,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "237",
     "name": "Harnoor Singh",
     "role": "Batsman",
     "allRounderType": "",
-    "teamId": "5",
-    "team": "Punjab Kings",
+    "teamId": "6",
+    "team": "6",
     "teamShortName": "PBKS",
     "league": "ipl",
     "age": 23,
@@ -1908,7 +1946,8 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "294",
@@ -1916,7 +1955,7 @@ export const fallbackIplPlayers = [
     "role": "Batsman",
     "allRounderType": "",
     "teamId": "10",
-    "team": "Chennai Super Kings",
+    "team": "10",
     "teamShortName": "CSK",
     "league": "ipl",
     "age": 22,
@@ -1957,15 +1996,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "301",
     "name": "Smaran Ravichandran",
     "role": "Batsman",
     "allRounderType": "",
-    "teamId": "3",
-    "team": "Sunrisers Hyderabad",
+    "teamId": "8",
+    "team": "8",
     "teamShortName": "SRH",
     "league": "ipl",
     "age": 22,
@@ -2006,7 +2046,8 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "19",
@@ -2014,7 +2055,7 @@ export const fallbackIplPlayers = [
     "role": "Batsman",
     "allRounderType": "",
     "teamId": "7",
-    "team": "Lucknow Super Giants",
+    "team": "7",
     "teamShortName": "LSG",
     "league": "ipl",
     "age": 22,
@@ -2055,15 +2096,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "162",
     "name": "Sameer Rizvi",
     "role": "Batsman",
     "allRounderType": "",
-    "teamId": "6",
-    "team": "Delhi Capitals",
+    "teamId": "5",
+    "team": "5",
     "teamShortName": "DC",
     "league": "ipl",
     "age": 22,
@@ -2104,7 +2146,8 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "70",
@@ -2112,7 +2155,7 @@ export const fallbackIplPlayers = [
     "role": "Batsman",
     "allRounderType": "",
     "teamId": "8",
-    "team": "Rajasthan Royals",
+    "team": "8",
     "teamShortName": "RR",
     "league": "ipl",
     "age": 21,
@@ -2153,15 +2196,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "156",
     "name": "Angkrish Raghuvanshi",
     "role": "Batsman",
     "allRounderType": "",
-    "teamId": "9",
-    "team": "Kolkata Knight Riders",
+    "teamId": "4",
+    "team": "4",
     "teamShortName": "KKR",
     "league": "ipl",
     "age": 21,
@@ -2202,15 +2246,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "72",
     "name": "Kanishk Chouhan",
     "role": "Batsman",
     "allRounderType": "",
-    "teamId": "1",
-    "team": "Royal Challengers Bangalore",
+    "teamId": "3",
+    "team": "3",
     "teamShortName": "RCB",
     "league": "ipl",
     "age": 19,
@@ -2251,15 +2296,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "73",
     "name": "Vihaan Malhotra",
     "role": "Batsman",
     "allRounderType": "",
-    "teamId": "1",
-    "team": "Royal Challengers Bangalore",
+    "teamId": "3",
+    "team": "3",
     "teamShortName": "RCB",
     "league": "ipl",
     "age": 19,
@@ -2300,7 +2346,8 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "311",
@@ -2308,7 +2355,7 @@ export const fallbackIplPlayers = [
     "role": "Batsman",
     "allRounderType": "",
     "teamId": "6",
-    "team": "Delhi Capitals",
+    "team": "6",
     "teamShortName": "DC",
     "league": "ipl",
     "age": 18,
@@ -2349,7 +2396,8 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "295",
@@ -2357,7 +2405,7 @@ export const fallbackIplPlayers = [
     "role": "Batsman",
     "allRounderType": "",
     "teamId": "10",
-    "team": "Chennai Super Kings",
+    "team": "10",
     "teamShortName": "CSK",
     "league": "ipl",
     "age": 18,
@@ -2398,7 +2446,8 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "283",
@@ -2406,7 +2455,7 @@ export const fallbackIplPlayers = [
     "role": "Batsman",
     "allRounderType": "",
     "teamId": "8",
-    "team": "Rajasthan Royals",
+    "team": "8",
     "teamShortName": "RR",
     "league": "ipl",
     "age": 14,
@@ -2447,15 +2496,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "94",
     "name": "MS Dhoni",
     "role": "Wicket-keeper",
     "allRounderType": "",
-    "teamId": "10",
-    "team": "Chennai Super Kings",
+    "teamId": "1",
+    "team": "1",
     "teamShortName": "CSK",
     "league": "ipl",
     "age": 44,
@@ -2496,15 +2546,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": true
   },
   {
     "id": "121",
     "name": "Jos Buttler",
     "role": "Wicket-keeper",
     "allRounderType": "",
-    "teamId": "4",
-    "team": "Gujarat Titans",
+    "teamId": "9",
+    "team": "9",
     "teamShortName": "GT",
     "league": "ipl",
     "age": 35,
@@ -2545,15 +2596,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": true
   },
   {
     "id": "86",
     "name": "Heinrich Klaasen",
     "role": "Wicket-keeper",
     "allRounderType": "",
-    "teamId": "3",
-    "team": "Sunrisers Hyderabad",
+    "teamId": "8",
+    "team": "8",
     "teamShortName": "SRH",
     "league": "ipl",
     "age": 34,
@@ -2594,15 +2646,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": true
   },
   {
     "id": "128",
     "name": "KL Rahul",
     "role": "Wicket-keeper",
     "allRounderType": "",
-    "teamId": "6",
-    "team": "Delhi Capitals",
+    "teamId": "5",
+    "team": "5",
     "teamShortName": "DC",
     "league": "ipl",
     "age": 33,
@@ -2643,15 +2696,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": true
   },
   {
     "id": "36",
     "name": "Quinton de Kock",
     "role": "Wicket-keeper",
     "allRounderType": "",
-    "teamId": "2",
-    "team": "Mumbai Indians",
+    "teamId": "4",
+    "team": "4",
     "teamShortName": "MI",
     "league": "ipl",
     "age": 33,
@@ -2692,15 +2746,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": true
   },
   {
     "id": "144",
     "name": "Jitesh Sharma",
     "role": "Wicket-keeper",
     "allRounderType": "",
-    "teamId": "1",
-    "team": "Royal Challengers Bangalore",
+    "teamId": "3",
+    "team": "3",
     "teamShortName": "RCB",
     "league": "ipl",
     "age": 32,
@@ -2741,7 +2796,8 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": true
   },
   {
     "id": "172",
@@ -2749,7 +2805,7 @@ export const fallbackIplPlayers = [
     "role": "Wicket-keeper",
     "allRounderType": "",
     "teamId": "5",
-    "team": "Punjab Kings",
+    "team": "5",
     "teamShortName": "PBKS",
     "league": "ipl",
     "age": 32,
@@ -2790,22 +2846,23 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "105",
     "name": "Sanju Samson",
     "role": "Wicket-keeper",
     "allRounderType": "",
-    "teamId": "10",
-    "team": "Chennai Super Kings",
+    "teamId": "7",
+    "team": "7",
     "teamShortName": "CSK",
     "league": "ipl",
     "age": 31,
     "dateOfBirth": "1994-11-11",
     "nationality": "India",
     "jerseyNumber": null,
-    "isCaptain": false,
+    "isCaptain": true,
     "battingStyle": "Right-handed bat",
     "bowlingStyle": "N/A (Batsman)",
     "transferAcquiredVia": "auction",
@@ -2839,7 +2896,8 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": true
   },
   {
     "id": "33",
@@ -2847,7 +2905,7 @@ export const fallbackIplPlayers = [
     "role": "Wicket-keeper",
     "allRounderType": "",
     "teamId": "9",
-    "team": "Kolkata Knight Riders",
+    "team": "9",
     "teamShortName": "KKR",
     "league": "ipl",
     "age": 31,
@@ -2888,15 +2946,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "7",
     "name": "Josh Inglis",
     "role": "Wicket-keeper",
     "allRounderType": "",
-    "teamId": "7",
-    "team": "Lucknow Super Giants",
+    "teamId": "6",
+    "team": "6",
     "teamShortName": "LSG",
     "league": "ipl",
     "age": 31,
@@ -2937,15 +2996,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "115",
     "name": "Nicholas Pooran",
     "role": "Wicket-keeper",
     "allRounderType": "",
-    "teamId": "7",
-    "team": "Lucknow Super Giants",
+    "teamId": "10",
+    "team": "10",
     "teamShortName": "LSG",
     "league": "ipl",
     "age": 30,
@@ -2986,7 +3046,8 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": true
   },
   {
     "id": "196",
@@ -2994,7 +3055,7 @@ export const fallbackIplPlayers = [
     "role": "Wicket-keeper",
     "allRounderType": "",
     "teamId": "2",
-    "team": "Mumbai Indians",
+    "team": "2",
     "teamShortName": "MI",
     "league": "ipl",
     "age": 29,
@@ -3035,15 +3096,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": true
   },
   {
     "id": "143",
     "name": "Phil Salt",
     "role": "Wicket-keeper",
     "allRounderType": "",
-    "teamId": "1",
-    "team": "Royal Challengers Bangalore",
+    "teamId": "3",
+    "team": "3",
     "teamShortName": "RCB",
     "league": "ipl",
     "age": 29,
@@ -3084,15 +3146,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": true
   },
   {
     "id": "123",
     "name": "Rishabh Pant",
     "role": "Wicket-keeper",
     "allRounderType": "",
-    "teamId": "7",
-    "team": "Lucknow Super Giants",
+    "teamId": "10",
+    "team": "10",
     "teamShortName": "LSG",
     "league": "ipl",
     "age": 28,
@@ -3133,15 +3196,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "142",
     "name": "Ishan Kishan",
     "role": "Wicket-keeper",
     "allRounderType": "",
-    "teamId": "3",
-    "team": "Sunrisers Hyderabad",
+    "teamId": "8",
+    "team": "8",
     "teamShortName": "SRH",
     "league": "ipl",
     "age": 27,
@@ -3182,15 +3246,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": true
   },
   {
     "id": "195",
     "name": "Donovan Ferreira",
     "role": "Wicket-keeper",
     "allRounderType": "",
-    "teamId": "8",
-    "team": "Rajasthan Royals",
+    "teamId": "5",
+    "team": "5",
     "teamShortName": "RR",
     "league": "ipl",
     "age": 27,
@@ -3231,7 +3296,8 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "296",
@@ -3239,7 +3305,7 @@ export const fallbackIplPlayers = [
     "role": "Wicket-keeper",
     "allRounderType": "",
     "teamId": "10",
-    "team": "Chennai Super Kings",
+    "team": "10",
     "teamShortName": "CSK",
     "league": "ipl",
     "age": 27,
@@ -3280,15 +3346,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "245",
     "name": "Matthew Breetzke",
     "role": "Wicket-keeper",
     "allRounderType": "",
-    "teamId": "7",
-    "team": "Lucknow Super Giants",
+    "teamId": "10",
+    "team": "10",
     "teamShortName": "LSG",
     "league": "ipl",
     "age": 27,
@@ -3329,7 +3396,8 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "307",
@@ -3337,7 +3405,7 @@ export const fallbackIplPlayers = [
     "role": "Wicket-keeper",
     "allRounderType": "",
     "teamId": "4",
-    "team": "Gujarat Titans",
+    "team": "4",
     "teamShortName": "GT",
     "league": "ipl",
     "age": 27,
@@ -3378,7 +3446,8 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "170",
@@ -3386,7 +3455,7 @@ export const fallbackIplPlayers = [
     "role": "Wicket-keeper",
     "allRounderType": "",
     "teamId": "4",
-    "team": "Gujarat Titans",
+    "team": "4",
     "teamShortName": "GT",
     "league": "ipl",
     "age": 26,
@@ -3427,7 +3496,8 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "171",
@@ -3435,7 +3505,7 @@ export const fallbackIplPlayers = [
     "role": "Wicket-keeper",
     "allRounderType": "",
     "teamId": "",
-    "team": "Unknown",
+    "team": "",
     "teamShortName": "Unknown",
     "league": "ipl",
     "age": 26,
@@ -3476,15 +3546,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "120",
     "name": "Prabhsimran Singh",
     "role": "Wicket-keeper",
     "allRounderType": "",
-    "teamId": "5",
-    "team": "Punjab Kings",
+    "teamId": "6",
+    "team": "6",
     "teamShortName": "PBKS",
     "league": "ipl",
     "age": 25,
@@ -3525,15 +3596,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "97",
     "name": "Tristan Stubbs",
     "role": "Wicket-keeper",
     "allRounderType": "",
-    "teamId": "6",
-    "team": "Delhi Capitals",
+    "teamId": "5",
+    "team": "5",
     "teamShortName": "DC",
     "league": "ipl",
     "age": 25,
@@ -3574,15 +3646,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "98",
     "name": "Abishek Porel",
     "role": "Wicket-keeper",
     "allRounderType": "",
-    "teamId": "6",
-    "team": "Delhi Capitals",
+    "teamId": "5",
+    "team": "5",
     "teamShortName": "DC",
     "league": "ipl",
     "age": 25,
@@ -3623,15 +3696,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": true
   },
   {
     "id": "71",
     "name": "Jordan Cox",
     "role": "Wicket-keeper",
     "allRounderType": "",
-    "teamId": "1",
-    "team": "Royal Challengers Bangalore",
+    "teamId": "3",
+    "team": "3",
     "teamShortName": "RCB",
     "league": "ipl",
     "age": 25,
@@ -3672,15 +3746,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "108",
     "name": "Dhruv Jurel",
     "role": "Wicket-keeper",
     "allRounderType": "",
-    "teamId": "8",
-    "team": "Rajasthan Royals",
+    "teamId": "7",
+    "team": "7",
     "teamShortName": "RR",
     "league": "ipl",
     "age": 25,
@@ -3721,7 +3796,8 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": true
   },
   {
     "id": "38",
@@ -3729,7 +3805,7 @@ export const fallbackIplPlayers = [
     "role": "Wicket-keeper",
     "allRounderType": "",
     "teamId": "8",
-    "team": "Rajasthan Royals",
+    "team": "8",
     "teamShortName": "RR",
     "league": "ipl",
     "age": 24,
@@ -3770,15 +3846,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "141",
     "name": "Rahmanullah Gurbaz",
     "role": "Wicket-keeper",
     "allRounderType": "",
-    "teamId": "",
-    "team": "Unknown",
+    "teamId": "4",
+    "team": "4",
     "teamShortName": "Unknown",
     "league": "ipl",
     "age": 24,
@@ -3819,7 +3896,8 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": true
   },
   {
     "id": "15",
@@ -3827,7 +3905,7 @@ export const fallbackIplPlayers = [
     "role": "Wicket-keeper",
     "allRounderType": "",
     "teamId": "9",
-    "team": "Kolkata Knight Riders",
+    "team": "9",
     "teamShortName": "KKR",
     "league": "ipl",
     "age": 23,
@@ -3868,7 +3946,8 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "169",
@@ -3876,7 +3955,7 @@ export const fallbackIplPlayers = [
     "role": "Wicket-keeper",
     "allRounderType": "",
     "teamId": "2",
-    "team": "Mumbai Indians",
+    "team": "2",
     "teamShortName": "MI",
     "league": "ipl",
     "age": 23,
@@ -3917,7 +3996,8 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": true
   },
   {
     "id": "17",
@@ -3925,7 +4005,7 @@ export const fallbackIplPlayers = [
     "role": "Wicket-keeper",
     "allRounderType": "",
     "teamId": "7",
-    "team": "Lucknow Super Giants",
+    "team": "7",
     "teamShortName": "LSG",
     "league": "ipl",
     "age": 21,
@@ -3966,7 +4046,8 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "168",
@@ -3974,7 +4055,7 @@ export const fallbackIplPlayers = [
     "role": "Wicket-keeper",
     "allRounderType": "",
     "teamId": "4",
-    "team": "Gujarat Titans",
+    "team": "4",
     "teamShortName": "GT",
     "league": "ipl",
     "age": 21,
@@ -4015,7 +4096,8 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "290",
@@ -4023,7 +4105,7 @@ export const fallbackIplPlayers = [
     "role": "Wicket-keeper",
     "allRounderType": "",
     "teamId": "8",
-    "team": "Rajasthan Royals",
+    "team": "8",
     "teamShortName": "RR",
     "league": "ipl",
     "age": 19,
@@ -4064,7 +4146,8 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "315",
@@ -4072,7 +4155,7 @@ export const fallbackIplPlayers = [
     "role": "Wicket-keeper",
     "allRounderType": "",
     "teamId": "10",
-    "team": "Chennai Super Kings",
+    "team": "10",
     "teamShortName": "CSK",
     "league": "ipl",
     "age": 19,
@@ -4113,15 +4196,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "31",
     "name": "Salil Arora",
     "role": "Wicket-keeper",
     "allRounderType": "",
-    "teamId": "3",
-    "team": "Sunrisers Hyderabad",
+    "teamId": "8",
+    "team": "8",
     "teamShortName": "SRH",
     "league": "ipl",
     "age": null,
@@ -4162,15 +4246,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": true
   },
   {
     "id": "140",
     "name": "Marcus Stoinis",
     "role": "All-rounder",
     "allRounderType": "Batting All-rounder",
-    "teamId": "5",
-    "team": "Punjab Kings",
+    "teamId": "6",
+    "team": "6",
     "teamShortName": "PBKS",
     "league": "ipl",
     "age": 36,
@@ -4211,7 +4296,8 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "137",
@@ -4219,7 +4305,7 @@ export const fallbackIplPlayers = [
     "role": "All-rounder",
     "allRounderType": "Batting All-rounder",
     "teamId": "7",
-    "team": "Lucknow Super Giants",
+    "team": "7",
     "teamShortName": "LSG",
     "league": "ipl",
     "age": 34,
@@ -4260,15 +4346,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "119",
     "name": "Shashank Singh",
     "role": "All-rounder",
     "allRounderType": "Batting All-rounder",
-    "teamId": "5",
-    "team": "Punjab Kings",
+    "teamId": "6",
+    "team": "6",
     "teamShortName": "PBKS",
     "league": "ipl",
     "age": 34,
@@ -4309,15 +4396,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "113",
     "name": "Rahul Tewatia",
     "role": "All-rounder",
     "allRounderType": "Batting All-rounder",
-    "teamId": "4",
-    "team": "Gujarat Titans",
+    "teamId": "9",
+    "team": "9",
     "teamShortName": "GT",
     "league": "ipl",
     "age": 32,
@@ -4358,15 +4446,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "93",
     "name": "Shivam Dube",
     "role": "All-rounder",
     "allRounderType": "Batting All-rounder",
-    "teamId": "10",
-    "team": "Chennai Super Kings",
+    "teamId": "1",
+    "team": "1",
     "teamShortName": "CSK",
     "league": "ipl",
     "age": 32,
@@ -4407,15 +4496,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "299",
     "name": "Liam Livingstone",
     "role": "All-rounder",
     "allRounderType": "Batting All-rounder",
-    "teamId": "3",
-    "team": "Sunrisers Hyderabad",
+    "teamId": "8",
+    "team": "8",
     "teamShortName": "SRH",
     "league": "ipl",
     "age": 32,
@@ -4456,7 +4546,8 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "83",
@@ -4464,7 +4555,7 @@ export const fallbackIplPlayers = [
     "role": "All-rounder",
     "allRounderType": "Batting All-rounder",
     "teamId": "2",
-    "team": "Mumbai Indians",
+    "team": "2",
     "teamShortName": "MI",
     "league": "ipl",
     "age": 32,
@@ -4505,7 +4596,8 @@ export const fallbackIplPlayers = [
       "fiveWickets": 1
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "280",
@@ -4513,7 +4605,7 @@ export const fallbackIplPlayers = [
     "role": "All-rounder",
     "allRounderType": "Batting All-rounder",
     "teamId": "10",
-    "team": "Chennai Super Kings",
+    "team": "10",
     "teamShortName": "CSK",
     "league": "ipl",
     "age": 31,
@@ -4554,15 +4646,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "230",
     "name": "Romario Shepherd",
     "role": "All-rounder",
     "allRounderType": "Batting All-rounder",
-    "teamId": "1",
-    "team": "Royal Challengers Bangalore",
+    "teamId": "3",
+    "team": "3",
     "teamShortName": "RCB",
     "league": "ipl",
     "age": 31,
@@ -4603,15 +4696,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "10",
     "name": "Venkatesh Iyer",
     "role": "All-rounder",
     "allRounderType": "Batting All-rounder",
-    "teamId": "1",
-    "team": "Royal Challengers Bangalore",
+    "teamId": "4",
+    "team": "4",
     "teamShortName": "RCB",
     "league": "ipl",
     "age": 31,
@@ -4652,7 +4746,8 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "114",
@@ -4660,7 +4755,7 @@ export const fallbackIplPlayers = [
     "role": "All-rounder",
     "allRounderType": "Batting All-rounder",
     "teamId": "4",
-    "team": "Gujarat Titans",
+    "team": "4",
     "teamShortName": "GT",
     "league": "ipl",
     "age": 30,
@@ -4701,15 +4796,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "187",
     "name": "Glenn Phillips",
     "role": "All-rounder",
     "allRounderType": "Batting All-rounder",
-    "teamId": "4",
-    "team": "Gujarat Titans",
+    "teamId": "9",
+    "team": "9",
     "teamShortName": "GT",
     "league": "ipl",
     "age": 29,
@@ -4750,15 +4846,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "104",
     "name": "Ramandeep Singh",
     "role": "All-rounder",
     "allRounderType": "Batting All-rounder",
-    "teamId": "9",
-    "team": "Kolkata Knight Riders",
+    "teamId": "4",
+    "team": "4",
     "teamShortName": "KKR",
     "league": "ipl",
     "age": 28,
@@ -4799,7 +4896,8 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "222",
@@ -4807,7 +4905,7 @@ export const fallbackIplPlayers = [
     "role": "All-rounder",
     "allRounderType": "Batting All-rounder",
     "teamId": "2",
-    "team": "Mumbai Indians",
+    "team": "2",
     "teamShortName": "MI",
     "league": "ipl",
     "age": 27,
@@ -4848,15 +4946,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "165",
     "name": "Ashutosh Sharma",
     "role": "All-rounder",
     "allRounderType": "Batting All-rounder",
-    "teamId": "6",
-    "team": "Delhi Capitals",
+    "teamId": "5",
+    "team": "5",
     "teamShortName": "DC",
     "league": "ipl",
     "age": 27,
@@ -4897,15 +4996,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "263",
     "name": "Kamindu Mendis",
     "role": "All-rounder",
     "allRounderType": "Batting All-rounder",
-    "teamId": "3",
-    "team": "Sunrisers Hyderabad",
+    "teamId": "8",
+    "team": "8",
     "teamShortName": "SRH",
     "league": "ipl",
     "age": 27,
@@ -4946,7 +5046,8 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "227",
@@ -4954,7 +5055,7 @@ export const fallbackIplPlayers = [
     "role": "All-rounder",
     "allRounderType": "Batting All-rounder",
     "teamId": "2",
-    "team": "Mumbai Indians",
+    "team": "2",
     "teamShortName": "MI",
     "league": "ipl",
     "age": 27,
@@ -4995,7 +5096,8 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "211",
@@ -5003,7 +5105,7 @@ export const fallbackIplPlayers = [
     "role": "All-rounder",
     "allRounderType": "Batting All-rounder",
     "teamId": "9",
-    "team": "Kolkata Knight Riders",
+    "team": "9",
     "teamShortName": "KKR",
     "league": "ipl",
     "age": 27,
@@ -5044,15 +5146,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "20",
     "name": "Rachin Ravindra",
     "role": "All-rounder",
     "allRounderType": "Batting All-rounder",
-    "teamId": "9",
-    "team": "Kolkata Knight Riders",
+    "teamId": "1",
+    "team": "1",
     "teamShortName": "KKR",
     "league": "ipl",
     "age": 26,
@@ -5093,15 +5196,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "118",
     "name": "Ayush Badoni",
     "role": "All-rounder",
     "allRounderType": "Batting All-rounder",
-    "teamId": "7",
-    "team": "Lucknow Super Giants",
+    "teamId": "10",
+    "team": "10",
     "teamShortName": "LSG",
     "league": "ipl",
     "age": 26,
@@ -5142,7 +5246,8 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "68",
@@ -5150,7 +5255,7 @@ export const fallbackIplPlayers = [
     "role": "All-rounder",
     "allRounderType": "Batting All-rounder",
     "teamId": "2",
-    "team": "Mumbai Indians",
+    "team": "2",
     "teamShortName": "MI",
     "league": "ipl",
     "age": 26,
@@ -5191,15 +5296,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "88",
     "name": "Abhishek Sharma",
     "role": "All-rounder",
     "allRounderType": "Batting All-rounder",
-    "teamId": "3",
-    "team": "Sunrisers Hyderabad",
+    "teamId": "8",
+    "team": "8",
     "teamShortName": "SRH",
     "league": "ipl",
     "age": 25,
@@ -5240,7 +5346,8 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "285",
@@ -5248,7 +5355,7 @@ export const fallbackIplPlayers = [
     "role": "All-rounder",
     "allRounderType": "Batting All-rounder",
     "teamId": "6",
-    "team": "Delhi Capitals",
+    "team": "6",
     "teamShortName": "DC",
     "league": "ipl",
     "age": 24,
@@ -5289,7 +5396,8 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "308",
@@ -5297,7 +5405,7 @@ export const fallbackIplPlayers = [
     "role": "All-rounder",
     "allRounderType": "Batting All-rounder",
     "teamId": "5",
-    "team": "Punjab Kings",
+    "team": "5",
     "teamShortName": "PBKS",
     "league": "ipl",
     "age": 24,
@@ -5338,15 +5446,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "163",
     "name": "Abdul Samad",
     "role": "All-rounder",
     "allRounderType": "Batting All-rounder",
-    "teamId": "7",
-    "team": "Lucknow Super Giants",
+    "teamId": "10",
+    "team": "10",
     "teamShortName": "LSG",
     "league": "ipl",
     "age": 24,
@@ -5387,15 +5496,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "107",
     "name": "Riyan Parag",
     "role": "All-rounder",
     "allRounderType": "Batting All-rounder",
-    "teamId": "8",
-    "team": "Rajasthan Royals",
+    "teamId": "7",
+    "team": "7",
     "teamShortName": "RR",
     "league": "ipl",
     "age": 24,
@@ -5436,15 +5546,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "304",
     "name": "Shivang Kumar",
     "role": "All-rounder",
     "allRounderType": "Batting All-rounder",
-    "teamId": "3",
-    "team": "Sunrisers Hyderabad",
+    "teamId": "8",
+    "team": "8",
     "teamShortName": "SRH",
     "league": "ipl",
     "age": 23,
@@ -5485,7 +5596,8 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "268",
@@ -5493,7 +5605,7 @@ export const fallbackIplPlayers = [
     "role": "All-rounder",
     "allRounderType": "Batting All-rounder",
     "teamId": "2",
-    "team": "Mumbai Indians",
+    "team": "2",
     "teamShortName": "MI",
     "league": "ipl",
     "age": 23,
@@ -5534,7 +5646,8 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "271",
@@ -5542,7 +5655,7 @@ export const fallbackIplPlayers = [
     "role": "All-rounder",
     "allRounderType": "Batting All-rounder",
     "teamId": "5",
-    "team": "Punjab Kings",
+    "team": "5",
     "teamShortName": "PBKS",
     "league": "ipl",
     "age": 23,
@@ -5583,15 +5696,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "90",
     "name": "Nitish Kumar Reddy",
     "role": "All-rounder",
     "allRounderType": "Batting All-rounder",
-    "teamId": "3",
-    "team": "Sunrisers Hyderabad",
+    "teamId": "8",
+    "team": "8",
     "teamShortName": "SRH",
     "league": "ipl",
     "age": 22,
@@ -5632,7 +5746,8 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "16",
@@ -5640,7 +5755,7 @@ export const fallbackIplPlayers = [
     "role": "All-rounder",
     "allRounderType": "Batting All-rounder",
     "teamId": "5",
-    "team": "Punjab Kings",
+    "team": "5",
     "teamShortName": "PBKS",
     "league": "ipl",
     "age": 22,
@@ -5681,15 +5796,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "260",
     "name": "Jacob Bethell",
     "role": "All-rounder",
     "allRounderType": "Batting All-rounder",
-    "teamId": "1",
-    "team": "Royal Challengers Bangalore",
+    "teamId": "3",
+    "team": "3",
     "teamShortName": "RCB",
     "league": "ipl",
     "age": 22,
@@ -5730,7 +5846,8 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "166",
@@ -5738,7 +5855,7 @@ export const fallbackIplPlayers = [
     "role": "All-rounder",
     "allRounderType": "Batting All-rounder",
     "teamId": "4",
-    "team": "Gujarat Titans",
+    "team": "4",
     "teamShortName": "GT",
     "league": "ipl",
     "age": 21,
@@ -5779,7 +5896,8 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "241",
@@ -5787,7 +5905,7 @@ export const fallbackIplPlayers = [
     "role": "All-rounder",
     "allRounderType": "Batting All-rounder",
     "teamId": "7",
-    "team": "Lucknow Super Giants",
+    "team": "7",
     "teamShortName": "LSG",
     "league": "ipl",
     "age": 21,
@@ -5828,7 +5946,8 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "269",
@@ -5836,7 +5955,7 @@ export const fallbackIplPlayers = [
     "role": "All-rounder",
     "allRounderType": "Batting All-rounder",
     "teamId": "5",
-    "team": "Punjab Kings",
+    "team": "5",
     "teamShortName": "PBKS",
     "league": "ipl",
     "age": 21,
@@ -5877,15 +5996,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "102",
     "name": "Andre Russell",
     "role": "All-rounder",
     "allRounderType": "Bowling All-rounder",
-    "teamId": "",
-    "team": "Unknown",
+    "teamId": "4",
+    "team": "4",
     "teamShortName": "Unknown",
     "league": "ipl",
     "age": 37,
@@ -5926,15 +6046,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 1
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "101",
     "name": "Sunil Narine",
     "role": "All-rounder",
     "allRounderType": "Bowling All-rounder",
-    "teamId": "9",
-    "team": "Kolkata Knight Riders",
+    "teamId": "4",
+    "team": "4",
     "teamShortName": "KKR",
     "league": "ipl",
     "age": 37,
@@ -5975,15 +6096,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 1
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "92",
     "name": "Ravindra Jadeja",
     "role": "All-rounder",
     "allRounderType": "Bowling All-rounder",
-    "teamId": "8",
-    "team": "Rajasthan Royals",
+    "teamId": "1",
+    "team": "1",
     "teamShortName": "RR",
     "league": "ipl",
     "age": 37,
@@ -6024,15 +6146,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 1
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "247",
     "name": "Jayant Yadav",
     "role": "All-rounder",
     "allRounderType": "Bowling All-rounder",
-    "teamId": "4",
-    "team": "Gujarat Titans",
+    "teamId": "9",
+    "team": "9",
     "teamShortName": "GT",
     "league": "ipl",
     "age": 36,
@@ -6073,15 +6196,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "212",
     "name": "Swapnil Singh",
     "role": "All-rounder",
     "allRounderType": "Bowling All-rounder",
-    "teamId": "1",
-    "team": "Royal Challengers Bangalore",
+    "teamId": "3",
+    "team": "3",
     "teamShortName": "RCB",
     "league": "ipl",
     "age": 34,
@@ -6122,15 +6246,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "192",
     "name": "Krunal Pandya",
     "role": "All-rounder",
     "allRounderType": "Bowling All-rounder",
-    "teamId": "1",
-    "team": "Royal Challengers Bangalore",
+    "teamId": "3",
+    "team": "3",
     "teamShortName": "RCB",
     "league": "ipl",
     "age": 34,
@@ -6171,7 +6296,8 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "291",
@@ -6179,7 +6305,7 @@ export const fallbackIplPlayers = [
     "role": "All-rounder",
     "allRounderType": "Bowling All-rounder",
     "teamId": "2",
-    "team": "Mumbai Indians",
+    "team": "2",
     "teamShortName": "MI",
     "league": "ipl",
     "age": 34,
@@ -6220,7 +6346,8 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "11",
@@ -6228,7 +6355,7 @@ export const fallbackIplPlayers = [
     "role": "All-rounder",
     "allRounderType": "Bowling All-rounder",
     "teamId": "4",
-    "team": "Gujarat Titans",
+    "team": "4",
     "teamShortName": "GT",
     "league": "ipl",
     "age": 34,
@@ -6269,7 +6396,8 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "246",
@@ -6277,7 +6405,7 @@ export const fallbackIplPlayers = [
     "role": "All-rounder",
     "allRounderType": "Bowling All-rounder",
     "teamId": "2",
-    "team": "Mumbai Indians",
+    "team": "2",
     "teamShortName": "MI",
     "league": "ipl",
     "age": 33,
@@ -6318,7 +6446,8 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "255",
@@ -6326,7 +6455,7 @@ export const fallbackIplPlayers = [
     "role": "All-rounder",
     "allRounderType": "Bowling All-rounder",
     "teamId": "5",
-    "team": "Punjab Kings",
+    "team": "5",
     "teamShortName": "PBKS",
     "league": "ipl",
     "age": 32,
@@ -6367,15 +6496,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "95",
     "name": "Axar Patel",
     "role": "All-rounder",
     "allRounderType": "Bowling All-rounder",
-    "teamId": "6",
-    "team": "Delhi Capitals",
+    "teamId": "5",
+    "team": "5",
     "teamShortName": "DC",
     "league": "ipl",
     "age": 32,
@@ -6416,15 +6546,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "274",
     "name": "Jamie Overton",
     "role": "All-rounder",
     "allRounderType": "Bowling All-rounder",
-    "teamId": "10",
-    "team": "Chennai Super Kings",
+    "teamId": "1",
+    "team": "1",
     "teamShortName": "CSK",
     "league": "ipl",
     "age": 31,
@@ -6465,7 +6596,8 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "292",
@@ -6473,7 +6605,7 @@ export const fallbackIplPlayers = [
     "role": "All-rounder",
     "allRounderType": "Bowling All-rounder",
     "teamId": "2",
-    "team": "Mumbai Indians",
+    "team": "2",
     "teamShortName": "MI",
     "league": "ipl",
     "age": 31,
@@ -6514,15 +6646,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "223",
     "name": "Shahbaz Ahmed",
     "role": "All-rounder",
     "allRounderType": "Bowling All-rounder",
-    "teamId": "7",
-    "team": "Lucknow Super Giants",
+    "teamId": "10",
+    "team": "10",
     "teamShortName": "LSG",
     "league": "ipl",
     "age": 31,
@@ -6563,15 +6696,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "256",
     "name": "Ajay Mandal",
     "role": "All-rounder",
     "allRounderType": "Bowling All-rounder",
-    "teamId": "6",
-    "team": "Delhi Capitals",
+    "teamId": "5",
+    "team": "5",
     "teamShortName": "DC",
     "league": "ipl",
     "age": 30,
@@ -6612,7 +6746,8 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "8",
@@ -6620,7 +6755,7 @@ export const fallbackIplPlayers = [
     "role": "All-rounder",
     "allRounderType": "Bowling All-rounder",
     "teamId": "6",
-    "team": "Delhi Capitals",
+    "team": "6",
     "teamShortName": "DC",
     "league": "ipl",
     "age": 29,
@@ -6661,7 +6796,8 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "229",
@@ -6669,7 +6805,7 @@ export const fallbackIplPlayers = [
     "role": "All-rounder",
     "allRounderType": "Bowling All-rounder",
     "teamId": "4",
-    "team": "Gujarat Titans",
+    "team": "4",
     "teamShortName": "GT",
     "league": "ipl",
     "age": 29,
@@ -6710,7 +6846,8 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "49",
@@ -6718,7 +6855,7 @@ export const fallbackIplPlayers = [
     "role": "All-rounder",
     "allRounderType": "Bowling All-rounder",
     "teamId": "",
-    "team": "Unknown",
+    "team": "",
     "teamShortName": "Unknown",
     "league": "ipl",
     "age": 29,
@@ -6759,7 +6896,8 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "22",
@@ -6767,7 +6905,7 @@ export const fallbackIplPlayers = [
     "role": "All-rounder",
     "allRounderType": "Bowling All-rounder",
     "teamId": "7",
-    "team": "Lucknow Super Giants",
+    "team": "7",
     "teamShortName": "LSG",
     "league": "ipl",
     "age": 28,
@@ -6808,15 +6946,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 1
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "209",
     "name": "Arshad Khan",
     "role": "All-rounder",
     "allRounderType": "Bowling All-rounder",
-    "teamId": "4",
-    "team": "Gujarat Titans",
+    "teamId": "9",
+    "team": "9",
     "teamShortName": "GT",
     "league": "ipl",
     "age": 28,
@@ -6857,15 +6996,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "190",
     "name": "Sam Curran",
     "role": "All-rounder",
     "allRounderType": "Bowling All-rounder",
-    "teamId": "8",
-    "team": "Rajasthan Royals",
+    "teamId": "1",
+    "team": "1",
     "teamShortName": "RR",
     "league": "ipl",
     "age": 27,
@@ -6906,15 +7046,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "110",
     "name": "Rashid Khan",
     "role": "All-rounder",
     "allRounderType": "Bowling All-rounder",
-    "teamId": "4",
-    "team": "Gujarat Titans",
+    "teamId": "9",
+    "team": "9",
     "teamShortName": "GT",
     "league": "ipl",
     "age": 27,
@@ -6955,7 +7096,8 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "217",
@@ -6963,7 +7105,7 @@ export const fallbackIplPlayers = [
     "role": "All-rounder",
     "allRounderType": "Bowling All-rounder",
     "teamId": "7",
-    "team": "Lucknow Super Giants",
+    "team": "7",
     "teamShortName": "LSG",
     "league": "ipl",
     "age": 26,
@@ -7004,15 +7146,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "194",
     "name": "Washington Sundar",
     "role": "All-rounder",
     "allRounderType": "Bowling All-rounder",
-    "teamId": "4",
-    "team": "Gujarat Titans",
+    "teamId": "9",
+    "team": "9",
     "teamShortName": "GT",
     "league": "ipl",
     "age": 26,
@@ -7053,15 +7196,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "228",
     "name": "Azmatullah Omarzai",
     "role": "All-rounder",
     "allRounderType": "Bowling All-rounder",
-    "teamId": "5",
-    "team": "Punjab Kings",
+    "teamId": "6",
+    "team": "6",
     "teamShortName": "PBKS",
     "league": "ipl",
     "age": 25,
@@ -7102,15 +7246,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "191",
     "name": "Marco Jansen",
     "role": "All-rounder",
     "allRounderType": "Bowling All-rounder",
-    "teamId": "5",
-    "team": "Punjab Kings",
+    "teamId": "6",
+    "team": "6",
     "teamShortName": "PBKS",
     "league": "ipl",
     "age": 25,
@@ -7151,7 +7296,8 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "54",
@@ -7159,7 +7305,7 @@ export const fallbackIplPlayers = [
     "role": "All-rounder",
     "allRounderType": "Bowling All-rounder",
     "teamId": "2",
-    "team": "Mumbai Indians",
+    "team": "2",
     "teamShortName": "MI",
     "league": "ipl",
     "age": 25,
@@ -7200,15 +7346,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "208",
     "name": "Anshul Kamboj",
     "role": "All-rounder",
     "allRounderType": "Bowling All-rounder",
-    "teamId": "10",
-    "team": "Chennai Super Kings",
+    "teamId": "1",
+    "team": "1",
     "teamShortName": "CSK",
     "league": "ipl",
     "age": 25,
@@ -7249,7 +7396,8 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "44",
@@ -7257,7 +7405,7 @@ export const fallbackIplPlayers = [
     "role": "All-rounder",
     "allRounderType": "Bowling All-rounder",
     "teamId": "10",
-    "team": "Chennai Super Kings",
+    "team": "10",
     "teamShortName": "CSK",
     "league": "ipl",
     "age": 23,
@@ -7298,15 +7446,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "302",
     "name": "Harsh Dubey",
     "role": "All-rounder",
     "allRounderType": "Bowling All-rounder",
-    "teamId": "3",
-    "team": "Sunrisers Hyderabad",
+    "teamId": "8",
+    "team": "8",
     "teamShortName": "SRH",
     "league": "ipl",
     "age": 23,
@@ -7347,15 +7496,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "12",
     "name": "Mangesh Yadav",
     "role": "All-rounder",
     "allRounderType": "Bowling All-rounder",
-    "teamId": "1",
-    "team": "Royal Challengers Bangalore",
+    "teamId": "3",
+    "team": "3",
     "teamShortName": "RCB",
     "league": "ipl",
     "age": 23,
@@ -7396,7 +7546,8 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "50",
@@ -7404,7 +7555,7 @@ export const fallbackIplPlayers = [
     "role": "All-rounder",
     "allRounderType": "Bowling All-rounder",
     "teamId": "9",
-    "team": "Kolkata Knight Riders",
+    "team": "9",
     "teamShortName": "KKR",
     "league": "ipl",
     "age": 23,
@@ -7445,7 +7596,8 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "286",
@@ -7453,7 +7605,7 @@ export const fallbackIplPlayers = [
     "role": "All-rounder",
     "allRounderType": "Bowling All-rounder",
     "teamId": "6",
-    "team": "Delhi Capitals",
+    "team": "6",
     "teamShortName": "DC",
     "league": "ipl",
     "age": 22,
@@ -7494,7 +7646,8 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "60",
@@ -7502,7 +7655,7 @@ export const fallbackIplPlayers = [
     "role": "All-rounder",
     "allRounderType": "Bowling All-rounder",
     "teamId": "2",
-    "team": "Mumbai Indians",
+    "team": "2",
     "teamShortName": "MI",
     "league": "ipl",
     "age": 22,
@@ -7543,7 +7696,8 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "309",
@@ -7551,7 +7705,7 @@ export const fallbackIplPlayers = [
     "role": "All-rounder",
     "allRounderType": "Bowling All-rounder",
     "teamId": "5",
-    "team": "Punjab Kings",
+    "team": "5",
     "teamShortName": "PBKS",
     "league": "ipl",
     "age": 20,
@@ -7592,15 +7746,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "59",
     "name": "Satvik Deswal",
     "role": "All-rounder",
     "allRounderType": "Bowling All-rounder",
-    "teamId": "1",
-    "team": "Royal Challengers Bangalore",
+    "teamId": "3",
+    "team": "3",
     "teamShortName": "RCB",
     "league": "ipl",
     "age": 18,
@@ -7641,15 +7796,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "224",
     "name": "Moeen Ali",
     "role": "All-rounder",
     "allRounderType": "",
-    "teamId": "9",
-    "team": "Kolkata Knight Riders",
+    "teamId": "4",
+    "team": "4",
     "teamShortName": "KKR",
     "league": "ipl",
     "age": null,
@@ -7690,15 +7846,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "233",
     "name": "Ishant Sharma",
     "role": "Bowler",
     "allRounderType": "",
-    "teamId": "4",
-    "team": "Gujarat Titans",
+    "teamId": "9",
+    "team": "9",
     "teamShortName": "GT",
     "league": "ipl",
     "age": 37,
@@ -7739,15 +7896,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 1
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "126",
     "name": "Mitchell Starc",
     "role": "Bowler",
     "allRounderType": "",
-    "teamId": "6",
-    "team": "Delhi Capitals",
+    "teamId": "5",
+    "team": "5",
     "teamShortName": "DC",
     "league": "ipl",
     "age": 36,
@@ -7788,15 +7946,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 1
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "201",
     "name": "Bhuvneshwar Kumar",
     "role": "Bowler",
     "allRounderType": "",
-    "teamId": "1",
-    "team": "Royal Challengers Bangalore",
+    "teamId": "3",
+    "team": "3",
     "teamShortName": "RCB",
     "league": "ipl",
     "age": 35,
@@ -7837,15 +7996,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 2
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "127",
     "name": "Yuzvendra Chahal",
     "role": "Bowler",
     "allRounderType": "",
-    "teamId": "5",
-    "team": "Punjab Kings",
+    "teamId": "6",
+    "team": "6",
     "teamShortName": "PBKS",
     "league": "ipl",
     "age": 35,
@@ -7886,7 +8046,8 @@ export const fallbackIplPlayers = [
       "fiveWickets": 1
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "288",
@@ -7894,7 +8055,7 @@ export const fallbackIplPlayers = [
     "role": "Bowler",
     "allRounderType": "",
     "teamId": "7",
-    "team": "Lucknow Super Giants",
+    "team": "7",
     "teamShortName": "LSG",
     "league": "ipl",
     "age": 35,
@@ -7935,15 +8096,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "139",
     "name": "Harshal Patel",
     "role": "Bowler",
     "allRounderType": "",
-    "teamId": "3",
-    "team": "Sunrisers Hyderabad",
+    "teamId": "8",
+    "team": "8",
     "teamShortName": "SRH",
     "league": "ipl",
     "age": 35,
@@ -7984,15 +8146,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 1
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "147",
     "name": "Josh Hazlewood",
     "role": "Bowler",
     "allRounderType": "",
-    "teamId": "1",
-    "team": "Royal Challengers Bangalore",
+    "teamId": "3",
+    "team": "3",
     "teamShortName": "RCB",
     "league": "ipl",
     "age": 34,
@@ -8033,15 +8196,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "150",
     "name": "T Natarajan",
     "role": "Bowler",
     "allRounderType": "",
-    "teamId": "6",
-    "team": "Delhi Capitals",
+    "teamId": "5",
+    "team": "5",
     "teamShortName": "DC",
     "league": "ipl",
     "age": 34,
@@ -8082,15 +8246,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "200",
     "name": "Lockie Ferguson",
     "role": "Bowler",
     "allRounderType": "",
-    "teamId": "5",
-    "team": "Punjab Kings",
+    "teamId": "6",
+    "team": "6",
     "teamShortName": "PBKS",
     "league": "ipl",
     "age": 34,
@@ -8131,15 +8296,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "100",
     "name": "Varun Chakaravarthy",
     "role": "Bowler",
     "allRounderType": "",
-    "teamId": "9",
-    "team": "Kolkata Knight Riders",
+    "teamId": "4",
+    "team": "4",
     "teamShortName": "KKR",
     "league": "ipl",
     "age": 34,
@@ -8180,15 +8346,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 1
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "303",
     "name": "Jaydev Unadkat",
     "role": "Bowler",
     "allRounderType": "",
-    "teamId": "3",
-    "team": "Sunrisers Hyderabad",
+    "teamId": "8",
+    "team": "8",
     "teamShortName": "SRH",
     "league": "ipl",
     "age": 34,
@@ -8229,7 +8396,8 @@ export const fallbackIplPlayers = [
       "fiveWickets": 2
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "27",
@@ -8237,7 +8405,7 @@ export const fallbackIplPlayers = [
     "role": "Bowler",
     "allRounderType": "",
     "teamId": "10",
-    "team": "Chennai Super Kings",
+    "team": "10",
     "teamShortName": "CSK",
     "league": "ipl",
     "age": 34,
@@ -8278,15 +8446,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "264",
     "name": "Dushmantha Chameera",
     "role": "Bowler",
     "allRounderType": "",
-    "teamId": "6",
-    "team": "Delhi Capitals",
+    "teamId": "5",
+    "team": "5",
     "teamShortName": "DC",
     "league": "ipl",
     "age": 34,
@@ -8327,7 +8496,8 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "18",
@@ -8335,7 +8505,7 @@ export const fallbackIplPlayers = [
     "role": "Bowler",
     "allRounderType": "",
     "teamId": "8",
-    "team": "Rajasthan Royals",
+    "team": "8",
     "teamShortName": "RR",
     "league": "ipl",
     "age": 33,
@@ -8376,15 +8546,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "197",
     "name": "Deepak Chahar",
     "role": "Bowler",
     "allRounderType": "",
-    "teamId": "2",
-    "team": "Mumbai Indians",
+    "teamId": "1",
+    "team": "1",
     "teamShortName": "MI",
     "league": "ipl",
     "age": 33,
@@ -8425,7 +8596,8 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "293",
@@ -8433,7 +8605,7 @@ export const fallbackIplPlayers = [
     "role": "Bowler",
     "allRounderType": "",
     "teamId": "2",
-    "team": "Mumbai Indians",
+    "team": "2",
     "teamShortName": "MI",
     "league": "ipl",
     "age": 32,
@@ -8474,7 +8646,8 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "28",
@@ -8482,7 +8655,7 @@ export const fallbackIplPlayers = [
     "role": "Bowler",
     "allRounderType": "",
     "teamId": "10",
-    "team": "Chennai Super Kings",
+    "team": "10",
     "teamShortName": "CSK",
     "league": "ipl",
     "age": 32,
@@ -8523,15 +8696,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "306",
     "name": "Pat Cummins",
     "role": "Bowler",
     "allRounderType": "",
-    "teamId": "3",
-    "team": "Sunrisers Hyderabad",
+    "teamId": "8",
+    "team": "8",
     "teamShortName": "SRH",
     "league": "ipl",
     "age": 32,
@@ -8572,15 +8746,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "48",
     "name": "Sandeep Sharma",
     "role": "Bowler",
     "allRounderType": "",
-    "teamId": "8",
-    "team": "Rajasthan Royals",
+    "teamId": "7",
+    "team": "7",
     "teamShortName": "RR",
     "league": "ipl",
     "age": 32,
@@ -8621,7 +8796,8 @@ export const fallbackIplPlayers = [
       "fiveWickets": 1
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "180",
@@ -8629,7 +8805,7 @@ export const fallbackIplPlayers = [
     "role": "Bowler",
     "allRounderType": "",
     "teamId": "10",
-    "team": "Chennai Super Kings",
+    "team": "10",
     "teamShortName": "CSK",
     "league": "ipl",
     "age": 32,
@@ -8670,15 +8846,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "202",
     "name": "Mukesh Kumar",
     "role": "Bowler",
     "allRounderType": "",
-    "teamId": "6",
-    "team": "Delhi Capitals",
+    "teamId": "5",
+    "team": "5",
     "teamShortName": "DC",
     "league": "ipl",
     "age": 32,
@@ -8719,15 +8896,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "23",
     "name": "Anrich Nortje",
     "role": "Bowler",
     "allRounderType": "",
-    "teamId": "7",
-    "team": "Lucknow Super Giants",
+    "teamId": "4",
+    "team": "4",
     "teamShortName": "LSG",
     "league": "ipl",
     "age": 32,
@@ -8768,15 +8946,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "130",
     "name": "Mohammed Siraj",
     "role": "Bowler",
     "allRounderType": "",
-    "teamId": "4",
-    "team": "Gujarat Titans",
+    "teamId": "9",
+    "team": "9",
     "teamShortName": "GT",
     "league": "ipl",
     "age": 31,
@@ -8817,7 +8996,8 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "310",
@@ -8825,7 +9005,7 @@ export const fallbackIplPlayers = [
     "role": "Bowler",
     "allRounderType": "",
     "teamId": "5",
-    "team": "Punjab Kings",
+    "team": "5",
     "teamShortName": "PBKS",
     "league": "ipl",
     "age": 31,
@@ -8866,15 +9046,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "30",
     "name": "Jacob Duffy",
     "role": "Bowler",
     "allRounderType": "",
-    "teamId": "1",
-    "team": "Royal Challengers Bangalore",
+    "teamId": "3",
+    "team": "3",
     "teamShortName": "RCB",
     "league": "ipl",
     "age": 31,
@@ -8915,15 +9096,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "234",
     "name": "Nuwan Thushara",
     "role": "Bowler",
     "allRounderType": "",
-    "teamId": "1",
-    "team": "Royal Challengers Bangalore",
+    "teamId": "3",
+    "team": "3",
     "teamShortName": "RCB",
     "league": "ipl",
     "age": 31,
@@ -8964,15 +9146,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "265",
     "name": "Nathan Ellis",
     "role": "Bowler",
     "allRounderType": "",
-    "teamId": "10",
-    "team": "Chennai Super Kings",
+    "teamId": "1",
+    "team": "1",
     "teamShortName": "CSK",
     "league": "ipl",
     "age": 31,
@@ -9013,15 +9196,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "96",
     "name": "Kuldeep Yadav",
     "role": "Bowler",
     "allRounderType": "",
-    "teamId": "6",
-    "team": "Delhi Capitals",
+    "teamId": "5",
+    "team": "5",
     "teamShortName": "DC",
     "league": "ipl",
     "age": 31,
@@ -9062,7 +9246,8 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "24",
@@ -9070,7 +9255,7 @@ export const fallbackIplPlayers = [
     "role": "Bowler",
     "allRounderType": "",
     "teamId": "6",
-    "team": "Delhi Capitals",
+    "team": "6",
     "teamShortName": "DC",
     "league": "ipl",
     "age": 31,
@@ -9111,15 +9296,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "287",
     "name": "Jofra Archer",
     "role": "Bowler",
     "allRounderType": "",
-    "teamId": "8",
-    "team": "Rajasthan Royals",
+    "teamId": "7",
+    "team": "7",
     "teamShortName": "RR",
     "league": "ipl",
     "age": 30,
@@ -9160,15 +9346,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "199",
     "name": "Tushar Deshpande",
     "role": "Bowler",
     "allRounderType": "",
-    "teamId": "8",
-    "team": "Rajasthan Royals",
+    "teamId": "7",
+    "team": "7",
     "teamShortName": "RR",
     "league": "ipl",
     "age": 30,
@@ -9209,15 +9396,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "124",
     "name": "Kagiso Rabada",
     "role": "Bowler",
     "allRounderType": "",
-    "teamId": "4",
-    "team": "Gujarat Titans",
+    "teamId": "9",
+    "team": "9",
     "teamShortName": "GT",
     "league": "ipl",
     "age": 30,
@@ -9258,15 +9446,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "261",
     "name": "Brydon Carse",
     "role": "Bowler",
     "allRounderType": "",
-    "teamId": "3",
-    "team": "Sunrisers Hyderabad",
+    "teamId": "8",
+    "team": "8",
     "teamShortName": "SRH",
     "league": "ipl",
     "age": 30,
@@ -9307,7 +9496,8 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "289",
@@ -9315,7 +9505,7 @@ export const fallbackIplPlayers = [
     "role": "Bowler",
     "allRounderType": "",
     "teamId": "8",
-    "team": "Rajasthan Royals",
+    "team": "8",
     "teamShortName": "RR",
     "league": "ipl",
     "age": 30,
@@ -9356,7 +9546,8 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "6",
@@ -9364,7 +9555,7 @@ export const fallbackIplPlayers = [
     "role": "Bowler",
     "allRounderType": "",
     "teamId": "",
-    "team": "Unknown",
+    "team": "",
     "teamShortName": "Unknown",
     "league": "ipl",
     "age": 30,
@@ -9405,15 +9596,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "159",
     "name": "Harpreet Brar",
     "role": "Bowler",
     "allRounderType": "",
-    "teamId": "5",
-    "team": "Punjab Kings",
+    "teamId": "6",
+    "team": "6",
     "teamShortName": "PBKS",
     "league": "ipl",
     "age": 30,
@@ -9454,15 +9646,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "231",
     "name": "Spencer Johnson",
     "role": "Bowler",
     "allRounderType": "",
-    "teamId": "",
-    "team": "Unknown",
+    "teamId": "4",
+    "team": "4",
     "teamShortName": "Unknown",
     "league": "ipl",
     "age": 30,
@@ -9503,15 +9696,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "149",
     "name": "Prasidh Krishna",
     "role": "Bowler",
     "allRounderType": "",
-    "teamId": "4",
-    "team": "Gujarat Titans",
+    "teamId": "9",
+    "team": "9",
     "teamShortName": "GT",
     "league": "ipl",
     "age": 30,
@@ -9552,15 +9746,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "25",
     "name": "Lungi Ngidi",
     "role": "Bowler",
     "allRounderType": "",
-    "teamId": "6",
-    "team": "Delhi Capitals",
+    "teamId": "3",
+    "team": "3",
     "teamShortName": "DC",
     "league": "ipl",
     "age": 29,
@@ -9601,15 +9796,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "216",
     "name": "Mukesh Choudhary",
     "role": "Bowler",
     "allRounderType": "",
-    "teamId": "10",
-    "team": "Chennai Super Kings",
+    "teamId": "1",
+    "team": "1",
     "teamShortName": "CSK",
     "league": "ipl",
     "age": 29,
@@ -9650,15 +9846,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "244",
     "name": "Gurjapneet Singh",
     "role": "Bowler",
     "allRounderType": "",
-    "teamId": "10",
-    "team": "Chennai Super Kings",
+    "teamId": "1",
+    "team": "1",
     "teamShortName": "CSK",
     "league": "ipl",
     "age": 29,
@@ -9699,15 +9896,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "313",
     "name": "Blessing Muzarabani",
     "role": "Bowler",
     "allRounderType": "",
-    "teamId": "9",
-    "team": "Kolkata Knight Riders",
+    "teamId": "3",
+    "team": "3",
     "teamShortName": "KKR",
     "league": "ipl",
     "age": 29,
@@ -9748,7 +9946,8 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "250",
@@ -9756,7 +9955,7 @@ export const fallbackIplPlayers = [
     "role": "Bowler",
     "allRounderType": "",
     "teamId": "8",
-    "team": "Rajasthan Royals",
+    "team": "8",
     "teamShortName": "RR",
     "league": "ipl",
     "age": 29,
@@ -9797,15 +9996,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "148",
     "name": "Avesh Khan",
     "role": "Bowler",
     "allRounderType": "",
-    "teamId": "7",
-    "team": "Lucknow Super Giants",
+    "teamId": "10",
+    "team": "10",
     "teamShortName": "LSG",
     "league": "ipl",
     "age": 29,
@@ -9846,15 +10046,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "35",
     "name": "Akash Deep",
     "role": "Bowler",
     "allRounderType": "",
-    "teamId": "9",
-    "team": "Kolkata Knight Riders",
+    "teamId": "10",
+    "team": "10",
     "teamShortName": "KKR",
     "league": "ipl",
     "age": 29,
@@ -9895,15 +10096,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "179",
     "name": "Vijaykumar Vyshak",
     "role": "Bowler",
     "allRounderType": "",
-    "teamId": "5",
-    "team": "Punjab Kings",
+    "teamId": "6",
+    "team": "6",
     "teamShortName": "PBKS",
     "league": "ipl",
     "age": 29,
@@ -9944,15 +10146,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "277",
     "name": "Abhinandan Singh",
     "role": "Bowler",
     "allRounderType": "",
-    "teamId": "1",
-    "team": "Royal Challengers Bangalore",
+    "teamId": "3",
+    "team": "3",
     "teamShortName": "RCB",
     "league": "ipl",
     "age": 28,
@@ -9993,7 +10196,8 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "239",
@@ -10001,7 +10205,7 @@ export const fallbackIplPlayers = [
     "role": "Bowler",
     "allRounderType": "",
     "teamId": "8",
-    "team": "Rajasthan Royals",
+    "team": "8",
     "teamShortName": "RR",
     "league": "ipl",
     "age": 28,
@@ -10042,15 +10246,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "181",
     "name": "Mayank Markande",
     "role": "Bowler",
     "allRounderType": "",
-    "teamId": "2",
-    "team": "Mumbai Indians",
+    "teamId": "4",
+    "team": "4",
     "teamShortName": "MI",
     "league": "ipl",
     "age": 28,
@@ -10091,15 +10296,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "145",
     "name": "Khaleel Ahmed",
     "role": "Bowler",
     "allRounderType": "",
-    "teamId": "10",
-    "team": "Chennai Super Kings",
+    "teamId": "1",
+    "team": "1",
     "teamShortName": "CSK",
     "league": "ipl",
     "age": 28,
@@ -10140,15 +10346,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "80",
     "name": "Yash Dayal",
     "role": "Bowler",
     "allRounderType": "",
-    "teamId": "1",
-    "team": "Royal Challengers Bangalore",
+    "teamId": "3",
+    "team": "3",
     "teamShortName": "RCB",
     "league": "ipl",
     "age": 28,
@@ -10189,15 +10396,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "173",
     "name": "Vaibhav Arora",
     "role": "Bowler",
     "allRounderType": "",
-    "teamId": "9",
-    "team": "Kolkata Knight Riders",
+    "teamId": "4",
+    "team": "4",
     "teamShortName": "KKR",
     "league": "ipl",
     "age": 28,
@@ -10238,7 +10446,8 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "219",
@@ -10246,7 +10455,7 @@ export const fallbackIplPlayers = [
     "role": "Bowler",
     "allRounderType": "",
     "teamId": "7",
-    "team": "Lucknow Super Giants",
+    "team": "7",
     "teamShortName": "LSG",
     "league": "ipl",
     "age": 27,
@@ -10287,15 +10496,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "117",
     "name": "Mohsin Khan",
     "role": "Bowler",
     "allRounderType": "",
-    "teamId": "7",
-    "team": "Lucknow Super Giants",
+    "teamId": "10",
+    "team": "10",
     "teamShortName": "LSG",
     "league": "ipl",
     "age": 27,
@@ -10336,15 +10546,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "46",
     "name": "Shivam Mavi",
     "role": "Bowler",
     "allRounderType": "",
-    "teamId": "3",
-    "team": "Sunrisers Hyderabad",
+    "teamId": "8",
+    "team": "8",
     "teamShortName": "SRH",
     "league": "ipl",
     "age": 27,
@@ -10385,7 +10596,8 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "312",
@@ -10393,7 +10605,7 @@ export const fallbackIplPlayers = [
     "role": "Bowler",
     "allRounderType": "",
     "teamId": "8",
-    "team": "Rajasthan Royals",
+    "team": "8",
     "teamShortName": "RR",
     "league": "ipl",
     "age": 27,
@@ -10434,15 +10646,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "275",
     "name": "Xavier Bartlett",
     "role": "Bowler",
     "allRounderType": "",
-    "teamId": "5",
-    "team": "Punjab Kings",
+    "teamId": "6",
+    "team": "6",
     "teamShortName": "PBKS",
     "league": "ipl",
     "age": 27,
@@ -10483,7 +10696,8 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "178",
@@ -10491,7 +10705,7 @@ export const fallbackIplPlayers = [
     "role": "Bowler",
     "allRounderType": "",
     "teamId": "5",
-    "team": "Punjab Kings",
+    "team": "5",
     "teamShortName": "PBKS",
     "league": "ipl",
     "age": 27,
@@ -10532,15 +10746,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 1
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "125",
     "name": "Arshdeep Singh",
     "role": "Bowler",
     "allRounderType": "",
-    "teamId": "5",
-    "team": "Punjab Kings",
+    "teamId": "6",
+    "team": "6",
     "teamShortName": "PBKS",
     "league": "ipl",
     "age": 27,
@@ -10581,7 +10796,8 @@ export const fallbackIplPlayers = [
       "fiveWickets": 1
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "13",
@@ -10589,7 +10805,7 @@ export const fallbackIplPlayers = [
     "role": "Bowler",
     "allRounderType": "",
     "teamId": "10",
-    "team": "Chennai Super Kings",
+    "team": "10",
     "teamShortName": "CSK",
     "league": "ipl",
     "age": 26,
@@ -10630,15 +10846,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "232",
     "name": "Umran Malik",
     "role": "Bowler",
     "allRounderType": "",
-    "teamId": "9",
-    "team": "Kolkata Knight Riders",
+    "teamId": "4",
+    "team": "4",
     "teamShortName": "KKR",
     "league": "ipl",
     "age": 26,
@@ -10679,7 +10896,8 @@ export const fallbackIplPlayers = [
       "fiveWickets": 1
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "220",
@@ -10687,7 +10905,7 @@ export const fallbackIplPlayers = [
     "role": "Bowler",
     "allRounderType": "",
     "teamId": "7",
-    "team": "Lucknow Super Giants",
+    "team": "7",
     "teamShortName": "LSG",
     "league": "ipl",
     "age": 26,
@@ -10728,15 +10946,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "305",
     "name": "Zeeshan Ansari",
     "role": "Bowler",
     "allRounderType": "",
-    "teamId": "3",
-    "team": "Sunrisers Hyderabad",
+    "teamId": "8",
+    "team": "8",
     "teamShortName": "SRH",
     "league": "ipl",
     "age": 26,
@@ -10777,7 +10996,8 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "62",
@@ -10785,7 +11005,7 @@ export const fallbackIplPlayers = [
     "role": "Bowler",
     "allRounderType": "",
     "teamId": "9",
-    "team": "Kolkata Knight Riders",
+    "team": "9",
     "teamShortName": "KKR",
     "league": "ipl",
     "age": 26,
@@ -10826,15 +11046,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "174",
     "name": "Rasikh Salam",
     "role": "Bowler",
     "allRounderType": "",
-    "teamId": "1",
-    "team": "Royal Challengers Bangalore",
+    "teamId": "3",
+    "team": "3",
     "teamShortName": "RCB",
     "league": "ipl",
     "age": 25,
@@ -10875,15 +11096,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "215",
     "name": "Gurnoor Brar",
     "role": "Bowler",
     "allRounderType": "",
-    "teamId": "4",
-    "team": "Gujarat Titans",
+    "teamId": "9",
+    "team": "9",
     "teamShortName": "GT",
     "league": "ipl",
     "age": 25,
@@ -10924,15 +11146,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "9",
     "name": "Ravi Bishnoi",
     "role": "Bowler",
     "allRounderType": "",
-    "teamId": "8",
-    "team": "Rajasthan Royals",
+    "teamId": "10",
+    "team": "10",
     "teamShortName": "RR",
     "league": "ipl",
     "age": 25,
@@ -10973,7 +11196,8 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "64",
@@ -10981,7 +11205,7 @@ export const fallbackIplPlayers = [
     "role": "Bowler",
     "allRounderType": "",
     "teamId": "9",
-    "team": "Kolkata Knight Riders",
+    "team": "9",
     "teamShortName": "KKR",
     "league": "ipl",
     "age": 25,
@@ -11022,7 +11246,8 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "40",
@@ -11030,7 +11255,7 @@ export const fallbackIplPlayers = [
     "role": "Bowler",
     "allRounderType": "",
     "teamId": "8",
-    "team": "Rajasthan Royals",
+    "team": "8",
     "teamShortName": "RR",
     "league": "ipl",
     "age": 25,
@@ -11071,15 +11296,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "284",
     "name": "Eshan Malinga",
     "role": "Bowler",
     "allRounderType": "",
-    "teamId": "3",
-    "team": "Sunrisers Hyderabad",
+    "teamId": "8",
+    "team": "8",
     "teamShortName": "SRH",
     "league": "ipl",
     "age": 25,
@@ -11120,7 +11346,8 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "61",
@@ -11128,7 +11355,7 @@ export const fallbackIplPlayers = [
     "role": "Bowler",
     "allRounderType": "",
     "teamId": "8",
-    "team": "Rajasthan Royals",
+    "team": "8",
     "teamShortName": "RR",
     "league": "ipl",
     "age": 25,
@@ -11169,7 +11396,8 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "242",
@@ -11177,7 +11405,7 @@ export const fallbackIplPlayers = [
     "role": "Bowler",
     "allRounderType": "",
     "teamId": "2",
-    "team": "Mumbai Indians",
+    "team": "2",
     "teamShortName": "MI",
     "league": "ipl",
     "age": 24,
@@ -11218,15 +11446,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "273",
     "name": "Prince Yadav",
     "role": "Bowler",
     "allRounderType": "",
-    "teamId": "7",
-    "team": "Lucknow Super Giants",
+    "teamId": "10",
+    "team": "10",
     "teamShortName": "LSG",
     "league": "ipl",
     "age": 24,
@@ -11267,15 +11496,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "103",
     "name": "Harshit Rana",
     "role": "Bowler",
     "allRounderType": "",
-    "teamId": "9",
-    "team": "Kolkata Knight Riders",
+    "teamId": "4",
+    "team": "4",
     "teamShortName": "KKR",
     "league": "ipl",
     "age": 24,
@@ -11316,15 +11546,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "298",
     "name": "Praful Hinge",
     "role": "Bowler",
     "allRounderType": "",
-    "teamId": "3",
-    "team": "Sunrisers Hyderabad",
+    "teamId": "8",
+    "team": "8",
     "teamShortName": "SRH",
     "league": "ipl",
     "age": 23,
@@ -11365,7 +11596,8 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "243",
@@ -11373,7 +11605,7 @@ export const fallbackIplPlayers = [
     "role": "Bowler",
     "allRounderType": "",
     "teamId": "7",
-    "team": "Lucknow Super Giants",
+    "team": "7",
     "teamShortName": "LSG",
     "league": "ipl",
     "age": 23,
@@ -11414,15 +11646,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "116",
     "name": "Mayank Yadav",
     "role": "Bowler",
     "allRounderType": "",
-    "teamId": "7",
-    "team": "Lucknow Super Giants",
+    "teamId": "10",
+    "team": "10",
     "teamShortName": "LSG",
     "league": "ipl",
     "age": 23,
@@ -11463,7 +11696,8 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "39",
@@ -11471,7 +11705,7 @@ export const fallbackIplPlayers = [
     "role": "Bowler",
     "allRounderType": "",
     "teamId": "4",
-    "team": "Gujarat Titans",
+    "team": "4",
     "teamShortName": "GT",
     "league": "ipl",
     "age": 23,
@@ -11512,15 +11746,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "185",
     "name": "Manav Suthar",
     "role": "Bowler",
     "allRounderType": "",
-    "teamId": "4",
-    "team": "Gujarat Titans",
+    "teamId": "9",
+    "team": "9",
     "teamShortName": "GT",
     "league": "ipl",
     "age": 23,
@@ -11561,15 +11796,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "56",
     "name": "Onkar Tarmale",
     "role": "Bowler",
     "allRounderType": "",
-    "teamId": "3",
-    "team": "Sunrisers Hyderabad",
+    "teamId": "8",
+    "team": "8",
     "teamShortName": "SRH",
     "league": "ipl",
     "age": 23,
@@ -11610,15 +11846,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "74",
     "name": "Vicky Ostwal",
     "role": "Bowler",
     "allRounderType": "",
-    "teamId": "1",
-    "team": "Royal Challengers Bangalore",
+    "teamId": "3",
+    "team": "3",
     "teamShortName": "RCB",
     "league": "ipl",
     "age": 23,
@@ -11659,15 +11896,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "55",
     "name": "Amit Kumar",
     "role": "Bowler",
     "allRounderType": "",
-    "teamId": "3",
-    "team": "Sunrisers Hyderabad",
+    "teamId": "8",
+    "team": "8",
     "teamShortName": "SRH",
     "league": "ipl",
     "age": 23,
@@ -11708,15 +11946,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "2",
     "name": "Matheesha Pathirana",
     "role": "Bowler",
     "allRounderType": "",
-    "teamId": "9",
-    "team": "Kolkata Knight Riders",
+    "teamId": "1",
+    "team": "1",
     "teamShortName": "KKR",
     "league": "ipl",
     "age": 23,
@@ -11757,15 +11996,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "182",
     "name": "Suyash Sharma",
     "role": "Bowler",
     "allRounderType": "",
-    "teamId": "1",
-    "team": "Royal Challengers Bangalore",
+    "teamId": "3",
+    "team": "3",
     "teamShortName": "RCB",
     "league": "ipl",
     "age": 22,
@@ -11806,7 +12046,8 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "57",
@@ -11814,7 +12055,7 @@ export const fallbackIplPlayers = [
     "role": "Bowler",
     "allRounderType": "",
     "teamId": "2",
-    "team": "Mumbai Indians",
+    "team": "2",
     "teamShortName": "MI",
     "league": "ipl",
     "age": 22,
@@ -11855,15 +12096,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "52",
     "name": "Krains Fuletra",
     "role": "Bowler",
     "allRounderType": "",
-    "teamId": "3",
-    "team": "Sunrisers Hyderabad",
+    "teamId": "8",
+    "team": "8",
     "teamShortName": "SRH",
     "league": "ipl",
     "age": 21,
@@ -11904,15 +12146,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "257",
     "name": "Vipraj Nigam",
     "role": "Bowler",
     "allRounderType": "",
-    "teamId": "6",
-    "team": "Delhi Capitals",
+    "teamId": "5",
+    "team": "5",
     "teamShortName": "DC",
     "league": "ipl",
     "age": 21,
@@ -11953,15 +12196,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "297",
     "name": "Sakib Hussain",
     "role": "Bowler",
     "allRounderType": "",
-    "teamId": "3",
-    "team": "Sunrisers Hyderabad",
+    "teamId": "8",
+    "team": "8",
     "teamShortName": "SRH",
     "league": "ipl",
     "age": 21,
@@ -12002,15 +12246,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "151",
     "name": "Noor Ahmad",
     "role": "Bowler",
     "allRounderType": "",
-    "teamId": "10",
-    "team": "Chennai Super Kings",
+    "teamId": "1",
+    "team": "1",
     "teamShortName": "CSK",
     "league": "ipl",
     "age": 20,
@@ -12051,7 +12296,8 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "37",
@@ -12059,7 +12305,7 @@ export const fallbackIplPlayers = [
     "role": "Bowler",
     "allRounderType": "",
     "teamId": "7",
-    "team": "Lucknow Super Giants",
+    "team": "7",
     "teamShortName": "LSG",
     "league": "ipl",
     "age": 20,
@@ -12100,7 +12346,8 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "316",
@@ -12108,7 +12355,7 @@ export const fallbackIplPlayers = [
     "role": "Bowler",
     "allRounderType": "",
     "teamId": "10",
-    "team": "Chennai Super Kings",
+    "team": "10",
     "teamShortName": "CSK",
     "league": "ipl",
     "age": 20,
@@ -12149,7 +12396,8 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "203",
@@ -12157,7 +12405,7 @@ export const fallbackIplPlayers = [
     "role": "Bowler",
     "allRounderType": "",
     "teamId": "2",
-    "team": "Mumbai Indians",
+    "team": "2",
     "teamShortName": "MI",
     "league": "ipl",
     "age": 19,
@@ -12198,15 +12446,16 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "249",
     "name": "Kwena Maphaka",
     "role": "Bowler",
     "allRounderType": "",
-    "teamId": "8",
-    "team": "Rajasthan Royals",
+    "teamId": "7",
+    "team": "7",
     "teamShortName": "RR",
     "league": "ipl",
     "age": 19,
@@ -12247,7 +12496,8 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "63",
@@ -12255,7 +12505,7 @@ export const fallbackIplPlayers = [
     "role": "Bowler",
     "allRounderType": "",
     "teamId": "8",
-    "team": "Rajasthan Royals",
+    "team": "8",
     "teamShortName": "RR",
     "league": "ipl",
     "age": 19,
@@ -12296,7 +12546,8 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "81",
@@ -12304,7 +12555,7 @@ export const fallbackIplPlayers = [
     "role": "Bowler",
     "allRounderType": "",
     "teamId": "2",
-    "team": "Mumbai Indians",
+    "team": "2",
     "teamShortName": "MI",
     "league": "ipl",
     "age": null,
@@ -12345,7 +12596,8 @@ export const fallbackIplPlayers = [
       "fiveWickets": 2
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "146",
@@ -12353,7 +12605,7 @@ export const fallbackIplPlayers = [
     "role": "Bowler",
     "allRounderType": "",
     "teamId": "2",
-    "team": "Mumbai Indians",
+    "team": "2",
     "teamShortName": "MI",
     "league": "ipl",
     "age": null,
@@ -12394,7 +12646,8 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "45",
@@ -12402,7 +12655,7 @@ export const fallbackIplPlayers = [
     "role": "Bowler",
     "allRounderType": "",
     "teamId": "4",
-    "team": "Gujarat Titans",
+    "team": "4",
     "teamShortName": "GT",
     "league": "ipl",
     "age": null,
@@ -12443,7 +12696,8 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   },
   {
     "id": "67",
@@ -12451,7 +12705,7 @@ export const fallbackIplPlayers = [
     "role": "Bowler",
     "allRounderType": "",
     "teamId": "4",
-    "team": "Gujarat Titans",
+    "team": "4",
     "teamShortName": "GT",
     "league": "ipl",
     "age": null,
@@ -12492,7 +12746,8 @@ export const fallbackIplPlayers = [
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "active",
+    "isKeeper": false
   }
 ];
 export default fallbackIplPlayers;
