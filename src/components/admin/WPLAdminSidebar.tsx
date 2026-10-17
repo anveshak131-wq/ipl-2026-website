@@ -31,11 +31,11 @@ export default function WPLAdminSidebar({ currentPage = '', onLogout }: WPLAdmin
   const navItems = [
     { href: '/ops/wpl/teams', label: 'Teams', icon: Shield },
     { href: '/ops/wpl/venues', label: 'Venues & Grounds', icon: MapPin },
-    { href: '/ops/wpl/squads', label: 'Players', icon: Users },
+    { href: '/ops/wpl/players', label: 'Players', icon: Users },
     { href: '/ops/wpl/batting-stats', label: 'Batting Stats', icon: Award },
     { href: '/ops/wpl/bowling-stats', label: 'Bowling Stats', icon: BarChart3 },
     { href: '/ops/wpl/statistics', label: 'Statistics', icon: BarChart3 },
-    { href: '/ops/wpl/squads/upload', label: 'Player Upload', icon: Upload },
+    { href: '/ops/wpl/players/upload', label: 'Player Upload', icon: Upload },
   ];
 
   return (
