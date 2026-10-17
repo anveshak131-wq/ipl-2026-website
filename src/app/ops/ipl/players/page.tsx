@@ -1,5 +1,7 @@
 'use client';
 
+import CricbuzzStatsEditor from '@/components/admin/players/CricbuzzStatsEditor';
+
 import PlayerExportBar from "@/components/admin/players/PlayerExportBar";
 
 import { Suspense, useState, useEffect, useMemo, ReactNode } from 'react';
@@ -572,6 +574,8 @@ function AdminPlayersWorkspace() {
       fiveWickets: string;
       bestBowling: string;
     };
+    bio?: any;
+    careerStats?: any;
   }>({
     name: '',
     role: 'Batsman',
@@ -3367,6 +3371,8 @@ function AdminPlayersWorkspace() {
         squadExitDate: formData.isActiveInSquad ? undefined : (formData.squadExitDate || new Date().toISOString().slice(0, 10)),
         currentSeasonYear: new Date().getFullYear(),
         stats: statsForPlayer,
+        bio: formData.bio || {},
+        careerStats: formData.careerStats || {},
         transferInfo: {
           lastAuctionYear: formData.lastAuctionYear ? Number(formData.lastAuctionYear) : undefined,
           acquiredVia: formData.acquiredVia,
@@ -5507,6 +5513,12 @@ function AdminPlayersWorkspace() {
                           </div>
                           <span className="oil-chip">Step 5</span>
                         </div>
+                        
+                        {/* Cricbuzz Bio & Multi-Format Stats Editor with Virat Kohli Reference Placeholders */}
+                        <div className="mb-8">
+                          <CricbuzzStatsEditor formData={formData} onChange={setFormData} />
+                        </div>
+
                         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                             <div className="group">
                               <label className="block text-sm font-semibold text-gray-200 mb-2.5 flex items-center gap-2">
