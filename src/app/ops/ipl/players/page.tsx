@@ -1,3 +1,4 @@
+import PlayerExportBar from "@/components/admin/players/PlayerExportBar";
 'use client';
 
 import { Suspense, useState, useEffect, useMemo, ReactNode } from 'react';
@@ -4850,7 +4851,8 @@ function AdminPlayersWorkspace() {
               </div>
             )
           ) : (
-            <AdminPlayersTable
+            <div className="mb-4"><PlayerExportBar players={players} league="IPL" teams={teams} /></div>
+        <AdminPlayersTable
               players={searchFilteredPlayers}
               teams={teams}
               currentLeague={currentLeague}
