@@ -56,3 +56,4 @@ admin-links-local.txt
 *.key
 secrets/
 .secrets/
+.cricbuzz-*.json
