@@ -380,7 +380,7 @@ export default function AdminSidebar({ currentPage = '', onLogout }: AdminSideba
         shortcut: 'P',
       },
       {
-        href: '/ops/ipl/roster',
+        href: '/ops/ipl/players',
         label: 'Players',
         icon: (
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -517,7 +517,7 @@ export default function AdminSidebar({ currentPage = '', onLogout }: AdminSideba
     ],
     Tools: [
       {
-        href: '/ops/ipl/roster/upload',
+        href: '/ops/ipl/players/upload',
         label: 'Upload Players CSV',
         icon: (
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -714,7 +714,7 @@ export default function AdminSidebar({ currentPage = '', onLogout }: AdminSideba
       ]),
       'League Data': pick([
         '/ops/ipl/teams',
-        '/ops/ipl/roster',
+        '/ops/ipl/players',
         '/ops/ipl/achievements',
         '/ops/ipl/coaches',
       ]),
@@ -729,7 +729,7 @@ export default function AdminSidebar({ currentPage = '', onLogout }: AdminSideba
         '/ops/ipl/stats',
       ]),
       'Data & AI': pick([
-        '/ops/ipl/roster/upload',
+        '/ops/ipl/players/upload',
         '/ops/ipl/dataset-manager',
         '/ops/ipl/datasets',
         '/ops/ipl/ml-lab',
