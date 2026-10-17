@@ -1,5 +1,6 @@
-import PlayerExportBar from "@/components/admin/players/PlayerExportBar";
 'use client';
+
+import PlayerExportBar from "@/components/admin/players/PlayerExportBar";
 
 import { Suspense, useState, useEffect, useMemo, ReactNode } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -4777,6 +4778,7 @@ function AdminPlayersWorkspace() {
       <div className="flex-1 relative">
         <div className="p-6 lg:p-8 relative">
           <PlayersStatsSubNav />
+            <div className="my-4"><PlayerExportBar players={players || []} league="WPL" teams={teams || []} /></div>
 
           {/* Enhanced Modern Header */}
           <div className="mb-8">
@@ -5718,8 +5720,7 @@ function AdminPlayersWorkspace() {
               </div>
             )
           ) : (
-            <div className="mb-4"><PlayerExportBar players={players || []} league="WPL" teams={teams || []} /></div>
-        <AdminPlayersTable
+            <AdminPlayersTable
               players={searchFilteredPlayers}
               teams={teams}
               currentLeague={currentLeague}
