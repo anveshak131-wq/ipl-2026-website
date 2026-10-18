@@ -471,19 +471,19 @@ function AdminPlayersWorkspace() {
             <div className="grid grid-cols-3 gap-2 mb-4">
               <div className="text-center">
                 <div className="text-white font-bold text-lg">
-                  {player.stats?.runs || '0'}
+                  {(player as any).careerStats?.batting?.IPL?.Runs || player.stats?.runs || "0"}
                 </div>
                 <div className="text-xs text-gray-300">Runs</div>
               </div>
               <div className="text-center">
                 <div className="text-white font-bold text-lg">
-                  {player.stats?.wickets || '0'}
+                  {(player as any).careerStats?.bowling?.IPL?.Wkts || player.stats?.wickets || "0"}
                 </div>
                 <div className="text-xs text-gray-300">Wickets</div>
               </div>
               <div className="text-center">
                 <div className="text-white font-bold text-lg">
-                  {Number.isFinite(Number(player.stats?.average)) ? Number(player.stats?.average).toFixed(2) : '0.00'}
+                  {(player as any).careerStats?.batting?.IPL?.Avg || (Number.isFinite(Number(player.stats?.average)) && Number(player.stats?.average) > 0 ? Number(player.stats?.average).toFixed(2) : "0.00")}
                 </div>
                 <div className="text-xs text-gray-300">Avg</div>
               </div>
