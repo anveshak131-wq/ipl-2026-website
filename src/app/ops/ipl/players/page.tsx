@@ -920,7 +920,9 @@ function AdminPlayersWorkspace() {
         nationality: player.nationality || '',
         jerseyNumber: player.jerseyNumber ?? '',
         isCaptain: player.isCaptain ?? false,
-        battingStyle: player.battingStyle || '',
+        battingStyle: player.battingStyle || "",
+      careerStats: (player as any).careerStats || { batting: {}, bowling: {} },
+      bio: (player as any).bio || {},
         bowlingStyle: player.bowlingStyle || '',
         league: player.league || currentLeague,
         photoUrl: player.photoUrl || '',
@@ -3179,7 +3181,9 @@ function AdminPlayersWorkspace() {
       isCaptain: player.isCaptain || false,
       bowlingStyle: isPredefinedBowlingStyle ? existingBowlingStyle : 'N/A (Batsman)',
       customBowlingStyle: isPredefinedBowlingStyle ? '' : (existingBowlingStyle || ''),
-      battingStyle: player.battingStyle || '',
+      battingStyle: player.battingStyle || "",
+      careerStats: (player as any).careerStats || { batting: {}, bowling: {} },
+      bio: (player as any).bio || {},
       // Transfer info mapping (if available)
       lastAuctionYear: player.transferInfo?.lastAuctionYear,
       acquiredVia: player.transferInfo?.acquiredVia || 'auction',
@@ -3401,7 +3405,9 @@ function AdminPlayersWorkspace() {
         // Update existing player - CRITICAL: Preserve ALL existing fields first, then override with form data
         const updatePayload = {
           ...editingPlayer, // Preserve ALL existing player fields first
-          ...playerData,    // Then override with form data
+          ...playerData,
+          careerStats: formData.careerStats || (editingPlayer as any).careerStats || {},
+          bio: formData.bio || (editingPlayer as any).bio || {},    // Then override with form data
           id: editingPlayer.id, // Ensure ID is always set
           // Explicitly preserve fields that might not be in form
           dateOfBirth: dateOfBirthISO || editingPlayer.dateOfBirth,

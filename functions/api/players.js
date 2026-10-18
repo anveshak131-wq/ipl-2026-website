@@ -33,11 +33,11 @@ export const onRequest = async (context) => {
       }
 
       // FAIL-SAFE IMMUNITY: Fall back to disk bundle if KV is wiped, empty, or incomplete
-      if (league === "ipl" && (!Array.isArray(players) || players.length < 200)) {
+      if (league === "ipl" && (!Array.isArray(players) || players.length === 0)) {
         players = fallbackIplPlayers;
         if (env?.SPORTS_KV) context.waitUntil(env.SPORTS_KV.put(kvKey, JSON.stringify(fallbackIplPlayers)).catch(() => {}));
         if (env?.IPL_CACHE) context.waitUntil(env.IPL_CACHE.put("players", JSON.stringify(fallbackIplPlayers)).catch(() => {}));
-      } else if (league === "wpl" && (!Array.isArray(players) || players.length < 30)) {
+      } else if (league === "wpl" && (!Array.isArray(players) || players.length === 0)) {
         players = fallbackWplPlayers;
         if (env?.SPORTS_KV) context.waitUntil(env.SPORTS_KV.put(kvKey, JSON.stringify(fallbackWplPlayers)).catch(() => {}));
       }
