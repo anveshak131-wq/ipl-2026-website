@@ -91,6 +91,8 @@ export const onRequest = async (context) => {
 
       if (env?.SPORTS_KV) await env.SPORTS_KV.put(kvKey, JSON.stringify(currentPlayers));
       if (env?.IPL_CACHE && targetLeague === "ipl") await env.IPL_CACHE.put("players", JSON.stringify(currentPlayers));
+      if (env?.IPL_CACHE && targetLeague === "wpl") await env.IPL_CACHE.put("players:wpl", JSON.stringify(currentPlayers));
+      if (env?.IPL_CACHE && targetLeague === "ipl") await env.IPL_CACHE.put("players", JSON.stringify(currentPlayers));
 
       return new Response(JSON.stringify({ success: true, player: incoming }), {
         status: 200,

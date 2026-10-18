@@ -9,20 +9,58 @@ interface CricbuzzStatsEditorProps {
 
 const FORMATS = ['Test', 'ODI', 'T20I', 'IPL'] as const;
 
-const VIRAT_PLACEHOLDERS = {
-  batting: {
-    Test: { M: '123', Inn: '210', NO: '21', Runs: '9230', HS: '254*', Avg: '48.83', BF: '16634', SR: '55.49', '100': '30', '200': '7', '50': '31', '4s': '1018', '6s': '26' },
-    ODI:  { M: '313', Inn: '301', NO: '47', Runs: '14867', HS: '183',  Avg: '58.53', BF: '15958', SR: '93.16', '100': '55', '200': '0', '50': '75', '4s': '1350', '6s': '156' },
-    T20I: { M: '125', Inn: '117', NO: '31', Runs: '4188',  HS: '122*', Avg: '48.69', BF: '3040',  SR: '137.04', '100': '1',  '200': '0', '50': '38', '4s': '361',  '6s': '124' },
-    IPL:  { M: '283', Inn: '275', NO: '44', Runs: '9336',  HS: '113*', Avg: '40.42', BF: '6926',  SR: '134.80', '100': '9',  '200': '0', '50': '68', '4s': '844',  '6s': '316' },
-  },
-  bowling: {
-    Test: { M: '123', Inn: '11', B: '175', Runs: '84',  Wkts: '0', BBI: '-',    BBM: '-',    Econ: '2.88', Avg: '-',    SR: '-',    '5W': '0', '10W': '0' },
-    ODI:  { M: '313', Inn: '50', B: '668', Runs: '680', Wkts: '5', BBI: '1/15', BBM: '1/15', Econ: '6.10', Avg: '136.00', SR: '133.60', '5W': '0', '10W': '0' },
-    T20I: { M: '125', Inn: '13', B: '152', Runs: '204', Wkts: '4', BBI: '1/13', BBM: '1/13', Econ: '8.05', Avg: '51.00',  SR: '38.00',  '5W': '0', '10W': '0' },
-    IPL:  { M: '283', Inn: '26', B: '251', Runs: '368', Wkts: '4', BBI: '2/25', BBM: '2/25', Econ: '8.80', Avg: '92.00',  SR: '62.75',  '5W': '0', '10W': '0' },
-  },
-};
+// Helper to read property regardless of legacy vs modern casing
+function getVal(row: any, ...keys: string[]): string {
+  if (!row) return '';
+  for (const k of keys) {
+    if (row[k] !== undefined && row[k] !== null && row[k] !== '') {
+      return String(row[k]);
+    }
+  }
+  return '';
+}
+
+// Canonical getters for row values
+function getBattingRow(career: any, fmt: string) {
+  const altFmt = fmt === 'T20I' ? 'T20' : fmt;
+  const raw = career?.batting?.[fmt] || career?.batting?.[altFmt] || {};
+  return {
+    raw,
+    M: getVal(raw, 'M', 'Matches'),
+    Inn: getVal(raw, 'Inn', 'Innings'),
+    NO: getVal(raw, 'NO', 'NotOut'),
+    Runs: getVal(raw, 'Runs'),
+    HS: getVal(raw, 'HS', 'Highest'),
+    Avg: getVal(raw, 'Avg', 'Average'),
+    BF: getVal(raw, 'BF', 'Balls'),
+    SR: getVal(raw, 'SR'),
+    '100': getVal(raw, '100', '100s'),
+    '200': getVal(raw, '200', '200s'),
+    '50': getVal(raw, '50', '50s'),
+    '4s': getVal(raw, '4s', 'Fours'),
+    '6s': getVal(raw, '6s', 'Sixes'),
+  };
+}
+
+function getBowlingRow(career: any, fmt: string) {
+  const altFmt = fmt === 'T20I' ? 'T20' : fmt;
+  const raw = career?.bowling?.[fmt] || career?.bowling?.[altFmt] || {};
+  return {
+    raw,
+    M: getVal(raw, 'M', 'Matches'),
+    Inn: getVal(raw, 'Inn', 'Innings'),
+    B: getVal(raw, 'B', 'Balls'),
+    Runs: getVal(raw, 'Runs'),
+    Wkts: getVal(raw, 'Wkts', 'Wickets'),
+    BBI: getVal(raw, 'BBI'),
+    BBM: getVal(raw, 'BBM'),
+    Econ: getVal(raw, 'Econ', 'Eco'),
+    Avg: getVal(raw, 'Avg'),
+    SR: getVal(raw, 'SR'),
+    '5W': getVal(raw, '5W', '5w'),
+    '10W': getVal(raw, '10W', '10w'),
+  };
+}
 
 const BATTING_AUTO_FIELDS = ['Avg', 'SR'] as const;
 const BOWLING_AUTO_FIELDS = ['Avg', 'SR', 'Econ'] as const;
@@ -31,49 +69,62 @@ export default function CricbuzzStatsEditor({ formData, onChange }: CricbuzzStat
   const career = formData.careerStats || { batting: {}, bowling: {} };
 
   const handleStatsChange = (type: 'batting' | 'bowling', format: string, field: string, val: string) => {
-    const existingRow = { ...(career[type]?.[format] || {}) };
-    existingRow[field] = val;
+    const altFormat = format === 'T20I' ? 'T20' : format;
+    const existing = { ...(career[type]?.[format] || career[type]?.[altFormat] || {}) };
+    
+    // Store both canonical and legacy keys for compatibility
+    existing[field] = val;
+    if (field === 'M') existing.Matches = Number(val) || val;
+    if (field === 'Inn') existing.Innings = Number(val) || val;
+    if (field === 'NO') existing.NotOut = Number(val) || val;
+    if (field === 'HS') existing.Highest = val;
+    if (field === 'BF') existing.Balls = Number(val) || val;
+    if (field === 'B') existing.Balls = Number(val) || val;
+    if (field === 'Wkts') existing.Wickets = Number(val) || val;
+    if (field === '50') existing['50s'] = Number(val) || val;
+    if (field === '100') existing['100s'] = Number(val) || val;
+    if (field === '4s') existing.Fours = Number(val) || val;
+    if (field === '6s') existing.Sixes = Number(val) || val;
+    if (field === '5W') existing['5w'] = Number(val) || val;
+    if (field === '10W') existing['10w'] = Number(val) || val;
 
     // Real-time automatic calculations
     if (type === 'batting') {
-      const runs = Number(existingRow.Runs);
-      const inn = Number(existingRow.Inn);
-      const no = Number(existingRow.NO);
-      const bf = Number(existingRow.BF);
+      const runs = Number(existing.Runs ?? val);
+      const inn = Number(existing.Inn ?? existing.Innings);
+      const no = Number(existing.NO ?? existing.NotOut);
+      const bf = Number(existing.BF ?? existing.Balls);
 
       if (!isNaN(runs) && !isNaN(inn) && !isNaN(no)) {
         const dismissals = inn - no;
-        if (dismissals > 0) {
-          existingRow.Avg = (runs / dismissals).toFixed(2);
-        } else if (dismissals === 0 && runs > 0) {
-          existingRow.Avg = runs.toFixed(2);
-        } else if (existingRow.Runs !== undefined && existingRow.Inn !== undefined) {
-          existingRow.Avg = '-';
-        }
+        const avg = dismissals > 0 ? (runs / dismissals).toFixed(2) : runs > 0 ? runs.toFixed(2) : '-';
+        existing.Avg = avg;
+        existing.Average = avg !== '-' ? Number(avg) : 0;
       }
 
       if (!isNaN(runs) && !isNaN(bf)) {
-        if (bf > 0) {
-          existingRow.SR = ((runs / bf) * 100).toFixed(2);
-        } else if (existingRow.BF !== undefined) {
-          existingRow.SR = '-';
-        }
+        const sr = bf > 0 ? ((runs / bf) * 100).toFixed(2) : '-';
+        existing.SR = sr;
       }
     } else if (type === 'bowling') {
-      const runs = Number(existingRow.Runs);
-      const balls = Number(existingRow.B);
-      const wkts = Number(existingRow.Wkts);
+      const runs = Number(existing.Runs ?? val);
+      const balls = Number(existing.B ?? existing.Balls);
+      const wkts = Number(existing.Wkts ?? existing.Wickets);
 
       if (!isNaN(runs) && !isNaN(wkts)) {
-        existingRow.Avg = wkts > 0 ? (runs / wkts).toFixed(2) : '-';
+        const avg = wkts > 0 ? (runs / wkts).toFixed(2) : '-';
+        existing.Avg = avg;
       }
 
       if (!isNaN(balls) && !isNaN(wkts)) {
-        existingRow.SR = wkts > 0 ? (balls / wkts).toFixed(2) : '-';
+        const sr = wkts > 0 ? (balls / wkts).toFixed(2) : '-';
+        existing.SR = sr;
       }
 
       if (!isNaN(runs) && !isNaN(balls)) {
-        existingRow.Econ = balls > 0 ? ((runs * 6) / balls).toFixed(2) : '-';
+        const econ = balls > 0 ? ((runs * 6) / balls).toFixed(2) : '-';
+        existing.Econ = econ;
+        existing.Eco = econ !== '-' ? Number(econ) : 0;
       }
     }
 
@@ -83,7 +134,8 @@ export default function CricbuzzStatsEditor({ formData, onChange }: CricbuzzStat
         ...career,
         [type]: {
           ...career[type],
-          [format]: existingRow,
+          [format]: existing,
+          ...(format === 'T20I' ? { T20: existing } : {}),
         },
       },
     });
@@ -122,8 +174,7 @@ export default function CricbuzzStatsEditor({ formData, onChange }: CricbuzzStat
           </thead>
           <tbody className="divide-y divide-slate-800/60">
             {FORMATS.map((fmt) => {
-              const b = career.batting?.[fmt] || {};
-              const p = VIRAT_PLACEHOLDERS.batting[fmt];
+              const row = getBattingRow(career, fmt);
               return (
                 <tr key={fmt}>
                   <td className="py-2 px-1.5 font-bold text-slate-300">{fmt}</td>
@@ -140,8 +191,7 @@ export default function CricbuzzStatsEditor({ formData, onChange }: CricbuzzStat
                               ? 'bg-sky-950/40 border-sky-900/60 text-sky-300 font-semibold cursor-not-allowed select-none'
                               : 'bg-slate-950 border-slate-800 text-slate-100 placeholder:text-slate-600 focus:border-sky-500'
                           }`}
-                          placeholder={p[col]}
-                          value={b[col] ?? ''}
+                          value={row[col] ?? ''}
                           onChange={(e) => !isAuto && handleStatsChange('batting', fmt, col, e.target.value)}
                         />
                       </td>
@@ -184,8 +234,7 @@ export default function CricbuzzStatsEditor({ formData, onChange }: CricbuzzStat
           </thead>
           <tbody className="divide-y divide-slate-800/60">
             {FORMATS.map((fmt) => {
-              const b = career.bowling?.[fmt] || {};
-              const p = VIRAT_PLACEHOLDERS.bowling[fmt];
+              const row = getBowlingRow(career, fmt);
               return (
                 <tr key={fmt}>
                   <td className="py-2 px-1.5 font-bold text-slate-300">{fmt}</td>
@@ -202,8 +251,7 @@ export default function CricbuzzStatsEditor({ formData, onChange }: CricbuzzStat
                               ? 'bg-amber-950/40 border-amber-900/60 text-amber-300 font-semibold cursor-not-allowed select-none'
                               : 'bg-slate-950 border-slate-800 text-slate-100 placeholder:text-slate-600 focus:border-amber-500'
                           }`}
-                          placeholder={p[col]}
-                          value={b[col] ?? ''}
+                          value={row[col] ?? ''}
                           onChange={(e) => !isAuto && handleStatsChange('bowling', fmt, col, e.target.value)}
                         />
                       </td>
