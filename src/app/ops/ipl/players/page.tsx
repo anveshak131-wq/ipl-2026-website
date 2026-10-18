@@ -3288,85 +3288,21 @@ function AdminPlayersWorkspace() {
         hundreds: Number(iplBat["100"] || formData.stats?.hundreds || 0),
         economy: Number(iplBowl.Econ || formData.stats?.economy || 0),
         bestBowling: String(iplBowl.BBI || formData.stats?.bestBowling || "-"),
-          matches: formData.stats.matches ? parseInt(formData.stats.matches) || 0 : 0,
-          runs: formData.stats.runs ? parseInt(formData.stats.runs) || 0 : 0,
-          wickets: formData.stats.wickets ? parseInt(formData.stats.wickets) || 0 : 0,
-          // Calculate average and strikeRate from base stats if not provided
-          average: (() => {
-            if (formData.stats.average && formData.stats.average.trim() !== '') {
-              return Number((parseFloat(formData.stats.average) || 0).toFixed(2));
-            }
-            // Calculate from runs, battingInnings, notOuts
-            const runs = formData.stats.runs ? parseInt(formData.stats.runs) || 0 : 0;
-            const battingInnings = formData.stats.battingInnings ? parseInt(formData.stats.battingInnings) || 0 : 0;
-            const notOuts = formData.stats.notOuts ? parseInt(formData.stats.notOuts) || 0 : 0;
-            const dismissals = battingInnings - notOuts;
-            if (dismissals > 0 && runs > 0) {
-              return Number((runs / dismissals).toFixed(2));
-            }
-            return 0;
-          })(),
-          strikeRate: (() => {
-            if (formData.stats.strikeRate && formData.stats.strikeRate.trim() !== '') {
-              return Number((parseFloat(formData.stats.strikeRate) || 0).toFixed(2));
-            }
-            // Calculate from runs and ballsFaced
-            const runs = formData.stats.runs ? parseInt(formData.stats.runs) || 0 : 0;
-            const ballsFaced = formData.stats.ballsFaced ? parseInt(formData.stats.ballsFaced) || 0 : 0;
-            if (ballsFaced > 0 && runs > 0) {
-              return Number(((runs * 100) / ballsFaced).toFixed(2));
-            }
-            return 0;
-          })(),
-          // Bowling stats - calculate if not provided
-          bowlingAverage: (() => {
-            if (formData.stats.bowlingAverage && formData.stats.bowlingAverage.trim() !== '') {
-              return parseFloat(formData.stats.bowlingAverage) || 0;
-            }
-            // Calculate from wickets and runsConceded
-            const wickets = formData.stats.wickets ? parseInt(formData.stats.wickets) || 0 : 0;
-            const runsConceded = formData.stats.runsConceded ? parseInt(formData.stats.runsConceded) || 0 : 0;
-            if (wickets > 0 && runsConceded >= 0) {
-              return runsConceded / wickets;
-            }
-            return 0;
-          })(),
-          economy: (() => {
-            if (formData.stats.economy && formData.stats.economy.trim() !== '') {
-              return parseFloat(formData.stats.economy) || 0;
-            }
-            // Calculate from balls and runsConceded
-            const balls = formData.stats.balls ? parseInt(formData.stats.balls) || 0 : 0;
-            const runsConceded = formData.stats.runsConceded ? parseInt(formData.stats.runsConceded) || 0 : 0;
-            if (balls > 0 && runsConceded >= 0) {
-              return (runsConceded * 6) / balls;
-            }
-            return 0;
-          })(),
-          highest: formData.stats.highest ? parseInt(formData.stats.highest) || 0 : 0,
-          fours: formData.stats.fours ? parseInt(formData.stats.fours) || 0 : 0,
-          sixes: formData.stats.sixes ? parseInt(formData.stats.sixes) || 0 : 0,
-          fifties: formData.stats.fifties ? parseInt(formData.stats.fifties) || 0 : 0,
-          hundreds: formData.stats.hundreds ? parseInt(formData.stats.hundreds) || 0 : 0,
-          bestBowling: formData.stats.bestBowling || '-',
-          // Batting-specific stats
-          battingInnings: formData.stats.battingInnings ? parseInt(formData.stats.battingInnings) || 0 : 0,
-          notOuts: formData.stats.notOuts ? parseInt(formData.stats.notOuts) || 0 : 0,
-          ballsFaced: formData.stats.ballsFaced ? parseInt(formData.stats.ballsFaced) || 0 : 0,
-          battingAverage: formData.stats.battingAverage && formData.stats.battingAverage.trim() !== '' ? formData.stats.battingAverage : '',
-          battingStrikeRate: formData.stats.battingStrikeRate && formData.stats.battingStrikeRate.trim() !== '' ? formData.stats.battingStrikeRate : '',
-          // Bowling-specific stats
-          bowlingInnings: formData.stats.bowlingInnings ? parseInt(formData.stats.bowlingInnings) || 0 : 0,
-          balls: formData.stats.balls ? parseInt(formData.stats.balls) || 0 : 0,
-          maidens: formData.stats.maidens ? parseInt(formData.stats.maidens) || 0 : 0,
-          runsConceded: formData.stats.runsConceded ? parseInt(formData.stats.runsConceded) || 0 : 0,
-          bowlingStrikeRate: formData.stats.bowlingStrikeRate && formData.stats.bowlingStrikeRate.trim() !== '' ? formData.stats.bowlingStrikeRate : '',
-          fiveWickets: formData.stats.fiveWickets ? parseInt(formData.stats.fiveWickets) || 0 : 0,
+        battingInnings: Number(iplBat.Inn || formData.stats?.battingInnings || 0),
+        notOuts: Number(iplBat.NO || formData.stats?.notOuts || 0),
+        ballsFaced: Number(iplBat.BF || formData.stats?.ballsFaced || 0),
+        battingAverage: String(iplBat.Avg || formData.stats?.battingAverage || "0"),
+        battingStrikeRate: String(iplBat.SR || formData.stats?.battingStrikeRate || "0"),
+        bowlingInnings: Number(iplBowl.Inn || formData.stats?.bowlingInnings || 0),
+        balls: Number(iplBowl.B || formData.stats?.balls || 0),
+        maidens: Number(formData.stats?.maidens || 0),
+        runsConceded: Number(iplBowl.Runs || formData.stats?.runsConceded || 0),
+        bowlingStrikeRate: String(iplBowl.SR || formData.stats?.bowlingStrikeRate || "0"),
+        fiveWickets: Number(iplBowl["5W"] || formData.stats?.fiveWickets || 0),
       };
 
-      // Ensure allrounderType is properly set for All-rounders
-      const allrounderTypeValue = formData.role === 'All-rounder' && formData.allrounderType && formData.allrounderType.trim() !== '' 
-        ? formData.allrounderType 
+      const allrounderTypeValue = formData.role === "All-rounder" && formData.allrounderType && formData.allrounderType.trim() !== ""
+        ? formData.allrounderType
         : undefined;
       
       console.log('Saving player - Role:', formData.role, 'All-rounder Type:', allrounderTypeValue, 'Form allrounderType:', formData.allrounderType);
