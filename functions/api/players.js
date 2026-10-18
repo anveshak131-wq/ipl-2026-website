@@ -59,6 +59,8 @@ export const onRequest = async (context) => {
       let currentPlayers = [];
       if (env?.SPORTS_KV) {
         currentPlayers = (await env.SPORTS_KV.get(kvKey, "json")) || [];
+      } else if (env?.IPL_CACHE && targetLeague === "ipl") {
+        currentPlayers = (await env.IPL_CACHE.get("players", "json")) || [];
       }
 
       // If current is empty, seed from bundled master first
