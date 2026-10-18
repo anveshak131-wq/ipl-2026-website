@@ -3268,7 +3268,22 @@ function AdminPlayersWorkspace() {
       
       const finalBowlingStyle = formData.customBowlingStyle.trim() || formData.bowlingStyle;
 
+      const iplBat = formData.careerStats?.batting?.IPL || {};
+      const iplBowl = formData.careerStats?.bowling?.IPL || {};
+
       const statsForPlayer = {
+        matches: Number(iplBat.M || iplBowl.M || formData.stats?.matches || 0),
+        runs: Number(iplBat.Runs || formData.stats?.runs || 0),
+        wickets: Number(iplBowl.Wkts || formData.stats?.wickets || 0),
+        highest: Number(String(iplBat.HS || formData.stats?.highest || 0).replace(/[^0-9]/g, "")) || 0,
+        average: Number(iplBat.Avg || formData.stats?.average || 0),
+        strikeRate: Number(iplBat.SR || formData.stats?.strikeRate || 0),
+        fours: Number(iplBat["4s"] || formData.stats?.fours || 0),
+        sixes: Number(iplBat["6s"] || formData.stats?.sixes || 0),
+        fifties: Number(iplBat["50"] || formData.stats?.fifties || 0),
+        hundreds: Number(iplBat["100"] || formData.stats?.hundreds || 0),
+        economy: Number(iplBowl.Econ || formData.stats?.economy || 0),
+        bestBowling: String(iplBowl.BBI || formData.stats?.bestBowling || "-"),
           matches: formData.stats.matches ? parseInt(formData.stats.matches) || 0 : 0,
           runs: formData.stats.runs ? parseInt(formData.stats.runs) || 0 : 0,
           wickets: formData.stats.wickets ? parseInt(formData.stats.wickets) || 0 : 0,
