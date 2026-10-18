@@ -5201,6 +5201,40 @@ function AdminPlayersWorkspace() {
                             />
                           </div>
                         </div>
+                        {/* Birth Place and Height (Cricbuzz Profile Details) */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                          <div className="group">
+                            <label className="block text-sm font-semibold text-gray-200 mb-2.5">
+                              Birth Place
+                            </label>
+                            <input
+                              type="text"
+                              value={formData.bio?.birthPlace || ""}
+                              onChange={(e) => setFormData({
+                                ...formData,
+                                bio: { ...(formData.bio || {}), birthPlace: e.target.value }
+                              })}
+                              className="oil-modal-input w-full"
+                              placeholder="Delhi"
+                            />
+                          </div>
+                          <div className="group">
+                            <label className="block text-sm font-semibold text-gray-200 mb-2.5">
+                              Height
+                            </label>
+                            <input
+                              type="text"
+                              value={formData.bio?.height || ""}
+                              onChange={(e) => setFormData({
+                                ...formData,
+                                bio: { ...(formData.bio || {}), height: e.target.value }
+                              })}
+                              className="oil-modal-input w-full"
+                              placeholder="5 ft 9 in (175 cm)"
+                            />
+                          </div>
+                        </div>
+
                     </section>
 
                     <section className="oil-modal-section p-5 oil-rise" id="player-form-profile">

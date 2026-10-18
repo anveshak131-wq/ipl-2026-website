@@ -11,15 +11,6 @@ const FORMATS = ['Test', 'ODI', 'T20I', 'IPL'] as const;
 
 // Virat Kohli reference placeholders
 const VIRAT_PLACEHOLDERS = {
-  bio: {
-    born: 'Nov 05, 1988 (37 years)',
-    birthPlace: 'Delhi',
-    height: '5 ft 9 in (175 cm)',
-    role: 'Batsman',
-    battingStyle: 'Right Handed Bat',
-    bowlingStyle: 'Right-arm medium',
-    teams: 'India, Royal Challengers Bengaluru, Delhi',
-  },
   batting: {
     Test: { M: '123', Inn: '210', NO: '21', Runs: '9230', HS: '254*', Avg: '48.83', BF: '16634', SR: '55.49', '100': '30', '200': '7', '50': '31', '4s': '1018', '6s': '26' },
     ODI:  { M: '313', Inn: '301', NO: '47', Runs: '14867', HS: '183',  Avg: '58.53', BF: '15958', SR: '93.16', '100': '55', '200': '0', '50': '75', '4s': '1350', '6s': '156' },
@@ -35,15 +26,7 @@ const VIRAT_PLACEHOLDERS = {
 };
 
 export default function CricbuzzStatsEditor({ formData, onChange }: CricbuzzStatsEditorProps) {
-  const bio = formData.bio || {};
   const career = formData.careerStats || { batting: {}, bowling: {} };
-
-  const handleBioChange = (field: string, val: string) => {
-    onChange({
-      ...formData,
-      bio: { ...bio, [field]: val },
-    });
-  };
 
   const handleStatsChange = (type: 'batting' | 'bowling', format: string, field: string, val: string) => {
     onChange({
@@ -63,97 +46,28 @@ export default function CricbuzzStatsEditor({ formData, onChange }: CricbuzzStat
 
   return (
     <div className="space-y-6 text-slate-100">
-      {/* 1. PERSONAL INFORMATION (BIO) */}
-      <div className="bg-slate-900/80 border border-slate-800 rounded-xl p-4">
-        <h4 className="text-sm font-semibold text-emerald-400 uppercase tracking-wide mb-3">
-          1. Personal Information (Bio)
-        </h4>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-          <div>
-            <label className="block text-xs font-medium text-slate-400 mb-1">Born / Age</label>
-            <input
-              type="text"
-              className="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-slate-200 placeholder:text-slate-600 focus:border-indigo-500 focus:outline-none"
-              placeholder={VIRAT_PLACEHOLDERS.bio.born}
-              value={bio.born || ''}
-              onChange={(e) => handleBioChange('born', e.target.value)}
-            />
-          </div>
-          <div>
-            <label className="block text-xs font-medium text-slate-400 mb-1">Birth Place</label>
-            <input
-              type="text"
-              className="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-slate-200 placeholder:text-slate-600 focus:border-indigo-500 focus:outline-none"
-              placeholder={VIRAT_PLACEHOLDERS.bio.birthPlace}
-              value={bio.birthPlace || ''}
-              onChange={(e) => handleBioChange('birthPlace', e.target.value)}
-            />
-          </div>
-          <div>
-            <label className="block text-xs font-medium text-slate-400 mb-1">Height</label>
-            <input
-              type="text"
-              className="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-slate-200 placeholder:text-slate-600 focus:border-indigo-500 focus:outline-none"
-              placeholder={VIRAT_PLACEHOLDERS.bio.height}
-              value={bio.height || ''}
-              onChange={(e) => handleBioChange('height', e.target.value)}
-            />
-          </div>
-          <div>
-            <label className="block text-xs font-medium text-slate-400 mb-1">Role</label>
-            <input
-              type="text"
-              className="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-slate-200 placeholder:text-slate-600 focus:border-indigo-500 focus:outline-none"
-              placeholder={VIRAT_PLACEHOLDERS.bio.role}
-              value={bio.role || ''}
-              onChange={(e) => handleBioChange('role', e.target.value)}
-            />
-          </div>
-          <div>
-            <label className="block text-xs font-medium text-slate-400 mb-1">Batting Style</label>
-            <input
-              type="text"
-              className="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-slate-200 placeholder:text-slate-600 focus:border-indigo-500 focus:outline-none"
-              placeholder={VIRAT_PLACEHOLDERS.bio.battingStyle}
-              value={bio.battingStyle || ''}
-              onChange={(e) => handleBioChange('battingStyle', e.target.value)}
-            />
-          </div>
-          <div>
-            <label className="block text-xs font-medium text-slate-400 mb-1">Bowling Style</label>
-            <input
-              type="text"
-              className="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-slate-200 placeholder:text-slate-600 focus:border-indigo-500 focus:outline-none"
-              placeholder={VIRAT_PLACEHOLDERS.bio.bowlingStyle}
-              value={bio.bowlingStyle || ''}
-              onChange={(e) => handleBioChange('bowlingStyle', e.target.value)}
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* 2. BATTING CAREER SUMMARY */}
+      {/* 1. BATTING CAREER SUMMARY */}
       <div className="bg-slate-900/80 border border-slate-800 rounded-xl p-4 overflow-x-auto">
         <h4 className="text-sm font-semibold text-sky-400 uppercase tracking-wide mb-3">
-          2. Batting Career Summary
+          1. Batting Career Summary
         </h4>
         <table className="w-full text-xs text-left min-w-[760px]">
           <thead>
             <tr className="text-slate-400 border-b border-slate-800">
               <th className="py-1 px-1.5 w-16">Format</th>
-              <th className="py-1 px-1">M</th>
-              <th className="py-1 px-1">Inn</th>
-              <th className="py-1 px-1">NO</th>
-              <th className="py-1 px-1">Runs</th>
-              <th className="py-1 px-1">HS</th>
-              <th className="py-1 px-1">Avg</th>
-              <th className="py-1 px-1">BF</th>
-              <th className="py-1 px-1">SR</th>
-              <th className="py-1 px-1">100</th>
-              <th className="py-1 px-1">200</th>
-              <th className="py-1 px-1">50</th>
-              <th className="py-1 px-1">4s</th>
-              <th className="py-1 px-1">6s</th>
+              <th className="py-1 px-1 text-center">M</th>
+              <th className="py-1 px-1 text-center">Inn</th>
+              <th className="py-1 px-1 text-center">NO</th>
+              <th className="py-1 px-1 text-center">Runs</th>
+              <th className="py-1 px-1 text-center">HS</th>
+              <th className="py-1 px-1 text-center">Avg</th>
+              <th className="py-1 px-1 text-center">BF</th>
+              <th className="py-1 px-1 text-center">SR</th>
+              <th className="py-1 px-1 text-center">100</th>
+              <th className="py-1 px-1 text-center">200</th>
+              <th className="py-1 px-1 text-center">50</th>
+              <th className="py-1 px-1 text-center">4s</th>
+              <th className="py-1 px-1 text-center">6s</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-800/60">
@@ -181,27 +95,27 @@ export default function CricbuzzStatsEditor({ formData, onChange }: CricbuzzStat
         </table>
       </div>
 
-      {/* 3. BOWLING CAREER SUMMARY */}
+      {/* 2. BOWLING CAREER SUMMARY */}
       <div className="bg-slate-900/80 border border-slate-800 rounded-xl p-4 overflow-x-auto">
         <h4 className="text-sm font-semibold text-amber-400 uppercase tracking-wide mb-3">
-          3. Bowling Career Summary
+          2. Bowling Career Summary
         </h4>
         <table className="w-full text-xs text-left min-w-[760px]">
           <thead>
             <tr className="text-slate-400 border-b border-slate-800">
               <th className="py-1 px-1.5 w-16">Format</th>
-              <th className="py-1 px-1">M</th>
-              <th className="py-1 px-1">Inn</th>
-              <th className="py-1 px-1">B</th>
-              <th className="py-1 px-1">Runs</th>
-              <th className="py-1 px-1">Wkts</th>
-              <th className="py-1 px-1">BBI</th>
-              <th className="py-1 px-1">BBM</th>
-              <th className="py-1 px-1">Econ</th>
-              <th className="py-1 px-1">Avg</th>
-              <th className="py-1 px-1">SR</th>
-              <th className="py-1 px-1">5W</th>
-              <th className="py-1 px-1">10W</th>
+              <th className="py-1 px-1 text-center">M</th>
+              <th className="py-1 px-1 text-center">Inn</th>
+              <th className="py-1 px-1 text-center">B</th>
+              <th className="py-1 px-1 text-center">Runs</th>
+              <th className="py-1 px-1 text-center">Wkts</th>
+              <th className="py-1 px-1 text-center">BBI</th>
+              <th className="py-1 px-1 text-center">BBM</th>
+              <th className="py-1 px-1 text-center">Econ</th>
+              <th className="py-1 px-1 text-center">Avg</th>
+              <th className="py-1 px-1 text-center">SR</th>
+              <th className="py-1 px-1 text-center">5W</th>
+              <th className="py-1 px-1 text-center">10W</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-800/60">
