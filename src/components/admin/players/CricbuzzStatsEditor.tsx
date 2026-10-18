@@ -9,7 +9,6 @@ interface CricbuzzStatsEditorProps {
 
 const FORMATS = ['Test', 'ODI', 'T20I', 'IPL'] as const;
 
-// Virat Kohli reference placeholders
 const VIRAT_PLACEHOLDERS = {
   batting: {
     Test: { M: '123', Inn: '210', NO: '21', Runs: '9230', HS: '254*', Avg: '48.83', BF: '16634', SR: '55.49', '100': '30', '200': '7', '50': '31', '4s': '1018', '6s': '26' },
@@ -25,20 +24,66 @@ const VIRAT_PLACEHOLDERS = {
   },
 };
 
+const BATTING_AUTO_FIELDS = ['Avg', 'SR'] as const;
+const BOWLING_AUTO_FIELDS = ['Avg', 'SR', 'Econ'] as const;
+
 export default function CricbuzzStatsEditor({ formData, onChange }: CricbuzzStatsEditorProps) {
   const career = formData.careerStats || { batting: {}, bowling: {} };
 
   const handleStatsChange = (type: 'batting' | 'bowling', format: string, field: string, val: string) => {
+    const existingRow = { ...(career[type]?.[format] || {}) };
+    existingRow[field] = val;
+
+    // Real-time automatic calculations
+    if (type === 'batting') {
+      const runs = Number(existingRow.Runs);
+      const inn = Number(existingRow.Inn);
+      const no = Number(existingRow.NO);
+      const bf = Number(existingRow.BF);
+
+      if (!isNaN(runs) && !isNaN(inn) && !isNaN(no)) {
+        const dismissals = inn - no;
+        if (dismissals > 0) {
+          existingRow.Avg = (runs / dismissals).toFixed(2);
+        } else if (dismissals === 0 && runs > 0) {
+          existingRow.Avg = runs.toFixed(2);
+        } else if (existingRow.Runs !== undefined && existingRow.Inn !== undefined) {
+          existingRow.Avg = '-';
+        }
+      }
+
+      if (!isNaN(runs) && !isNaN(bf)) {
+        if (bf > 0) {
+          existingRow.SR = ((runs / bf) * 100).toFixed(2);
+        } else if (existingRow.BF !== undefined) {
+          existingRow.SR = '-';
+        }
+      }
+    } else if (type === 'bowling') {
+      const runs = Number(existingRow.Runs);
+      const balls = Number(existingRow.B);
+      const wkts = Number(existingRow.Wkts);
+
+      if (!isNaN(runs) && !isNaN(wkts)) {
+        existingRow.Avg = wkts > 0 ? (runs / wkts).toFixed(2) : '-';
+      }
+
+      if (!isNaN(balls) && !isNaN(wkts)) {
+        existingRow.SR = wkts > 0 ? (balls / wkts).toFixed(2) : '-';
+      }
+
+      if (!isNaN(runs) && !isNaN(balls)) {
+        existingRow.Econ = balls > 0 ? ((runs * 6) / balls).toFixed(2) : '-';
+      }
+    }
+
     onChange({
       ...formData,
       careerStats: {
         ...career,
         [type]: {
           ...career[type],
-          [format]: {
-            ...(career[type]?.[format] || {}),
-            [field]: val,
-          },
+          [format]: existingRow,
         },
       },
     });
@@ -48,9 +93,14 @@ export default function CricbuzzStatsEditor({ formData, onChange }: CricbuzzStat
     <div className="space-y-6 text-slate-100">
       {/* 1. BATTING CAREER SUMMARY */}
       <div className="bg-slate-900/80 border border-slate-800 rounded-xl p-4 overflow-x-auto">
-        <h4 className="text-sm font-semibold text-sky-400 uppercase tracking-wide mb-3">
-          1. Batting Career Summary
-        </h4>
+        <div className="flex items-center justify-between mb-3">
+          <h4 className="text-sm font-semibold text-sky-400 uppercase tracking-wide">
+            1. Batting Career Summary
+          </h4>
+          <span className="text-[11px] font-medium text-sky-400/80 bg-sky-950/60 border border-sky-800/40 px-2 py-0.5 rounded">
+            ✦ Avg &amp; SR auto-calculate from Runs, Inn, NO, BF
+          </span>
+        </div>
         <table className="w-full text-xs text-left min-w-[760px]">
           <thead>
             <tr className="text-slate-400 border-b border-slate-800">
@@ -60,9 +110,9 @@ export default function CricbuzzStatsEditor({ formData, onChange }: CricbuzzStat
               <th className="py-1 px-1 text-center">NO</th>
               <th className="py-1 px-1 text-center">Runs</th>
               <th className="py-1 px-1 text-center">HS</th>
-              <th className="py-1 px-1 text-center">Avg</th>
+              <th className="py-1 px-1 text-center text-sky-400 font-semibold">Avg 🔒</th>
               <th className="py-1 px-1 text-center">BF</th>
-              <th className="py-1 px-1 text-center">SR</th>
+              <th className="py-1 px-1 text-center text-sky-400 font-semibold">SR 🔒</th>
               <th className="py-1 px-1 text-center">100</th>
               <th className="py-1 px-1 text-center">200</th>
               <th className="py-1 px-1 text-center">50</th>
@@ -77,17 +127,26 @@ export default function CricbuzzStatsEditor({ formData, onChange }: CricbuzzStat
               return (
                 <tr key={fmt}>
                   <td className="py-2 px-1.5 font-bold text-slate-300">{fmt}</td>
-                  {(['M', 'Inn', 'NO', 'Runs', 'HS', 'Avg', 'BF', 'SR', '100', '200', '50', '4s', '6s'] as const).map((col) => (
-                    <td key={col} className="p-1">
-                      <input
-                        type="text"
-                        className="w-14 bg-slate-950 border border-slate-800 rounded px-1.5 py-1 text-xs text-slate-100 placeholder:text-slate-600 focus:border-sky-500 focus:outline-none text-center"
-                        placeholder={p[col]}
-                        value={b[col] ?? ''}
-                        onChange={(e) => handleStatsChange('batting', fmt, col, e.target.value)}
-                      />
-                    </td>
-                  ))}
+                  {(['M', 'Inn', 'NO', 'Runs', 'HS', 'Avg', 'BF', 'SR', '100', '200', '50', '4s', '6s'] as const).map((col) => {
+                    const isAuto = (BATTING_AUTO_FIELDS as readonly string[]).includes(col);
+                    return (
+                      <td key={col} className="p-1">
+                        <input
+                          type="text"
+                          readOnly={isAuto}
+                          title={isAuto ? 'Auto-calculated' : undefined}
+                          className={`w-14 border rounded px-1.5 py-1 text-xs text-center focus:outline-none ${
+                            isAuto
+                              ? 'bg-sky-950/40 border-sky-900/60 text-sky-300 font-semibold cursor-not-allowed select-none'
+                              : 'bg-slate-950 border-slate-800 text-slate-100 placeholder:text-slate-600 focus:border-sky-500'
+                          }`}
+                          placeholder={p[col]}
+                          value={b[col] ?? ''}
+                          onChange={(e) => !isAuto && handleStatsChange('batting', fmt, col, e.target.value)}
+                        />
+                      </td>
+                    );
+                  })}
                 </tr>
               );
             })}
@@ -97,9 +156,14 @@ export default function CricbuzzStatsEditor({ formData, onChange }: CricbuzzStat
 
       {/* 2. BOWLING CAREER SUMMARY */}
       <div className="bg-slate-900/80 border border-slate-800 rounded-xl p-4 overflow-x-auto">
-        <h4 className="text-sm font-semibold text-amber-400 uppercase tracking-wide mb-3">
-          2. Bowling Career Summary
-        </h4>
+        <div className="flex items-center justify-between mb-3">
+          <h4 className="text-sm font-semibold text-amber-400 uppercase tracking-wide">
+            2. Bowling Career Summary
+          </h4>
+          <span className="text-[11px] font-medium text-amber-400/80 bg-amber-950/60 border border-amber-800/40 px-2 py-0.5 rounded">
+            ✦ Econ, Avg &amp; SR auto-calculate from B, Runs, Wkts
+          </span>
+        </div>
         <table className="w-full text-xs text-left min-w-[760px]">
           <thead>
             <tr className="text-slate-400 border-b border-slate-800">
@@ -111,9 +175,9 @@ export default function CricbuzzStatsEditor({ formData, onChange }: CricbuzzStat
               <th className="py-1 px-1 text-center">Wkts</th>
               <th className="py-1 px-1 text-center">BBI</th>
               <th className="py-1 px-1 text-center">BBM</th>
-              <th className="py-1 px-1 text-center">Econ</th>
-              <th className="py-1 px-1 text-center">Avg</th>
-              <th className="py-1 px-1 text-center">SR</th>
+              <th className="py-1 px-1 text-center text-amber-400 font-semibold">Econ 🔒</th>
+              <th className="py-1 px-1 text-center text-amber-400 font-semibold">Avg 🔒</th>
+              <th className="py-1 px-1 text-center text-amber-400 font-semibold">SR 🔒</th>
               <th className="py-1 px-1 text-center">5W</th>
               <th className="py-1 px-1 text-center">10W</th>
             </tr>
@@ -125,17 +189,26 @@ export default function CricbuzzStatsEditor({ formData, onChange }: CricbuzzStat
               return (
                 <tr key={fmt}>
                   <td className="py-2 px-1.5 font-bold text-slate-300">{fmt}</td>
-                  {(['M', 'Inn', 'B', 'Runs', 'Wkts', 'BBI', 'BBM', 'Econ', 'Avg', 'SR', '5W', '10W'] as const).map((col) => (
-                    <td key={col} className="p-1">
-                      <input
-                        type="text"
-                        className="w-14 bg-slate-950 border border-slate-800 rounded px-1.5 py-1 text-xs text-slate-100 placeholder:text-slate-600 focus:border-amber-500 focus:outline-none text-center"
-                        placeholder={p[col]}
-                        value={b[col] ?? ''}
-                        onChange={(e) => handleStatsChange('bowling', fmt, col, e.target.value)}
-                      />
-                    </td>
-                  ))}
+                  {(['M', 'Inn', 'B', 'Runs', 'Wkts', 'BBI', 'BBM', 'Econ', 'Avg', 'SR', '5W', '10W'] as const).map((col) => {
+                    const isAuto = (BOWLING_AUTO_FIELDS as readonly string[]).includes(col);
+                    return (
+                      <td key={col} className="p-1">
+                        <input
+                          type="text"
+                          readOnly={isAuto}
+                          title={isAuto ? 'Auto-calculated' : undefined}
+                          className={`w-14 border rounded px-1.5 py-1 text-xs text-center focus:outline-none ${
+                            isAuto
+                              ? 'bg-amber-950/40 border-amber-900/60 text-amber-300 font-semibold cursor-not-allowed select-none'
+                              : 'bg-slate-950 border-slate-800 text-slate-100 placeholder:text-slate-600 focus:border-amber-500'
+                          }`}
+                          placeholder={p[col]}
+                          value={b[col] ?? ''}
+                          onChange={(e) => !isAuto && handleStatsChange('bowling', fmt, col, e.target.value)}
+                        />
+                      </td>
+                    );
+                  })}
                 </tr>
               );
             })}
