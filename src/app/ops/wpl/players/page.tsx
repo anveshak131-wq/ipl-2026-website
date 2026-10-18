@@ -1733,6 +1733,8 @@ function AdminPlayersWorkspace() {
         jerseyNumber: player.jerseyNumber ?? '',
         isCaptain: player.isCaptain ?? false,
         battingStyle: player.battingStyle || '',
+      careerStats: (player as any).careerStats || { batting: {}, bowling: {} },
+      bio: (player as any).bio || {},
         bowlingStyle: player.bowlingStyle || '',
         league: player.league || currentLeague,
         photoUrl: player.photoUrl || '',
