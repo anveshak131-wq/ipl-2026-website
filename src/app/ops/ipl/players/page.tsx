@@ -1,5 +1,6 @@
 'use client';
 
+import { getAllFormatRatings } from '@/lib/formatRatings';
 import CricbuzzStatsEditor from '@/components/admin/players/CricbuzzStatsEditor';
 
 import PlayerExportBar from "@/components/admin/players/PlayerExportBar";
@@ -427,6 +428,7 @@ function AdminPlayersWorkspace() {
     if (!player) return <div style={style}></div>;
     
     const team = teams.find(t => String(t.id) === String(player.teamId));
+    const fmtRatings = getAllFormatRatings(player);
     
     return (
       <div style={style} className="p-3">
@@ -487,6 +489,29 @@ function AdminPlayersWorkspace() {
                 </div>
                 <div className="text-xs text-gray-300">Avg</div>
               </div>
+            </div>
+
+            {/* 4-Format Rating Matrix: Test, ODI, T20I, IPL */}
+            <div className="grid grid-cols-4 gap-1.5 my-2.5 pt-2 border-t border-slate-800/80">
+              {(['Test', 'ODI', 'T20I', 'IPL'] as const).map((fmt) => {
+                const r = fmtRatings[fmt];
+                const badgeTheme =
+                  r.grade === 'A+'
+                    ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-400'
+                    : r.grade === 'A'
+                    ? 'bg-blue-500/15 border-blue-500/40 text-blue-400'
+                    : r.grade === 'B+' || r.grade === 'B'
+                    ? 'bg-amber-500/15 border-amber-500/40 text-amber-300'
+                    : 'bg-slate-800/60 border-slate-700/50 text-slate-400';
+
+                return (
+                  <div key={fmt} className={'py-1 px-1 rounded-md border text-center ' + badgeTheme} title={fmt + ': ' + r.score + '/100 (' + r.label + ')'}>
+                    <div className="text-[9px] font-semibold tracking-wider uppercase opacity-80">{fmt}</div>
+                    <div className="text-xs font-bold leading-none mt-0.5">{r.grade}</div>
+                    <div className="text-[9px] opacity-70 mt-0.5">{r.score}</div>
+                  </div>
+                );
+              })}
             </div>
 
             <div className="flex gap-2">
