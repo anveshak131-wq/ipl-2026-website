@@ -12,52 +12,73 @@ interface TeamPlayersTabProps {
   league?: 'ipl' | 'wpl';
 }
 
+function isMatchingTeam(
+  playerTeamRef: unknown,
+  playerTeamName: unknown,
+  targetTeamRef: unknown,
+  teams: Team[]
+): boolean {
+  const p = String(playerTeamRef ?? '').toLowerCase().trim();
+  const pn = String(playerTeamName ?? '').toLowerCase().trim();
+  const t = String(targetTeamRef ?? '').toLowerCase().trim();
+  if (!t) return false;
 
-function isMatchingTeam(playerTeamRef: unknown, targetTeamRef: unknown, teams: Team[]): boolean {
-  const pRaw = String(playerTeamRef ?? '').toLowerCase().trim();
-  const tRaw = String(targetTeamRef ?? '').toLowerCase().trim();
-  if (!pRaw || !tRaw) return false;
+  const pClean = p.replace(/^team[-_]?/i, '');
+  const tClean = t.replace(/^team[-_]?/i, '');
 
-  // Direct match
-  if (pRaw === tRaw) return true;
+  if (p === t || pClean === tClean) return true;
 
-  // Stripped prefixes
-  const pClean = pRaw.replace(/^team[-_]?/i, '');
-  const tClean = tRaw.replace(/^team[-_]?/i, '');
-  if (pClean === tClean) return true;
+  const rcbAliases = [
+    '1',
+    'rcb',
+    'royal-challengers-bangalore',
+    'royal-challengers-bengaluru',
+    'royal challengers bangalore',
+    'royal challengers bengaluru'
+  ];
 
-  // Known RCB ID mappings: 1, rcb, royal challengers bangalore/bengaluru
-  const rcbAliases = ['1', 'rcb', 'royal challengers bangalore', 'royal challengers bengaluru'];
-  if (rcbAliases.includes(pClean) && rcbAliases.includes(tClean)) return true;
+  if (rcbAliases.includes(tClean)) {
+    if (rcbAliases.includes(pClean)) return true;
+    if (pn.includes('bengaluru') || pn.includes('bangalore') || pn === 'rcb') return true;
+  }
 
-  // Cross-reference with teams metadata list if available
-  const matchedTeam = teams.find(t => {
-    const id = String(t.id).toLowerCase();
-    const short = String(t.shortName || '').toLowerCase();
-    const name = String(t.name || '').toLowerCase();
-    return (id === tClean || short === tClean || name === tClean);
+  const matched = teams.find((team) => {
+    const id = String(team.id).toLowerCase();
+    const short = String(team.shortName || '').toLowerCase();
+    const name = String(team.name || '').toLowerCase();
+    return id === tClean || short === tClean || name === tClean;
   });
 
-  if (matchedTeam) {
-    const id = String(matchedTeam.id).toLowerCase();
-    const short = String(matchedTeam.shortName || '').toLowerCase();
-    const name = String(matchedTeam.name || '').toLowerCase();
-    return pClean === id || pClean === short || pClean === name;
+  if (matched) {
+    const id = String(matched.id).toLowerCase();
+    const short = String(matched.shortName || '').toLowerCase();
+    const name = String(matched.name || '').toLowerCase();
+    return (
+      pClean === id ||
+      pClean === short ||
+      pClean === name ||
+      pn === name ||
+      pn === short
+    );
   }
 
   return false;
 }
 
-export default function TeamPlayersTab({ teamId, teamName, initialPlayers = [], league }: TeamPlayersTabProps) {
+export default function TeamPlayersTab({
+  teamId,
+  teamName,
+  initialPlayers = [],
+  league
+}: TeamPlayersTabProps) {
   const [players, setPlayers] = useState<Player[]>(initialPlayers);
   const [isLoading, setIsLoading] = useState(!initialPlayers.length);
   const [teams, setTeams] = useState<Team[]>([]);
-  const [canonicalTeamId, setCanonicalTeamId] = useState<string>(() => String(teamId ?? ''));
   const [accentColors, setAccentColors] = useState<{ primary: string; secondary: string } | null>(null);
 
   useEffect(() => {
-    setPlayers(initialPlayers);
-    if (initialPlayers.length > 0) {
+    if (initialPlayers && initialPlayers.length > 0) {
+      setPlayers(initialPlayers);
       setIsLoading(false);
     }
   }, [initialPlayers]);
@@ -80,22 +101,30 @@ export default function TeamPlayersTab({ teamId, teamName, initialPlayers = [], 
 
         setTeams(teamsData);
 
-        const canonicalTeamId = resolveCanonicalTeamId(teamId, teamsData);
-        setCanonicalTeamId(canonicalTeamId);
+        const matchedTeam = teamsData.find((t) =>
+          isMatchingTeam(t.id, t.name, teamId, teamsData)
+        );
 
-        const matchedTeam = teamsData.find((t) => String(t.id) === String(canonicalTeamId));
-        setAccentColors(matchedTeam?.colors ? matchedTeam.colors : null);
+        if (matchedTeam && (matchedTeam as any).colors) {
+          setAccentColors((matchedTeam as any).colors);
+        } else if (matchedTeam && matchedTeam.primaryColor) {
+          setAccentColors({
+            primary: matchedTeam.primaryColor,
+            secondary: matchedTeam.secondaryColor || '#E5B80B'
+          });
+        }
 
-        const teamPlayers = (playersData || []).filter((p) => {
-          return isMatchingTeam(p.teamId, teamId, teamsData);
-        });
+        const teamPlayers = (playersData || []).filter((p: any) =>
+          isMatchingTeam(p.teamId, p.teamName, teamId, teamsData)
+        );
 
-        // Only replace local state if KV returns data (otherwise preserve initialPlayers)
-        if (teamPlayers.length > 0 || !initialPlayers.length) {
+        if (teamPlayers.length > 0) {
           setPlayers(teamPlayers);
+        } else if (initialPlayers && initialPlayers.length > 0) {
+          setPlayers(initialPlayers);
         }
       } catch (error) {
-        console.error('Error fetching data:', error);
+        console.error('Error fetching squad data:', error);
       } finally {
         if (!cancelled) {
           setIsLoading(false);
@@ -110,10 +139,10 @@ export default function TeamPlayersTab({ teamId, teamName, initialPlayers = [], 
     };
   }, [teamId, league, initialPlayers.length]);
 
-  if (isLoading) {
+  if (isLoading && players.length === 0) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      <div className="flex items-center justify-center py-16">
+        <div className="w-10 h-10 border-4 border-slate-700 border-t-amber-400 rounded-full animate-spin"></div>
       </div>
     );
   }
@@ -124,7 +153,7 @@ export default function TeamPlayersTab({ teamId, teamName, initialPlayers = [], 
         <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs font-semibold text-white/70">
           <span
             className="h-2 w-2 rounded-full"
-            style={{ background: accentColors?.primary || '#7C3AED' }}
+            style={{ background: accentColors?.primary || '#DA1A32' }}
           />
           Players • {new Date().getFullYear()}
         </div>
@@ -135,15 +164,16 @@ export default function TeamPlayersTab({ teamId, teamName, initialPlayers = [], 
           Search by name or role and tap a player for the quick profile view.
         </p>
       </div>
-      
+
       <ModernPlayersPanel 
+        players={players}
         initialPlayers={players} 
+        teamId={teamId}
         teams={teams}
         showHeader={false}
         showTeamFilter={false}
-        defaultTeamId={canonicalTeamId}
-        accentColor={accentColors?.primary}
-        accentColorSecondary={accentColors?.secondary}
+        accentColor={accentColors?.primary || '#DA1A32'}
+        accentColorSecondary={accentColors?.secondary || '#E5B80B'}
         searchPlaceholder={`Search ${teamName} players…`}
       />
     </div>

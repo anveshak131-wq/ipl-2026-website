@@ -1,31 +1,42 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Search, Shield, Crown, Plane, Sparkles, 
   Grid, List, TrendingUp, Activity, User, ArrowUpDown, Zap
 } from 'lucide-react';
 import { getAllFormatRatings } from '@/lib/formatRatings';
+import { api } from '@/lib/data';
 import PlayerCardModal from '../teams/PlayerCardModal';
 
 interface ModernPlayersPanelProps {
   players?: any[];
+  initialPlayers?: any[];
   team?: any;
   teams?: any[];
   teamId?: string | number;
-  initialRole?: string;
+  defaultTeamId?: string | number;
   onPlayerSelect?: (player: any) => void;
   [key: string]: any;
 }
 
 export default function ModernPlayersPanel({
   players = [],
+  initialPlayers = [],
   team,
   teams = [],
   teamId,
+  defaultTeamId,
   onPlayerSelect
 }: ModernPlayersPanelProps) {
+  const sourcePlayers = (players && players.length > 0) 
+    ? players 
+    : (initialPlayers && initialPlayers.length > 0 ? initialPlayers : []);
+
+  const [squadList, setSquadList] = useState<any[]>(sourcePlayers);
+  const [isLoading, setIsLoading] = useState<boolean>(sourcePlayers.length === 0);
+
   const [selectedRole, setSelectedRole] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [onlyOverseas, setOnlyOverseas] = useState<boolean>(false);
@@ -35,10 +46,60 @@ export default function ModernPlayersPanel({
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [selectedPlayer, setSelectedPlayer] = useState<any | null>(null);
 
-  // Derive active team colors (RCB Crimson #DA1A32 & Gold #E5B80B by default)
-  const activeTeam = team || teams.find((t: any) => String(t.id) === String(teamId || players[0]?.teamId));
-  const primaryColor = activeTeam?.primaryColor || '#DA1A32';
-  const secondaryColor = activeTeam?.secondaryColor || '#E5B80B';
+  useEffect(() => {
+    if (sourcePlayers.length > 0) {
+      setSquadList(sourcePlayers);
+      setIsLoading(false);
+    }
+  }, [sourcePlayers]);
+
+  useEffect(() => {
+    if (sourcePlayers.length === 0) {
+      let active = true;
+      setIsLoading(true);
+
+      const target = String(teamId || defaultTeamId || 'rcb').toLowerCase().replace(/^team[-_]?/i, '');
+      const rcbAliases = [
+        '1',
+        'rcb',
+        'royal-challengers-bangalore',
+        'royal-challengers-bengaluru',
+        'royal challengers bangalore',
+        'royal challengers bengaluru'
+      ];
+
+      api.getPlayers()
+        .then((data: any[]) => {
+          if (!active) return;
+          if (Array.isArray(data) && data.length > 0) {
+            const matched = data.filter((p) => {
+              const pTeam = String(p.teamId || p.team || '').toLowerCase().replace(/^team[-_]?/i, '');
+              const pName = String(p.teamName || '').toLowerCase();
+              if (rcbAliases.includes(target)) {
+                return (
+                  rcbAliases.includes(pTeam) ||
+                  pName.includes('bengaluru') ||
+                  pName.includes('bangalore') ||
+                  pName === 'rcb'
+                );
+              }
+              return pTeam === target || pName.includes(target);
+            });
+            setSquadList(matched.length > 0 ? matched : data);
+          }
+        })
+        .catch(() => {})
+        .finally(() => {
+          if (active) setIsLoading(false);
+        });
+
+      return () => { active = false; };
+    }
+  }, [teamId, defaultTeamId, sourcePlayers.length]);
+
+  const activeTeam = team || teams.find((t: any) => String(t.id).toLowerCase() === String(teamId || 'rcb').toLowerCase());
+  const primaryColor = activeTeam?.primaryColor || activeTeam?.colors?.primary || '#DA1A32';
+  const secondaryColor = activeTeam?.secondaryColor || activeTeam?.colors?.secondary || '#E5B80B';
 
   const extractStats = (player: any) => {
     const cs = player.careerStats || {};
@@ -78,7 +139,7 @@ export default function ModernPlayersPanel({
   ];
 
   const filteredPlayers = useMemo(() => {
-    return (players || [])
+    return squadList
       .filter((player) => {
         const role = (player.role || '').toLowerCase();
         if (selectedRole === 'batsman' && !(role.includes('batsman') || role.includes('batter'))) return false;
@@ -112,21 +173,14 @@ export default function ModernPlayersPanel({
 
         return sortOrder === 'desc' ? -diff : diff;
       });
-  }, [players, selectedRole, searchQuery, onlyOverseas, onlyCaptains, sortBy, sortOrder]);
+  }, [squadList, selectedRole, searchQuery, onlyOverseas, onlyCaptains, sortBy, sortOrder]);
 
-  const overseasCount = (players || []).filter(p => p.nationality && p.nationality !== 'India' && p.nationality !== 'Indian').length;
-  const captain = (players || []).find(p => p.isCaptain);
-
-  const handleCardClick = (player: any) => {
-    if (onPlayerSelect) {
-      onPlayerSelect(player);
-    }
-    setSelectedPlayer(player);
-  };
+  const overseasCount = squadList.filter(p => p.nationality && p.nationality !== 'India' && p.nationality !== 'Indian').length;
+  const captain = squadList.find(p => p.isCaptain);
 
   return (
     <div className="space-y-6 my-6">
-      {/* Control Header & Live Squad Metrics */}
+      {/* Header Toolbar */}
       <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-6 backdrop-blur-2xl shadow-2xl relative overflow-hidden">
         <div 
           className="absolute -top-20 left-1/3 w-96 h-36 blur-3xl opacity-25 pointer-events-none rounded-full"
@@ -143,12 +197,12 @@ export default function ModernPlayersPanel({
                 Squad Roster & Ratings
               </h2>
               <span className="px-3 py-1 rounded-full text-xs font-bold bg-white/10 text-slate-200 border border-white/10">
-                {players.length} Squad
+                {squadList.length} Squad
               </span>
             </div>
             <p className="text-xs text-slate-400 mt-2 flex flex-wrap items-center gap-2">
               <span className="text-slate-300 font-medium">{overseasCount} Overseas (✈️)</span> • 
-              <span className="text-slate-300 font-medium">{players.length - overseasCount} Domestic</span>
+              <span className="text-slate-300 font-medium">{squadList.length - overseasCount} Domestic</span>
               {captain && (
                 <>
                   • <span className="text-amber-300 font-bold flex items-center gap-1 bg-amber-500/10 px-2.5 py-0.5 rounded-md border border-amber-500/30">
@@ -201,7 +255,7 @@ export default function ModernPlayersPanel({
           </div>
         </div>
 
-        {/* Role Filter Tabs & Quick Filters */}
+        {/* Role Filter Pills */}
         <div className="mt-6 pt-5 border-t border-slate-800/80 flex flex-col xl:flex-row xl:items-center justify-between gap-4">
           <div className="flex flex-wrap items-center gap-2">
             {roles.map((r) => {
@@ -271,8 +325,14 @@ export default function ModernPlayersPanel({
         </div>
       </div>
 
-      {/* Empty State */}
-      {filteredPlayers.length === 0 && (
+      {isLoading && (
+        <div className="flex flex-col items-center justify-center py-16">
+          <div className="w-10 h-10 border-4 border-slate-700 border-t-amber-400 rounded-full animate-spin"></div>
+          <p className="text-xs text-slate-400 mt-3 font-medium">Loading squad roster…</p>
+        </div>
+      )}
+
+      {!isLoading && filteredPlayers.length === 0 && (
         <div className="bg-slate-900/40 border border-slate-800 rounded-3xl p-12 text-center">
           <User className="w-12 h-12 mx-auto text-slate-600 mb-3" />
           <h3 className="text-lg font-bold text-white">No squad players match your criteria</h3>
@@ -280,8 +340,8 @@ export default function ModernPlayersPanel({
         </div>
       )}
 
-      {/* 3D FUT Trading Cards Grid */}
-      {viewMode === 'grid' && (
+      {/* 3D FUT Trading Card Grid */}
+      {!isLoading && viewMode === 'grid' && (
         <motion.div 
           layout 
           className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
@@ -304,19 +364,21 @@ export default function ModernPlayersPanel({
                   exit={{ opacity: 0, scale: 0.95 }}
                   whileHover={{ y: -8, scale: 1.02 }}
                   transition={{ duration: 0.25 }}
-                  onClick={() => handleCardClick(player)}
+                  onClick={() => {
+                    if (onPlayerSelect) onPlayerSelect(player);
+                    setSelectedPlayer(player);
+                  }}
                   className="group relative bg-gradient-to-b from-slate-900 via-slate-900/90 to-slate-950 border border-slate-800/80 hover:border-slate-700 rounded-3xl p-5 cursor-pointer shadow-xl hover:shadow-2xl transition-all duration-300 overflow-hidden flex flex-col justify-between"
                   style={{
                     boxShadow: '0 10px 30px -10px rgba(0,0,0,0.5)'
                   }}
                 >
-                  {/* Glowing Team Halo */}
                   <div 
                     className="absolute -top-16 -right-16 w-36 h-36 blur-3xl opacity-20 group-hover:opacity-40 transition-opacity rounded-full pointer-events-none"
                     style={{ backgroundColor: primaryColor }}
                   />
 
-                  {/* Header Row: Jersey Watermark & Chips */}
+                  {/* Header Row: Jersey Watermark & Badges */}
                   <div className="flex items-start justify-between relative z-10 mb-3">
                     <div>
                       {player.jerseyNumber ? (
@@ -352,7 +414,7 @@ export default function ModernPlayersPanel({
                     </div>
                   </div>
 
-                  {/* Avatar & Player Name */}
+                  {/* Avatar & Player Info */}
                   <div className="flex items-center gap-3.5 my-2 relative z-10">
                     <div 
                       className="w-14 h-14 rounded-2xl bg-slate-800 border border-slate-700/80 flex items-center justify-center font-black text-lg text-white shadow-inner overflow-hidden group-hover:border-slate-500 transition-colors"
@@ -392,7 +454,7 @@ export default function ModernPlayersPanel({
                     })}
                   </div>
 
-                  {/* Role-Specific Metric Summary */}
+                  {/* Primary Stats */}
                   <div className="pt-2.5 border-t border-slate-800/80 grid grid-cols-3 gap-1 text-center font-mono">
                     <div>
                       <div className="text-[10px] text-slate-400 font-sans uppercase">Matches</div>
@@ -430,8 +492,8 @@ export default function ModernPlayersPanel({
         </motion.div>
       )}
 
-      {/* Pro Tactical Data Table */}
-      {viewMode === 'table' && (
+      {/* Pro Table View */}
+      {!isLoading && viewMode === 'table' && (
         <div className="bg-slate-900/90 border border-slate-800 rounded-3xl overflow-hidden backdrop-blur-xl shadow-2xl">
           <div className="overflow-x-auto">
             <table className="w-full text-xs text-left min-w-[700px]">
@@ -458,7 +520,10 @@ export default function ModernPlayersPanel({
                   return (
                     <tr 
                       key={player.id || player.name}
-                      onClick={() => handleCardClick(player)}
+                      onClick={() => {
+                        if (onPlayerSelect) onPlayerSelect(player);
+                        setSelectedPlayer(player);
+                      }}
                       className="hover:bg-slate-800/40 cursor-pointer transition-colors"
                     >
                       <td className="py-3.5 px-4 font-sans font-bold text-white flex items-center gap-2">
@@ -494,7 +559,6 @@ export default function ModernPlayersPanel({
         </div>
       )}
 
-      {/* Modal Popup for Details */}
       {selectedPlayer && (
         <PlayerCardModal
           player={selectedPlayer as any}
