@@ -1722,9 +1722,9 @@ export default function TeamDetailClient({ teamId, league }: TeamDetailClientPro
                        boxShadow: `0 10px 30px ${primaryColor.glow}15`,
                      }}>
                   <TeamPlayersTab 
-                    teamId={teamData.id} 
-                    teamName={teamData.name}
-                    initialPlayers={teamData.players}
+                    teamId={teamData.id || "rcb"} 
+                    teamName={teamData.name || "Royal Challengers Bengaluru"}
+                    initialPlayers={(teamData.players && teamData.players.length > 0) ? teamData.players : (teamData.squad || (sections && sections.flatMap(s => s.players)) || [])}
                     league={teamLeague}
                   />
                 </div>

@@ -12,26 +12,40 @@ interface TeamPlayersTabProps {
   league?: 'ipl' | 'wpl';
 }
 
-function resolveCanonicalTeamId(teamRef: unknown, teams: Team[]): string {
-  const raw = String(teamRef ?? '').trim();
-  if (!raw) return '';
 
-  const withoutPrefix = raw.replace(/^team/i, '');
-  if (/^\d+$/.test(withoutPrefix)) return withoutPrefix;
+function isMatchingTeam(playerTeamRef: unknown, targetTeamRef: unknown, teams: Team[]): boolean {
+  const pRaw = String(playerTeamRef ?? '').toLowerCase().trim();
+  const tRaw = String(targetTeamRef ?? '').toLowerCase().trim();
+  if (!pRaw || !tRaw) return false;
 
-  const lower = raw.toLowerCase();
-  const match = teams.find((t) => {
+  // Direct match
+  if (pRaw === tRaw) return true;
+
+  // Stripped prefixes
+  const pClean = pRaw.replace(/^team[-_]?/i, '');
+  const tClean = tRaw.replace(/^team[-_]?/i, '');
+  if (pClean === tClean) return true;
+
+  // Known RCB ID mappings: 1, rcb, royal challengers bangalore/bengaluru
+  const rcbAliases = ['1', 'rcb', 'royal challengers bangalore', 'royal challengers bengaluru'];
+  if (rcbAliases.includes(pClean) && rcbAliases.includes(tClean)) return true;
+
+  // Cross-reference with teams metadata list if available
+  const matchedTeam = teams.find(t => {
+    const id = String(t.id).toLowerCase();
     const short = String(t.shortName || '').toLowerCase();
     const name = String(t.name || '').toLowerCase();
-    return (
-      short === lower ||
-      short.replace('-w', '') === lower ||
-      name === lower
-    );
+    return (id === tClean || short === tClean || name === tClean);
   });
 
-  if (match) return String(match.id);
-  return withoutPrefix.toLowerCase();
+  if (matchedTeam) {
+    const id = String(matchedTeam.id).toLowerCase();
+    const short = String(matchedTeam.shortName || '').toLowerCase();
+    const name = String(matchedTeam.name || '').toLowerCase();
+    return pClean === id || pClean === short || pClean === name;
+  }
+
+  return false;
 }
 
 export default function TeamPlayersTab({ teamId, teamName, initialPlayers = [], league }: TeamPlayersTabProps) {
@@ -73,8 +87,7 @@ export default function TeamPlayersTab({ teamId, teamName, initialPlayers = [], 
         setAccentColors(matchedTeam?.colors ? matchedTeam.colors : null);
 
         const teamPlayers = (playersData || []).filter((p) => {
-          const playerTeamId = resolveCanonicalTeamId(p.teamId, teamsData);
-          return playerTeamId === canonicalTeamId;
+          return isMatchingTeam(p.teamId, teamId, teamsData);
         });
 
         // Only replace local state if KV returns data (otherwise preserve initialPlayers)
