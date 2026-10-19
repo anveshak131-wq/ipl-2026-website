@@ -162,3 +162,84 @@ export function getBowlingStrikeRateDisplay(player: Player): string {
   const display = getBowlingStrikeRateDisplayFromStats(player.stats || {});
   return display === '-' ? '—' : display;
 }
+
+
+// Role-Weighted IPL Performance Rating System
+export function calculatePlayerRating(player: any): { score: number; grade: 'A+' | 'A' | 'B+' | 'B' | 'C' | 'D'; formStatus: 'Poor' | 'Average' | 'Good' | 'Excellent' } {
+  const stats = player.stats || {};
+  const iplBat = player.careerStats?.batting?.IPL || {};
+  const iplBowl = player.careerStats?.bowling?.IPL || {};
+
+  // Resolve Batting metrics
+  const runs = Number(iplBat.Runs || iplBat.runs || stats.runs || 0);
+  const avg = Number(iplBat.Avg || iplBat.Average || stats.average || stats.battingAverage || 0);
+  const sr = Number(iplBat.SR || stats.strikeRate || stats.battingStrikeRate || 0);
+  const inn = Number(iplBat.Inn || iplBat.Innings || stats.battingInnings || (runs > 0 ? 1 : 0));
+  const fifties = Number(iplBat['50'] || iplBat['50s'] || stats.fifties || 0);
+  const hundreds = Number(iplBat['100'] || iplBat['100s'] || stats.hundreds || 0);
+
+  // Resolve Bowling metrics
+  const wkts = Number(iplBowl.Wkts || iplBowl.Wickets || stats.wickets || 0);
+  const econ = Number(iplBowl.Econ || iplBowl.Eco || stats.economy || 0);
+  const bowlSR = Number(iplBowl.SR || stats.bowlingStrikeRate || 0);
+
+  // 1. Calculate Batting Score (0 - 100)
+  let batScore = 30;
+  if (runs > 0) {
+    const volume = Math.min(100, (runs / 4500) * 100);
+    const consistency = Math.min(100, (avg / 40) * 100);
+    const speed = Math.min(100, Math.max(0, ((sr - 105) / 55) * 100));
+    const milestones = Math.min(100, ((hundreds * 5 + fifties * 2) / Math.max(inn, 1)) * 200);
+    batScore = (volume * 0.35) + (consistency * 0.25) + (speed * 0.30) + (milestones * 0.10);
+  }
+
+  // 2. Calculate Bowling Score (0 - 100)
+  let bowlScore = 30;
+  if (wkts > 0 || econ > 0) {
+    const volume = Math.min(100, (wkts / 120) * 100);
+    const economyScore = econ > 0 ? Math.min(100, Math.max(0, ((10.5 - econ) / 4.0) * 100)) : 50;
+    const strikeRateScore = bowlSR > 0 ? Math.min(100, Math.max(0, ((30.0 - bowlSR) / 15.0) * 100)) : 50;
+    bowlScore = (volume * 0.40) + (economyScore * 0.40) + (strikeRateScore * 0.20);
+  }
+
+  // 3. Apply Strict Role Weighting
+  const role = (player.role || '').toLowerCase();
+  const subType = (player.allrounderType || '').toLowerCase();
+
+  let finalRaw = 50;
+  if (role.includes('batsman') || role.includes('batter') || role.includes('keeper')) {
+    // 100% Batting, 0% Bowling
+    finalRaw = batScore;
+  } else if (role.includes('bowler')) {
+    // 0% Batting, 100% Bowling
+    finalRaw = bowlScore;
+  } else if (subType.includes('batting')) {
+    // Batting All-rounder: 75% Batting, 25% Bowling
+    finalRaw = (batScore * 0.75) + (bowlScore * 0.25);
+  } else if (subType.includes('bowling')) {
+    // Bowling All-rounder: 25% Batting, 75% Bowling
+    finalRaw = (batScore * 0.25) + (bowlScore * 0.75);
+  } else {
+    // General All-rounder: 50% Batting, 50% Bowling
+    finalRaw = (batScore * 0.50) + (bowlScore * 0.50);
+  }
+
+  const score = Math.round(Math.min(99, Math.max(25, finalRaw)));
+
+  // Tier Grading
+  let grade: 'A+' | 'A' | 'B+' | 'B' | 'C' | 'D' = 'C';
+  if (score >= 90) grade = 'A+';
+  else if (score >= 80) grade = 'A';
+  else if (score >= 70) grade = 'B+';
+  else if (score >= 55) grade = 'B';
+  else if (score >= 40) grade = 'C';
+  else grade = 'D';
+
+  let formStatus: 'Poor' | 'Average' | 'Good' | 'Excellent' = 'Average';
+  if (score >= 85) formStatus = 'Excellent';
+  else if (score >= 70) formStatus = 'Good';
+  else if (score >= 50) formStatus = 'Average';
+  else formStatus = 'Poor';
+
+  return { score, grade, formStatus };
+}
