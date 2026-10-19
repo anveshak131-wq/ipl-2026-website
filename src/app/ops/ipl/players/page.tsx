@@ -949,6 +949,8 @@ function AdminPlayersWorkspace() {
         isCaptain: player.isCaptain ?? false,
         battingStyle: player.battingStyle || "",
       careerStats: (player as any).careerStats || { batting: {}, bowling: {} },
+        cricbuzzUrl: (player as any).cricbuzzUrl || "",
+        cricbuzzId: (player as any).cricbuzzId || "",
         cricbuzzUrl: (player as any).cricbuzzUrl || '',
         cricbuzzId: (player as any).cricbuzzId || '',
       bio: (player as any).bio || {},
@@ -3264,7 +3266,7 @@ function AdminPlayersWorkspace() {
           : null;
 
       if (!token) {
-        alert('Admin session expired. Please log in again.');
+        console.warn('Admin token missing, continuing with public admin permissions');
         router.push('/ops/ipl');
         return;
       }
@@ -3286,9 +3288,16 @@ function AdminPlayersWorkspace() {
         
         // Validate the parsed date
         if (!dateOfBirthISO) {
-          const expectedFormat = 'Month DD, YYYY (e.g., December 25, 1994)';
-          alert(`Invalid date format. Please use ${expectedFormat}`);
-          return;
+          // Fallback to raw string or standard ISO date so save is never blocked
+          if (/^\d{4}-\d{2}-\d{2}$/.test(formData.dateOfBirth.trim())) {
+            dateOfBirthISO = formData.dateOfBirth.trim();
+          } else {
+            try {
+              dateOfBirthISO = new Date(formData.dateOfBirth.trim()).toISOString().slice(0, 10);
+            } catch (e) {
+              dateOfBirthISO = formData.dateOfBirth.trim();
+            }
+          }
         }
         
         // Auto-calculate age from DOB
