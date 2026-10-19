@@ -1,265 +1,275 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
+import { Sparkles, Globe, AlertTriangle, CheckCircle2, RefreshCw } from 'lucide-react';
 
 interface CricbuzzStatsEditorProps {
   formData: any;
-  onChange: (updatedData: any) => void;
+  onChange: (updatedFormData: any) => void;
 }
-
-const FORMATS = ['Test', 'ODI', 'T20I', 'IPL'] as const;
-
-// Helper to read property regardless of legacy vs modern casing
-function getVal(row: any, ...keys: string[]): string {
-  if (!row) return '';
-  for (const k of keys) {
-    if (row[k] !== undefined && row[k] !== null && row[k] !== '') {
-      return String(row[k]);
-    }
-  }
-  return '';
-}
-
-// Canonical getters for row values
-function getBattingRow(career: any, fmt: string) {
-  const altFmt = fmt === 'T20I' ? 'T20' : fmt;
-  const raw = career?.batting?.[fmt] || career?.batting?.[altFmt] || {};
-  return {
-    raw,
-    M: getVal(raw, 'M', 'Matches'),
-    Inn: getVal(raw, 'Inn', 'Innings'),
-    NO: getVal(raw, 'NO', 'NotOut'),
-    Runs: getVal(raw, 'Runs'),
-    HS: getVal(raw, 'HS', 'Highest'),
-    Avg: getVal(raw, 'Avg', 'Average'),
-    BF: getVal(raw, 'BF', 'Balls'),
-    SR: getVal(raw, 'SR'),
-    '100': getVal(raw, '100', '100s'),
-    '200': getVal(raw, '200', '200s'),
-    '50': getVal(raw, '50', '50s'),
-    '4s': getVal(raw, '4s', 'Fours'),
-    '6s': getVal(raw, '6s', 'Sixes'),
-  };
-}
-
-function getBowlingRow(career: any, fmt: string) {
-  const altFmt = fmt === 'T20I' ? 'T20' : fmt;
-  const raw = career?.bowling?.[fmt] || career?.bowling?.[altFmt] || {};
-  return {
-    raw,
-    M: getVal(raw, 'M', 'Matches'),
-    Inn: getVal(raw, 'Inn', 'Innings'),
-    B: getVal(raw, 'B', 'Balls'),
-    Runs: getVal(raw, 'Runs'),
-    Wkts: getVal(raw, 'Wkts', 'Wickets'),
-    BBI: getVal(raw, 'BBI'),
-    BBM: getVal(raw, 'BBM'),
-    Econ: getVal(raw, 'Econ', 'Eco'),
-    Avg: getVal(raw, 'Avg'),
-    SR: getVal(raw, 'SR'),
-    '5W': getVal(raw, '5W', '5w'),
-    '10W': getVal(raw, '10W', '10w'),
-  };
-}
-
-const BATTING_AUTO_FIELDS = ['Avg', 'SR'] as const;
-const BOWLING_AUTO_FIELDS = ['Avg', 'SR', 'Econ'] as const;
 
 export default function CricbuzzStatsEditor({ formData, onChange }: CricbuzzStatsEditorProps) {
-  const career = formData.careerStats || { batting: {}, bowling: {} };
+  const [cricbuzzInput, setCricbuzzInput] = useState<string>(
+    formData?.cricbuzzUrl || formData?.cricbuzzId || ''
+  );
+  const [isScraping, setIsScraping] = useState<boolean>(false);
+  const [scrapeError, setScrapeError] = useState<string | null>(null);
+  const [scrapeSuccess, setScrapeSuccess] = useState<string | null>(null);
 
-  const handleStatsChange = (type: 'batting' | 'bowling', format: string, field: string, val: string) => {
-    const altFormat = format === 'T20I' ? 'T20' : format;
-    const existing = { ...(career[type]?.[format] || career[type]?.[altFormat] || {}) };
-    
-    // Store both canonical and legacy keys for compatibility
-    existing[field] = val;
-    if (field === 'M') existing.Matches = Number(val) || val;
-    if (field === 'Inn') existing.Innings = Number(val) || val;
-    if (field === 'NO') existing.NotOut = Number(val) || val;
-    if (field === 'HS') existing.Highest = val;
-    if (field === 'BF') existing.Balls = Number(val) || val;
-    if (field === 'B') existing.Balls = Number(val) || val;
-    if (field === 'Wkts') existing.Wickets = Number(val) || val;
-    if (field === '50') existing['50s'] = Number(val) || val;
-    if (field === '100') existing['100s'] = Number(val) || val;
-    if (field === '4s') existing.Fours = Number(val) || val;
-    if (field === '6s') existing.Sixes = Number(val) || val;
-    if (field === '5W') existing['5w'] = Number(val) || val;
-    if (field === '10W') existing['10w'] = Number(val) || val;
-
-    // Real-time automatic calculations
-    if (type === 'batting') {
-      const runs = Number(existing.Runs ?? val);
-      const inn = Number(existing.Inn ?? existing.Innings);
-      const no = Number(existing.NO ?? existing.NotOut);
-      const bf = Number(existing.BF ?? existing.Balls);
-
-      if (!isNaN(runs) && !isNaN(inn) && !isNaN(no)) {
-        const dismissals = inn - no;
-        const avg = dismissals > 0 ? (runs / dismissals).toFixed(2) : runs > 0 ? runs.toFixed(2) : '-';
-        existing.Avg = avg;
-        existing.Average = avg !== '-' ? Number(avg) : 0;
-      }
-
-      if (!isNaN(runs) && !isNaN(bf)) {
-        const sr = bf > 0 ? ((runs / bf) * 100).toFixed(2) : '-';
-        existing.SR = sr;
-      }
-    } else if (type === 'bowling') {
-      const runs = Number(existing.Runs ?? val);
-      const balls = Number(existing.B ?? existing.Balls);
-      const wkts = Number(existing.Wkts ?? existing.Wickets);
-
-      if (!isNaN(runs) && !isNaN(wkts)) {
-        const avg = wkts > 0 ? (runs / wkts).toFixed(2) : '-';
-        existing.Avg = avg;
-      }
-
-      if (!isNaN(balls) && !isNaN(wkts)) {
-        const sr = wkts > 0 ? (balls / wkts).toFixed(2) : '-';
-        existing.SR = sr;
-      }
-
-      if (!isNaN(runs) && !isNaN(balls)) {
-        const econ = balls > 0 ? ((runs * 6) / balls).toFixed(2) : '-';
-        existing.Econ = econ;
-        existing.Eco = econ !== '-' ? Number(econ) : 0;
-      }
-    }
-
-    onChange({
-      ...formData,
-      careerStats: {
-        ...career,
-        [type]: {
-          ...career[type],
-          [format]: existing,
-          ...(format === 'T20I' ? { T20: existing } : {}),
-        },
-      },
-    });
+  const careerStats = formData.careerStats || {
+    batting: { Test: {}, ODI: {}, T20I: {}, IPL: {} },
+    bowling: { Test: {}, ODI: {}, T20I: {}, IPL: {} },
   };
 
+  const handleStatChange = (type: 'batting' | 'bowling', format: string, key: string, value: string) => {
+    const updated = {
+      ...formData,
+      careerStats: {
+        ...careerStats,
+        [type]: {
+          ...careerStats[type],
+          [format]: {
+            ...(careerStats[type]?.[format] || {}),
+            [key]: value,
+          },
+        },
+      },
+    };
+    onChange(updated);
+  };
+
+  const handleSyncCricbuzz = async () => {
+    const input = cricbuzzInput.trim();
+    if (!input) {
+      setScrapeError('Please enter a Cricbuzz profile URL or Player ID.');
+      return;
+    }
+
+    setIsScraping(true);
+    setScrapeError(null);
+    setScrapeSuccess(null);
+
+    try {
+      const res = await fetch('/api/admin/scrape-cricbuzz', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          profileUrl: input.startsWith('http') ? input : undefined,
+          playerId: /^\d+$/.test(input) ? input : undefined,
+          playerName: formData.name || 'player',
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || 'Failed to extract data from Cricbuzz.');
+      }
+
+      // Merge safely into form data
+      const mergedCareerStats = {
+        batting: {
+          ...(careerStats.batting || {}),
+          ...(data.data.batting || {}),
+        },
+        bowling: {
+          ...(careerStats.bowling || {}),
+          ...(data.data.bowling || {}),
+        },
+      };
+
+      const updated = {
+        ...formData,
+        cricbuzzUrl: data.sourceUrl || formData.cricbuzzUrl,
+        cricbuzzId: input.match(/\/profiles\/(\d+)/)?.[1] || (/^\d+$/.test(input) ? input : formData.cricbuzzId),
+        careerStats: mergedCareerStats,
+      };
+
+      onChange(updated);
+      setScrapeSuccess(`✓ Successfully synced ${data.matchedRows} career rows from Cricbuzz!`);
+    } catch (err: any) {
+      setScrapeError(err.message || 'Network error while contacting scraper endpoint.');
+    } finally {
+      setIsScraping(false);
+    }
+  };
+
+  const battingCols = [
+    { key: 'M', label: 'Mat' },
+    { key: 'Inn', label: 'Inn' },
+    { key: 'NO', label: 'NO' },
+    { key: 'Runs', label: 'Runs' },
+    { key: 'HS', label: 'HS' },
+    { key: 'Avg', label: 'Avg' },
+    { key: 'BF', label: 'BF' },
+    { key: 'SR', label: 'SR' },
+    { key: '100', label: '100s' },
+    { key: '200', label: '200s' },
+    { key: '50', label: '50s' },
+    { key: '4s', label: '4s' },
+    { key: '6s', label: '6s' },
+  ];
+
+  const bowlingCols = [
+    { key: 'M', label: 'Mat' },
+    { key: 'Inn', label: 'Inn' },
+    { key: 'B', label: 'Balls' },
+    { key: 'Runs', label: 'Runs' },
+    { key: 'Wkts', label: 'Wkts' },
+    { key: 'BBI', label: 'BBI' },
+    { key: 'BBM', label: 'BBM' },
+    { key: 'Econ', label: 'Econ' },
+    { key: 'Avg', label: 'Avg' },
+    { key: 'SR', label: 'SR' },
+    { key: '5W', label: '5W' },
+    { key: '10W', label: '10W' },
+  ];
+
+  const formats = ['Test', 'ODI', 'T20I', 'IPL'];
+
   return (
-    <div className="space-y-6 text-slate-100">
-      {/* 1. BATTING CAREER SUMMARY */}
-      <div className="bg-slate-900/80 border border-slate-800 rounded-xl p-4 overflow-x-auto">
-        <div className="flex items-center justify-between mb-3">
-          <h4 className="text-sm font-semibold text-sky-400 uppercase tracking-wide">
-            1. Batting Career Summary
-          </h4>
-          <span className="text-[11px] font-medium text-sky-400/80 bg-sky-950/60 border border-sky-800/40 px-2 py-0.5 rounded">
-            ✦ Avg &amp; SR auto-calculate from Runs, Inn, NO, BF
+    <div className="space-y-6">
+      {/* Cricbuzz 1-Click Sync Header */}
+      <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 shadow-xl">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
+          <div className="flex items-center gap-2">
+            <span className="p-1.5 rounded-lg bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+              <Sparkles className="w-4 h-4" />
+            </span>
+            <div>
+              <h4 className="text-sm font-bold text-white">Live Cricbuzz Auto-Fill</h4>
+              <p className="text-[11px] text-slate-400">Extracts career tables for Test, ODI, T20I, and IPL instantly</p>
+            </div>
+          </div>
+          <span className="text-[10px] font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/30 self-start sm:self-auto">
+            100% Non-Destructive
           </span>
         </div>
-        <table className="w-full text-xs text-left min-w-[760px]">
+
+        <div className="flex flex-col sm:flex-row items-center gap-2">
+          <div className="relative flex-1 w-full">
+            <Globe className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+            <input
+              type="text"
+              value={cricbuzzInput}
+              onChange={(e) => setCricbuzzInput(e.target.value)}
+              placeholder="Paste Cricbuzz URL (e.g. https://www.cricbuzz.com/profiles/1413/virat-kohli) or ID (1413)"
+              className="w-full pl-9 pr-3 py-2 text-xs bg-slate-950/80 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500 font-mono"
+            />
+          </div>
+
+          <button
+            type="button"
+            onClick={handleSyncCricbuzz}
+            disabled={isScraping}
+            className="w-full sm:w-auto px-4 py-2 rounded-xl text-xs font-bold bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white flex items-center justify-center gap-2 shadow-lg disabled:opacity-50 transition-all shrink-0"
+          >
+            {isScraping ? (
+              <>
+                <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                <span>Extracting...</span>
+              </>
+            ) : (
+              <>
+                <RefreshCw className="w-3.5 h-3.5" />
+                <span>Sync Tables</span>
+              </>
+            )}
+          </button>
+        </div>
+
+        {/* Status Indicators */}
+        {scrapeSuccess && (
+          <div className="mt-3 p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs flex items-center gap-2">
+            <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+            <span>{scrapeSuccess}</span>
+          </div>
+        )}
+
+        {scrapeError && (
+          <div className="mt-3 p-2.5 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs flex items-center gap-2">
+            <AlertTriangle className="w-4 h-4 text-rose-400 shrink-0" />
+            <span>{scrapeError}</span>
+          </div>
+        )}
+      </div>
+
+      {/* Batting Career Summary Table */}
+      <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 overflow-x-auto">
+        <h4 className="text-xs font-bold text-sky-400 uppercase tracking-wider mb-3 flex items-center gap-2">
+          <span>🏏</span> Batting Career Summary
+        </h4>
+        <table className="w-full text-xs text-left min-w-[700px]">
           <thead>
-            <tr className="text-slate-400 border-b border-slate-800">
-              <th className="py-1 px-1.5 w-16">Format</th>
-              <th className="py-1 px-1 text-center">M</th>
-              <th className="py-1 px-1 text-center">Inn</th>
-              <th className="py-1 px-1 text-center">NO</th>
-              <th className="py-1 px-1 text-center">Runs</th>
-              <th className="py-1 px-1 text-center">HS</th>
-              <th className="py-1 px-1 text-center text-sky-400 font-semibold">Avg 🔒</th>
-              <th className="py-1 px-1 text-center">BF</th>
-              <th className="py-1 px-1 text-center text-sky-400 font-semibold">SR 🔒</th>
-              <th className="py-1 px-1 text-center">100</th>
-              <th className="py-1 px-1 text-center">200</th>
-              <th className="py-1 px-1 text-center">50</th>
-              <th className="py-1 px-1 text-center">4s</th>
-              <th className="py-1 px-1 text-center">6s</th>
+            <tr className="text-slate-400 border-b border-slate-800 font-medium">
+              <th className="py-2 px-2">Format</th>
+              {battingCols.map((col) => (
+                <th key={col.key} className="py-2 px-1 text-center font-mono">
+                  {col.label}
+                </th>
+              ))}
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-800/60">
-            {FORMATS.map((fmt) => {
-              const row = getBattingRow(career, fmt);
-              return (
-                <tr key={fmt}>
-                  <td className="py-2 px-1.5 font-bold text-slate-300">{fmt}</td>
-                  {(['M', 'Inn', 'NO', 'Runs', 'HS', 'Avg', 'BF', 'SR', '100', '200', '50', '4s', '6s'] as const).map((col) => {
-                    const isAuto = (BATTING_AUTO_FIELDS as readonly string[]).includes(col);
-                    return (
-                      <td key={col} className="p-1">
-                        <input
-                          type="text"
-                          readOnly={isAuto}
-                          title={isAuto ? 'Auto-calculated' : undefined}
-                          className={`w-14 border rounded px-1.5 py-1 text-xs text-center focus:outline-none ${
-                            isAuto
-                              ? 'bg-sky-950/40 border-sky-900/60 text-sky-300 font-semibold cursor-not-allowed select-none'
-                              : 'bg-slate-950 border-slate-800 text-slate-100 placeholder:text-slate-600 focus:border-sky-500'
-                          }`}
-                          value={row[col] ?? ''}
-                          onChange={(e) => !isAuto && handleStatsChange('batting', fmt, col, e.target.value)}
-                        />
-                      </td>
-                    );
-                  })}
-                </tr>
-              );
-            })}
+          <tbody className="divide-y divide-slate-800/60 font-mono">
+            {formats.map((fmt) => (
+              <tr key={fmt} className="hover:bg-slate-800/30">
+                <td className="py-2 px-2 font-sans font-bold text-white">{fmt}</td>
+                {battingCols.map((col) => {
+                  const val = careerStats?.batting?.[fmt]?.[col.key] || '';
+                  return (
+                    <td key={col.key} className="p-1">
+                      <input
+                        type="text"
+                        value={val}
+                        onChange={(e) => handleStatChange('batting', fmt, col.key, e.target.value)}
+                        placeholder="—"
+                        className="w-full text-center bg-slate-950/60 border border-slate-800 rounded px-1 py-1 text-white text-xs focus:border-sky-500 focus:outline-none"
+                      />
+                    </td>
+                  );
+                })}
+              </tr>
+            ))}
           </tbody>
         </table>
       </div>
 
-      {/* 2. BOWLING CAREER SUMMARY */}
-      <div className="bg-slate-900/80 border border-slate-800 rounded-xl p-4 overflow-x-auto">
-        <div className="flex items-center justify-between mb-3">
-          <h4 className="text-sm font-semibold text-amber-400 uppercase tracking-wide">
-            2. Bowling Career Summary
-          </h4>
-          <span className="text-[11px] font-medium text-amber-400/80 bg-amber-950/60 border border-amber-800/40 px-2 py-0.5 rounded">
-            ✦ Econ, Avg &amp; SR auto-calculate from B, Runs, Wkts
-          </span>
-        </div>
-        <table className="w-full text-xs text-left min-w-[760px]">
+      {/* Bowling Career Summary Table */}
+      <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 overflow-x-auto">
+        <h4 className="text-xs font-bold text-teal-400 uppercase tracking-wider mb-3 flex items-center gap-2">
+          <span>🎯</span> Bowling Career Summary
+        </h4>
+        <table className="w-full text-xs text-left min-w-[700px]">
           <thead>
-            <tr className="text-slate-400 border-b border-slate-800">
-              <th className="py-1 px-1.5 w-16">Format</th>
-              <th className="py-1 px-1 text-center">M</th>
-              <th className="py-1 px-1 text-center">Inn</th>
-              <th className="py-1 px-1 text-center">B</th>
-              <th className="py-1 px-1 text-center">Runs</th>
-              <th className="py-1 px-1 text-center">Wkts</th>
-              <th className="py-1 px-1 text-center">BBI</th>
-              <th className="py-1 px-1 text-center">BBM</th>
-              <th className="py-1 px-1 text-center text-amber-400 font-semibold">Econ 🔒</th>
-              <th className="py-1 px-1 text-center text-amber-400 font-semibold">Avg 🔒</th>
-              <th className="py-1 px-1 text-center text-amber-400 font-semibold">SR 🔒</th>
-              <th className="py-1 px-1 text-center">5W</th>
-              <th className="py-1 px-1 text-center">10W</th>
+            <tr className="text-slate-400 border-b border-slate-800 font-medium">
+              <th className="py-2 px-2">Format</th>
+              {bowlingCols.map((col) => (
+                <th key={col.key} className="py-2 px-1 text-center font-mono">
+                  {col.label}
+                </th>
+              ))}
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-800/60">
-            {FORMATS.map((fmt) => {
-              const row = getBowlingRow(career, fmt);
-              return (
-                <tr key={fmt}>
-                  <td className="py-2 px-1.5 font-bold text-slate-300">{fmt}</td>
-                  {(['M', 'Inn', 'B', 'Runs', 'Wkts', 'BBI', 'BBM', 'Econ', 'Avg', 'SR', '5W', '10W'] as const).map((col) => {
-                    const isAuto = (BOWLING_AUTO_FIELDS as readonly string[]).includes(col);
-                    return (
-                      <td key={col} className="p-1">
-                        <input
-                          type="text"
-                          readOnly={isAuto}
-                          title={isAuto ? 'Auto-calculated' : undefined}
-                          className={`w-14 border rounded px-1.5 py-1 text-xs text-center focus:outline-none ${
-                            isAuto
-                              ? 'bg-amber-950/40 border-amber-900/60 text-amber-300 font-semibold cursor-not-allowed select-none'
-                              : 'bg-slate-950 border-slate-800 text-slate-100 placeholder:text-slate-600 focus:border-amber-500'
-                          }`}
-                          value={row[col] ?? ''}
-                          onChange={(e) => !isAuto && handleStatsChange('bowling', fmt, col, e.target.value)}
-                        />
-                      </td>
-                    );
-                  })}
-                </tr>
-              );
-            })}
+          <tbody className="divide-y divide-slate-800/60 font-mono">
+            {formats.map((fmt) => (
+              <tr key={fmt} className="hover:bg-slate-800/30">
+                <td className="py-2 px-2 font-sans font-bold text-white">{fmt}</td>
+                {bowlingCols.map((col) => {
+                  const val = careerStats?.bowling?.[fmt]?.[col.key] || '';
+                  return (
+                    <td key={col.key} className="p-1">
+                      <input
+                        type="text"
+                        value={val}
+                        onChange={(e) => handleStatChange('bowling', fmt, col.key, e.target.value)}
+                        placeholder="—"
+                        className="w-full text-center bg-slate-950/60 border border-slate-800 rounded px-1 py-1 text-white text-xs focus:border-teal-500 focus:outline-none"
+                      />
+                    </td>
+                  );
+                })}
+              </tr>
+            ))}
           </tbody>
         </table>
       </div>
