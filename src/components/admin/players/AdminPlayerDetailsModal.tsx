@@ -1,5 +1,7 @@
 'use client';
 
+import { getAllFormatRatings } from '@/lib/formatRatings';
+
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -100,6 +102,12 @@ export default function AdminPlayerDetailsModal({
   onEdit,
   renderFormBand,
 }: AdminPlayerDetailsModalProps) {
+  const careerBat = (player as any)?.careerStats?.batting || {};
+  const careerBowl = (player as any)?.careerStats?.bowling || {};
+  const iplBat = careerBat.IPL || {};
+  const iplBowl = careerBowl.IPL || {};
+  const fmtRatings = player ? getAllFormatRatings(player) : null;
+
   const [activeTab, setActiveTab] = useState<DetailTab>('overview');
 
   if (!player) return null;
@@ -303,7 +311,62 @@ export default function AdminPlayerDetailsModal({
 
                 {isIpl && (
                   <div className="oil-table-shell rounded-2xl overflow-hidden">
-                    <div className="oil-table-header px-5 py-4">
+                    
+              {/* Multi-Format Batting Career Breakdown */}
+              <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 mb-6 overflow-x-auto">
+                <div className="flex items-center justify-between mb-3">
+                  <h4 className="text-sm font-bold text-sky-400 uppercase tracking-wider">
+                    Batting Career Breakdown (All Formats)
+                  </h4>
+                  <span className="text-xs text-slate-400 font-mono">Test • ODI • T20I • IPL</span>
+                </div>
+                <table className="w-full text-xs text-left min-w-[640px]">
+                  <thead>
+                    <tr className="text-slate-400 border-b border-slate-800">
+                      <th className="py-2 px-2">Format</th>
+                      <th className="py-2 px-1 text-center">Mat</th>
+                      <th className="py-2 px-1 text-center">Inn</th>
+                      <th className="py-2 px-1 text-center">NO</th>
+                      <th className="py-2 px-1 text-center font-bold text-white">Runs</th>
+                      <th className="py-2 px-1 text-center">HS</th>
+                      <th className="py-2 px-1 text-center font-bold text-sky-400">Avg</th>
+                      <th className="py-2 px-1 text-center font-bold text-sky-400">SR</th>
+                      <th className="py-2 px-1 text-center text-amber-300">100s</th>
+                      <th className="py-2 px-1 text-center text-amber-300">50s</th>
+                      <th className="py-2 px-1 text-center">4s</th>
+                      <th className="py-2 px-1 text-center">6s</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-800/60 font-mono">
+                    {(['Test', 'ODI', 'T20I', 'IPL'] as const).map((fmt) => {
+                      const altFmt = fmt === 'T20I' ? 'T20' : fmt;
+                      const b = careerBat[fmt] || careerBat[altFmt] || {};
+                      const isIPL = fmt === 'IPL';
+                      const runs = b.Runs || (isIPL ? player.stats?.runs : null) || '—';
+                      const matches = b.M || b.Matches || (isIPL ? player.stats?.matches : null) || '—';
+                      const avg = b.Avg || b.Average || (isIPL && player.stats?.average ? Number(player.stats.average).toFixed(2) : null) || '—';
+                      const sr = b.SR || (isIPL && player.stats?.strikeRate ? Number(player.stats.strikeRate).toFixed(2) : null) || '—';
+                      const hs = b.HS || b.Highest || (isIPL ? player.stats?.highest : null) || '—';
+                      return (
+                        <tr key={fmt} className="hover:bg-slate-800/30">
+                          <td className="py-2.5 px-2 font-sans font-bold text-slate-200">{fmt}</td>
+                          <td className="py-2.5 px-1 text-center">{matches}</td>
+                          <td className="py-2.5 px-1 text-center">{b.Inn || b.Innings || '—'}</td>
+                          <td className="py-2.5 px-1 text-center">{b.NO || b.NotOut || '—'}</td>
+                          <td className="py-2.5 px-1 text-center font-bold text-white">{runs}</td>
+                          <td className="py-2.5 px-1 text-center">{hs}</td>
+                          <td className="py-2.5 px-1 text-center text-sky-400 font-semibold">{avg}</td>
+                          <td className="py-2.5 px-1 text-center text-sky-400 font-semibold">{sr}</td>
+                          <td className="py-2.5 px-1 text-center text-amber-300 font-semibold">{b['100'] || b['100s'] || '0'}</td>
+                          <td className="py-2.5 px-1 text-center text-amber-300 font-semibold">{b['50'] || b['50s'] || '0'}</td>
+                          <td className="py-2.5 px-1 text-center">{b['4s'] || b.Fours || '—'}</td>
+                          <td className="py-2.5 px-1 text-center">{b['6s'] || b.Sixes || '—'}</td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div><div className="oil-table-header px-5 py-4">
                       <h3 className="flex items-center gap-2 font-bold text-white">
                         <BarChart3 className="h-4 w-4 text-[#f2d39a]" />
                         Season summary
