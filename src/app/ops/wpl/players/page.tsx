@@ -1734,6 +1734,8 @@ function AdminPlayersWorkspace() {
         isCaptain: player.isCaptain ?? false,
         battingStyle: player.battingStyle || '',
       careerStats: (player as any).careerStats || { batting: {}, bowling: {} },
+        cricbuzzUrl: (player as any).cricbuzzUrl || '',
+        cricbuzzId: (player as any).cricbuzzId || '',
       bio: (player as any).bio || {},
         bowlingStyle: player.bowlingStyle || '',
         league: player.league || currentLeague,

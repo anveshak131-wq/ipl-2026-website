@@ -601,6 +601,8 @@ function AdminPlayersWorkspace() {
     };
     bio?: any;
     careerStats?: any;
+  cricbuzzUrl?: string;
+  cricbuzzId?: string;
   }>({
     name: '',
     role: 'Batsman',
@@ -947,6 +949,8 @@ function AdminPlayersWorkspace() {
         isCaptain: player.isCaptain ?? false,
         battingStyle: player.battingStyle || "",
       careerStats: (player as any).careerStats || { batting: {}, bowling: {} },
+        cricbuzzUrl: (player as any).cricbuzzUrl || '',
+        cricbuzzId: (player as any).cricbuzzId || '',
       bio: (player as any).bio || {},
         bowlingStyle: player.bowlingStyle || '',
         league: player.league || currentLeague,
@@ -3352,7 +3356,9 @@ function AdminPlayersWorkspace() {
         currentSeasonYear: new Date().getFullYear(),
         stats: statsForPlayer,
         bio: formData.bio || {},
-        careerStats: formData.careerStats || {},
+        careerStats: formData.careerStats || { batting: {}, bowling: {} },
+        cricbuzzUrl: formData.cricbuzzUrl || '',
+        cricbuzzId: formData.cricbuzzId || '',
         transferInfo: {
           lastAuctionYear: formData.lastAuctionYear ? Number(formData.lastAuctionYear) : undefined,
           acquiredVia: formData.acquiredVia,
@@ -3367,7 +3373,9 @@ function AdminPlayersWorkspace() {
         const updatePayload = {
           ...editingPlayer, // Preserve ALL existing player fields first
           ...playerData,
-          careerStats: formData.careerStats || (editingPlayer as any).careerStats || {},
+          careerStats: formData.careerStats || (editingPlayer as any).careerStats || { batting: {}, bowling: {} },
+          cricbuzzUrl: formData.cricbuzzUrl || (editingPlayer as any).cricbuzzUrl || '',
+          cricbuzzId: formData.cricbuzzId || (editingPlayer as any).cricbuzzId || '',
           bio: formData.bio || (editingPlayer as any).bio || {},    // Then override with form data
           id: editingPlayer.id, // Ensure ID is always set
           // Explicitly preserve fields that might not be in form

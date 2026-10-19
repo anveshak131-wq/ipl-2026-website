@@ -84,7 +84,17 @@ export const onRequest = async (context) => {
       const playerIndex = currentPlayers.findIndex(p => String(p.id) === id);
 
       if (playerIndex >= 0) {
-        currentPlayers[playerIndex] = { ...currentPlayers[playerIndex], ...incoming, id };
+        const existing = currentPlayers[playerIndex];
+        currentPlayers[playerIndex] = {
+          ...existing,
+          ...incoming,
+          id,
+          careerStats: incoming.careerStats && Object.keys(incoming.careerStats).length > 0 
+            ? incoming.careerStats 
+            : (existing.careerStats || { batting: {}, bowling: {} }),
+          cricbuzzUrl: incoming.cricbuzzUrl || existing.cricbuzzUrl || '',
+          cricbuzzId: incoming.cricbuzzId || existing.cricbuzzId || '',
+        };
       } else {
         currentPlayers.push({ ...incoming, id });
       }
