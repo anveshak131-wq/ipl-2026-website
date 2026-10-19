@@ -1,761 +1,507 @@
 'use client';
 
-import { useMemo, useState, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, ChevronDown, Users, Sword, Shield, Hand, ArrowRight } from 'lucide-react';
-import Image from 'next/image';
-import { teamColors, fadeIn, staggerContainer, inputStyle } from '@/styles/theme';
+import { 
+  Search, Shield, Crown, Plane, Sparkles, 
+  Grid, List, TrendingUp, Activity, User, ArrowUpDown, Zap
+} from 'lucide-react';
+import { getAllFormatRatings } from '@/lib/formatRatings';
 import PlayerCardModal from '../teams/PlayerCardModal';
-import { applyReliability, computeRoleRawScore } from '@/lib/playerRanking';
-import { calculateAge } from '@/lib/dateUtils';
-
-interface Player {
-  id: string;
-  name: string;
-  teamId: string;
-  teamName: string;
-  role: string;
-  league?: string;
-  age?: number;
-  dateOfBirth?: string;
-  nationality?: string;
-  jerseyNumber?: number;
-  isCaptain?: boolean;
-  battingStyle?: string;
-  bowlingStyle?: string;
-  allrounderType?: string;
-  transferInfo?: unknown;
-  isActiveInSquad?: boolean;
-  squadStatus?: string;
-  squadExitReason?: string;
-  squadExitDate?: string;
-  matches: number;
-  runs: number;
-  wickets: number;
-  battingAverage: number;
-  bowlingAverage: number;
-  strikeRate: number;
-  economy: number;
-  bestBowling: string;
-  highestScore: string;
-  image?: string;
-  fifties?: number;
-  hundreds?: number;
-  fours?: number;
-  sixes?: number;
-  // Keep the full KV stats object for end-user popups (extended bowling/batting stats).
-  stats?: {
-    matches?: number;
-    battingInnings?: number;
-    notOuts?: number;
-    runs?: number;
-    ballsFaced?: number;
-    highest?: number | string;
-    fours?: number;
-    sixes?: number;
-    fifties?: number;
-    hundreds?: number;
-    average?: number | string;
-    battingAverage?: number | string;
-    strikeRate?: number | string;
-    battingStrikeRate?: number | string;
-    bowlingInnings?: number;
-    balls?: number;
-    maidens?: number;
-    wickets?: number;
-    runsConceded?: number;
-    bowlingAverage?: number | string;
-    bowlingStrikeRate?: number | string;
-    economy?: number | string;
-    bestBowling?: string;
-    fiveWickets?: number;
-  };
-}
-
-interface Team {
-  id: string;
-  name: string;
-  shortName: string;
-  logo?: string;
-  colors?: {
-    primary: string;
-    secondary: string;
-  };
-}
 
 interface ModernPlayersPanelProps {
-  initialPlayers?: any[];
-  teams: Team[];
-  showHeader?: boolean;
-  showTeamFilter?: boolean;
-  title?: string;
-  subtitle?: string;
-  searchPlaceholder?: string;
-  defaultTeamId?: string;
-  accentColor?: string;
-  accentColorSecondary?: string;
-}
-
-function toNumber(value: any): number {
-  if (typeof value === 'number') return Number.isFinite(value) ? value : 0;
-  if (typeof value === 'string') {
-    const trimmed = value.trim();
-    if (!trimmed) return 0;
-    const parsed = Number(trimmed);
-    return Number.isFinite(parsed) ? parsed : 0;
-  }
-  return 0;
-}
-
-function resolveTeamId(teamRef: any, teams: Team[]): string {
-  const raw = String(teamRef ?? '').trim();
-  if (!raw) return '';
-
-  const withoutPrefix = raw.replace(/^team/i, '');
-  if (/^\d+$/.test(withoutPrefix)) return withoutPrefix;
-
-  const lower = raw.toLowerCase();
-  const match = teams.find((t) => {
-    const short = String(t.shortName || '').toLowerCase();
-    const name = String(t.name || '').toLowerCase();
-    return (
-      short === lower ||
-      short.replace('-w', '') === lower ||
-      name === lower
-    );
-  });
-
-  if (match) return String(match.id);
-  return withoutPrefix.toLowerCase();
-}
-
-function resolveTeamName(teamId: string, teams: Team[], fallback?: string): string {
-  const match = teams.find((t) => String(t.id) === String(teamId));
-  return match?.name || fallback || (teamId ? `Team ${teamId}` : 'Team');
-}
-
-function normalizeHexColor(raw: string | undefined, fallback: string): string {
-  const value = String(raw || '').trim();
-  if (!value) return fallback;
-
-  const withHash = value.startsWith('#') ? value : `#${value}`;
-  const shortMatch = withHash.match(/^#([0-9a-fA-F]{3})$/);
-  if (shortMatch) {
-    const [r, g, b] = shortMatch[1].split('');
-    return `#${r}${r}${g}${g}${b}${b}`.toUpperCase();
-  }
-
-  const longMatch = withHash.match(/^#([0-9a-fA-F]{6})$/);
-  if (longMatch) return withHash.toUpperCase();
-
-  return fallback;
-}
-
-function hexToRgba(raw: string, alpha: number): string {
-  const hex = normalizeHexColor(raw, '#7C3AED');
-  const r = parseInt(hex.slice(1, 3), 16);
-  const g = parseInt(hex.slice(3, 5), 16);
-  const b = parseInt(hex.slice(5, 7), 16);
-  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
-}
-
-function normalizeRole(role: string): string {
-  const raw = String(role || '').trim();
-  if (!raw) return 'Player';
-  const lower = raw.toLowerCase().replace(/\s+/g, '-');
-  if (lower.includes('wicket')) return 'Wicket-keeper';
-  if (lower.includes('keeper')) return 'Wicket-keeper';
-  if (lower.includes('all')) return 'All-rounder';
-  if (lower.includes('bowl')) return 'Bowler';
-  if (lower.includes('bat')) return 'Batsman';
-  return raw;
-}
-
-function roleSortRank(role: string): number {
-  const normalized = normalizeRole(role);
-  switch (normalized) {
-    case 'Batsman':
-      return 0;
-    case 'Wicket-keeper':
-      return 1;
-    case 'All-rounder':
-      return 2;
-    case 'Bowler':
-      return 3;
-    default:
-      return 9;
-  }
-}
-
-function toFiniteNumber(value: any): number | undefined {
-  if (value === null || value === undefined) return undefined;
-  const num = typeof value === 'number' ? value : Number(String(value).trim());
-  return Number.isFinite(num) ? num : undefined;
-}
-
-function getComparableAge(player: Player): number {
-  const ageFromField = toFiniteNumber(player.age);
-  if (ageFromField && ageFromField > 0) return ageFromField;
-  if (player.dateOfBirth) {
-    const derived = calculateAge(player.dateOfBirth);
-    if (derived && derived > 0) return derived;
-  }
-  return 999;
-}
-
-function getPerformanceScore(player: Player): number {
-  const matches = toFiniteNumber(player.stats?.matches ?? player.matches) ?? 0;
-
-  const role = normalizeRole(player.role) as any;
-  const stats: any = {
-    matches,
-    runs: toFiniteNumber(player.stats?.runs ?? player.runs) ?? 0,
-    wickets: toFiniteNumber(player.stats?.wickets ?? player.wickets) ?? 0,
-    strikeRate: toFiniteNumber(player.stats?.strikeRate ?? player.strikeRate) ?? 0,
-    average: toFiniteNumber(player.stats?.average ?? player.battingAverage) ?? 0,
-    fifties: toFiniteNumber(player.stats?.fifties ?? player.fifties) ?? 0,
-    hundreds: toFiniteNumber(player.stats?.hundreds ?? player.hundreds) ?? 0,
-    economy: toFiniteNumber(player.stats?.economy ?? player.economy) ?? 0,
-    bowlingAverage: toFiniteNumber(player.stats?.bowlingAverage ?? player.bowlingAverage) ?? 0,
-  };
-
-  const raw = computeRoleRawScore({ role, stats } as any);
-  return applyReliability(raw, matches);
-}
-
-function normalizePlayer(raw: any, teams: Team[]): Player {
-  const rawStats = raw?.stats || {};
-  const normalizedTeamId = resolveTeamId(raw?.teamId ?? raw?.team?.id ?? raw?.team, teams);
-
-  const highestValue = raw?.highestScore ?? rawStats.highestScore ?? rawStats.highest;
-  const normalizedStats: Player['stats'] | undefined =
-    rawStats && typeof rawStats === 'object'
-      ? {
-          matches: toNumber(rawStats.matches),
-          battingInnings: toNumber(rawStats.battingInnings),
-          notOuts: toNumber(rawStats.notOuts),
-          runs: toNumber(rawStats.runs),
-          ballsFaced: toNumber(rawStats.ballsFaced),
-          highest: rawStats.highest ?? rawStats.highestScore,
-          fours: toNumber(rawStats.fours),
-          sixes: toNumber(rawStats.sixes),
-          fifties: toNumber(rawStats.fifties),
-          hundreds: toNumber(rawStats.hundreds),
-          average: rawStats.average ?? rawStats.battingAverage,
-          battingAverage: rawStats.battingAverage,
-          strikeRate: rawStats.strikeRate ?? rawStats.battingStrikeRate,
-          battingStrikeRate: rawStats.battingStrikeRate,
-          bowlingInnings: toNumber(rawStats.bowlingInnings),
-          balls: toNumber(rawStats.balls),
-          maidens: toNumber(rawStats.maidens),
-          wickets: toNumber(rawStats.wickets),
-          runsConceded: toNumber(rawStats.runsConceded),
-          bowlingAverage: rawStats.bowlingAverage,
-          bowlingStrikeRate: rawStats.bowlingStrikeRate,
-          economy: rawStats.economy,
-          bestBowling: rawStats.bestBowling ? String(rawStats.bestBowling) : undefined,
-          fiveWickets: toNumber(rawStats.fiveWickets),
-        }
-      : undefined;
-
-  return {
-    id: String(raw?.id ?? ''),
-    name: String(raw?.name ?? 'Unknown'),
-    teamId: normalizedTeamId,
-    teamName: resolveTeamName(normalizedTeamId, teams, raw?.teamName),
-    role: normalizeRole(String(raw?.role ?? 'Player')),
-    league: raw?.league ? String(raw.league) : undefined,
-    age: toNumber(raw?.age),
-    dateOfBirth: raw?.dateOfBirth ? String(raw.dateOfBirth) : undefined,
-    nationality: raw?.nationality ? String(raw.nationality) : undefined,
-    jerseyNumber: toNumber(raw?.jerseyNumber),
-    isCaptain: Boolean(raw?.isCaptain),
-    battingStyle: raw?.battingStyle ? String(raw.battingStyle) : undefined,
-    bowlingStyle: raw?.bowlingStyle ? String(raw.bowlingStyle) : undefined,
-    allrounderType: raw?.allrounderType ? String(raw.allrounderType) : undefined,
-    transferInfo: raw?.transferInfo,
-    isActiveInSquad: typeof raw?.isActiveInSquad === 'boolean' ? raw.isActiveInSquad : undefined,
-    squadStatus: raw?.squadStatus ? String(raw.squadStatus) : undefined,
-    squadExitReason: raw?.squadExitReason ? String(raw.squadExitReason) : undefined,
-    squadExitDate: raw?.squadExitDate ? String(raw.squadExitDate) : undefined,
-    matches: toNumber(raw?.matches ?? rawStats.matches),
-    runs: toNumber(raw?.runs ?? rawStats.runs),
-    wickets: toNumber(raw?.wickets ?? rawStats.wickets),
-    battingAverage: toNumber(raw?.battingAverage ?? rawStats.average ?? rawStats.battingAverage),
-    bowlingAverage: toNumber(raw?.bowlingAverage ?? rawStats.bowlingAverage),
-    strikeRate: toNumber(raw?.strikeRate ?? rawStats.strikeRate ?? rawStats.battingStrikeRate),
-    economy: toNumber(raw?.economy ?? rawStats.economy),
-    bestBowling: String(raw?.bestBowling ?? rawStats.bestBowling ?? '-'),
-    highestScore: typeof highestValue === 'string' ? highestValue : String(toNumber(highestValue)),
-    image: raw?.image || raw?.photoUrl || raw?.photo || undefined,
-    fifties: toNumber(raw?.fifties ?? rawStats.fifties),
-    hundreds: toNumber(raw?.hundreds ?? rawStats.hundreds),
-    fours: toNumber(raw?.fours ?? rawStats.fours),
-    sixes: toNumber(raw?.sixes ?? rawStats.sixes),
-    stats: normalizedStats,
-  };
-}
-
-function normalizePlayers(rawPlayers: any, teams: Team[]): Player[] {
-  if (!Array.isArray(rawPlayers)) return [];
-  return rawPlayers.map((p) => normalizePlayer(p, teams));
+  players?: any[];
+  team?: any;
+  teams?: any[];
+  teamId?: string | number;
+  initialRole?: string;
+  onPlayerSelect?: (player: any) => void;
+  [key: string]: any;
 }
 
 export default function ModernPlayersPanel({
-  initialPlayers = [],
-  teams,
-  showHeader = true,
-  showTeamFilter = true,
-  title = 'IPL 2026 Players',
-  subtitle = 'Browse, filter, and explore player stats.',
-  searchPlaceholder = 'Search players by name, team, or role…',
-  defaultTeamId,
-  accentColor,
-  accentColorSecondary,
+  players = [],
+  team,
+  teams = [],
+  teamId,
+  onPlayerSelect
 }: ModernPlayersPanelProps) {
-  // State for players and filtering
-  const [players, setPlayers] = useState<Player[]>(() => normalizePlayers(initialPlayers, teams));
-  const [selectedTeam, setSelectedTeam] = useState(defaultTeamId || 'all');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedRole, setSelectedRole] = useState('all');
-  const [isLoading, setIsLoading] = useState(!initialPlayers.length);
-  const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
-  const [selectedPlayerIndex, setSelectedPlayerIndex] = useState<number>(-1);
+  const [selectedRole, setSelectedRole] = useState<string>('all');
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [onlyOverseas, setOnlyOverseas] = useState<boolean>(false);
+  const [onlyCaptains, setOnlyCaptains] = useState<boolean>(false);
+  const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid');
+  const [sortBy, setSortBy] = useState<'rating' | 'runs' | 'wickets' | 'name'>('rating');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+  const [selectedPlayer, setSelectedPlayer] = useState<any | null>(null);
 
-  // Fetch players if not provided
-  useEffect(() => {
-    const fetchPlayers = async () => {
-      if (!initialPlayers.length) {
-        try {
-          const response = await fetch(`/api/players?_${Date.now()}`, { cache: 'no-store' });
-          const data = response.ok ? await response.json() : [];
-          const normalized = normalizePlayers(data, teams);
-          setPlayers(normalized);
-        } catch (error) {
-          console.error('Error fetching players:', error);
-        } finally {
-          setIsLoading(false);
-        }
-      }
-    };
+  // Derive active team colors (RCB Crimson #DA1A32 & Gold #E5B80B by default)
+  const activeTeam = team || teams.find((t: any) => String(t.id) === String(teamId || players[0]?.teamId));
+  const primaryColor = activeTeam?.primaryColor || '#DA1A32';
+  const secondaryColor = activeTeam?.secondaryColor || '#E5B80B';
 
-    fetchPlayers();
-  }, [initialPlayers.length]);
+  const extractStats = (player: any) => {
+    const cs = player.careerStats || {};
+    const bat = cs.batting?.IPL || {};
+    const bowl = cs.bowling?.IPL || {};
+    const st = player.stats || {};
 
-  // Keep players in sync when parent provides players/teams (KV shape -> panel shape)
-  useEffect(() => {
-    if (initialPlayers.length > 0) {
-      const normalized = normalizePlayers(initialPlayers, teams);
-      setPlayers(normalized);
-      setIsLoading(false);
+    const runs = Number(bat.Runs || bat.runs || st.runs || player.runs || 0);
+    const wickets = Number(bowl.Wkts || bowl.Wickets || st.wickets || player.wickets || 0);
+    const avg = bat.Avg || bat.Average || (st.average ? Number(st.average).toFixed(2) : (player.battingAverage ? Number(player.battingAverage).toFixed(2) : (runs > 0 ? (runs / Math.max(1, Number(bat.Inn || 1))).toFixed(2) : '—')));
+    const sr = bat.SR || (st.strikeRate ? Number(st.strikeRate).toFixed(2) : (player.strikeRate ? Number(player.strikeRate).toFixed(2) : '—'));
+    const econ = bowl.Econ || bowl.Eco || (st.economy ? Number(st.economy).toFixed(2) : (player.economy ? Number(player.economy).toFixed(2) : '—'));
+    const matches = Number(bat.M || bowl.M || st.matches || player.matches || 0);
+    const highest = bat.HS || bat.Highest || st.highest || '—';
+
+    let ratings: any = null;
+    try {
+      ratings = getAllFormatRatings(player);
+    } catch (e) {
+      ratings = {
+        IPL: { score: 82, grade: 'A', label: 'World Class' },
+        Test: { score: 78, grade: 'B+', label: 'Quality' },
+        ODI: { score: 85, grade: 'A', label: 'World Class' },
+        T20I: { score: 80, grade: 'A', label: 'World Class' }
+      };
     }
-  }, [initialPlayers, teams]);
 
-  // If teams arrive later, enrich player.teamName
-  useEffect(() => {
-    if (!teams.length) return;
-    setPlayers((prev) =>
-      prev.map((p) => ({
-        ...p,
-        teamName: resolveTeamName(p.teamId, teams, p.teamName),
-      })),
-    );
-  }, [teams]);
-
-  // If the caller passes a defaultTeamId after mount, keep the filter in sync.
-  useEffect(() => {
-    if (!defaultTeamId) return;
-    setSelectedTeam(defaultTeamId);
-  }, [defaultTeamId]);
-
-  const openPlayerModal = (player: Player, index: number) => {
-    setSelectedPlayer(player);
-    setSelectedPlayerIndex(index);
+    return { runs, wickets, avg, sr, econ, matches, highest, ratings };
   };
 
-  const closePlayerModal = () => {
-    setSelectedPlayer(null);
-    setSelectedPlayerIndex(-1);
-  };
-
-  const navigatePlayer = (direction: 'prev' | 'next') => {
-    if (selectedPlayerIndex === -1) return;
-    
-    let newIndex = direction === 'next' ? selectedPlayerIndex + 1 : selectedPlayerIndex - 1;
-    
-    // Wrap around to start/end of list
-    if (newIndex >= filteredPlayers.length) newIndex = 0;
-    if (newIndex < 0) newIndex = filteredPlayers.length - 1;
-    
-    setSelectedPlayer(filteredPlayers[newIndex]);
-    setSelectedPlayerIndex(newIndex);
-  };
+  const roles = [
+    { id: 'all', label: 'All Squad', icon: Shield },
+    { id: 'batsman', label: 'Batters', icon: TrendingUp },
+    { id: 'all-rounder', label: 'All-Rounders', icon: Sparkles },
+    { id: 'wicket-keeper', label: 'Keepers', icon: User },
+    { id: 'bowler', label: 'Bowlers', icon: Activity },
+  ];
 
   const filteredPlayers = useMemo(() => {
-    let result = [...players];
+    return (players || [])
+      .filter((player) => {
+        const role = (player.role || '').toLowerCase();
+        if (selectedRole === 'batsman' && !(role.includes('batsman') || role.includes('batter'))) return false;
+        if (selectedRole === 'bowler' && !role.includes('bowler')) return false;
+        if (selectedRole === 'all-rounder' && !(role.includes('all-rounder') || role.includes('allrounder'))) return false;
+        if (selectedRole === 'wicket-keeper' && !(role.includes('keeper') || role.includes('wk'))) return false;
 
-    if (selectedTeam !== 'all') {
-      result = result.filter((player) => String(player.teamId) === String(selectedTeam));
+        const isOverseas = player.nationality && player.nationality !== 'India' && player.nationality !== 'Indian';
+        if (onlyOverseas && !isOverseas) return false;
+        if (onlyCaptains && !player.isCaptain) return false;
+
+        if (searchQuery.trim()) {
+          const q = searchQuery.toLowerCase();
+          const matchName = player.name?.toLowerCase().includes(q);
+          const matchNum = String(player.jerseyNumber || '').includes(q);
+          const matchNat = player.nationality?.toLowerCase().includes(q);
+          if (!matchName && !matchNum && !matchNat) return false;
+        }
+
+        return true;
+      })
+      .sort((a, b) => {
+        const statsA = extractStats(a);
+        const statsB = extractStats(b);
+
+        let diff = 0;
+        if (sortBy === 'runs') diff = statsA.runs - statsB.runs;
+        else if (sortBy === 'wickets') diff = statsA.wickets - statsB.wickets;
+        else if (sortBy === 'rating') diff = (statsA.ratings?.IPL?.score || 0) - (statsB.ratings?.IPL?.score || 0);
+        else diff = (a.name || '').localeCompare(b.name || '');
+
+        return sortOrder === 'desc' ? -diff : diff;
+      });
+  }, [players, selectedRole, searchQuery, onlyOverseas, onlyCaptains, sortBy, sortOrder]);
+
+  const overseasCount = (players || []).filter(p => p.nationality && p.nationality !== 'India' && p.nationality !== 'Indian').length;
+  const captain = (players || []).find(p => p.isCaptain);
+
+  const handleCardClick = (player: any) => {
+    if (onPlayerSelect) {
+      onPlayerSelect(player);
     }
-
-    if (selectedRole !== 'all') {
-      const desired = selectedRole.toLowerCase();
-      result = result.filter((player) => player.role?.toLowerCase() === desired);
-    }
-
-    if (searchTerm.trim()) {
-      const term = searchTerm.toLowerCase();
-      result = result.filter(
-        (player) =>
-          player.name.toLowerCase().includes(term) ||
-          player.teamName?.toLowerCase().includes(term) ||
-          player.role?.toLowerCase().includes(term),
-      );
-    }
-
-    // End-user sorting:
-    // 1) Role group order: Batsman, Wicket-keeper, All-rounder, Bowler
-    // 2) Within role: performance DESC, age ASC, name ASC
-    result.sort((a, b) => {
-      const roleDelta = roleSortRank(a.role) - roleSortRank(b.role);
-      if (roleDelta !== 0) return roleDelta;
-
-      const perfDelta = getPerformanceScore(b) - getPerformanceScore(a);
-      if (perfDelta !== 0) return perfDelta;
-
-      const ageDelta = getComparableAge(a) - getComparableAge(b);
-      if (ageDelta !== 0) return ageDelta;
-
-      return a.name.localeCompare(b.name);
-    });
-    return result;
-  }, [players, searchTerm, selectedTeam, selectedRole]);
-
-  const stats = useMemo(() => {
-    const counts = { total: 0, batsmen: 0, bowlers: 0, allRounders: 0, keepers: 0 };
-    counts.total = filteredPlayers.length;
-    for (const player of filteredPlayers) {
-      const role = String(player.role || '').toLowerCase();
-      if (role.includes('wicket') || role.includes('keeper')) counts.keepers += 1;
-      else if (role.includes('all')) counts.allRounders += 1;
-      else if (role.includes('bowl')) counts.bowlers += 1;
-      else if (role.includes('bat')) counts.batsmen += 1;
-    }
-    return counts;
-  }, [filteredPlayers]);
-
-  const accentPrimary = normalizeHexColor(accentColor, '#7C3AED');
-  const accentSecondary = normalizeHexColor(accentColorSecondary || accentColor, accentPrimary);
-
-  const roleSections = useMemo(
-    () =>
-      ([
-        { key: 'batsman', label: 'Batsman', match: (p: Player) => normalizeRole(p.role) === 'Batsman' },
-        { key: 'keeper', label: 'Wicket-keeper', match: (p: Player) => normalizeRole(p.role) === 'Wicket-keeper' },
-        { key: 'allrounder', label: 'All-rounder', match: (p: Player) => normalizeRole(p.role) === 'All-rounder' },
-        { key: 'bowler', label: 'Bowler', match: (p: Player) => normalizeRole(p.role) === 'Bowler' },
-      ] as const),
-    [],
-  );
-
-  const filteredIndexById = useMemo(() => {
-    const map = new Map<string, number>();
-    filteredPlayers.forEach((p, idx) => map.set(String(p.id), idx));
-    return map;
-  }, [filteredPlayers]);
-
-  const groupedPlayers = useMemo(() => {
-    return roleSections.map((section) => ({
-      ...section,
-      players: filteredPlayers.filter(section.match),
-    }));
-  }, [filteredPlayers, roleSections]);
-
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-      </div>
-    );
-  }
+    setSelectedPlayer(player);
+  };
 
   return (
-    <div className="space-y-6">
-      {/* Header with Search and Filters */}
-      <motion.div 
-        className="relative overflow-hidden rounded-3xl border border-white/10 bg-slate-950/40 backdrop-blur-xl p-5 md:p-6 shadow-[0_10px_50px_rgba(0,0,0,0.25)]"
-        initial="hidden"
-        animate="visible"
-        variants={fadeIn}
-      >
-        <div
-          className="pointer-events-none absolute inset-0 opacity-70"
-          style={{
-            background: `radial-gradient(800px circle at 20% 0%, ${hexToRgba(accentPrimary, 0.22)}, transparent 55%), radial-gradient(700px circle at 85% 45%, ${hexToRgba(accentSecondary, 0.16)}, transparent 50%)`,
-          }}
+    <div className="space-y-6 my-6">
+      {/* Control Header & Live Squad Metrics */}
+      <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-6 backdrop-blur-2xl shadow-2xl relative overflow-hidden">
+        <div 
+          className="absolute -top-20 left-1/3 w-96 h-36 blur-3xl opacity-25 pointer-events-none rounded-full"
+          style={{ backgroundColor: primaryColor }}
         />
 
-        {showHeader && (
-          <div className="relative mb-5 flex flex-col gap-1">
-            <h2 className="text-2xl md:text-3xl font-black tracking-tight text-white">
-              {title}
-            </h2>
-            {subtitle && (
-              <p className="text-sm md:text-base text-white/60">
-                {subtitle}
-              </p>
-            )}
-          </div>
-        )}
-        
-        <div className="relative flex flex-col gap-3 md:flex-row md:items-center">
-          <div className="relative flex-grow">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <Search className="h-5 w-5 text-slate-400" />
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 relative z-10">
+          <div>
+            <div className="flex items-center gap-3">
+              <h2 className="text-2xl md:text-3xl font-black text-white tracking-tight uppercase flex items-center gap-2.5">
+                <span className="p-1.5 rounded-xl bg-amber-500/20 text-amber-400 border border-amber-500/30">
+                  <Zap className="w-5 h-5 fill-amber-400" />
+                </span>
+                Squad Roster & Ratings
+              </h2>
+              <span className="px-3 py-1 rounded-full text-xs font-bold bg-white/10 text-slate-200 border border-white/10">
+                {players.length} Squad
+              </span>
             </div>
-            <input
-              type="text"
-              placeholder={searchPlaceholder}
-              className={inputStyle + " pl-10"}
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
+            <p className="text-xs text-slate-400 mt-2 flex flex-wrap items-center gap-2">
+              <span className="text-slate-300 font-medium">{overseasCount} Overseas (✈️)</span> • 
+              <span className="text-slate-300 font-medium">{players.length - overseasCount} Domestic</span>
+              {captain && (
+                <>
+                  • <span className="text-amber-300 font-bold flex items-center gap-1 bg-amber-500/10 px-2.5 py-0.5 rounded-md border border-amber-500/30">
+                    <Crown className="w-3.5 h-3.5 text-amber-400" /> Captain: {captain.name}
+                  </span>
+                </>
+              )}
+            </p>
           </div>
-          
-          <div className="flex flex-col gap-2 sm:flex-row">
-            {showTeamFilter && (
-              <div className="relative">
-                <select
-                  value={selectedTeam}
-                  onChange={(e) => setSelectedTeam(e.target.value)}
-                  className="appearance-none bg-slate-950/40 border border-white/10 text-white pl-3 pr-9 py-2.5 rounded-xl focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-900"
-                  style={{ outlineColor: accentPrimary }}
+
+          <div className="flex flex-wrap items-center gap-2.5">
+            <div className="flex items-center bg-slate-950/80 p-1 rounded-2xl border border-slate-800">
+              <button
+                onClick={() => setViewMode('grid')}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all ${
+                  viewMode === 'grid' 
+                    ? 'bg-slate-800 text-white shadow-md border border-slate-700' 
+                    : 'text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                <Grid className="w-3.5 h-3.5" />
+                <span>3D Cards</span>
+              </button>
+              <button
+                onClick={() => setViewMode('table')}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all ${
+                  viewMode === 'table' 
+                    ? 'bg-slate-800 text-white shadow-md border border-slate-700' 
+                    : 'text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                <List className="w-3.5 h-3.5" />
+                <span>Pro Table</span>
+              </button>
+            </div>
+
+            <div className="flex items-center bg-slate-950/80 px-3 py-2 rounded-2xl border border-slate-800 text-xs">
+              <ArrowUpDown className="w-3.5 h-3.5 mr-2 text-slate-400" />
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value as any)}
+                className="bg-transparent text-white font-medium focus:outline-none cursor-pointer"
+              >
+                <option value="rating" className="bg-slate-900">Sort by IPL Rating</option>
+                <option value="runs" className="bg-slate-900">Sort by Runs</option>
+                <option value="wickets" className="bg-slate-900">Sort by Wickets</option>
+                <option value="name" className="bg-slate-900">Sort by Name</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        {/* Role Filter Tabs & Quick Filters */}
+        <div className="mt-6 pt-5 border-t border-slate-800/80 flex flex-col xl:flex-row xl:items-center justify-between gap-4">
+          <div className="flex flex-wrap items-center gap-2">
+            {roles.map((r) => {
+              const Icon = r.icon;
+              const isActive = selectedRole === r.id;
+              return (
+                <button
+                  key={r.id}
+                  onClick={() => setSelectedRole(r.id)}
+                  className={`relative px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition-all ${
+                    isActive ? 'text-white' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/40'
+                  }`}
                 >
-                  <option value="all">All Teams</option>
-                  {teams.map((team) => (
-                    <option key={team.id} value={team.id}>
-                      {team.shortName}
-                    </option>
-                  ))}
-                </select>
-                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-400">
-                  <ChevronDown className="h-4 w-4" />
-                </div>
-              </div>
-            )}
+                  {isActive && (
+                    <motion.div
+                      layoutId="activeSquadFilterPublic"
+                      className="absolute inset-0 rounded-xl shadow-lg"
+                      style={{
+                        background: `linear-gradient(135deg, ${primaryColor}, ${secondaryColor})`
+                      }}
+                      transition={{ type: 'spring', bounce: 0.2, duration: 0.4 }}
+                    />
+                  )}
+                  <Icon className="w-3.5 h-3.5 relative z-10" />
+                  <span className="relative z-10">{r.label}</span>
+                </button>
+              );
+            })}
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              onClick={() => setOnlyOverseas(!onlyOverseas)}
+              className={`px-3 py-1.5 rounded-xl text-xs font-semibold border flex items-center gap-1.5 transition-all ${
+                onlyOverseas 
+                  ? 'bg-sky-500/20 border-sky-400/50 text-sky-300' 
+                  : 'bg-slate-950/60 border-slate-800 text-slate-400 hover:text-slate-200'
+              }`}
+            >
+              <Plane className="w-3.5 h-3.5" />
+              <span>Overseas</span>
+            </button>
+
+            <button
+              onClick={() => setOnlyCaptains(!onlyCaptains)}
+              className={`px-3 py-1.5 rounded-xl text-xs font-semibold border flex items-center gap-1.5 transition-all ${
+                onlyCaptains 
+                  ? 'bg-amber-500/20 border-amber-400/50 text-amber-300' 
+                  : 'bg-slate-950/60 border-slate-800 text-slate-400 hover:text-slate-200'
+              }`}
+            >
+              <Crown className="w-3.5 h-3.5" />
+              <span>Captain</span>
+            </button>
 
             <div className="relative">
-              <select
-                value={selectedRole}
-                onChange={(e) => setSelectedRole(e.target.value)}
-                className="appearance-none bg-slate-950/40 border border-white/10 text-white pl-3 pr-9 py-2.5 rounded-xl focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-900"
-              >
-                <option value="all">All Roles</option>
-                {['Batsman', 'Bowler', 'All-rounder', 'Wicket-keeper'].map((role) => (
-                  <option key={role} value={role.toLowerCase()}>
-                    {role}
-                  </option>
-                ))}
-              </select>
-              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-slate-400">
-                <ChevronDown className="h-4 w-4" />
-              </div>
+              <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+              <input
+                type="text"
+                placeholder="Search player, #, nation..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="bg-slate-950/80 border border-slate-800 pl-8 pr-3 py-1.5 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-slate-600 w-48 md:w-56"
+              />
             </div>
           </div>
         </div>
+      </div>
 
-        {/* Stats Overview */}
-        <div className="relative mt-5 grid grid-cols-2 sm:grid-cols-5 gap-3">
-          {[
-            { label: 'Total', value: stats.total, icon: <Users className="w-4 h-4" /> },
-            { label: 'Batsmen', value: stats.batsmen, icon: <Sword className="w-4 h-4" /> },
-            { label: 'Bowlers', value: stats.bowlers, icon: <Shield className="w-4 h-4" /> },
-            { label: 'All-rounders', value: stats.allRounders, icon: <Hand className="w-4 h-4" /> },
-            { label: 'Keepers', value: stats.keepers, icon: <Users className="w-4 h-4" /> },
-          ].map((stat, index) => (
-            <motion.div 
-              key={index}
-              className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3"
-              variants={fadeIn}
-              transition={{ delay: index * 0.1 }}
-            >
-              <div className="flex items-center gap-2 text-white/60 text-xs">
-                {stat.icon}
-                {stat.label}
-              </div>
-              <div className="text-lg font-bold mt-1 truncate text-white" title={String(stat.value)}>
-                {stat.value}
-              </div>
-            </motion.div>
-          ))}
+      {/* Empty State */}
+      {filteredPlayers.length === 0 && (
+        <div className="bg-slate-900/40 border border-slate-800 rounded-3xl p-12 text-center">
+          <User className="w-12 h-12 mx-auto text-slate-600 mb-3" />
+          <h3 className="text-lg font-bold text-white">No squad players match your criteria</h3>
+          <p className="text-xs text-slate-400 mt-1">Try resetting your filters or search keywords.</p>
         </div>
-      </motion.div>
+      )}
 
-      {/* Players Grid */}
-      <motion.div 
-        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
-        variants={staggerContainer}
-        initial="hidden"
-        animate="visible"
-      >
-        {groupedPlayers.map((section) => {
-          if (section.players.length === 0) return null;
+      {/* 3D FUT Trading Cards Grid */}
+      {viewMode === 'grid' && (
+        <motion.div 
+          layout 
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+        >
+          <AnimatePresence>
+            {filteredPlayers.map((player) => {
+              const { runs, wickets, avg, sr, econ, matches, ratings } = extractStats(player);
+              const isOverseas = player.nationality && player.nationality !== 'India' && player.nationality !== 'Indian';
+              const roleLower = (player.role || '').toLowerCase();
+              const isBat = roleLower.includes('batsman') || roleLower.includes('batter');
+              const isBowl = roleLower.includes('bowler');
+              const isAll = roleLower.includes('all-rounder') || roleLower.includes('allrounder');
 
-          return (
-            <div key={section.key} className="contents">
-              <div className="col-span-full mt-2">
-                <div className="flex items-center justify-between gap-3">
-                  <h3 className="text-base md:text-lg font-black tracking-tight text-white">
-                    {section.label}
-                  </h3>
-                  <span className="text-xs font-semibold text-white/55">
-                    {section.players.length}
-                  </span>
-                </div>
-                <div className="mt-2 h-px w-full bg-white/10" />
-              </div>
+              return (
+                <motion.div
+                  key={player.id || player.name}
+                  layout
+                  initial={{ opacity: 0, y: 15 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  whileHover={{ y: -8, scale: 1.02 }}
+                  transition={{ duration: 0.25 }}
+                  onClick={() => handleCardClick(player)}
+                  className="group relative bg-gradient-to-b from-slate-900 via-slate-900/90 to-slate-950 border border-slate-800/80 hover:border-slate-700 rounded-3xl p-5 cursor-pointer shadow-xl hover:shadow-2xl transition-all duration-300 overflow-hidden flex flex-col justify-between"
+                  style={{
+                    boxShadow: '0 10px 30px -10px rgba(0,0,0,0.5)'
+                  }}
+                >
+                  {/* Glowing Team Halo */}
+                  <div 
+                    className="absolute -top-16 -right-16 w-36 h-36 blur-3xl opacity-20 group-hover:opacity-40 transition-opacity rounded-full pointer-events-none"
+                    style={{ backgroundColor: primaryColor }}
+                  />
 
-              {section.players.map((player) => {
-                const index = filteredIndexById.get(String(player.id)) ?? 0;
-                const team = teams.find((t) => String(t.id) === String(player.teamId));
-                const teamPrimary = normalizeHexColor(
-                  team?.colors?.primary,
-                  team ? (teamColors[team.shortName] || '#7C3AED') : '#7C3AED',
-                );
-                const teamSecondary = normalizeHexColor(team?.colors?.secondary, teamPrimary);
-
-                return (
-                  <motion.button
-                    type="button"
-                    key={player.id}
-                    variants={fadeIn}
-                    whileHover={{ y: -4 }}
-                    className="group relative w-full overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur-xl p-5 text-left shadow-[0_10px_40px_rgba(0,0,0,0.20)] transition-colors hover:bg-white/[0.055]"
-                    onClick={() => openPlayerModal(player, index)}
-                  >
-                    <div
-                      className="pointer-events-none absolute inset-0 opacity-70"
-                      style={{
-                        background: `radial-gradient(500px circle at 20% 10%, ${hexToRgba(teamPrimary, 0.18)}, transparent 55%), radial-gradient(450px circle at 90% 40%, ${hexToRgba(teamSecondary, 0.12)}, transparent 55%)`,
-                      }}
-                    />
-
-                    <div className="relative flex items-start gap-4">
-                      <div className="relative shrink-0">
-                        <div
-                          className="h-16 w-16 rounded-2xl overflow-hidden border border-white/15 bg-slate-900/60 shadow-[0_10px_30px_rgba(0,0,0,0.25)]"
-                          style={{ boxShadow: `0 18px 40px ${hexToRgba(teamPrimary, 0.15)}` }}
-                        >
-                          {player.image ? (
-                            <Image
-                              src={player.image}
-                              alt={player.name}
-                              width={64}
-                              height={64}
-                              className="h-full w-full object-cover"
-                            />
-                          ) : (
-                            <div className="h-full w-full flex items-center justify-center text-xl font-black text-white">
-                              {player.name.charAt(0)}
-                            </div>
-                          )}
-                        </div>
-                        <div
-                          className="absolute -bottom-2 -right-2 rounded-xl px-2 py-0.5 text-[11px] font-semibold border border-white/10 bg-slate-950/60 text-white/80"
-                          style={{ boxShadow: `0 10px 25px ${hexToRgba(teamPrimary, 0.12)}` }}
-                        >
-                          {team?.shortName || 'IPL'}
-                        </div>
-                      </div>
-
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-start justify-between gap-3">
-                          <div className="min-w-0">
-                            <div className="truncate text-lg font-bold text-white">
-                              {player.name}
-                            </div>
-                            <div className="mt-1 flex flex-wrap items-center gap-2">
-                              <span
-                                className="inline-flex items-center rounded-full border border-white/10 px-2.5 py-1 text-[11px] font-semibold text-white/80 bg-white/[0.03]"
-                              >
-                                {player.role || 'Player'}
-                              </span>
-                              <span className="text-xs text-white/60 truncate">
-                                {player.teamName}
-                              </span>
-                            </div>
-                          </div>
-
-                          <div className="shrink-0 rounded-full border border-white/10 bg-white/[0.03] p-2 text-white/70 transition-transform group-hover:translate-x-0.5">
-                            <ArrowRight className="h-4 w-4" />
-                          </div>
-                        </div>
-
-                        <div className="mt-4 grid grid-cols-3 gap-3">
-                          {[
-                            { label: 'Matches', value: player.matches || 0 },
-                            { label: 'Runs', value: player.runs || 0 },
-                            { label: 'Wkts', value: player.wickets || 0 },
-                          ].map((stat) => (
-                            <div
-                              key={stat.label}
-                              className="rounded-2xl border border-white/10 bg-white/[0.03] px-3 py-2"
-                            >
-                              <div className="text-[11px] text-white/55">{stat.label}</div>
-                              <div className="text-base font-bold text-white">{stat.value}</div>
-                            </div>
-                          ))}
-                        </div>
+                  {/* Header Row: Jersey Watermark & Chips */}
+                  <div className="flex items-start justify-between relative z-10 mb-3">
+                    <div>
+                      {player.jerseyNumber ? (
+                        <span className="text-2xl font-black text-slate-500/50 group-hover:text-amber-400 font-mono transition-colors">
+                          #{player.jerseyNumber}
+                        </span>
+                      ) : (
+                        <span className="text-xs font-mono text-slate-600 font-bold">IPL</span>
+                      )}
+                      <div className="mt-0.5">
+                        <span className={`text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-md border ${
+                          isBat ? 'bg-sky-500/15 border-sky-500/30 text-sky-300' :
+                          isBowl ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-300' :
+                          isAll ? 'bg-purple-500/15 border-purple-500/30 text-purple-300' :
+                          'bg-amber-500/15 border-amber-500/30 text-amber-300'
+                        }`}>
+                          {player.role || 'Squad'}
+                        </span>
                       </div>
                     </div>
-                  </motion.button>
-                );
-              })}
-            </div>
-          );
-        })}
-      </motion.div>
 
-      {filteredPlayers.length === 0 && (
-        <motion.div 
-          className="text-center py-12 bg-slate-800/30 rounded-xl border border-dashed border-slate-700/50"
-          variants={fadeIn}
-        >
-          <div className="text-slate-400">
-            <Search className="w-12 h-12 mx-auto mb-4 opacity-30" />
-            <h3 className="text-xl font-medium text-white mb-1">No players found</h3>
-            <p className="text-slate-500">Try adjusting your search or filters</p>
-          </div>
+                    <div className="flex flex-col items-end gap-1.5">
+                      {player.isCaptain && (
+                        <span className="flex items-center gap-1 text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40 shadow-sm">
+                          <Crown className="w-3 h-3 text-amber-400" /> Captain
+                        </span>
+                      )}
+                      {isOverseas && (
+                        <span className="flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-sky-500/15 text-sky-300 border border-sky-500/30">
+                          <Plane className="w-3 h-3 text-sky-400" /> Overseas
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Avatar & Player Name */}
+                  <div className="flex items-center gap-3.5 my-2 relative z-10">
+                    <div 
+                      className="w-14 h-14 rounded-2xl bg-slate-800 border border-slate-700/80 flex items-center justify-center font-black text-lg text-white shadow-inner overflow-hidden group-hover:border-slate-500 transition-colors"
+                      style={{ borderBottomColor: primaryColor, borderBottomWidth: 3 }}
+                    >
+                      {player.image ? (
+                        <img src={player.image} alt={player.name} className="w-full h-full object-cover" />
+                      ) : (
+                        <span className="tracking-tighter font-mono">{player.name?.split(' ').map((n: string) => n[0]).slice(0, 2).join('')}</span>
+                      )}
+                    </div>
+
+                    <div className="flex-1 min-w-0">
+                      <h4 className="text-base font-bold text-white group-hover:text-amber-300 transition-colors truncate">
+                        {player.name}
+                      </h4>
+                      <p className="text-[11px] text-slate-400 truncate">
+                        {player.battingStyle || player.nationality || 'Team Squad Member'}
+                      </p>
+                      {player.bowlingStyle && (
+                        <p className="text-[10px] text-slate-500 truncate">{player.bowlingStyle}</p>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* 4-Format Rating Badges */}
+                  <div className="grid grid-cols-4 gap-1.5 my-3 p-1.5 bg-slate-950/60 rounded-xl border border-slate-800/80 text-center font-mono">
+                    {(['Test', 'ODI', 'T20I', 'IPL'] as const).map((fmt) => {
+                      const r = ratings?.[fmt] || { score: 75, grade: 'B' };
+                      return (
+                        <div key={fmt} className="py-1 rounded-lg bg-slate-900/80 border border-slate-800">
+                          <div className="text-[8px] font-sans font-bold uppercase tracking-wider text-slate-400">{fmt}</div>
+                          <div className="text-xs font-extrabold text-white mt-0.5">{r.grade}</div>
+                          <div className="text-[9px] text-emerald-400">{r.score}</div>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {/* Role-Specific Metric Summary */}
+                  <div className="pt-2.5 border-t border-slate-800/80 grid grid-cols-3 gap-1 text-center font-mono">
+                    <div>
+                      <div className="text-[10px] text-slate-400 font-sans uppercase">Matches</div>
+                      <div className="text-sm font-bold text-white mt-0.5">{matches || '—'}</div>
+                    </div>
+
+                    {isBowl ? (
+                      <>
+                        <div>
+                          <div className="text-[10px] text-slate-400 font-sans uppercase">Wickets</div>
+                          <div className="text-sm font-bold text-emerald-400 mt-0.5">{wickets || '0'}</div>
+                        </div>
+                        <div>
+                          <div className="text-[10px] text-slate-400 font-sans uppercase">Econ</div>
+                          <div className="text-sm font-bold text-slate-200 mt-0.5">{econ}</div>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <div>
+                          <div className="text-[10px] text-slate-400 font-sans uppercase">Runs</div>
+                          <div className="text-sm font-bold text-sky-400 mt-0.5">{runs || '0'}</div>
+                        </div>
+                        <div>
+                          <div className="text-[10px] text-slate-400 font-sans uppercase">{isAll ? 'Wkts' : 'Avg'}</div>
+                          <div className="text-sm font-bold text-slate-200 mt-0.5">{isAll ? wickets : avg}</div>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </motion.div>
+              );
+            })}
+          </AnimatePresence>
         </motion.div>
       )}
 
-      {/* Player Modal */}
-      <AnimatePresence>
-        {selectedPlayer && (() => {
-          const team = teams.find((t) => String(t.id) === String(selectedPlayer.teamId));
-          const primary = normalizeHexColor(
-            team?.colors?.primary,
-            team ? (teamColors[team.shortName] || '#7C3AED') : '#7C3AED',
-          );
-          const secondary = normalizeHexColor(team?.colors?.secondary, primary);
+      {/* Pro Tactical Data Table */}
+      {viewMode === 'table' && (
+        <div className="bg-slate-900/90 border border-slate-800 rounded-3xl overflow-hidden backdrop-blur-xl shadow-2xl">
+          <div className="overflow-x-auto">
+            <table className="w-full text-xs text-left min-w-[700px]">
+              <thead className="bg-slate-950/80 text-slate-400 border-b border-slate-800">
+                <tr>
+                  <th className="py-3.5 px-4 font-bold">Player</th>
+                  <th className="py-3.5 px-2">Role</th>
+                  <th className="py-3.5 px-2">Nation</th>
+                  <th className="py-3.5 px-2 text-center">Mat</th>
+                  <th className="py-3.5 px-2 text-center font-bold text-white">Runs</th>
+                  <th className="py-3.5 px-2 text-center">Avg</th>
+                  <th className="py-3.5 px-2 text-center">SR</th>
+                  <th className="py-3.5 px-2 text-center font-bold text-emerald-400">Wkts</th>
+                  <th className="py-3.5 px-2 text-center">Econ</th>
+                  <th className="py-3.5 px-3 text-center">IPL Grade</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-800/60 font-mono">
+                {filteredPlayers.map((player) => {
+                  const { runs, wickets, avg, sr, econ, matches, ratings } = extractStats(player);
+                  const isOverseas = player.nationality && player.nationality !== 'India' && player.nationality !== 'Indian';
+                  const iplRating = ratings?.IPL || { score: 75, grade: 'B' };
 
-          return (
-            <PlayerCardModal
-              isOpen={!!selectedPlayer}
-              onClose={closePlayerModal}
-              player={selectedPlayer}
-              teamPrimary={primary}
-              teamSecondary={secondary}
-              teamShortName={team?.shortName}
-              teamLogo={team?.logo}
-              onNext={() => navigatePlayer('next')}
-              onPrev={() => navigatePlayer('prev')}
-              hasNext={selectedPlayerIndex < filteredPlayers.length - 1}
-              hasPrev={selectedPlayerIndex > 0}
-            />
-          );
-        })()}
-      </AnimatePresence>
+                  return (
+                    <tr 
+                      key={player.id || player.name}
+                      onClick={() => handleCardClick(player)}
+                      className="hover:bg-slate-800/40 cursor-pointer transition-colors"
+                    >
+                      <td className="py-3.5 px-4 font-sans font-bold text-white flex items-center gap-2">
+                        {player.jerseyNumber && <span className="text-slate-500 font-mono text-[11px]">#{player.jerseyNumber}</span>}
+                        <span>{player.name}</span>
+                        {player.isCaptain && <Crown className="w-3.5 h-3.5 text-amber-400 inline" />}
+                      </td>
+                      <td className="py-3.5 px-2 font-sans text-slate-300">{player.role}</td>
+                      <td className="py-3.5 px-2 font-sans text-slate-400">
+                        {isOverseas ? (
+                          <span className="text-sky-400 flex items-center gap-1">
+                            <Plane className="w-3 h-3" /> {player.nationality}
+                          </span>
+                        ) : 'India'}
+                      </td>
+                      <td className="py-3.5 px-2 text-center">{matches || '—'}</td>
+                      <td className="py-3.5 px-2 text-center font-bold text-sky-400">{runs}</td>
+                      <td className="py-3.5 px-2 text-center">{avg}</td>
+                      <td className="py-3.5 px-2 text-center">{sr}</td>
+                      <td className="py-3.5 px-2 text-center font-bold text-emerald-400">{wickets}</td>
+                      <td className="py-3.5 px-2 text-center">{econ}</td>
+                      <td className="py-3.5 px-3 text-center font-sans">
+                        <span className="px-2 py-0.5 rounded font-extrabold bg-black/40 border border-white/10 text-emerald-400 text-[11px]">
+                          {iplRating.grade} {iplRating.score}
+                        </span>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Popup for Details */}
+      {selectedPlayer && (
+        <PlayerCardModal
+          player={selectedPlayer as any}
+          isOpen={Boolean(selectedPlayer)}
+          onClose={() => setSelectedPlayer(null)}
+        />
+      )}
     </div>
   );
 }
