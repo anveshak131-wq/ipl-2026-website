@@ -8,7 +8,7 @@ function normalizeMetricKey(rawMetric: string, isBowling: boolean): string | nul
   const m = rawMetric.toLowerCase().replace(/[^a-z0-9]/g, '');
 
   if (!isBowling) {
-    if (m.startsWith('match')) return 'M';
+    if (m.startsWith('match') || m === 'm') return 'M';
     if (m.startsWith('inn')) return 'Inn';
     if (m.startsWith('notout') || m === 'no') return 'NO';
     if (m.startsWith('run')) return 'Runs';
@@ -22,14 +22,14 @@ function normalizeMetricKey(rawMetric: string, isBowling: boolean): string | nul
     if (m === '4s' || m === 'fours') return '4s';
     if (m === '6s' || m === 'sixes') return '6s';
   } else {
-    if (m.startsWith('match')) return 'M';
+    if (m.startsWith('match') || m === 'm') return 'M';
     if (m.startsWith('inn')) return 'Inn';
     if (m.startsWith('ball') || m === 'b') return 'B';
     if (m.startsWith('run')) return 'Runs';
     if (m.startsWith('wicket') || m === 'wkts') return 'Wkts';
-    if (m.includes('bbi') || m === 'bestbowling') return 'BBI';
+    if (m.includes('bbi') || m === 'bestbowling' || m === 'best') return 'BBI';
     if (m.includes('bbm')) return 'BBM';
-    if (m.startsWith('econ')) return 'Econ';
+    if (m.startsWith('eco')) return 'Econ'; // Handles "Eco" and "Economy"
     if (m.startsWith('avg') || m.startsWith('aver')) return 'Avg';
     if (m.startsWith('strike') || m === 'sr') return 'SR';
     if (m === '5w' || m.includes('five')) return '5W';
@@ -39,30 +39,27 @@ function normalizeMetricKey(rawMetric: string, isBowling: boolean): string | nul
   return null;
 }
 
-function parseTableChunk(chunk: string, isBowling: boolean, targetResult: any) {
+function parseTableFromChunk(tableHtml: string, isBowling: boolean, targetResult: any): number {
   let matchedRows = 0;
 
-  // Extract table headers (formats)
-  const theadMatch = chunk.match(/<thead[^>]*>([\s\S]*?)<\/thead>/i);
+  const theadMatch = tableHtml.match(/<thead[^>]*>([\s\S]*?)<\/thead>/i);
   if (!theadMatch) return 0;
 
   const thMatches = theadMatch[1].match(/<th[^>]*>([\s\S]*?)<\/th>/gi) || [];
   const headerFormats: string[] = [];
 
   for (const th of thMatches) {
-    const txt = cleanText(th);
+    const txt = cleanText(th).toLowerCase();
     if (!txt) continue;
-    const l = txt.toLowerCase();
-    if (l === 'test') headerFormats.push('Test');
-    else if (l === 'odi') headerFormats.push('ODI');
-    else if (l === 't20' || l === 't20i') headerFormats.push('T20I');
-    else if (l === 'ipl') headerFormats.push('IPL');
+    if (txt === 'test') headerFormats.push('Test');
+    else if (txt === 'odi') headerFormats.push('ODI');
+    else if (txt === 't20' || txt === 't20i') headerFormats.push('T20I');
+    else if (txt === 'ipl') headerFormats.push('IPL');
   }
 
   if (headerFormats.length === 0) return 0;
 
-  // Extract table rows (metrics)
-  const tbodyMatch = chunk.match(/<tbody[^>]*>([\s\S]*?)<\/tbody>/i);
+  const tbodyMatch = tableHtml.match(/<tbody[^>]*>([\s\S]*?)<\/tbody>/i);
   if (!tbodyMatch) return 0;
 
   const trMatches = tbodyMatch[1].match(/<tr[^>]*>([\s\S]*?)<\/tr>/gi) || [];
@@ -75,7 +72,6 @@ function parseTableChunk(chunk: string, isBowling: boolean, targetResult: any) {
     const metricKey = normalizeMetricKey(rawMetric, isBowling);
     if (!metricKey) continue;
 
-    // Map each column value to its corresponding format
     headerFormats.forEach((fmt, idx) => {
       const cellVal = cleanText(tdMatches[idx + 1] || '0');
       targetResult[fmt][metricKey] = cellVal;
@@ -93,20 +89,20 @@ function parseCricbuzzCareer(html: string) {
     bowling: { Test: {}, ODI: {}, T20I: {}, IPL: {} },
   };
 
-  const lower = html.toLowerCase();
-  const batIdx = lower.indexOf('batting career summary');
-  const bowlIdx = lower.indexOf('bowling career summary');
-
   let matchedRows = 0;
 
-  if (batIdx !== -1) {
-    const batChunk = bowlIdx > batIdx ? html.slice(batIdx, bowlIdx) : html.slice(batIdx, batIdx + 8000);
-    matchedRows += parseTableChunk(batChunk, false, result.batting);
+  // 1. Locate Batting Table: find occurrence directly followed by a <table>
+  const batRegex = /Batting Career Summary[\s\S]*?(<table[\s\S]*?<\/table>)/i;
+  const batMatch = html.match(batRegex);
+  if (batMatch && batMatch[1]) {
+    matchedRows += parseTableFromChunk(batMatch[1], false, result.batting);
   }
 
-  if (bowlIdx !== -1) {
-    const bowlChunk = html.slice(bowlIdx, bowlIdx + 8000);
-    matchedRows += parseTableChunk(bowlChunk, true, result.bowling);
+  // 2. Locate Bowling Table: find occurrence directly followed by a <table>
+  const bowlRegex = /Bowling Career Summary[\s\S]*?(<table[\s\S]*?<\/table>)/i;
+  const bowlMatch = html.match(bowlRegex);
+  if (bowlMatch && bowlMatch[1]) {
+    matchedRows += parseTableFromChunk(bowlMatch[1], true, result.bowling);
   }
 
   return { result, matchedRows };
@@ -118,11 +114,15 @@ export async function POST(req: Request) {
     const { profileUrl, playerId, playerName } = body || {};
 
     let targetUrl = '';
+    let extractedId = '';
+
     if (profileUrl && profileUrl.includes('cricbuzz.com/profiles/')) {
       targetUrl = profileUrl.trim();
+      extractedId = targetUrl.match(/\/profiles\/(\d+)/)?.[1] || '';
     } else if (playerId && /^\d+$/.test(String(playerId).trim())) {
+      extractedId = String(playerId).trim();
       const slug = (playerName || 'player').toLowerCase().replace(/[^a-z0-9]+/g, '-');
-      targetUrl = `https://www.cricbuzz.com/profiles/${String(playerId).trim()}/${slug}`;
+      targetUrl = `https://www.cricbuzz.com/profiles/${extractedId}/${slug}`;
     }
 
     if (!targetUrl) {
@@ -168,6 +168,7 @@ export async function POST(req: Request) {
       success: true,
       data: result,
       sourceUrl: targetUrl,
+      cricbuzzId: extractedId,
       matchedRows,
     });
   } catch (error: any) {

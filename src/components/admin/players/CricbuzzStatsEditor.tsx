@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
-import { Sparkles, Globe, AlertTriangle, CheckCircle2, RefreshCw } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Sparkles, Globe, AlertTriangle, CheckCircle2, RefreshCw, ExternalLink } from 'lucide-react';
 
 interface CricbuzzStatsEditorProps {
   formData: any;
@@ -9,12 +9,19 @@ interface CricbuzzStatsEditorProps {
 }
 
 export default function CricbuzzStatsEditor({ formData, onChange }: CricbuzzStatsEditorProps) {
-  const [cricbuzzInput, setCricbuzzInput] = useState<string>(
-    formData?.cricbuzzUrl || formData?.cricbuzzId || ''
-  );
+  const initialUrl = formData?.cricbuzzUrl || (formData?.cricbuzzId ? `https://www.cricbuzz.com/profiles/${formData.cricbuzzId}` : '');
+  const [cricbuzzInput, setCricbuzzInput] = useState<string>(initialUrl);
   const [isScraping, setIsScraping] = useState<boolean>(false);
   const [scrapeError, setScrapeError] = useState<string | null>(null);
   const [scrapeSuccess, setScrapeSuccess] = useState<string | null>(null);
+
+  // Sync state if a different player is selected
+  useEffect(() => {
+    const url = formData?.cricbuzzUrl || (formData?.cricbuzzId ? `https://www.cricbuzz.com/profiles/${formData.cricbuzzId}` : '');
+    setCricbuzzInput(url);
+    setScrapeError(null);
+    setScrapeSuccess(null);
+  }, [formData?.id, formData?.cricbuzzUrl, formData?.cricbuzzId]);
 
   const careerStats = formData.careerStats || {
     batting: { Test: {}, ODI: {}, T20I: {}, IPL: {} },
@@ -36,6 +43,19 @@ export default function CricbuzzStatsEditor({ formData, onChange }: CricbuzzStat
       },
     };
     onChange(updated);
+  };
+
+  const handleInputChange = (val: string) => {
+    setCricbuzzInput(val);
+    const cleaned = val.trim();
+    const extractedId = cleaned.match(/\/profiles\/(\d+)/)?.[1] || (/^\d+$/.test(cleaned) ? cleaned : undefined);
+
+    // Save URL and ID to player formData immediately
+    onChange({
+      ...formData,
+      cricbuzzUrl: cleaned.startsWith('http') ? cleaned : (extractedId ? `https://www.cricbuzz.com/profiles/${extractedId}` : formData.cricbuzzUrl),
+      cricbuzzId: extractedId || formData.cricbuzzId,
+    });
   };
 
   const handleSyncCricbuzz = async () => {
@@ -66,7 +86,7 @@ export default function CricbuzzStatsEditor({ formData, onChange }: CricbuzzStat
         throw new Error(data.error || 'Failed to extract data from Cricbuzz.');
       }
 
-      // Merge safely into form data
+      // Merge batting & bowling into careerStats
       const mergedCareerStats = {
         batting: {
           ...(careerStats.batting || {}),
@@ -78,15 +98,18 @@ export default function CricbuzzStatsEditor({ formData, onChange }: CricbuzzStat
         },
       };
 
+      const finalUrl = data.sourceUrl || input;
+      const finalId = data.cricbuzzId || input.match(/\/profiles\/(\d+)/)?.[1] || (/^\d+$/.test(input) ? input : formData.cricbuzzId);
+
       const updated = {
         ...formData,
-        cricbuzzUrl: data.sourceUrl || formData.cricbuzzUrl,
-        cricbuzzId: input.match(/\/profiles\/(\d+)/)?.[1] || (/^\d+$/.test(input) ? input : formData.cricbuzzId),
+        cricbuzzUrl: finalUrl,
+        cricbuzzId: finalId,
         careerStats: mergedCareerStats,
       };
 
       onChange(updated);
-      setScrapeSuccess(`✓ Successfully synced ${data.matchedRows} career rows from Cricbuzz!`);
+      setScrapeSuccess(`✓ Successfully synced Batting & Bowling tables (${data.matchedRows} total rows) and saved Cricbuzz profile link!`);
     } catch (err: any) {
       setScrapeError(err.message || 'Network error while contacting scraper endpoint.');
     } finally {
@@ -137,8 +160,21 @@ export default function CricbuzzStatsEditor({ formData, onChange }: CricbuzzStat
               <Sparkles className="w-4 h-4" />
             </span>
             <div>
-              <h4 className="text-sm font-bold text-white">Live Cricbuzz Auto-Fill</h4>
-              <p className="text-[11px] text-slate-400">Extracts career tables for Test, ODI, T20I, and IPL instantly</p>
+              <h4 className="text-sm font-bold text-white flex items-center gap-2">
+                <span>Live Cricbuzz Auto-Fill</span>
+                {formData?.cricbuzzUrl && (
+                  <a
+                    href={formData.cricbuzzUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-[11px] text-sky-400 hover:text-sky-300 font-normal inline-flex items-center gap-1 underline"
+                  >
+                    <span>View Profile</span>
+                    <ExternalLink className="w-3 h-3" />
+                  </a>
+                )}
+              </h4>
+              <p className="text-[11px] text-slate-400">Extracts and saves career tables for Test, ODI, T20I, and IPL permanently</p>
             </div>
           </div>
           <span className="text-[10px] font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/30 self-start sm:self-auto">
@@ -152,7 +188,7 @@ export default function CricbuzzStatsEditor({ formData, onChange }: CricbuzzStat
             <input
               type="text"
               value={cricbuzzInput}
-              onChange={(e) => setCricbuzzInput(e.target.value)}
+              onChange={(e) => handleInputChange(e.target.value)}
               placeholder="Paste Cricbuzz URL (e.g. https://www.cricbuzz.com/profiles/1413/virat-kohli) or ID (1413)"
               className="w-full pl-9 pr-3 py-2 text-xs bg-slate-950/80 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500 font-mono"
             />
@@ -178,7 +214,6 @@ export default function CricbuzzStatsEditor({ formData, onChange }: CricbuzzStat
           </button>
         </div>
 
-        {/* Status Indicators */}
         {scrapeSuccess && (
           <div className="mt-3 p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs flex items-center gap-2">
             <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
@@ -194,7 +229,7 @@ export default function CricbuzzStatsEditor({ formData, onChange }: CricbuzzStat
         )}
       </div>
 
-      {/* Batting Career Summary Table */}
+      {/* Batting Career Summary */}
       <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 overflow-x-auto">
         <h4 className="text-xs font-bold text-sky-400 uppercase tracking-wider mb-3 flex items-center gap-2">
           <span>🏏</span> Batting Career Summary
@@ -234,7 +269,7 @@ export default function CricbuzzStatsEditor({ formData, onChange }: CricbuzzStat
         </table>
       </div>
 
-      {/* Bowling Career Summary Table */}
+      {/* Bowling Career Summary */}
       <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 overflow-x-auto">
         <h4 className="text-xs font-bold text-teal-400 uppercase tracking-wider mb-3 flex items-center gap-2">
           <span>🎯</span> Bowling Career Summary
