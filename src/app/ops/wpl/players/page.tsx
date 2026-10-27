@@ -5334,7 +5334,7 @@ function AdminPlayersWorkspace() {
                         >
                           <div 
                                 className="flex items-center justify-center w-10 h-10 rounded-xl text-white font-bold text-sm shadow-lg flex-shrink-0"
-                            style={{ backgroundColor: team.colors.primary }}
+                            style={{ backgroundColor: (team?.colors?.primary || team?.primaryColor || "#7e22ce") }}
                             title={team.name}
                           >
                             {team.shortName}
