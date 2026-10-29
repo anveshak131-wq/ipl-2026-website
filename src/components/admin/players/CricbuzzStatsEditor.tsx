@@ -63,7 +63,7 @@ export default function CricbuzzStatsEditor({ formData, onChange }: CricbuzzStat
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({ url: targetUrl, profileId: targetId })
+        body: JSON.stringify({ url: targetUrl, profileId: targetId, playerName: formData?.name || "" })
       });
 
       const payload = await res.json();

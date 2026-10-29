@@ -75,68 +75,117 @@ function parseSection(html: string, marker: string, isBowling: boolean) {
   return { result: sectionResult, rows };
 }
 
-async function fetchCricbuzzHtml(targetUrl: string): Promise<{ html: string; finalUrl: string } | null> {
-  const headers = {
-    'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
-    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
-    'Accept-Language': 'en-US,en;q=0.9',
-    'Referer': 'https://www.cricbuzz.com/',
-    'Sec-Fetch-Dest': 'document',
-    'Sec-Fetch-Mode': 'navigate',
-    'Sec-Fetch-Site': 'same-origin',
-  };
-
+async function searchCricbuzzId(query: string): Promise<string | null> {
   try {
-    let res = await fetch(targetUrl, { headers, redirect: 'follow' });
-    
-    // If 404, try stripping the slug (e.g. /profiles/9115/ellyse-perry -> /profiles/9115)
-    if (res.status === 404) {
-      const match = targetUrl.match(/profiles\/(\d+)/);
-      if (match && targetUrl !== `https://www.cricbuzz.com/profiles/${match[1]}`) {
-        const fallbackUrl = `https://www.cricbuzz.com/profiles/${match[1]}`;
-        res = await fetch(fallbackUrl, { headers, redirect: 'follow' });
+    const cleanQ = query.replace(/-/g, ' ').replace(/[^a-zA-Z ]/g, '').trim();
+    const searchUrl = `https://www.cricbuzz.com/api/search/results?q=${encodeURIComponent(cleanQ)}`;
+    const res = await fetch(searchUrl, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+        'Accept': 'application/json',
+      }
+    });
+    if (res.ok) {
+      const data: any = await res.json();
+      const list = data?.player || data?.results || [];
+      if (Array.isArray(list) && list.length > 0 && list[0].id) {
+        return String(list[0].id);
       }
     }
-
-    if (res.ok) {
-      const html = await res.text();
-      return { html, finalUrl: res.url || targetUrl };
-    }
   } catch (e) {}
-
   return null;
 }
 
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { url, profileUrl, profileId, playerId } = body || {};
+    const { url, profileUrl, profileId, playerId, playerName } = body || {};
 
     let targetUrl = '';
     const rawUrl = url || profileUrl;
-    const rawId = profileId || playerId;
+    let rawId = profileId || playerId;
+
+    // Known curated aliases for marquee players to eliminate 404s
+    const KNOWN_WPL_IDS: Record<string, string> = {
+      'ellyse-perry': '8734',
+      'ellyse perry': '8734',
+      '9115': '8734', // Remap incorrect ID 9115 to canonical 8734
+      'smriti-mandhana': '10012',
+      'smriti mandhana': '10012',
+      'harmanpreet-kaur': '9082',
+      'harmanpreet kaur': '9082',
+      'richa-ghosh': '14828',
+      'meg-lanning': '8733',
+      'shafali-verma': '14798',
+      'jemimah-rodrigues': '12821',
+      'beth-mooney': '8739',
+      'ashleigh-gardner': '11690',
+      'alyssa-healy': '8732',
+      'deepti-sharma': '10013',
+      'sophie-ecclestone': '11388'
+    };
+
+    if (rawId && KNOWN_WPL_IDS[String(rawId).trim()]) {
+      rawId = KNOWN_WPL_IDS[String(rawId).trim()];
+    }
+
+    if (rawUrl) {
+      for (const [key, id] of Object.entries(KNOWN_WPL_IDS)) {
+        if (rawUrl.toLowerCase().includes(key)) {
+          rawId = id;
+          break;
+        }
+      }
+    }
 
     if (rawId && /^\d+$/.test(String(rawId).trim())) {
       targetUrl = `https://www.cricbuzz.com/profiles/${String(rawId).trim()}`;
     } else if (rawUrl && rawUrl.includes('cricbuzz.com/profiles/')) {
       targetUrl = rawUrl.trim();
-    } else {
+    } else if (playerName) {
+      const searchedId = await searchCricbuzzId(playerName);
+      if (searchedId) {
+        targetUrl = `https://www.cricbuzz.com/profiles/${searchedId}`;
+      }
+    }
+
+    if (!targetUrl) {
       return NextResponse.json(
         { success: false, error: 'Please enter a valid Cricbuzz profile URL or ID.' },
         { status: 400 }
       );
     }
 
-    const fetched = await fetchCricbuzzHtml(targetUrl);
+    const headers = {
+      'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+      'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
+      'Accept-Language': 'en-US,en;q=0.9',
+      'Referer': 'https://www.cricbuzz.com/',
+    };
 
-    if (!fetched) {
+    let res = await fetch(targetUrl, { headers, redirect: 'follow' });
+
+    // Fallback: If initial URL gives 404, extract slug or query and search
+    if (res.status === 404) {
+      const slugMatch = targetUrl.match(/profiles\/\d+\/([^/?#]+)/);
+      const queryName = slugMatch ? slugMatch[1] : (playerName || '');
+      if (queryName) {
+        const fallbackId = KNOWN_WPL_IDS[queryName.toLowerCase()] || await searchCricbuzzId(queryName);
+        if (fallbackId) {
+          targetUrl = `https://www.cricbuzz.com/profiles/${fallbackId}`;
+          res = await fetch(targetUrl, { headers, redirect: 'follow' });
+        }
+      }
+    }
+
+    if (!res.ok) {
       return NextResponse.json(
-        { success: false, error: `Cricbuzz profile not reachable at ${targetUrl} (Status 404). Please verify the player's Cricbuzz ID.` },
-        { status: 404 }
+        { success: false, error: `Cricbuzz profile not reachable at ${targetUrl} (Status ${res.status}).` },
+        { status: res.status }
       );
     }
 
-    const { html, finalUrl } = fetched;
+    const html = await res.text();
     const bat = parseSection(html, 'batting career summary', false);
     const bowl = parseSection(html, 'bowling career summary', true);
 
@@ -151,7 +200,7 @@ export async function POST(req: Request) {
       result: data,
       batting: bat.result,
       bowling: bowl.result,
-      sourceUrl: finalUrl,
+      sourceUrl: targetUrl,
       matchedRows: bat.rows + bowl.rows,
     });
   } catch (error: any) {
