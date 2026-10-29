@@ -4275,6 +4275,11 @@ function AdminPlayersWorkspace() {
       careerStats: formData.careerStats || (editingPlayer as any).careerStats || { batting: {}, bowling: {} },
       cricbuzzUrl: formData.cricbuzzUrl || (editingPlayer as any).cricbuzzUrl || '',
       cricbuzzId: formData.cricbuzzId || (editingPlayer as any).cricbuzzId || ''
+    ,
+      careerStats: formData.careerStats || (editingPlayer as any)?.careerStats || { batting: {}, bowling: {} },
+      cricbuzzUrl: formData.cricbuzzUrl || (editingPlayer as any)?.cricbuzzUrl || '',
+      cricbuzzId: formData.cricbuzzId || (editingPlayer as any)?.cricbuzzId || '',
+      bio: formData.bio || (editingPlayer as any)?.bio || {}
     };
         
         const response = await fetch('/api/players', {
