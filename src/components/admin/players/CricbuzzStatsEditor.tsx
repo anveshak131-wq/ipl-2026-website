@@ -10,16 +10,27 @@ interface CricbuzzStatsEditorProps {
 
 function getFormatData(categoryObj: any, fmt: string) {
   if (!categoryObj) return {};
-  if (fmt === 'T20I') return categoryObj['T20I'] || categoryObj['T20'] || {};
-  if (fmt === 'WPL') return categoryObj['WPL'] || categoryObj['WT20'] || categoryObj['IPL'] || {};
-  return categoryObj[fmt] || {};
+  if (fmt === 'T20I') {
+    return categoryObj['T20I'] || categoryObj['T20'] || categoryObj['t20i'] || categoryObj['t20'] || {};
+  }
+  if (fmt === 'WPL') {
+    return categoryObj['WPL'] || categoryObj['wpl'] || categoryObj['WT20'] || categoryObj['wt20'] || categoryObj['IPL'] || {};
+  }
+  if (fmt === 'IPL') {
+    return categoryObj['IPL'] || categoryObj['ipl'] || categoryObj['WPL'] || {};
+  }
+  return categoryObj[fmt] || categoryObj[fmt.toUpperCase()] || categoryObj[fmt.toLowerCase()] || {};
 }
 
 function getMetricVal(row: any, ...keys: string[]) {
   if (!row) return '—';
   for (const k of keys) {
-    if (row[k] !== undefined && row[k] !== null && String(row[k]).trim() !== '') {
+    if (row[k] !== undefined && row[k] !== null && String(row[k]).trim() !== '' && String(row[k]).trim() !== 'undefined') {
       return String(row[k]);
+    }
+    const lower = k.toLowerCase();
+    if (row[lower] !== undefined && row[lower] !== null && String(row[lower]).trim() !== '') {
+      return String(row[lower]);
     }
   }
   return '—';
@@ -183,17 +194,17 @@ export default function CricbuzzStatsEditor({ formData, onChange }: CricbuzzStat
                 return (
                   <tr key={fmt} className="hover:bg-slate-800/30 text-slate-200">
                     <td className="py-2.5 px-3 font-bold text-white">{fmt}</td>
-                    <td className="py-2.5 px-2 text-center">{getMetricVal(row, 'M', 'Matches', 'mat')}</td>
-                    <td className="py-2.5 px-2 text-center">{getMetricVal(row, 'Inn', 'Innings', 'inn')}</td>
-                    <td className="py-2.5 px-2 text-center">{getMetricVal(row, 'NO', 'NotOuts', 'no')}</td>
-                    <td className="py-2.5 px-2 text-center font-semibold text-emerald-400">{getMetricVal(row, 'Runs', 'runs')}</td>
-                    <td className="py-2.5 px-2 text-center">{getMetricVal(row, 'HS', 'Highest', 'hs')}</td>
-                    <td className="py-2.5 px-2 text-center">{getMetricVal(row, 'Avg', 'Average', 'avg')}</td>
-                    <td className="py-2.5 px-2 text-center">{getMetricVal(row, 'BF', 'BallsFaced', 'bf')}</td>
-                    <td className="py-2.5 px-2 text-center">{getMetricVal(row, 'SR', 'StrikeRate', 'sr')}</td>
-                    <td className="py-2.5 px-2 text-center">{getMetricVal(row, '100', '100s', 'hundreds')}</td>
+                    <td className="py-2.5 px-2 text-center">{getMetricVal(row, 'M', 'Matches', 'matches', 'mat')}</td>
+                    <td className="py-2.5 px-2 text-center">{getMetricVal(row, 'Inn', 'Innings', 'innings', 'inn')}</td>
+                    <td className="py-2.5 px-2 text-center">{getMetricVal(row, 'NO', 'NotOut', 'notOut', 'not_out', 'no')}</td>
+                    <td className="py-2.5 px-2 text-center font-semibold text-emerald-400">{getMetricVal(row, 'Runs', 'runs', 'R')}</td>
+                    <td className="py-2.5 px-2 text-center">{getMetricVal(row, 'HS', 'Highest', 'highest', 'hs')}</td>
+                    <td className="py-2.5 px-2 text-center">{getMetricVal(row, 'Avg', 'Average', 'average', 'avg')}</td>
+                    <td className="py-2.5 px-2 text-center">{getMetricVal(row, 'BF', 'Balls', 'balls', 'ballsFaced', 'bf')}</td>
+                    <td className="py-2.5 px-2 text-center">{getMetricVal(row, 'SR', 'StrikeRate', 'strikeRate', 'sr')}</td>
+                    <td className="py-2.5 px-2 text-center">{getMetricVal(row, '100', '100s', 'hundreds', 'Hundreds')}</td>
                     <td className="py-2.5 px-2 text-center">{getMetricVal(row, '200', '200s')}</td>
-                    <td className="py-2.5 px-2 text-center">{getMetricVal(row, '50', '50s', 'fifties')}</td>
+                    <td className="py-2.5 px-2 text-center">{getMetricVal(row, '50', '50s', 'fifties', 'Fifties')}</td>
                     <td className="py-2.5 px-2 text-center">{getMetricVal(row, '4s', 'Fours', 'fours')}</td>
                     <td className="py-2.5 px-2 text-center">{getMetricVal(row, '6s', 'Sixes', 'sixes')}</td>
                   </tr>
@@ -234,18 +245,18 @@ export default function CricbuzzStatsEditor({ formData, onChange }: CricbuzzStat
                 return (
                   <tr key={fmt} className="hover:bg-slate-800/30 text-slate-200">
                     <td className="py-2.5 px-3 font-bold text-white">{fmt}</td>
-                    <td className="py-2.5 px-2 text-center">{getMetricVal(row, 'M', 'Matches', 'mat')}</td>
-                    <td className="py-2.5 px-2 text-center">{getMetricVal(row, 'Inn', 'Innings', 'inn')}</td>
-                    <td className="py-2.5 px-2 text-center">{getMetricVal(row, 'B', 'Balls', 'balls')}</td>
-                    <td className="py-2.5 px-2 text-center">{getMetricVal(row, 'Runs', 'runs')}</td>
-                    <td className="py-2.5 px-2 text-center font-semibold text-cyan-400">{getMetricVal(row, 'Wkts', 'Wickets', 'wkts')}</td>
-                    <td className="py-2.5 px-2 text-center">{getMetricVal(row, 'BBI', 'bbi')}</td>
+                    <td className="py-2.5 px-2 text-center">{getMetricVal(row, 'M', 'Matches', 'matches', 'mat')}</td>
+                    <td className="py-2.5 px-2 text-center">{getMetricVal(row, 'Inn', 'Innings', 'innings', 'inn')}</td>
+                    <td className="py-2.5 px-2 text-center">{getMetricVal(row, 'B', 'Balls', 'balls', 'b')}</td>
+                    <td className="py-2.5 px-2 text-center">{getMetricVal(row, 'Runs', 'runs', 'R')}</td>
+                    <td className="py-2.5 px-2 text-center font-semibold text-cyan-400">{getMetricVal(row, 'Wkts', 'Wickets', 'wickets', 'wkts')}</td>
+                    <td className="py-2.5 px-2 text-center">{getMetricVal(row, 'BBI', 'bbi', 'bestBowling', 'best_bowling')}</td>
                     <td className="py-2.5 px-2 text-center">{getMetricVal(row, 'BBM', 'bbm')}</td>
-                    <td className="py-2.5 px-2 text-center">{getMetricVal(row, 'Econ', 'Economy', 'econ')}</td>
-                    <td className="py-2.5 px-2 text-center">{getMetricVal(row, 'Avg', 'Average', 'avg')}</td>
-                    <td className="py-2.5 px-2 text-center">{getMetricVal(row, 'SR', 'StrikeRate', 'sr')}</td>
-                    <td className="py-2.5 px-2 text-center">{getMetricVal(row, '5W', 'fiveWickets', '5w')}</td>
-                    <td className="py-2.5 px-2 text-center">{getMetricVal(row, '10W', '10w')}</td>
+                    <td className="py-2.5 px-2 text-center">{getMetricVal(row, 'Econ', 'Economy', 'economy', 'eco', 'Eco')}</td>
+                    <td className="py-2.5 px-2 text-center">{getMetricVal(row, 'Avg', 'Average', 'average', 'avg')}</td>
+                    <td className="py-2.5 px-2 text-center">{getMetricVal(row, 'SR', 'StrikeRate', 'strikeRate', 'sr')}</td>
+                    <td className="py-2.5 px-2 text-center">{getMetricVal(row, '5W', '5w', 'fiveWickets', '5wh')}</td>
+                    <td className="py-2.5 px-2 text-center">{getMetricVal(row, '10W', '10w', 'tenWickets', '10wh')}</td>
                   </tr>
                 );
               })}
