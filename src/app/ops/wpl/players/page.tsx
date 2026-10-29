@@ -4015,6 +4015,10 @@ function AdminPlayersWorkspace() {
     const isPredefinedBowlingStyle = existingBowlingStyle && BOWLING_STYLES.includes(existingBowlingStyle);
 
     setFormData({
+      careerStats: (player as any).careerStats || { batting: {}, bowling: {} },
+      cricbuzzUrl: (player as any).cricbuzzUrl || '',
+      cricbuzzId: (player as any).cricbuzzId || '',
+      bio: (player as any).bio || {},
       name: player.name,
       role: player.role,
       allrounderType: player.allrounderType || '',

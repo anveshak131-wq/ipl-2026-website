@@ -75,6 +75,38 @@ function parseSection(html: string, marker: string, isBowling: boolean) {
   return { result: sectionResult, rows };
 }
 
+async function fetchCricbuzzHtml(targetUrl: string): Promise<{ html: string; finalUrl: string } | null> {
+  const headers = {
+    'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
+    'Accept-Language': 'en-US,en;q=0.9',
+    'Referer': 'https://www.cricbuzz.com/',
+    'Sec-Fetch-Dest': 'document',
+    'Sec-Fetch-Mode': 'navigate',
+    'Sec-Fetch-Site': 'same-origin',
+  };
+
+  try {
+    let res = await fetch(targetUrl, { headers, redirect: 'follow' });
+    
+    // If 404, try stripping the slug (e.g. /profiles/9115/ellyse-perry -> /profiles/9115)
+    if (res.status === 404) {
+      const match = targetUrl.match(/profiles\/(\d+)/);
+      if (match && targetUrl !== `https://www.cricbuzz.com/profiles/${match[1]}`) {
+        const fallbackUrl = `https://www.cricbuzz.com/profiles/${match[1]}`;
+        res = await fetch(fallbackUrl, { headers, redirect: 'follow' });
+      }
+    }
+
+    if (res.ok) {
+      const html = await res.text();
+      return { html, finalUrl: res.url || targetUrl };
+    }
+  } catch (e) {}
+
+  return null;
+}
+
 export async function onRequestPost(context: any) {
   try {
     const body = await context.request.json();
@@ -95,28 +127,16 @@ export async function onRequestPost(context: any) {
       );
     }
 
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 9000);
+    const fetched = await fetchCricbuzzHtml(targetUrl);
 
-    const res = await fetch(targetUrl, {
-      signal: controller.signal,
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-        'Accept-Language': 'en-US,en;q=0.9',
-      },
-    });
-
-    clearTimeout(timeout);
-
-    if (!res.ok) {
+    if (!fetched) {
       return Response.json(
-        { success: false, error: `Cricbuzz returned status ${res.status}.` },
-        { status: res.status }
+        { success: false, error: `Cricbuzz profile not reachable at ${targetUrl} (Status 404). Please verify the player's Cricbuzz ID.` },
+        { status: 404 }
       );
     }
 
-    const html = await res.text();
+    const { html, finalUrl } = fetched;
     const bat = parseSection(html, 'batting career summary', false);
     const bowl = parseSection(html, 'bowling career summary', true);
 
@@ -131,18 +151,12 @@ export async function onRequestPost(context: any) {
       result: data,
       batting: bat.result,
       bowling: bowl.result,
-      sourceUrl: targetUrl,
+      sourceUrl: finalUrl,
       matchedRows: bat.rows + bowl.rows,
     });
   } catch (error: any) {
-    const isTimeout = error.name === 'AbortError';
     return Response.json(
-      {
-        success: false,
-        error: isTimeout
-          ? 'Cricbuzz connection timed out after 9 seconds.'
-          : (error.message || 'Scraper encountered an internal error.'),
-      },
+      { success: false, error: error.message || 'Scraper encountered an internal error.' },
       { status: 500 }
     );
   }
