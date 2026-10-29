@@ -4248,6 +4248,9 @@ function AdminPlayersWorkspace() {
       if (editingPlayer) {
         // Update existing player - CRITICAL: Preserve ALL existing fields first, then override with form data
         const updatePayload = {
+        careerStats: formData.careerStats || (editingPlayer as any)?.careerStats || { batting: {}, bowling: {} },
+        cricbuzzUrl: formData.cricbuzzUrl || (editingPlayer as any)?.cricbuzzUrl || '',
+        cricbuzzId: formData.cricbuzzId || (editingPlayer as any)?.cricbuzzId || '',
           ...editingPlayer, // Preserve ALL existing player fields first
           ...playerData,    // Then override with form data
           id: editingPlayer.id, // Ensure ID is always set

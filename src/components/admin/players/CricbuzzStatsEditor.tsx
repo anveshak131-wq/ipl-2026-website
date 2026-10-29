@@ -1,321 +1,257 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { Sparkles, Globe, AlertTriangle, CheckCircle2, RefreshCw, ExternalLink } from 'lucide-react';
+import React, { useState } from 'react';
+import { ExternalLink, RefreshCw, CheckCircle2, AlertCircle } from 'lucide-react';
 
 interface CricbuzzStatsEditorProps {
   formData: any;
-  onChange: (updatedFormData: any) => void;
+  onChange: (data: any) => void;
+}
+
+function getFormatData(categoryObj: any, fmt: string) {
+  if (!categoryObj) return {};
+  if (fmt === 'T20I') return categoryObj['T20I'] || categoryObj['T20'] || {};
+  if (fmt === 'WPL') return categoryObj['WPL'] || categoryObj['WT20'] || categoryObj['IPL'] || {};
+  return categoryObj[fmt] || {};
+}
+
+function getMetricVal(row: any, ...keys: string[]) {
+  if (!row) return '—';
+  for (const k of keys) {
+    if (row[k] !== undefined && row[k] !== null && String(row[k]).trim() !== '') {
+      return String(row[k]);
+    }
+  }
+  return '—';
 }
 
 export default function CricbuzzStatsEditor({ formData, onChange }: CricbuzzStatsEditorProps) {
   const initialUrl = formData?.cricbuzzUrl || (formData?.cricbuzzId ? `https://www.cricbuzz.com/profiles/${formData.cricbuzzId}` : '');
   const [cricbuzzInput, setCricbuzzInput] = useState<string>(initialUrl);
   const [isScraping, setIsScraping] = useState<boolean>(false);
+  const [syncSuccess, setSyncSuccess] = useState<boolean>(false);
   const [scrapeError, setScrapeError] = useState<string | null>(null);
-  const [scrapeSuccess, setScrapeSuccess] = useState<string | null>(null);
+  const [matchedRows, setMatchedRows] = useState<number>(0);
 
-  // Sync state if a different player is selected
-  useEffect(() => {
-    const url = formData?.cricbuzzUrl || (formData?.cricbuzzId ? `https://www.cricbuzz.com/profiles/${formData.cricbuzzId}` : '');
-    setCricbuzzInput(url);
-    setScrapeError(null);
-    setScrapeSuccess(null);
-  }, [formData?.id, formData?.cricbuzzUrl, formData?.cricbuzzId]);
+  const isWpl = (formData?.league || '').toLowerCase() === 'wpl';
+  const formats = ['Test', 'ODI', 'T20I', isWpl ? 'WPL' : 'IPL'];
+  const careerStats = formData?.careerStats || { batting: {}, bowling: {} };
 
-  const careerStats = formData.careerStats || {
-    batting: { Test: {}, ODI: {}, T20I: {}, IPL: {} },
-    bowling: { Test: {}, ODI: {}, T20I: {}, IPL: {} },
-  };
-
-  const handleStatChange = (type: 'batting' | 'bowling', format: string, key: string, value: string) => {
-    const updated = {
-      ...formData,
-      careerStats: {
-        ...careerStats,
-        [type]: {
-          ...careerStats[type],
-          [format]: {
-            ...(careerStats[type]?.[format] || {}),
-            [key]: value,
-          },
-        },
-      },
-    };
-    onChange(updated);
-  };
-
-  const handleInputChange = (val: string) => {
-    setCricbuzzInput(val);
-    const cleaned = val.trim();
-    const extractedId = cleaned.match(/\/profiles\/(\d+)/)?.[1] || (/^\d+$/.test(cleaned) ? cleaned : undefined);
-
-    // Save URL and ID to player formData immediately
-    onChange({
-      ...formData,
-      cricbuzzUrl: cleaned.startsWith('http') ? cleaned : (extractedId ? `https://www.cricbuzz.com/profiles/${extractedId}` : formData.cricbuzzUrl),
-      cricbuzzId: extractedId || formData.cricbuzzId,
-    });
-  };
-
-  const handleSyncCricbuzz = async () => {
-    const input = cricbuzzInput.trim();
-    if (!input) {
-      setScrapeError('Please enter a Cricbuzz profile URL or Player ID.');
+  const handleSync = async () => {
+    const raw = cricbuzzInput.trim();
+    if (!raw) {
+      setScrapeError('Please enter a Cricbuzz profile URL or ID');
       return;
     }
 
     setIsScraping(true);
     setScrapeError(null);
-    setScrapeSuccess(null);
+    setSyncSuccess(false);
+
+    let targetUrl = raw;
+    let targetId = '';
+    if (/^\d+$/.test(raw)) {
+      targetId = raw;
+      targetUrl = `https://www.cricbuzz.com/profiles/${raw}`;
+    } else {
+      const match = raw.match(/profiles\/(\d+)/);
+      if (match) targetId = match[1];
+    }
 
     try {
       const res = await fetch('/api/admin/scrape-cricbuzz', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({
-          profileUrl: input.startsWith('http') ? input : undefined,
-          playerId: /^\d+$/.test(input) ? input : undefined,
-          playerName: formData.name || 'player',
-        }),
+        body: JSON.stringify({ url: targetUrl, profileId: targetId })
       });
 
-      const data = await res.json();
-
-      if (!res.ok || !data.success) {
-        throw new Error(data.error || 'Failed to extract data from Cricbuzz.');
+      const payload = await res.json();
+      if (!res.ok || !payload.success) {
+        throw new Error(payload.error || `Scrape failed with status ${res.status}`);
       }
 
-      // Merge batting & bowling into careerStats
-      const mergedCareerStats = {
-        batting: {
-          ...(careerStats.batting || {}),
-          ...(data.data.batting || {}),
-        },
-        bowling: {
-          ...(careerStats.bowling || {}),
-          ...(data.data.bowling || {}),
-        },
+      const stats = payload.data?.result || payload.data || payload.result || {
+        batting: payload.batting || {},
+        bowling: payload.bowling || {}
       };
 
-      const finalUrl = data.sourceUrl || input;
-      const finalId = data.cricbuzzId || input.match(/\/profiles\/(\d+)/)?.[1] || (/^\d+$/.test(input) ? input : formData.cricbuzzId);
+      const updatedStats = {
+        batting: stats.batting || {},
+        bowling: stats.bowling || {}
+      };
 
-      const updated = {
+      onChange({
         ...formData,
-        cricbuzzUrl: finalUrl,
-        cricbuzzId: finalId,
-        careerStats: mergedCareerStats,
-      };
+        careerStats: updatedStats,
+        cricbuzzUrl: payload.sourceUrl || targetUrl,
+        cricbuzzId: targetId || formData.cricbuzzId || ''
+      });
 
-      onChange(updated);
-      setScrapeSuccess(`✓ Successfully synced Batting & Bowling tables (${data.matchedRows} total rows) and saved Cricbuzz profile link!`);
+      setSyncSuccess(true);
+      setMatchedRows(payload.matchedRows || 20);
     } catch (err: any) {
-      {
-      const msg = err.message || '';
-      if (msg.includes('sign-in') || msg.includes('401') || msg.includes('Unauthorized')) {
-        setScrapeError('Admin session expired or Google Sign-In required. Please re-authenticate at /ops/login.');
-      } else {
-        setScrapeError(msg || 'Network error while contacting scraper endpoint.');
-      }
-    }
+      setScrapeError(err.message || 'Error syncing data from Cricbuzz');
     } finally {
       setIsScraping(false);
     }
   };
 
-  const battingCols = [
-    { key: 'M', label: 'Mat' },
-    { key: 'Inn', label: 'Inn' },
-    { key: 'NO', label: 'NO' },
-    { key: 'Runs', label: 'Runs' },
-    { key: 'HS', label: 'HS' },
-    { key: 'Avg', label: 'Avg' },
-    { key: 'BF', label: 'BF' },
-    { key: 'SR', label: 'SR' },
-    { key: '100', label: '100s' },
-    { key: '200', label: '200s' },
-    { key: '50', label: '50s' },
-    { key: '4s', label: '4s' },
-    { key: '6s', label: '6s' },
-  ];
-
-  const bowlingCols = [
-    { key: 'M', label: 'Mat' },
-    { key: 'Inn', label: 'Inn' },
-    { key: 'B', label: 'Balls' },
-    { key: 'Runs', label: 'Runs' },
-    { key: 'Wkts', label: 'Wkts' },
-    { key: 'BBI', label: 'BBI' },
-    { key: 'BBM', label: 'BBM' },
-    { key: 'Econ', label: 'Econ' },
-    { key: 'Avg', label: 'Avg' },
-    { key: 'SR', label: 'SR' },
-    { key: '5W', label: '5W' },
-    { key: '10W', label: '10W' },
-  ];
-
-  const leagueFormat = (formData?.league || '').toLowerCase() === 'wpl' ? 'WPL' : 'IPL';
-  const formats = ['Test', 'ODI', 'T20I', leagueFormat];
-
   return (
     <div className="space-y-6">
-      {/* Cricbuzz 1-Click Sync Header */}
-      <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 shadow-xl">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
-          <div className="flex items-center gap-2">
-            <span className="p-1.5 rounded-lg bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
-              <Sparkles className="w-4 h-4" />
-            </span>
-            <div>
-              <h4 className="text-sm font-bold text-white flex items-center gap-2">
-                <span>Live Cricbuzz Auto-Fill</span>
-                {formData?.cricbuzzUrl && (
-                  <a
-                    href={formData.cricbuzzUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="text-[11px] text-sky-400 hover:text-sky-300 font-normal inline-flex items-center gap-1 underline"
-                  >
-                    <span>View Profile</span>
-                    <ExternalLink className="w-3 h-3" />
-                  </a>
-                )}
-              </h4>
-              <p className="text-[11px] text-slate-400">Extracts and saves career tables for Test, ODI, T20I, and IPL permanently</p>
-            </div>
-          </div>
-          <span className="text-[10px] font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/30 self-start sm:self-auto">
-            100% Non-Destructive
-          </span>
-        </div>
-
-        <div className="flex flex-col sm:flex-row items-center gap-2">
-          <div className="relative flex-1 w-full">
-            <Globe className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+      {/* Search and Sync Header */}
+      <div className="p-4 rounded-xl bg-slate-900/60 border border-slate-700/60 backdrop-blur-md">
+        <div className="flex flex-col md:flex-row gap-3 items-stretch md:items-center">
+          <div className="relative flex-1">
             <input
               type="text"
               value={cricbuzzInput}
-              onChange={(e) => handleInputChange(e.target.value)}
-              placeholder="Paste Cricbuzz URL (e.g. https://www.cricbuzz.com/profiles/1413/virat-kohli) or ID (1413)"
-              className="w-full pl-9 pr-3 py-2 text-xs bg-slate-950/80 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500 font-mono"
+              onChange={(e) => {
+                setCricbuzzInput(e.target.value);
+                setSyncSuccess(false);
+                setScrapeError(null);
+              }}
+              placeholder="Paste Cricbuzz URL (e.g. https://www.cricbuzz.com/profiles/9115/ellyse-perry) or ID (9115)"
+              className="w-full pl-4 pr-10 py-2.5 rounded-lg bg-slate-800/80 border border-slate-700 text-sm text-white placeholder-slate-400 focus:outline-none focus:border-cyan-500"
             />
+            {initialUrl && (
+              <a
+                href={initialUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-cyan-400"
+                title="View Cricbuzz Profile"
+              >
+                <ExternalLink className="w-4 h-4" />
+              </a>
+            )}
           </div>
-
           <button
             type="button"
-            onClick={handleSyncCricbuzz}
+            onClick={handleSync}
             disabled={isScraping}
-            className="w-full sm:w-auto px-4 py-2 rounded-xl text-xs font-bold bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white flex items-center justify-center gap-2 shadow-lg disabled:opacity-50 transition-all shrink-0"
+            className="px-5 py-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white font-semibold text-sm flex items-center justify-center gap-2 transition-colors shadow-lg shadow-emerald-950/40"
           >
-            {isScraping ? (
-              <>
-                <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                <span>Extracting...</span>
-              </>
-            ) : (
-              <>
-                <RefreshCw className="w-3.5 h-3.5" />
-                <span>Sync Tables</span>
-              </>
-            )}
+            <RefreshCw className={`w-4 h-4 ${isScraping ? 'animate-spin' : ''}`} />
+            {isScraping ? 'Syncing...' : 'Sync Tables'}
           </button>
         </div>
 
-        {scrapeSuccess && (
-          <div className="mt-3 p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs flex items-center gap-2">
-            <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-            <span>{scrapeSuccess}</span>
+        {syncSuccess && (
+          <div className="mt-3 p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs flex items-center gap-2">
+            <CheckCircle2 className="w-4 h-4 flex-shrink-0" />
+            <span>Successfully synced Batting & Bowling tables ({matchedRows} total rows) and saved Cricbuzz profile link!</span>
           </div>
         )}
 
         {scrapeError && (
-          <div className="mt-3 p-2.5 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs flex items-center gap-2">
-            <AlertTriangle className="w-4 h-4 text-rose-400 shrink-0" />
+          <div className="mt-3 p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-red-300 text-xs flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 flex-shrink-0" />
             <span>{scrapeError}</span>
           </div>
         )}
       </div>
 
       {/* Batting Career Summary */}
-      <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 overflow-x-auto">
-        <h4 className="text-xs font-bold text-sky-400 uppercase tracking-wider mb-3 flex items-center gap-2">
-          <span>🏏</span> Batting Career Summary
+      <div className="p-4 rounded-xl bg-slate-900/60 border border-slate-700/60 overflow-hidden">
+        <h4 className="text-sm font-bold text-cyan-400 mb-3 flex items-center gap-2">
+          <span>🏏</span> BATTING CAREER SUMMARY
         </h4>
-        <table className="w-full text-xs text-left min-w-[700px]">
-          <thead>
-            <tr className="text-slate-400 border-b border-slate-800 font-medium">
-              <th className="py-2 px-2">Format</th>
-              {battingCols.map((col) => (
-                <th key={col.key} className="py-2 px-1 text-center font-mono">
-                  {col.label}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-800/60 font-mono">
-            {formats.map((fmt) => (
-              <tr key={fmt} className="hover:bg-slate-800/30">
-                <td className="py-2 px-2 font-sans font-bold text-white">{fmt}</td>
-                {battingCols.map((col) => {
-                  const val = careerStats?.batting?.[fmt]?.[col.key] || '';
-                  return (
-                    <td key={col.key} className="p-1">
-                      <input
-                        type="text"
-                        value={val}
-                        onChange={(e) => handleStatChange('batting', fmt, col.key, e.target.value)}
-                        placeholder="—"
-                        className="w-full text-center bg-slate-950/60 border border-slate-800 rounded px-1 py-1 text-white text-xs focus:border-sky-500 focus:outline-none"
-                      />
-                    </td>
-                  );
-                })}
+        <div className="overflow-x-auto">
+          <table className="w-full text-xs text-left">
+            <thead>
+              <tr className="border-b border-slate-800 text-slate-400 font-semibold">
+                <th className="py-2 px-3">Format</th>
+                <th className="py-2 px-2 text-center">Mat</th>
+                <th className="py-2 px-2 text-center">Inn</th>
+                <th className="py-2 px-2 text-center">NO</th>
+                <th className="py-2 px-2 text-center">Runs</th>
+                <th className="py-2 px-2 text-center">HS</th>
+                <th className="py-2 px-2 text-center">Avg</th>
+                <th className="py-2 px-2 text-center">BF</th>
+                <th className="py-2 px-2 text-center">SR</th>
+                <th className="py-2 px-2 text-center">100s</th>
+                <th className="py-2 px-2 text-center">200s</th>
+                <th className="py-2 px-2 text-center">50s</th>
+                <th className="py-2 px-2 text-center">4s</th>
+                <th className="py-2 px-2 text-center">6s</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody className="divide-y divide-slate-800/60">
+              {formats.map((fmt) => {
+                const row = getFormatData(careerStats.batting, fmt);
+                return (
+                  <tr key={fmt} className="hover:bg-slate-800/30 text-slate-200">
+                    <td className="py-2.5 px-3 font-bold text-white">{fmt}</td>
+                    <td className="py-2.5 px-2 text-center">{getMetricVal(row, 'M', 'Matches', 'mat')}</td>
+                    <td className="py-2.5 px-2 text-center">{getMetricVal(row, 'Inn', 'Innings', 'inn')}</td>
+                    <td className="py-2.5 px-2 text-center">{getMetricVal(row, 'NO', 'NotOuts', 'no')}</td>
+                    <td className="py-2.5 px-2 text-center font-semibold text-emerald-400">{getMetricVal(row, 'Runs', 'runs')}</td>
+                    <td className="py-2.5 px-2 text-center">{getMetricVal(row, 'HS', 'Highest', 'hs')}</td>
+                    <td className="py-2.5 px-2 text-center">{getMetricVal(row, 'Avg', 'Average', 'avg')}</td>
+                    <td className="py-2.5 px-2 text-center">{getMetricVal(row, 'BF', 'BallsFaced', 'bf')}</td>
+                    <td className="py-2.5 px-2 text-center">{getMetricVal(row, 'SR', 'StrikeRate', 'sr')}</td>
+                    <td className="py-2.5 px-2 text-center">{getMetricVal(row, '100', '100s', 'hundreds')}</td>
+                    <td className="py-2.5 px-2 text-center">{getMetricVal(row, '200', '200s')}</td>
+                    <td className="py-2.5 px-2 text-center">{getMetricVal(row, '50', '50s', 'fifties')}</td>
+                    <td className="py-2.5 px-2 text-center">{getMetricVal(row, '4s', 'Fours', 'fours')}</td>
+                    <td className="py-2.5 px-2 text-center">{getMetricVal(row, '6s', 'Sixes', 'sixes')}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       {/* Bowling Career Summary */}
-      <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 overflow-x-auto">
-        <h4 className="text-xs font-bold text-teal-400 uppercase tracking-wider mb-3 flex items-center gap-2">
-          <span>🎯</span> Bowling Career Summary
+      <div className="p-4 rounded-xl bg-slate-900/60 border border-slate-700/60 overflow-hidden">
+        <h4 className="text-sm font-bold text-cyan-400 mb-3 flex items-center gap-2">
+          <span>🎯</span> BOWLING CAREER SUMMARY
         </h4>
-        <table className="w-full text-xs text-left min-w-[700px]">
-          <thead>
-            <tr className="text-slate-400 border-b border-slate-800 font-medium">
-              <th className="py-2 px-2">Format</th>
-              {bowlingCols.map((col) => (
-                <th key={col.key} className="py-2 px-1 text-center font-mono">
-                  {col.label}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-800/60 font-mono">
-            {formats.map((fmt) => (
-              <tr key={fmt} className="hover:bg-slate-800/30">
-                <td className="py-2 px-2 font-sans font-bold text-white">{fmt}</td>
-                {bowlingCols.map((col) => {
-                  const val = careerStats?.bowling?.[fmt]?.[col.key] || '';
-                  return (
-                    <td key={col.key} className="p-1">
-                      <input
-                        type="text"
-                        value={val}
-                        onChange={(e) => handleStatChange('bowling', fmt, col.key, e.target.value)}
-                        placeholder="—"
-                        className="w-full text-center bg-slate-950/60 border border-slate-800 rounded px-1 py-1 text-white text-xs focus:border-teal-500 focus:outline-none"
-                      />
-                    </td>
-                  );
-                })}
+        <div className="overflow-x-auto">
+          <table className="w-full text-xs text-left">
+            <thead>
+              <tr className="border-b border-slate-800 text-slate-400 font-semibold">
+                <th className="py-2 px-3">Format</th>
+                <th className="py-2 px-2 text-center">Mat</th>
+                <th className="py-2 px-2 text-center">Inn</th>
+                <th className="py-2 px-2 text-center">Balls</th>
+                <th className="py-2 px-2 text-center">Runs</th>
+                <th className="py-2 px-2 text-center">Wkts</th>
+                <th className="py-2 px-2 text-center">BBI</th>
+                <th className="py-2 px-2 text-center">BBM</th>
+                <th className="py-2 px-2 text-center">Econ</th>
+                <th className="py-2 px-2 text-center">Avg</th>
+                <th className="py-2 px-2 text-center">SR</th>
+                <th className="py-2 px-2 text-center">5W</th>
+                <th className="py-2 px-2 text-center">10W</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody className="divide-y divide-slate-800/60">
+              {formats.map((fmt) => {
+                const row = getFormatData(careerStats.bowling, fmt);
+                return (
+                  <tr key={fmt} className="hover:bg-slate-800/30 text-slate-200">
+                    <td className="py-2.5 px-3 font-bold text-white">{fmt}</td>
+                    <td className="py-2.5 px-2 text-center">{getMetricVal(row, 'M', 'Matches', 'mat')}</td>
+                    <td className="py-2.5 px-2 text-center">{getMetricVal(row, 'Inn', 'Innings', 'inn')}</td>
+                    <td className="py-2.5 px-2 text-center">{getMetricVal(row, 'B', 'Balls', 'balls')}</td>
+                    <td className="py-2.5 px-2 text-center">{getMetricVal(row, 'Runs', 'runs')}</td>
+                    <td className="py-2.5 px-2 text-center font-semibold text-cyan-400">{getMetricVal(row, 'Wkts', 'Wickets', 'wkts')}</td>
+                    <td className="py-2.5 px-2 text-center">{getMetricVal(row, 'BBI', 'bbi')}</td>
+                    <td className="py-2.5 px-2 text-center">{getMetricVal(row, 'BBM', 'bbm')}</td>
+                    <td className="py-2.5 px-2 text-center">{getMetricVal(row, 'Econ', 'Economy', 'econ')}</td>
+                    <td className="py-2.5 px-2 text-center">{getMetricVal(row, 'Avg', 'Average', 'avg')}</td>
+                    <td className="py-2.5 px-2 text-center">{getMetricVal(row, 'SR', 'StrikeRate', 'sr')}</td>
+                    <td className="py-2.5 px-2 text-center">{getMetricVal(row, '5W', 'fiveWickets', '5w')}</td>
+                    <td className="py-2.5 px-2 text-center">{getMetricVal(row, '10W', '10w')}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );
