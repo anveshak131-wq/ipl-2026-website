@@ -1,104 +1,92 @@
+
+
+
+
 function cleanText(text: string): string {
   return text.replace(/<[^>]+>/g, '').replace(/&nbsp;/g, ' ').trim();
 }
 
-function normalizeMetricKey(rawMetric: string, isBowling: boolean): string | null {
-  const m = rawMetric.toLowerCase().replace(/[^a-z0-9]/g, '');
-
-  if (!isBowling) {
-    if (m.startsWith('match') || m === 'm') return 'M';
-    if (m.startsWith('inn')) return 'Inn';
-    if (m.startsWith('notout') || m === 'no') return 'NO';
-    if (m.startsWith('run')) return 'Runs';
-    if (m.startsWith('high') || m === 'hs') return 'HS';
-    if (m.startsWith('avg') || m.startsWith('aver')) return 'Avg';
-    if (m.startsWith('ball') || m === 'bf') return 'BF';
-    if (m.startsWith('strike') || m === 'sr') return 'SR';
-    if (m === '100' || m === '100s' || m === 'hundreds') return '100';
-    if (m === '200' || m === '200s') return '200';
-    if (m === '50' || m === '50s' || m === 'fifties') return '50';
-    if (m === '4s' || m === 'fours') return '4s';
-    if (m === '6s' || m === 'sixes') return '6s';
-  } else {
-    if (m.startsWith('match') || m === 'm') return 'M';
-    if (m.startsWith('inn')) return 'Inn';
-    if (m.startsWith('ball') || m === 'b') return 'B';
-    if (m.startsWith('run')) return 'Runs';
-    if (m.startsWith('wicket') || m === 'wkts') return 'Wkts';
-    if (m.includes('bbi') || m === 'bestbowling' || m === 'best') return 'BBI';
-    if (m.includes('bbm')) return 'BBM';
-    if (m.startsWith('eco')) return 'Econ';
-    if (m.startsWith('avg') || m.startsWith('aver')) return 'Avg';
-    if (m.startsWith('strike') || m === 'sr') return 'SR';
-    if (m === '5w' || m.includes('five')) return '5W';
-    if (m === '10w' || m.includes('ten')) return '10W';
-  }
-
-  return null;
-}
-
-function parseTableFromChunk(tableHtml: string, isBowling: boolean, targetResult: any): number {
-  let matchedRows = 0;
-
-  const theadMatch = tableHtml.match(/<thead[^>]*>([\s\S]*?)<\/thead>/i);
-  if (!theadMatch) return 0;
-
-  const thMatches = theadMatch[1].match(/<th[^>]*>([\s\S]*?)<\/th>/gi) || [];
-  const headerFormats: string[] = [];
-
-  for (const th of thMatches) {
-    const txt = cleanText(th).toLowerCase();
-    if (!txt) continue;
-    if (txt === 'test') headerFormats.push('Test');
-    else if (txt === 'odi') headerFormats.push('ODI');
-    else if (txt === 't20' || txt === 't20i') headerFormats.push('T20I');
-    else if (txt === 'ipl') headerFormats.push('IPL');
-  }
-
-  if (headerFormats.length === 0) return 0;
-
-  const tbodyMatch = tableHtml.match(/<tbody[^>]*>([\s\S]*?)<\/tbody>/i);
-  if (!tbodyMatch) return 0;
-
-  const trMatches = tbodyMatch[1].match(/<tr[^>]*>([\s\S]*?)<\/tr>/gi) || [];
-
-  for (const tr of trMatches) {
-    const tdMatches = tr.match(/<td[^>]*>([\s\S]*?)<\/td>/gi) || [];
-    if (tdMatches.length < headerFormats.length + 1) continue;
-
-    const rawMetric = cleanText(tdMatches[0]);
-    const metricKey = normalizeMetricKey(rawMetric, isBowling);
-    if (!metricKey) continue;
-
-    headerFormats.forEach((fmt, idx) => {
-      const cellVal = cleanText(tdMatches[idx + 1] || '0');
-      targetResult[fmt][metricKey] = cellVal;
-    });
-
-    matchedRows++;
-  }
-
-  return matchedRows;
-}
-
 function parseCricbuzzCareer(html: string) {
-  const result: any = {
-    batting: { Test: {}, ODI: {}, T20I: {}, IPL: {} },
-    bowling: { Test: {}, ODI: {}, T20I: {}, IPL: {} },
+  const result: Record<string, Record<string, Record<string, string>>> = {
+    batting: { Test: {}, ODI: {}, T20I: {}, WPL: {}, IPL: {} },
+    bowling: { Test: {}, ODI: {}, T20I: {}, WPL: {}, IPL: {} },
   };
 
+  const sections = [
+    { type: 'batting', marker: 'batting career summary' },
+    { type: 'bowling', marker: 'bowling career summary' }
+  ];
+
   let matchedRows = 0;
 
-  const batRegex = /Batting Career Summary[\s\S]*?(<table[\s\S]*?<\/table>)/i;
-  const batMatch = html.match(batRegex);
-  if (batMatch && batMatch[1]) {
-    matchedRows += parseTableFromChunk(batMatch[1], false, result.batting);
-  }
+  for (const sec of sections) {
+    const idx = html.toLowerCase().indexOf(sec.marker);
+    if (idx === -1) continue;
 
-  const bowlRegex = /Bowling Career Summary[\s\S]*?(<table[\s\S]*?<\/table>)/i;
-  const bowlMatch = html.match(bowlRegex);
-  if (bowlMatch && bowlMatch[1]) {
-    matchedRows += parseTableFromChunk(bowlMatch[1], true, result.bowling);
+    const chunk = html.slice(idx, idx + 8000);
+    const tableMatch = chunk.match(/<table[\s\S]*?<\/table>/i);
+    if (!tableMatch) continue;
+
+    const tableHtml = tableMatch[0];
+    const theadMatch = tableHtml.match(/<thead[^>]*>([\s\S]*?)<\/thead>/i);
+    if (!theadMatch) continue;
+
+    const ths = theadMatch[1].match(/<th[^>]*>([\s\S]*?)<\/th>/gi) || [];
+    const formats: string[] = [];
+
+    // Header formats mapping
+    for (const th of ths) {
+      const raw = cleanText(th).toLowerCase().replace(/[^a-z0-9]/g, '');
+      if (raw === 'test') formats.push('Test');
+      else if (raw === 'odi') formats.push('ODI');
+      else if (raw === 't20' || raw === 't20i') formats.push('T20I');
+      else if (raw === 'wpl' || raw === 'wt20' || raw === 'wbbl') formats.push('WPL');
+      else if (raw === 'ipl') formats.push('IPL');
+      else formats.push(cleanText(th));
+    }
+
+    const tbodyMatch = tableHtml.match(/<tbody[^>]*>([\s\S]*?)<\/tbody>/i);
+    if (!tbodyMatch) continue;
+
+    const trs = tbodyMatch[1].match(/<tr[^>]*>([\s\S]*?)<\/tr>/gi) || [];
+    for (const tr of trs) {
+      const tds = tr.match(/<td[^>]*>([\s\S]*?)<\/td>/gi) || [];
+      const values = tds.map(cleanText);
+      if (values.length < 2) continue;
+
+      let metric = values[0];
+      const mNorm = metric.toLowerCase().replace(/[^a-z0-9]/g, '');
+      if (mNorm.startsWith('match') || mNorm === 'm') metric = 'M';
+      else if (mNorm.startsWith('inn')) metric = 'Inn';
+      else if (mNorm.startsWith('notout') || mNorm === 'no') metric = 'NO';
+      else if (mNorm.startsWith('run')) metric = 'Runs';
+      else if (mNorm.startsWith('high') || mNorm === 'hs') metric = 'HS';
+      else if (mNorm.startsWith('avg') || mNorm === 'average') metric = 'Avg';
+      else if (mNorm.startsWith('ball') && sec.type === 'batting') metric = 'BF';
+      else if (mNorm.startsWith('ball') && sec.type === 'bowling') metric = 'B';
+      else if (mNorm.startsWith('sr') || mNorm.startsWith('strike')) metric = 'SR';
+      else if (mNorm === '100' || mNorm === '100s') metric = '100s';
+      else if (mNorm === '200' || mNorm === '200s') metric = '200s';
+      else if (mNorm === '50' || mNorm === '50s') metric = '50s';
+      else if (mNorm === '4s' || mNorm === 'fours') metric = '4s';
+      else if (mNorm === '6s' || mNorm === 'sixes') metric = '6s';
+      else if (mNorm.startsWith('wicket') || mNorm === 'wkts') metric = 'Wkts';
+      else if (mNorm.startsWith('eco')) metric = 'Econ';
+      else if (mNorm === 'bbi') metric = 'BBI';
+      else if (mNorm === 'bbm') metric = 'BBM';
+      else if (mNorm === '5w' || mNorm === '5wh') metric = '5W';
+      else if (mNorm === '10w' || mNorm === '10wh') metric = '10W';
+
+      // Assign column value to format
+      const dataCols = values.slice(1);
+      dataCols.forEach((val, i) => {
+        const fmt = formats[i];
+        if (fmt && result[sec.type][fmt]) {
+          result[sec.type][fmt][metric] = val;
+          matchedRows++;
+        }
+      });
+    }
   }
 
   return { result, matchedRows };
@@ -107,23 +95,19 @@ function parseCricbuzzCareer(html: string) {
 export async function onRequestPost(context: any) {
   try {
     const body = await context.request.json();
-    const { profileUrl, playerId, playerName } = body || {};
+    const { url, profileUrl, profileId, playerId } = body || {};
 
     let targetUrl = '';
-    let extractedId = '';
+    const rawUrl = url || profileUrl;
+    const rawId = profileId || playerId;
 
-    if (profileUrl && profileUrl.includes('cricbuzz.com/profiles/')) {
-      targetUrl = profileUrl.trim();
-      extractedId = targetUrl.match(/\/profiles\/(\d+)/)?.[1] || '';
-    } else if (playerId && /^\d+$/.test(String(playerId).trim())) {
-      extractedId = String(playerId).trim();
-      const slug = (playerName || 'player').toLowerCase().replace(/[^a-z0-9]+/g, '-');
-      targetUrl = `https://www.cricbuzz.com/profiles/${extractedId}/${slug}`;
-    }
-
-    if (!targetUrl) {
+    if (rawId && /^\d+$/.test(String(rawId).trim())) {
+      targetUrl = `https://www.cricbuzz.com/profiles/${String(rawId).trim()}`;
+    } else if (rawUrl && rawUrl.includes('cricbuzz.com/profiles/')) {
+      targetUrl = rawUrl.trim();
+    } else {
       return Response.json(
-        { success: false, error: 'Please enter a valid Cricbuzz profile URL or numeric Player ID.' },
+        { success: false, error: 'Please enter a valid Cricbuzz profile URL or ID.' },
         { status: 400 }
       );
     }
@@ -132,39 +116,30 @@ export async function onRequestPost(context: any) {
     const timeout = setTimeout(() => controller.abort(), 9000);
 
     const res = await fetch(targetUrl, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
-        'Accept-Language': 'en-US,en;q=0.9',
-        'Cache-Control': 'no-cache',
-      },
       signal: controller.signal,
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        'Accept-Language': 'en-US,en;q=0.9',
+      },
     });
 
     clearTimeout(timeout);
 
     if (!res.ok) {
       return Response.json(
-        { success: false, error: `Cricbuzz returned HTTP ${res.status}: ${res.statusText}` },
-        { status: 502 }
+        { success: false, error: `Cricbuzz returned status ${res.status}.` },
+        { status: res.status }
       );
     }
 
     const html = await res.text();
     const { result, matchedRows } = parseCricbuzzCareer(html);
 
-    if (matchedRows === 0) {
-      return Response.json(
-        { success: false, error: 'Could not detect Career Summary tables on this Cricbuzz page. Check URL format.' },
-        { status: 422 }
-      );
-    }
-
     return Response.json({
       success: true,
       data: result,
       sourceUrl: targetUrl,
-      cricbuzzId: extractedId,
       matchedRows,
     });
   } catch (error: any) {
@@ -173,22 +148,10 @@ export async function onRequestPost(context: any) {
       {
         success: false,
         error: isTimeout
-          ? 'Cricbuzz connection timed out after 9 seconds. Existing data was not modified.'
+          ? 'Cricbuzz connection timed out after 9 seconds.'
           : (error.message || 'Scraper encountered an internal error.'),
       },
       { status: 500 }
     );
   }
-}
-
-export async function onRequestOptions() {
-  return new Response(null, {
-    status: 204,
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization, Cookie',
-      'Access-Control-Allow-Credentials': 'true',
-    },
-  });
 }

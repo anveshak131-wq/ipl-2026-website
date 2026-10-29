@@ -1735,6 +1735,9 @@ function AdminPlayersWorkspace() {
         isCaptain: player.isCaptain ?? false,
         battingStyle: player.battingStyle || '',
       careerStats: (player as any).careerStats || { batting: {}, bowling: {} },
+      cricbuzzUrl: (player as any).cricbuzzUrl || '',
+      cricbuzzId: (player as any).cricbuzzId || '',
+      bio: (player as any).bio || {},
         cricbuzzUrl: (player as any).cricbuzzUrl || "",
         cricbuzzId: (player as any).cricbuzzId || "",
         cricbuzzUrl: (player as any).cricbuzzUrl || '',
@@ -4269,7 +4272,10 @@ function AdminPlayersWorkspace() {
             ...editingPlayer.stats, // Preserve ALL existing stats first
             ...statsForPlayer,     // Then override with form stats
           },
-        };
+      careerStats: formData.careerStats || (editingPlayer as any).careerStats || { batting: {}, bowling: {} },
+      cricbuzzUrl: formData.cricbuzzUrl || (editingPlayer as any).cricbuzzUrl || '',
+      cricbuzzId: formData.cricbuzzId || (editingPlayer as any).cricbuzzId || ''
+    };
         
         const response = await fetch('/api/players', {
           method: 'PUT',
