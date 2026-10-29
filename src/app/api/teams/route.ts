@@ -1,3 +1,5 @@
+export const dynamic = 'force-static';
+export const revalidate = false;
 import { NextRequest, NextResponse } from 'next/server';
 
 const WPL_TEAMS = [
@@ -67,7 +69,10 @@ const IPL_TEAMS = [
 ];
 
 export async function GET(req: NextRequest) {
-  const { searchParams } = new URL(req.url);
-  const league = (searchParams.get('league') || 'ipl').toLowerCase();
+  let league = 'ipl';
+  try {
+    const url = new URL(req.url);
+    league = (url.searchParams.get('league') || 'ipl').toLowerCase();
+  } catch (e) {}
   return NextResponse.json(league === 'wpl' ? WPL_TEAMS : IPL_TEAMS);
 }
