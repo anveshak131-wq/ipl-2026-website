@@ -1,0 +1,815 @@
+[
+  {
+    "name": "Smriti Mandhana",
+    "teamId": "14",
+    "role": "Batsman",
+    "isCaptain": true,
+    "jerseyNumber": 18,
+    "nationality": "India",
+    "dateOfBirth": "1996-07-18",
+    "age": 30,
+    "battingStyle": "Left-handed bat",
+    "bowlingStyle": "Right-arm medium-fast",
+    "bio": {
+      "birthPlace": "Mumbai, Maharashtra",
+      "height": "5 ft 4 in (163 cm)"
+    },
+    "cricbuzzId": "10012",
+    "cricbuzzUrl": "https://www.cricbuzz.com/profiles/10012/smriti-mandhana",
+    "transferInfo": {
+      "acquiredVia": "auction",
+      "lastAuctionYear": 2023,
+      "transferFee": 34000000
+    },
+    "id": "wpl_smriti_mandhana",
+    "league": "wpl",
+    "isActiveInSquad": true,
+    "squadStatus": "active",
+    "careerStats": {
+      "batting": {
+        "Test": {},
+        "ODI": {},
+        "T20I": {},
+        "WPL": {}
+      },
+      "bowling": {
+        "Test": {},
+        "ODI": {},
+        "T20I": {},
+        "WPL": {}
+      }
+    }
+  },
+  {
+    "name": "Ellyse Perry",
+    "teamId": "14",
+    "role": "All-rounder",
+    "allrounderType": "Batting All-rounder",
+    "jerseyNumber": 8,
+    "nationality": "Australia",
+    "dateOfBirth": "1990-11-03",
+    "age": 35,
+    "battingStyle": "Right-handed bat",
+    "bowlingStyle": "Right-arm fast-medium",
+    "bio": {
+      "birthPlace": "Wahroonga, Sydney",
+      "height": "5 ft 9 in (176 cm)"
+    },
+    "cricbuzzId": "8734",
+    "cricbuzzUrl": "https://www.cricbuzz.com/profiles/8734/ellyse-perry",
+    "transferInfo": {
+      "acquiredVia": "auction",
+      "lastAuctionYear": 2023,
+      "transferFee": 17000000
+    },
+    "id": "wpl_ellyse_perry",
+    "league": "wpl",
+    "isActiveInSquad": true,
+    "squadStatus": "active",
+    "careerStats": {
+      "batting": {
+        "Test": {},
+        "ODI": {},
+        "T20I": {},
+        "WPL": {}
+      },
+      "bowling": {
+        "Test": {},
+        "ODI": {},
+        "T20I": {},
+        "WPL": {}
+      }
+    }
+  },
+  {
+    "name": "Richa Ghosh",
+    "teamId": "14",
+    "role": "Wicket-keeper",
+    "jerseyNumber": 13,
+    "nationality": "India",
+    "dateOfBirth": "2003-09-28",
+    "age": 23,
+    "battingStyle": "Right-handed bat",
+    "bowlingStyle": "Right-arm medium",
+    "bio": {
+      "birthPlace": "Siliguri, West Bengal",
+      "height": "5 ft 3 in (160 cm)"
+    },
+    "cricbuzzId": "14828",
+    "cricbuzzUrl": "https://www.cricbuzz.com/profiles/14828/richa-ghosh",
+    "transferInfo": {
+      "acquiredVia": "auction",
+      "lastAuctionYear": 2023,
+      "transferFee": 19000000
+    },
+    "id": "wpl_richa_ghosh",
+    "league": "wpl",
+    "isActiveInSquad": true,
+    "squadStatus": "active",
+    "careerStats": {
+      "batting": {
+        "Test": {},
+        "ODI": {},
+        "T20I": {},
+        "WPL": {}
+      },
+      "bowling": {
+        "Test": {},
+        "ODI": {},
+        "T20I": {},
+        "WPL": {}
+      }
+    }
+  },
+  {
+    "name": "Renuka Singh",
+    "teamId": "14",
+    "role": "Bowler",
+    "jerseyNumber": 10,
+    "nationality": "India",
+    "dateOfBirth": "1996-02-01",
+    "age": 30,
+    "battingStyle": "Right-handed bat",
+    "bowlingStyle": "Right-arm medium-fast",
+    "bio": {
+      "birthPlace": "Shimla, Himachal Pradesh",
+      "height": "5 ft 6 in (168 cm)"
+    },
+    "cricbuzzId": "14316",
+    "cricbuzzUrl": "https://www.cricbuzz.com/profiles/14316/renuka-singh",
+    "transferInfo": {
+      "acquiredVia": "auction",
+      "lastAuctionYear": 2023,
+      "transferFee": 15000000
+    },
+    "id": "wpl_renuka_singh",
+    "league": "wpl",
+    "isActiveInSquad": true,
+    "squadStatus": "active",
+    "careerStats": {
+      "batting": {
+        "Test": {},
+        "ODI": {},
+        "T20I": {},
+        "WPL": {}
+      },
+      "bowling": {
+        "Test": {},
+        "ODI": {},
+        "T20I": {},
+        "WPL": {}
+      }
+    }
+  },
+  {
+    "name": "Shreyanka Patil",
+    "teamId": "14",
+    "role": "Bowler",
+    "jerseyNumber": 31,
+    "nationality": "India",
+    "dateOfBirth": "2002-07-31",
+    "age": 24,
+    "battingStyle": "Right-handed bat",
+    "bowlingStyle": "Right-arm offbreak",
+    "bio": {
+      "birthPlace": "Bengaluru, Karnataka",
+      "height": "5 ft 5 in (165 cm)"
+    },
+    "cricbuzzId": "16900",
+    "cricbuzzUrl": "https://www.cricbuzz.com/profiles/16900/shreyanka-patil",
+    "transferInfo": {
+      "acquiredVia": "auction",
+      "lastAuctionYear": 2023,
+      "transferFee": 1000000
+    },
+    "id": "wpl_shreyanka_patil",
+    "league": "wpl",
+    "isActiveInSquad": true,
+    "squadStatus": "active",
+    "careerStats": {
+      "batting": {
+        "Test": {},
+        "ODI": {},
+        "T20I": {},
+        "WPL": {}
+      },
+      "bowling": {
+        "Test": {},
+        "ODI": {},
+        "T20I": {},
+        "WPL": {}
+      }
+    }
+  },
+  {
+    "name": "Harmanpreet Kaur",
+    "teamId": "13",
+    "role": "All-rounder",
+    "allrounderType": "Batting All-rounder",
+    "isCaptain": true,
+    "jerseyNumber": 7,
+    "nationality": "India",
+    "dateOfBirth": "1989-03-08",
+    "age": 37,
+    "battingStyle": "Right-handed bat",
+    "bowlingStyle": "Right-arm offbreak",
+    "bio": {
+      "birthPlace": "Moga, Punjab",
+      "height": "5 ft 3 in (160 cm)"
+    },
+    "cricbuzzId": "9082",
+    "cricbuzzUrl": "https://www.cricbuzz.com/profiles/9082/harmanpreet-kaur",
+    "transferInfo": {
+      "acquiredVia": "auction",
+      "lastAuctionYear": 2023,
+      "transferFee": 18000000
+    },
+    "id": "wpl_harmanpreet_kaur",
+    "league": "wpl",
+    "isActiveInSquad": true,
+    "squadStatus": "active",
+    "careerStats": {
+      "batting": {
+        "Test": {},
+        "ODI": {},
+        "T20I": {},
+        "WPL": {}
+      },
+      "bowling": {
+        "Test": {},
+        "ODI": {},
+        "T20I": {},
+        "WPL": {}
+      }
+    }
+  },
+  {
+    "name": "Nat Sciver-Brunt",
+    "teamId": "13",
+    "role": "All-rounder",
+    "allrounderType": "Batting All-rounder",
+    "jerseyNumber": 39,
+    "nationality": "England",
+    "dateOfBirth": "1992-08-20",
+    "age": 34,
+    "battingStyle": "Right-handed bat",
+    "bowlingStyle": "Right-arm medium",
+    "bio": {
+      "birthPlace": "Tokyo, Japan",
+      "height": "5 ft 8 in (173 cm)"
+    },
+    "cricbuzzId": "9211",
+    "cricbuzzUrl": "https://www.cricbuzz.com/profiles/9211/nat-sciver-brunt",
+    "transferInfo": {
+      "acquiredVia": "auction",
+      "lastAuctionYear": 2023,
+      "transferFee": 32000000
+    },
+    "id": "wpl_nat_sciver_brunt",
+    "league": "wpl",
+    "isActiveInSquad": true,
+    "squadStatus": "active",
+    "careerStats": {
+      "batting": {
+        "Test": {},
+        "ODI": {},
+        "T20I": {},
+        "WPL": {}
+      },
+      "bowling": {
+        "Test": {},
+        "ODI": {},
+        "T20I": {},
+        "WPL": {}
+      }
+    }
+  },
+  {
+    "name": "Hayley Matthews",
+    "teamId": "13",
+    "role": "All-rounder",
+    "allrounderType": "Batting All-rounder",
+    "jerseyNumber": 50,
+    "nationality": "West Indies",
+    "dateOfBirth": "1998-03-19",
+    "age": 28,
+    "battingStyle": "Right-handed bat",
+    "bowlingStyle": "Right-arm offbreak",
+    "bio": {
+      "birthPlace": "Barbados",
+      "height": "5 ft 6 in (168 cm)"
+    },
+    "cricbuzzId": "10471",
+    "cricbuzzUrl": "https://www.cricbuzz.com/profiles/10471/hayley-matthews",
+    "transferInfo": {
+      "acquiredVia": "auction",
+      "lastAuctionYear": 2023,
+      "transferFee": 4000000
+    },
+    "id": "wpl_hayley_matthews",
+    "league": "wpl",
+    "isActiveInSquad": true,
+    "squadStatus": "active",
+    "careerStats": {
+      "batting": {
+        "Test": {},
+        "ODI": {},
+        "T20I": {},
+        "WPL": {}
+      },
+      "bowling": {
+        "Test": {},
+        "ODI": {},
+        "T20I": {},
+        "WPL": {}
+      }
+    }
+  },
+  {
+    "name": "Yastika Bhatia",
+    "teamId": "13",
+    "role": "Wicket-keeper",
+    "jerseyNumber": 11,
+    "nationality": "India",
+    "dateOfBirth": "2000-01-11",
+    "age": 26,
+    "battingStyle": "Left-handed bat",
+    "bowlingStyle": "Slow left-arm orthodox",
+    "bio": {
+      "birthPlace": "Vadodara, Gujarat",
+      "height": "5 ft 4 in (163 cm)"
+    },
+    "cricbuzzId": "14101",
+    "cricbuzzUrl": "https://www.cricbuzz.com/profiles/14101/yastika-bhatia",
+    "transferInfo": {
+      "acquiredVia": "auction",
+      "lastAuctionYear": 2023,
+      "transferFee": 15000000
+    },
+    "id": "wpl_yastika_bhatia",
+    "league": "wpl",
+    "isActiveInSquad": true,
+    "squadStatus": "active",
+    "careerStats": {
+      "batting": {
+        "Test": {},
+        "ODI": {},
+        "T20I": {},
+        "WPL": {}
+      },
+      "bowling": {
+        "Test": {},
+        "ODI": {},
+        "T20I": {},
+        "WPL": {}
+      }
+    }
+  },
+  {
+    "name": "Meg Lanning",
+    "teamId": "11",
+    "role": "Batsman",
+    "isCaptain": true,
+    "jerseyNumber": 17,
+    "nationality": "Australia",
+    "dateOfBirth": "1992-03-25",
+    "age": 34,
+    "battingStyle": "Right-handed bat",
+    "bowlingStyle": "Right-arm medium",
+    "bio": {
+      "birthPlace": "Singapore",
+      "height": "5 ft 8 in (173 cm)"
+    },
+    "cricbuzzId": "8733",
+    "cricbuzzUrl": "https://www.cricbuzz.com/profiles/8733/meg-lanning",
+    "transferInfo": {
+      "acquiredVia": "auction",
+      "lastAuctionYear": 2023,
+      "transferFee": 11000000
+    },
+    "id": "wpl_meg_lanning",
+    "league": "wpl",
+    "isActiveInSquad": true,
+    "squadStatus": "active",
+    "careerStats": {
+      "batting": {
+        "Test": {},
+        "ODI": {},
+        "T20I": {},
+        "WPL": {}
+      },
+      "bowling": {
+        "Test": {},
+        "ODI": {},
+        "T20I": {},
+        "WPL": {}
+      }
+    }
+  },
+  {
+    "name": "Shafali Verma",
+    "teamId": "11",
+    "role": "Batsman",
+    "jerseyNumber": 17,
+    "nationality": "India",
+    "dateOfBirth": "2004-01-28",
+    "age": 22,
+    "battingStyle": "Right-handed bat",
+    "bowlingStyle": "Right-arm offbreak",
+    "bio": {
+      "birthPlace": "Rohtak, Haryana",
+      "height": "5 ft 4 in (163 cm)"
+    },
+    "cricbuzzId": "14798",
+    "cricbuzzUrl": "https://www.cricbuzz.com/profiles/14798/shafali-verma",
+    "transferInfo": {
+      "acquiredVia": "auction",
+      "lastAuctionYear": 2023,
+      "transferFee": 20000000
+    },
+    "id": "wpl_shafali_verma",
+    "league": "wpl",
+    "isActiveInSquad": true,
+    "squadStatus": "active",
+    "careerStats": {
+      "batting": {
+        "Test": {},
+        "ODI": {},
+        "T20I": {},
+        "WPL": {}
+      },
+      "bowling": {
+        "Test": {},
+        "ODI": {},
+        "T20I": {},
+        "WPL": {}
+      }
+    }
+  },
+  {
+    "name": "Jemimah Rodrigues",
+    "teamId": "11",
+    "role": "Batsman",
+    "jerseyNumber": 5,
+    "nationality": "India",
+    "dateOfBirth": "2000-09-05",
+    "age": 26,
+    "battingStyle": "Right-handed bat",
+    "bowlingStyle": "Right-arm offbreak",
+    "bio": {
+      "birthPlace": "Bhandup, Mumbai",
+      "height": "5 ft 2 in (157 cm)"
+    },
+    "cricbuzzId": "12821",
+    "cricbuzzUrl": "https://www.cricbuzz.com/profiles/12821/jemimah-rodrigues",
+    "transferInfo": {
+      "acquiredVia": "auction",
+      "lastAuctionYear": 2023,
+      "transferFee": 22000000
+    },
+    "id": "wpl_jemimah_rodrigues",
+    "league": "wpl",
+    "isActiveInSquad": true,
+    "squadStatus": "active",
+    "careerStats": {
+      "batting": {
+        "Test": {},
+        "ODI": {},
+        "T20I": {},
+        "WPL": {}
+      },
+      "bowling": {
+        "Test": {},
+        "ODI": {},
+        "T20I": {},
+        "WPL": {}
+      }
+    }
+  },
+  {
+    "name": "Marizanne Kapp",
+    "teamId": "11",
+    "role": "All-rounder",
+    "allrounderType": "Bowling All-rounder",
+    "jerseyNumber": 7,
+    "nationality": "South Africa",
+    "dateOfBirth": "1990-01-04",
+    "age": 36,
+    "battingStyle": "Right-handed bat",
+    "bowlingStyle": "Right-arm medium",
+    "bio": {
+      "birthPlace": "Port Elizabeth, South Africa",
+      "height": "5 ft 8 in (173 cm)"
+    },
+    "cricbuzzId": "9219",
+    "cricbuzzUrl": "https://www.cricbuzz.com/profiles/9219/marizanne-kapp",
+    "transferInfo": {
+      "acquiredVia": "auction",
+      "lastAuctionYear": 2023,
+      "transferFee": 15000000
+    },
+    "id": "wpl_marizanne_kapp",
+    "league": "wpl",
+    "isActiveInSquad": true,
+    "squadStatus": "active",
+    "careerStats": {
+      "batting": {
+        "Test": {},
+        "ODI": {},
+        "T20I": {},
+        "WPL": {}
+      },
+      "bowling": {
+        "Test": {},
+        "ODI": {},
+        "T20I": {},
+        "WPL": {}
+      }
+    }
+  },
+  {
+    "name": "Beth Mooney",
+    "teamId": "12",
+    "role": "Wicket-keeper",
+    "isCaptain": true,
+    "jerseyNumber": 6,
+    "nationality": "Australia",
+    "dateOfBirth": "1994-01-14",
+    "age": 32,
+    "battingStyle": "Left-handed bat",
+    "bowlingStyle": "Right-arm medium",
+    "bio": {
+      "birthPlace": "Shepparton, Victoria",
+      "height": "5 ft 4 in (163 cm)"
+    },
+    "cricbuzzId": "8739",
+    "cricbuzzUrl": "https://www.cricbuzz.com/profiles/8739/beth-mooney",
+    "transferInfo": {
+      "acquiredVia": "auction",
+      "lastAuctionYear": 2023,
+      "transferFee": 20000000
+    },
+    "id": "wpl_beth_mooney",
+    "league": "wpl",
+    "isActiveInSquad": true,
+    "squadStatus": "active",
+    "careerStats": {
+      "batting": {
+        "Test": {},
+        "ODI": {},
+        "T20I": {},
+        "WPL": {}
+      },
+      "bowling": {
+        "Test": {},
+        "ODI": {},
+        "T20I": {},
+        "WPL": {}
+      }
+    }
+  },
+  {
+    "name": "Ashleigh Gardner",
+    "teamId": "12",
+    "role": "All-rounder",
+    "allrounderType": "Batting All-rounder",
+    "jerseyNumber": 63,
+    "nationality": "Australia",
+    "dateOfBirth": "1997-04-15",
+    "age": 29,
+    "battingStyle": "Right-handed bat",
+    "bowlingStyle": "Right-arm offbreak",
+    "bio": {
+      "birthPlace": "Bankstown, Sydney",
+      "height": "5 ft 7 in (170 cm)"
+    },
+    "cricbuzzId": "11690",
+    "cricbuzzUrl": "https://www.cricbuzz.com/profiles/11690/ashleigh-gardner",
+    "transferInfo": {
+      "acquiredVia": "auction",
+      "lastAuctionYear": 2023,
+      "transferFee": 32000000
+    },
+    "id": "wpl_ashleigh_gardner",
+    "league": "wpl",
+    "isActiveInSquad": true,
+    "squadStatus": "active",
+    "careerStats": {
+      "batting": {
+        "Test": {},
+        "ODI": {},
+        "T20I": {},
+        "WPL": {}
+      },
+      "bowling": {
+        "Test": {},
+        "ODI": {},
+        "T20I": {},
+        "WPL": {}
+      }
+    }
+  },
+  {
+    "name": "Dayalan Hemalatha",
+    "teamId": "12",
+    "role": "All-rounder",
+    "jerseyNumber": 27,
+    "nationality": "India",
+    "dateOfBirth": "1994-09-29",
+    "age": 32,
+    "battingStyle": "Right-handed bat",
+    "bowlingStyle": "Right-arm offbreak",
+    "bio": {
+      "birthPlace": "Chennai, Tamil Nadu",
+      "height": "5 ft 5 in (165 cm)"
+    },
+    "cricbuzzId": "13670",
+    "cricbuzzUrl": "https://www.cricbuzz.com/profiles/13670/dayalan-hemalatha",
+    "transferInfo": {
+      "acquiredVia": "auction",
+      "lastAuctionYear": 2023,
+      "transferFee": 3000000
+    },
+    "id": "wpl_dayalan_hemalatha",
+    "league": "wpl",
+    "isActiveInSquad": true,
+    "squadStatus": "active",
+    "careerStats": {
+      "batting": {
+        "Test": {},
+        "ODI": {},
+        "T20I": {},
+        "WPL": {}
+      },
+      "bowling": {
+        "Test": {},
+        "ODI": {},
+        "T20I": {},
+        "WPL": {}
+      }
+    }
+  },
+  {
+    "name": "Alyssa Healy",
+    "teamId": "15",
+    "role": "Wicket-keeper",
+    "isCaptain": true,
+    "jerseyNumber": 77,
+    "nationality": "Australia",
+    "dateOfBirth": "1990-03-24",
+    "age": 36,
+    "battingStyle": "Right-handed bat",
+    "bowlingStyle": "Right-arm medium",
+    "bio": {
+      "birthPlace": "Gold Coast, Queensland",
+      "height": "5 ft 5 in (165 cm)"
+    },
+    "cricbuzzId": "8732",
+    "cricbuzzUrl": "https://www.cricbuzz.com/profiles/8732/alyssa-healy",
+    "transferInfo": {
+      "acquiredVia": "auction",
+      "lastAuctionYear": 2023,
+      "transferFee": 7000000
+    },
+    "id": "wpl_alyssa_healy",
+    "league": "wpl",
+    "isActiveInSquad": true,
+    "squadStatus": "active",
+    "careerStats": {
+      "batting": {
+        "Test": {},
+        "ODI": {},
+        "T20I": {},
+        "WPL": {}
+      },
+      "bowling": {
+        "Test": {},
+        "ODI": {},
+        "T20I": {},
+        "WPL": {}
+      }
+    }
+  },
+  {
+    "name": "Deepti Sharma",
+    "teamId": "15",
+    "role": "All-rounder",
+    "allrounderType": "Bowling All-rounder",
+    "jerseyNumber": 6,
+    "nationality": "India",
+    "dateOfBirth": "1997-08-24",
+    "age": 29,
+    "battingStyle": "Left-handed bat",
+    "bowlingStyle": "Right-arm offbreak",
+    "bio": {
+      "birthPlace": "Agra, Uttar Pradesh",
+      "height": "5 ft 5 in (165 cm)"
+    },
+    "cricbuzzId": "10013",
+    "cricbuzzUrl": "https://www.cricbuzz.com/profiles/10013/deepti-sharma",
+    "transferInfo": {
+      "acquiredVia": "auction",
+      "lastAuctionYear": 2023,
+      "transferFee": 26000000
+    },
+    "id": "wpl_deepti_sharma",
+    "league": "wpl",
+    "isActiveInSquad": true,
+    "squadStatus": "active",
+    "careerStats": {
+      "batting": {
+        "Test": {},
+        "ODI": {},
+        "T20I": {},
+        "WPL": {}
+      },
+      "bowling": {
+        "Test": {},
+        "ODI": {},
+        "T20I": {},
+        "WPL": {}
+      }
+    }
+  },
+  {
+    "name": "Sophie Ecclestone",
+    "teamId": "15",
+    "role": "Bowler",
+    "jerseyNumber": 19,
+    "nationality": "England",
+    "dateOfBirth": "1999-05-06",
+    "age": 27,
+    "battingStyle": "Right-handed bat",
+    "bowlingStyle": "Slow left-arm orthodox",
+    "bio": {
+      "birthPlace": "Chester, Cheshire",
+      "height": "5 ft 11 in (180 cm)"
+    },
+    "cricbuzzId": "11388",
+    "cricbuzzUrl": "https://www.cricbuzz.com/profiles/11388/sophie-ecclestone",
+    "transferInfo": {
+      "acquiredVia": "auction",
+      "lastAuctionYear": 2023,
+      "transferFee": 18000000
+    },
+    "id": "wpl_sophie_ecclestone",
+    "league": "wpl",
+    "isActiveInSquad": true,
+    "squadStatus": "active",
+    "careerStats": {
+      "batting": {
+        "Test": {},
+        "ODI": {},
+        "T20I": {},
+        "WPL": {}
+      },
+      "bowling": {
+        "Test": {},
+        "ODI": {},
+        "T20I": {},
+        "WPL": {}
+      }
+    }
+  },
+  {
+    "name": "Tahila McGrath",
+    "teamId": "15",
+    "role": "All-rounder",
+    "allrounderType": "Batting All-rounder",
+    "jerseyNumber": 31,
+    "nationality": "Australia",
+    "dateOfBirth": "1995-11-10",
+    "age": 30,
+    "battingStyle": "Right-handed bat",
+    "bowlingStyle": "Right-arm medium",
+    "bio": {
+      "birthPlace": "Adelaide, South Australia",
+      "height": "5 ft 8 in (173 cm)"
+    },
+    "cricbuzzId": "11700",
+    "cricbuzzUrl": "https://www.cricbuzz.com/profiles/11700/tahlia-mcgrath",
+    "transferInfo": {
+      "acquiredVia": "auction",
+      "lastAuctionYear": 2023,
+      "transferFee": 14000000
+    },
+    "id": "wpl_tahila_mcgrath",
+    "league": "wpl",
+    "isActiveInSquad": true,
+    "squadStatus": "active",
+    "careerStats": {
+      "batting": {
+        "Test": {},
+        "ODI": {},
+        "T20I": {},
+        "WPL": {}
+      },
+      "bowling": {
+        "Test": {},
+        "ODI": {},
+        "T20I": {},
+        "WPL": {}
+      }
+    }
+  }
+]
