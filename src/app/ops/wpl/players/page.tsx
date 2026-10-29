@@ -4240,6 +4240,10 @@ function AdminPlayersWorkspace() {
         squadExitDate: formData.isActiveInSquad ? undefined : (formData.squadExitDate || new Date().toISOString().slice(0, 10)),
         currentSeasonYear: new Date().getFullYear(),
         stats: statsForPlayer,
+      careerStats: formData.careerStats || { batting: {}, bowling: {} },
+      cricbuzzUrl: formData.cricbuzzUrl || '',
+      cricbuzzId: formData.cricbuzzId || '',
+      bio: formData.bio || {},
         transferInfo: {
           lastAuctionYear: formData.lastAuctionYear ? Number(formData.lastAuctionYear) : undefined,
           acquiredVia: formData.acquiredVia,
