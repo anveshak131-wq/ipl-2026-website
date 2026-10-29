@@ -180,3 +180,15 @@ export async function onRequestPost(context: any) {
     );
   }
 }
+
+export async function onRequestOptions() {
+  return new Response(null, {
+    status: 204,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization, Cookie',
+      'Access-Control-Allow-Credentials': 'true',
+    },
+  });
+}

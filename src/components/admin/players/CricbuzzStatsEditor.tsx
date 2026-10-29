@@ -73,6 +73,7 @@ export default function CricbuzzStatsEditor({ formData, onChange }: CricbuzzStat
       const res = await fetch('/api/admin/scrape-cricbuzz', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({
           profileUrl: input.startsWith('http') ? input : undefined,
           playerId: /^\d+$/.test(input) ? input : undefined,
@@ -111,7 +112,14 @@ export default function CricbuzzStatsEditor({ formData, onChange }: CricbuzzStat
       onChange(updated);
       setScrapeSuccess(`✓ Successfully synced Batting & Bowling tables (${data.matchedRows} total rows) and saved Cricbuzz profile link!`);
     } catch (err: any) {
-      setScrapeError(err.message || 'Network error while contacting scraper endpoint.');
+      {
+      const msg = err.message || '';
+      if (msg.includes('sign-in') || msg.includes('401') || msg.includes('Unauthorized')) {
+        setScrapeError('Admin session expired or Google Sign-In required. Please re-authenticate at /ops/login.');
+      } else {
+        setScrapeError(msg || 'Network error while contacting scraper endpoint.');
+      }
+    }
     } finally {
       setIsScraping(false);
     }
@@ -148,7 +156,8 @@ export default function CricbuzzStatsEditor({ formData, onChange }: CricbuzzStat
     { key: '10W', label: '10W' },
   ];
 
-  const formats = ['Test', 'ODI', 'T20I', 'IPL'];
+  const leagueFormat = (formData?.league || '').toLowerCase() === 'wpl' ? 'WPL' : 'IPL';
+  const formats = ['Test', 'ODI', 'T20I', leagueFormat];
 
   return (
     <div className="space-y-6">
