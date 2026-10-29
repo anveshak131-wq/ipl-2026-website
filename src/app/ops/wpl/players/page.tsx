@@ -4088,8 +4088,7 @@ function AdminPlayersWorkspace() {
         return;
       }
       if (!formData.dateOfBirth || formData.dateOfBirth.trim() === "") {
-        alert("Date of Birth is required.");
-        return;
+        // DOB made optional
       }
       if (formData.league !== "wpl" && formData.isActiveInSquad && !formData.teamId) {
         alert("Active squad players must have a team selected.");
@@ -5901,7 +5900,7 @@ function AdminPlayersWorkspace() {
                           }}
                                 className="oil-modal-input oil-modal-input--icon w-full"
                                 placeholder="Enter age"
-                          required={!formData.dateOfBirth || formData.dateOfBirth.trim() === ''}
+                          required={false}
                         />
                               <Calendar className="oil-modal-input-icon text-white/40" />
                             </div>
