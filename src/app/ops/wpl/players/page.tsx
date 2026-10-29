@@ -4287,7 +4287,8 @@ function AdminPlayersWorkspace() {
       cricbuzzUrl: formData.cricbuzzUrl || (editingPlayer as any)?.cricbuzzUrl || '',
       cricbuzzId: formData.cricbuzzId || (editingPlayer as any)?.cricbuzzId || '',
       bio: formData.bio || (editingPlayer as any)?.bio || {}
-    };
+    
+      };
         
         const response = await fetch('/api/players', {
           method: 'PUT',
