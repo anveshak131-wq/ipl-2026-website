@@ -4245,6 +4245,10 @@ function AdminPlayersWorkspace() {
       cricbuzzUrl: formData.cricbuzzUrl || '',
       cricbuzzId: formData.cricbuzzId || '',
       bio: formData.bio || {},
+      careerStats: formData.careerStats || { batting: {}, bowling: {} },
+      cricbuzzUrl: formData.cricbuzzUrl || '',
+      cricbuzzId: formData.cricbuzzId || '',
+      bio: formData.bio || {},
         transferInfo: {
           lastAuctionYear: formData.lastAuctionYear ? Number(formData.lastAuctionYear) : undefined,
           acquiredVia: formData.acquiredVia,
@@ -4261,7 +4265,11 @@ function AdminPlayersWorkspace() {
         cricbuzzUrl: formData.cricbuzzUrl || (editingPlayer as any)?.cricbuzzUrl || '',
         cricbuzzId: formData.cricbuzzId || (editingPlayer as any)?.cricbuzzId || '',
           ...editingPlayer, // Preserve ALL existing player fields first
-          ...playerData,    // Then override with form data
+          ...playerData,
+        careerStats: formData.careerStats || (editingPlayer as any)?.careerStats || { batting: {}, bowling: {} },
+        cricbuzzUrl: formData.cricbuzzUrl || (editingPlayer as any)?.cricbuzzUrl || '',
+        cricbuzzId: formData.cricbuzzId || (editingPlayer as any)?.cricbuzzId || '',
+        bio: formData.bio || (editingPlayer as any)?.bio || {},    // Then override with form data
           id: editingPlayer.id, // Ensure ID is always set
           // Explicitly preserve fields that might not be in form
           dateOfBirth: dateOfBirthISO || editingPlayer.dateOfBirth,
@@ -6430,7 +6438,7 @@ function AdminPlayersWorkspace() {
                       <X className="w-4 h-4" />
                       Cancel
                     </button>
-                    <button type="submit" form="player-form" onClick={(e) => handleSubmit(e)} className="oil-btn-warm px-8 py-3">
+                    <button type="button" onClick={handleSubmit} onClick={(e) => handleSubmit(e)} className="oil-btn-warm px-8 py-3">
                       {editingPlayer ? (
                         <>
                           <Edit2 className="w-5 h-5" />
