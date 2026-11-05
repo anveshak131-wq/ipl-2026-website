@@ -4241,6 +4241,11 @@ function AdminPlayersWorkspace() {
         squadExitDate: formData.isActiveInSquad ? undefined : (formData.squadExitDate || new Date().toISOString().slice(0, 10)),
         currentSeasonYear: new Date().getFullYear(),
         stats: statsForPlayer,
+      league: 'wpl',
+      careerStats: formData.careerStats || { batting: {}, bowling: {} },
+      cricbuzzUrl: formData.cricbuzzUrl || '',
+      cricbuzzId: formData.cricbuzzId || '',
+      bio: formData.bio || {},
       careerStats: formData.careerStats || { batting: {}, bowling: {} },
       cricbuzzUrl: formData.cricbuzzUrl || '',
       cricbuzzId: formData.cricbuzzId || '',
@@ -4271,6 +4276,11 @@ function AdminPlayersWorkspace() {
         cricbuzzId: formData.cricbuzzId || (editingPlayer as any)?.cricbuzzId || '',
           ...editingPlayer, // Preserve ALL existing player fields first
           ...playerData,
+        league: 'wpl',
+        careerStats: formData.careerStats || (editingPlayer as any)?.careerStats || { batting: {}, bowling: {} },
+        cricbuzzUrl: formData.cricbuzzUrl || (editingPlayer as any)?.cricbuzzUrl || '',
+        cricbuzzId: formData.cricbuzzId || (editingPlayer as any)?.cricbuzzId || '',
+        bio: formData.bio || (editingPlayer as any)?.bio || {},
         league: 'wpl',
         careerStats: formData.careerStats || (editingPlayer as any)?.careerStats || { batting: {}, bowling: {} },
         cricbuzzUrl: formData.cricbuzzUrl || (editingPlayer as any)?.cricbuzzUrl || '',
@@ -4313,8 +4323,7 @@ function AdminPlayersWorkspace() {
     
       };
         
-        const response = await fetch('/api/players', {
-          method: 'PUT',
+        const response = await fetch('/api/players?league=wpl', { method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${token}`,
@@ -4340,8 +4349,7 @@ function AdminPlayersWorkspace() {
         await fetchData();
       } else {
         // Create new player
-        const response = await fetch('/api/players', {
-          method: 'POST',
+        const response = await fetch('/api/players?league=wpl', { method: 'POST',
           headers: {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${token}`,
