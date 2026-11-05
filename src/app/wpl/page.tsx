@@ -130,6 +130,31 @@ export default function WPLHomePage() {
   const [isHydrated, setIsHydrated] = useState(false);
   const [teams, setTeams] = useState<Team[]>([]);
   const [matches, setMatches] = useState<Match[]>([]);
+
+  useEffect(() => {
+    async function loadAdminWplMatches() {
+      try {
+        if (typeof window !== 'undefined') {
+          const cached = localStorage.getItem('sportsup99_wpl_matches_v1');
+          if (cached) {
+            const parsed = JSON.parse(cached);
+            if (Array.isArray(parsed) && parsed.length > 0) setMatches(parsed);
+          }
+        }
+        const res = await fetch('/api/matches?league=wpl&_t=' + Date.now());
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data) && data.length > 0) {
+            setMatches(data);
+            if (typeof window !== 'undefined') {
+              localStorage.setItem('sportsup99_wpl_matches_v1', JSON.stringify(data));
+            }
+          }
+        }
+      } catch (e) {}
+    }
+    loadAdminWplMatches();
+  }, []);
   const [news, setNews] = useState<News[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showConfetti, setShowConfetti] = useState(false);

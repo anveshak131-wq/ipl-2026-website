@@ -101,6 +101,18 @@ function getTeamKey(raw: any): string {
 
 export default function WplPlaying11ConfirmationPage() {
   const [matches, setMatches] = useState<any[]>([]);
+
+  useEffect(() => {
+    try {
+      if (typeof window !== 'undefined') {
+        const cached = localStorage.getItem('sportsup99_wpl_matches_v1');
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          if (Array.isArray(parsed) && parsed.length > 0) setMatches(parsed);
+        }
+      }
+    } catch (e) {}
+  }, []);
   const [selectedMatchId, setSelectedMatchId] = useState<string>('');
   const [isLoading, setIsLoading] = useState(true);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');

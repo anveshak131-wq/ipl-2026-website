@@ -330,6 +330,18 @@ const getInningsPhase = (legalBalls: number, complete: boolean) => {
 
 export default function IPLAdminLiveScoreTablePage() {
   const [matches, setMatches] = useState<Match[]>([]);
+
+  useEffect(() => {
+    try {
+      if (typeof window !== 'undefined') {
+        const cached = localStorage.getItem('sportsup99_wpl_matches_v1');
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          if (Array.isArray(parsed) && parsed.length > 0) setMatches(parsed);
+        }
+      }
+    } catch (e) {}
+  }, []);
   const [players, setPlayers] = useState<Player[]>([]);
   const [seasonYear, setSeasonYear] = useState<number | null>(null);
   const [selectedMatchId, setSelectedMatchId] = useState<string>('');

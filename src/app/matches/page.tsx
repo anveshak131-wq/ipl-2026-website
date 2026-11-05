@@ -167,6 +167,15 @@ export default function MatchesPage() {
 
   useEffect(() => {
     const fetchMatches = async () => {
+        try {
+          const wplCached = typeof window !== 'undefined' ? localStorage.getItem('sportsup99_wpl_matches_v1') : null;
+          if (wplCached) {
+            const parsed = JSON.parse(wplCached);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+              setMatches(parsed);
+            }
+          }
+        } catch (e) {}
       try {
         const [matchesData, teamsData] = await Promise.all([
           api.getMatches(currentLeague),

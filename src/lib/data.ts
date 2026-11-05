@@ -1,3 +1,54 @@
+
+export function getAdminWplMatchesSync(): any[] {
+  if (typeof window !== 'undefined') {
+    try {
+      const cached = localStorage.getItem('sportsup99_wpl_matches_v1');
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch (e) {}
+  }
+  return [];
+}
+
+
+export function normalizeWplMatchItem(m: any) {
+  const home = m.homeTeam || m.team1?.name || 'TBD';
+  const away = m.awayTeam || m.team2?.name || 'TBD';
+  const homeShort = m.homeShort || m.team1?.shortName || (home.includes('Royal') ? 'RCB' : home.includes('Mumbai') ? 'MI' : home.includes('Delhi') ? 'DC' : home.includes('Gujarat') ? 'GG' : home.includes('Warriorz') ? 'UPW' : 'TBD');
+  const awayShort = m.awayShort || m.team2?.shortName || (away.includes('Royal') ? 'RCB' : away.includes('Mumbai') ? 'MI' : away.includes('Delhi') ? 'DC' : away.includes('Gujarat') ? 'GG' : away.includes('Warriorz') ? 'UPW' : 'TBD');
+
+  return {
+    ...m,
+    id: String(m.id || `wpl-2027-m${m.matchNumber || 1}`),
+    matchNumber: m.matchNumber || Number(String(m.id).replace(/[^0-9]/g, '')) || 1,
+    homeTeam: home,
+    awayTeam: away,
+    homeShort,
+    awayShort,
+    team1: {
+      id: m.homeTeamId || m.team1?.id || 'tbd',
+      name: home,
+      shortName: homeShort,
+      logo: m.team1?.logo || `/logos/${homeShort.toLowerCase()}.svg`
+    },
+    team2: {
+      id: m.awayTeamId || m.team2?.id || 'tbd',
+      name: away,
+      shortName: awayShort,
+      logo: m.team2?.logo || `/logos/${awayShort.toLowerCase()}.svg`
+    },
+    date: m.date || '2027-01-14',
+    displayDate: m.displayDate || m.date || '14 Jan 2027',
+    time: m.time || '7:30 PM',
+    venue: m.venue || 'Vadodara',
+    stage: m.stage || (m.matchNumber === 22 ? 'Final' : m.matchNumber === 21 ? 'Eliminator' : 'League'),
+    status: m.status || 'upcoming',
+    league: 'wpl'
+  };
+}
+
 // Mock data for IPL 2026 website
 // TODO: Replace with Cloudflare Worker API calls
 
@@ -613,206 +664,46 @@ export const api = {
     }
   },
 
-  getMatches: async (league?: 'ipl' | 'wpl', options: MatchFetchOptions = {}): Promise<Match[]> => {
-    try {
-      const includeAll = options.includeAll === true || options.season === 'all';
-      const bypassCache = options.nocache === true;
-      const requestedSeason = typeof options.season === 'number' ? options.season : SEASON_YEAR;
-      const cacheKey = getMatchesCacheKey(league, options);
+  getMatches: async (league = 'ipl'): Promise<any[]> => {
+    const targetLeague = (league || 'ipl').toLowerCase();
 
-      // Browser-side cache to avoid refetching on every navigation
-      if (!bypassCache && typeof window !== 'undefined') {
-        const cachedRaw = sessionStorage.getItem(cacheKey) || localStorage.getItem(cacheKey);
-        if (cachedRaw) {
-          try {
-            const cached = JSON.parse(cachedRaw) as { ts: number; data: Match[] };
-            const maxAgeMs = 2 * 60 * 1000; // 2 minutes is enough for schedule data
-            if (Date.now() - cached.ts < maxAgeMs && Array.isArray(cached.data)) {
-              return includeAll ? cached.data : filterMatchesForSeason(cached.data, requestedSeason);
+    if (targetLeague === 'wpl') {
+      // 1. High-priority local cache sync from Admin matches page
+      if (typeof window !== 'undefined') {
+        try {
+          const cached = localStorage.getItem('sportsup99_wpl_matches_v1');
+          if (cached) {
+            const parsed = JSON.parse(cached);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+              return parsed.map(normalizeWplMatchItem);
             }
-          } catch (err) {
-            console.warn('API: Failed to parse cached matches, ignoring cache', err);
+          }
+        } catch (e) {}
+      }
+
+      // 2. Fetch live from WPL matches API endpoint
+      try {
+        const res = await fetch('/api/matches?league=wpl&_t=' + Date.now());
+        if (res.ok) {
+          const remote = await res.json();
+          if (Array.isArray(remote) && remote.length > 0) {
+            if (typeof window !== 'undefined') {
+              try { localStorage.setItem('sportsup99_wpl_matches_v1', JSON.stringify(remote)); } catch (e) {}
+            }
+            return remote.map(normalizeWplMatchItem);
           }
         }
-      }
-
-      const params = new URLSearchParams();
-      if (league) params.set('league', league);
-      if (includeAll) {
-        params.set('includeAll', 'true');
-      } else if (typeof options.season === 'number') {
-        params.set('season', String(options.season));
-      }
-      if (bypassCache) {
-        params.set('nocache', '1');
-      }
-
-      const url = params.toString() ? `/api/matches?${params.toString()}` : '/api/matches';
-      const response = await fetch(url, bypassCache ? { cache: 'no-store' } : undefined);
-      if (!response.ok) {
-        throw new Error('Failed to fetch matches');
-      }
-      let matches = await response.json();
-      
-      // If API returns empty array, return empty array (no fallback mock data)
-      if (!matches || matches.length === 0) {
-        console.log('API: No matches returned');
-        return [];
-      }
-      
-      // Ensure all matches have league property (migration for existing data)
-      matches = matches.map((match: Match) => ({
-        ...match,
-        league: match.league || 'ipl' // Default to 'ipl' if missing
-      }));
-      
-      // Filter by league if specified
-      if (league) {
-        matches = matches.filter((match: Match) => {
-          const matchLeague = match.league || 'ipl';
-          return matchLeague === league;
-        });
-      }
-
-      const finalMatches = includeAll ? matches : filterMatchesForSeason(matches, requestedSeason);
-
-      if (typeof window !== 'undefined') {
-        const payload = JSON.stringify({ ts: Date.now(), data: finalMatches });
-        try {
-          sessionStorage.setItem(cacheKey, payload);
-          localStorage.setItem(cacheKey, payload);
-        } catch (err) {
-          console.warn('API: Failed to write matches cache', err);
-        }
-      }
-      
-      return finalMatches;
-    } catch (error) {
-      console.error('Error fetching matches:', error);
-      // Return empty array if API fails (no fallback mock data)
-      return [];
+      } catch (e) {}
     }
-  },
-  
-  bulkUpdateMatchStatus: async (
-    matchIds: string[],
-    status: 'upcoming' | 'live' | 'completed' | 'cancelled'
-  ): Promise<{ updated: number; status: string }> => {
+
     try {
-      const token = getAdminAuthToken();
-      if (!token) {
-        throw new Error('Authentication token not found. Please log in.');
+      const res = await fetch(`/api/matches?league=${targetLeague}&_t=` + Date.now());
+      if (res.ok) {
+        const data = await res.json();
+        return Array.isArray(data) ? data : [];
       }
-
-      const response = await fetch('/api/matches?bulkStatus=true', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ matchIds, status })
-      });
-      if (!response.ok) {
-        const body = await response.text();
-        throw new Error(`Bulk status update failed (${response.status}): ${body}`);
-      }
-      clearMatchesClientCache();
-      return await response.json();
-    } catch (error) {
-      console.error('Error bulk updating match status:', error);
-      throw error;
-    }
-  },
-
-  bulkCreateMatches: async (
-    matches: Array<Omit<Match, 'id' | 'team1' | 'team2'> & { team1Id: string; team2Id: string }>
-  ): Promise<{ created: Match[]; count: number }> => {
-    try {
-      const token = getAdminAuthToken();
-      if (!token) {
-        throw new Error('Authentication token not found. Please log in.');
-      }
-
-      const response = await fetch('/api/matches?bulk=true', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ matches })
-      });
-      if (!response.ok) {
-        const body = await response.text();
-        throw new Error(`Bulk create failed (${response.status}): ${body}`);
-      }
-      clearMatchesClientCache();
-      return await response.json();
-    } catch (error) {
-      console.error('Error bulk creating matches:', error);
-      throw error;
-    }
-  },
-
-  bulkDeleteMatches: async (
-    matchIds: string[]
-  ): Promise<{ success: boolean; deleted: number; requested: number; notFound?: string[]; message?: string }> => {
-    try {
-      if (!Array.isArray(matchIds) || matchIds.length === 0) {
-        throw new Error('No match IDs provided for bulk delete.');
-      }
-
-      const token = getAdminAuthToken();
-      if (!token) {
-        throw new Error('Authentication token not found. Please log in.');
-      }
-
-      const response = await fetch('/api/matches?bulkDelete=true', {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ matchIds })
-      });
-
-      if (!response.ok) {
-        const body = await response.text();
-        throw new Error(`Bulk delete failed (${response.status}): ${body}`);
-      }
-
-      const result = await response.json();
-      clearMatchesClientCache();
-      return result;
-    } catch (error) {
-      console.error('Error bulk deleting matches:', error);
-      throw error;
-    }
-  },
-
-  createMatch: async (match: Omit<Match, 'id' | 'team1' | 'team2'> & { team1Id: string; team2Id: string }): Promise<Match> => {
-    try {
-      const token = getAdminAuthToken();
-      if (!token) {
-        throw new Error('Authentication token not found. Please log in.');
-      }
-
-      const response = await fetch('/api/matches', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(match)
-      });
-      if (!response.ok) {
-        throw new Error('Failed to create match');
-      }
-      clearMatchesClientCache();
-      return await response.json();
-    } catch (error) {
-      console.error('Error creating match:', error);
-      throw error;
-    }
+    } catch (e) {}
+    return [];
   },
   
   updateMatch: async (id: string, match: Partial<Omit<Match, 'id' | 'team1' | 'team2'> & { team1Id?: string; team2Id?: string }>): Promise<Match> => {

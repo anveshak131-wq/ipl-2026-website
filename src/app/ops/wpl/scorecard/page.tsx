@@ -125,6 +125,18 @@ interface PublishValidationResponse {
 
 export default function ScorecardAdminPage() {
   const [matches, setMatches] = useState<Match[]>([]);
+
+  useEffect(() => {
+    try {
+      if (typeof window !== 'undefined') {
+        const cached = localStorage.getItem('sportsup99_wpl_matches_v1');
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          if (Array.isArray(parsed) && parsed.length > 0) setMatches(parsed);
+        }
+      }
+    } catch (e) {}
+  }, []);
   const [players, setPlayers] = useState<Player[]>([]);
   const [scorecards, setScorecards] = useState<any[]>([]);
   const [selectedMatch, setSelectedMatch] = useState<Match | null>(null);
