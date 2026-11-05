@@ -3980,6 +3980,7 @@ function AdminPlayersWorkspace() {
     return runsConceded / wickets;
   };
 
+  const handleEdit = (p: any) => handleEditPlayer(p);
   const handleEditPlayer = (player: Player) => {
     setEditingPlayer(player);
     // Calculate bowling average if not available (for backward compatibility)
