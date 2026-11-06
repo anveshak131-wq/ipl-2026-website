@@ -61,11 +61,11 @@ function readFromLocalCache(formData: any) {
   }
 }
 
-function writeToLocalCache(formData: any, careerStats: any, cricbuzzUrl: string, cricbuzzId: string) {
+function writeToLocalCache(formData: any, careerStats: any, cricbuzzUrl: string, cricbuzzId: string, bioData?: any) {
   if (typeof window === 'undefined') return;
   try {
     const store = JSON.parse(localStorage.getItem(CACHE_KEY) || '{}');
-    const record = { careerStats, cricbuzzUrl, cricbuzzId, updatedAt: Date.now() };
+    const record = { careerStats, cricbuzzUrl, cricbuzzId, bio: bioData || {}, updatedAt: Date.now() };
     if (formData?.id) store[String(formData.id).trim()] = record;
     if (formData?.name) store[String(formData.name).toLowerCase().trim()] = record;
     if (cricbuzzId) store['cb_' + String(cricbuzzId).trim()] = record;
@@ -96,7 +96,6 @@ export default function CricbuzzStatsEditor({ formData, onChange }: CricbuzzStat
 
   const formats = ['Test', 'ODI', 'T20I', isWpl ? 'WPL' : 'IPL'];
 
-  // Automatically hydrate parent formData if parent opened with empty careerStats
   useEffect(() => {
     const localHit = readFromLocalCache(formData);
     const urlToUse =
@@ -175,13 +174,12 @@ export default function CricbuzzStatsEditor({ formData, onChange }: CricbuzzStat
 
       const finalUrl = payload.sourceUrl || targetUrl;
       const finalId = targetId || formData?.cricbuzzId || '';
+      const bioData = payload.bio || payload.data?.bio || {};
 
-      // 1. Save immediately to localStorage cache so refresh never loses it
-      writeToLocalCache(formData, updatedStats, finalUrl, finalId);
+      // 1. Cache stats & bio locally
+      writeToLocalCache(formData, updatedStats, finalUrl, finalId, bioData);
 
-      // 2. Update parent form state
-      const bio = payload.bio || payload.data?.bio || {};
-
+      // 2. Auto-fill Step 1, Step 2, and Step 3 in parent form state
       const updatedFormData = {
         ...formData,
         league: isWpl ? 'wpl' : (formData?.league || 'ipl'),
@@ -189,22 +187,23 @@ export default function CricbuzzStatsEditor({ formData, onChange }: CricbuzzStat
         cricbuzzUrl: finalUrl,
         cricbuzzId: finalId,
         // Step 1: Name & Role
-        name: formData.name || bio.name || '',
-        role: bio.role || formData.role || 'All-rounder',
-        allrounderType: bio.allrounderType || formData.allrounderType || (bio.role === 'All-rounder' ? 'Batting Allrounder' : ''),
-        // Step 2: Identity & Personal Details
-        dateOfBirth: bio.dateOfBirth || formData.dateOfBirth || '',
-        age: bio.age ? String(bio.age) : (formData.age || ''),
-        nationality: bio.nationality || (formData.nationality || 'India'),
+        name: formData?.name || bioData.name || '',
+        role: bioData.role || formData?.role || 'All-rounder',
+        allrounderType: bioData.allrounderType || formData?.allrounderType || (bioData.role === 'All-rounder' ? 'Batting Allrounder' : ''),
+        // Step 2: Personal Details & Identity
+        dateOfBirth: bioData.dateOfBirth || formData?.dateOfBirth || '',
+        age: bioData.age ? String(bioData.age) : (formData?.age || ''),
+        nationality: bioData.nationality || formData?.nationality || 'India',
         // Step 3: Playing Profile
-        battingStyle: bio.battingStyle || formData.battingStyle || 'Right-hand bat',
-        bowlingStyle: bio.bowlingStyle || formData.bowlingStyle || 'Right-arm medium-fast'
-        // SKIPPED: jerseyNumber, auction, squadStatus, teamId are preserved without override
+        battingStyle: bioData.battingStyle || formData?.battingStyle || 'Right-hand bat',
+        bowlingStyle: bioData.bowlingStyle || formData?.bowlingStyle || 'Right-arm medium-fast'
+        // Preserved without override: jerseyNumber, auction, squadStatus, teamId
       };
+
       onChange(updatedFormData);
       setCricbuzzInput(finalUrl);
 
-      // 3. Auto-save directly to backend KV API immediately upon sync
+      // 3. Persist to API
       if (formData?.name || formData?.id) {
         const leagueParam = isWpl ? 'wpl' : 'ipl';
         fetch(`/api/players?league=${leagueParam}`, {
@@ -213,7 +212,7 @@ export default function CricbuzzStatsEditor({ formData, onChange }: CricbuzzStat
           body: JSON.stringify({
             ...updatedFormData,
             id: formData?.id || undefined,
-            name: formData?.name,
+            name: updatedFormData.name,
             league: leagueParam,
             careerStats: updatedStats,
             cricbuzzUrl: finalUrl,
@@ -266,14 +265,14 @@ export default function CricbuzzStatsEditor({ formData, onChange }: CricbuzzStat
             className="px-5 py-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white font-semibold text-sm flex items-center justify-center gap-2 transition-colors shadow-lg shadow-emerald-950/40"
           >
             <RefreshCw className={`w-4 h-4 ${isScraping ? 'animate-spin' : ''}`} />
-            {isScraping ? 'Syncing...' : 'Sync Tables'}
+            {isScraping ? 'Auto-Filling...' : '⚡ Auto-Fill All Details & Stats'}
           </button>
         </div>
 
         {syncSuccess && (
           <div className="mt-3 p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs flex items-center gap-2">
             <CheckCircle2 className="w-4 h-4 flex-shrink-0" />
-            <span>Successfully auto-filled Personal Details, Playing Profile, and 24 Career Stats rows from Cricbuzz!</span>
+            <span>Successfully auto-filled Personal Details, Playing Profile, and {matchedRows} Career Stats rows from Cricbuzz!</span>
           </div>
         )}
 
