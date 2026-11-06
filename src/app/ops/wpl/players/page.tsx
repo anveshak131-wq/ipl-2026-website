@@ -3983,6 +3983,14 @@ function AdminPlayersWorkspace() {
 
   const handleEdit = (p: any) => handleEditPlayer(p);
   
+      
+  
+
+  
+      
+  
+
+  
   const [quickUrlInput, setQuickUrlInput] = useState<string>('');
   const [isQuickSyncing, setIsQuickSyncing] = useState<boolean>(false);
   const [quickSyncBanner, setQuickSyncBanner] = useState<string | null>(null);
@@ -4021,7 +4029,7 @@ function AdminPlayersWorkspace() {
 
       setFormData((prev: any) => ({
         ...prev,
-        name: prev.name || bio.name || '',
+        name: bio.name || prev.name || '',
         dateOfBirth: bio.dateOfBirth || prev.dateOfBirth || '',
         age: bio.age ? String(bio.age) : (prev.age || ''),
         nationality: bio.nationality || prev.nationality || 'India',
@@ -4034,7 +4042,7 @@ function AdminPlayersWorkspace() {
         cricbuzzId: targetId || prev.cricbuzzId || ''
       }));
 
-      setQuickSyncBanner('✓ Auto-filled Name, Age, DOB, Nationality, Role, Styles, and Career Stats tables!');
+      setQuickSyncBanner('✓ Successfully auto-filled Name, Role, Age, DOB, Nationality, Playing Styles, and Career Stats from Cricbuzz!');
     } catch (err: any) {
       alert(err.message || 'Error auto-filling from Cricbuzz');
     } finally {
@@ -7075,6 +7083,7 @@ function AdminPlayersContent() {
   return <AdminPlayersWorkspace />;
 }
 
+// Last Auto-Fill Injection: 1793991700410
 export default function AdminPlayers() {
   return (
     <Suspense fallback={<div className="min-h-screen bg-slate-950 flex items-center justify-center text-white">Loading...</div>}>
