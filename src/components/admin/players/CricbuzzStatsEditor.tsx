@@ -1,4 +1,5 @@
 'use client';
+// Force Push Timestamp: 1793991700402
 
 import React, { useState, useEffect } from 'react';
 import { ExternalLink, RefreshCw, CheckCircle2, AlertCircle } from 'lucide-react';
@@ -12,28 +13,18 @@ const CACHE_KEY = 'sportsup99_cricbuzz_sync_cache_v1';
 
 function getFormatData(categoryObj: any, fmt: string) {
   if (!categoryObj) return {};
-  if (fmt === 'T20I') {
-    return categoryObj['T20I'] || categoryObj['T20'] || categoryObj['t20i'] || categoryObj['t20'] || {};
-  }
-  if (fmt === 'WPL') {
-    return categoryObj['WPL'] || categoryObj['wpl'] || categoryObj['WT20'] || categoryObj['wt20'] || categoryObj['IPL'] || {};
-  }
-  if (fmt === 'IPL') {
-    return categoryObj['IPL'] || categoryObj['ipl'] || categoryObj['WPL'] || {};
-  }
+  if (fmt === 'T20I') return categoryObj['T20I'] || categoryObj['T20'] || categoryObj['t20i'] || categoryObj['t20'] || {};
+  if (fmt === 'WPL') return categoryObj['WPL'] || categoryObj['wpl'] || categoryObj['WT20'] || categoryObj['wt20'] || categoryObj['IPL'] || {};
+  if (fmt === 'IPL') return categoryObj['IPL'] || categoryObj['ipl'] || categoryObj['WPL'] || {};
   return categoryObj[fmt] || categoryObj[fmt.toUpperCase()] || categoryObj[fmt.toLowerCase()] || {};
 }
 
 function getMetricVal(row: any, ...keys: string[]) {
   if (!row) return '—';
   for (const k of keys) {
-    if (row[k] !== undefined && row[k] !== null && String(row[k]).trim() !== '' && String(row[k]).trim() !== 'undefined') {
-      return String(row[k]);
-    }
+    if (row[k] !== undefined && row[k] !== null && String(row[k]).trim() !== '' && String(row[k]).trim() !== 'undefined') return String(row[k]);
     const lower = k.toLowerCase();
-    if (row[lower] !== undefined && row[lower] !== null && String(row[lower]).trim() !== '') {
-      return String(row[lower]);
-    }
+    if (row[lower] !== undefined && row[lower] !== null && String(row[lower]).trim() !== '') return String(row[lower]);
   }
   return '—';
 }
@@ -61,13 +52,14 @@ function readFromLocalCache(formData: any) {
   }
 }
 
-function writeToLocalCache(formData: any, careerStats: any, cricbuzzUrl: string, cricbuzzId: string, bioData?: any) {
+function writeToLocalCache(formData: any, careerStats: any, cricbuzzUrl: string, cricbuzzId: string, bio?: any) {
   if (typeof window === 'undefined') return;
   try {
     const store = JSON.parse(localStorage.getItem(CACHE_KEY) || '{}');
-    const record = { careerStats, cricbuzzUrl, cricbuzzId, bio: bioData || {}, updatedAt: Date.now() };
+    const record = { careerStats, cricbuzzUrl, cricbuzzId, bio: bio || {}, updatedAt: Date.now() };
     if (formData?.id) store[String(formData.id).trim()] = record;
     if (formData?.name) store[String(formData.name).toLowerCase().trim()] = record;
+    if (bio?.name) store[String(bio.name).toLowerCase().trim()] = record;
     if (cricbuzzId) store['cb_' + String(cricbuzzId).trim()] = record;
     localStorage.setItem(CACHE_KEY, JSON.stringify(store));
   } catch (e) {}
@@ -90,38 +82,13 @@ export default function CricbuzzStatsEditor({ formData, onChange }: CricbuzzStat
   const [scrapeError, setScrapeError] = useState<string | null>(null);
   const [matchedRows, setMatchedRows] = useState<number>(0);
 
-  const isWpl =
-    (formData?.league || '').toLowerCase() === 'wpl' ||
-    (typeof window !== 'undefined' && window.location.pathname.toLowerCase().includes('/wpl'));
-
+  const isWpl = (formData?.league || '').toLowerCase() === 'wpl' || (typeof window !== 'undefined' && window.location.pathname.toLowerCase().includes('/wpl'));
   const formats = ['Test', 'ODI', 'T20I', isWpl ? 'WPL' : 'IPL'];
 
   useEffect(() => {
     const localHit = readFromLocalCache(formData);
-    const urlToUse =
-      formData?.cricbuzzUrl ||
-      localHit?.cricbuzzUrl ||
-      (formData?.cricbuzzId ? `https://www.cricbuzz.com/profiles/${formData.cricbuzzId}` : '');
-
-    if (urlToUse && urlToUse !== cricbuzzInput) {
-      setCricbuzzInput(urlToUse);
-    }
-
-    if (!hasValidCareerStats(formData?.careerStats) && localHit?.careerStats) {
-      onChange({
-        ...formData,
-        careerStats: localHit.careerStats,
-        cricbuzzUrl: localHit.cricbuzzUrl || formData?.cricbuzzUrl || '',
-        cricbuzzId: localHit.cricbuzzId || formData?.cricbuzzId || ''
-      });
-    } else if (hasValidCareerStats(formData?.careerStats)) {
-      writeToLocalCache(
-        formData,
-        formData.careerStats,
-        formData.cricbuzzUrl || '',
-        formData.cricbuzzId || ''
-      );
-    }
+    const urlToUse = formData?.cricbuzzUrl || localHit?.cricbuzzUrl || (formData?.cricbuzzId ? `https://www.cricbuzz.com/profiles/${formData.cricbuzzId}` : '');
+    if (urlToUse && urlToUse !== cricbuzzInput) setCricbuzzInput(urlToUse);
   }, [formData?.name, formData?.id]);
 
   const handleSync = async () => {
@@ -150,74 +117,45 @@ export default function CricbuzzStatsEditor({ formData, onChange }: CricbuzzStat
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({
-          url: targetUrl,
-          profileId: targetId,
-          playerName: formData?.name || ''
-        })
+        body: JSON.stringify({ url: targetUrl, profileId: targetId, playerName: formData?.name || '' })
       });
 
       const payload = await res.json();
-      if (!res.ok || !payload.success) {
-        throw new Error(payload.error || `Scrape failed with status ${res.status}`);
-      }
+      if (!res.ok || !payload.success) throw new Error(payload.error || `Scrape failed with status ${res.status}`);
 
-      const stats = payload.data?.result || payload.data || payload.result || {
-        batting: payload.batting || {},
-        bowling: payload.bowling || {}
-      };
-
-      const updatedStats = {
-        batting: stats.batting || {},
-        bowling: stats.bowling || {}
-      };
-
+      const stats = payload.data?.result || payload.data || payload.result || { batting: {}, bowling: {} };
+      const updatedStats = { batting: stats.batting || {}, bowling: stats.bowling || {} };
+      const bio = payload.bio || payload.data?.bio || {};
       const finalUrl = payload.sourceUrl || targetUrl;
       const finalId = targetId || formData?.cricbuzzId || '';
-      const bioData = payload.bio || payload.data?.bio || {};
 
-      // 1. Cache stats & bio locally
-      writeToLocalCache(formData, updatedStats, finalUrl, finalId, bioData);
+      writeToLocalCache(formData, updatedStats, finalUrl, finalId, bio);
 
-      // 2. Auto-fill Step 1, Step 2, and Step 3 in parent form state
       const updatedFormData = {
         ...formData,
         league: isWpl ? 'wpl' : (formData?.league || 'ipl'),
         careerStats: updatedStats,
         cricbuzzUrl: finalUrl,
         cricbuzzId: finalId,
-        // Step 1: Name & Role
-        name: formData?.name || bioData.name || '',
-        role: bioData.role || formData?.role || 'All-rounder',
-        allrounderType: bioData.allrounderType || formData?.allrounderType || (bioData.role === 'All-rounder' ? 'Batting Allrounder' : ''),
-        // Step 2: Personal Details & Identity
-        dateOfBirth: bioData.dateOfBirth || formData?.dateOfBirth || '',
-        age: bioData.age ? String(bioData.age) : (formData?.age || ''),
-        nationality: bioData.nationality || formData?.nationality || 'India',
-        // Step 3: Playing Profile
-        battingStyle: bioData.battingStyle || formData?.battingStyle || 'Right-hand bat',
-        bowlingStyle: bioData.bowlingStyle || formData?.bowlingStyle || 'Right-arm medium-fast'
-        // Preserved without override: jerseyNumber, auction, squadStatus, teamId
+        name: formData?.name || bio.name || '',
+        role: bio.role || formData?.role || 'All-rounder',
+        allrounderType: bio.allrounderType || formData?.allrounderType || (bio.role === 'All-rounder' ? 'Batting Allrounder' : ''),
+        dateOfBirth: bio.dateOfBirth || formData?.dateOfBirth || '',
+        age: bio.age ? Number(bio.age) : formData?.age,
+        nationality: bio.nationality || formData?.nationality || 'India',
+        battingStyle: bio.battingStyle || formData?.battingStyle || 'Right-hand bat',
+        bowlingStyle: bio.bowlingStyle || formData?.bowlingStyle || 'Right-arm medium-fast'
       };
 
       onChange(updatedFormData);
       setCricbuzzInput(finalUrl);
 
-      // 3. Persist to API
-      if (formData?.name || formData?.id) {
+      if (updatedFormData.name || formData?.id) {
         const leagueParam = isWpl ? 'wpl' : 'ipl';
         fetch(`/api/players?league=${leagueParam}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            ...updatedFormData,
-            id: formData?.id || undefined,
-            name: updatedFormData.name,
-            league: leagueParam,
-            careerStats: updatedStats,
-            cricbuzzUrl: finalUrl,
-            cricbuzzId: finalId
-          })
+          body: JSON.stringify({ ...updatedFormData, id: formData?.id || undefined, league: leagueParam })
         }).catch(() => {});
       }
 
@@ -243,17 +181,11 @@ export default function CricbuzzStatsEditor({ formData, onChange }: CricbuzzStat
                 setSyncSuccess(false);
                 setScrapeError(null);
               }}
-              placeholder="Paste Cricbuzz URL (e.g. https://www.cricbuzz.com/profiles/8734/ellyse-perry) or ID (8734)"
+              placeholder="Paste Cricbuzz URL (e.g. https://www.cricbuzz.com/profiles/8734) or ID (8734)"
               className="w-full pl-4 pr-10 py-2.5 rounded-lg bg-slate-800/80 border border-slate-700 text-sm text-white placeholder-slate-400 focus:outline-none focus:border-cyan-500"
             />
             {cricbuzzInput && (
-              <a
-                href={cricbuzzInput}
-                target="_blank"
-                rel="noreferrer"
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-cyan-400"
-                title="View Cricbuzz Profile"
-              >
+              <a href={cricbuzzInput} target="_blank" rel="noreferrer" className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-cyan-400">
                 <ExternalLink className="w-4 h-4" />
               </a>
             )}
@@ -265,14 +197,14 @@ export default function CricbuzzStatsEditor({ formData, onChange }: CricbuzzStat
             className="px-5 py-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white font-semibold text-sm flex items-center justify-center gap-2 transition-colors shadow-lg shadow-emerald-950/40"
           >
             <RefreshCw className={`w-4 h-4 ${isScraping ? 'animate-spin' : ''}`} />
-            {isScraping ? 'Auto-Filling...' : '⚡ Auto-Fill All Details & Stats'}
+            {isScraping ? 'Syncing...' : 'Sync Tables & Profile'}
           </button>
         </div>
 
         {syncSuccess && (
           <div className="mt-3 p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs flex items-center gap-2">
             <CheckCircle2 className="w-4 h-4 flex-shrink-0" />
-            <span>Successfully auto-filled Personal Details, Playing Profile, and {matchedRows} Career Stats rows from Cricbuzz!</span>
+            <span>Successfully auto-filled Personal Details, Playing Profile, and Career Stats ({matchedRows} rows) from Cricbuzz!</span>
           </div>
         )}
 
@@ -302,11 +234,6 @@ export default function CricbuzzStatsEditor({ formData, onChange }: CricbuzzStat
                 <th className="py-2 px-2 text-center">Avg</th>
                 <th className="py-2 px-2 text-center">BF</th>
                 <th className="py-2 px-2 text-center">SR</th>
-                <th className="py-2 px-2 text-center">100s</th>
-                <th className="py-2 px-2 text-center">200s</th>
-                <th className="py-2 px-2 text-center">50s</th>
-                <th className="py-2 px-2 text-center">4s</th>
-                <th className="py-2 px-2 text-center">6s</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-800/60">
@@ -323,61 +250,6 @@ export default function CricbuzzStatsEditor({ formData, onChange }: CricbuzzStat
                     <td className="py-2.5 px-2 text-center">{getMetricVal(row, 'Avg', 'Average', 'average', 'avg')}</td>
                     <td className="py-2.5 px-2 text-center">{getMetricVal(row, 'BF', 'Balls', 'ballsFaced', 'bf')}</td>
                     <td className="py-2.5 px-2 text-center">{getMetricVal(row, 'SR', 'StrikeRate', 'strikeRate', 'sr')}</td>
-                    <td className="py-2.5 px-2 text-center">{getMetricVal(row, '100', '100s', 'hundreds')}</td>
-                    <td className="py-2.5 px-2 text-center">{getMetricVal(row, '200', '200s')}</td>
-                    <td className="py-2.5 px-2 text-center">{getMetricVal(row, '50', '50s', 'fifties')}</td>
-                    <td className="py-2.5 px-2 text-center">{getMetricVal(row, '4s', 'Fours', 'fours')}</td>
-                    <td className="py-2.5 px-2 text-center">{getMetricVal(row, '6s', 'Sixes', 'sixes')}</td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      {/* Bowling Career Summary */}
-      <div className="p-4 rounded-xl bg-slate-900/60 border border-slate-700/60 overflow-hidden">
-        <h4 className="text-sm font-bold text-cyan-400 mb-3 flex items-center gap-2">
-          <span>🎯</span> BOWLING CAREER SUMMARY
-        </h4>
-        <div className="overflow-x-auto">
-          <table className="w-full text-xs text-left">
-            <thead>
-              <tr className="border-b border-slate-800 text-slate-400 font-semibold">
-                <th className="py-2 px-3">Format</th>
-                <th className="py-2 px-2 text-center">Mat</th>
-                <th className="py-2 px-2 text-center">Inn</th>
-                <th className="py-2 px-2 text-center">Balls</th>
-                <th className="py-2 px-2 text-center">Runs</th>
-                <th className="py-2 px-2 text-center">Wkts</th>
-                <th className="py-2 px-2 text-center">BBI</th>
-                <th className="py-2 px-2 text-center">BBM</th>
-                <th className="py-2 px-2 text-center">Econ</th>
-                <th className="py-2 px-2 text-center">Avg</th>
-                <th className="py-2 px-2 text-center">SR</th>
-                <th className="py-2 px-2 text-center">5W</th>
-                <th className="py-2 px-2 text-center">10W</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-800/60">
-              {formats.map((fmt) => {
-                const row = getFormatData(effectiveCareerStats.bowling, fmt);
-                return (
-                  <tr key={fmt} className="hover:bg-slate-800/30 text-slate-200">
-                    <td className="py-2.5 px-3 font-bold text-white">{fmt}</td>
-                    <td className="py-2.5 px-2 text-center">{getMetricVal(row, 'M', 'Matches', 'matches', 'mat')}</td>
-                    <td className="py-2.5 px-2 text-center">{getMetricVal(row, 'Inn', 'Innings', 'innings', 'inn')}</td>
-                    <td className="py-2.5 px-2 text-center">{getMetricVal(row, 'B', 'Balls', 'balls')}</td>
-                    <td className="py-2.5 px-2 text-center">{getMetricVal(row, 'Runs', 'runs')}</td>
-                    <td className="py-2.5 px-2 text-center font-semibold text-cyan-400">{getMetricVal(row, 'Wkts', 'Wickets', 'wickets', 'wkts')}</td>
-                    <td className="py-2.5 px-2 text-center">{getMetricVal(row, 'BBI', 'bbi', 'bestBowling')}</td>
-                    <td className="py-2.5 px-2 text-center">{getMetricVal(row, 'BBM', 'bbm')}</td>
-                    <td className="py-2.5 px-2 text-center">{getMetricVal(row, 'Econ', 'Economy', 'economy', 'econ')}</td>
-                    <td className="py-2.5 px-2 text-center">{getMetricVal(row, 'Avg', 'Average', 'average', 'avg')}</td>
-                    <td className="py-2.5 px-2 text-center">{getMetricVal(row, 'SR', 'StrikeRate', 'strikeRate', 'sr')}</td>
-                    <td className="py-2.5 px-2 text-center">{getMetricVal(row, '5W', 'fiveWickets', '5w')}</td>
-                    <td className="py-2.5 px-2 text-center">{getMetricVal(row, '10W', '10w')}</td>
                   </tr>
                 );
               })}

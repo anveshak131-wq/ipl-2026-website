@@ -4031,7 +4031,7 @@ function AdminPlayersWorkspace() {
         ...prev,
         name: bio.name || prev.name || '',
         dateOfBirth: bio.dateOfBirth || prev.dateOfBirth || '',
-        age: bio.age ? String(bio.age) : (prev.age || ''),
+        age: bio.age ? Number(bio.age) : prev.age,
         nationality: bio.nationality || prev.nationality || 'India',
         role: bio.role || prev.role || 'All-rounder',
         allrounderType: bio.allrounderType || prev.allrounderType || (bio.role === 'All-rounder' ? 'Batting Allrounder' : ''),
