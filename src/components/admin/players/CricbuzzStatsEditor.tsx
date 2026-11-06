@@ -180,12 +180,26 @@ export default function CricbuzzStatsEditor({ formData, onChange }: CricbuzzStat
       writeToLocalCache(formData, updatedStats, finalUrl, finalId);
 
       // 2. Update parent form state
+      const bio = payload.bio || payload.data?.bio || {};
+
       const updatedFormData = {
         ...formData,
         league: isWpl ? 'wpl' : (formData?.league || 'ipl'),
         careerStats: updatedStats,
         cricbuzzUrl: finalUrl,
-        cricbuzzId: finalId
+        cricbuzzId: finalId,
+        // Step 1: Name & Role
+        name: formData.name || bio.name || '',
+        role: bio.role || formData.role || 'All-rounder',
+        allrounderType: bio.allrounderType || formData.allrounderType || (bio.role === 'All-rounder' ? 'Batting Allrounder' : ''),
+        // Step 2: Identity & Personal Details
+        dateOfBirth: bio.dateOfBirth || formData.dateOfBirth || '',
+        age: bio.age ? String(bio.age) : (formData.age || ''),
+        nationality: bio.nationality || (formData.nationality || 'India'),
+        // Step 3: Playing Profile
+        battingStyle: bio.battingStyle || formData.battingStyle || 'Right-hand bat',
+        bowlingStyle: bio.bowlingStyle || formData.bowlingStyle || 'Right-arm medium-fast'
+        // SKIPPED: jerseyNumber, auction, squadStatus, teamId are preserved without override
       };
       onChange(updatedFormData);
       setCricbuzzInput(finalUrl);
@@ -259,7 +273,7 @@ export default function CricbuzzStatsEditor({ formData, onChange }: CricbuzzStat
         {syncSuccess && (
           <div className="mt-3 p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs flex items-center gap-2">
             <CheckCircle2 className="w-4 h-4 flex-shrink-0" />
-            <span>Successfully synced & saved Batting & Bowling tables ({matchedRows} total rows) and Cricbuzz profile link!</span>
+            <span>Successfully auto-filled Personal Details, Playing Profile, and 24 Career Stats rows from Cricbuzz!</span>
           </div>
         )}
 

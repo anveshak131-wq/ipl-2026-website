@@ -3982,6 +3982,66 @@ function AdminPlayersWorkspace() {
   };
 
   const handleEdit = (p: any) => handleEditPlayer(p);
+  
+  const [quickUrlInput, setQuickUrlInput] = useState<string>('');
+  const [isQuickSyncing, setIsQuickSyncing] = useState<boolean>(false);
+  const [quickSyncBanner, setQuickSyncBanner] = useState<string | null>(null);
+
+  const handleQuickCricbuzzAutoFill = async () => {
+    const raw = (quickUrlInput || formData.cricbuzzUrl || '').trim();
+    if (!raw && !formData.name) {
+      alert('Please enter a Cricbuzz Profile URL or ID');
+      return;
+    }
+    setIsQuickSyncing(true);
+    setQuickSyncBanner(null);
+
+    let targetUrl = raw;
+    let targetId = '';
+    if (/^\d+$/.test(raw)) {
+      targetId = raw;
+      targetUrl = `https://www.cricbuzz.com/profiles/${raw}`;
+    } else {
+      const match = raw.match(/profiles\/(\d+)/);
+      if (match) targetId = match[1];
+    }
+
+    try {
+      const res = await fetch('/api/admin/scrape-cricbuzz', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: targetUrl, profileId: targetId, playerName: formData.name || '' })
+      });
+      const payload = await res.json();
+      if (!res.ok || !payload.success) throw new Error(payload.error || 'Failed to fetch from Cricbuzz');
+
+      const stats = payload.data?.result || payload.data || { batting: {}, bowling: {} };
+      const bio = payload.bio || payload.data?.bio || {};
+      const finalUrl = payload.sourceUrl || targetUrl;
+
+      setFormData((prev: any) => ({
+        ...prev,
+        name: prev.name || bio.name || '',
+        dateOfBirth: bio.dateOfBirth || prev.dateOfBirth || '',
+        age: bio.age ? String(bio.age) : (prev.age || ''),
+        nationality: bio.nationality || prev.nationality || 'India',
+        role: bio.role || prev.role || 'All-rounder',
+        allrounderType: bio.allrounderType || prev.allrounderType || (bio.role === 'All-rounder' ? 'Batting Allrounder' : ''),
+        battingStyle: bio.battingStyle || prev.battingStyle || 'Right-hand bat',
+        bowlingStyle: bio.bowlingStyle || prev.bowlingStyle || 'Right-arm medium-fast',
+        careerStats: { batting: stats.batting || {}, bowling: stats.bowling || {} },
+        cricbuzzUrl: finalUrl,
+        cricbuzzId: targetId || prev.cricbuzzId || ''
+      }));
+
+      setQuickSyncBanner('✓ Auto-filled Name, Age, DOB, Nationality, Role, Styles, and Career Stats tables!');
+    } catch (err: any) {
+      alert(err.message || 'Error auto-filling from Cricbuzz');
+    } finally {
+      setIsQuickSyncing(false);
+    }
+  };
+
   const handleEditPlayer = (player: Player) => {
     setEditingPlayer(player);
     // Calculate bowling average if not available (for backward compatibility)
