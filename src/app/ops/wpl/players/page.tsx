@@ -1,3 +1,4 @@
+import fallbackWplRoster from '../../../../../wpl-players-roster.json';
 'use client';
 import CricbuzzStatsEditor from '@/components/admin/players/CricbuzzStatsEditor';
 
