@@ -18,21 +18,16 @@
     "stats": {
       "matches": 18,
       "runs": 449,
-      "wickets": 0,
       "highest": 80,
       "average": 24.94,
       "strikeRate": 142.53,
-      "fours": 61,
-      "sixes": 13,
-      "fifties": 2,
-      "hundreds": 0
+      "fifties": 2
     },
     "auction": {
       "year": "2026",
       "type": "Retained",
-      "transferable": false,
-      "fee": "₹3.40 Cr",
-      "notes": "Captain & Icon Player"
+      "fee": "₹3.50 Cr",
+      "notes": "Captain & Title Winning Skipper"
     }
   },
   {
@@ -65,9 +60,8 @@
     "auction": {
       "year": "2026",
       "type": "Retained",
-      "transferable": false,
-      "fee": "₹1.70 Cr",
-      "notes": "Orange Cap Winner (2024)"
+      "fee": "₹2.00 Cr",
+      "notes": "Orange Cap Legend"
     }
   },
   {
@@ -80,7 +74,7 @@
     "isCaptain": false,
     "nationality": "India",
     "battingStyle": "Right-hand bat",
-    "bowlingStyle": "Right-arm medium",
+    "bowlingStyle": "",
     "jerseyNumber": "13",
     "age": 22,
     "squadStatus": "active",
@@ -89,19 +83,108 @@
     "stats": {
       "matches": 18,
       "runs": 395,
-      "wickets": 0,
       "highest": 64,
       "average": 28.21,
-      "strikeRate": 144.16,
-      "fours": 42,
-      "sixes": 17
+      "strikeRate": 144.16
     },
     "auction": {
       "year": "2026",
       "type": "Retained",
-      "transferable": false,
-      "fee": "₹1.90 Cr",
-      "notes": "Primary Wicketkeeper Finisher"
+      "fee": "₹2.75 Cr",
+      "notes": "Lead Wicketkeeper Finisher"
+    }
+  },
+  {
+    "id": "wpl_rcb_arundhati_reddy",
+    "name": "Arundhati Reddy",
+    "role": "All-Rounder",
+    "allrounderType": "Bowling Allrounder",
+    "teamId": "14",
+    "team": "RCB-W",
+    "league": "wpl",
+    "isCaptain": false,
+    "nationality": "India",
+    "battingStyle": "Right-hand bat",
+    "bowlingStyle": "Right-arm medium-fast",
+    "jerseyNumber": "8",
+    "age": 28,
+    "squadStatus": "active",
+    "cricbuzzId": "13865",
+    "cricbuzzUrl": "https://www.cricbuzz.com/profiles/13865/arundhati-reddy",
+    "stats": {
+      "matches": 18,
+      "runs": 48,
+      "wickets": 12,
+      "highest": 15,
+      "economy": 7.92,
+      "bestBowling": "2/17"
+    },
+    "auction": {
+      "year": "2026",
+      "type": "Retained",
+      "fee": "₹75 Lakh",
+      "notes": "Core India Pace-Bowling Allrounder for RCB"
+    }
+  },
+  {
+    "id": "wpl_rcb_pooja_vastrakar",
+    "name": "Pooja Vastrakar",
+    "role": "All-Rounder",
+    "allrounderType": "Bowling Allrounder",
+    "teamId": "14",
+    "team": "RCB-W",
+    "league": "wpl",
+    "isCaptain": false,
+    "nationality": "India",
+    "battingStyle": "Right-hand bat",
+    "bowlingStyle": "Right-arm medium-fast",
+    "jerseyNumber": "28",
+    "age": 26,
+    "squadStatus": "active",
+    "cricbuzzId": "13175",
+    "cricbuzzUrl": "https://www.cricbuzz.com/profiles/13175/pooja-vastrakar",
+    "stats": {
+      "matches": 16,
+      "runs": 117,
+      "wickets": 9,
+      "highest": 26,
+      "economy": 7.5
+    },
+    "auction": {
+      "year": "2026",
+      "type": "Retained",
+      "fee": "₹85 Lakh",
+      "notes": "Strike Pace Bowling Allrounder"
+    }
+  },
+  {
+    "id": "wpl_rcb_radha_yadav",
+    "name": "Radha Yadav",
+    "role": "Bowler",
+    "teamId": "14",
+    "team": "RCB-W",
+    "league": "wpl",
+    "isCaptain": false,
+    "nationality": "India",
+    "battingStyle": "Right-hand bat",
+    "bowlingStyle": "Slow left-arm orthodox",
+    "jerseyNumber": "21",
+    "age": 25,
+    "squadStatus": "active",
+    "cricbuzzId": "13174",
+    "cricbuzzUrl": "https://www.cricbuzz.com/profiles/13174/radha-yadav",
+    "stats": {
+      "matches": 18,
+      "runs": 58,
+      "wickets": 14,
+      "economy": 7.72,
+      "bestBowling": "4/20"
+    },
+    "auction": {
+      "year": "2026",
+      "type": "Retained",
+      "fee": "₹65 Lakh",
+      "notes": "Left-Arm Orthodox Spinner & Gun Fielder"
     }
   },
   {
@@ -133,81 +216,13 @@
     "auction": {
       "year": "2026",
       "type": "Retained",
-      "transferable": false,
-      "fee": "₹10 Lakh",
-      "notes": "Purple Cap Winner (2024)"
+      "fee": "₹60 Lakh",
+      "notes": "Purple Cap Off-Spinner"
     }
   },
   {
-    "id": "wpl_rcb_sophie_devine",
-    "name": "Sophie Devine",
-    "role": "All-Rounder",
-    "allrounderType": "Batting Allrounder",
-    "teamId": "14",
-    "team": "RCB-W",
-    "league": "wpl",
-    "isCaptain": false,
-    "nationality": "New Zealand",
-    "battingStyle": "Right-hand bat",
-    "bowlingStyle": "Right-arm medium",
-    "jerseyNumber": "77",
-    "age": 36,
-    "squadStatus": "active",
-    "cricbuzzId": "8731",
-    "cricbuzzUrl": "https://www.cricbuzz.com/profiles/8731/sophie-devine",
-    "stats": {
-      "matches": 18,
-      "runs": 402,
-      "wickets": 9,
-      "highest": 99,
-      "average": 26.8,
-      "strikeRate": 158.26,
-      "fours": 48,
-      "sixes": 22
-    },
-    "auction": {
-      "year": "2026",
-      "type": "Retained",
-      "transferable": false,
-      "fee": "₹50 Lakh",
-      "notes": "Powerplay Enforcer"
-    }
-  },
-  {
-    "id": "wpl_rcb_renuka_singh",
-    "name": "Renuka Singh Thakur",
-    "role": "Bowler",
-    "teamId": "14",
-    "team": "RCB-W",
-    "league": "wpl",
-    "isCaptain": false,
-    "nationality": "India",
-    "battingStyle": "Right-hand bat",
-    "bowlingStyle": "Right-arm medium-fast",
-    "jerseyNumber": "10",
-    "age": 29,
-    "squadStatus": "active",
-    "cricbuzzId": "14945",
-    "cricbuzzUrl": "https://www.cricbuzz.com/profiles/14945/renuka-singh",
-    "stats": {
-      "matches": 16,
-      "runs": 6,
-      "wickets": 7,
-      "highest": 2,
-      "economy": 8.24,
-      "bestBowling": "2/14"
-    },
-    "auction": {
-      "year": "2026",
-      "type": "Retained",
-      "transferable": false,
-      "fee": "₹1.50 Cr",
-      "notes": "Strike Swing Bowler"
-    }
-  },
-  {
-    "id": "wpl_rcb_georgia_wareham",
-    "name": "Georgia Wareham",
+    "id": "wpl_rcb_jess_jonassen",
+    "name": "Jess Jonassen",
     "role": "All-Rounder",
     "allrounderType": "Bowling Allrounder",
     "teamId": "14",
@@ -215,126 +230,84 @@
     "league": "wpl",
     "isCaptain": false,
     "nationality": "Australia",
-    "battingStyle": "Right-hand bat",
-    "bowlingStyle": "Right-arm legbreak",
-    "jerseyNumber": "35",
-    "age": 26,
+    "battingStyle": "Left-hand bat",
+    "bowlingStyle": "Slow left-arm orthodox",
+    "jerseyNumber": "21",
+    "age": 33,
     "squadStatus": "active",
-    "cricbuzzId": "13083",
-    "cricbuzzUrl": "https://www.cricbuzz.com/profiles/13083/georgia-wareham",
+    "cricbuzzId": "8735",
+    "cricbuzzUrl": "https://www.cricbuzz.com/profiles/8735/jess-jonassen",
     "stats": {
-      "matches": 14,
-      "runs": 135,
-      "wickets": 10,
-      "highest": 48,
-      "average": 22.5,
-      "economy": 7.95,
-      "bestBowling": "3/22"
+      "matches": 16,
+      "runs": 187,
+      "wickets": 25,
+      "economy": 7.42,
+      "bestBowling": "3/21"
     },
     "auction": {
       "year": "2026",
-      "type": "Retained",
-      "transferable": false,
+      "type": "Auction",
       "fee": "₹40 Lakh",
-      "notes": "Leg-Spin Allrounder"
+      "notes": "Major Pick by RCB in Oct 28 2026 Auction"
     }
   },
   {
-    "id": "wpl_rcb_asha_sobhana",
-    "name": "Asha Sobhana",
-    "role": "Bowler",
+    "id": "wpl_rcb_tejal_hasabnis",
+    "name": "Tejal Hasabnis",
+    "role": "Batter",
     "teamId": "14",
     "team": "RCB-W",
     "league": "wpl",
     "isCaptain": false,
     "nationality": "India",
     "battingStyle": "Right-hand bat",
-    "bowlingStyle": "Right-arm legbreak",
-    "jerseyNumber": "11",
-    "age": 34,
+    "bowlingStyle": "Right-arm offbreak",
+    "jerseyNumber": "22",
+    "age": 28,
     "squadStatus": "active",
-    "cricbuzzId": "22638",
-    "cricbuzzUrl": "https://www.cricbuzz.com/profiles/22638/asha-sobhana",
+    "cricbuzzId": "22646",
+    "cricbuzzUrl": "https://www.cricbuzz.com/profiles/22646/tejal-hasabnis",
     "stats": {
-      "matches": 15,
-      "runs": 18,
-      "wickets": 17,
-      "highest": 8,
-      "average": 19.41,
-      "economy": 7.78,
-      "bestBowling": "5/22"
+      "matches": 6,
+      "runs": 142,
+      "highest": 45,
+      "average": 28.4
     },
     "auction": {
       "year": "2026",
-      "type": "Retained",
-      "transferable": false,
-      "fee": "₹10 Lakh",
-      "notes": "Five-Wicket Haul Hero"
+      "type": "Auction",
+      "fee": "₹30 Lakh",
+      "notes": "Bought by RCB in Oct 28 2026 Auction"
     }
   },
   {
-    "id": "wpl_rcb_kanika_ahuja",
-    "name": "Kanika Ahuja",
+    "id": "wpl_rcb_chloe_tryon",
+    "name": "Chloe Tryon",
     "role": "All-Rounder",
     "allrounderType": "Batting Allrounder",
     "teamId": "14",
     "team": "RCB-W",
     "league": "wpl",
     "isCaptain": false,
-    "nationality": "India",
-    "battingStyle": "Left-hand bat",
-    "bowlingStyle": "Right-arm offbreak",
-    "jerseyNumber": "24",
-    "age": 23,
-    "squadStatus": "active",
-    "cricbuzzId": "22635",
-    "cricbuzzUrl": "https://www.cricbuzz.com/profiles/22635/kanika-ahuja",
-    "stats": {
-      "matches": 9,
-      "runs": 98,
-      "wickets": 2,
-      "highest": 46,
-      "average": 16.33,
-      "economy": 8.66
-    },
-    "auction": {
-      "year": "2026",
-      "type": "Retained",
-      "transferable": false,
-      "fee": "₹35 Lakh",
-      "notes": "Middle-Order Striker"
-    }
-  },
-  {
-    "id": "wpl_rcb_ekta_bisht",
-    "name": "Ekta Bisht",
-    "role": "Bowler",
-    "teamId": "14",
-    "team": "RCB-W",
-    "league": "wpl",
-    "isCaptain": false,
-    "nationality": "India",
-    "battingStyle": "Left-hand bat",
+    "nationality": "South Africa",
+    "battingStyle": "Right-hand bat",
     "bowlingStyle": "Slow left-arm orthodox",
-    "jerseyNumber": "1",
-    "age": 39,
+    "jerseyNumber": "25",
+    "age": 32,
     "squadStatus": "active",
-    "cricbuzzId": "9084",
-    "cricbuzzUrl": "https://www.cricbuzz.com/profiles/9084/ekta-bisht",
+    "cricbuzzId": "9005",
+    "cricbuzzUrl": "https://www.cricbuzz.com/profiles/9005/chloe-tryon",
     "stats": {
-      "matches": 3,
-      "runs": 2,
-      "wickets": 2,
-      "highest": 2,
-      "economy": 8.5,
-      "bestBowling": "1/18"
+      "matches": 8,
+      "runs": 125,
+      "wickets": 3,
+      "strikeRate": 148.8
     },
     "auction": {
       "year": "2026",
       "type": "Auction",
-      "transferable": false,
       "fee": "₹30 Lakh",
-      "notes": "Veteran Spinner"
+      "notes": "Bought by RCB in Oct 28 2026 Auction"
     }
   },
   {
@@ -357,20 +330,16 @@
     "stats": {
       "matches": 17,
       "runs": 549,
-      "wickets": 0,
       "highest": 95,
       "average": 54.9,
       "strikeRate": 140.76,
-      "fours": 72,
-      "sixes": 12,
       "fifties": 5
     },
     "auction": {
       "year": "2026",
       "type": "Retained",
-      "transferable": false,
       "fee": "₹1.80 Cr",
-      "notes": "Inaugural Title Winning Captain"
+      "notes": "Captain & Franchise Icon"
     }
   },
   {
@@ -396,16 +365,13 @@
       "wickets": 20,
       "highest": 72,
       "average": 45.38,
-      "strikeRate": 135.63,
-      "economy": 7.21,
-      "bestBowling": "3/10"
+      "economy": 7.21
     },
     "auction": {
       "year": "2026",
       "type": "Retained",
-      "transferable": false,
       "fee": "₹3.20 Cr",
-      "notes": "Premier World Allrounder"
+      "notes": "Premier World All-Rounder"
     }
   },
   {
@@ -430,51 +396,13 @@
       "runs": 451,
       "wickets": 20,
       "highest": 77,
-      "average": 26.52,
-      "strikeRate": 122.55,
-      "economy": 6.94,
-      "bestBowling": "3/15"
+      "economy": 6.94
     },
     "auction": {
       "year": "2026",
       "type": "Retained",
-      "transferable": false,
       "fee": "₹40 Lakh",
-      "notes": "Purple Cap & MVP Winner (2023)"
-    }
-  },
-  {
-    "id": "wpl_mi_yastika_bhatia",
-    "name": "Yastika Bhatia",
-    "role": "Wicketkeeper",
-    "teamId": "13",
-    "team": "MI-W",
-    "league": "wpl",
-    "isCaptain": false,
-    "nationality": "India",
-    "battingStyle": "Left-hand bat",
-    "bowlingStyle": "Slow left-arm orthodox",
-    "jerseyNumber": "5",
-    "age": 25,
-    "squadStatus": "active",
-    "cricbuzzId": "14801",
-    "cricbuzzUrl": "https://www.cricbuzz.com/profiles/14801/yastika-bhatia",
-    "stats": {
-      "matches": 19,
-      "runs": 399,
-      "wickets": 0,
-      "highest": 57,
-      "average": 21,
-      "strikeRate": 116.32,
-      "fours": 57,
-      "sixes": 7
-    },
-    "auction": {
-      "year": "2026",
-      "type": "Retained",
-      "transferable": false,
-      "fee": "₹1.50 Cr",
-      "notes": "Lead Wicketkeeper Opening Batter"
+      "notes": "Purple Cap & MVP Winner"
     }
   },
   {
@@ -499,81 +427,71 @@
       "runs": 284,
       "wickets": 22,
       "highest": 40,
-      "average": 28.4,
       "economy": 7.36,
       "bestBowling": "4/26"
     },
     "auction": {
       "year": "2026",
       "type": "Retained",
-      "transferable": false,
       "fee": "₹1.00 Cr",
-      "notes": "Match-winning Leg Spinner"
+      "notes": "World Class Leg-Spin Allrounder"
     }
   },
   {
-    "id": "wpl_mi_pooja_vastrakar",
-    "name": "Pooja Vastrakar",
-    "role": "All-Rounder",
-    "allrounderType": "Bowling Allrounder",
+    "id": "wpl_mi_shweta_sehrawat",
+    "name": "Shweta Sehrawat",
+    "role": "Batter",
     "teamId": "13",
     "team": "MI-W",
     "league": "wpl",
     "isCaptain": false,
     "nationality": "India",
     "battingStyle": "Right-hand bat",
-    "bowlingStyle": "Right-arm medium-fast",
-    "jerseyNumber": "28",
-    "age": 26,
+    "bowlingStyle": "Right-arm offbreak",
+    "jerseyNumber": "9",
+    "age": 21,
     "squadStatus": "active",
-    "cricbuzzId": "13175",
-    "cricbuzzUrl": "https://www.cricbuzz.com/profiles/13175/pooja-vastrakar",
+    "cricbuzzId": "22641",
+    "cricbuzzUrl": "https://www.cricbuzz.com/profiles/22641/shweta-sehrawat",
     "stats": {
-      "matches": 16,
-      "runs": 117,
-      "wickets": 9,
-      "highest": 26,
-      "economy": 7.5,
-      "bestBowling": "2/17"
+      "matches": 12,
+      "runs": 125,
+      "highest": 45,
+      "strikeRate": 114.67
     },
     "auction": {
       "year": "2026",
-      "type": "Retained",
-      "transferable": false,
-      "fee": "₹1.90 Cr",
-      "notes": "Pace Bowling All-Rounder"
+      "type": "Auction",
+      "fee": "₹20 Lakh",
+      "notes": "Key Acquisition by MI in Oct 28 2026 Auction"
     }
   },
   {
-    "id": "wpl_mi_saika_ishaque",
-    "name": "Saika Ishaque",
-    "role": "Bowler",
+    "id": "wpl_mi_disha_kasat",
+    "name": "Disha Kasat",
+    "role": "Batter",
     "teamId": "13",
     "team": "MI-W",
     "league": "wpl",
     "isCaptain": false,
     "nationality": "India",
-    "battingStyle": "Left-hand bat",
-    "bowlingStyle": "Slow left-arm orthodox",
-    "jerseyNumber": "23",
-    "age": 30,
+    "battingStyle": "Right-hand bat",
+    "bowlingStyle": "Right-arm medium",
+    "jerseyNumber": "15",
+    "age": 28,
     "squadStatus": "active",
-    "cricbuzzId": "22629",
-    "cricbuzzUrl": "https://www.cricbuzz.com/profiles/22629/saika-ishaque",
+    "cricbuzzId": "14800",
+    "cricbuzzUrl": "https://www.cricbuzz.com/profiles/14800/disha-kasat",
     "stats": {
-      "matches": 19,
-      "runs": 7,
-      "wickets": 24,
-      "highest": 4,
-      "economy": 7.35,
-      "bestBowling": "4/11"
+      "matches": 11,
+      "runs": 95,
+      "highest": 27
     },
     "auction": {
       "year": "2026",
-      "type": "Retained",
-      "transferable": false,
+      "type": "Auction",
       "fee": "₹10 Lakh",
-      "notes": "Left-Arm Powerplay Specialist"
+      "notes": "Bought by MI in Oct 28 2026 Auction"
     }
   },
   {
@@ -598,47 +516,13 @@
       "runs": 132,
       "wickets": 2,
       "highest": 42,
-      "average": 22,
       "strikeRate": 124.52
     },
     "auction": {
       "year": "2026",
       "type": "Retained",
-      "transferable": false,
       "fee": "₹50 Lakh",
-      "notes": "Middle Order Anchor"
-    }
-  },
-  {
-    "id": "wpl_mi_issy_wong",
-    "name": "Issy Wong",
-    "role": "Bowler",
-    "teamId": "13",
-    "team": "MI-W",
-    "league": "wpl",
-    "isCaptain": false,
-    "nationality": "England",
-    "battingStyle": "Right-hand bat",
-    "bowlingStyle": "Right-arm fast-medium",
-    "jerseyNumber": "3",
-    "age": 23,
-    "squadStatus": "active",
-    "cricbuzzId": "15309",
-    "cricbuzzUrl": "https://www.cricbuzz.com/profiles/15309/issy-wong",
-    "stats": {
-      "matches": 12,
-      "runs": 61,
-      "wickets": 18,
-      "highest": 15,
-      "economy": 7.85,
-      "bestBowling": "4/15"
-    },
-    "auction": {
-      "year": "2026",
-      "type": "Retained",
-      "transferable": false,
-      "fee": "₹30 Lakh",
-      "notes": "Hat-trick Taker in 2023 Eliminator"
+      "notes": "Solid Middle Order Anchor"
     }
   },
   {
@@ -663,50 +547,101 @@
       "runs": 87,
       "wickets": 2,
       "highest": 22,
-      "strikeRate": 158.18,
-      "bestBowling": "1/12"
+      "strikeRate": 158.18
     },
     "auction": {
       "year": "2026",
       "type": "Retained",
-      "transferable": false,
       "fee": "₹15 Lakh",
-      "notes": "Last Ball Six Finisher"
+      "notes": "Clutch Finisher & Power Hitter"
     }
   },
   {
-    "id": "wpl_dc_meg_lanning",
-    "name": "Meg Lanning",
+    "id": "wpl_mi_tara_norris",
+    "name": "Tara Norris",
+    "role": "Bowler",
+    "teamId": "13",
+    "team": "MI-W",
+    "league": "wpl",
+    "isCaptain": false,
+    "nationality": "USA",
+    "battingStyle": "Left-hand bat",
+    "bowlingStyle": "Left-arm medium",
+    "jerseyNumber": "14",
+    "age": 27,
+    "squadStatus": "active",
+    "cricbuzzId": "15306",
+    "cricbuzzUrl": "https://www.cricbuzz.com/profiles/15306/tara-norris",
+    "stats": {
+      "matches": 7,
+      "runs": 12,
+      "wickets": 7,
+      "economy": 7.95,
+      "bestBowling": "5/29"
+    },
+    "auction": {
+      "year": "2026",
+      "type": "Trade",
+      "fee": "₹10 Lakh",
+      "notes": "Acquired in Pre-Auction Trade"
+    }
+  },
+  {
+    "id": "wpl_mi_latika_inamdar",
+    "name": "Latika Inamdar",
+    "role": "Wicketkeeper",
+    "teamId": "13",
+    "team": "MI-W",
+    "league": "wpl",
+    "isCaptain": false,
+    "nationality": "India",
+    "battingStyle": "Right-hand bat",
+    "bowlingStyle": "",
+    "jerseyNumber": "12",
+    "age": 24,
+    "squadStatus": "active",
+    "cricbuzzId": "26044",
+    "cricbuzzUrl": "https://www.cricbuzz.com/profiles/26044/latika-inamdar",
+    "stats": {
+      "matches": 0,
+      "runs": 0,
+      "wickets": 0
+    },
+    "auction": {
+      "year": "2026",
+      "type": "Auction",
+      "fee": "₹10 Lakh",
+      "notes": "Bought by MI in Oct 28 2026 Auction"
+    }
+  },
+  {
+    "id": "wpl_dc_jemimah_rodrigues",
+    "name": "Jemimah Rodrigues",
     "role": "Batter",
     "teamId": "11",
     "team": "DC-W",
     "league": "wpl",
     "isCaptain": true,
-    "nationality": "Australia",
+    "nationality": "India",
     "battingStyle": "Right-hand bat",
-    "bowlingStyle": "Right-arm medium",
-    "jerseyNumber": "17",
-    "age": 33,
+    "bowlingStyle": "Right-arm offbreak",
+    "jerseyNumber": "5",
+    "age": 25,
     "squadStatus": "active",
-    "cricbuzzId": "8733",
-    "cricbuzzUrl": "https://www.cricbuzz.com/profiles/8733/meg-lanning",
+    "cricbuzzId": "12821",
+    "cricbuzzUrl": "https://www.cricbuzz.com/profiles/12821/jemimah-rodrigues",
     "stats": {
       "matches": 18,
-      "runs": 676,
-      "wickets": 0,
-      "highest": 72,
-      "average": 42.25,
-      "strikeRate": 131.77,
-      "fours": 98,
-      "sixes": 10,
-      "fifties": 6
+      "runs": 362,
+      "highest": 69,
+      "average": 30.16,
+      "strikeRate": 139.76
     },
     "auction": {
       "year": "2026",
       "type": "Retained",
-      "transferable": false,
-      "fee": "₹1.10 Cr",
-      "notes": "Back-to-Back Finalist Captain"
+      "fee": "₹2.20 Cr",
+      "notes": "Captain & Primary Playmaker"
     }
   },
   {
@@ -732,21 +667,18 @@
       "highest": 84,
       "average": 33,
       "strikeRate": 168.97,
-      "fours": 69,
-      "sixes": 28,
       "fifties": 5
     },
     "auction": {
       "year": "2026",
       "type": "Retained",
-      "transferable": false,
       "fee": "₹2.00 Cr",
-      "notes": "Explosive Powerplay Opener"
+      "notes": "Explosive Opener"
     }
   },
   {
-    "id": "wpl_dc_jemimah_rodrigues",
-    "name": "Jemimah Rodrigues",
+    "id": "wpl_dc_kiran_navgire",
+    "name": "Kiran Navgire",
     "role": "Batter",
     "teamId": "11",
     "team": "DC-W",
@@ -755,27 +687,23 @@
     "nationality": "India",
     "battingStyle": "Right-hand bat",
     "bowlingStyle": "Right-arm offbreak",
-    "jerseyNumber": "5",
-    "age": 25,
+    "jerseyNumber": "25",
+    "age": 31,
     "squadStatus": "active",
-    "cricbuzzId": "12821",
-    "cricbuzzUrl": "https://www.cricbuzz.com/profiles/12821/jemimah-rodrigues",
+    "cricbuzzId": "20112",
+    "cricbuzzUrl": "https://www.cricbuzz.com/profiles/20112/kiran-navgire",
     "stats": {
-      "matches": 18,
-      "runs": 362,
-      "wickets": 0,
-      "highest": 69,
-      "average": 30.16,
-      "strikeRate": 139.76,
-      "fours": 51,
-      "sixes": 5
+      "matches": 17,
+      "runs": 284,
+      "highest": 57,
+      "strikeRate": 145.64,
+      "sixes": 16
     },
     "auction": {
       "year": "2026",
-      "type": "Retained",
-      "transferable": false,
-      "fee": "₹2.20 Cr",
-      "notes": "Middle Order Backbone"
+      "type": "Auction",
+      "fee": "₹75 Lakh",
+      "notes": "Top Indian Signing by DC in Oct 28 2026 Auction"
     }
   },
   {
@@ -800,146 +728,14 @@
       "runs": 221,
       "wickets": 20,
       "highest": 39,
-      "average": 24.55,
       "economy": 6.08,
       "bestBowling": "5/15"
     },
     "auction": {
       "year": "2026",
       "type": "Retained",
-      "transferable": false,
       "fee": "₹1.50 Cr",
-      "notes": "Most Economical Powerplay Seamer"
-    }
-  },
-  {
-    "id": "wpl_dc_alice_capsey",
-    "name": "Alice Capsey",
-    "role": "All-Rounder",
-    "allrounderType": "Batting Allrounder",
-    "teamId": "11",
-    "team": "DC-W",
-    "league": "wpl",
-    "isCaptain": false,
-    "nationality": "England",
-    "battingStyle": "Right-hand bat",
-    "bowlingStyle": "Right-arm offbreak",
-    "jerseyNumber": "64",
-    "age": 21,
-    "squadStatus": "active",
-    "cricbuzzId": "18077",
-    "cricbuzzUrl": "https://www.cricbuzz.com/profiles/18077/alice-capsey",
-    "stats": {
-      "matches": 17,
-      "runs": 300,
-      "wickets": 10,
-      "highest": 75,
-      "average": 25,
-      "strikeRate": 140.18,
-      "economy": 8.21
-    },
-    "auction": {
-      "year": "2026",
-      "type": "Retained",
-      "transferable": false,
-      "fee": "₹75 Lakh",
-      "notes": "Dynamic Allrounder"
-    }
-  },
-  {
-    "id": "wpl_dc_radha_yadav",
-    "name": "Radha Yadav",
-    "role": "Bowler",
-    "teamId": "11",
-    "team": "DC-W",
-    "league": "wpl",
-    "isCaptain": false,
-    "nationality": "India",
-    "battingStyle": "Right-hand bat",
-    "bowlingStyle": "Slow left-arm orthodox",
-    "jerseyNumber": "21",
-    "age": 25,
-    "squadStatus": "active",
-    "cricbuzzId": "13174",
-    "cricbuzzUrl": "https://www.cricbuzz.com/profiles/13174/radha-yadav",
-    "stats": {
-      "matches": 18,
-      "runs": 58,
-      "wickets": 14,
-      "highest": 16,
-      "economy": 7.72,
-      "bestBowling": "4/20"
-    },
-    "auction": {
-      "year": "2026",
-      "type": "Retained",
-      "transferable": false,
-      "fee": "₹40 Lakh",
-      "notes": "Key Left-Arm Spinner & Gun Fielder"
-    }
-  },
-  {
-    "id": "wpl_dc_shikha_pandey",
-    "name": "Shikha Pandey",
-    "role": "Bowler",
-    "teamId": "11",
-    "team": "DC-W",
-    "league": "wpl",
-    "isCaptain": false,
-    "nationality": "India",
-    "battingStyle": "Right-hand bat",
-    "bowlingStyle": "Right-arm medium",
-    "jerseyNumber": "12",
-    "age": 36,
-    "squadStatus": "active",
-    "cricbuzzId": "9691",
-    "cricbuzzUrl": "https://www.cricbuzz.com/profiles/9691/shikha-pandey",
-    "stats": {
-      "matches": 18,
-      "runs": 42,
-      "wickets": 19,
-      "highest": 27,
-      "economy": 6.88,
-      "bestBowling": "3/23"
-    },
-    "auction": {
-      "year": "2026",
-      "type": "Retained",
-      "transferable": false,
-      "fee": "₹60 Lakh",
-      "notes": "Precision Death Bowler"
-    }
-  },
-  {
-    "id": "wpl_dc_arundhati_reddy",
-    "name": "Arundhati Reddy",
-    "role": "Bowler",
-    "teamId": "11",
-    "team": "DC-W",
-    "league": "wpl",
-    "isCaptain": false,
-    "nationality": "India",
-    "battingStyle": "Right-hand bat",
-    "bowlingStyle": "Right-arm medium-fast",
-    "jerseyNumber": "8",
-    "age": 28,
-    "squadStatus": "active",
-    "cricbuzzId": "13865",
-    "cricbuzzUrl": "https://www.cricbuzz.com/profiles/13865/arundhati-reddy",
-    "stats": {
-      "matches": 16,
-      "runs": 48,
-      "wickets": 11,
-      "highest": 15,
-      "economy": 7.92,
-      "bestBowling": "2/17"
-    },
-    "auction": {
-      "year": "2026",
-      "type": "Retained",
-      "transferable": false,
-      "fee": "₹30 Lakh",
-      "notes": "Hit-the-Deck Seamer"
+      "notes": "Strike Seamer in Powerplay"
     }
   },
   {
@@ -963,124 +759,21 @@
       "matches": 8,
       "runs": 65,
       "wickets": 5,
-      "highest": 20,
-      "economy": 8.1,
-      "bestBowling": "2/28"
+      "economy": 8.1
     },
     "auction": {
       "year": "2026",
       "type": "Retained",
-      "transferable": false,
       "fee": "₹2.00 Cr",
-      "notes": "Premier Australian All-Rounder"
+      "notes": "Australian All-Round Superstar"
     }
   },
   {
-    "id": "wpl_dc_taniya_bhatia",
-    "name": "Taniya Bhatia",
-    "role": "Wicketkeeper",
-    "teamId": "11",
-    "team": "DC-W",
-    "league": "wpl",
-    "isCaptain": false,
-    "nationality": "India",
-    "battingStyle": "Right-hand bat",
-    "bowlingStyle": "",
-    "jerseyNumber": "28",
-    "age": 27,
-    "squadStatus": "active",
-    "cricbuzzId": "13176",
-    "cricbuzzUrl": "https://www.cricbuzz.com/profiles/13176/taniya-bhatia",
-    "stats": {
-      "matches": 18,
-      "runs": 12,
-      "wickets": 0,
-      "highest": 9
-    },
-    "auction": {
-      "year": "2026",
-      "type": "Retained",
-      "transferable": false,
-      "fee": "₹30 Lakh",
-      "notes": "Glovework Specialist"
-    }
-  },
-  {
-    "id": "wpl_gg_beth_mooney",
-    "name": "Beth Mooney",
-    "role": "Wicketkeeper",
-    "teamId": "12",
-    "team": "GG",
-    "league": "wpl",
-    "isCaptain": true,
-    "nationality": "Australia",
-    "battingStyle": "Left-hand bat",
-    "bowlingStyle": "",
-    "jerseyNumber": "6",
-    "age": 32,
-    "squadStatus": "active",
-    "cricbuzzId": "8739",
-    "cricbuzzUrl": "https://www.cricbuzz.com/profiles/8739/beth-mooney",
-    "stats": {
-      "matches": 9,
-      "runs": 285,
-      "wickets": 0,
-      "highest": 85,
-      "average": 47.5,
-      "strikeRate": 141.08,
-      "fours": 38,
-      "sixes": 4,
-      "fifties": 3
-    },
-    "auction": {
-      "year": "2026",
-      "type": "Retained",
-      "transferable": false,
-      "fee": "₹2.00 Cr",
-      "notes": "Giants Captain & Lead Run-Getter"
-    }
-  },
-  {
-    "id": "wpl_gg_ashleigh_gardner",
-    "name": "Ashleigh Gardner",
-    "role": "All-Rounder",
-    "allrounderType": "Batting Allrounder",
-    "teamId": "12",
-    "team": "GG",
-    "league": "wpl",
-    "isCaptain": false,
-    "nationality": "Australia",
-    "battingStyle": "Right-hand bat",
-    "bowlingStyle": "Right-arm offbreak",
-    "jerseyNumber": "63",
-    "age": 28,
-    "squadStatus": "active",
-    "cricbuzzId": "11690",
-    "cricbuzzUrl": "https://www.cricbuzz.com/profiles/11690/ashleigh-gardner",
-    "stats": {
-      "matches": 16,
-      "runs": 324,
-      "wickets": 17,
-      "highest": 60,
-      "average": 23.14,
-      "strikeRate": 131.7,
-      "economy": 8.44,
-      "bestBowling": "3/31"
-    },
-    "auction": {
-      "year": "2026",
-      "type": "Retained",
-      "transferable": false,
-      "fee": "₹3.20 Cr",
-      "notes": "Pillar All-Rounder"
-    }
-  },
-  {
-    "id": "wpl_gg_laura_wolvaardt",
+    "id": "wpl_dc_laura_wolvaardt",
     "name": "Laura Wolvaardt",
     "role": "Batter",
-    "teamId": "12",
-    "team": "GG",
+    "teamId": "11",
+    "team": "DC-W",
     "league": "wpl",
     "isCaptain": false,
     "nationality": "South Africa",
@@ -1094,117 +787,373 @@
     "stats": {
       "matches": 10,
       "runs": 322,
-      "wickets": 0,
       "highest": 76,
       "average": 35.77,
-      "strikeRate": 138.79,
-      "fours": 44,
-      "sixes": 4,
-      "fifties": 3
+      "strikeRate": 138.79
     },
     "auction": {
       "year": "2026",
       "type": "Retained",
-      "transferable": false,
       "fee": "₹60 Lakh",
-      "notes": "Class Top Order Opener"
+      "notes": "Solid Top Order Specialist"
     }
   },
   {
-    "id": "wpl_gg_phoebe_litchfield",
-    "name": "Phoebe Litchfield",
-    "role": "Batter",
+    "id": "wpl_dc_chinelle_henry",
+    "name": "Chinelle Henry",
+    "role": "All-Rounder",
+    "allrounderType": "Bowling Allrounder",
+    "teamId": "11",
+    "team": "DC-W",
+    "league": "wpl",
+    "isCaptain": false,
+    "nationality": "West Indies",
+    "battingStyle": "Right-hand bat",
+    "bowlingStyle": "Right-arm medium-fast",
+    "jerseyNumber": "3",
+    "age": 30,
+    "squadStatus": "active",
+    "cricbuzzId": "10428",
+    "cricbuzzUrl": "https://www.cricbuzz.com/profiles/10428/chinelle-henry",
+    "stats": {
+      "matches": 9,
+      "runs": 110,
+      "wickets": 6,
+      "economy": 8.12
+    },
+    "auction": {
+      "year": "2026",
+      "type": "Retained",
+      "fee": "₹30 Lakh",
+      "notes": "Hard-Hitting Pace Allrounder"
+    }
+  },
+  {
+    "id": "wpl_dc_kirstie_gordon",
+    "name": "Kirstie Gordon",
+    "role": "Bowler",
+    "teamId": "11",
+    "team": "DC-W",
+    "league": "wpl",
+    "isCaptain": false,
+    "nationality": "Scotland",
+    "battingStyle": "Right-hand bat",
+    "bowlingStyle": "Slow left-arm orthodox",
+    "jerseyNumber": "11",
+    "age": 28,
+    "squadStatus": "active",
+    "cricbuzzId": "13084",
+    "cricbuzzUrl": "https://www.cricbuzz.com/profiles/13084/kirstie-gordon",
+    "stats": {
+      "matches": 0,
+      "runs": 0,
+      "wickets": 0
+    },
+    "auction": {
+      "year": "2026",
+      "type": "Auction",
+      "fee": "₹10 Lakh",
+      "notes": "Scottish Left-Arm Spinner Bought in Oct 28 2026 Auction"
+    }
+  },
+  {
+    "id": "wpl_dc_uma_kashvi",
+    "name": "Uma Kashvi",
+    "role": "All-Rounder",
+    "allrounderType": "Bowling Allrounder",
+    "teamId": "11",
+    "team": "DC-W",
+    "league": "wpl",
+    "isCaptain": false,
+    "nationality": "India",
+    "battingStyle": "Right-hand bat",
+    "bowlingStyle": "Right-arm medium",
+    "jerseyNumber": "24",
+    "age": 18,
+    "squadStatus": "active",
+    "cricbuzzId": "26051",
+    "cricbuzzUrl": "https://www.cricbuzz.com/profiles/26051/uma-kashvi",
+    "stats": {
+      "matches": 0,
+      "runs": 0,
+      "wickets": 0
+    },
+    "auction": {
+      "year": "2026",
+      "type": "Auction",
+      "fee": "₹10 Lakh",
+      "notes": "Youngest Pick in Oct 28 2026 Auction"
+    }
+  },
+  {
+    "id": "wpl_dc_nazma_khan",
+    "name": "Nazma Khan",
+    "role": "All-Rounder",
+    "allrounderType": "Batting Allrounder",
+    "teamId": "11",
+    "team": "DC-W",
+    "league": "wpl",
+    "isCaptain": false,
+    "nationality": "India",
+    "battingStyle": "Left-hand bat",
+    "bowlingStyle": "Right-arm offbreak",
+    "jerseyNumber": "33",
+    "age": 23,
+    "squadStatus": "active",
+    "cricbuzzId": "26052",
+    "cricbuzzUrl": "https://www.cricbuzz.com/profiles/26052/nazma-khan",
+    "stats": {
+      "matches": 0,
+      "runs": 0,
+      "wickets": 0
+    },
+    "auction": {
+      "year": "2026",
+      "type": "Auction",
+      "fee": "₹10 Lakh",
+      "notes": "Bought by DC in Oct 28 2026 Auction"
+    }
+  },
+  {
+    "id": "wpl_gg_ashleigh_gardner",
+    "name": "Ashleigh Gardner",
+    "role": "All-Rounder",
+    "allrounderType": "Batting Allrounder",
+    "teamId": "12",
+    "team": "GG",
+    "league": "wpl",
+    "isCaptain": true,
+    "nationality": "Australia",
+    "battingStyle": "Right-hand bat",
+    "bowlingStyle": "Right-arm offbreak",
+    "jerseyNumber": "63",
+    "age": 28,
+    "squadStatus": "active",
+    "cricbuzzId": "11690",
+    "cricbuzzUrl": "https://www.cricbuzz.com/profiles/11690/ashleigh-gardner",
+    "stats": {
+      "matches": 16,
+      "runs": 324,
+      "wickets": 17,
+      "highest": 60,
+      "economy": 8.44,
+      "bestBowling": "3/31"
+    },
+    "auction": {
+      "year": "2026",
+      "type": "Retained",
+      "fee": "₹3.20 Cr",
+      "notes": "Giants Captain & MVP"
+    }
+  },
+  {
+    "id": "wpl_gg_beth_mooney",
+    "name": "Beth Mooney",
+    "role": "Wicketkeeper",
     "teamId": "12",
     "team": "GG",
     "league": "wpl",
     "isCaptain": false,
     "nationality": "Australia",
     "battingStyle": "Left-hand bat",
-    "bowlingStyle": "Right-arm legbreak",
-    "jerseyNumber": "18",
-    "age": 22,
+    "bowlingStyle": "",
+    "jerseyNumber": "6",
+    "age": 32,
     "squadStatus": "active",
-    "cricbuzzId": "15302",
-    "cricbuzzUrl": "https://www.cricbuzz.com/profiles/15302/phoebe-litchfield",
+    "cricbuzzId": "8739",
+    "cricbuzzUrl": "https://www.cricbuzz.com/profiles/8739/beth-mooney",
     "stats": {
-      "matches": 8,
-      "runs": 108,
-      "wickets": 0,
-      "highest": 35,
-      "strikeRate": 121.34
+      "matches": 9,
+      "runs": 285,
+      "highest": 85,
+      "average": 47.5,
+      "strikeRate": 141.08,
+      "fifties": 3
     },
     "auction": {
       "year": "2026",
       "type": "Retained",
-      "transferable": false,
-      "fee": "₹1.00 Cr",
-      "notes": "Innovative 360 Degree Batter"
+      "fee": "₹2.00 Cr",
+      "notes": "Prolific Opening Batter"
     }
   },
   {
-    "id": "wpl_gg_harleen_deol",
-    "name": "Harleen Deol",
-    "role": "Batter",
+    "id": "wpl_gg_sophie_devine",
+    "name": "Sophie Devine",
+    "role": "All-Rounder",
+    "allrounderType": "Batting Allrounder",
     "teamId": "12",
     "team": "GG",
     "league": "wpl",
     "isCaptain": false,
-    "nationality": "India",
+    "nationality": "New Zealand",
     "battingStyle": "Right-hand bat",
-    "bowlingStyle": "Right-arm legbreak",
-    "jerseyNumber": "98",
-    "age": 27,
+    "bowlingStyle": "Right-arm medium",
+    "jerseyNumber": "77",
+    "age": 36,
     "squadStatus": "active",
-    "cricbuzzId": "14197",
-    "cricbuzzUrl": "https://www.cricbuzz.com/profiles/14197/harleen-deol",
+    "cricbuzzId": "8731",
+    "cricbuzzUrl": "https://www.cricbuzz.com/profiles/8731/sophie-devine",
     "stats": {
-      "matches": 11,
-      "runs": 250,
-      "wickets": 0,
-      "highest": 67,
-      "average": 25,
-      "strikeRate": 119.61,
-      "fifties": 1
+      "matches": 18,
+      "runs": 402,
+      "wickets": 9,
+      "highest": 99,
+      "strikeRate": 158.26,
+      "sixes": 22
     },
     "auction": {
       "year": "2026",
       "type": "Retained",
-      "transferable": false,
-      "fee": "₹40 Lakh",
-      "notes": "Middle Order Stroke Maker"
+      "fee": "₹50 Lakh",
+      "notes": "Power Hitter & All-Rounder"
     }
   },
   {
-    "id": "wpl_gg_dayalan_hemalatha",
-    "name": "Dayalan Hemalatha",
-    "role": "Batter",
+    "id": "wpl_gg_georgia_wareham",
+    "name": "Georgia Wareham",
+    "role": "All-Rounder",
+    "allrounderType": "Bowling Allrounder",
     "teamId": "12",
     "team": "GG",
     "league": "wpl",
     "isCaptain": false,
-    "nationality": "India",
+    "nationality": "Australia",
     "battingStyle": "Right-hand bat",
-    "bowlingStyle": "Right-arm offbreak",
-    "jerseyNumber": "4",
-    "age": 31,
+    "bowlingStyle": "Right-arm legbreak",
+    "jerseyNumber": "35",
+    "age": 26,
     "squadStatus": "active",
-    "cricbuzzId": "13866",
-    "cricbuzzUrl": "https://www.cricbuzz.com/profiles/13866/dayalan-hemalatha",
+    "cricbuzzId": "13083",
+    "cricbuzzUrl": "https://www.cricbuzz.com/profiles/13083/georgia-wareham",
     "stats": {
       "matches": 14,
-      "runs": 266,
-      "wickets": 1,
-      "highest": 74,
-      "average": 26.6,
-      "strikeRate": 148.6,
-      "fifties": 2
+      "runs": 135,
+      "wickets": 10,
+      "highest": 48,
+      "economy": 7.95
     },
     "auction": {
       "year": "2026",
       "type": "Retained",
-      "transferable": false,
+      "fee": "₹40 Lakh",
+      "notes": "Leg-Spin Allrounder"
+    }
+  },
+  {
+    "id": "wpl_gg_yastika_bhatia",
+    "name": "Yastika Bhatia",
+    "role": "Wicketkeeper",
+    "teamId": "12",
+    "team": "GG",
+    "league": "wpl",
+    "isCaptain": false,
+    "nationality": "India",
+    "battingStyle": "Left-hand bat",
+    "bowlingStyle": "",
+    "jerseyNumber": "19",
+    "age": 25,
+    "squadStatus": "active",
+    "cricbuzzId": "14801",
+    "cricbuzzUrl": "https://www.cricbuzz.com/profiles/14801/yastika-bhatia",
+    "stats": {
+      "matches": 19,
+      "runs": 399,
+      "highest": 57,
+      "strikeRate": 116.32
+    },
+    "auction": {
+      "year": "2026",
+      "type": "Retained",
+      "fee": "₹1.50 Cr",
+      "notes": "Top Order Wicketkeeper-Batter"
+    }
+  },
+  {
+    "id": "wpl_gg_renuka_singh",
+    "name": "Renuka Singh Thakur",
+    "role": "Bowler",
+    "teamId": "12",
+    "team": "GG",
+    "league": "wpl",
+    "isCaptain": false,
+    "nationality": "India",
+    "battingStyle": "Right-hand bat",
+    "bowlingStyle": "Right-arm medium-fast",
+    "jerseyNumber": "10",
+    "age": 29,
+    "squadStatus": "active",
+    "cricbuzzId": "14945",
+    "cricbuzzUrl": "https://www.cricbuzz.com/profiles/14945/renuka-singh",
+    "stats": {
+      "matches": 16,
+      "runs": 6,
+      "wickets": 7,
+      "economy": 8.24,
+      "bestBowling": "2/14"
+    },
+    "auction": {
+      "year": "2026",
+      "type": "Retained",
+      "fee": "₹1.50 Cr",
+      "notes": "Frontline Swing Specialist"
+    }
+  },
+  {
+    "id": "wpl_gg_g_kamalini",
+    "name": "G Kamalini",
+    "role": "Wicketkeeper",
+    "teamId": "12",
+    "team": "GG",
+    "league": "wpl",
+    "isCaptain": false,
+    "nationality": "India",
+    "battingStyle": "Right-hand bat",
+    "bowlingStyle": "",
+    "jerseyNumber": "27",
+    "age": 18,
+    "squadStatus": "active",
+    "cricbuzzId": "26039",
+    "cricbuzzUrl": "https://www.cricbuzz.com/profiles/26039/g-kamalini",
+    "stats": {
+      "matches": 0,
+      "runs": 0,
+      "wickets": 0
+    },
+    "auction": {
+      "year": "2026",
+      "type": "Auction",
+      "fee": "₹40 Lakh",
+      "notes": "Significant Pick by GG in Oct 28 2026 Auction"
+    }
+  },
+  {
+    "id": "wpl_gg_orla_prendergast",
+    "name": "Orla Prendergast",
+    "role": "All-Rounder",
+    "allrounderType": "Batting Allrounder",
+    "teamId": "12",
+    "team": "GG",
+    "league": "wpl",
+    "isCaptain": false,
+    "nationality": "Ireland",
+    "battingStyle": "Right-hand bat",
+    "bowlingStyle": "Right-arm medium-fast",
+    "jerseyNumber": "15",
+    "age": 24,
+    "squadStatus": "active",
+    "cricbuzzId": "15305",
+    "cricbuzzUrl": "https://www.cricbuzz.com/profiles/15305/orla-prendergast",
+    "stats": {
+      "matches": 0,
+      "runs": 0,
+      "wickets": 0
+    },
+    "auction": {
+      "year": "2026",
+      "type": "Auction",
       "fee": "₹30 Lakh",
-      "notes": "Aggressive Number 3"
+      "notes": "Historic First Irish Player in WPL (Oct 28 2026 Auction)"
     }
   },
   {
@@ -1227,85 +1176,19 @@
       "matches": 16,
       "runs": 68,
       "wickets": 15,
-      "highest": 28,
       "economy": 7.78,
       "bestBowling": "2/21"
     },
     "auction": {
       "year": "2026",
       "type": "Retained",
-      "transferable": false,
       "fee": "₹50 Lakh",
-      "notes": "Leading Spinner for Giants"
+      "notes": "Lead Spinner for Giants"
     }
   },
   {
-    "id": "wpl_gg_shabnam_shakil",
-    "name": "Shabnam Shakil",
-    "role": "Bowler",
-    "teamId": "12",
-    "team": "GG",
-    "league": "wpl",
-    "isCaptain": false,
-    "nationality": "India",
-    "battingStyle": "Right-hand bat",
-    "bowlingStyle": "Right-arm medium-fast",
-    "jerseyNumber": "29",
-    "age": 18,
-    "squadStatus": "active",
-    "cricbuzzId": "22644",
-    "cricbuzzUrl": "https://www.cricbuzz.com/profiles/22644/shabnam-shakil",
-    "stats": {
-      "matches": 4,
-      "runs": 0,
-      "wickets": 4,
-      "highest": 0,
-      "economy": 7.5,
-      "bestBowling": "3/11"
-    },
-    "auction": {
-      "year": "2026",
-      "type": "Retained",
-      "transferable": false,
-      "fee": "₹10 Lakh",
-      "notes": "Young Pace Prodigy"
-    }
-  },
-  {
-    "id": "wpl_gg_meghna_singh",
-    "name": "Meghna Singh",
-    "role": "Bowler",
-    "teamId": "12",
-    "team": "GG",
-    "league": "wpl",
-    "isCaptain": false,
-    "nationality": "India",
-    "battingStyle": "Right-hand bat",
-    "bowlingStyle": "Right-arm medium",
-    "jerseyNumber": "16",
-    "age": 31,
-    "squadStatus": "active",
-    "cricbuzzId": "14946",
-    "cricbuzzUrl": "https://www.cricbuzz.com/profiles/14946/meghna-singh",
-    "stats": {
-      "matches": 10,
-      "runs": 8,
-      "wickets": 7,
-      "highest": 4,
-      "economy": 8.92,
-      "bestBowling": "4/37"
-    },
-    "auction": {
-      "year": "2026",
-      "type": "Auction",
-      "transferable": false,
-      "fee": "₹30 Lakh",
-      "notes": "Opening Spell Seamer"
-    }
-  },
-  {
-    "id": "wpl_gg_sayali_satghare",
-    "name": "Sayali Satghare",
+    "id": "wpl_gg_samaira_raghav",
+    "name": "Samaira Raghav",
     "role": "All-Rounder",
     "allrounderType": "Bowling Allrounder",
     "teamId": "12",
@@ -1315,30 +1198,27 @@
     "nationality": "India",
     "battingStyle": "Right-hand bat",
     "bowlingStyle": "Right-arm medium",
-    "jerseyNumber": "22",
-    "age": 25,
+    "jerseyNumber": "23",
+    "age": 17,
     "squadStatus": "active",
-    "cricbuzzId": "26042",
-    "cricbuzzUrl": "https://www.cricbuzz.com/profiles/26042/sayali-satghare",
+    "cricbuzzId": "26056",
+    "cricbuzzUrl": "https://www.cricbuzz.com/profiles/26056/samaira-raghav",
     "stats": {
-      "matches": 3,
-      "runs": 12,
-      "wickets": 1,
-      "highest": 8,
-      "economy": 8.25
+      "matches": 0,
+      "runs": 0,
+      "wickets": 0
     },
     "auction": {
       "year": "2026",
       "type": "Auction",
-      "transferable": false,
       "fee": "₹10 Lakh",
-      "notes": "Domestic All-Round Performer"
+      "notes": "Young Prodigy Picked in Oct 28 2026 Auction"
     }
   },
   {
-    "id": "wpl_upw_alyssa_healy",
-    "name": "Alyssa Healy",
-    "role": "Wicketkeeper",
+    "id": "wpl_upw_meg_lanning",
+    "name": "Meg Lanning",
+    "role": "Batter",
     "teamId": "15",
     "team": "UPW",
     "league": "wpl",
@@ -1346,28 +1226,24 @@
     "nationality": "Australia",
     "battingStyle": "Right-hand bat",
     "bowlingStyle": "",
-    "jerseyNumber": "77",
-    "age": 35,
+    "jerseyNumber": "17",
+    "age": 33,
     "squadStatus": "active",
-    "cricbuzzId": "8732",
-    "cricbuzzUrl": "https://www.cricbuzz.com/profiles/8732/alyssa-healy",
+    "cricbuzzId": "8733",
+    "cricbuzzUrl": "https://www.cricbuzz.com/profiles/8733/meg-lanning",
     "stats": {
-      "matches": 17,
-      "runs": 428,
-      "wickets": 0,
-      "highest": 96,
-      "average": 26.75,
-      "strikeRate": 128.91,
-      "fours": 62,
-      "sixes": 7,
-      "fifties": 3
+      "matches": 18,
+      "runs": 676,
+      "highest": 72,
+      "average": 42.25,
+      "strikeRate": 131.77,
+      "fifties": 6
     },
     "auction": {
       "year": "2026",
       "type": "Retained",
-      "transferable": false,
-      "fee": "₹70 Lakh",
-      "notes": "Captain & World Class Opener"
+      "fee": "₹1.10 Cr",
+      "notes": "Captain & Legend"
     }
   },
   {
@@ -1392,8 +1268,6 @@
       "runs": 385,
       "wickets": 19,
       "highest": 88,
-      "average": 32.08,
-      "strikeRate": 119.56,
       "economy": 7.78,
       "bestBowling": "4/19",
       "hattricks": 1
@@ -1401,9 +1275,8 @@
     "auction": {
       "year": "2026",
       "type": "Retained",
-      "transferable": false,
       "fee": "₹2.60 Cr",
-      "notes": "Premier India All-Rounder & Hat-trick Taker"
+      "notes": "Premier Indian All-Rounder"
     }
   },
   {
@@ -1426,7 +1299,6 @@
       "matches": 17,
       "runs": 128,
       "wickets": 27,
-      "highest": 33,
       "average": 16.48,
       "economy": 6.68,
       "bestBowling": "4/13"
@@ -1434,9 +1306,39 @@
     "auction": {
       "year": "2026",
       "type": "Retained",
-      "transferable": false,
       "fee": "₹1.80 Cr",
       "notes": "World No.1 T20I Bowler"
+    }
+  },
+  {
+    "id": "wpl_upw_sophie_molineux",
+    "name": "Sophie Molineux",
+    "role": "All-Rounder",
+    "allrounderType": "Bowling Allrounder",
+    "teamId": "15",
+    "team": "UPW",
+    "league": "wpl",
+    "isCaptain": false,
+    "nationality": "Australia",
+    "battingStyle": "Left-hand bat",
+    "bowlingStyle": "Slow left-arm orthodox",
+    "jerseyNumber": "5",
+    "age": 28,
+    "squadStatus": "active",
+    "cricbuzzId": "11691",
+    "cricbuzzUrl": "https://www.cricbuzz.com/profiles/11691/sophie-molineux",
+    "stats": {
+      "matches": 10,
+      "runs": 85,
+      "wickets": 12,
+      "economy": 7.3,
+      "bestBowling": "3/20"
+    },
+    "auction": {
+      "year": "2026",
+      "type": "Auction",
+      "fee": "₹1.10 Cr",
+      "notes": "Highest Bid Player in Oct 28 2026 Auction"
     }
   },
   {
@@ -1462,57 +1364,20 @@
       "wickets": 3,
       "highest": 72,
       "average": 39.77,
-      "strikeRate": 161.99,
-      "fours": 44,
-      "sixes": 17,
-      "fifties": 3
+      "strikeRate": 161.99
     },
     "auction": {
       "year": "2026",
-      "type": "Retained",
-      "transferable": false,
-      "fee": "₹75 Lakh",
-      "notes": "Clutch Power Finisher"
+      "type": "Auction",
+      "fee": "₹30 Lakh",
+      "notes": "Re-acquired by UPW in Oct 28 2026 Auction"
     }
   },
   {
-    "id": "wpl_upw_tahlia_mcgrath",
-    "name": "Tahlia McGrath",
+    "id": "wpl_upw_sneh_rana",
+    "name": "Sneh Rana",
     "role": "All-Rounder",
-    "allrounderType": "Batting Allrounder",
-    "teamId": "15",
-    "team": "UPW",
-    "league": "wpl",
-    "isCaptain": false,
-    "nationality": "Australia",
-    "battingStyle": "Right-hand bat",
-    "bowlingStyle": "Right-arm medium",
-    "jerseyNumber": "31",
-    "age": 30,
-    "squadStatus": "active",
-    "cricbuzzId": "11771",
-    "cricbuzzUrl": "https://www.cricbuzz.com/profiles/11771/tahlia-mcgrath",
-    "stats": {
-      "matches": 16,
-      "runs": 342,
-      "wickets": 6,
-      "highest": 90,
-      "average": 28.5,
-      "strikeRate": 143.69,
-      "fifties": 4
-    },
-    "auction": {
-      "year": "2026",
-      "type": "Retained",
-      "transferable": false,
-      "fee": "₹1.40 Cr",
-      "notes": "Vice Captain & Top Order Bat"
-    }
-  },
-  {
-    "id": "wpl_upw_kiran_navgire",
-    "name": "Kiran Navgire",
-    "role": "Batter",
+    "allrounderType": "Bowling Allrounder",
     "teamId": "15",
     "team": "UPW",
     "league": "wpl",
@@ -1520,32 +1385,28 @@
     "nationality": "India",
     "battingStyle": "Right-hand bat",
     "bowlingStyle": "Right-arm offbreak",
-    "jerseyNumber": "25",
+    "jerseyNumber": "2",
     "age": 31,
     "squadStatus": "active",
-    "cricbuzzId": "20112",
-    "cricbuzzUrl": "https://www.cricbuzz.com/profiles/20112/kiran-navgire",
+    "cricbuzzId": "9693",
+    "cricbuzzUrl": "https://www.cricbuzz.com/profiles/9693/sneh-rana",
     "stats": {
-      "matches": 17,
-      "runs": 284,
-      "wickets": 0,
-      "highest": 57,
-      "strikeRate": 145.64,
-      "fours": 28,
-      "sixes": 16,
-      "fifties": 2
+      "matches": 15,
+      "runs": 124,
+      "wickets": 10,
+      "economy": 8.65,
+      "bestBowling": "2/17"
     },
     "auction": {
       "year": "2026",
-      "type": "Retained",
-      "transferable": false,
+      "type": "Auction",
       "fee": "₹30 Lakh",
-      "notes": "Pinch Hitter & Big Six Hitter"
+      "notes": "Key Acquisition in Oct 28 2026 Auction"
     }
   },
   {
-    "id": "wpl_upw_rajeshwari_gayakwad",
-    "name": "Rajeshwari Gayakwad",
+    "id": "wpl_upw_asha_sobhana",
+    "name": "Asha Sobhana",
     "role": "Bowler",
     "teamId": "15",
     "team": "UPW",
@@ -1553,121 +1414,112 @@
     "isCaptain": false,
     "nationality": "India",
     "battingStyle": "Right-hand bat",
-    "bowlingStyle": "Slow left-arm orthodox",
-    "jerseyNumber": "1",
+    "bowlingStyle": "Right-arm legbreak",
+    "jerseyNumber": "11",
     "age": 34,
     "squadStatus": "active",
-    "cricbuzzId": "9692",
-    "cricbuzzUrl": "https://www.cricbuzz.com/profiles/9692/rajeshwari-gayakwad",
+    "cricbuzzId": "22638",
+    "cricbuzzUrl": "https://www.cricbuzz.com/profiles/22638/asha-sobhana",
     "stats": {
-      "matches": 16,
-      "runs": 5,
-      "wickets": 13,
-      "highest": 3,
-      "economy": 8.12,
-      "bestBowling": "2/22"
-    },
-    "auction": {
-      "year": "2026",
-      "type": "Retained",
-      "transferable": false,
-      "fee": "₹40 Lakh",
-      "notes": "Experienced India Orthodox Spinner"
-    }
-  },
-  {
-    "id": "wpl_upw_shweta_sehrawat",
-    "name": "Shweta Sehrawat",
-    "role": "Batter",
-    "teamId": "15",
-    "team": "UPW",
-    "league": "wpl",
-    "isCaptain": false,
-    "nationality": "India",
-    "battingStyle": "Right-hand bat",
-    "bowlingStyle": "Right-arm offbreak",
-    "jerseyNumber": "9",
-    "age": 21,
-    "squadStatus": "active",
-    "cricbuzzId": "22641",
-    "cricbuzzUrl": "https://www.cricbuzz.com/profiles/22641/shweta-sehrawat",
-    "stats": {
-      "matches": 12,
-      "runs": 125,
-      "wickets": 0,
-      "highest": 45,
-      "strikeRate": 114.67
-    },
-    "auction": {
-      "year": "2026",
-      "type": "Retained",
-      "transferable": false,
-      "fee": "₹40 Lakh",
-      "notes": "U19 World Cup Top Scorer"
-    }
-  },
-  {
-    "id": "wpl_upw_vrinda_dinesh",
-    "name": "Vrinda Dinesh",
-    "role": "Batter",
-    "teamId": "15",
-    "team": "UPW",
-    "league": "wpl",
-    "isCaptain": false,
-    "nationality": "India",
-    "battingStyle": "Right-hand bat",
-    "bowlingStyle": "Right-arm legbreak",
-    "jerseyNumber": "17",
-    "age": 24,
-    "squadStatus": "active",
-    "cricbuzzId": "26034",
-    "cricbuzzUrl": "https://www.cricbuzz.com/profiles/26034/vrinda-dinesh",
-    "stats": {
-      "matches": 3,
+      "matches": 15,
       "runs": 18,
-      "wickets": 0,
-      "highest": 18,
-      "strikeRate": 85.71
+      "wickets": 17,
+      "highest": 8,
+      "economy": 7.78,
+      "bestBowling": "5/22"
+    },
+    "auction": {
+      "year": "2026",
+      "type": "Auction",
+      "fee": "₹30 Lakh",
+      "notes": "Bought back by UPW in Oct 28 2026 Auction"
+    }
+  },
+  {
+    "id": "wpl_upw_sushma_verma",
+    "name": "Sushma Verma",
+    "role": "Wicketkeeper",
+    "teamId": "15",
+    "team": "UPW",
+    "league": "wpl",
+    "isCaptain": false,
+    "nationality": "India",
+    "battingStyle": "Right-hand bat",
+    "bowlingStyle": "",
+    "jerseyNumber": "8",
+    "age": 33,
+    "squadStatus": "active",
+    "cricbuzzId": "9083",
+    "cricbuzzUrl": "https://www.cricbuzz.com/profiles/9083/sushma-verma",
+    "stats": {
+      "matches": 8,
+      "runs": 58,
+      "highest": 18
+    },
+    "auction": {
+      "year": "2026",
+      "type": "Auction",
+      "fee": "₹30 Lakh",
+      "notes": "Bought by UPW in Oct 28 2026 Auction"
+    }
+  },
+  {
+    "id": "wpl_upw_phoebe_litchfield",
+    "name": "Phoebe Litchfield",
+    "role": "Batter",
+    "teamId": "15",
+    "team": "UPW",
+    "league": "wpl",
+    "isCaptain": false,
+    "nationality": "Australia",
+    "battingStyle": "Left-hand bat",
+    "bowlingStyle": "Right-arm legbreak",
+    "jerseyNumber": "18",
+    "age": 22,
+    "squadStatus": "active",
+    "cricbuzzId": "15302",
+    "cricbuzzUrl": "https://www.cricbuzz.com/profiles/15302/phoebe-litchfield",
+    "stats": {
+      "matches": 8,
+      "runs": 108,
+      "highest": 35,
+      "strikeRate": 121.34
     },
     "auction": {
       "year": "2026",
       "type": "Retained",
-      "transferable": false,
-      "fee": "₹1.30 Cr",
-      "notes": "Auction Sensation Top Order Bat"
+      "fee": "₹1.00 Cr",
+      "notes": "Dynamic 360 Batter"
     }
   },
   {
-    "id": "wpl_upw_poonam_khemnar",
-    "name": "Poonam Khemnar",
+    "id": "wpl_upw_kathryn_bryce",
+    "name": "Kathryn Bryce",
     "role": "All-Rounder",
     "allrounderType": "Batting Allrounder",
     "teamId": "15",
     "team": "UPW",
     "league": "wpl",
     "isCaptain": false,
-    "nationality": "India",
+    "nationality": "Scotland",
     "battingStyle": "Right-hand bat",
-    "bowlingStyle": "Right-arm legbreak",
-    "jerseyNumber": "33",
+    "bowlingStyle": "Right-arm medium",
+    "jerseyNumber": "27",
     "age": 28,
     "squadStatus": "active",
-    "cricbuzzId": "22647",
-    "cricbuzzUrl": "https://www.cricbuzz.com/profiles/22647/poonam-khemnar",
+    "cricbuzzId": "13085",
+    "cricbuzzUrl": "https://www.cricbuzz.com/profiles/13085/kathryn-bryce",
     "stats": {
       "matches": 8,
-      "runs": 82,
-      "wickets": 2,
-      "highest": 31,
-      "average": 20.5,
-      "economy": 8.5
+      "runs": 124,
+      "wickets": 5,
+      "economy": 7.9
     },
     "auction": {
       "year": "2026",
-      "type": "Retained",
-      "transferable": false,
+      "type": "Auction",
       "fee": "₹10 Lakh",
-      "notes": "Hard Hitting Lower Order Batter"
+      "notes": "Associate Allrounder Bought in Oct 28 2026 Auction"
     }
   }
 ]
