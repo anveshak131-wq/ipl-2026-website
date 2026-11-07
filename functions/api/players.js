@@ -25,21 +25,30 @@ export const onRequest = async (context) => {
       const kvKey = league === "wpl" ? "players:wpl" : "players:ipl";
       let players = [];
 
-      // Try reading from isolated KV namespace
       if (env?.SPORTS_KV) {
         players = (await env.SPORTS_KV.get(kvKey, "json")) || [];
       } else if (env?.IPL_CACHE && league === "ipl") {
         players = (await env.IPL_CACHE.get("players", "json")) || [];
       }
 
-      // FAIL-SAFE IMMUNITY: Fall back to disk bundle if KV is wiped, empty, or incomplete
-      if (league === "ipl" && (!Array.isArray(players) || players.length === 0)) {
+      // AUTO-HEALING: If KV contains rotated/corrupted team IDs (e.g. Beth Mooney in 14), reset to fallback
+      if (league === "wpl") {
+        const isCorrupted = Array.isArray(players) && players.some(p =>
+          (String(p.name).includes('Mooney') && String(p.teamId) === '14') ||
+          (String(p.name).includes('Harmanpreet') && String(p.teamId) === '11') ||
+          (String(p.name).includes('Mandhana') && String(p.teamId) === '12') ||
+          (String(p.id).includes('wpl_gg') && String(p.teamId) === '14') ||
+          (String(p.id).includes('wpl-gg') && String(p.teamId) === '14')
+        );
+
+        if (isCorrupted || !Array.isArray(players) || players.length === 0 || url.searchParams.get("realign") === "true") {
+          players = fallbackWplPlayers;
+          if (env?.SPORTS_KV) context.waitUntil(env.SPORTS_KV.put(kvKey, JSON.stringify(fallbackWplPlayers)).catch(() => {}));
+        }
+      } else if (league === "ipl" && (!Array.isArray(players) || players.length === 0)) {
         players = fallbackIplPlayers;
         if (env?.SPORTS_KV) context.waitUntil(env.SPORTS_KV.put(kvKey, JSON.stringify(fallbackIplPlayers)).catch(() => {}));
         if (env?.IPL_CACHE) context.waitUntil(env.IPL_CACHE.put("players", JSON.stringify(fallbackIplPlayers)).catch(() => {}));
-      } else if (league === "wpl" && (!Array.isArray(players) || players.length === 0)) {
-        players = fallbackWplPlayers;
-        if (env?.SPORTS_KV) context.waitUntil(env.SPORTS_KV.put(kvKey, JSON.stringify(fallbackWplPlayers)).catch(() => {}));
       }
 
       return new Response(JSON.stringify(players), {
@@ -49,12 +58,22 @@ export const onRequest = async (context) => {
     }
 
     // -------------------------------------------------------------
-    // POST /api/players (Add, Bulk Replace, or Update Player)
+    // POST / PUT /api/players
     // -------------------------------------------------------------
     if (request.method === "POST" || request.method === "PUT") {
-      const body = await request.json();
+      const body = await request.json().catch(() => ({}));
       const targetLeague = (body.league || league || "ipl").toLowerCase();
       const kvKey = targetLeague === "wpl" ? "players:wpl" : "players:ipl";
+
+      // Explicit Squad Re-alignment action
+      if (body.action === "realign" || body.realign === true) {
+        const resetData = targetLeague === "wpl" ? fallbackWplPlayers : fallbackIplPlayers;
+        if (env?.SPORTS_KV) await env.SPORTS_KV.put(kvKey, JSON.stringify(resetData));
+        return new Response(JSON.stringify({ success: true, count: resetData.length, players: resetData }), {
+          status: 200,
+          headers: { "Content-Type": "application/json", ...corsHeaders }
+        });
+      }
 
       let currentPlayers = [];
       if (env?.SPORTS_KV) {
@@ -63,22 +82,18 @@ export const onRequest = async (context) => {
         currentPlayers = (await env.IPL_CACHE.get("players", "json")) || [];
       }
 
-      // If current is empty, seed from bundled master first
       if (!currentPlayers || currentPlayers.length === 0) {
         currentPlayers = targetLeague === "wpl" ? [...fallbackWplPlayers] : [...fallbackIplPlayers];
       }
 
-      // Bulk snapshot replacement (used by Restore button)
       if (body.bulk && Array.isArray(body.players)) {
         if (env?.SPORTS_KV) await env.SPORTS_KV.put(kvKey, JSON.stringify(body.players));
-        if (env?.IPL_CACHE && targetLeague === "ipl") await env.IPL_CACHE.put("players", JSON.stringify(body.players));
         return new Response(JSON.stringify({ success: true, count: body.players.length }), {
           status: 200,
           headers: { "Content-Type": "application/json", ...corsHeaders }
         });
       }
 
-      // Single player Upsert
       const incoming = body;
       const id = String(incoming.id || Date.now());
       const playerIndex = currentPlayers.findIndex(p => String(p.id) === id);
@@ -89,8 +104,8 @@ export const onRequest = async (context) => {
           ...existing,
           ...incoming,
           id,
-          careerStats: incoming.careerStats && Object.keys(incoming.careerStats).length > 0 
-            ? incoming.careerStats 
+          careerStats: incoming.careerStats && Object.keys(incoming.careerStats).length > 0
+            ? incoming.careerStats
             : (existing.careerStats || { batting: {}, bowling: {} }),
           cricbuzzUrl: incoming.cricbuzzUrl || existing.cricbuzzUrl || '',
           cricbuzzId: incoming.cricbuzzId || existing.cricbuzzId || '',
@@ -100,9 +115,6 @@ export const onRequest = async (context) => {
       }
 
       if (env?.SPORTS_KV) await env.SPORTS_KV.put(kvKey, JSON.stringify(currentPlayers));
-      if (env?.IPL_CACHE && targetLeague === "ipl") await env.IPL_CACHE.put("players", JSON.stringify(currentPlayers));
-      if (env?.IPL_CACHE && targetLeague === "wpl") await env.IPL_CACHE.put("players:wpl", JSON.stringify(currentPlayers));
-      if (env?.IPL_CACHE && targetLeague === "ipl") await env.IPL_CACHE.put("players", JSON.stringify(currentPlayers));
 
       return new Response(JSON.stringify({ success: true, player: incoming }), {
         status: 200,
@@ -125,7 +137,6 @@ export const onRequest = async (context) => {
 
       const filtered = players.filter(p => String(p.id) !== String(playerId));
       if (env?.SPORTS_KV) await env.SPORTS_KV.put(kvKey, JSON.stringify(filtered));
-      if (env?.IPL_CACHE && league === "ipl") await env.IPL_CACHE.put("players", JSON.stringify(filtered));
 
       return new Response(JSON.stringify({ success: true, remaining: filtered.length }), {
         status: 200,

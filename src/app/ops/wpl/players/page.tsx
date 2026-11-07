@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import {
   Search, Plus, RefreshCw, Trash2, Edit2, Shield,
-  ExternalLink, Sparkles, User, Check, X, ChevronDown, ChevronUp, BarChart2
+  ExternalLink, Sparkles, User, Check, X, ChevronDown, ChevronUp, BarChart2, RotateCcw
 } from 'lucide-react';
 
 interface Player {
@@ -45,21 +45,20 @@ const WPL_TEAMS = [
 const STAT_FORMATS = ['Test', 'ODI', 'T20I', 'WPL'];
 
 function playerMatchesTeam(player: Player, team: typeof WPL_TEAMS[0]): boolean {
+  const pId = String(player.id || '').toLowerCase();
   const pTeamId = String(player.teamId || '').toLowerCase().trim();
   const pTeam = String(player.team || '').toLowerCase().trim();
-  const slug = team.slug.toLowerCase();
-  const short = team.short.toLowerCase();
-  const id = team.id.toLowerCase();
-  const name = team.name.toLowerCase();
 
-  if (pTeamId === id || pTeamId === slug || pTeamId === short) return true;
-  if (pTeam === name || pTeam === short || pTeam === slug) return true;
+  // 1. Strict ID Prefix check
+  if (team.slug === 'rcb-w' && (pId.includes('wpl_rcb') || pId.includes('wpl-rcb'))) return true;
+  if (team.slug === 'mi-w' && (pId.includes('wpl_mi') || pId.includes('wpl-mi'))) return true;
+  if (team.slug === 'dc-w' && (pId.includes('wpl_dc') || pId.includes('wpl-dc'))) return true;
+  if (team.slug === 'gg' && (pId.includes('wpl_gg') || pId.includes('wpl-gg'))) return true;
+  if (team.slug === 'upw' && (pId.includes('wpl_upw') || pId.includes('wpl-upw'))) return true;
 
-  if (slug === 'rcb-w' && (pTeamId.includes('rcb') || pTeam.includes('rcb') || pTeam.includes('bangalore') || pTeam.includes('bengaluru'))) return true;
-  if (slug === 'mi-w' && (pTeamId.includes('mi') || pTeam.includes('mumbai'))) return true;
-  if (slug === 'dc-w' && (pTeamId.includes('dc') || pTeam.includes('delhi'))) return true;
-  if (slug === 'gg' && (pTeamId.includes('gg') || pTeam.includes('gujarat'))) return true;
-  if (slug === 'upw' && (pTeamId.includes('upw') || pTeam.includes('warrior') || pTeam.includes('up '))) return true;
+  // 2. Strict ID or Slug check
+  if (pTeamId === team.id || pTeamId === team.slug) return true;
+  if (pTeam === team.name.toLowerCase() || pTeam === team.short.toLowerCase()) return true;
 
   return false;
 }
@@ -70,6 +69,7 @@ export default function WplPlayersCleanOpsPage() {
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [roleFilter, setRoleFilter] = useState<string>('ALL');
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isRealigning, setIsRealigning] = useState<boolean>(false);
   const [expandedStatsPlayerId, setExpandedStatsPlayerId] = useState<string | null>(null);
 
   // Modal State
@@ -86,7 +86,7 @@ export default function WplPlayersCleanOpsPage() {
     name: '',
     role: 'All-rounder',
     allrounderType: 'Batting Allrounder',
-    teamId: 'rcb-w',
+    teamId: '14',
     team: 'Royal Challengers Bengaluru',
     league: 'wpl',
     nationality: 'India',
@@ -120,6 +120,29 @@ export default function WplPlayersCleanOpsPage() {
     loadPlayers();
   }, []);
 
+  const handleRealignSquads = async () => {
+    if (!confirm('This will synchronize all 5 WPL franchise squads to their authentic official rosters. Continue?')) return;
+    setIsRealigning(true);
+    try {
+      const res = await fetch('/api/players?league=wpl', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'realign', league: 'wpl' })
+      });
+      const payload = await res.json();
+      if (payload.success && Array.isArray(payload.players)) {
+        setPlayers(payload.players);
+        alert('✓ Squads successfully re-aligned to official franchise rosters!');
+      } else {
+        await loadPlayers();
+      }
+    } catch (e: any) {
+      alert('Error realigning squads: ' + e.message);
+    } finally {
+      setIsRealigning(false);
+    }
+  };
+
   const activeTeam = useMemo(() => {
     return WPL_TEAMS.find((t) => t.id === selectedTeamId) || WPL_TEAMS[0];
   }, [selectedTeamId]);
@@ -145,7 +168,7 @@ export default function WplPlayersCleanOpsPage() {
       name: '',
       role: 'All-rounder',
       allrounderType: 'Batting Allrounder',
-      teamId: activeTeam.slug,
+      teamId: activeTeam.id,
       team: activeTeam.name,
       league: 'wpl',
       nationality: 'India',
@@ -170,7 +193,7 @@ export default function WplPlayersCleanOpsPage() {
     setActiveModalTab('profile');
     setFormData({
       ...p,
-      teamId: p.teamId || activeTeam.slug,
+      teamId: p.teamId || activeTeam.id,
       team: p.team || activeTeam.name
     });
     setIsModalOpen(true);
@@ -199,11 +222,11 @@ export default function WplPlayersCleanOpsPage() {
       try {
         payload = JSON.parse(text);
       } catch (parseErr) {
-        throw new Error(`Server returned non-JSON response (${res.status})`);
+        throw new Error('Invalid response from server');
       }
 
       if (!res.ok || !payload.success) {
-        throw new Error(payload.error || `Scrape failed with status ${res.status}`);
+        throw new Error(payload.error || 'Scrape failed');
       }
 
       const bio = payload.bio || {};
@@ -226,7 +249,7 @@ export default function WplPlayersCleanOpsPage() {
 
       const batCount = Object.keys(stats.batting || {}).length;
       const bowlCount = Object.keys(stats.bowling || {}).length;
-      setScrapeSuccess(`✓ Successfully extracted ${bio.name || 'player'}: ${bio.nationality || 'Nationality'}, ${bio.role || 'Role'}, DOB: ${bio.dateOfBirth || '—'}, and Stats (${batCount} Batting, ${bowlCount} Bowling formats)!`);
+      setScrapeSuccess('✓ Auto-filled ' + (bio.name || 'player') + ': ' + bio.nationality + ', ' + bio.role + ', DOB: ' + (bio.dateOfBirth || '—') + ', and Stats (' + batCount + ' Batting, ' + bowlCount + ' Bowling formats)!');
     } catch (err: any) {
       setScrapeError(err.message || 'Error communicating with Cricbuzz scraper');
     } finally {
@@ -240,12 +263,12 @@ export default function WplPlayersCleanOpsPage() {
       return;
     }
 
-    const assignedTeam = WPL_TEAMS.find((t) => t.slug === formData.teamId || t.id === formData.teamId) || activeTeam;
+    const assignedTeam = WPL_TEAMS.find((t) => t.id === formData.teamId || t.slug === formData.teamId) || activeTeam;
 
     const payload: Player = {
-      id: editingPlayer?.id || `wpl_${assignedTeam.slug}_${formData.name.toLowerCase().replace(/[^a-z0-9]/g, '_')}`,
+      id: editingPlayer?.id || ('wpl_' + assignedTeam.slug.replace('-w', '') + '_' + formData.name.toLowerCase().replace(/[^a-z0-9]/g, '_')),
       name: formData.name,
-      teamId: assignedTeam.slug,
+      teamId: assignedTeam.id,
       team: assignedTeam.name,
       league: 'wpl',
       role: formData.role || 'All-rounder',
@@ -287,7 +310,7 @@ export default function WplPlayersCleanOpsPage() {
     if (!confirm('Are you sure you want to remove this player from the squad?')) return;
 
     try {
-      await fetch(`/api/players?id=${playerId}&league=wpl`, { method: 'DELETE' });
+      await fetch('/api/players?id=' + playerId + '&league=wpl', { method: 'DELETE' });
       setPlayers((prev) => prev.filter((p) => p.id !== playerId));
     } catch (e) {
       alert('Failed to delete player');
@@ -308,16 +331,27 @@ export default function WplPlayersCleanOpsPage() {
               Squad & Player Management
             </h1>
             <p className="text-xs text-slate-400 mt-1">
-              Add players individually via their Cricbuzz profile URL with full bio records and career statistics.
+              Add players individually via Cricbuzz profile URLs with full bio records and career statistics.
             </p>
           </div>
 
-          <button
-            onClick={handleOpenAddPlayer}
-            className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-bold flex items-center gap-2 shadow-lg shadow-emerald-950/40 transition-all self-start md:self-auto"
-          >
-            <Plus className="w-4 h-4" /> Add Player to {activeTeam.short}
-          </button>
+          <div className="flex items-center gap-3 self-start md:self-auto">
+            <button
+              onClick={handleRealignSquads}
+              disabled={isRealigning}
+              className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-xs font-bold flex items-center gap-2 border border-slate-700 transition-all disabled:opacity-50"
+              title="Fix and re-align all 5 franchise squads to official team rosters"
+            >
+              <RotateCcw className={'w-3.5 h-3.5 ' + (isRealigning ? 'animate-spin' : '')} />
+              {isRealigning ? 'Re-aligning...' : 'Re-align Official Squads'}
+            </button>
+            <button
+              onClick={handleOpenAddPlayer}
+              className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-bold flex items-center gap-2 shadow-lg shadow-emerald-950/40 transition-all"
+            >
+              <Plus className="w-4 h-4" /> Add Player to {activeTeam.short}
+            </button>
+          </div>
         </div>
 
         {/* Team Selector Tabs */}
@@ -330,18 +364,18 @@ export default function WplPlayersCleanOpsPage() {
               <button
                 key={team.id}
                 onClick={() => setSelectedTeamId(team.id)}
-                className={`p-4 rounded-2xl border text-left transition-all relative overflow-hidden flex flex-col justify-between ${
-                  isSelected
-                    ? `bg-gradient-to-br ${team.color} ${team.border} ring-2 ring-emerald-500/50 shadow-xl`
-                    : 'bg-slate-900/60 border-slate-800/80 hover:border-slate-700'
-                }`}
+                className={'p-4 rounded-2xl border text-left transition-all relative overflow-hidden flex flex-col justify-between ' +
+                  (isSelected
+                    ? ('bg-gradient-to-br ' + team.color + ' ' + team.border + ' ring-2 ring-emerald-500/50 shadow-xl')
+                    : 'bg-slate-900/60 border-slate-800/80 hover:border-slate-700')
+                }
               >
                 <div>
                   <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400">{team.short}</div>
                   <div className="text-sm font-extrabold text-white mt-0.5 truncate">{team.name}</div>
                 </div>
                 <div className="mt-3 flex items-center justify-between">
-                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md ${team.badge}`}>
+                  <span className={'text-[10px] font-bold px-2 py-0.5 rounded-md ' + team.badge}>
                     {count} Players
                   </span>
                   {isSelected && <Check className="w-4 h-4 text-emerald-400" />}
@@ -359,7 +393,7 @@ export default function WplPlayersCleanOpsPage() {
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder={`Search ${activeTeam.short} players...`}
+              placeholder={'Search ' + activeTeam.short + ' players...'}
               className="w-full pl-10 pr-4 py-2 rounded-xl bg-slate-950/80 border border-slate-700/80 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500"
             />
           </div>
@@ -369,11 +403,11 @@ export default function WplPlayersCleanOpsPage() {
               <button
                 key={role}
                 onClick={() => setRoleFilter(role)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all ${
-                  roleFilter === role
+                className={'px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all ' +
+                  (roleFilter === role
                     ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
-                    : 'bg-slate-800/60 text-slate-400 hover:text-white border border-transparent'
-                }`}
+                    : 'bg-slate-800/60 text-slate-400 hover:text-white border border-transparent')
+                }
               >
                 {role}
               </button>
@@ -418,7 +452,7 @@ export default function WplPlayersCleanOpsPage() {
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex items-center gap-3">
                         <div className="w-11 h-11 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center text-base font-extrabold text-emerald-400">
-                          {player.jerseyNumber && player.jerseyNumber !== 'N/A' ? `#${player.jerseyNumber}` : player.name[0]}
+                          {player.jerseyNumber && player.jerseyNumber !== 'N/A' ? ('#' + player.jerseyNumber) : player.name[0]}
                         </div>
                         <div>
                           <h3 className="font-extrabold text-sm text-white group-hover:text-emerald-400 transition-colors flex items-center gap-1.5">
@@ -430,7 +464,7 @@ export default function WplPlayersCleanOpsPage() {
                           <div className="flex items-center gap-2 mt-0.5">
                             <span className="text-[11px] font-semibold text-slate-400">{player.nationality}</span>
                             <span className="text-slate-600">·</span>
-                            <span className="text-[11px] text-slate-400">{player.age ? `${player.age} yrs` : '—'}</span>
+                            <span className="text-[11px] text-slate-400">{player.age ? (player.age + ' yrs') : '—'}</span>
                           </div>
                         </div>
                       </div>
@@ -465,7 +499,7 @@ export default function WplPlayersCleanOpsPage() {
                       </button>
 
                       <span className="text-[10px] text-slate-400 font-medium">
-                        {batStats['WPL']?.Runs || batStats['T20I']?.Runs || 0} runs · {bowlStats['WPL']?.Wkts || bowlStats['T20I']?.Wkts || 0} wkts
+                        {(batStats['WPL']?.Runs || batStats['T20I']?.Runs || 0) + ' runs · ' + (bowlStats['WPL']?.Wkts || bowlStats['T20I']?.Wkts || 0) + ' wkts'}
                       </span>
                     </div>
 
@@ -588,7 +622,7 @@ export default function WplPlayersCleanOpsPage() {
               <div className="p-5 border-b border-slate-800 flex items-center justify-between bg-slate-950/60">
                 <div>
                   <h2 className="text-base font-extrabold text-white">
-                    {editingPlayer ? `Edit ${editingPlayer.name}` : `Add Player to ${activeTeam.name}`}
+                    {editingPlayer ? ('Edit ' + editingPlayer.name) : ('Add Player to ' + activeTeam.name)}
                   </h2>
                   <p className="text-xs text-slate-400 mt-0.5">
                     Paste a Cricbuzz profile URL to auto-fill personal profile and full career statistics tables.
@@ -623,7 +657,7 @@ export default function WplPlayersCleanOpsPage() {
                       disabled={isScraping}
                       className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white text-xs font-bold flex items-center gap-1.5 shadow-md whitespace-nowrap"
                     >
-                      <RefreshCw className={`w-3.5 h-3.5 ${isScraping ? 'animate-spin' : ''}`} />
+                      <RefreshCw className={'w-3.5 h-3.5 ' + (isScraping ? 'animate-spin' : '')} />
                       {isScraping ? 'Fetching...' : 'Fetch All'}
                     </button>
                   </div>
@@ -636,22 +670,22 @@ export default function WplPlayersCleanOpsPage() {
                   <button
                     type="button"
                     onClick={() => setActiveModalTab('profile')}
-                    className={`px-4 py-2 text-xs font-bold border-b-2 transition-all ${
-                      activeModalTab === 'profile'
+                    className={'px-4 py-2 text-xs font-bold border-b-2 transition-all ' +
+                      (activeModalTab === 'profile'
                         ? 'border-emerald-400 text-emerald-400'
-                        : 'border-transparent text-slate-400 hover:text-white'
-                    }`}
+                        : 'border-transparent text-slate-400 hover:text-white')
+                    }
                   >
                     1. Personal & Playing Profile
                   </button>
                   <button
                     type="button"
                     onClick={() => setActiveModalTab('stats')}
-                    className={`px-4 py-2 text-xs font-bold border-b-2 transition-all flex items-center gap-1.5 ${
-                      activeModalTab === 'stats'
+                    className={'px-4 py-2 text-xs font-bold border-b-2 transition-all flex items-center gap-1.5 ' +
+                      (activeModalTab === 'stats'
                         ? 'border-emerald-400 text-emerald-400'
-                        : 'border-transparent text-slate-400 hover:text-white'
-                    }`}
+                        : 'border-transparent text-slate-400 hover:text-white')
+                    }
                   >
                     <BarChart2 className="w-3.5 h-3.5" />
                     <span>2. Career Statistics ({Object.keys(formData.careerStats?.batting || {}).length + Object.keys(formData.careerStats?.bowling || {}).length} Formats)</span>
@@ -664,15 +698,15 @@ export default function WplPlayersCleanOpsPage() {
                     <div>
                       <label className="text-xs text-slate-400 font-semibold">Assign Team *</label>
                       <select
-                        value={formData.teamId || activeTeam.slug}
+                        value={formData.teamId || activeTeam.id}
                         onChange={(e) => {
-                          const chosen = WPL_TEAMS.find((t) => t.slug === e.target.value) || activeTeam;
-                          setFormData({ ...formData, teamId: chosen.slug, team: chosen.name });
+                          const chosen = WPL_TEAMS.find((t) => t.id === e.target.value || t.slug === e.target.value) || activeTeam;
+                          setFormData({ ...formData, teamId: chosen.id, team: chosen.name });
                         }}
                         className="w-full mt-1 px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white"
                       >
                         {WPL_TEAMS.map((t) => (
-                          <option key={t.slug} value={t.slug}>{t.name} ({t.short})</option>
+                          <option key={t.id} value={t.id}>{t.name} ({t.short})</option>
                         ))}
                       </select>
                     </div>

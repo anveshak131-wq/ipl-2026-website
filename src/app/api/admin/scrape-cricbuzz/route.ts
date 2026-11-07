@@ -1,11 +1,12 @@
-export async function POST(req: Request) {
+export async function POST(req) {
   try {
-    const req = context;
+    // context mapped
+
     const body = await req.json().catch(() => ({}));
     let targetUrl = (body.url || '').trim();
 
     if (!targetUrl && body.profileId) {
-      targetUrl = `https://www.cricbuzz.com/profiles/${body.profileId}`;
+      targetUrl = 'https://www.cricbuzz.com/profiles/' + body.profileId;
     }
 
     if (!targetUrl) {
@@ -16,7 +17,7 @@ export async function POST(req: Request) {
     }
 
     if (/^\d+$/.test(targetUrl)) {
-      targetUrl = `https://www.cricbuzz.com/profiles/${targetUrl}`;
+      targetUrl = 'https://www.cricbuzz.com/profiles/' + targetUrl;
     }
 
     const cricRes = await fetch(targetUrl, {
@@ -30,7 +31,7 @@ export async function POST(req: Request) {
     });
 
     if (!cricRes.ok) {
-      return new Response(JSON.stringify({ success: false, error: `Cricbuzz returned status ${cricRes.status}` }), {
+      return new Response(JSON.stringify({ success: false, error: 'Cricbuzz returned status ' + cricRes.status }), {
         status: 200,
         headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
       });
@@ -38,35 +39,25 @@ export async function POST(req: Request) {
 
     const html = await cricRes.text();
 
-    // 1. Robust Player Name Extraction (Title -> H1 -> DOM -> URL slug)
-    const slugMatch = targetUrl.match(/profiles\/\d+\/([a-zA-Z0-9-]+)/);
-    let fallbackNameFromUrl = '';
-    if (slugMatch) {
-      fallbackNameFromUrl = slugMatch[1]
-        .split('-')
-        .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
-        .join(' ');
-    }
-
+    // 1. Scrape Name (Title -> URL Slug -> H1)
     let scrapedName = '';
     const titleMatch = html.match(/<title>([^<]+?)\s+Profile\s*[-_]/i) || html.match(/<title>([^<]+?)\s*\|\s*Cricbuzz/i);
     if (titleMatch) {
       scrapedName = titleMatch[1].replace(/Profile.*$/i, '').trim();
     }
+    if (!scrapedName || scrapedName.toLowerCase().includes('cricbuzz')) {
+      const slugMatch = targetUrl.match(/profiles\/\d+\/([a-zA-Z0-9-]+)/);
+      if (slugMatch) {
+        scrapedName = slugMatch[1].split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
+      }
+    }
     if (!scrapedName) {
       const h1Match = html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/i);
       if (h1Match) scrapedName = h1Match[1].replace(/<[^>]+>/g, '').trim();
     }
-    if (!scrapedName) {
-      const divNameMatch = html.match(/<div[^>]*class="[^"]*cb-font-24[^"]*"[^>]*>([\s\S]*?)<\/div>/i);
-      if (divNameMatch) scrapedName = divNameMatch[1].replace(/<[^>]+>/g, '').trim();
-    }
-    if (!scrapedName || scrapedName.toLowerCase().includes('cricbuzz')) {
-      scrapedName = fallbackNameFromUrl;
-    }
 
     // 2. Personal Information Key-Values
-    const bioMap: Record<string, string> = {};
+    const bioMap = {};
     const divRegex = /<div[^>]*class="[^"]*cb-col-(?:40|33|50)[^"]*"[^>]*>([\s\S]*?)<\/div>\s*<div[^>]*class="[^"]*cb-col-(?:60|67|50)[^"]*"[^>]*>([\s\S]*?)<\/div>/gi;
     let match;
     while ((match = divRegex.exec(html)) !== null) {
@@ -75,7 +66,7 @@ export async function POST(req: Request) {
       if (k && v) bioMap[k] = v;
     }
 
-    ['born', 'birth place', 'role', 'batting style', 'bowling style'].forEach((key) => {
+    ['born', 'birth place', 'role', 'batting style', 'bowling style'].forEach(key => {
       if (!bioMap[key]) {
         const fb = new RegExp('(?:>|\\b)' + key + '\\s*<\\/(?:div|td|span)>\\s*<(?:div|td|span)[^>]*>([\\s\\S]*?)<\\/(?:div|td|span)>', 'i');
         const m = html.match(fb);
@@ -94,7 +85,7 @@ export async function POST(req: Request) {
       const cleanDateStr = rawBorn.replace(/\(.*?\)/g, '').trim();
       const d = new Date(cleanDateStr);
       if (!isNaN(d.getTime())) {
-        dateOfBirth = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        dateOfBirth = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
         if (!ageMatch) {
           const now = new Date();
           let calculated = now.getFullYear() - d.getFullYear();
@@ -107,25 +98,23 @@ export async function POST(req: Request) {
       }
     }
 
-    // 4. Robust Nationality Detection
+    // 4. Nationality
     let nationality = '';
     const countryMatch = html.match(/<h3[^>]*class="[^"]*cb-font-18[^"]*"[^>]*>([\s\S]*?)<\/h3>/i) ||
                          html.match(/<div[^>]*class="[^"]*(?:cb-font-18|text-gray)[^"]*"[^>]*>([\s\S]*?)<\/div>/i);
-    if (countryMatch) {
-      nationality = countryMatch[1].replace(/<[^>]+>/g, '').trim();
-    }
+    if (countryMatch) nationality = countryMatch[1].replace(/<[^>]+>/g, '').trim();
 
     const nations = ['Australia', 'England', 'South Africa', 'New Zealand', 'West Indies', 'Sri Lanka', 'Pakistan', 'Bangladesh', 'Ireland', 'Scotland', 'Zimbabwe', 'Afghanistan', 'USA', 'Netherlands', 'India'];
     for (const n of nations) {
       const re = new RegExp('\\b' + n + '\\b', 'i');
-      if (re.test(nationality) || re.test(bioMap['birth place'] || '') || re.test(html.substring(0, 1500))) {
+      if (re.test(nationality) || re.test(bioMap['birth place'] || '') || re.test(html.substring(0, 2000))) {
         nationality = n;
         break;
       }
     }
     if (!nationality) nationality = 'India';
 
-    // 5. Role & Allrounder Type
+    // 5. Role & Playing Styles
     const rawRole = (bioMap['role'] || '').toLowerCase();
     let role = 'Batter';
     let allrounderType = '';
@@ -138,7 +127,6 @@ export async function POST(req: Request) {
       role = 'Bowler';
     }
 
-    // 6. Batting & Bowling Styles
     const rawBat = (bioMap['batting style'] || '').toLowerCase();
     const battingStyle = rawBat.includes('left') ? 'Left-hand bat' : 'Right-hand bat';
 
@@ -155,8 +143,8 @@ export async function POST(req: Request) {
     else if (/left.*med.*fast/i.test(rawBowl)) bowlingStyle = 'Left-arm medium-fast';
     else if (rawBowl) bowlingStyle = rawBowl;
 
-    // 7. Targeted Career Stats Table Parsing
-    function parseTargetedTable(headerSnippet: string): Record<string, Record<string, string>> {
+    // 6. Targeted Table Parsing
+    function parseTargetedTable(headerSnippet) {
       const idx = html.indexOf(headerSnippet);
       if (idx === -1) return {};
 
@@ -165,21 +153,21 @@ export async function POST(req: Request) {
       if (tableStart === -1 || tableEnd === -1) return {};
 
       const tableHtml = html.substring(tableStart, tableEnd + 8);
-      const headers: string[] = [];
+      const headers = [];
       const thRegex = /<th[^>]*>([\s\S]*?)<\/th>/gi;
       let th;
       while ((th = thRegex.exec(tableHtml)) !== null) {
         headers.push(th[1].replace(/<[^>]+>/g, '').trim());
       }
 
-      const rows: Record<string, Record<string, string>> = {};
+      const rows = {};
       const trRegex = /<tr[^>]*>([\s\S]*?)<\/tr>/gi;
       let tr;
       while ((tr = trRegex.exec(tableHtml)) !== null) {
         const rowContent = tr[1];
         if (rowContent.includes('<th')) continue;
 
-        const cells: string[] = [];
+        const cells = [];
         const tdRegex = /<td[^>]*>([\s\S]*?)<\/td>/gi;
         let td;
         while ((td = tdRegex.exec(rowContent)) !== null) {
@@ -194,7 +182,7 @@ export async function POST(req: Request) {
           else if (/^t20i?$/i.test(rawFmt)) fmtKey = 'T20I';
           else if (/^(wpl|wt20|ipl)$/i.test(rawFmt)) fmtKey = 'WPL';
 
-          const rowData: Record<string, string> = {};
+          const rowData = {};
           headers.forEach((h, i) => {
             if (i > 0 && cells[i] !== undefined) {
               const val = cells[i];
@@ -220,7 +208,6 @@ export async function POST(req: Request) {
           });
 
           rows[fmtKey] = rowData;
-          rows[rawFmt] = rowData;
         }
       }
       return rows;
@@ -253,7 +240,7 @@ export async function POST(req: Request) {
       headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
     });
 
-  } catch (err: any) {
+  } catch (err) {
     return new Response(JSON.stringify({ success: false, error: err.message || 'Scrape failed' }), {
       status: 200,
       headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
