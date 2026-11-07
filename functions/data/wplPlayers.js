@@ -109,8 +109,8 @@ export const fallbackWplPlayers = [
     "jerseyNumber": "8",
     "age": 28,
     "squadStatus": "active",
-    "cricbuzzId": "13865",
-    "cricbuzzUrl": "https://www.cricbuzz.com/profiles/13865/arundhati-reddy",
+    "cricbuzzId": "13661",
+    "cricbuzzUrl": "https://www.cricbuzz.com/profiles/13661/arundhati-reddy",
     "stats": {
       "matches": 18,
       "runs": 48,

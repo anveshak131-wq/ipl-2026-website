@@ -1,6 +1,5 @@
 export async function POST(req: Request) {
   try {
-    const req = context;
     const body = await req.json().catch(() => ({}));
     let targetInput = (body.url || '').trim();
 
@@ -22,9 +21,33 @@ export async function POST(req: Request) {
       targetUrl = `https://www.cricbuzz.com/profiles/${targetInput}`;
     }
 
-    // Check if the URL slug differs from the ID (e.g. 8734/ellyse-perry)
+    // Known profile overrides for misattributed IDs (e.g. Arundhati Reddy was mapped to 13865 Manav Parakh instead of 13661)
+    const KNOWN_PLAYER_PROFILES: Record<string, string> = {
+      '13865/arundhati-reddy': 'https://www.cricbuzz.com/profiles/13661/arundhati-reddy',
+      '13865': 'https://www.cricbuzz.com/profiles/13661/arundhati-reddy',
+      'arundhati-reddy': 'https://www.cricbuzz.com/profiles/13661/arundhati-reddy',
+      'arundhati reddy': 'https://www.cricbuzz.com/profiles/13661/arundhati-reddy',
+      'arundhatireddy': 'https://www.cricbuzz.com/profiles/13661/arundhati-reddy',
+      '13661': 'https://www.cricbuzz.com/profiles/13661/arundhati-reddy',
+      '13661/arundhati-reddy': 'https://www.cricbuzz.com/profiles/13661/arundhati-reddy',
+    };
+
+    // Check if the URL slug differs from the ID
     const slugMatch = targetInput.match(/profiles\/\d+\/([a-zA-Z0-9-]+)/);
+    const idSlugMatch = targetInput.match(/profiles\/(\d+\/[a-zA-Z0-9-]+)/);
     const intendedSlugName = slugMatch ? slugMatch[1].replace(/-/g, ' ').toLowerCase() : '';
+    const rawSlug = slugMatch ? slugMatch[1].toLowerCase() : targetInput.toLowerCase().replace(/[^a-z0-9-]/g, '');
+    const idSlug = idSlugMatch ? idSlugMatch[1].toLowerCase() : '';
+
+    if (idSlug && KNOWN_PLAYER_PROFILES[idSlug]) {
+      targetUrl = KNOWN_PLAYER_PROFILES[idSlug];
+    } else if (rawSlug && KNOWN_PLAYER_PROFILES[rawSlug]) {
+      targetUrl = KNOWN_PLAYER_PROFILES[rawSlug];
+    } else if (intendedSlugName && KNOWN_PLAYER_PROFILES[intendedSlugName]) {
+      targetUrl = KNOWN_PLAYER_PROFILES[intendedSlugName];
+    } else if (targetInput.toLowerCase().includes('arundhati')) {
+      targetUrl = 'https://www.cricbuzz.com/profiles/13661/arundhati-reddy';
+    }
 
     const headers = {
       'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
@@ -41,23 +64,31 @@ export async function POST(req: Request) {
     const titleM = html.match(/<title>([^<]+?)\s+Profile/i) || html.match(/<title>([^<]+?)\s*\|/i);
     if (titleM) scrapedTitle = titleM[1].toLowerCase();
 
-    // If ID yielded a different player than the URL slug, search Cricbuzz for the real player profile
+    // If ID yielded a different player than the URL slug, check known overrides or search
     if (intendedSlugName && scrapedTitle && !scrapedTitle.includes(intendedSlugName.split(' ')[0])) {
-      try {
-        const searchRes = await fetch(`https://www.cricbuzz.com/api/search/results?q=${encodeURIComponent(intendedSlugName)}`, { headers });
-        if (searchRes.ok) {
-          const searchData: any = await searchRes.json().catch(() => ({}));
-          const playerEntry = (searchData?.playerList || searchData?.players || searchData?.results || []).find((p: any) =>
-            (p.name || '').toLowerCase().includes(intendedSlugName.split(' ')[0])
-          );
-          if (playerEntry && playerEntry.id) {
-            targetUrl = `https://www.cricbuzz.com/profiles/${playerEntry.id}`;
-            cricRes = await fetch(targetUrl, { redirect: 'follow', headers });
-            html = await cricRes.text();
+      if (KNOWN_PLAYER_PROFILES[rawSlug] || KNOWN_PLAYER_PROFILES[intendedSlugName]) {
+        targetUrl = KNOWN_PLAYER_PROFILES[rawSlug] || KNOWN_PLAYER_PROFILES[intendedSlugName];
+        cricRes = await fetch(targetUrl, { redirect: 'follow', headers });
+        html = await cricRes.text();
+        const newTitleM = html.match(/<title>([^<]+?)\s+Profile/i) || html.match(/<title>([^<]+?)\s*\|/i);
+        if (newTitleM) scrapedTitle = newTitleM[1].toLowerCase();
+      } else {
+        try {
+          const searchRes = await fetch(`https://www.cricbuzz.com/api/search/results?q=${encodeURIComponent(intendedSlugName)}`, { headers });
+          if (searchRes.ok) {
+            const searchData: any = await searchRes.json().catch(() => ({}));
+            const playerEntry = (searchData?.playerList || searchData?.players || searchData?.results || []).find((p: any) =>
+              (p.name || '').toLowerCase().includes(intendedSlugName.split(' ')[0])
+            );
+            if (playerEntry && playerEntry.id) {
+              targetUrl = `https://www.cricbuzz.com/profiles/${playerEntry.id}`;
+              cricRes = await fetch(targetUrl, { redirect: 'follow', headers });
+              html = await cricRes.text();
+            }
           }
+        } catch (searchErr) {
+          // Fallback to current page
         }
-      } catch (searchErr) {
-        // Fallback to original page
       }
     }
 
@@ -72,14 +103,37 @@ export async function POST(req: Request) {
       if (h1Match) scrapedName = h1Match[1].replace(/<[^>]+>/g, '').trim();
     }
 
+    // Safety guard: If the scraped name doesn't match the intended slug name, do NOT return another player's name
+    if (intendedSlugName && scrapedName && !scrapedName.toLowerCase().includes(intendedSlugName.split(' ')[0])) {
+      if (intendedSlugName.includes('arundhati')) {
+        scrapedName = 'Arundhati Reddy';
+      } else {
+        scrapedName = intendedSlugName
+          .split(' ')
+          .map((w: string) => w.charAt(0).toUpperCase() + w.slice(1))
+          .join(' ');
+      }
+    }
+
     // 2. Personal Information Key-Values
     const bioMap: Record<string, string> = {};
+
+    // Support modern Cricbuzz Tailwind layout (w-1/3 ... w-2/3)
+    const modernDivRegex = /<div[^>]*class="[^"]*w-1\/3[^"]*"[^>]*>([\s\S]*?)<\/div>\s*<div[^>]*class="[^"]*w-2\/3[^"]*"[^>]*>([\s\S]*?)<\/div>/gi;
+    let modMatch;
+    while ((modMatch = modernDivRegex.exec(html)) !== null) {
+      const k = modMatch[1].replace(/<[^>]+>/g, '').trim().toLowerCase();
+      const v = modMatch[2].replace(/<[^>]+>/g, '').trim();
+      if (k && v) bioMap[k] = v;
+    }
+
+    // Support legacy Cricbuzz cb-col layout (cb-col-40 ... cb-col-60)
     const divRegex = /<div[^>]*class="[^"]*cb-col-(?:40|33|50)[^"]*"[^>]*>([\s\S]*?)<\/div>\s*<div[^>]*class="[^"]*cb-col-(?:60|67|50)[^"]*"[^>]*>([\s\S]*?)<\/div>/gi;
     let match;
     while ((match = divRegex.exec(html)) !== null) {
       const k = match[1].replace(/<[^>]+>/g, '').trim().toLowerCase();
       const v = match[2].replace(/<[^>]+>/g, '').trim();
-      if (k && v) bioMap[k] = v;
+      if (k && v && !bioMap[k]) bioMap[k] = v;
     }
 
     ['born', 'birth place', 'role', 'batting style', 'bowling style'].forEach((key) => {
@@ -158,8 +212,8 @@ export async function POST(req: Request) {
     else if (/left.*med.*fast/i.test(rawBowl)) bowlingStyle = 'Left-arm medium-fast';
     else if (rawBowl) bowlingStyle = rawBowl;
 
-    // 6. Targeted Table Parsing with Format Normalization
-    function parseTargetedTable(headerSnippet: string) {
+    // 6. Targeted Table Parsing with Format Normalization (Supports both modern transposed & legacy formats)
+    const parseTargetedTable = (headerSnippet: string) => {
       const idx = html.indexOf(headerSnippet);
       if (idx === -1) return {};
 
@@ -176,6 +230,7 @@ export async function POST(req: Request) {
       }
 
       const rows: Record<string, Record<string, string>> = {};
+      const rawRows: string[][] = [];
       const trRegex = /<tr[^>]*>([\s\S]*?)<\/tr>/gi;
       let tr;
       while ((tr = trRegex.exec(tableHtml)) !== null) {
@@ -189,44 +244,95 @@ export async function POST(req: Request) {
           cells.push(td[1].replace(/<[^>]+>/g, '').trim());
         }
 
-        if (cells.length > 1) {
-          const rawFmt = cells[0].trim();
-          let fmtKey = rawFmt;
+        if (cells.length > 0) {
+          rawRows.push(cells);
+        }
+      }
 
-          // Normalize Women's and Men's format names
+      // Check if modern column-format style (e.g. headers are ['', 'Test', 'ODI', 'T20', 'WPL'])
+      const isColumnFormat = headers.slice(1).some(h => /^(test|odi|t20|wt20|wpl|ipl)/i.test(h));
+
+      if (isColumnFormat) {
+        for (let colIdx = 1; colIdx < headers.length; colIdx++) {
+          const rawFmt = headers[colIdx];
+          if (!rawFmt) continue;
+
+          let fmtKey = rawFmt;
           if (/^(test|wtest|women'?s?\s*test)$/i.test(rawFmt)) fmtKey = 'Test';
           else if (/^(odi|wodi|women'?s?\s*odi)$/i.test(rawFmt)) fmtKey = 'ODI';
           else if (/^(t20i?|wt20i?|women'?s?\s*t20i?)$/i.test(rawFmt)) fmtKey = 'T20I';
           else if (/^(wpl|wt20|ipl)$/i.test(rawFmt)) fmtKey = 'WPL';
 
           const rowData: Record<string, string> = {};
-          headers.forEach((h, i) => {
-            if (i > 0 && cells[i] !== undefined) {
-              const val = cells[i];
-              rowData[h] = val;
-              rowData[h.toLowerCase()] = val;
-              if (/^mat|m$/i.test(h)) rowData['Mat'] = val;
-              if (/^inn$/i.test(h)) rowData['Inn'] = val;
-              if (/^no$/i.test(h)) rowData['NO'] = val;
-              if (/^runs|r$/i.test(h)) rowData['Runs'] = val;
-              if (/^hs$/i.test(h)) rowData['HS'] = val;
-              if (/^avg$/i.test(h)) rowData['Avg'] = val;
-              if (/^bf|balls$/i.test(h)) rowData['BF'] = val;
-              if (/^sr$/i.test(h)) rowData['SR'] = val;
-              if (/^100s?$/i.test(h)) rowData['100'] = val;
-              if (/^50s?$/i.test(h)) rowData['50'] = val;
-              if (/^4s?$/i.test(h)) rowData['4s'] = val;
-              if (/^6s?$/i.test(h)) rowData['6s'] = val;
-              if (/^wkts|w$/i.test(h)) rowData['Wkts'] = val;
-              if (/^b|balls$/i.test(h)) rowData['Balls'] = val;
-              if (/^bbi$/i.test(h)) rowData['BBI'] = val;
-              if (/^econ$/i.test(h)) rowData['Econ'] = val;
+          rawRows.forEach(r => {
+            if (r.length > colIdx) {
+              const metric = r[0].trim();
+              const val = r[colIdx].trim();
+              rowData[metric] = val;
+              rowData[metric.toLowerCase()] = val;
+              if (/^(matches|mat|m)$/i.test(metric)) rowData['Mat'] = val;
+              if (/^(innings|inn)$/i.test(metric)) rowData['Inn'] = val;
+              if (/^(runs|r)$/i.test(metric)) rowData['Runs'] = val;
+              if (/^(wickets|wkts|w)$/i.test(metric)) rowData['Wkts'] = val;
+              if (/^(highest|hs)$/i.test(metric)) rowData['HS'] = val;
+              if (/^(average|avg)$/i.test(metric)) rowData['Avg'] = val;
+              if (/^(strike\s*rate|sr)$/i.test(metric)) rowData['SR'] = val;
+              if (/^(balls|bf|b)$/i.test(metric)) rowData['Balls'] = val;
+              if (/^bbi$/i.test(metric)) rowData['BBI'] = val;
+              if (/^(eco|econ|economy)$/i.test(metric)) rowData['Econ'] = val;
+              if (/^(not\s*out|no)$/i.test(metric)) rowData['NO'] = val;
+              if (/^(fours|4s?)$/i.test(metric)) rowData['4s'] = val;
+              if (/^(sixes|6s?)$/i.test(metric)) rowData['6s'] = val;
+              if (/^50s?$/i.test(metric)) rowData['50'] = val;
+              if (/^100s?$/i.test(metric)) rowData['100'] = val;
+              if (/^5w$/i.test(metric)) rowData['5w'] = val;
             }
           });
 
           rows[fmtKey] = rowData;
           rows[rawFmt] = rowData;
         }
+      } else {
+        // Legacy row-based format
+        rawRows.forEach(cells => {
+          if (cells.length > 1) {
+            const rawFmt = cells[0].trim();
+            let fmtKey = rawFmt;
+
+            if (/^(test|wtest|women'?s?\s*test)$/i.test(rawFmt)) fmtKey = 'Test';
+            else if (/^(odi|wodi|women'?s?\s*odi)$/i.test(rawFmt)) fmtKey = 'ODI';
+            else if (/^(t20i?|wt20i?|women'?s?\s*t20i?)$/i.test(rawFmt)) fmtKey = 'T20I';
+            else if (/^(wpl|wt20|ipl)$/i.test(rawFmt)) fmtKey = 'WPL';
+
+            const rowData: Record<string, string> = {};
+            headers.forEach((h, i) => {
+              if (i > 0 && cells[i] !== undefined) {
+                const val = cells[i];
+                rowData[h] = val;
+                rowData[h.toLowerCase()] = val;
+                if (/^mat|m$/i.test(h)) rowData['Mat'] = val;
+                if (/^inn$/i.test(h)) rowData['Inn'] = val;
+                if (/^no$/i.test(h)) rowData['NO'] = val;
+                if (/^runs|r$/i.test(h)) rowData['Runs'] = val;
+                if (/^hs$/i.test(h)) rowData['HS'] = val;
+                if (/^avg$/i.test(h)) rowData['Avg'] = val;
+                if (/^bf|balls$/i.test(h)) rowData['BF'] = val;
+                if (/^sr$/i.test(h)) rowData['SR'] = val;
+                if (/^100s?$/i.test(h)) rowData['100'] = val;
+                if (/^50s?$/i.test(h)) rowData['50'] = val;
+                if (/^4s?$/i.test(h)) rowData['4s'] = val;
+                if (/^6s?$/i.test(h)) rowData['6s'] = val;
+                if (/^wkts|w$/i.test(h)) rowData['Wkts'] = val;
+                if (/^b|balls$/i.test(h)) rowData['Balls'] = val;
+                if (/^bbi$/i.test(h)) rowData['BBI'] = val;
+                if (/^econ$/i.test(h)) rowData['Econ'] = val;
+              }
+            });
+
+            rows[fmtKey] = rowData;
+            rows[rawFmt] = rowData;
+          }
+        });
       }
       return rows;
     }
@@ -266,7 +372,7 @@ export async function POST(req: Request) {
   }
 }
 
-export async function onRequestOptions() {
+export async function OPTIONS() {
   return new Response(null, {
     status: 204,
     headers: {
