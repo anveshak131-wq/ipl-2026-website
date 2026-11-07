@@ -30,7 +30,7 @@ export async function onRequestPost(context: any) {
     });
 
     if (!cricRes.ok) {
-      return new Response(JSON.stringify({ success: false, error: `Cricbuzz profile returned status ${cricRes.status}` }), {
+      return new Response(JSON.stringify({ success: false, error: `Cricbuzz returned status ${cricRes.status}` }), {
         status: 200,
         headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
       });
@@ -38,11 +38,34 @@ export async function onRequestPost(context: any) {
 
     const html = await cricRes.text();
 
-    // 1. Scrape Name
-    const h1Match = html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/i);
-    const scrapedName = h1Match ? h1Match[1].replace(/<[^>]+>/g, '').trim() : '';
+    // 1. Robust Player Name Extraction (Title -> H1 -> DOM -> URL slug)
+    const slugMatch = targetUrl.match(/profiles\/\d+\/([a-zA-Z0-9-]+)/);
+    let fallbackNameFromUrl = '';
+    if (slugMatch) {
+      fallbackNameFromUrl = slugMatch[1]
+        .split('-')
+        .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+        .join(' ');
+    }
 
-    // 2. Personal Info Mapping
+    let scrapedName = '';
+    const titleMatch = html.match(/<title>([^<]+?)\s+Profile\s*[-_]/i) || html.match(/<title>([^<]+?)\s*\|\s*Cricbuzz/i);
+    if (titleMatch) {
+      scrapedName = titleMatch[1].replace(/Profile.*$/i, '').trim();
+    }
+    if (!scrapedName) {
+      const h1Match = html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/i);
+      if (h1Match) scrapedName = h1Match[1].replace(/<[^>]+>/g, '').trim();
+    }
+    if (!scrapedName) {
+      const divNameMatch = html.match(/<div[^>]*class="[^"]*cb-font-24[^"]*"[^>]*>([\s\S]*?)<\/div>/i);
+      if (divNameMatch) scrapedName = divNameMatch[1].replace(/<[^>]+>/g, '').trim();
+    }
+    if (!scrapedName || scrapedName.toLowerCase().includes('cricbuzz')) {
+      scrapedName = fallbackNameFromUrl;
+    }
+
+    // 2. Personal Information Key-Values
     const bioMap: Record<string, string> = {};
     const divRegex = /<div[^>]*class="[^"]*cb-col-(?:40|33|50)[^"]*"[^>]*>([\s\S]*?)<\/div>\s*<div[^>]*class="[^"]*cb-col-(?:60|67|50)[^"]*"[^>]*>([\s\S]*?)<\/div>/gi;
     let match;
@@ -84,24 +107,29 @@ export async function onRequestPost(context: any) {
       }
     }
 
-    // 4. Nationality
-    const countryMatch = html.match(/<h3[^>]*class="[^"]*cb-font-18[^"]*"[^>]*>([\s\S]*?)<\/h3>/i);
-    const scrapedCountry = countryMatch ? countryMatch[1].replace(/<[^>]+>/g, '').trim() : '';
-    let nationality = scrapedCountry;
-    const nations = ['India', 'Australia', 'England', 'South Africa', 'New Zealand', 'West Indies', 'Sri Lanka', 'Pakistan', 'Bangladesh', 'Ireland', 'Scotland', 'Zimbabwe', 'Afghanistan', 'USA', 'Netherlands'];
+    // 4. Robust Nationality Detection
+    let nationality = '';
+    const countryMatch = html.match(/<h3[^>]*class="[^"]*cb-font-18[^"]*"[^>]*>([\s\S]*?)<\/h3>/i) ||
+                         html.match(/<div[^>]*class="[^"]*(?:cb-font-18|text-gray)[^"]*"[^>]*>([\s\S]*?)<\/div>/i);
+    if (countryMatch) {
+      nationality = countryMatch[1].replace(/<[^>]+>/g, '').trim();
+    }
+
+    const nations = ['Australia', 'England', 'South Africa', 'New Zealand', 'West Indies', 'Sri Lanka', 'Pakistan', 'Bangladesh', 'Ireland', 'Scotland', 'Zimbabwe', 'Afghanistan', 'USA', 'Netherlands', 'India'];
     for (const n of nations) {
-      if (new RegExp('\\b' + n + '\\b', 'i').test(nationality + ' ' + (bioMap['birth place'] || '') + ' ' + html)) {
+      const re = new RegExp('\\b' + n + '\\b', 'i');
+      if (re.test(nationality) || re.test(bioMap['birth place'] || '') || re.test(html.substring(0, 1500))) {
         nationality = n;
         break;
       }
     }
     if (!nationality) nationality = 'India';
 
-    // 5. Role & All-Rounder Type
+    // 5. Role & Allrounder Type
     const rawRole = (bioMap['role'] || '').toLowerCase();
     let role = 'Batter';
     let allrounderType = '';
-    if (rawRole.includes('allrounder') || rawRole.includes('all-rounder')) {
+    if (rawRole.includes('allrounder') || rawRole.includes('all-rounder') || rawRole.includes('all rounder')) {
       role = 'All-rounder';
       allrounderType = rawRole.includes('bowl') ? 'Bowling Allrounder' : 'Batting Allrounder';
     } else if (rawRole.includes('keeper') || rawRole.includes('wk') || rawRole.includes('wicket')) {
@@ -119,6 +147,7 @@ export async function onRequestPost(context: any) {
     if (/right.*fast.*med/i.test(rawBowl)) bowlingStyle = 'Right-arm fast-medium';
     else if (/right.*med.*fast/i.test(rawBowl)) bowlingStyle = 'Right-arm medium-fast';
     else if (/right.*fast/i.test(rawBowl)) bowlingStyle = 'Right-arm fast';
+    else if (/right.*med/i.test(rawBowl)) bowlingStyle = 'Right-arm medium';
     else if (/right.*off/i.test(rawBowl)) bowlingStyle = 'Right-arm offbreak';
     else if (/right.*leg/i.test(rawBowl)) bowlingStyle = 'Right-arm legbreak';
     else if (/left.*orthodox/i.test(rawBowl)) bowlingStyle = 'Slow left-arm orthodox';
@@ -126,17 +155,16 @@ export async function onRequestPost(context: any) {
     else if (/left.*med.*fast/i.test(rawBowl)) bowlingStyle = 'Left-arm medium-fast';
     else if (rawBowl) bowlingStyle = rawBowl;
 
-    // 7. Scrape Multi-Format Career Tables (Batting & Bowling)
-    const batting: Record<string, any> = {};
-    const bowling: Record<string, any> = {};
+    // 7. Targeted Career Stats Table Parsing
+    function parseTargetedTable(headerSnippet: string): Record<string, Record<string, string>> {
+      const idx = html.indexOf(headerSnippet);
+      if (idx === -1) return {};
 
-    const tableMatches = html.match(/<table[\s\S]*?<\/table>/gi) || [];
-    for (const tableHtml of tableMatches) {
-      const isBatting = /runs|hs|avg|strike\s*rate|sr|100s?/i.test(tableHtml) && !/wkts|bbi|econ/i.test(tableHtml);
-      const isBowling = /wkts|wickets|bbi|econ|economy/i.test(tableHtml);
-      if (!isBatting && !isBowling) continue;
+      const tableStart = html.indexOf('<table', idx);
+      const tableEnd = html.indexOf('</table>', tableStart);
+      if (tableStart === -1 || tableEnd === -1) return {};
 
-      const targetObj = isBowling ? bowling : batting;
+      const tableHtml = html.substring(tableStart, tableEnd + 8);
       const headers: string[] = [];
       const thRegex = /<th[^>]*>([\s\S]*?)<\/th>/gi;
       let th;
@@ -144,36 +172,62 @@ export async function onRequestPost(context: any) {
         headers.push(th[1].replace(/<[^>]+>/g, '').trim());
       }
 
+      const rows: Record<string, Record<string, string>> = {};
       const trRegex = /<tr[^>]*>([\s\S]*?)<\/tr>/gi;
       let tr;
       while ((tr = trRegex.exec(tableHtml)) !== null) {
-        const row = tr[1];
-        if (row.includes('<th')) continue;
+        const rowContent = tr[1];
+        if (rowContent.includes('<th')) continue;
+
         const cells: string[] = [];
         const tdRegex = /<td[^>]*>([\s\S]*?)<\/td>/gi;
         let td;
-        while ((td = tdRegex.exec(row)) !== null) {
+        while ((td = tdRegex.exec(rowContent)) !== null) {
           cells.push(td[1].replace(/<[^>]+>/g, '').trim());
         }
 
         if (cells.length > 1) {
-          const rawFormat = cells[0];
-          let normalizedFormat = rawFormat;
-          if (/^test$/i.test(rawFormat)) normalizedFormat = 'Test';
-          else if (/^odi$/i.test(rawFormat)) normalizedFormat = 'ODI';
-          else if (/^t20i?$/i.test(rawFormat)) normalizedFormat = 'T20I';
-          else if (/^(wpl|wt20|ipl)$/i.test(rawFormat)) normalizedFormat = 'WPL';
+          const rawFmt = cells[0].trim();
+          let fmtKey = rawFmt;
+          if (/^test$/i.test(rawFmt)) fmtKey = 'Test';
+          else if (/^odi$/i.test(rawFmt)) fmtKey = 'ODI';
+          else if (/^t20i?$/i.test(rawFmt)) fmtKey = 'T20I';
+          else if (/^(wpl|wt20|ipl)$/i.test(rawFmt)) fmtKey = 'WPL';
 
           const rowData: Record<string, string> = {};
-          headers.forEach((h, idx) => {
-            if (idx > 0 && cells[idx] !== undefined) {
-              rowData[h] = cells[idx];
+          headers.forEach((h, i) => {
+            if (i > 0 && cells[i] !== undefined) {
+              const val = cells[i];
+              rowData[h] = val;
+              rowData[h.toLowerCase()] = val;
+              if (/^mat|m$/i.test(h)) rowData['Mat'] = val;
+              if (/^inn$/i.test(h)) rowData['Inn'] = val;
+              if (/^no$/i.test(h)) rowData['NO'] = val;
+              if (/^runs|r$/i.test(h)) rowData['Runs'] = val;
+              if (/^hs$/i.test(h)) rowData['HS'] = val;
+              if (/^avg$/i.test(h)) rowData['Avg'] = val;
+              if (/^bf|balls$/i.test(h)) rowData['BF'] = val;
+              if (/^sr$/i.test(h)) rowData['SR'] = val;
+              if (/^100s?$/i.test(h)) rowData['100'] = val;
+              if (/^50s?$/i.test(h)) rowData['50'] = val;
+              if (/^4s?$/i.test(h)) rowData['4s'] = val;
+              if (/^6s?$/i.test(h)) rowData['6s'] = val;
+              if (/^wkts|w$/i.test(h)) rowData['Wkts'] = val;
+              if (/^b|balls$/i.test(h)) rowData['Balls'] = val;
+              if (/^bbi$/i.test(h)) rowData['BBI'] = val;
+              if (/^econ$/i.test(h)) rowData['Econ'] = val;
             }
           });
-          targetObj[normalizedFormat] = rowData;
+
+          rows[fmtKey] = rowData;
+          rows[rawFmt] = rowData;
         }
       }
+      return rows;
     }
+
+    const batting = parseTargetedTable('Batting Career Summary');
+    const bowling = parseTargetedTable('Bowling Career Summary');
 
     const bio = {
       name: scrapedName,

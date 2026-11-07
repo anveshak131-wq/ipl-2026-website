@@ -44,6 +44,26 @@ const WPL_TEAMS = [
 
 const STAT_FORMATS = ['Test', 'ODI', 'T20I', 'WPL'];
 
+function playerMatchesTeam(player: Player, team: typeof WPL_TEAMS[0]): boolean {
+  const pTeamId = String(player.teamId || '').toLowerCase().trim();
+  const pTeam = String(player.team || '').toLowerCase().trim();
+  const slug = team.slug.toLowerCase();
+  const short = team.short.toLowerCase();
+  const id = team.id.toLowerCase();
+  const name = team.name.toLowerCase();
+
+  if (pTeamId === id || pTeamId === slug || pTeamId === short) return true;
+  if (pTeam === name || pTeam === short || pTeam === slug) return true;
+
+  if (slug === 'rcb-w' && (pTeamId.includes('rcb') || pTeam.includes('rcb') || pTeam.includes('bangalore') || pTeam.includes('bengaluru'))) return true;
+  if (slug === 'mi-w' && (pTeamId.includes('mi') || pTeam.includes('mumbai'))) return true;
+  if (slug === 'dc-w' && (pTeamId.includes('dc') || pTeam.includes('delhi'))) return true;
+  if (slug === 'gg' && (pTeamId.includes('gg') || pTeam.includes('gujarat'))) return true;
+  if (slug === 'upw' && (pTeamId.includes('upw') || pTeam.includes('warrior') || pTeam.includes('up '))) return true;
+
+  return false;
+}
+
 export default function WplPlayersCleanOpsPage() {
   const [players, setPlayers] = useState<Player[]>([]);
   const [selectedTeamId, setSelectedTeamId] = useState<string>('14');
@@ -66,7 +86,7 @@ export default function WplPlayersCleanOpsPage() {
     name: '',
     role: 'All-rounder',
     allrounderType: 'Batting Allrounder',
-    teamId: '14',
+    teamId: 'rcb-w',
     team: 'Royal Challengers Bengaluru',
     league: 'wpl',
     nationality: 'India',
@@ -106,14 +126,14 @@ export default function WplPlayersCleanOpsPage() {
 
   const teamPlayers = useMemo(() => {
     return players.filter((p) => {
-      const matchesTeam = p.teamId === selectedTeamId || p.team === activeTeam.short || p.team === activeTeam.name;
-      if (!matchesTeam) return false;
+      const belongs = playerMatchesTeam(p, activeTeam);
+      if (!belongs) return false;
 
       const matchesSearch = !searchQuery || p.name.toLowerCase().includes(searchQuery.toLowerCase());
       const matchesRole = roleFilter === 'ALL' || p.role.toLowerCase() === roleFilter.toLowerCase();
       return matchesSearch && matchesRole;
     });
-  }, [players, selectedTeamId, activeTeam, searchQuery, roleFilter]);
+  }, [players, activeTeam, searchQuery, roleFilter]);
 
   const handleOpenAddPlayer = () => {
     setEditingPlayer(null);
@@ -125,7 +145,7 @@ export default function WplPlayersCleanOpsPage() {
       name: '',
       role: 'All-rounder',
       allrounderType: 'Batting Allrounder',
-      teamId: activeTeam.id,
+      teamId: activeTeam.slug,
       team: activeTeam.name,
       league: 'wpl',
       nationality: 'India',
@@ -148,7 +168,11 @@ export default function WplPlayersCleanOpsPage() {
     setScrapeError(null);
     setScrapeSuccess(null);
     setActiveModalTab('profile');
-    setFormData({ ...p });
+    setFormData({
+      ...p,
+      teamId: p.teamId || activeTeam.slug,
+      team: p.team || activeTeam.name
+    });
     setIsModalOpen(true);
   };
 
@@ -175,7 +199,7 @@ export default function WplPlayersCleanOpsPage() {
       try {
         payload = JSON.parse(text);
       } catch (parseErr) {
-        throw new Error(`Invalid server response (${res.status}): ${text.slice(0, 120)}`);
+        throw new Error(`Server returned non-JSON response (${res.status})`);
       }
 
       if (!res.ok || !payload.success) {
@@ -200,9 +224,9 @@ export default function WplPlayersCleanOpsPage() {
         careerStats: { batting: stats.batting || {}, bowling: stats.bowling || {} }
       }));
 
-      const battingRows = Object.keys(stats.batting || {}).length;
-      const bowlingRows = Object.keys(stats.bowling || {}).length;
-      setScrapeSuccess(`✓ Successfully auto-filled ${bio.name || 'player'}: Personal info, playing style, and Career Stats (${battingRows} Batting, ${bowlingRows} Bowling formats) extracted!`);
+      const batCount = Object.keys(stats.batting || {}).length;
+      const bowlCount = Object.keys(stats.bowling || {}).length;
+      setScrapeSuccess(`✓ Successfully extracted ${bio.name || 'player'}: ${bio.nationality || 'Nationality'}, ${bio.role || 'Role'}, DOB: ${bio.dateOfBirth || '—'}, and Stats (${batCount} Batting, ${bowlCount} Bowling formats)!`);
     } catch (err: any) {
       setScrapeError(err.message || 'Error communicating with Cricbuzz scraper');
     } finally {
@@ -216,11 +240,13 @@ export default function WplPlayersCleanOpsPage() {
       return;
     }
 
+    const assignedTeam = WPL_TEAMS.find((t) => t.slug === formData.teamId || t.id === formData.teamId) || activeTeam;
+
     const payload: Player = {
-      id: editingPlayer?.id || `wpl_${activeTeam.id}_${formData.name.toLowerCase().replace(/[^a-z0-9]/g, '_')}`,
+      id: editingPlayer?.id || `wpl_${assignedTeam.slug}_${formData.name.toLowerCase().replace(/[^a-z0-9]/g, '_')}`,
       name: formData.name,
-      teamId: activeTeam.id,
-      team: activeTeam.name,
+      teamId: assignedTeam.slug,
+      team: assignedTeam.name,
       league: 'wpl',
       role: formData.role || 'All-rounder',
       allrounderType: formData.allrounderType || (formData.role === 'All-rounder' ? 'Batting Allrounder' : undefined),
@@ -282,7 +308,7 @@ export default function WplPlayersCleanOpsPage() {
               Squad & Player Management
             </h1>
             <p className="text-xs text-slate-400 mt-1">
-              Select a franchise and add players individually via their Cricbuzz profile URL with full bio and multi-format stats.
+              Add players individually via their Cricbuzz profile URL with full bio records and career statistics.
             </p>
           </div>
 
@@ -298,7 +324,7 @@ export default function WplPlayersCleanOpsPage() {
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
           {WPL_TEAMS.map((team) => {
             const isSelected = team.id === selectedTeamId;
-            const count = players.filter((p) => p.teamId === team.id || p.team === team.short || p.team === team.name).length;
+            const count = players.filter((p) => playerMatchesTeam(p, team)).length;
 
             return (
               <button
@@ -438,7 +464,7 @@ export default function WplPlayersCleanOpsPage() {
                         {isStatsExpanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
                       </button>
 
-                      <span className="text-[10px] text-slate-400">
+                      <span className="text-[10px] text-slate-400 font-medium">
                         {batStats['WPL']?.Runs || batStats['T20I']?.Runs || 0} runs · {bowlStats['WPL']?.Wkts || bowlStats['T20I']?.Wkts || 0} wkts
                       </span>
                     </div>
@@ -467,7 +493,7 @@ export default function WplPlayersCleanOpsPage() {
                                   return (
                                     <tr key={fmt} className="text-slate-300">
                                       <td className="py-1 font-bold text-white">{fmt}</td>
-                                      <td className="py-1 text-center">{row.M || row.Mat || '—'}</td>
+                                      <td className="py-1 text-center">{row.Mat || row.M || '—'}</td>
                                       <td className="py-1 text-center">{row.Inn || '—'}</td>
                                       <td className="py-1 text-center text-emerald-400 font-semibold">{row.Runs || row.R || '—'}</td>
                                       <td className="py-1 text-center">{row.HS || '—'}</td>
@@ -502,8 +528,8 @@ export default function WplPlayersCleanOpsPage() {
                                   return (
                                     <tr key={fmt} className="text-slate-300">
                                       <td className="py-1 font-bold text-white">{fmt}</td>
-                                      <td className="py-1 text-center">{row.M || row.Mat || '—'}</td>
-                                      <td className="py-1 text-center">{row.B || row.Balls || '—'}</td>
+                                      <td className="py-1 text-center">{row.Mat || row.M || '—'}</td>
+                                      <td className="py-1 text-center">{row.Balls || row.B || '—'}</td>
                                       <td className="py-1 text-center text-cyan-400 font-semibold">{row.Wkts || row.W || '—'}</td>
                                       <td className="py-1 text-center">{row.BBI || '—'}</td>
                                       <td className="py-1 text-center">{row.Econ || '—'}</td>
@@ -628,13 +654,29 @@ export default function WplPlayersCleanOpsPage() {
                     }`}
                   >
                     <BarChart2 className="w-3.5 h-3.5" />
-                    <span>2. Career Statistics ({Object.keys(formData.careerStats?.batting || {}).length + Object.keys(formData.careerStats?.bowling || {}).length} Rows)</span>
+                    <span>2. Career Statistics ({Object.keys(formData.careerStats?.batting || {}).length + Object.keys(formData.careerStats?.bowling || {}).length} Formats)</span>
                   </button>
                 </div>
 
                 {/* Tab 1: Personal Profile Fields */}
                 {activeModalTab === 'profile' && (
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-xs text-slate-400 font-semibold">Assign Team *</label>
+                      <select
+                        value={formData.teamId || activeTeam.slug}
+                        onChange={(e) => {
+                          const chosen = WPL_TEAMS.find((t) => t.slug === e.target.value) || activeTeam;
+                          setFormData({ ...formData, teamId: chosen.slug, team: chosen.name });
+                        }}
+                        className="w-full mt-1 px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white"
+                      >
+                        {WPL_TEAMS.map((t) => (
+                          <option key={t.slug} value={t.slug}>{t.name} ({t.short})</option>
+                        ))}
+                      </select>
+                    </div>
+
                     <div>
                       <label className="text-xs text-slate-400 font-semibold">Player Name *</label>
                       <input
@@ -787,7 +829,7 @@ export default function WplPlayersCleanOpsPage() {
                               return (
                                 <tr key={fmt} className="hover:bg-slate-900/50 text-slate-200">
                                   <td className="py-2 px-2 font-bold text-white">{fmt}</td>
-                                  <td className="py-2 px-2 text-center">{row.M || row.Mat || '—'}</td>
+                                  <td className="py-2 px-2 text-center">{row.Mat || row.M || '—'}</td>
                                   <td className="py-2 px-2 text-center">{row.Inn || '—'}</td>
                                   <td className="py-2 px-2 text-center">{row.NO || '—'}</td>
                                   <td className="py-2 px-2 text-center font-bold text-emerald-400">{row.Runs || row.R || '—'}</td>
@@ -826,7 +868,6 @@ export default function WplPlayersCleanOpsPage() {
                               <th className="py-2 px-2 text-center">Runs</th>
                               <th className="py-2 px-2 text-center">Wkts</th>
                               <th className="py-2 px-2 text-center">BBI</th>
-                              <th className="py-2 px-2 text-center">BBM</th>
                               <th className="py-2 px-2 text-center">Econ</th>
                               <th className="py-2 px-2 text-center">Avg</th>
                               <th className="py-2 px-2 text-center">SR</th>
@@ -839,13 +880,12 @@ export default function WplPlayersCleanOpsPage() {
                               return (
                                 <tr key={fmt} className="hover:bg-slate-900/50 text-slate-200">
                                   <td className="py-2 px-2 font-bold text-white">{fmt}</td>
-                                  <td className="py-2 px-2 text-center">{row.M || row.Mat || '—'}</td>
+                                  <td className="py-2 px-2 text-center">{row.Mat || row.M || '—'}</td>
                                   <td className="py-2 px-2 text-center">{row.Inn || '—'}</td>
-                                  <td className="py-2 px-2 text-center">{row.B || row.Balls || '—'}</td>
+                                  <td className="py-2 px-2 text-center">{row.Balls || row.B || '—'}</td>
                                   <td className="py-2 px-2 text-center">{row.Runs || row.R || '—'}</td>
                                   <td className="py-2 px-2 text-center font-bold text-cyan-400">{row.Wkts || row.W || '—'}</td>
                                   <td className="py-2 px-2 text-center">{row.BBI || '—'}</td>
-                                  <td className="py-2 px-2 text-center">{row.BBM || '—'}</td>
                                   <td className="py-2 px-2 text-center">{row.Econ || '—'}</td>
                                   <td className="py-2 px-2 text-center">{row.Avg || '—'}</td>
                                   <td className="py-2 px-2 text-center">{row.SR || '—'}</td>
@@ -882,7 +922,7 @@ export default function WplPlayersCleanOpsPage() {
                     onClick={handleSavePlayer}
                     className="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-lg"
                   >
-                    Save Player to {activeTeam.short}
+                    Save Player
                   </button>
                 </div>
               </div>
