@@ -1,40 +1,48 @@
-import { NextResponse } from 'next/server';
-
-export async function POST(req: Request) {
+export async function onRequestPost(context: any) {
   try {
-    const { url, profileId } = await req.json();
-    let targetUrl = (url || '').trim();
+    const req = context.request;
+    const body = await req.json().catch(() => ({}));
+    let targetUrl = (body.url || '').trim();
 
-    if (!targetUrl && profileId) {
-      targetUrl = `https://www.cricbuzz.com/profiles/${profileId}`;
+    if (!targetUrl && body.profileId) {
+      targetUrl = `https://www.cricbuzz.com/profiles/${body.profileId}`;
     }
 
     if (!targetUrl) {
-      return NextResponse.json({ success: false, error: 'Please provide a valid Cricbuzz profile URL or ID' }, { status: 400 });
+      return new Response(JSON.stringify({ success: false, error: 'Please enter a Cricbuzz profile URL or ID' }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
+      });
     }
 
     if (/^\d+$/.test(targetUrl)) {
       targetUrl = `https://www.cricbuzz.com/profiles/${targetUrl}`;
     }
 
-    const res = await fetch(targetUrl, {
+    const cricRes = await fetch(targetUrl, {
+      redirect: 'follow',
       headers: {
-        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+        'Accept-Language': 'en-US,en;q=0.9',
+        'Cache-Control': 'no-cache'
       }
     });
 
-    if (!res.ok) {
-      return NextResponse.json({ success: false, error: `Cricbuzz returned status ${res.status}` }, { status: res.status });
+    if (!cricRes.ok) {
+      return new Response(JSON.stringify({ success: false, error: `Cricbuzz profile returned status ${cricRes.status}` }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
+      });
     }
 
-    const html = await res.text();
+    const html = await cricRes.text();
 
-    // 1. Scrape Player Name
+    // 1. Scrape Name
     const h1Match = html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/i);
     const scrapedName = h1Match ? h1Match[1].replace(/<[^>]+>/g, '').trim() : '';
 
-    // 2. Scrape Personal Information Key-Values
+    // 2. Personal Info Mapping
     const bioMap: Record<string, string> = {};
     const divRegex = /<div[^>]*class="[^"]*cb-col-(?:40|33|50)[^"]*"[^>]*>([\s\S]*?)<\/div>\s*<div[^>]*class="[^"]*cb-col-(?:60|67|50)[^"]*"[^>]*>([\s\S]*?)<\/div>/gi;
     let match;
@@ -118,51 +126,53 @@ export async function POST(req: Request) {
     else if (/left.*med.*fast/i.test(rawBowl)) bowlingStyle = 'Left-arm medium-fast';
     else if (rawBowl) bowlingStyle = rawBowl;
 
-    // 7. Scrape Multi-Format Career Tables
+    // 7. Scrape Multi-Format Career Tables (Batting & Bowling)
     const batting: Record<string, any> = {};
     const bowling: Record<string, any> = {};
 
-    const tableRegex = /<table[^>]*class="[^"]*cb-col-100[^"]*"[^>]*>([\s\S]*?)<\/table>/gi;
-    let tMatch;
-    let tableIndex = 0;
+    const tableMatches = html.match(/<table[\s\S]*?<\/table>/gi) || [];
+    for (const tableHtml of tableMatches) {
+      const isBatting = /runs|hs|avg|strike\s*rate|sr|100s?/i.test(tableHtml) && !/wkts|bbi|econ/i.test(tableHtml);
+      const isBowling = /wkts|wickets|bbi|econ|economy/i.test(tableHtml);
+      if (!isBatting && !isBowling) continue;
 
-    while ((tMatch = tableRegex.exec(html)) !== null) {
-      const tableHtml = tMatch[1];
-      const isBatting = tableIndex === 0;
-      const targetObj = isBatting ? batting : bowling;
-
+      const targetObj = isBowling ? bowling : batting;
       const headers: string[] = [];
       const thRegex = /<th[^>]*>([\s\S]*?)<\/th>/gi;
-      let thMatch;
-      while ((thMatch = thRegex.exec(tableHtml)) !== null) {
-        headers.push(thMatch[1].replace(/<[^>]+>/g, '').trim());
+      let th;
+      while ((th = thRegex.exec(tableHtml)) !== null) {
+        headers.push(th[1].replace(/<[^>]+>/g, '').trim());
       }
 
       const trRegex = /<tr[^>]*>([\s\S]*?)<\/tr>/gi;
-      let trMatch;
-      while ((trMatch = trRegex.exec(tableHtml)) !== null) {
-        const rowHtml = trMatch[1];
-        if (rowHtml.includes('<th')) continue;
-
+      let tr;
+      while ((tr = trRegex.exec(tableHtml)) !== null) {
+        const row = tr[1];
+        if (row.includes('<th')) continue;
         const cells: string[] = [];
         const tdRegex = /<td[^>]*>([\s\S]*?)<\/td>/gi;
-        let tdMatch;
-        while ((tdMatch = tdRegex.exec(rowHtml)) !== null) {
-          cells.push(tdMatch[1].replace(/<[^>]+>/g, '').trim());
+        let td;
+        while ((td = tdRegex.exec(row)) !== null) {
+          cells.push(td[1].replace(/<[^>]+>/g, '').trim());
         }
 
         if (cells.length > 1) {
-          const format = cells[0];
+          const rawFormat = cells[0];
+          let normalizedFormat = rawFormat;
+          if (/^test$/i.test(rawFormat)) normalizedFormat = 'Test';
+          else if (/^odi$/i.test(rawFormat)) normalizedFormat = 'ODI';
+          else if (/^t20i?$/i.test(rawFormat)) normalizedFormat = 'T20I';
+          else if (/^(wpl|wt20|ipl)$/i.test(rawFormat)) normalizedFormat = 'WPL';
+
           const rowData: Record<string, string> = {};
           headers.forEach((h, idx) => {
             if (idx > 0 && cells[idx] !== undefined) {
               rowData[h] = cells[idx];
             }
           });
-          targetObj[format] = rowData;
+          targetObj[normalizedFormat] = rowData;
         }
       }
-      tableIndex++;
     }
 
     const bio = {
@@ -178,15 +188,32 @@ export async function POST(req: Request) {
 
     const targetId = targetUrl.match(/profiles\/(\d+)/)?.[1] || '';
 
-    return NextResponse.json({
+    return new Response(JSON.stringify({
       success: true,
       sourceUrl: targetUrl,
       profileId: targetId,
       bio,
       data: { batting, bowling }
+    }), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
     });
 
-  } catch (error: any) {
-    return NextResponse.json({ success: false, error: error.message || 'Scrape failed' }, { status: 500 });
+  } catch (err: any) {
+    return new Response(JSON.stringify({ success: false, error: err.message || 'Scrape failed' }), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
+    });
   }
+}
+
+export async function onRequestOptions() {
+  return new Response(null, {
+    status: 204,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type'
+    }
+  });
 }

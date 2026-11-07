@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import {
   Search, Plus, RefreshCw, Trash2, Edit2, Shield,
-  ExternalLink, Sparkles, User, Check, X
+  ExternalLink, Sparkles, User, Check, X, ChevronDown, ChevronUp, BarChart2
 } from 'lucide-react';
 
 interface Player {
@@ -42,12 +42,15 @@ const WPL_TEAMS = [
   { id: '15', slug: 'upw', name: 'UP Warriorz', short: 'UPW', color: 'from-yellow-500/30 via-purple-950/40 to-slate-950', border: 'border-yellow-500/40', badge: 'bg-yellow-500/20 text-yellow-300' }
 ];
 
+const STAT_FORMATS = ['Test', 'ODI', 'T20I', 'WPL'];
+
 export default function WplPlayersCleanOpsPage() {
   const [players, setPlayers] = useState<Player[]>([]);
   const [selectedTeamId, setSelectedTeamId] = useState<string>('14');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [roleFilter, setRoleFilter] = useState<string>('ALL');
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [expandedStatsPlayerId, setExpandedStatsPlayerId] = useState<string | null>(null);
 
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
@@ -56,6 +59,7 @@ export default function WplPlayersCleanOpsPage() {
   const [isScraping, setIsScraping] = useState<boolean>(false);
   const [scrapeError, setScrapeError] = useState<string | null>(null);
   const [scrapeSuccess, setScrapeSuccess] = useState<string | null>(null);
+  const [activeModalTab, setActiveModalTab] = useState<'profile' | 'stats'>('profile');
 
   // Form State
   const [formData, setFormData] = useState<Partial<Player>>({
@@ -116,6 +120,7 @@ export default function WplPlayersCleanOpsPage() {
     setCricbuzzUrlInput('');
     setScrapeError(null);
     setScrapeSuccess(null);
+    setActiveModalTab('profile');
     setFormData({
       name: '',
       role: 'All-rounder',
@@ -142,6 +147,7 @@ export default function WplPlayersCleanOpsPage() {
     setCricbuzzUrlInput(p.cricbuzzUrl || '');
     setScrapeError(null);
     setScrapeSuccess(null);
+    setActiveModalTab('profile');
     setFormData({ ...p });
     setIsModalOpen(true);
   };
@@ -164,9 +170,16 @@ export default function WplPlayersCleanOpsPage() {
         body: JSON.stringify({ url: rawUrl })
       });
 
-      const payload = await res.json();
+      const text = await res.text();
+      let payload: any = {};
+      try {
+        payload = JSON.parse(text);
+      } catch (parseErr) {
+        throw new Error(`Invalid server response (${res.status}): ${text.slice(0, 120)}`);
+      }
+
       if (!res.ok || !payload.success) {
-        throw new Error(payload.error || 'Failed to scrape player profile');
+        throw new Error(payload.error || `Scrape failed with status ${res.status}`);
       }
 
       const bio = payload.bio || {};
@@ -187,7 +200,9 @@ export default function WplPlayersCleanOpsPage() {
         careerStats: { batting: stats.batting || {}, bowling: stats.bowling || {} }
       }));
 
-      setScrapeSuccess(`✓ Auto-filled ${bio.name || 'player'}: DOB, Age, Nationality, Role, Styles, and Stats extracted!`);
+      const battingRows = Object.keys(stats.batting || {}).length;
+      const bowlingRows = Object.keys(stats.bowling || {}).length;
+      setScrapeSuccess(`✓ Successfully auto-filled ${bio.name || 'player'}: Personal info, playing style, and Career Stats (${battingRows} Batting, ${bowlingRows} Bowling formats) extracted!`);
     } catch (err: any) {
       setScrapeError(err.message || 'Error communicating with Cricbuzz scraper');
     } finally {
@@ -264,10 +279,10 @@ export default function WplPlayersCleanOpsPage() {
               <Shield className="w-4 h-4" /> WPL Operations Desk
             </div>
             <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight text-white mt-1">
-              Squad Management
+              Squad & Player Management
             </h1>
             <p className="text-xs text-slate-400 mt-1">
-              Select a franchise and add players individually via their Cricbuzz profile URL.
+              Select a franchise and add players individually via their Cricbuzz profile URL with full bio and multi-format stats.
             </p>
           </div>
 
@@ -362,98 +377,187 @@ export default function WplPlayersCleanOpsPage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {teamPlayers.map((player) => (
-              <div
-                key={player.id}
-                className="p-5 rounded-2xl bg-gradient-to-b from-slate-900/90 to-slate-950/90 border border-slate-800/90 hover:border-slate-700 transition-all flex flex-col justify-between group shadow-lg"
-              >
-                <div>
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="flex items-center gap-3">
-                      <div className="w-11 h-11 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center text-base font-extrabold text-emerald-400">
-                        {player.jerseyNumber && player.jerseyNumber !== 'N/A' ? `#${player.jerseyNumber}` : player.name[0]}
-                      </div>
-                      <div>
-                        <h3 className="font-extrabold text-sm text-white group-hover:text-emerald-400 transition-colors flex items-center gap-1.5">
-                          {player.name}
-                          {player.isCaptain && (
-                            <span className="text-[9px] px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 font-black">C</span>
-                          )}
-                        </h3>
-                        <div className="flex items-center gap-2 mt-0.5">
-                          <span className="text-[11px] font-semibold text-slate-400">{player.nationality}</span>
-                          <span className="text-slate-600">·</span>
-                          <span className="text-[11px] text-slate-400">{player.age ? `${player.age} yrs` : '—'}</span>
+            {teamPlayers.map((player) => {
+              const isStatsExpanded = expandedStatsPlayerId === player.id;
+              const batStats = player.careerStats?.batting || {};
+              const bowlStats = player.careerStats?.bowling || {};
+              const hasStats = Object.keys(batStats).length > 0 || Object.keys(bowlStats).length > 0;
+
+              return (
+                <div
+                  key={player.id}
+                  className="p-5 rounded-2xl bg-gradient-to-b from-slate-900/90 to-slate-950/90 border border-slate-800/90 hover:border-slate-700 transition-all flex flex-col justify-between group shadow-lg"
+                >
+                  <div>
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex items-center gap-3">
+                        <div className="w-11 h-11 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center text-base font-extrabold text-emerald-400">
+                          {player.jerseyNumber && player.jerseyNumber !== 'N/A' ? `#${player.jerseyNumber}` : player.name[0]}
+                        </div>
+                        <div>
+                          <h3 className="font-extrabold text-sm text-white group-hover:text-emerald-400 transition-colors flex items-center gap-1.5">
+                            {player.name}
+                            {player.isCaptain && (
+                              <span className="text-[9px] px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 font-black">C</span>
+                            )}
+                          </h3>
+                          <div className="flex items-center gap-2 mt-0.5">
+                            <span className="text-[11px] font-semibold text-slate-400">{player.nationality}</span>
+                            <span className="text-slate-600">·</span>
+                            <span className="text-[11px] text-slate-400">{player.age ? `${player.age} yrs` : '—'}</span>
+                          </div>
                         </div>
                       </div>
-                    </div>
 
-                    <span className="text-[10px] px-2 py-0.5 rounded-md font-bold bg-slate-800 text-slate-300 border border-slate-700">
-                      {player.role}
-                    </span>
-                  </div>
-
-                  {/* Playing Styles */}
-                  <div className="mt-4 grid grid-cols-2 gap-2 text-[11px] p-2.5 rounded-xl bg-slate-950/70 border border-slate-800/60">
-                    <div>
-                      <span className="text-slate-500 block text-[10px]">Batting</span>
-                      <span className="text-slate-300 font-medium truncate block">{player.battingStyle || 'Right-hand bat'}</span>
-                    </div>
-                    <div>
-                      <span className="text-slate-500 block text-[10px]">Bowling</span>
-                      <span className="text-slate-300 font-medium truncate block">{player.bowlingStyle || '—'}</span>
-                    </div>
-                  </div>
-
-                  {/* Stats Highlights */}
-                  {player.careerStats?.batting && Object.keys(player.careerStats.batting).length > 0 && (
-                    <div className="mt-2.5 text-[10px] text-slate-400 flex items-center justify-between px-1">
-                      <span>Career Highlight:</span>
-                      <span className="text-emerald-400 font-semibold">
-                        {player.careerStats.batting['WPL']?.Runs || player.careerStats.batting['T20I']?.Runs || 0} runs · {player.careerStats.bowling?.['WPL']?.Wkts || player.careerStats.bowling?.['T20I']?.Wkts || 0} wkts
+                      <span className="text-[10px] px-2 py-0.5 rounded-md font-bold bg-slate-800 text-slate-300 border border-slate-700">
+                        {player.role}
                       </span>
                     </div>
-                  )}
-                </div>
 
-                <div className="mt-4 pt-3 border-t border-slate-800/80 flex items-center justify-between">
-                  {player.cricbuzzUrl ? (
-                    <a
-                      href={player.cricbuzzUrl}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="text-[11px] text-slate-400 hover:text-cyan-400 flex items-center gap-1 transition-colors"
-                    >
-                      <ExternalLink className="w-3.5 h-3.5" /> Cricbuzz
-                    </a>
-                  ) : <span />}
+                    {/* Playing Styles */}
+                    <div className="mt-4 grid grid-cols-2 gap-2 text-[11px] p-2.5 rounded-xl bg-slate-950/70 border border-slate-800/60">
+                      <div>
+                        <span className="text-slate-500 block text-[10px]">Batting</span>
+                        <span className="text-slate-300 font-medium truncate block">{player.battingStyle || 'Right-hand bat'}</span>
+                      </div>
+                      <div>
+                        <span className="text-slate-500 block text-[10px]">Bowling</span>
+                        <span className="text-slate-300 font-medium truncate block">{player.bowlingStyle || '—'}</span>
+                      </div>
+                    </div>
 
-                  <div className="flex items-center gap-1.5">
-                    <button
-                      onClick={() => handleOpenEdit(player)}
-                      className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors"
-                      title="Edit Player"
-                    >
-                      <Edit2 className="w-3.5 h-3.5" />
-                    </button>
-                    <button
-                      onClick={() => handleDeletePlayer(player.id)}
-                      className="p-1.5 rounded-lg bg-slate-800 hover:bg-red-950/60 text-slate-300 hover:text-red-400 transition-colors"
-                      title="Remove from Squad"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
+                    {/* Stats Highlights Header */}
+                    <div className="mt-3 pt-2 border-t border-slate-800/80 flex items-center justify-between text-xs">
+                      <button
+                        type="button"
+                        onClick={() => setExpandedStatsPlayerId(isStatsExpanded ? null : player.id)}
+                        className="text-[11px] font-semibold text-emerald-400 hover:text-emerald-300 flex items-center gap-1"
+                      >
+                        <BarChart2 className="w-3.5 h-3.5" />
+                        <span>{hasStats ? 'Career Stats Table' : 'No stats recorded'}</span>
+                        {isStatsExpanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+                      </button>
+
+                      <span className="text-[10px] text-slate-400">
+                        {batStats['WPL']?.Runs || batStats['T20I']?.Runs || 0} runs · {bowlStats['WPL']?.Wkts || bowlStats['T20I']?.Wkts || 0} wkts
+                      </span>
+                    </div>
+
+                    {/* Expanded Stats Drawer */}
+                    {isStatsExpanded && (
+                      <div className="mt-3 p-3 rounded-xl bg-slate-950 border border-slate-800 text-[10px] space-y-3">
+                        <div>
+                          <div className="font-bold text-cyan-400 mb-1">🏏 Batting Career Summary</div>
+                          <div className="overflow-x-auto">
+                            <table className="w-full text-left">
+                              <thead>
+                                <tr className="text-slate-500 border-b border-slate-800">
+                                  <th className="py-1">Fmt</th>
+                                  <th className="py-1 text-center">Mat</th>
+                                  <th className="py-1 text-center">Inn</th>
+                                  <th className="py-1 text-center">Runs</th>
+                                  <th className="py-1 text-center">HS</th>
+                                  <th className="py-1 text-center">Avg</th>
+                                  <th className="py-1 text-center">SR</th>
+                                </tr>
+                              </thead>
+                              <tbody className="divide-y divide-slate-900">
+                                {STAT_FORMATS.map((fmt) => {
+                                  const row = batStats[fmt] || {};
+                                  return (
+                                    <tr key={fmt} className="text-slate-300">
+                                      <td className="py-1 font-bold text-white">{fmt}</td>
+                                      <td className="py-1 text-center">{row.M || row.Mat || '—'}</td>
+                                      <td className="py-1 text-center">{row.Inn || '—'}</td>
+                                      <td className="py-1 text-center text-emerald-400 font-semibold">{row.Runs || row.R || '—'}</td>
+                                      <td className="py-1 text-center">{row.HS || '—'}</td>
+                                      <td className="py-1 text-center">{row.Avg || '—'}</td>
+                                      <td className="py-1 text-center">{row.SR || '—'}</td>
+                                    </tr>
+                                  );
+                                })}
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+
+                        <div>
+                          <div className="font-bold text-cyan-400 mb-1">🎯 Bowling Career Summary</div>
+                          <div className="overflow-x-auto">
+                            <table className="w-full text-left">
+                              <thead>
+                                <tr className="text-slate-500 border-b border-slate-800">
+                                  <th className="py-1">Fmt</th>
+                                  <th className="py-1 text-center">Mat</th>
+                                  <th className="py-1 text-center">Balls</th>
+                                  <th className="py-1 text-center">Wkts</th>
+                                  <th className="py-1 text-center">BBI</th>
+                                  <th className="py-1 text-center">Econ</th>
+                                  <th className="py-1 text-center">Avg</th>
+                                </tr>
+                              </thead>
+                              <tbody className="divide-y divide-slate-900">
+                                {STAT_FORMATS.map((fmt) => {
+                                  const row = bowlStats[fmt] || {};
+                                  return (
+                                    <tr key={fmt} className="text-slate-300">
+                                      <td className="py-1 font-bold text-white">{fmt}</td>
+                                      <td className="py-1 text-center">{row.M || row.Mat || '—'}</td>
+                                      <td className="py-1 text-center">{row.B || row.Balls || '—'}</td>
+                                      <td className="py-1 text-center text-cyan-400 font-semibold">{row.Wkts || row.W || '—'}</td>
+                                      <td className="py-1 text-center">{row.BBI || '—'}</td>
+                                      <td className="py-1 text-center">{row.Econ || '—'}</td>
+                                      <td className="py-1 text-center">{row.Avg || '—'}</td>
+                                    </tr>
+                                  );
+                                })}
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="mt-4 pt-3 border-t border-slate-800/80 flex items-center justify-between">
+                    {player.cricbuzzUrl ? (
+                      <a
+                        href={player.cricbuzzUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-[11px] text-slate-400 hover:text-cyan-400 flex items-center gap-1 transition-colors"
+                      >
+                        <ExternalLink className="w-3.5 h-3.5" /> Cricbuzz
+                      </a>
+                    ) : <span />}
+
+                    <div className="flex items-center gap-1.5">
+                      <button
+                        onClick={() => handleOpenEdit(player)}
+                        className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors"
+                        title="Edit Player & Stats"
+                      >
+                        <Edit2 className="w-3.5 h-3.5" />
+                      </button>
+                      <button
+                        onClick={() => handleDeletePlayer(player.id)}
+                        className="p-1.5 rounded-lg bg-slate-800 hover:bg-red-950/60 text-slate-300 hover:text-red-400 transition-colors"
+                        title="Remove from Squad"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
 
         {/* SINGLE PLAYER INTAKE MODAL */}
         {isModalOpen && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
-            <div className="w-full max-w-2xl bg-slate-900 border border-slate-700 rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+            <div className="w-full max-w-3xl bg-slate-900 border border-slate-700 rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
               {/* Modal Header */}
               <div className="p-5 border-b border-slate-800 flex items-center justify-between bg-slate-950/60">
                 <div>
@@ -461,7 +565,7 @@ export default function WplPlayersCleanOpsPage() {
                     {editingPlayer ? `Edit ${editingPlayer.name}` : `Add Player to ${activeTeam.name}`}
                   </h2>
                   <p className="text-xs text-slate-400 mt-0.5">
-                    Paste a Cricbuzz profile URL to auto-fill personal records, playing styles, and career stats.
+                    Paste a Cricbuzz profile URL to auto-fill personal profile and full career statistics tables.
                   </p>
                 </div>
                 <button
@@ -484,7 +588,7 @@ export default function WplPlayersCleanOpsPage() {
                       type="text"
                       value={cricbuzzUrlInput}
                       onChange={(e) => setCricbuzzUrlInput(e.target.value)}
-                      placeholder="Paste Cricbuzz URL (e.g. https://www.cricbuzz.com/profiles/8734/ellyse-perry) or ID (8734)..."
+                      placeholder="Paste Cricbuzz URL (e.g. https://www.cricbuzz.com/profiles/9115/ellyse-perry) or ID (9115)..."
                       className="flex-1 px-3.5 py-2 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500"
                     />
                     <button
@@ -501,140 +605,286 @@ export default function WplPlayersCleanOpsPage() {
                   {scrapeError && <p className="text-xs text-red-400 font-semibold">{scrapeError}</p>}
                 </div>
 
-                {/* Extracted Form Inputs */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="text-xs text-slate-400 font-semibold">Player Name *</label>
-                    <input
-                      type="text"
-                      value={formData.name || ''}
-                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                      placeholder="e.g. Ellyse Perry"
-                      className="w-full mt-1 px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="text-xs text-slate-400 font-semibold">Nationality</label>
-                    <input
-                      type="text"
-                      value={formData.nationality || ''}
-                      onChange={(e) => setFormData({ ...formData, nationality: e.target.value })}
-                      placeholder="e.g. Australia"
-                      className="w-full mt-1 px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="text-xs text-slate-400 font-semibold">Role</label>
-                    <select
-                      value={formData.role || 'All-rounder'}
-                      onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-                      className="w-full mt-1 px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white"
-                    >
-                      <option value="Batter">Batter</option>
-                      <option value="All-rounder">All-rounder</option>
-                      <option value="Bowler">Bowler</option>
-                      <option value="Wicketkeeper">Wicketkeeper</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="text-xs text-slate-400 font-semibold">All-Rounder Type</label>
-                    <select
-                      value={formData.allrounderType || 'Batting Allrounder'}
-                      onChange={(e) => setFormData({ ...formData, allrounderType: e.target.value })}
-                      className="w-full mt-1 px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white"
-                    >
-                      <option value="Batting Allrounder">Batting Allrounder</option>
-                      <option value="Bowling Allrounder">Bowling Allrounder</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="text-xs text-slate-400 font-semibold">Date of Birth</label>
-                    <input
-                      type="date"
-                      value={formData.dateOfBirth || ''}
-                      onChange={(e) => setFormData({ ...formData, dateOfBirth: e.target.value })}
-                      className="w-full mt-1 px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="text-xs text-slate-400 font-semibold">Age</label>
-                    <input
-                      type="number"
-                      value={formData.age !== undefined && formData.age !== null ? formData.age : ''}
-                      onChange={(e) => setFormData({ ...formData, age: parseInt(e.target.value, 10) || '' })}
-                      placeholder="e.g. 35"
-                      className="w-full mt-1 px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="text-xs text-slate-400 font-semibold">Batting Style</label>
-                    <select
-                      value={formData.battingStyle || 'Right-hand bat'}
-                      onChange={(e) => setFormData({ ...formData, battingStyle: e.target.value })}
-                      className="w-full mt-1 px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white"
-                    >
-                      <option value="Right-hand bat">Right-hand bat</option>
-                      <option value="Left-hand bat">Left-hand bat</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="text-xs text-slate-400 font-semibold">Bowling Style</label>
-                    <input
-                      type="text"
-                      value={formData.bowlingStyle || ''}
-                      onChange={(e) => setFormData({ ...formData, bowlingStyle: e.target.value })}
-                      placeholder="e.g. Right-arm fast-medium"
-                      className="w-full mt-1 px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="text-xs text-slate-400 font-semibold">Jersey Number</label>
-                    <input
-                      type="text"
-                      value={formData.jerseyNumber || 'N/A'}
-                      onChange={(e) => setFormData({ ...formData, jerseyNumber: e.target.value })}
-                      placeholder="e.g. 8"
-                      className="w-full mt-1 px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="text-xs text-slate-400 font-semibold">Contract / Auction Fee</label>
-                    <input
-                      type="text"
-                      value={formData.auction?.fee || '₹50 Lakh'}
-                      onChange={(e) => setFormData({ ...formData, auction: { ...formData.auction, fee: e.target.value } })}
-                      placeholder="e.g. ₹2.00 Cr"
-                      className="w-full mt-1 px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white"
-                    />
-                  </div>
+                {/* Modal View Tabs: Personal Profile vs Career Stats */}
+                <div className="flex border-b border-slate-800">
+                  <button
+                    type="button"
+                    onClick={() => setActiveModalTab('profile')}
+                    className={`px-4 py-2 text-xs font-bold border-b-2 transition-all ${
+                      activeModalTab === 'profile'
+                        ? 'border-emerald-400 text-emerald-400'
+                        : 'border-transparent text-slate-400 hover:text-white'
+                    }`}
+                  >
+                    1. Personal & Playing Profile
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setActiveModalTab('stats')}
+                    className={`px-4 py-2 text-xs font-bold border-b-2 transition-all flex items-center gap-1.5 ${
+                      activeModalTab === 'stats'
+                        ? 'border-emerald-400 text-emerald-400'
+                        : 'border-transparent text-slate-400 hover:text-white'
+                    }`}
+                  >
+                    <BarChart2 className="w-3.5 h-3.5" />
+                    <span>2. Career Statistics ({Object.keys(formData.careerStats?.batting || {}).length + Object.keys(formData.careerStats?.bowling || {}).length} Rows)</span>
+                  </button>
                 </div>
+
+                {/* Tab 1: Personal Profile Fields */}
+                {activeModalTab === 'profile' && (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-xs text-slate-400 font-semibold">Player Name *</label>
+                      <input
+                        type="text"
+                        value={formData.name || ''}
+                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                        placeholder="e.g. Ellyse Perry"
+                        className="w-full mt-1 px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="text-xs text-slate-400 font-semibold">Nationality</label>
+                      <input
+                        type="text"
+                        value={formData.nationality || ''}
+                        onChange={(e) => setFormData({ ...formData, nationality: e.target.value })}
+                        placeholder="e.g. Australia"
+                        className="w-full mt-1 px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="text-xs text-slate-400 font-semibold">Role</label>
+                      <select
+                        value={formData.role || 'All-rounder'}
+                        onChange={(e) => setFormData({ ...formData, role: e.target.value })}
+                        className="w-full mt-1 px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white"
+                      >
+                        <option value="Batter">Batter</option>
+                        <option value="All-rounder">All-rounder</option>
+                        <option value="Bowler">Bowler</option>
+                        <option value="Wicketkeeper">Wicketkeeper</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="text-xs text-slate-400 font-semibold">All-Rounder Type</label>
+                      <select
+                        value={formData.allrounderType || 'Batting Allrounder'}
+                        onChange={(e) => setFormData({ ...formData, allrounderType: e.target.value })}
+                        className="w-full mt-1 px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white"
+                      >
+                        <option value="Batting Allrounder">Batting Allrounder</option>
+                        <option value="Bowling Allrounder">Bowling Allrounder</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="text-xs text-slate-400 font-semibold">Date of Birth</label>
+                      <input
+                        type="date"
+                        value={formData.dateOfBirth || ''}
+                        onChange={(e) => setFormData({ ...formData, dateOfBirth: e.target.value })}
+                        className="w-full mt-1 px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="text-xs text-slate-400 font-semibold">Age</label>
+                      <input
+                        type="number"
+                        value={formData.age !== undefined && formData.age !== null ? formData.age : ''}
+                        onChange={(e) => setFormData({ ...formData, age: parseInt(e.target.value, 10) || '' })}
+                        placeholder="e.g. 35"
+                        className="w-full mt-1 px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="text-xs text-slate-400 font-semibold">Batting Style</label>
+                      <select
+                        value={formData.battingStyle || 'Right-hand bat'}
+                        onChange={(e) => setFormData({ ...formData, battingStyle: e.target.value })}
+                        className="w-full mt-1 px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white"
+                      >
+                        <option value="Right-hand bat">Right-hand bat</option>
+                        <option value="Left-hand bat">Left-hand bat</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="text-xs text-slate-400 font-semibold">Bowling Style</label>
+                      <input
+                        type="text"
+                        value={formData.bowlingStyle || ''}
+                        onChange={(e) => setFormData({ ...formData, bowlingStyle: e.target.value })}
+                        placeholder="e.g. Right-arm fast-medium"
+                        className="w-full mt-1 px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="text-xs text-slate-400 font-semibold">Jersey Number</label>
+                      <input
+                        type="text"
+                        value={formData.jerseyNumber || 'N/A'}
+                        onChange={(e) => setFormData({ ...formData, jerseyNumber: e.target.value })}
+                        placeholder="e.g. 8"
+                        className="w-full mt-1 px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="text-xs text-slate-400 font-semibold">Contract / Auction Fee</label>
+                      <input
+                        type="text"
+                        value={formData.auction?.fee || '₹50 Lakh'}
+                        onChange={(e) => setFormData({ ...formData, auction: { ...formData.auction, fee: e.target.value } })}
+                        placeholder="e.g. ₹2.00 Cr"
+                        className="w-full mt-1 px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white"
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {/* Tab 2: Career Stats Tables (Batting & Bowling) */}
+                {activeModalTab === 'stats' && (
+                  <div className="space-y-6">
+                    {/* Batting Career Summary */}
+                    <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <h4 className="text-xs font-bold text-cyan-400 flex items-center gap-1.5">
+                          <span>🏏</span> BATTING CAREER SUMMARY
+                        </h4>
+                        <span className="text-[10px] text-slate-500">Auto-extracted from Cricbuzz</span>
+                      </div>
+                      <div className="overflow-x-auto">
+                        <table className="w-full text-xs text-left">
+                          <thead>
+                            <tr className="border-b border-slate-800 text-slate-400 font-semibold">
+                              <th className="py-2 px-2">Format</th>
+                              <th className="py-2 px-2 text-center">Mat</th>
+                              <th className="py-2 px-2 text-center">Inn</th>
+                              <th className="py-2 px-2 text-center">NO</th>
+                              <th className="py-2 px-2 text-center">Runs</th>
+                              <th className="py-2 px-2 text-center">HS</th>
+                              <th className="py-2 px-2 text-center">Avg</th>
+                              <th className="py-2 px-2 text-center">BF</th>
+                              <th className="py-2 px-2 text-center">SR</th>
+                              <th className="py-2 px-2 text-center">100</th>
+                              <th className="py-2 px-2 text-center">50</th>
+                              <th className="py-2 px-2 text-center">4s</th>
+                              <th className="py-2 px-2 text-center">6s</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-slate-800/60">
+                            {STAT_FORMATS.map((fmt) => {
+                              const row = formData.careerStats?.batting?.[fmt] || {};
+                              return (
+                                <tr key={fmt} className="hover:bg-slate-900/50 text-slate-200">
+                                  <td className="py-2 px-2 font-bold text-white">{fmt}</td>
+                                  <td className="py-2 px-2 text-center">{row.M || row.Mat || '—'}</td>
+                                  <td className="py-2 px-2 text-center">{row.Inn || '—'}</td>
+                                  <td className="py-2 px-2 text-center">{row.NO || '—'}</td>
+                                  <td className="py-2 px-2 text-center font-bold text-emerald-400">{row.Runs || row.R || '—'}</td>
+                                  <td className="py-2 px-2 text-center">{row.HS || '—'}</td>
+                                  <td className="py-2 px-2 text-center">{row.Avg || '—'}</td>
+                                  <td className="py-2 px-2 text-center">{row.BF || '—'}</td>
+                                  <td className="py-2 px-2 text-center">{row.SR || '—'}</td>
+                                  <td className="py-2 px-2 text-center">{row['100'] || '—'}</td>
+                                  <td className="py-2 px-2 text-center">{row['50'] || '—'}</td>
+                                  <td className="py-2 px-2 text-center">{row['4s'] || '—'}</td>
+                                  <td className="py-2 px-2 text-center">{row['6s'] || '—'}</td>
+                                </tr>
+                              );
+                            })}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+
+                    {/* Bowling Career Summary */}
+                    <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <h4 className="text-xs font-bold text-cyan-400 flex items-center gap-1.5">
+                          <span>🎯</span> BOWLING CAREER SUMMARY
+                        </h4>
+                        <span className="text-[10px] text-slate-500">Auto-extracted from Cricbuzz</span>
+                      </div>
+                      <div className="overflow-x-auto">
+                        <table className="w-full text-xs text-left">
+                          <thead>
+                            <tr className="border-b border-slate-800 text-slate-400 font-semibold">
+                              <th className="py-2 px-2">Format</th>
+                              <th className="py-2 px-2 text-center">Mat</th>
+                              <th className="py-2 px-2 text-center">Inn</th>
+                              <th className="py-2 px-2 text-center">Balls</th>
+                              <th className="py-2 px-2 text-center">Runs</th>
+                              <th className="py-2 px-2 text-center">Wkts</th>
+                              <th className="py-2 px-2 text-center">BBI</th>
+                              <th className="py-2 px-2 text-center">BBM</th>
+                              <th className="py-2 px-2 text-center">Econ</th>
+                              <th className="py-2 px-2 text-center">Avg</th>
+                              <th className="py-2 px-2 text-center">SR</th>
+                              <th className="py-2 px-2 text-center">5W</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-slate-800/60">
+                            {STAT_FORMATS.map((fmt) => {
+                              const row = formData.careerStats?.bowling?.[fmt] || {};
+                              return (
+                                <tr key={fmt} className="hover:bg-slate-900/50 text-slate-200">
+                                  <td className="py-2 px-2 font-bold text-white">{fmt}</td>
+                                  <td className="py-2 px-2 text-center">{row.M || row.Mat || '—'}</td>
+                                  <td className="py-2 px-2 text-center">{row.Inn || '—'}</td>
+                                  <td className="py-2 px-2 text-center">{row.B || row.Balls || '—'}</td>
+                                  <td className="py-2 px-2 text-center">{row.Runs || row.R || '—'}</td>
+                                  <td className="py-2 px-2 text-center font-bold text-cyan-400">{row.Wkts || row.W || '—'}</td>
+                                  <td className="py-2 px-2 text-center">{row.BBI || '—'}</td>
+                                  <td className="py-2 px-2 text-center">{row.BBM || '—'}</td>
+                                  <td className="py-2 px-2 text-center">{row.Econ || '—'}</td>
+                                  <td className="py-2 px-2 text-center">{row.Avg || '—'}</td>
+                                  <td className="py-2 px-2 text-center">{row.SR || '—'}</td>
+                                  <td className="py-2 px-2 text-center">{row['5W'] || row['5w'] || '—'}</td>
+                                </tr>
+                              );
+                            })}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Modal Footer */}
-              <div className="p-4 border-t border-slate-800 flex items-center justify-end gap-3 bg-slate-950/80">
-                <button
-                  type="button"
-                  onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="button"
-                  onClick={handleSavePlayer}
-                  className="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-lg"
-                >
-                  Save Player to {activeTeam.short}
-                </button>
+              <div className="p-4 border-t border-slate-800 flex items-center justify-between bg-slate-950/80">
+                <div className="text-xs text-slate-400">
+                  {Object.keys(formData.careerStats?.batting || {}).length > 0 && (
+                    <span className="text-emerald-400 font-semibold">✓ Career Stats tables attached</span>
+                  )}
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setIsModalOpen(false)}
+                    className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleSavePlayer}
+                    className="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-lg"
+                  >
+                    Save Player to {activeTeam.short}
+                  </button>
+                </div>
               </div>
             </div>
           </div>
