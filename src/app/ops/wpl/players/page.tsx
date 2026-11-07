@@ -42,21 +42,17 @@ const WPL_TEAMS = [
   { id: '15', slug: 'upw', name: 'UP Warriorz', short: 'UPW', color: 'from-yellow-500/30 via-purple-950/40 to-slate-950', border: 'border-yellow-500/40', badge: 'bg-yellow-500/20 text-yellow-300' }
 ];
 
-const STAT_FORMATS = ['Test', 'ODI', 'T20I', 'WPL'];
-
 function playerMatchesTeam(player: Player, team: typeof WPL_TEAMS[0]): boolean {
   const pId = String(player.id || '').toLowerCase();
   const pTeamId = String(player.teamId || '').toLowerCase().trim();
   const pTeam = String(player.team || '').toLowerCase().trim();
 
-  // 1. Strict ID Prefix check
   if (team.slug === 'rcb-w' && (pId.includes('wpl_rcb') || pId.includes('wpl-rcb'))) return true;
   if (team.slug === 'mi-w' && (pId.includes('wpl_mi') || pId.includes('wpl-mi'))) return true;
   if (team.slug === 'dc-w' && (pId.includes('wpl_dc') || pId.includes('wpl-dc'))) return true;
   if (team.slug === 'gg' && (pId.includes('wpl_gg') || pId.includes('wpl-gg'))) return true;
   if (team.slug === 'upw' && (pId.includes('wpl_upw') || pId.includes('wpl-upw'))) return true;
 
-  // 2. Strict ID or Slug check
   if (pTeamId === team.id || pTeamId === team.slug) return true;
   if (pTeam === team.name.toLowerCase() || pTeam === team.short.toLowerCase()) return true;
 
@@ -202,7 +198,7 @@ export default function WplPlayersCleanOpsPage() {
   const handleFetchCricbuzzData = async () => {
     const rawUrl = cricbuzzUrlInput.trim();
     if (!rawUrl) {
-      setScrapeError('Please enter a valid Cricbuzz profile URL or ID');
+      setScrapeError('Please enter a valid Cricbuzz profile URL, ID, or player name');
       return;
     }
 
@@ -222,7 +218,7 @@ export default function WplPlayersCleanOpsPage() {
       try {
         payload = JSON.parse(text);
       } catch (parseErr) {
-        throw new Error('Invalid response from server');
+        throw new Error('Invalid response from scraper');
       }
 
       if (!res.ok || !payload.success) {
@@ -249,7 +245,7 @@ export default function WplPlayersCleanOpsPage() {
 
       const batCount = Object.keys(stats.batting || {}).length;
       const bowlCount = Object.keys(stats.bowling || {}).length;
-      setScrapeSuccess('✓ Auto-filled ' + (bio.name || 'player') + ': ' + bio.nationality + ', ' + bio.role + ', DOB: ' + (bio.dateOfBirth || '—') + ', and Stats (' + batCount + ' Batting, ' + bowlCount + ' Bowling formats)!');
+      setScrapeSuccess(`✓ Successfully fetched ${bio.name || 'player'}: ${bio.nationality}, ${bio.role}, DOB: ${bio.dateOfBirth || '—'}, Stats (${batCount} Batting, ${bowlCount} Bowling formats)!`);
     } catch (err: any) {
       setScrapeError(err.message || 'Error communicating with Cricbuzz scraper');
     } finally {
@@ -266,7 +262,7 @@ export default function WplPlayersCleanOpsPage() {
     const assignedTeam = WPL_TEAMS.find((t) => t.id === formData.teamId || t.slug === formData.teamId) || activeTeam;
 
     const payload: Player = {
-      id: editingPlayer?.id || ('wpl_' + assignedTeam.slug.replace('-w', '') + '_' + formData.name.toLowerCase().replace(/[^a-z0-9]/g, '_')),
+      id: editingPlayer?.id || (`wpl_${assignedTeam.slug.replace('-w', '')}_${formData.name.toLowerCase().replace(/[^a-z0-9]/g, '_')}`),
       name: formData.name,
       teamId: assignedTeam.id,
       team: assignedTeam.name,
@@ -317,6 +313,14 @@ export default function WplPlayersCleanOpsPage() {
     }
   };
 
+  // Get list of all available formats across batting and bowling
+  const availableFormats = useMemo(() => {
+    const batFmts = Object.keys(formData.careerStats?.batting || {});
+    const bowlFmts = Object.keys(formData.careerStats?.bowling || {});
+    const combined = Array.from(new Set(['Test', 'ODI', 'T20I', 'WPL', ...batFmts, ...bowlFmts]));
+    return combined;
+  }, [formData.careerStats]);
+
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 p-4 md:p-8">
       <div className="max-w-7xl mx-auto space-y-6">
@@ -331,7 +335,7 @@ export default function WplPlayersCleanOpsPage() {
               Squad & Player Management
             </h1>
             <p className="text-xs text-slate-400 mt-1">
-              Add players individually via Cricbuzz profile URLs with full bio records and career statistics.
+              Manage squads and fetch player records dynamically from verified Cricbuzz profiles.
             </p>
           </div>
 
@@ -426,7 +430,7 @@ export default function WplPlayersCleanOpsPage() {
             <User className="w-8 h-8 text-slate-600 mx-auto mb-2" />
             <h3 className="text-sm font-bold text-slate-300">No players assigned to {activeTeam.name}</h3>
             <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto">
-              Click below to paste a Cricbuzz profile URL and add a player to this squad.
+              Click below or use "Re-align Official Squads" to populate this roster.
             </p>
             <button
               onClick={handleOpenAddPlayer}
@@ -442,6 +446,7 @@ export default function WplPlayersCleanOpsPage() {
               const batStats = player.careerStats?.batting || {};
               const bowlStats = player.careerStats?.bowling || {};
               const hasStats = Object.keys(batStats).length > 0 || Object.keys(bowlStats).length > 0;
+              const cardFormats = Array.from(new Set(['Test', 'ODI', 'T20I', 'WPL', ...Object.keys(batStats), ...Object.keys(bowlStats)]));
 
               return (
                 <div
@@ -522,8 +527,9 @@ export default function WplPlayersCleanOpsPage() {
                                 </tr>
                               </thead>
                               <tbody className="divide-y divide-slate-900">
-                                {STAT_FORMATS.map((fmt) => {
+                                {cardFormats.map((fmt) => {
                                   const row = batStats[fmt] || {};
+                                  if (!row.Mat && !row.M && !row.Runs && !row.R) return null;
                                   return (
                                     <tr key={fmt} className="text-slate-300">
                                       <td className="py-1 font-bold text-white">{fmt}</td>
@@ -557,8 +563,9 @@ export default function WplPlayersCleanOpsPage() {
                                 </tr>
                               </thead>
                               <tbody className="divide-y divide-slate-900">
-                                {STAT_FORMATS.map((fmt) => {
+                                {cardFormats.map((fmt) => {
                                   const row = bowlStats[fmt] || {};
+                                  if (!row.Mat && !row.M && !row.Wkts && !row.W) return null;
                                   return (
                                     <tr key={fmt} className="text-slate-300">
                                       <td className="py-1 font-bold text-white">{fmt}</td>
@@ -625,7 +632,7 @@ export default function WplPlayersCleanOpsPage() {
                     {editingPlayer ? ('Edit ' + editingPlayer.name) : ('Add Player to ' + activeTeam.name)}
                   </h2>
                   <p className="text-xs text-slate-400 mt-0.5">
-                    Paste a Cricbuzz profile URL to auto-fill personal profile and full career statistics tables.
+                    Paste a Cricbuzz profile URL, ID, or search by player name to auto-fill bio and stats.
                   </p>
                 </div>
                 <button
@@ -648,7 +655,7 @@ export default function WplPlayersCleanOpsPage() {
                       type="text"
                       value={cricbuzzUrlInput}
                       onChange={(e) => setCricbuzzUrlInput(e.target.value)}
-                      placeholder="Paste Cricbuzz URL (e.g. https://www.cricbuzz.com/profiles/9115/ellyse-perry) or ID (9115)..."
+                      placeholder="Paste Cricbuzz URL (e.g. https://www.cricbuzz.com/profiles/10012/smriti-mandhana) or type player name..."
                       className="flex-1 px-3.5 py-2 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500"
                     />
                     <button
@@ -717,7 +724,7 @@ export default function WplPlayersCleanOpsPage() {
                         type="text"
                         value={formData.name || ''}
                         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                        placeholder="e.g. Ellyse Perry"
+                        placeholder="Player Name"
                         className="w-full mt-1 px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white"
                       />
                     </div>
@@ -775,7 +782,7 @@ export default function WplPlayersCleanOpsPage() {
                         type="number"
                         value={formData.age !== undefined && formData.age !== null ? formData.age : ''}
                         onChange={(e) => setFormData({ ...formData, age: parseInt(e.target.value, 10) || '' })}
-                        placeholder="e.g. 35"
+                        placeholder="e.g. 30"
                         className="w-full mt-1 px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-xs text-white"
                       />
                     </div>
@@ -858,8 +865,9 @@ export default function WplPlayersCleanOpsPage() {
                             </tr>
                           </thead>
                           <tbody className="divide-y divide-slate-800/60">
-                            {STAT_FORMATS.map((fmt) => {
+                            {availableFormats.map((fmt) => {
                               const row = formData.careerStats?.batting?.[fmt] || {};
+                              if (!row.Mat && !row.M && !row.Runs && !row.R) return null;
                               return (
                                 <tr key={fmt} className="hover:bg-slate-900/50 text-slate-200">
                                   <td className="py-2 px-2 font-bold text-white">{fmt}</td>
@@ -909,8 +917,9 @@ export default function WplPlayersCleanOpsPage() {
                             </tr>
                           </thead>
                           <tbody className="divide-y divide-slate-800/60">
-                            {STAT_FORMATS.map((fmt) => {
+                            {availableFormats.map((fmt) => {
                               const row = formData.careerStats?.bowling?.[fmt] || {};
+                              if (!row.Mat && !row.M && !row.Wkts && !row.W) return null;
                               return (
                                 <tr key={fmt} className="hover:bg-slate-900/50 text-slate-200">
                                   <td className="py-2 px-2 font-bold text-white">{fmt}</td>
