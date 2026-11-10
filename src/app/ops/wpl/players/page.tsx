@@ -644,19 +644,6 @@ export default function WplPlayersCleanOpsPage() {
                             </table>
                           </div>
                         </div>
-                                      <td className="py-1 text-center">{row.Mat || row.M || '—'}</td>
-                                      <td className="py-1 text-center">{row.Balls || row.B || '—'}</td>
-                                      <td className="py-1 text-center text-cyan-400 font-semibold">{row.Wkts || row.W || '—'}</td>
-                                      <td className="py-1 text-center">{row.BBI || '—'}</td>
-                                      <td className="py-1 text-center">{row.Econ || '—'}</td>
-                                      <td className="py-1 text-center">{row.Avg || '—'}</td>
-                                    </tr>
-                                  );
-                                })}
-                              </tbody>
-                            </table>
-                          </div>
-                        </div>
                       </div>
                     )}
                   </div>
