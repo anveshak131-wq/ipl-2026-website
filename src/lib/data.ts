@@ -14,8 +14,8 @@ export function getAdminWplMatchesSync(): any[] {
 
 
 export function normalizeWplMatchItem(m: any) {
-  const home = m.homeTeam || m.team1?.name || 'TBD';
-  const away = m.awayTeam || m.team2?.name || 'TBD';
+  const home = m.homeTeam || m.team1?.name || (typeof m.team1 === 'string' ? m.team1 : 'TBD');
+  const away = m.awayTeam || m.team2?.name || (typeof m.team2 === 'string' ? m.team2 : 'TBD');
   const homeShort = m.homeShort || m.team1?.shortName || (home.includes('Royal') ? 'RCB' : home.includes('Mumbai') ? 'MI' : home.includes('Delhi') ? 'DC' : home.includes('Gujarat') ? 'GG' : home.includes('Warriorz') ? 'UPW' : 'TBD');
   const awayShort = m.awayShort || m.team2?.shortName || (away.includes('Royal') ? 'RCB' : away.includes('Mumbai') ? 'MI' : away.includes('Delhi') ? 'DC' : away.includes('Gujarat') ? 'GG' : away.includes('Warriorz') ? 'UPW' : 'TBD');
 
@@ -27,6 +27,8 @@ export function normalizeWplMatchItem(m: any) {
     awayTeam: away,
     homeShort,
     awayShort,
+    team1Short: homeShort,
+    team2Short: awayShort,
     team1: {
       id: m.homeTeamId || m.team1?.id || 'tbd',
       name: home,

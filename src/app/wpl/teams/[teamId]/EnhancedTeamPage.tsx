@@ -287,17 +287,55 @@ function isPlayerInWplTeam(p: any, teamParamId: string, teamObj?: any): boolean 
 function getPlayerDisplayStats(player: any) {
   const s = player?.stats || {};
   const cs = player?.careerStats || {};
-  const bat = cs.batting || {};
-  const bowl = cs.bowling || {};
+  const bat = (cs && typeof cs.batting === 'object') ? cs.batting : {};
+  const bowl = (cs && typeof cs.bowling === 'object') ? cs.bowling : {};
 
   const wplBat = bat['WPL'] || bat['wpl'] || bat['T20'] || bat['T20I'] || {};
   const wplBowl = bowl['WPL'] || bowl['wpl'] || bowl['T20'] || bowl['T20I'] || {};
 
-  const runs = wplBat.Runs ?? wplBat.runs ?? wplBat.R ?? s.runs ?? 0;
-  const wickets = wplBowl.Wkts ?? wplBowl.wkts ?? wplBowl.W ?? s.wickets ?? 0;
-  const matches = wplBat.Mat ?? wplBat.matches ?? wplBat.M ?? wplBowl.Mat ?? s.matches ?? 0;
+  const rawRuns = wplBat.Runs ?? wplBat.runs ?? wplBat.R ?? s.runs ?? 0;
+  const rawWkts = wplBowl.Wkts ?? wplBowl.wkts ?? wplBowl.W ?? s.wickets ?? 0;
+  const rawMatches = wplBat.Mat ?? wplBat.matches ?? wplBat.M ?? wplBowl.Mat ?? s.matches ?? 0;
+
+  const runs = typeof rawRuns === 'object' ? 0 : rawRuns;
+  const wickets = typeof rawWkts === 'object' ? 0 : rawWkts;
+  const matches = typeof rawMatches === 'object' ? 0 : rawMatches;
 
   return { runs, wickets, matches };
+}
+
+function getTeamDisplayShort(team: any, fallback?: string): string {
+  if (fallback && typeof fallback === 'string') return fallback;
+  if (!team) return 'TBD';
+  if (typeof team === 'string') return team;
+  if (typeof team === 'object') {
+    return team.shortName || team.name || String(team.id || 'TBD');
+  }
+  return String(team);
+}
+
+function getTeamDisplayName(team: any, fallback?: string): string {
+  if (fallback && typeof fallback === 'string') return fallback;
+  if (!team) return 'TBD';
+  if (typeof team === 'string') return team;
+  if (typeof team === 'object') {
+    return team.name || team.shortName || String(team.id || 'TBD');
+  }
+  return String(team);
+}
+
+function getTeamLogoUrl(team: any): string | null {
+  if (!team) return null;
+  if (typeof team === 'object' && team.logo && typeof team.logo === 'string') {
+    return team.logo;
+  }
+  return null;
+}
+
+function safeCell(val: any, fallback: string = '—'): string | number {
+  if (val === undefined || val === null) return fallback;
+  if (typeof val === 'object') return fallback;
+  return val;
 }
 
 function getRoleMeta(role?: string) {
@@ -536,8 +574,18 @@ export default function EnhancedWPLTeamPage({ teamId }: { teamId: string }) {
     return opponents.map((opp, idx) => ({
       id: `wpl-2027-m${idx + 1}`,
       name: `Match ${idx + 1}: ${config.shortName} vs ${opp.shortName}`,
-      team1: config.name,
-      team2: opp.name,
+      team1: {
+        id: config.id,
+        name: config.name,
+        shortName: config.shortName,
+        logo: config.logo
+      },
+      team2: {
+        id: opp.id,
+        name: opp.name,
+        shortName: opp.shortName,
+        logo: opp.logo
+      },
       team1Short: config.shortName,
       team2Short: opp.shortName,
       venue: idx % 2 === 0 ? config.stadium : opp.stadium,
@@ -1002,10 +1050,10 @@ export default function EnhancedWPLTeamPage({ teamId }: { teamId: string }) {
                           {/* Card Footer: Auction Fee & View Button */}
                           <div className="mt-4 pt-3 border-t border-white/10 flex items-center justify-between text-[11px]">
                             <span className="text-slate-400 font-semibold truncate mr-2">
-                              {player.auction?.fee ? (
-                                <>Fee: <strong className="text-emerald-400">{player.auction.fee}</strong></>
+                              {player.auction?.fee && (typeof player.auction.fee === 'string' || typeof player.auction.fee === 'number') ? (
+                                <>Fee: <strong className="text-emerald-400">{String(player.auction.fee)}</strong></>
                               ) : (
-                                <>Nationality: <strong className="text-slate-200">{player.nationality || 'India'}</strong></>
+                                <>Nationality: <strong className="text-slate-200">{typeof player.nationality === 'string' ? player.nationality : 'India'}</strong></>
                               )}
                             </span>
                             <span className="text-pink-400 font-bold group-hover:text-pink-300 group-hover:underline flex items-center gap-0.5 shrink-0">
@@ -1036,39 +1084,55 @@ export default function EnhancedWPLTeamPage({ teamId }: { teamId: string }) {
               </div>
 
               <div className="grid gap-4">
-                {displayMatches.map((m: any, idx) => (
-                  <div
-                    key={m.id || idx}
-                    className="p-5 rounded-2xl bg-[#0c1020] border border-white/10 hover:border-pink-500/40 transition-all flex flex-col sm:flex-row items-center justify-between gap-4"
-                  >
-                    <div className="space-y-1 text-center sm:text-left">
-                      <div className="flex items-center justify-center sm:justify-start gap-2 text-xs font-bold text-pink-400 uppercase tracking-wider">
-                        <MapPin className="w-3.5 h-3.5" />
-                        <span>{m.venue || config.stadium}</span>
-                        <span>•</span>
-                        <span>{m.date || 'TBA 2027'}</span>
-                      </div>
-                      <h4 className="text-base font-black text-white">
-                        {m.team1Short || m.team1} vs {m.team2Short || m.team2}
-                      </h4>
-                      <p className="text-xs text-slate-400">
-                        {m.name || 'WPL Regular Season Clash'} • 19:30 IST
-                      </p>
-                    </div>
+                {displayMatches.map((m: any, idx) => {
+                  const t1Short = getTeamDisplayShort(m.team1, m.team1Short || m.homeShort);
+                  const t2Short = getTeamDisplayShort(m.team2, m.team2Short || m.awayShort);
+                  const t1Name = getTeamDisplayName(m.team1, m.homeTeam);
+                  const t2Name = getTeamDisplayName(m.team2, m.awayTeam);
+                  const t1Logo = getTeamLogoUrl(m.team1);
+                  const t2Logo = getTeamLogoUrl(m.team2);
+                  const matchVenue = typeof m.venue === 'string' && m.venue ? m.venue : config.stadium;
+                  const matchDate = typeof m.displayDate === 'string' && m.displayDate ? m.displayDate : typeof m.date === 'string' && m.date ? m.date : 'TBA 2027';
+                  const matchName = typeof m.name === 'string' && m.name ? m.name : `${t1Name} vs ${t2Name}`;
 
-                    <div className="flex items-center gap-3">
-                      <span className="px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 text-xs font-bold text-slate-300">
-                        Pending Toss
-                      </span>
-                      <Link
-                        href={`/wpl/matches/${m.id}`}
-                        className="px-4 py-2 rounded-xl bg-pink-600 hover:bg-pink-500 text-white text-xs font-bold transition-all shadow-md"
-                      >
-                        Match Center
-                      </Link>
+                  return (
+                    <div
+                      key={m.id || idx}
+                      className="p-5 rounded-2xl bg-[#0c1020] border border-white/10 hover:border-pink-500/40 transition-all flex flex-col sm:flex-row items-center justify-between gap-4"
+                    >
+                      <div className="space-y-1.5 text-center sm:text-left">
+                        <div className="flex items-center justify-center sm:justify-start gap-2 text-xs font-bold text-pink-400 uppercase tracking-wider">
+                          <MapPin className="w-3.5 h-3.5" />
+                          <span>{matchVenue}</span>
+                          <span>•</span>
+                          <span>{matchDate}</span>
+                        </div>
+                        <h4 className="text-base font-black text-white flex items-center justify-center sm:justify-start gap-2.5">
+                          {t1Logo && <img src={t1Logo} alt={t1Short} className="w-6 h-6 object-contain inline-block shrink-0" />}
+                          <span>{t1Short}</span>
+                          <span className="text-pink-400 text-xs font-bold px-2 py-0.5 rounded bg-pink-500/15 border border-pink-500/30">VS</span>
+                          <span>{t2Short}</span>
+                          {t2Logo && <img src={t2Logo} alt={t2Short} className="w-6 h-6 object-contain inline-block shrink-0" />}
+                        </h4>
+                        <p className="text-xs text-slate-400">
+                          {matchName} • {typeof m.time === 'string' ? m.time : '19:30 IST'}
+                        </p>
+                      </div>
+
+                      <div className="flex items-center gap-3">
+                        <span className="px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 text-xs font-bold text-slate-300">
+                          {typeof m.status === 'string' ? (m.status === 'completed' ? 'Final' : m.status === 'live' ? 'LIVE' : 'Scheduled') : 'Scheduled'}
+                        </span>
+                        <Link
+                          href={`/wpl/matches/${m.id || ''}`}
+                          className="px-4 py-2 rounded-xl bg-pink-600 hover:bg-pink-500 text-white text-xs font-bold transition-all shadow-md"
+                        >
+                          Match Center
+                        </Link>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           )}
@@ -1403,18 +1467,18 @@ export default function EnhancedWPLTeamPage({ teamId }: { teamId: string }) {
                           return (
                             <tr key={fmt} className="hover:bg-white/[0.04] transition-colors">
                               <td className="py-2.5 px-3 text-left font-black text-white">{fmt}</td>
-                              <td className="py-2.5 px-2">{row.Mat ?? row.M ?? row.matches ?? row.Matches ?? '—'}</td>
-                              <td className="py-2.5 px-2">{row.Inn ?? row.inn ?? row.Innings ?? row.innings ?? '—'}</td>
-                              <td className="py-2.5 px-2">{row.NO ?? row.no ?? row.NotOut ?? row['not out'] ?? '—'}</td>
-                              <td className="py-2.5 px-2 font-black text-emerald-400">{row.Runs ?? row.runs ?? row.R ?? row.r ?? '—'}</td>
-                              <td className="py-2.5 px-2 font-bold">{row.HS ?? row.hs ?? row.Highest ?? row.highest ?? '—'}</td>
-                              <td className="py-2.5 px-2 font-bold text-cyan-400">{row.Avg ?? row.avg ?? row.Average ?? row.average ?? '—'}</td>
-                              <td className="py-2.5 px-2">{row.BF ?? row.bf ?? row.Balls ?? row.balls ?? '—'}</td>
-                              <td className="py-2.5 px-2 font-bold text-amber-400">{row.SR ?? row.sr ?? row.strikeRate ?? row['strike rate'] ?? '—'}</td>
-                              <td className="py-2.5 px-2">{row['100'] ?? row['100s'] ?? row.hundreds ?? 0}</td>
-                              <td className="py-2.5 px-2">{row['50'] ?? row['50s'] ?? row.fifties ?? 0}</td>
-                              <td className="py-2.5 px-2">{row['4s'] ?? row.fours ?? 0}</td>
-                              <td className="py-2.5 px-2">{row['6s'] ?? row.sixes ?? 0}</td>
+                              <td className="py-2.5 px-2">{safeCell(row.Mat ?? row.M ?? row.matches ?? row.Matches)}</td>
+                              <td className="py-2.5 px-2">{safeCell(row.Inn ?? row.inn ?? row.Innings ?? row.innings)}</td>
+                              <td className="py-2.5 px-2">{safeCell(row.NO ?? row.no ?? row.NotOut ?? row['not out'])}</td>
+                              <td className="py-2.5 px-2 font-black text-emerald-400">{safeCell(row.Runs ?? row.runs ?? row.R ?? row.r)}</td>
+                              <td className="py-2.5 px-2 font-bold">{safeCell(row.HS ?? row.hs ?? row.Highest ?? row.highest)}</td>
+                              <td className="py-2.5 px-2 font-bold text-cyan-400">{safeCell(row.Avg ?? row.avg ?? row.Average ?? row.average)}</td>
+                              <td className="py-2.5 px-2">{safeCell(row.BF ?? row.bf ?? row.Balls ?? row.balls)}</td>
+                              <td className="py-2.5 px-2 font-bold text-amber-400">{safeCell(row.SR ?? row.sr ?? row.strikeRate ?? row['strike rate'])}</td>
+                              <td className="py-2.5 px-2">{safeCell(row['100'] ?? row['100s'] ?? row.hundreds, '0')}</td>
+                              <td className="py-2.5 px-2">{safeCell(row['50'] ?? row['50s'] ?? row.fifties, '0')}</td>
+                              <td className="py-2.5 px-2">{safeCell(row['4s'] ?? row.fours, '0')}</td>
+                              <td className="py-2.5 px-2">{safeCell(row['6s'] ?? row.sixes, '0')}</td>
                             </tr>
                           );
                         }).filter(Boolean);
@@ -1510,16 +1574,16 @@ export default function EnhancedWPLTeamPage({ teamId }: { teamId: string }) {
                           return (
                             <tr key={fmt} className="hover:bg-white/[0.04] transition-colors">
                               <td className="py-2.5 px-3 text-left font-black text-white">{fmt}</td>
-                              <td className="py-2.5 px-2">{row.Mat ?? row.M ?? row.matches ?? row.Matches ?? '—'}</td>
-                              <td className="py-2.5 px-2">{row.Inn ?? row.inn ?? row.Innings ?? row.innings ?? '—'}</td>
-                              <td className="py-2.5 px-2">{row.Balls ?? row.balls ?? row.B ?? row.b ?? '—'}</td>
-                              <td className="py-2.5 px-2">{row.Runs ?? row.runs ?? row.R ?? row.r ?? '—'}</td>
-                              <td className="py-2.5 px-2 font-black text-teal-400">{row.Wkts ?? row.wkts ?? row.W ?? row.w ?? '—'}</td>
-                              <td className="py-2.5 px-2">{row.BBI ?? row.bbi ?? row.bestBowling ?? '—/—'}</td>
-                              <td className="py-2.5 px-2 font-bold text-amber-400">{row.Econ ?? row.econ ?? row.economy ?? '—'}</td>
-                              <td className="py-2.5 px-2 font-bold text-purple-400">{row.Avg ?? row.avg ?? row.average ?? '—'}</td>
-                              <td className="py-2.5 px-2 font-bold text-rose-400">{row.SR ?? row.sr ?? row.strikeRate ?? '—'}</td>
-                              <td className="py-2.5 px-2">{row['5w'] ?? row['5W'] ?? row.fiveWickets ?? 0}</td>
+                              <td className="py-2.5 px-2">{safeCell(row.Mat ?? row.M ?? row.matches ?? row.Matches)}</td>
+                              <td className="py-2.5 px-2">{safeCell(row.Inn ?? row.inn ?? row.Innings ?? row.innings)}</td>
+                              <td className="py-2.5 px-2">{safeCell(row.Balls ?? row.balls ?? row.B ?? row.b)}</td>
+                              <td className="py-2.5 px-2">{safeCell(row.Runs ?? row.runs ?? row.R ?? row.r)}</td>
+                              <td className="py-2.5 px-2 font-black text-teal-400">{safeCell(row.Wkts ?? row.wkts ?? row.W ?? row.w)}</td>
+                              <td className="py-2.5 px-2">{safeCell(row.BBI ?? row.bbi ?? row.bestBowling, '—/—')}</td>
+                              <td className="py-2.5 px-2 font-bold text-amber-400">{safeCell(row.Econ ?? row.econ ?? row.economy)}</td>
+                              <td className="py-2.5 px-2 font-bold text-purple-400">{safeCell(row.Avg ?? row.avg ?? row.average)}</td>
+                              <td className="py-2.5 px-2 font-bold text-rose-400">{safeCell(row.SR ?? row.sr ?? row.strikeRate)}</td>
+                              <td className="py-2.5 px-2">{safeCell(row['5w'] ?? row['5W'] ?? row.fiveWickets, '0')}</td>
                             </tr>
                           );
                         }).filter(Boolean);
@@ -1543,16 +1607,16 @@ export default function EnhancedWPLTeamPage({ teamId }: { teamId: string }) {
               {/* Contract & Fielding Footer */}
               <div className="pt-2 flex flex-wrap items-center justify-between gap-3 text-xs border-t border-white/10">
                 <div className="flex items-center gap-4 text-slate-300">
-                  {selectedPlayer.auction?.fee && (
+                  {selectedPlayer.auction?.fee && (typeof selectedPlayer.auction.fee === 'string' || typeof selectedPlayer.auction.fee === 'number') && (
                     <span>
-                      Contract / Fee: <strong className="text-emerald-400 font-black">{selectedPlayer.auction.fee}</strong>
+                      Contract / Fee: <strong className="text-emerald-400 font-black">{String(selectedPlayer.auction.fee)}</strong>
                     </span>
                   )}
                   {selectedPlayer.stats?.catches ? (
-                    <span>Catches: <strong className="text-white">{selectedPlayer.stats.catches}</strong></span>
+                    <span>Catches: <strong className="text-white">{String(selectedPlayer.stats.catches)}</strong></span>
                   ) : null}
                   {selectedPlayer.stats?.stumpings ? (
-                    <span>Stumpings: <strong className="text-white">{selectedPlayer.stats.stumpings}</strong></span>
+                    <span>Stumpings: <strong className="text-white">{String(selectedPlayer.stats.stumpings)}</strong></span>
                   ) : null}
                 </div>
 
