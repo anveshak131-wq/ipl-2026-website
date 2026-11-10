@@ -906,7 +906,7 @@ export default function EnhancedWPLTeamPage({ teamId }: { teamId: string }) {
                   </div>
                 </div>
 
-                {/* SQUAD ATHLETE CARDS (ALL 10 VISIBLE, CLEAN GRID) */}
+                {/* SQUAD ATHLETE CARDS (ALL 10 VISIBLE, CLEAN GRID WITH PROPER SPACING) */}
                 {filteredSquad.length === 0 ? (
                   <div className="py-20 text-center rounded-3xl bg-white/[0.02] border border-white/10">
                     <p className="text-sm font-bold text-slate-300">No athletes match the current search or filter</p>
@@ -919,7 +919,7 @@ export default function EnhancedWPLTeamPage({ teamId }: { teamId: string }) {
                     </button>
                   </div>
                 ) : (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4.5">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 sm:gap-7">
                     {filteredSquad.map((player, idx) => {
                       const stats = getPlayerDisplayStats(player);
                       const roleMeta = getRoleMeta(player.role);
@@ -929,31 +929,31 @@ export default function EnhancedWPLTeamPage({ teamId }: { teamId: string }) {
                       return (
                         <motion.div
                           key={player.id || player.name}
-                          whileHover={{ y: -4, scale: 1.01 }}
+                          whileHover={{ y: -5 }}
                           transition={{ duration: 0.15 }}
                           onClick={() => {
                             setActiveHeroPlayer(player);
                             setSelectedPlayer(player);
                           }}
-                          className={`group relative overflow-hidden rounded-2xl border p-4.5 cursor-pointer transition-all duration-200 backdrop-blur-xl flex flex-col justify-between ${
+                          className={`group relative overflow-hidden rounded-2xl border p-5 cursor-pointer transition-all duration-200 backdrop-blur-xl flex flex-col justify-between ${
                             isHero
-                              ? 'border-pink-500 bg-white/[0.08] shadow-xl shadow-pink-500/10'
-                              : 'border-white/10 bg-[#0d101e]/90 hover:border-white/25 hover:bg-white/[0.04]'
+                              ? 'ring-2 ring-pink-500 border-pink-500/90 bg-[#13182e] shadow-xl shadow-pink-500/15'
+                              : 'border-white/10 bg-[#0d101e]/90 hover:border-white/25 hover:bg-[#12162a]'
                           }`}
                         >
                           <div>
                             {/* Card Top Meta */}
-                            <div className="flex items-center justify-between gap-2 mb-3">
-                              <span className={`text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded border ${roleMeta.badgeBg}`}>
+                            <div className="flex items-center justify-between gap-2 mb-3.5">
+                              <span className={`text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded border ${roleMeta.badgeBg}`}>
                                 {roleMeta.label}
                               </span>
                               <div className="flex items-center gap-1.5">
                                 {player.isCaptain && (
-                                  <span className="text-[10px] font-black text-amber-300 bg-amber-400/20 px-1.5 py-0.5 rounded border border-amber-400/30 uppercase">
+                                  <span className="text-[10px] font-black text-amber-300 bg-amber-400/20 px-2 py-0.5 rounded border border-amber-400/30 uppercase">
                                     ★ Captain
                                   </span>
                                 )}
-                                <span className="text-[11px] font-mono text-slate-500 font-bold">
+                                <span className="text-xs font-mono text-slate-500 font-bold ml-1">
                                   #{idx + 1 < 10 ? `0${idx + 1}` : idx + 1}
                                 </span>
                               </div>
@@ -964,7 +964,7 @@ export default function EnhancedWPLTeamPage({ teamId }: { teamId: string }) {
                               {/* Avatar */}
                               <div className={`w-12 h-12 rounded-xl shrink-0 flex items-center justify-center font-black text-sm border ${
                                 isHero ? 'border-pink-500 bg-pink-500/20 text-white' : 'border-white/15 bg-black/40 text-slate-200'
-                              } shadow-inner`}>
+                              } shadow-inner overflow-hidden`}>
                                 {player.image ? (
                                   <img src={player.image} alt={player.name} className="w-full h-full object-cover object-top rounded-xl" />
                                 ) : (
@@ -977,7 +977,7 @@ export default function EnhancedWPLTeamPage({ teamId }: { teamId: string }) {
                                   {player.name}
                                 </h3>
                                 <p className="text-[11px] text-slate-400 truncate mt-0.5">
-                                  {player.battingStyle || 'Right Hand'} • {player.bowlingStyle || 'None'}
+                                  {player.battingStyle || 'Right Hand'} • {player.bowlingStyle || 'Specialist'}
                                 </p>
                               </div>
                             </div>
@@ -1000,15 +1000,15 @@ export default function EnhancedWPLTeamPage({ teamId }: { teamId: string }) {
                           </div>
 
                           {/* Card Footer: Auction Fee & View Button */}
-                          <div className="mt-3.5 pt-2.5 border-t border-white/5 flex items-center justify-between text-[11px]">
-                            <span className="text-slate-400 font-semibold truncate">
+                          <div className="mt-4 pt-3 border-t border-white/10 flex items-center justify-between text-[11px]">
+                            <span className="text-slate-400 font-semibold truncate mr-2">
                               {player.auction?.fee ? (
                                 <>Fee: <strong className="text-emerald-400">{player.auction.fee}</strong></>
                               ) : (
                                 <>Nationality: <strong className="text-slate-200">{player.nationality || 'India'}</strong></>
                               )}
                             </span>
-                            <span className="text-pink-400 font-bold group-hover:underline flex items-center gap-0.5 shrink-0">
+                            <span className="text-pink-400 font-bold group-hover:text-pink-300 group-hover:underline flex items-center gap-0.5 shrink-0">
                               <span>Dossier</span>
                               <ChevronRight className="w-3 h-3" />
                             </span>
