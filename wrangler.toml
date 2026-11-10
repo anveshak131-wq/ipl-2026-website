@@ -52,11 +52,29 @@ ADMIN_PLAYERS_ADMIN_EMAILS = "anvesh.ak.131@gmail.com"
 # # MAILGUN_API_KEY = "your-mailgun-api-key"
 # # MAILGUN_DOMAIN = "your-mailgun-domain"
 
-# Local & Preview KV Bindings
+# Local KV Bindings
 [[kv_namespaces]]
 binding = "SPORTS_KV"
 id = "sports_kv_local"
 
 [[kv_namespaces]]
+binding = "IPL_CACHE"
+id = "ipl_cache_local"
+
+# Production KV Bindings
+[[env.production.kv_namespaces]]
+binding = "SPORTS_KV"
+id = "sports_kv_local"
+
+[[env.production.kv_namespaces]]
+binding = "IPL_CACHE"
+id = "ipl_cache_local"
+
+# Preview KV Bindings
+[[env.preview.kv_namespaces]]
+binding = "SPORTS_KV"
+id = "sports_kv_local"
+
+[[env.preview.kv_namespaces]]
 binding = "IPL_CACHE"
 id = "ipl_cache_local"

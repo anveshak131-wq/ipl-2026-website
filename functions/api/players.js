@@ -160,12 +160,6 @@ export const onRequest = async (context) => {
       });
     }
 
-      return new Response(JSON.stringify({ success: true, remaining: filtered.length }), {
-        status: 200,
-        headers: { "Content-Type": "application/json", ...corsHeaders }
-      });
-    }
-
     return new Response(JSON.stringify({ error: "Method not allowed" }), {
       status: 405,
       headers: { "Content-Type": "application/json", ...corsHeaders }
