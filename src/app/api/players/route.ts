@@ -1,5 +1,5 @@
-export const dynamic = 'force-static';
-export const revalidate = false;
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 import { NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
@@ -16,9 +16,22 @@ function getFilePath(league: string) {
 
 function readPlayers(league: string): any[] {
   try {
-    const p = getFilePath(league);
-    if (fs.existsSync(p)) {
-      return JSON.parse(fs.readFileSync(p, 'utf8'));
+    const isWpl = (league || '').toLowerCase() === 'wpl';
+    const candidatePaths = isWpl
+      ? [
+          path.join(process.cwd(), 'functions', 'data', 'wpl-players.json'),
+          path.join(process.cwd(), 'wpl-players.json'),
+          path.join(process.cwd(), 'wpl-players-roster.json')
+        ]
+      : [
+          path.join(process.cwd(), 'functions', 'data', 'comprehensive-players.json'),
+          path.join(process.cwd(), 'comprehensive-players.json')
+        ];
+
+    for (const p of candidatePaths) {
+      if (fs.existsSync(p)) {
+        return JSON.parse(fs.readFileSync(p, 'utf8'));
+      }
     }
   } catch (err) {
     console.error('Error reading players file:', err);
@@ -28,8 +41,25 @@ function readPlayers(league: string): any[] {
 
 function writePlayers(league: string, players: any[]) {
   try {
-    const p = getFilePath(league);
-    fs.writeFileSync(p, JSON.stringify(players, null, 2), 'utf8');
+    const isWpl = (league || '').toLowerCase() === 'wpl';
+    const targetPaths = isWpl
+      ? [
+          path.join(process.cwd(), 'functions', 'data', 'wpl-players.json'),
+          path.join(process.cwd(), 'wpl-players.json'),
+          path.join(process.cwd(), 'wpl-players-roster.json')
+        ]
+      : [
+          path.join(process.cwd(), 'functions', 'data', 'comprehensive-players.json'),
+          path.join(process.cwd(), 'comprehensive-players.json')
+        ];
+
+    for (const p of targetPaths) {
+      try {
+        fs.writeFileSync(p, JSON.stringify(players, null, 2), 'utf8');
+      } catch (e) {
+        // ignore missing directory or path
+      }
+    }
   } catch (err) {
     console.error('Error writing players file:', err);
   }
@@ -39,7 +69,11 @@ export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const league = searchParams.get('league') || 'ipl';
   const players = readPlayers(league);
-  return NextResponse.json(players);
+  return NextResponse.json(players, {
+    headers: {
+      'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate'
+    }
+  });
 }
 
 export async function PUT(req: Request) {
@@ -58,6 +92,7 @@ export async function PUT(req: Request) {
         ...incoming,
         id,
         careerStats: incoming.careerStats || existing.careerStats || { batting: {}, bowling: {} },
+        stats: incoming.stats || existing.stats || {},
         cricbuzzUrl: incoming.cricbuzzUrl || existing.cricbuzzUrl || '',
         cricbuzzId: incoming.cricbuzzId || existing.cricbuzzId || '',
       };
@@ -66,6 +101,7 @@ export async function PUT(req: Request) {
         ...incoming,
         id,
         careerStats: incoming.careerStats || { batting: {}, bowling: {} },
+        stats: incoming.stats || {},
         cricbuzzUrl: incoming.cricbuzzUrl || '',
         cricbuzzId: incoming.cricbuzzId || '',
       });
@@ -79,5 +115,43 @@ export async function PUT(req: Request) {
 }
 
 export async function POST(req: Request) {
-  return PUT(req);
+  try {
+    const body = await req.json().catch(() => ({}));
+    if (body.action === 'realign') {
+      const targetLeague = (body.league || 'ipl').toLowerCase();
+      const players = readPlayers(targetLeague);
+      return NextResponse.json({ success: true, players });
+    }
+    // Forward standard player create to PUT handler
+    const fakeReq = new Request(req.url, {
+      method: 'PUT',
+      headers: req.headers,
+      body: JSON.stringify(body)
+    });
+    return PUT(fakeReq);
+  } catch (err: any) {
+    return NextResponse.json({ error: err.message || 'Failed' }, { status: 500 });
+  }
+}
+
+export async function DELETE(req: Request) {
+  try {
+    const { searchParams } = new URL(req.url);
+    const targetLeague = (searchParams.get('league') || 'ipl').toLowerCase();
+    const id = searchParams.get('id');
+    const deleteAll = searchParams.get('deleteAll');
+
+    let players = readPlayers(targetLeague);
+
+    if (deleteAll === 'true') {
+      players = [];
+    } else if (id) {
+      players = players.filter((p: any) => String(p.id) !== String(id));
+    }
+
+    writePlayers(targetLeague, players);
+    return NextResponse.json({ success: true, count: players.length });
+  } catch (err: any) {
+    return NextResponse.json({ error: err.message || 'Failed to delete player' }, { status: 500 });
+  }
 }

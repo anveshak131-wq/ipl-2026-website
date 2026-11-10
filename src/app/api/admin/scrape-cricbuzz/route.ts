@@ -1,3 +1,26 @@
+async function searchCricbuzzProfile(query: string, headers: Record<string, string>): Promise<string | null> {
+  try {
+    const cleanQuery = query.trim().replace(/^https?:\/\/www\.cricbuzz\.com\/profiles\/\d+\/?/i, '').replace(/[-_]/g, ' ');
+    const res = await fetch(`https://html.duckduckgo.com/html/?q=${encodeURIComponent('cricbuzz ' + cleanQuery)}`, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        'Accept-Language': 'en-US,en;q=0.9'
+      }
+    });
+    if (res.ok) {
+      const html = await res.text();
+      const m = html.match(/cricbuzz\.com\/profiles\/(\d+)\/([a-zA-Z0-9-]+)/i);
+      if (m) {
+        return `https://www.cricbuzz.com/profiles/${m[1]}/${m[2]}`;
+      }
+    }
+  } catch (e) {
+    // search fallback error
+  }
+  return null;
+}
+
 export async function POST(req: Request) {
   try {
     const body = await req.json().catch(() => ({}));
@@ -14,15 +37,66 @@ export async function POST(req: Request) {
       });
     }
 
-    let targetUrl = targetInput;
-
-    // Check if input is a numeric ID
-    if (/^\d+$/.test(targetInput)) {
-      targetUrl = `https://www.cricbuzz.com/profiles/${targetInput}`;
-    }
-
-    // Known profile overrides for misattributed IDs (e.g. Arundhati Reddy was mapped to 13865 Manav Parakh instead of 13661)
+    // Known profile overrides for misattributed IDs or shortcuts
     const KNOWN_PLAYER_PROFILES: Record<string, string> = {
+      // Ellyse Perry
+      '8734': 'https://www.cricbuzz.com/profiles/9115/ellyse-perry',
+      '8734/ellyse-perry': 'https://www.cricbuzz.com/profiles/9115/ellyse-perry',
+      'ellyse-perry': 'https://www.cricbuzz.com/profiles/9115/ellyse-perry',
+      'ellyse perry': 'https://www.cricbuzz.com/profiles/9115/ellyse-perry',
+      'ellyseperry': 'https://www.cricbuzz.com/profiles/9115/ellyse-perry',
+      '9115': 'https://www.cricbuzz.com/profiles/9115/ellyse-perry',
+      '9115/ellyse-perry': 'https://www.cricbuzz.com/profiles/9115/ellyse-perry',
+
+      // Sophie Devine
+      '8731': 'https://www.cricbuzz.com/profiles/9165/sophie-devine',
+      '8731/sophie-devine': 'https://www.cricbuzz.com/profiles/9165/sophie-devine',
+      'sophie-devine': 'https://www.cricbuzz.com/profiles/9165/sophie-devine',
+      'sophie devine': 'https://www.cricbuzz.com/profiles/9165/sophie-devine',
+      '9165': 'https://www.cricbuzz.com/profiles/9165/sophie-devine',
+      '9165/sophie-devine': 'https://www.cricbuzz.com/profiles/9165/sophie-devine',
+
+      // Meg Lanning
+      '8733': 'https://www.cricbuzz.com/profiles/9114/meg-lanning',
+      '8733/meg-lanning': 'https://www.cricbuzz.com/profiles/9114/meg-lanning',
+      'meg-lanning': 'https://www.cricbuzz.com/profiles/9114/meg-lanning',
+      'meg lanning': 'https://www.cricbuzz.com/profiles/9114/meg-lanning',
+      '9114': 'https://www.cricbuzz.com/profiles/9114/meg-lanning',
+      '9114/meg-lanning': 'https://www.cricbuzz.com/profiles/9114/meg-lanning',
+
+      // Jess Jonassen
+      '8735': 'https://www.cricbuzz.com/profiles/9537/jess-jonassen',
+      '8735/jess-jonassen': 'https://www.cricbuzz.com/profiles/9537/jess-jonassen',
+      'jess-jonassen': 'https://www.cricbuzz.com/profiles/9537/jess-jonassen',
+      'jess jonassen': 'https://www.cricbuzz.com/profiles/9537/jess-jonassen',
+      '9537': 'https://www.cricbuzz.com/profiles/9537/jess-jonassen',
+      '9537/jess-jonassen': 'https://www.cricbuzz.com/profiles/9537/jess-jonassen',
+
+      // Beth Mooney
+      '8739': 'https://www.cricbuzz.com/profiles/9989/beth-mooney',
+      '8739/beth-mooney': 'https://www.cricbuzz.com/profiles/9989/beth-mooney',
+      'beth-mooney': 'https://www.cricbuzz.com/profiles/9989/beth-mooney',
+      'beth mooney': 'https://www.cricbuzz.com/profiles/9989/beth-mooney',
+      '9989': 'https://www.cricbuzz.com/profiles/9989/beth-mooney',
+      '9989/beth-mooney': 'https://www.cricbuzz.com/profiles/9989/beth-mooney',
+
+      // Richa Ghosh
+      '14828': 'https://www.cricbuzz.com/profiles/16208/richa-ghosh',
+      '14828/richa-ghosh': 'https://www.cricbuzz.com/profiles/16208/richa-ghosh',
+      'richa-ghosh': 'https://www.cricbuzz.com/profiles/16208/richa-ghosh',
+      'richa ghosh': 'https://www.cricbuzz.com/profiles/16208/richa-ghosh',
+      '16208': 'https://www.cricbuzz.com/profiles/16208/richa-ghosh',
+      '16208/richa-ghosh': 'https://www.cricbuzz.com/profiles/16208/richa-ghosh',
+
+      // Sophie Ecclestone
+      '11388': 'https://www.cricbuzz.com/profiles/11531/sophie-ecclestone',
+      '11388/sophie-ecclestone': 'https://www.cricbuzz.com/profiles/11531/sophie-ecclestone',
+      'sophie-ecclestone': 'https://www.cricbuzz.com/profiles/11531/sophie-ecclestone',
+      'sophie ecclestone': 'https://www.cricbuzz.com/profiles/11531/sophie-ecclestone',
+      '11531': 'https://www.cricbuzz.com/profiles/11531/sophie-ecclestone',
+      '11531/sophie-ecclestone': 'https://www.cricbuzz.com/profiles/11531/sophie-ecclestone',
+
+      // Arundhati Reddy
       '13865/arundhati-reddy': 'https://www.cricbuzz.com/profiles/13661/arundhati-reddy',
       '13865': 'https://www.cricbuzz.com/profiles/13661/arundhati-reddy',
       'arundhati-reddy': 'https://www.cricbuzz.com/profiles/13661/arundhati-reddy',
@@ -31,6 +105,17 @@ export async function POST(req: Request) {
       '13661': 'https://www.cricbuzz.com/profiles/13661/arundhati-reddy',
       '13661/arundhati-reddy': 'https://www.cricbuzz.com/profiles/13661/arundhati-reddy',
     };
+
+    let targetUrl = targetInput;
+
+    // Check if input is a numeric ID
+    if (/^\d+$/.test(targetInput)) {
+      if (KNOWN_PLAYER_PROFILES[targetInput]) {
+        targetUrl = KNOWN_PLAYER_PROFILES[targetInput];
+      } else {
+        targetUrl = `https://www.cricbuzz.com/profiles/${targetInput}`;
+      }
+    }
 
     // Check if the URL slug differs from the ID
     const slugMatch = targetInput.match(/profiles\/\d+\/([a-zA-Z0-9-]+)/);
@@ -45,8 +130,14 @@ export async function POST(req: Request) {
       targetUrl = KNOWN_PLAYER_PROFILES[rawSlug];
     } else if (intendedSlugName && KNOWN_PLAYER_PROFILES[intendedSlugName]) {
       targetUrl = KNOWN_PLAYER_PROFILES[intendedSlugName];
+    } else if (targetInput.toLowerCase().includes('perry') || targetInput.toLowerCase().includes('ellyse')) {
+      targetUrl = 'https://www.cricbuzz.com/profiles/9115/ellyse-perry';
     } else if (targetInput.toLowerCase().includes('arundhati')) {
       targetUrl = 'https://www.cricbuzz.com/profiles/13661/arundhati-reddy';
+    } else if (!/^https?:\/\//i.test(targetInput)) {
+      // If it's not a URL, try to resolve via search
+      const resolved = await searchCricbuzzProfile(targetInput, {});
+      if (resolved) targetUrl = resolved;
     }
 
     const headers = {
@@ -73,21 +164,11 @@ export async function POST(req: Request) {
         const newTitleM = html.match(/<title>([^<]+?)\s+Profile/i) || html.match(/<title>([^<]+?)\s*\|/i);
         if (newTitleM) scrapedTitle = newTitleM[1].toLowerCase();
       } else {
-        try {
-          const searchRes = await fetch(`https://www.cricbuzz.com/api/search/results?q=${encodeURIComponent(intendedSlugName)}`, { headers });
-          if (searchRes.ok) {
-            const searchData: any = await searchRes.json().catch(() => ({}));
-            const playerEntry = (searchData?.playerList || searchData?.players || searchData?.results || []).find((p: any) =>
-              (p.name || '').toLowerCase().includes(intendedSlugName.split(' ')[0])
-            );
-            if (playerEntry && playerEntry.id) {
-              targetUrl = `https://www.cricbuzz.com/profiles/${playerEntry.id}`;
-              cricRes = await fetch(targetUrl, { redirect: 'follow', headers });
-              html = await cricRes.text();
-            }
-          }
-        } catch (searchErr) {
-          // Fallback to current page
+        const searchedUrl = await searchCricbuzzProfile(intendedSlugName, headers);
+        if (searchedUrl && searchedUrl !== targetUrl) {
+          targetUrl = searchedUrl;
+          cricRes = await fetch(targetUrl, { redirect: 'follow', headers });
+          html = await cricRes.text();
         }
       }
     }
@@ -260,8 +341,9 @@ export async function POST(req: Request) {
           let fmtKey = rawFmt;
           if (/^(test|wtest|women'?s?\s*test)$/i.test(rawFmt)) fmtKey = 'Test';
           else if (/^(odi|wodi|women'?s?\s*odi)$/i.test(rawFmt)) fmtKey = 'ODI';
-          else if (/^(t20i?|wt20i?|women'?s?\s*t20i?)$/i.test(rawFmt)) fmtKey = 'T20I';
-          else if (/^(wpl|wt20|ipl)$/i.test(rawFmt)) fmtKey = 'WPL';
+          else if (/^(t20i?|wt20i?|women'?s?\s*t20i?)$/i.test(rawFmt)) fmtKey = 'T20';
+          else if (/^(wpl|wt20|women'?s?\s*ipl)$/i.test(rawFmt)) fmtKey = 'WPL';
+          else if (/^ipl$/i.test(rawFmt)) fmtKey = 'IPL';
 
           const rowData: Record<string, string> = {};
           rawRows.forEach(r => {
@@ -270,27 +352,113 @@ export async function POST(req: Request) {
               const val = r[colIdx].trim();
               rowData[metric] = val;
               rowData[metric.toLowerCase()] = val;
-              if (/^(matches|mat|m)$/i.test(metric)) rowData['Mat'] = val;
-              if (/^(innings|inn)$/i.test(metric)) rowData['Inn'] = val;
-              if (/^(runs|r)$/i.test(metric)) rowData['Runs'] = val;
-              if (/^(wickets|wkts|w)$/i.test(metric)) rowData['Wkts'] = val;
-              if (/^(highest|hs)$/i.test(metric)) rowData['HS'] = val;
-              if (/^(average|avg)$/i.test(metric)) rowData['Avg'] = val;
-              if (/^(strike\s*rate|sr)$/i.test(metric)) rowData['SR'] = val;
-              if (/^(balls|bf|b)$/i.test(metric)) rowData['Balls'] = val;
-              if (/^bbi$/i.test(metric)) rowData['BBI'] = val;
-              if (/^(eco|econ|economy)$/i.test(metric)) rowData['Econ'] = val;
-              if (/^(not\s*out|no)$/i.test(metric)) rowData['NO'] = val;
-              if (/^(fours|4s?)$/i.test(metric)) rowData['4s'] = val;
-              if (/^(sixes|6s?)$/i.test(metric)) rowData['6s'] = val;
-              if (/^50s?$/i.test(metric)) rowData['50'] = val;
-              if (/^100s?$/i.test(metric)) rowData['100'] = val;
-              if (/^5w$/i.test(metric)) rowData['5w'] = val;
+              if (/^(matches|mat|m)$/i.test(metric)) {
+                rowData['Mat'] = val;
+                rowData['mat'] = val;
+                rowData['M'] = val;
+                rowData['Matches'] = val;
+                rowData['matches'] = val;
+              }
+              if (/^(innings|inn)$/i.test(metric)) {
+                rowData['Inn'] = val;
+                rowData['inn'] = val;
+                rowData['Innings'] = val;
+                rowData['innings'] = val;
+              }
+              if (/^(runs|r)$/i.test(metric)) {
+                rowData['Runs'] = val;
+                rowData['runs'] = val;
+                rowData['R'] = val;
+              }
+              if (/^(wickets|wkts|w)$/i.test(metric)) {
+                rowData['Wkts'] = val;
+                rowData['wkts'] = val;
+                rowData['W'] = val;
+                rowData['Wickets'] = val;
+                rowData['wickets'] = val;
+              }
+              if (/^(highest|hs)$/i.test(metric)) {
+                rowData['HS'] = val;
+                rowData['hs'] = val;
+                rowData['Highest'] = val;
+                rowData['highest'] = val;
+              }
+              if (/^(average|avg)$/i.test(metric)) {
+                rowData['Avg'] = val;
+                rowData['avg'] = val;
+                rowData['Average'] = val;
+                rowData['average'] = val;
+              }
+              if (/^(strike\s*rate|sr)$/i.test(metric)) {
+                rowData['SR'] = val;
+                rowData['sr'] = val;
+                rowData['strikeRate'] = val;
+              }
+              if (/^(balls|bf|b)$/i.test(metric)) {
+                rowData['Balls'] = val;
+                rowData['balls'] = val;
+                rowData['BF'] = val;
+                rowData['bf'] = val;
+                rowData['B'] = val;
+                rowData['ballsFaced'] = val;
+              }
+              if (/^bbi$/i.test(metric)) {
+                rowData['BBI'] = val;
+                rowData['bbi'] = val;
+                rowData['bestBowling'] = val;
+              }
+              if (/^(eco|econ|economy)$/i.test(metric)) {
+                rowData['Econ'] = val;
+                rowData['econ'] = val;
+                rowData['Eco'] = val;
+                rowData['eco'] = val;
+                rowData['economy'] = val;
+              }
+              if (/^(not\s*out|no)$/i.test(metric)) {
+                rowData['NO'] = val;
+                rowData['no'] = val;
+                rowData['Not Out'] = val;
+                rowData['notOuts'] = val;
+              }
+              if (/^(fours|4s?)$/i.test(metric)) {
+                rowData['4s'] = val;
+                rowData['fours'] = val;
+              }
+              if (/^(sixes|6s?)$/i.test(metric)) {
+                rowData['6s'] = val;
+                rowData['sixes'] = val;
+              }
+              if (/^50s?$/i.test(metric)) {
+                rowData['50'] = val;
+                rowData['50s'] = val;
+                rowData['fifties'] = val;
+              }
+              if (/^100s?$/i.test(metric)) {
+                rowData['100'] = val;
+                rowData['100s'] = val;
+                rowData['hundreds'] = val;
+              }
+              if (/^5w$/i.test(metric)) {
+                rowData['5W'] = val;
+                rowData['5w'] = val;
+                rowData['fiveWickets'] = val;
+              }
             }
           });
 
+          // Register under standard case, lowercase, uppercase, and aliases
           rows[fmtKey] = rowData;
+          rows[fmtKey.toLowerCase()] = rowData;
+          rows[fmtKey.toUpperCase()] = rowData;
           rows[rawFmt] = rowData;
+          rows[rawFmt.toLowerCase()] = rowData;
+          if (fmtKey === 'T20') {
+            rows['T20I'] = rowData;
+            rows['t20i'] = rowData;
+          } else if (fmtKey === 'T20I') {
+            rows['T20'] = rowData;
+            rows['t20'] = rowData;
+          }
         }
       } else {
         // Legacy row-based format
@@ -301,8 +469,9 @@ export async function POST(req: Request) {
 
             if (/^(test|wtest|women'?s?\s*test)$/i.test(rawFmt)) fmtKey = 'Test';
             else if (/^(odi|wodi|women'?s?\s*odi)$/i.test(rawFmt)) fmtKey = 'ODI';
-            else if (/^(t20i?|wt20i?|women'?s?\s*t20i?)$/i.test(rawFmt)) fmtKey = 'T20I';
-            else if (/^(wpl|wt20|ipl)$/i.test(rawFmt)) fmtKey = 'WPL';
+            else if (/^(t20i?|wt20i?|women'?s?\s*t20i?)$/i.test(rawFmt)) fmtKey = 'T20';
+            else if (/^(wpl|wt20|women'?s?\s*ipl)$/i.test(rawFmt)) fmtKey = 'WPL';
+            else if (/^ipl$/i.test(rawFmt)) fmtKey = 'IPL';
 
             const rowData: Record<string, string> = {};
             headers.forEach((h, i) => {
@@ -310,27 +479,37 @@ export async function POST(req: Request) {
                 const val = cells[i];
                 rowData[h] = val;
                 rowData[h.toLowerCase()] = val;
-                if (/^mat|m$/i.test(h)) rowData['Mat'] = val;
-                if (/^inn$/i.test(h)) rowData['Inn'] = val;
-                if (/^no$/i.test(h)) rowData['NO'] = val;
-                if (/^runs|r$/i.test(h)) rowData['Runs'] = val;
-                if (/^hs$/i.test(h)) rowData['HS'] = val;
-                if (/^avg$/i.test(h)) rowData['Avg'] = val;
-                if (/^bf|balls$/i.test(h)) rowData['BF'] = val;
-                if (/^sr$/i.test(h)) rowData['SR'] = val;
-                if (/^100s?$/i.test(h)) rowData['100'] = val;
-                if (/^50s?$/i.test(h)) rowData['50'] = val;
-                if (/^4s?$/i.test(h)) rowData['4s'] = val;
-                if (/^6s?$/i.test(h)) rowData['6s'] = val;
-                if (/^wkts|w$/i.test(h)) rowData['Wkts'] = val;
-                if (/^b|balls$/i.test(h)) rowData['Balls'] = val;
-                if (/^bbi$/i.test(h)) rowData['BBI'] = val;
-                if (/^econ$/i.test(h)) rowData['Econ'] = val;
+                if (/^mat|m|matches$/i.test(h)) { rowData['Mat'] = val; rowData['mat'] = val; rowData['M'] = val; rowData['Matches'] = val; }
+                if (/^inn|innings$/i.test(h)) { rowData['Inn'] = val; rowData['inn'] = val; rowData['Innings'] = val; }
+                if (/^no|not\s*out$/i.test(h)) { rowData['NO'] = val; rowData['no'] = val; }
+                if (/^runs|r$/i.test(h)) { rowData['Runs'] = val; rowData['runs'] = val; rowData['R'] = val; }
+                if (/^hs|highest$/i.test(h)) { rowData['HS'] = val; rowData['hs'] = val; rowData['Highest'] = val; }
+                if (/^avg|average$/i.test(h)) { rowData['Avg'] = val; rowData['avg'] = val; rowData['Average'] = val; }
+                if (/^bf|balls|b$/i.test(h)) { rowData['BF'] = val; rowData['bf'] = val; rowData['Balls'] = val; rowData['balls'] = val; rowData['B'] = val; }
+                if (/^sr|strike\s*rate$/i.test(h)) { rowData['SR'] = val; rowData['sr'] = val; }
+                if (/^100s?$/i.test(h)) { rowData['100'] = val; rowData['100s'] = val; }
+                if (/^50s?$/i.test(h)) { rowData['50'] = val; rowData['50s'] = val; }
+                if (/^4s?|fours$/i.test(h)) { rowData['4s'] = val; rowData['fours'] = val; }
+                if (/^6s?|sixes$/i.test(h)) { rowData['6s'] = val; rowData['sixes'] = val; }
+                if (/^wkts|w|wickets$/i.test(h)) { rowData['Wkts'] = val; rowData['wkts'] = val; rowData['W'] = val; rowData['Wickets'] = val; }
+                if (/^bbi$/i.test(h)) { rowData['BBI'] = val; rowData['bbi'] = val; }
+                if (/^econ|eco|economy$/i.test(h)) { rowData['Econ'] = val; rowData['econ'] = val; rowData['Eco'] = val; }
+                if (/^5w$/i.test(h)) { rowData['5W'] = val; rowData['5w'] = val; }
               }
             });
 
             rows[fmtKey] = rowData;
+            rows[fmtKey.toLowerCase()] = rowData;
+            rows[fmtKey.toUpperCase()] = rowData;
             rows[rawFmt] = rowData;
+            rows[rawFmt.toLowerCase()] = rowData;
+            if (fmtKey === 'T20') {
+              rows['T20I'] = rowData;
+              rows['t20i'] = rowData;
+            } else if (fmtKey === 'T20I') {
+              rows['T20'] = rowData;
+              rows['t20'] = rowData;
+            }
           }
         });
       }

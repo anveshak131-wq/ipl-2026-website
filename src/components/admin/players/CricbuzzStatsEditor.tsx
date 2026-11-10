@@ -14,6 +14,12 @@ export default function CricbuzzStatsEditor({ formData, onChange }: { formData: 
       return;
     }
     
+    let target = cricbuzzInput.trim();
+    if (target.includes('8734/ellyse-perry')) {
+      target = 'https://www.cricbuzz.com/profiles/9115/ellyse-perry';
+      setCricbuzzInput(target);
+    }
+    
     setIsScraping(true);
     setScrapeError(null);
     setSyncSuccess(false);
@@ -22,7 +28,7 @@ export default function CricbuzzStatsEditor({ formData, onChange }: { formData: 
       const res = await fetch('/api/admin/scrape-cricbuzz', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url: cricbuzzInput })
+        body: JSON.stringify({ url: target })
       });
       const payload = await res.json();
       
@@ -63,7 +69,7 @@ export default function CricbuzzStatsEditor({ formData, onChange }: { formData: 
           type="text" 
           value={cricbuzzInput} 
           onChange={(e) => setCricbuzzInput(e.target.value)}
-          placeholder="https://www.cricbuzz.com/profiles/8734/ellyse-perry"
+          placeholder="https://www.cricbuzz.com/profiles/9115/ellyse-perry"
           className="flex-1 px-4 py-2 rounded-lg bg-slate-800 border border-slate-700 text-sm text-white"
         />
         <button 
