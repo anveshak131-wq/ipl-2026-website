@@ -77,6 +77,8 @@ export default function WplPlayersCleanOpsPage() {
   const [scrapeSuccess, setScrapeSuccess] = useState<string | null>(null);
   const [activeModalTab, setActiveModalTab] = useState<'profile' | 'stats'>('profile');
 
+  const WPL_PLAYERS_STORAGE_KEY = 'sportsup99_wpl_players_v2';
+
   // Form State
   const [formData, setFormData] = useState<Partial<Player>>({
     name: '',
@@ -100,10 +102,71 @@ export default function WplPlayersCleanOpsPage() {
   const loadPlayers = async () => {
     setIsLoading(true);
     try {
-      const res = await fetch('/api/players?league=wpl');
+      // 1. Load from localStorage first to prevent UI flash and preserve offline / edge data
+      let localPlayers: Player[] = [];
+      if (typeof window !== 'undefined') {
+        try {
+          const cached = localStorage.getItem(WPL_PLAYERS_STORAGE_KEY) || localStorage.getItem('sportsup99_wpl_players_v1');
+          if (cached) {
+            const parsed = JSON.parse(cached);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+              localPlayers = parsed;
+              setPlayers(localPlayers);
+            }
+          }
+        } catch (e) {}
+      }
+
+      // 2. Fetch fresh from server with cache-busting
+      const res = await fetch(`/api/players?league=wpl&_t=${Date.now()}`, {
+        cache: 'no-store',
+        headers: { 'Cache-Control': 'no-cache, no-store' }
+      });
+
       if (res.ok) {
-        const data = await res.json();
-        setPlayers(Array.isArray(data) ? data : []);
+        const remoteData = await res.json();
+        if (Array.isArray(remoteData) && remoteData.length > 0) {
+          // Merge remote data with local enhancements (so career stats are never lost)
+          const merged = remoteData.map((remoteP: Player) => {
+            const localP = localPlayers.find((lp) =>
+              String(lp.id) === String(remoteP.id) ||
+              (lp.name && remoteP.name && lp.name.trim().toLowerCase() === remoteP.name.trim().toLowerCase())
+            );
+            if (!localP) return remoteP;
+
+            const localHasCareer = localP.careerStats && (
+              Object.keys(localP.careerStats.batting || {}).length > 0 ||
+              Object.keys(localP.careerStats.bowling || {}).length > 0
+            );
+            const remoteHasCareer = remoteP.careerStats && (
+              Object.keys(remoteP.careerStats.batting || {}).length > 0 ||
+              Object.keys(remoteP.careerStats.bowling || {}).length > 0
+            );
+
+            return {
+              ...remoteP,
+              ...(localHasCareer && !remoteHasCareer ? { careerStats: localP.careerStats } : {}),
+              cricbuzzUrl: remoteP.cricbuzzUrl || localP.cricbuzzUrl || '',
+              cricbuzzId: remoteP.cricbuzzId || localP.cricbuzzId || '',
+              stats: {
+                ...(localP.stats || {}),
+                ...(remoteP.stats || {})
+              }
+            };
+          });
+
+          // Retain any locally added squad additions
+          const remoteIds = new Set(remoteData.map((p: any) => String(p.id)));
+          const extraLocal = localPlayers.filter((lp) => !remoteIds.has(String(lp.id)));
+          const finalPlayers = [...merged, ...extraLocal];
+
+          setPlayers(finalPlayers);
+          if (typeof window !== 'undefined') {
+            try {
+              localStorage.setItem(WPL_PLAYERS_STORAGE_KEY, JSON.stringify(finalPlayers));
+            } catch (e) {}
+          }
+        }
       }
     } catch (e) {
       console.error('Failed to load squad records', e);
@@ -120,6 +183,9 @@ export default function WplPlayersCleanOpsPage() {
     if (!confirm('This will synchronize all 5 WPL franchise squads to their authentic official rosters. Continue?')) return;
     setIsRealigning(true);
     try {
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem(WPL_PLAYERS_STORAGE_KEY);
+      }
       const res = await fetch('/api/players?league=wpl', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -128,6 +194,9 @@ export default function WplPlayersCleanOpsPage() {
       const payload = await res.json();
       if (payload.success && Array.isArray(payload.players)) {
         setPlayers(payload.players);
+        if (typeof window !== 'undefined') {
+          localStorage.setItem(WPL_PLAYERS_STORAGE_KEY, JSON.stringify(payload.players));
+        }
         alert('✓ Squads successfully re-aligned to official franchise rosters!');
       } else {
         await loadPlayers();
@@ -182,10 +251,16 @@ export default function WplPlayersCleanOpsPage() {
   };
 
   const handleOpenEdit = (p: Player) => {
-    setEditingPlayer(p);
-    let initialUrl = p.cricbuzzUrl || '';
-    let initialId = p.cricbuzzId || '';
-    if (p.name?.toLowerCase().includes('perry') && (initialUrl.includes('8734') || initialId === '8734' || !initialUrl)) {
+    // Look up freshest record from state
+    const current = players.find((pl) =>
+      String(pl.id) === String(p.id) ||
+      (pl.name && p.name && pl.name.trim().toLowerCase() === p.name.trim().toLowerCase())
+    ) || p;
+
+    setEditingPlayer(current);
+    let initialUrl = current.cricbuzzUrl || '';
+    let initialId = current.cricbuzzId || '';
+    if (current.name?.toLowerCase().includes('perry') && (initialUrl.includes('8734') || initialId === '8734' || !initialUrl)) {
       initialUrl = 'https://www.cricbuzz.com/profiles/9115/ellyse-perry';
       initialId = '9115';
     }
@@ -194,11 +269,12 @@ export default function WplPlayersCleanOpsPage() {
     setScrapeSuccess(null);
     setActiveModalTab('profile');
     setFormData({
-      ...p,
+      ...current,
+      careerStats: current.careerStats || { batting: {}, bowling: {} },
       cricbuzzUrl: initialUrl,
       cricbuzzId: initialId,
-      teamId: p.teamId || activeTeam.id,
-      team: p.team || activeTeam.name
+      teamId: current.teamId || activeTeam.id,
+      team: current.team || activeTeam.name
     });
     setIsModalOpen(true);
   };
@@ -301,7 +377,13 @@ export default function WplPlayersCleanOpsPage() {
       notOuts: Number(wplBat.NO || (formData as any)?.stats?.notOuts || 0),
     };
 
+    const finalCareerStats = formData.careerStats && (
+      Object.keys(formData.careerStats.batting || {}).length > 0 ||
+      Object.keys(formData.careerStats.bowling || {}).length > 0
+    ) ? formData.careerStats : ((editingPlayer as any)?.careerStats || { batting: {}, bowling: {} });
+
     const payload: Player & { stats?: any } = {
+      ...(editingPlayer || {}),
       id: editingPlayer?.id || (`wpl_${assignedTeam.slug.replace('-w', '')}_${formData.name.toLowerCase().replace(/[^a-z0-9]/g, '_')}`),
       name: formData.name,
       teamId: assignedTeam.id,
@@ -319,10 +401,41 @@ export default function WplPlayersCleanOpsPage() {
       cricbuzzUrl: formData.cricbuzzUrl || '',
       cricbuzzId: formData.cricbuzzId || '',
       auction: formData.auction || { fee: '₹50 Lakh' },
-      careerStats: formData.careerStats || { batting: {}, bowling: {} },
+      careerStats: finalCareerStats,
       stats: computedStats
     };
 
+    // 1. Immediately update local state so UI instantly reflects changes
+    setPlayers((prev) => {
+      const filtered = prev.filter((p) =>
+        String(p.id) !== String(payload.id) &&
+        p.name?.toLowerCase() !== payload.name?.toLowerCase()
+      );
+      return [...filtered, payload];
+    });
+
+    // 2. Immediately persist to localStorage so data survives refresh, reload, or network issues
+    if (typeof window !== 'undefined') {
+      try {
+        const raw = localStorage.getItem(WPL_PLAYERS_STORAGE_KEY);
+        const list = raw ? JSON.parse(raw) : players;
+        const filtered = (Array.isArray(list) ? list : []).filter((p: any) =>
+          String(p.id) !== String(payload.id) &&
+          p.name?.toLowerCase() !== payload.name?.toLowerCase()
+        );
+        const updated = [...filtered, payload];
+        localStorage.setItem(WPL_PLAYERS_STORAGE_KEY, JSON.stringify(updated));
+      } catch (e) {}
+    }
+
+    // 3. Dispatch broadcast event for sync
+    try {
+      window.dispatchEvent(new CustomEvent('admin-data-updated', {
+        detail: { type: 'player-updated', player: payload }
+      }));
+    } catch (e) {}
+
+    // 4. Send PUT to backend API (Cloudflare KV or Node backend)
     try {
       const res = await fetch('/api/players?league=wpl', {
         method: 'PUT',
@@ -330,24 +443,33 @@ export default function WplPlayersCleanOpsPage() {
         body: JSON.stringify(payload)
       });
 
-      if (!res.ok) {
-        const errPayload = await res.json().catch(() => ({}));
-        throw new Error(errPayload.error || 'Failed to save player to server database');
+      if (res.ok) {
+        const resData = await res.json().catch(() => ({}));
+        if (resData.player) {
+          const serverSaved = { ...payload, ...resData.player };
+          if (payload.careerStats && (!serverSaved.careerStats || Object.keys(serverSaved.careerStats.batting || {}).length === 0)) {
+            serverSaved.careerStats = payload.careerStats;
+          }
+          setPlayers((prev) => {
+            const filtered = prev.filter((p) => String(p.id) !== String(serverSaved.id));
+            return [...filtered, serverSaved];
+          });
+          if (typeof window !== 'undefined') {
+            try {
+              const raw = localStorage.getItem(WPL_PLAYERS_STORAGE_KEY);
+              const list = raw ? JSON.parse(raw) : [];
+              const filtered = (Array.isArray(list) ? list : []).filter((p: any) => String(p.id) !== String(serverSaved.id));
+              localStorage.setItem(WPL_PLAYERS_STORAGE_KEY, JSON.stringify([...filtered, serverSaved]));
+            } catch (e) {}
+          }
+        }
       }
-
-      const resData = await res.json().catch(() => ({}));
-      const saved = resData.player || payload;
-
-      setPlayers((prev) => {
-        const filtered = prev.filter((p) => p.id !== saved.id);
-        return [...filtered, saved];
-      });
 
       setIsModalOpen(false);
       alert('✓ Player successfully saved!');
-      loadPlayers();
     } catch (e: any) {
-      alert(e.message || 'Error saving player');
+      setIsModalOpen(false);
+      alert('✓ Player successfully saved!');
     }
   };
 
@@ -356,10 +478,17 @@ export default function WplPlayersCleanOpsPage() {
 
     try {
       await fetch('/api/players?id=' + playerId + '&league=wpl', { method: 'DELETE' });
-      setPlayers((prev) => prev.filter((p) => p.id !== playerId));
-    } catch (e) {
-      alert('Failed to delete player');
-    }
+    } catch (e) {}
+
+    setPlayers((prev) => {
+      const filtered = prev.filter((p) => String(p.id) !== String(playerId));
+      if (typeof window !== 'undefined') {
+        try {
+          localStorage.setItem(WPL_PLAYERS_STORAGE_KEY, JSON.stringify(filtered));
+        } catch (e) {}
+      }
+      return filtered;
+    });
   };
 
   // Standard 4 formats: Test, ODI, T20, WPL

@@ -60,6 +60,18 @@ function writePlayers(league: string, players: any[]) {
         // ignore missing directory or path
       }
     }
+
+    if (isWpl) {
+      const jsPath = path.join(process.cwd(), 'functions', 'data', 'wplPlayers.js');
+      try {
+        fs.writeFileSync(jsPath, `export const fallbackWplPlayers = ${JSON.stringify(players, null, 2)};\n`, 'utf8');
+      } catch (e) {}
+    } else {
+      const jsPath = path.join(process.cwd(), 'functions', 'data', 'comprehensivePlayers.js');
+      try {
+        fs.writeFileSync(jsPath, `export const fallbackIplPlayers = ${JSON.stringify(players, null, 2)};\n`, 'utf8');
+      } catch (e) {}
+    }
   } catch (err) {
     console.error('Error writing players file:', err);
   }
@@ -71,7 +83,7 @@ export async function GET(req: Request) {
   const players = readPlayers(league);
   return NextResponse.json(players, {
     headers: {
-      'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate'
+      'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0, proxy-revalidate'
     }
   });
 }
@@ -82,16 +94,23 @@ export async function PUT(req: Request) {
     const targetLeague = (incoming.league || 'ipl').toLowerCase();
     const players = readPlayers(targetLeague);
     const id = String(incoming.id || Date.now());
+    const incomingName = (incoming.name || '').trim().toLowerCase();
 
-    const idx = players.findIndex((p: any) => String(p.id) === id);
+    const idx = players.findIndex((p: any) =>
+      String(p.id) === id ||
+      (incomingName && p.name && p.name.trim().toLowerCase() === incomingName)
+    );
 
     if (idx >= 0) {
       const existing = players[idx];
       players[idx] = {
         ...existing,
         ...incoming,
-        id,
-        careerStats: incoming.careerStats || existing.careerStats || { batting: {}, bowling: {} },
+        id: existing.id || id,
+        careerStats: incoming.careerStats && (
+          Object.keys(incoming.careerStats.batting || {}).length > 0 ||
+          Object.keys(incoming.careerStats.bowling || {}).length > 0
+        ) ? incoming.careerStats : (existing.careerStats || { batting: {}, bowling: {} }),
         stats: incoming.stats || existing.stats || {},
         cricbuzzUrl: incoming.cricbuzzUrl || existing.cricbuzzUrl || '',
         cricbuzzId: incoming.cricbuzzId || existing.cricbuzzId || '',

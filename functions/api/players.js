@@ -18,6 +18,8 @@ export const onRequest = async (context) => {
   const league = (url.searchParams.get("league") || "ipl").toLowerCase();
 
   try {
+    const kv = env?.SPORTS_KV || env?.IPL_CACHE;
+
     // -------------------------------------------------------------
     // GET /api/players?league=ipl OR league=wpl
     // -------------------------------------------------------------
@@ -25,10 +27,8 @@ export const onRequest = async (context) => {
       const kvKey = league === "wpl" ? "players:wpl" : "players:ipl";
       let players = [];
 
-      if (env?.SPORTS_KV) {
-        players = (await env.SPORTS_KV.get(kvKey, "json")) || [];
-      } else if (env?.IPL_CACHE && league === "ipl") {
-        players = (await env.IPL_CACHE.get("players", "json")) || [];
+      if (kv) {
+        players = (await kv.get(kvKey, "json")) || [];
       }
 
       // AUTO-HEALING: If KV contains rotated/corrupted team IDs (e.g. Beth Mooney in 14), reset to fallback
@@ -43,17 +43,20 @@ export const onRequest = async (context) => {
 
         if (isCorrupted || !Array.isArray(players) || players.length === 0 || url.searchParams.get("realign") === "true") {
           players = fallbackWplPlayers;
-          if (env?.SPORTS_KV) context.waitUntil(env.SPORTS_KV.put(kvKey, JSON.stringify(fallbackWplPlayers)).catch(() => {}));
+          if (kv) context.waitUntil(kv.put(kvKey, JSON.stringify(fallbackWplPlayers)).catch(() => {}));
         }
       } else if (league === "ipl" && (!Array.isArray(players) || players.length === 0)) {
         players = fallbackIplPlayers;
-        if (env?.SPORTS_KV) context.waitUntil(env.SPORTS_KV.put(kvKey, JSON.stringify(fallbackIplPlayers)).catch(() => {}));
-        if (env?.IPL_CACHE) context.waitUntil(env.IPL_CACHE.put("players", JSON.stringify(fallbackIplPlayers)).catch(() => {}));
+        if (kv) context.waitUntil(kv.put(kvKey, JSON.stringify(fallbackIplPlayers)).catch(() => {}));
       }
 
       return new Response(JSON.stringify(players), {
         status: 200,
-        headers: { "Content-Type": "application/json", ...corsHeaders }
+        headers: {
+          "Content-Type": "application/json",
+          "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
+          ...corsHeaders
+        }
       });
     }
 
@@ -68,18 +71,16 @@ export const onRequest = async (context) => {
       // Explicit Squad Re-alignment action
       if (body.action === "realign" || body.realign === true) {
         const resetData = targetLeague === "wpl" ? fallbackWplPlayers : fallbackIplPlayers;
-        if (env?.SPORTS_KV) await env.SPORTS_KV.put(kvKey, JSON.stringify(resetData));
+        if (kv) await kv.put(kvKey, JSON.stringify(resetData));
         return new Response(JSON.stringify({ success: true, count: resetData.length, players: resetData }), {
           status: 200,
-          headers: { "Content-Type": "application/json", ...corsHeaders }
+          headers: { "Content-Type": "application/json", "Cache-Control": "no-store", ...corsHeaders }
         });
       }
 
       let currentPlayers = [];
-      if (env?.SPORTS_KV) {
-        currentPlayers = (await env.SPORTS_KV.get(kvKey, "json")) || [];
-      } else if (env?.IPL_CACHE && targetLeague === "ipl") {
-        currentPlayers = (await env.IPL_CACHE.get("players", "json")) || [];
+      if (kv) {
+        currentPlayers = (await kv.get(kvKey, "json")) || [];
       }
 
       if (!currentPlayers || currentPlayers.length === 0) {
@@ -87,38 +88,53 @@ export const onRequest = async (context) => {
       }
 
       if (body.bulk && Array.isArray(body.players)) {
-        if (env?.SPORTS_KV) await env.SPORTS_KV.put(kvKey, JSON.stringify(body.players));
+        if (kv) await kv.put(kvKey, JSON.stringify(body.players));
         return new Response(JSON.stringify({ success: true, count: body.players.length }), {
           status: 200,
-          headers: { "Content-Type": "application/json", ...corsHeaders }
+          headers: { "Content-Type": "application/json", "Cache-Control": "no-store", ...corsHeaders }
         });
       }
 
       const incoming = body;
       const id = String(incoming.id || Date.now());
-      const playerIndex = currentPlayers.findIndex(p => String(p.id) === id);
+      const incomingName = (incoming.name || '').trim().toLowerCase();
+      const playerIndex = currentPlayers.findIndex(p =>
+        String(p.id) === id ||
+        (incomingName && p.name && p.name.trim().toLowerCase() === incomingName)
+      );
 
+      let savedPlayer;
       if (playerIndex >= 0) {
         const existing = currentPlayers[playerIndex];
-        currentPlayers[playerIndex] = {
+        savedPlayer = {
           ...existing,
           ...incoming,
-          id,
-          careerStats: incoming.careerStats && Object.keys(incoming.careerStats).length > 0
+          id: existing.id || id,
+          careerStats: incoming.careerStats && (Object.keys(incoming.careerStats.batting || {}).length > 0 || Object.keys(incoming.careerStats.bowling || {}).length > 0)
             ? incoming.careerStats
             : (existing.careerStats || { batting: {}, bowling: {} }),
+          stats: incoming.stats || existing.stats || {},
           cricbuzzUrl: incoming.cricbuzzUrl || existing.cricbuzzUrl || '',
           cricbuzzId: incoming.cricbuzzId || existing.cricbuzzId || '',
         };
+        currentPlayers[playerIndex] = savedPlayer;
       } else {
-        currentPlayers.push({ ...incoming, id });
+        savedPlayer = {
+          ...incoming,
+          id,
+          careerStats: incoming.careerStats || { batting: {}, bowling: {} },
+          stats: incoming.stats || {},
+        };
+        currentPlayers.push(savedPlayer);
       }
 
-      if (env?.SPORTS_KV) await env.SPORTS_KV.put(kvKey, JSON.stringify(currentPlayers));
+      if (kv) {
+        await kv.put(kvKey, JSON.stringify(currentPlayers));
+      }
 
-      return new Response(JSON.stringify({ success: true, player: incoming }), {
+      return new Response(JSON.stringify({ success: true, player: savedPlayer, count: currentPlayers.length }), {
         status: 200,
-        headers: { "Content-Type": "application/json", ...corsHeaders }
+        headers: { "Content-Type": "application/json", "Cache-Control": "no-store", ...corsHeaders }
       });
     }
 
@@ -130,13 +146,19 @@ export const onRequest = async (context) => {
       const kvKey = league === "wpl" ? "players:wpl" : "players:ipl";
 
       let players = [];
-      if (env?.SPORTS_KV) players = (await env.SPORTS_KV.get(kvKey, "json")) || [];
+      if (kv) players = (await kv.get(kvKey, "json")) || [];
       if (!players || players.length === 0) {
         players = league === "wpl" ? [...fallbackWplPlayers] : [...fallbackIplPlayers];
       }
 
       const filtered = players.filter(p => String(p.id) !== String(playerId));
-      if (env?.SPORTS_KV) await env.SPORTS_KV.put(kvKey, JSON.stringify(filtered));
+      if (kv) await kv.put(kvKey, JSON.stringify(filtered));
+
+      return new Response(JSON.stringify({ success: true, remaining: filtered.length }), {
+        status: 200,
+        headers: { "Content-Type": "application/json", "Cache-Control": "no-store", ...corsHeaders }
+      });
+    }
 
       return new Response(JSON.stringify({ success: true, remaining: filtered.length }), {
         status: 200,
