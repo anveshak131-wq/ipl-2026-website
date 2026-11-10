@@ -313,9 +313,33 @@ export const mockTeams: Team[] = [
     trophies: [],
     homeGrounds: ['Maharashtra Cricket Association Stadium, Pune']
   },
-  // WPL Teams
+  // WPL Teams (Canonical IDs: DC-W=11, GG=12, MI-W=13, RCB-W=14, UPW=15)
   {
     id: '11',
+    league: 'wpl',
+    name: 'Delhi Capitals (WPL)',
+    shortName: 'DC-W',
+    logo: '/logos/wpl_dc_logo_animated.svg',
+    description: 'The women\'s franchise of Delhi Capitals combining youth and experience',
+    colors: { primary: '#004BA0', secondary: '#DC2626' },
+    players: [],
+    trophies: [],
+    homeGrounds: ['Arun Jaitley Stadium, Delhi']
+  },
+  {
+    id: '12',
+    league: 'wpl',
+    name: 'Gujarat Giants (WPL)',
+    shortName: 'GG',
+    logo: '/logos/wpl_gg_logo_animated.svg',
+    description: 'The women\'s franchise of Gujarat Giants aiming for glory',
+    colors: { primary: '#F97316', secondary: '#FFD700' },
+    players: [],
+    trophies: [],
+    homeGrounds: ['Narendra Modi Stadium, Ahmedabad']
+  },
+  {
+    id: '13',
     league: 'wpl',
     name: 'Mumbai Indians (WPL)',
     shortName: 'MI-W',
@@ -332,9 +356,9 @@ export const mockTeams: Team[] = [
     homeGrounds: ['Wankhede Stadium, Mumbai']
   },
   {
-    id: '12',
+    id: '14',
     league: 'wpl',
-    name: 'Royal Challengers Bangalore (WPL)',
+    name: 'Royal Challengers Bengaluru (WPL)',
     shortName: 'RCB-W',
     logo: '/logos/wpl_rcb_logo_animated.svg',
     description: 'The women\'s franchise of RCB with explosive talent',
@@ -347,30 +371,6 @@ export const mockTeams: Team[] = [
       }
     ],
     homeGrounds: ['M. Chinnaswamy Stadium, Bengaluru']
-  },
-  {
-    id: '13',
-    league: 'wpl',
-    name: 'Delhi Capitals (WPL)',
-    shortName: 'DC-W',
-    logo: '/logos/wpl_dc_logo_animated.svg',
-    description: 'The women\'s franchise of Delhi Capitals combining youth and experience',
-    colors: { primary: '#004BA0', secondary: '#DC2626' },
-    players: [],
-    trophies: [],
-    homeGrounds: ['Arun Jaitley Stadium, Delhi']
-  },
-  {
-    id: '14',
-    league: 'wpl',
-    name: 'Gujarat Giants (WPL)',
-    shortName: 'GG',
-    logo: '/logos/wpl_gg_logo_animated.svg',
-    description: 'The women\'s franchise of Gujarat Giants aiming for glory',
-    colors: { primary: '#F97316', secondary: '#FFD700' },
-    players: [],
-    trophies: [],
-    homeGrounds: ['Narendra Modi Stadium, Ahmedabad']
   },
   {
     id: '15',

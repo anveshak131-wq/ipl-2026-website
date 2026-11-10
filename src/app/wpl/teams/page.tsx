@@ -170,6 +170,48 @@ const CANONICAL_WPL_TEAMS: Team[] = [
   } as unknown as Team,
 ];
 
+function getFranchiseKey(str?: string): 'rcb' | 'mi' | 'dc' | 'gg' | 'upw' | null {
+  const s = String(str || '').toLowerCase().trim();
+  if (s.includes('rcb') || s.includes('bangalore') || s.includes('bengaluru') || s === '14') return 'rcb';
+  if (s.includes('mi') || s.includes('mumbai') || s === '13') return 'mi';
+  if (s.includes('dc') || s.includes('delhi') || s === '11') return 'dc';
+  if (s.includes('gg') || s.includes('gujarat') || s === '12') return 'gg';
+  if (s.includes('upw') || s.includes('up') || s.includes('warrior') || s === '15') return 'upw';
+  return null;
+}
+
+function isPlayerInWplTeam(p: any, teamParamId: string, teamObj?: any): boolean {
+  const targetKey = getFranchiseKey(teamParamId) || (teamObj ? getFranchiseKey(teamObj.id || teamObj.shortName || teamObj.name) : null);
+  if (!targetKey) return false;
+
+  const pId = String(p.id || '').toLowerCase();
+  const pTeamId = String(p.teamId || '').toLowerCase();
+  const pTeam = String(p.team || '').toLowerCase();
+
+  // Match by id prefix (e.g. wpl_rcb_..., wpl-rcb-...)
+  if (pId.startsWith(`wpl_${targetKey}`) || pId.startsWith(`wpl-${targetKey}`)) return true;
+  if (targetKey === 'upw' && (pId.startsWith('wpl_up') || pId.startsWith('wpl-up'))) return true;
+
+  // Match by canonical franchise ID
+  const franchiseIdMap: Record<string, string> = {
+    rcb: '14',
+    mi: '13',
+    dc: '11',
+    gg: '12',
+    upw: '15'
+  };
+  if (pTeamId === franchiseIdMap[targetKey]) return true;
+
+  // Match by team name
+  if (targetKey === 'rcb' && (pTeam.includes('rcb') || pTeam.includes('bengaluru') || pTeam.includes('bangalore'))) return true;
+  if (targetKey === 'mi' && (pTeam.includes('mumbai') || pTeam.includes('mi'))) return true;
+  if (targetKey === 'dc' && (pTeam.includes('delhi') || pTeam.includes('capitals') || pTeam.includes('dc'))) return true;
+  if (targetKey === 'gg' && (pTeam.includes('gujarat') || pTeam.includes('giants') || pTeam.includes('gg'))) return true;
+  if (targetKey === 'upw' && (pTeam.includes('up') || pTeam.includes('warrior'))) return true;
+
+  return false;
+}
+
 function WPLTeamsContent() {
   const searchParams = useSearchParams();
   const { currentLeague, setCurrentLeague } = useLeague();
@@ -191,6 +233,17 @@ function WPLTeamsContent() {
   useEffect(() => {
     (async () => {
       try {
+        let cachedPlayers: Player[] = [];
+        if (typeof window !== 'undefined') {
+          try {
+            const raw = localStorage.getItem('sportsup99_wpl_players_v2') || localStorage.getItem('sportsup99_wpl_players_v1');
+            if (raw) {
+              const parsed = JSON.parse(raw);
+              if (Array.isArray(parsed) && parsed.length > 0) cachedPlayers = parsed;
+            }
+          } catch (e) {}
+        }
+
         const [teamsData, playersData] = await Promise.all([
           api.getTeams('wpl').catch(() => []),
           api.getPlayers(undefined, 'wpl').catch(() => []),
@@ -223,8 +276,20 @@ function WPLTeamsContent() {
           }
         });
 
+        // Merge remote + local cached players
+        const mergedPlayersMap = new Map<string, any>();
+        (playersData || []).forEach((p: any) => {
+          const k = String(p.id || p.name || '').trim().toLowerCase();
+          mergedPlayersMap.set(k, p);
+        });
+        cachedPlayers.forEach((lp: any) => {
+          const k = String(lp.id || lp.name || '').trim().toLowerCase();
+          const existing = mergedPlayersMap.get(k);
+          mergedPlayersMap.set(k, existing ? { ...existing, ...lp } : lp);
+        });
+
         setTeams(Array.from(mergedMap.values()));
-        setPlayers(playersData || []);
+        setPlayers(Array.from(mergedPlayersMap.values()));
       } catch (err) {
         console.error('Failed to load WPL teams:', err);
         setTeams(CANONICAL_WPL_TEAMS);
@@ -236,13 +301,16 @@ function WPLTeamsContent() {
 
   const playersByTeam = useMemo(() => {
     const map = new Map<string, Player[]>();
-    for (const p of players) {
-      const tid = String(p.teamId || '').toLowerCase();
-      if (!map.has(tid)) map.set(tid, []);
-      map.get(tid)!.push(p);
+    for (const team of teams) {
+      const roster = players.filter((p) => isPlayerInWplTeam(p, team.id, team));
+      map.set(String(team.id).toLowerCase(), roster);
+      const fKey = getFranchiseKey(team.id || team.shortName);
+      if (fKey) {
+        map.set(fKey, roster);
+      }
     }
     return map;
-  }, [players]);
+  }, [players, teams]);
 
   const uniqueVenues = useMemo(() => {
     const set = new Set<string>();

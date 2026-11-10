@@ -23,7 +23,7 @@ import {
 } from 'lucide-react';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
-import { api } from '@/lib/data';
+import { api, mockTeams } from '@/lib/data';
 import type { Team, Player, Match } from '@/types';
 
 interface TeamTheme {
@@ -110,6 +110,66 @@ const getInitials = (name: string): string => {
   return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
 };
 
+const WPL_PLAYERS_STORAGE_KEY = 'sportsup99_wpl_players_v2';
+
+function getFranchiseKey(str?: string): 'rcb' | 'mi' | 'dc' | 'gg' | 'upw' | null {
+  const s = String(str || '').toLowerCase().trim();
+  if (s.includes('rcb') || s.includes('bangalore') || s.includes('bengaluru') || s === '14') return 'rcb';
+  if (s.includes('mi') || s.includes('mumbai') || s === '13') return 'mi';
+  if (s.includes('dc') || s.includes('delhi') || s === '11') return 'dc';
+  if (s.includes('gg') || s.includes('gujarat') || s === '12') return 'gg';
+  if (s.includes('upw') || s.includes('up') || s.includes('warrior') || s === '15') return 'upw';
+  return null;
+}
+
+function isPlayerInWplTeam(p: any, teamParamId: string, teamObj?: any): boolean {
+  const targetKey = getFranchiseKey(teamParamId) || (teamObj ? getFranchiseKey(teamObj.id || teamObj.shortName || teamObj.name) : null);
+  if (!targetKey) return false;
+
+  const pId = String(p.id || '').toLowerCase();
+  const pTeamId = String(p.teamId || '').toLowerCase();
+  const pTeam = String(p.team || '').toLowerCase();
+
+  // Match by id prefix (e.g. wpl_rcb_..., wpl-rcb-...)
+  if (pId.startsWith(`wpl_${targetKey}`) || pId.startsWith(`wpl-${targetKey}`)) return true;
+  if (targetKey === 'upw' && (pId.startsWith('wpl_up') || pId.startsWith('wpl-up'))) return true;
+
+  // Match by canonical franchise ID
+  const franchiseIdMap: Record<string, string> = {
+    rcb: '14',
+    mi: '13',
+    dc: '11',
+    gg: '12',
+    upw: '15'
+  };
+  if (pTeamId === franchiseIdMap[targetKey]) return true;
+
+  // Match by team name
+  if (targetKey === 'rcb' && (pTeam.includes('rcb') || pTeam.includes('bengaluru') || pTeam.includes('bangalore'))) return true;
+  if (targetKey === 'mi' && (pTeam.includes('mumbai') || pTeam.includes('mi'))) return true;
+  if (targetKey === 'dc' && (pTeam.includes('delhi') || pTeam.includes('capitals') || pTeam.includes('dc'))) return true;
+  if (targetKey === 'gg' && (pTeam.includes('gujarat') || pTeam.includes('giants') || pTeam.includes('gg'))) return true;
+  if (targetKey === 'upw' && (pTeam.includes('up') || pTeam.includes('warrior'))) return true;
+
+  return false;
+}
+
+function getPlayerDisplayStats(player: any) {
+  const s = player?.stats || {};
+  const cs = player?.careerStats || {};
+  const bat = cs.batting || {};
+  const bowl = cs.bowling || {};
+
+  const wplBat = bat['WPL'] || bat['wpl'] || bat['T20'] || bat['T20I'] || {};
+  const wplBowl = bowl['WPL'] || bowl['wpl'] || bowl['T20'] || bowl['T20I'] || {};
+
+  const runs = wplBat.Runs || wplBat.runs || wplBat.R || s.runs || 0;
+  const wickets = wplBowl.Wkts || wplBowl.wkts || wplBowl.W || s.wickets || 0;
+  const matches = wplBat.Mat || wplBat.matches || wplBat.M || wplBowl.Mat || s.matches || 0;
+
+  return { runs, wickets, matches };
+}
+
 const getTeamVariations = (team: any, paramId: string): string[] => {
   const set = new Set<string>();
   const add = (val: any) => {
@@ -154,25 +214,68 @@ export default function EnhancedWPLTeamPage({ teamId }: { teamId: string }) {
   const [selectedRole, setSelectedRole] = useState<'all' | 'batsman' | 'all-rounder' | 'bowler' | 'wicketkeeper'>('all');
   const [activeTab, setActiveTab] = useState<'squad' | 'fixtures'>('squad');
 
-  // Priority 1: Load Core Team + Players fast
-  // Initialize Hero Spotlight Player
+  // Priority 1: Initialize or update Hero Spotlight Player to team leader
   useEffect(() => {
-    if (activeHeroPlayer) return;
-    const list = (players && players.length > 0)
-      ? players
-      : (team && (team.squad || team.players)) || [];
-    if (list.length > 0) {
-      const captain = list.find((p: any) => p.isCaptain);
-      setActiveHeroPlayer(captain || list[0]);
-    }
-  }, [players, team, activeHeroPlayer]);
+    if (!players || players.length === 0) return;
 
-useEffect(() => {
+    // Check if current hero belongs to this squad
+    const currentHeroValid = activeHeroPlayer && players.some((p: any) =>
+      String(p.id) === String(activeHeroPlayer.id) || (p.name && activeHeroPlayer.name && p.name.trim().toLowerCase() === activeHeroPlayer.name.trim().toLowerCase())
+    );
+
+    if (currentHeroValid) {
+      // Sync fresh stats reference
+      const refreshed = players.find((p: any) =>
+        String(p.id) === String(activeHeroPlayer.id) || (p.name && activeHeroPlayer.name && p.name.trim().toLowerCase() === activeHeroPlayer.name.trim().toLowerCase())
+      );
+      if (refreshed) setActiveHeroPlayer(refreshed);
+      return;
+    }
+
+    // Default to Captain
+    const captain = players.find((p: any) => p.isCaptain);
+    if (captain) {
+      setActiveHeroPlayer(captain);
+      return;
+    }
+
+    // Known franchise captains fallback:
+    const franchiseKey = getFranchiseKey(teamId) || (team ? getFranchiseKey(team.id || team.shortName) : null);
+    let preferredHeroName = '';
+    if (franchiseKey === 'rcb') preferredHeroName = 'Smriti Mandhana';
+    else if (franchiseKey === 'mi') preferredHeroName = 'Harmanpreet Kaur';
+    else if (franchiseKey === 'dc') preferredHeroName = 'Meg Lanning';
+    else if (franchiseKey === 'gg') preferredHeroName = 'Ashleigh Gardner';
+    else if (franchiseKey === 'upw') preferredHeroName = 'Meg Lanning';
+
+    const preferred = preferredHeroName
+      ? players.find((p: any) => p.name?.toLowerCase().includes(preferredHeroName.toLowerCase()))
+      : null;
+
+    setActiveHeroPlayer(preferred || players[0]);
+  }, [players, team, teamId, activeHeroPlayer]);
+
+  useEffect(() => {
     let isMounted = true;
     async function loadCoreData() {
       setLoading(true);
       try {
-        const [teamsData, playersData] = await Promise.all([
+        // 1. Read localStorage immediately (instant cache from Admin WPL operations)
+        let cachedPlayers: Player[] = [];
+        if (typeof window !== 'undefined') {
+          try {
+            const raw = localStorage.getItem(WPL_PLAYERS_STORAGE_KEY) || localStorage.getItem('sportsup99_wpl_players_v1');
+            if (raw) {
+              const parsed = JSON.parse(raw);
+              if (Array.isArray(parsed) && parsed.length > 0) {
+                cachedPlayers = parsed;
+              }
+            }
+          } catch (e) {}
+        }
+
+        // 2. Fetch fresh teams and players from API
+        const [teamsData, apiPlayersData] = await Promise.all([
           fetchWithTimeout(api.getTeams('wpl'), 2000, []),
           fetchWithTimeout(api.getPlayers(undefined, 'wpl'), 2000, [])
         ]);
@@ -180,21 +283,53 @@ useEffect(() => {
         if (!isMounted) return;
         setAllTeams(teamsData);
 
-        const targetVariants = getTeamVariations(null, teamId);
-        const found = teamsData.find((t: Team) => {
-          const tVars = getTeamVariations(t, '');
-          return targetVariants.some(v => tVars.includes(v));
-        });
+        const targetKey = getFranchiseKey(teamId);
+        let found = teamsData.find((t: Team) => getFranchiseKey(t.id || t.shortName || t.name) === targetKey);
+        if (!found) {
+          found = mockTeams.find((t: Team) => t.league === 'wpl' && getFranchiseKey(t.id || t.shortName || t.name) === targetKey) || null;
+        }
 
         if (found) {
           setTeam(found);
-          const fullVariants = getTeamVariations(found, teamId);
 
-          const squad = playersData.filter((p: Player) => {
-            const pTeamId = String(p.teamId || '').toLowerCase().trim();
-            const pTeamNum = pTeamId.replace(/^team/i, '');
-            return fullVariants.some(v => v === pTeamId || v === pTeamNum);
+          // 3. Merge API players with local admin players (retaining full careerStats)
+          const mergedMap = new Map<string, any>();
+          (apiPlayersData || []).forEach((p: any) => {
+            const k = String(p.id || p.name || '').trim().toLowerCase();
+            mergedMap.set(k, p);
           });
+
+          cachedPlayers.forEach((lp: any) => {
+            const k = String(lp.id || lp.name || '').trim().toLowerCase();
+            const existing = mergedMap.get(k);
+            if (!existing) {
+              mergedMap.set(k, lp);
+            } else {
+              const localBatKeys = Object.keys(lp.careerStats?.batting || {});
+              const localBowlKeys = Object.keys(lp.careerStats?.bowling || {});
+              const existingBatKeys = Object.keys(existing.careerStats?.batting || {});
+              const existingBowlKeys = Object.keys(existing.careerStats?.bowling || {});
+              const localTotal = localBatKeys.length + localBowlKeys.length;
+              const existingTotal = existingBatKeys.length + existingBowlKeys.length;
+
+              const careerStats = (localTotal >= existingTotal && localTotal > 0)
+                ? lp.careerStats
+                : (existingTotal > 0 ? existing.careerStats : (lp.careerStats || { batting: {}, bowling: {} }));
+
+              mergedMap.set(k, {
+                ...existing,
+                ...lp,
+                careerStats,
+                stats: {
+                  ...(existing.stats || {}),
+                  ...(lp.stats || {})
+                }
+              });
+            }
+          });
+
+          const allPlayers = Array.from(mergedMap.values());
+          const squad = allPlayers.filter((p: Player) => isPlayerInWplTeam(p, teamId, found));
           setPlayers(squad);
         }
       } catch (err) {
@@ -205,7 +340,19 @@ useEffect(() => {
     }
 
     loadCoreData();
-    return () => { isMounted = false; };
+
+    // Live sync when admin updates player data
+    const handleSync = () => {
+      loadCoreData();
+    };
+    window.addEventListener('admin-data-updated', handleSync);
+    window.addEventListener('storage', handleSync);
+
+    return () => {
+      isMounted = false;
+      window.removeEventListener('admin-data-updated', handleSync);
+      window.removeEventListener('storage', handleSync);
+    };
   }, [teamId]);
 
   // Priority 2: Lazy load Matches in background
@@ -633,7 +780,7 @@ useEffect(() => {
               {/* === FEATURED HERO SPOTLIGHT STAGE === */}
               {activeHeroPlayer && (() => {
                 const hero = activeHeroPlayer;
-                const hs = hero.stats || {};
+                const hs = getPlayerDisplayStats(hero);
                 const heroRole = getRoleDesign(hero.role);
                 const heroInitials = (hero.name || 'P').split(' ').map((n: string) => n[0]).slice(0, 2).join('').toUpperCase();
                 const heroBatting = (hero.battingStyle || '').toLowerCase().includes('left') ? 'Left Hand' : 'Right Hand';
@@ -775,7 +922,7 @@ useEffect(() => {
                 {/* Tactical Dugout Roster Grid */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                   {visibleSquad.map((player, idx) => {
-                    const s = player.stats || {};
+                    const s = getPlayerDisplayStats(player);
                     const roleTheme = getRoleDesign(player.role);
                     const isHero = activeHeroPlayer?.name === player.name;
                     const initials = (player.name || 'P').split(' ').map((n: string) => n[0]).slice(0, 2).join('').toUpperCase();
@@ -1080,238 +1227,14 @@ useEffect(() => {
         </section>
       </main>
 
-      {/* PUBLIC PLAYER DETAIL MODAL (CRICBUZZ STANDARD) */}
+      {/* PUBLIC PLAYER DETAIL MODAL (CRICBUZZ STANDARD WITH FULL MULTI-FORMAT CAREER STATS) */}
       {selectedPlayer && (
         <div 
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fadeIn"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-in fade-in duration-200"
           onClick={() => setSelectedPlayer(null)}
         >
           <div 
-            className="relative w-full max-w-3xl max-h-[90vh] overflow-y-auto rounded-3xl bg-[#0a0f1d] border border-white/15 p-6 shadow-2xl text-white"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Header / Dismiss */}
-            <button
-              onClick={() => setSelectedPlayer(null)}
-              className="absolute top-5 right-5 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
-            >
-              <X className="w-5 h-5" />
-            </button>
-
-            {/* Profile Bar */}
-            <div className="flex flex-col sm:flex-row items-center gap-5 pb-6 border-b border-white/10">
-              <div className="relative w-24 h-24 rounded-2xl overflow-hidden bg-gradient-to-br from-white/10 via-black/70 to-black/95 border border-white/20 shrink-0 flex flex-col items-center justify-center shadow-xl">
-                {/* Ambient Dynamic Role/Theme Glow */}
-                <div 
-                  className="absolute inset-0 opacity-40 blur-lg pointer-events-none"
-                  style={{ background: `radial-gradient(circle, ${theme.primary}, transparent)` }}
-                />
-
-                {/* Metallic Tech Ring Motif */}
-                <div className="absolute inset-1 rounded-xl border border-dashed border-white/15 pointer-events-none" />
-
-                {/* Jersey Number or Initials */}
-                <span className="relative z-10 text-3xl font-black tracking-tight text-white drop-shadow-md">
-                  {selectedPlayer.jerseyNumber ? `#${selectedPlayer.jerseyNumber}` : getInitials(selectedPlayer.name)}
-                </span>
-
-                <span className="relative z-10 text-[9px] font-bold uppercase tracking-widest text-zinc-200 mt-0.5">
-                  {selectedPlayer.role ? selectedPlayer.role.slice(0, 10) : 'Player'}
-                </span>
-              </div>
-              <div className="text-center sm:text-left space-y-1">
-                <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
-                  <h3 className="text-2xl font-black text-white">{selectedPlayer.name}</h3>
-                  {selectedPlayer.isCaptain && (
-                    <span className="px-2 py-0.5 rounded bg-amber-400 text-slate-950 font-black text-[10px] uppercase">
-                      Captain
-                    </span>
-                  )}
-                </div>
-                <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 pt-1">
-                  {(() => {
-                    const badge = getRoleBadgeStyle(selectedPlayer);
-                    return (
-                      <span className={`px-2.5 py-0.5 rounded text-xs font-black uppercase tracking-wider border ring-1 ${badge.bg}`}>
-                        {badge.label}
-                      </span>
-                    );
-                  })()}
-                  {selectedPlayer.nationality && (
-                    <span className="px-2 py-0.5 rounded bg-white/10 text-xs font-semibold text-gray-300">
-                      {selectedPlayer.nationality}
-                    </span>
-                  )}
-                  {selectedPlayer.dateOfBirth && (
-                    <span className="text-xs text-zinc-200">
-                      DOB: {selectedPlayer.dateOfBirth} ({selectedPlayer.age ? `${selectedPlayer.age} yrs` : ''})
-                    </span>
-                  )}
-                </div>
-                <p className="text-xs text-zinc-200 pt-1">
-                  Batting: <span className="text-gray-200">{selectedPlayer.battingStyle || 'Right Handed'}</span> • Bowling: <span className="text-gray-200">{selectedPlayer.bowlingStyle || 'None'}</span>
-                </p>
-              </div>
-            </div>
-
-            {/* BATTING CAREER SUMMARY */}
-            <div className="mt-6">
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-2">
-                  <TrendingUp className="w-4 h-4 text-emerald-400" />
-                  <h4 className="text-sm font-black uppercase tracking-wider text-emerald-400">Batting Career Summary</h4>
-                </div>
-                <span className="text-[11px] font-bold text-zinc-200 uppercase">WPL Tournament</span>
-              </div>
-              <div className="overflow-x-auto rounded-xl border border-white/10 bg-white/[0.02]">
-                <table className="w-full text-center text-xs">
-                  <thead className="bg-white/5 text-zinc-200 font-bold uppercase text-[10px]">
-                    <tr>
-                      <th className="py-2.5 px-3 text-left">Format</th>
-                      <th className="py-2.5 px-2">M</th>
-                      <th className="py-2.5 px-2">Inn</th>
-                      <th className="py-2.5 px-2">NO</th>
-                      <th className="py-2.5 px-2">Runs</th>
-                      <th className="py-2.5 px-2">Balls</th>
-                      <th className="py-2.5 px-2">HS</th>
-                      <th className="py-2.5 px-2">Avg</th>
-                      <th className="py-2.5 px-2">SR</th>
-                      <th className="py-2.5 px-2">4s</th>
-                      <th className="py-2.5 px-2">6s</th>
-                      <th className="py-2.5 px-2">50s</th>
-                      <th className="py-2.5 px-2">100s</th>
-                      <th className="py-2.5 px-2">Ducks</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-white/5 font-semibold text-gray-200">
-                    {(() => {
-                      const s = selectedPlayer.stats || ({} as any);
-                      const m = s.matches || 0;
-                      const inn = s.battingInnings || 0;
-                      const no = s.notOuts || 0;
-                      const runs = s.runs || 0;
-                      const bf = s.ballsFaced || 0;
-                      const hs = s.highest || 0;
-                      const hsDisplay = s.highestNotOut ? `${hs}*` : `${hs}`;
-                      const dismissals = Math.max(0, inn - no);
-                      const avg = s.average ? Number(s.average).toFixed(2) : (dismissals > 0 && runs > 0 ? (runs / dismissals).toFixed(2) : (runs > 0 ? runs.toFixed(2) : '-'));
-                      const sr = s.strikeRate ? Number(s.strikeRate).toFixed(2) : (bf > 0 && runs > 0 ? ((runs * 100) / bf).toFixed(2) : '-');
-                      return (
-                        <tr className="hover:bg-white/[0.04]">
-                          <td className="py-3 px-3 text-left font-black text-white">WPL</td>
-                          <td className="py-3 px-2">{m}</td>
-                          <td className="py-3 px-2">{inn}</td>
-                          <td className="py-3 px-2">{no}</td>
-                          <td className="py-3 px-2 font-black text-emerald-400">{runs}</td>
-                          <td className="py-3 px-2">{bf}</td>
-                          <td className="py-3 px-2 font-bold">{hsDisplay}</td>
-                          <td className="py-3 px-2 font-bold text-cyan-400">{avg}</td>
-                          <td className="py-3 px-2 font-bold text-amber-400">{sr}</td>
-                          <td className="py-3 px-2">{s.fours || 0}</td>
-                          <td className="py-3 px-2">{s.sixes || 0}</td>
-                          <td className="py-3 px-2">{s.fifties || 0}</td>
-                          <td className="py-3 px-2">{s.hundreds || 0}</td>
-                          <td className="py-3 px-2 text-rose-400">{s.ducks ?? 0}</td>
-                        </tr>
-                      );
-                    })()}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-
-            {/* BOWLING CAREER SUMMARY */}
-            <div className="mt-6">
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-2">
-                  <Target className="w-4 h-4 text-teal-400" />
-                  <h4 className="text-sm font-black uppercase tracking-wider text-teal-400">Bowling Career Summary</h4>
-                </div>
-                <span className="text-[11px] font-bold text-zinc-200 uppercase">WPL Tournament</span>
-              </div>
-              <div className="overflow-x-auto rounded-xl border border-white/10 bg-white/[0.02]">
-                <table className="w-full text-center text-xs">
-                  <thead className="bg-white/5 text-zinc-200 font-bold uppercase text-[10px]">
-                    <tr>
-                      <th className="py-2.5 px-3 text-left">Format</th>
-                      <th className="py-2.5 px-2">M</th>
-                      <th className="py-2.5 px-2">Inn</th>
-                      <th className="py-2.5 px-2">Balls</th>
-                      <th className="py-2.5 px-2">Runs</th>
-                      <th className="py-2.5 px-2">Maidens</th>
-                      <th className="py-2.5 px-2">Wkts</th>
-                      <th className="py-2.5 px-2">Avg</th>
-                      <th className="py-2.5 px-2">Eco</th>
-                      <th className="py-2.5 px-2">SR</th>
-                      <th className="py-2.5 px-2">BBI</th>
-                      <th className="py-2.5 px-2">4w</th>
-                      <th className="py-2.5 px-2">5w</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-white/5 font-semibold text-gray-200">
-                    {(() => {
-                      const s = selectedPlayer.stats || ({} as any);
-                      const m = s.matches || 0;
-                      const inn = s.bowlingInnings || 0;
-                      const oversRaw = parseFloat(s.balls || '0') || 0;
-                      const fullOvers = Math.floor(oversRaw);
-                      const remBalls = Math.round((oversRaw - fullOvers) * 10);
-                      const totalBalls = fullOvers * 6 + remBalls;
-                      const runsConceded = s.runsConceded || 0;
-                      const wkts = s.wickets || 0;
-                      const econ = s.economy ? Number(s.economy).toFixed(2) : (totalBalls > 0 ? ((runsConceded * 6) / totalBalls).toFixed(2) : '-');
-                      const bAvg = s.bowlingAverage ? Number(s.bowlingAverage).toFixed(2) : (wkts > 0 && runsConceded > 0 ? (runsConceded / wkts).toFixed(2) : '-');
-                      const bSR = s.bowlingStrikeRate ? Number(s.bowlingStrikeRate).toFixed(1) : (wkts > 0 && totalBalls > 0 ? (totalBalls / wkts).toFixed(1) : '-');
-                      return (
-                        <tr className="hover:bg-white/[0.04]">
-                          <td className="py-3 px-3 text-left font-black text-white">WPL</td>
-                          <td className="py-3 px-2">{m}</td>
-                          <td className="py-3 px-2">{inn}</td>
-                          <td className="py-3 px-2">{totalBalls > 0 ? totalBalls : (s.balls || 0)}</td>
-                          <td className="py-3 px-2">{runsConceded}</td>
-                          <td className="py-3 px-2">{s.maidens || 0}</td>
-                          <td className="py-3 px-2 font-black text-teal-400">{wkts}</td>
-                          <td className="py-3 px-2 font-bold text-purple-400">{bAvg}</td>
-                          <td className="py-3 px-2 font-bold text-amber-400">{econ}</td>
-                          <td className="py-3 px-2 font-bold text-rose-400">{bSR}</td>
-                          <td className="py-3 px-2">{s.bestBowling || '-/-'}</td>
-                          <td className="py-3 px-2">{s.fourWickets || 0}</td>
-                          <td className="py-3 px-2">{s.fiveWickets || 0}</td>
-                        </tr>
-                      );
-                    })()}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-
-            {/* FIELDING / KEEPING */}
-            {(() => {
-              const s = selectedPlayer.stats || ({} as any);
-              if (s.catches || s.stumpings) {
-                return (
-                  <div className="mt-5 p-3 rounded-xl bg-white/[0.03] border border-white/10 flex items-center gap-6 justify-center text-xs">
-                    <span className="text-zinc-200">Fielding:</span>
-                    <span><strong className="text-white">{s.catches || 0}</strong> Catches</span>
-                    <span><strong className="text-white">{s.stumpings || 0}</strong> Stumpings</span>
-                  </div>
-                );
-              }
-              return null;
-            })()}
-          </div>
-        </div>
-      )}
-
-      
-      {/* PUBLIC PLAYER DETAIL MODAL (CRICBUZZ STANDARD) */}
-      {selectedPlayer && (
-        <div 
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200"
-          onClick={() => setSelectedPlayer(null)}
-        >
-          <div 
-            className="relative w-full max-w-3xl max-h-[90vh] overflow-y-auto rounded-3xl bg-[#0a0f1d] border border-white/15 p-6 sm:p-8 shadow-2xl text-white"
+            className="relative w-full max-w-4xl max-h-[92vh] overflow-y-auto rounded-3xl bg-[#090d1a] border border-white/15 p-6 sm:p-8 shadow-2xl text-white space-y-6"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header / Dismiss */}
@@ -1329,7 +1252,7 @@ useEffect(() => {
                 {/* Ambient Dynamic Role/Theme Glow */}
                 <div 
                   className="absolute inset-0 opacity-40 blur-lg pointer-events-none"
-                  style={{ background: `radial-gradient(circle, ${theme.primary}, transparent)` }}
+                  style={{ background: "radial-gradient(circle, " + theme.primary + ", transparent)" }}
                 />
 
                 {/* Metallic Tech Ring Motif */}
@@ -1337,14 +1260,14 @@ useEffect(() => {
 
                 {/* Jersey Number or Initials */}
                 <span className="relative z-10 text-3xl font-black tracking-tight text-white drop-shadow-md">
-                  {selectedPlayer.jerseyNumber ? `#${selectedPlayer.jerseyNumber}` : getInitials(selectedPlayer.name)}
+                  {selectedPlayer.jerseyNumber && selectedPlayer.jerseyNumber !== "N/A" ? ("#" + selectedPlayer.jerseyNumber) : getInitials(selectedPlayer.name)}
                 </span>
 
                 <span className="relative z-10 text-[9px] font-bold uppercase tracking-widest text-zinc-200 mt-0.5">
-                  {selectedPlayer.role ? selectedPlayer.role.slice(0, 10) : 'Player'}
+                  {selectedPlayer.role ? selectedPlayer.role.slice(0, 10) : "Player"}
                 </span>
               </div>
-              <div className="text-center sm:text-left space-y-1">
+              <div className="text-center sm:text-left space-y-1 flex-1">
                 <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
                   <h3 className="text-2xl font-black text-white">{selectedPlayer.name}</h3>
                   {selectedPlayer.isCaptain && (
@@ -1352,12 +1275,23 @@ useEffect(() => {
                       Captain
                     </span>
                   )}
+                  {selectedPlayer.cricbuzzUrl && (
+                    <a
+                      href={selectedPlayer.cricbuzzUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 text-[10px] font-bold border border-emerald-500/30 transition-colors"
+                    >
+                      <span>Cricbuzz Dossier</span>
+                      <ChevronRight className="w-3 h-3" />
+                    </a>
+                  )}
                 </div>
                 <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 pt-1">
                   {(() => {
                     const badge = getRoleBadgeStyle(selectedPlayer);
                     return (
-                      <span className={`px-2.5 py-0.5 rounded text-xs font-black uppercase tracking-wider border ring-1 ${badge.bg}`}>
+                      <span className={"px-2.5 py-0.5 rounded text-xs font-black uppercase tracking-wider border ring-1 " + badge.bg}>
                         {badge.label}
                       </span>
                     );
@@ -1368,162 +1302,256 @@ useEffect(() => {
                     </span>
                   )}
                   {selectedPlayer.dateOfBirth && (
-                    <span className="text-xs text-zinc-200">
-                      DOB: {selectedPlayer.dateOfBirth} ({selectedPlayer.age ? `${selectedPlayer.age} yrs` : ''})
+                    <span className="text-xs text-zinc-300">
+                      DOB: {selectedPlayer.dateOfBirth} {selectedPlayer.age ? "(" + selectedPlayer.age + " yrs)" : ""}
                     </span>
                   )}
                 </div>
-                <p className="text-xs text-zinc-200 pt-1">
-                  Batting: <span className="text-gray-200">{selectedPlayer.battingStyle || 'Right Handed'}</span> • Bowling: <span className="text-gray-200">{selectedPlayer.bowlingStyle || 'None'}</span>
+                <p className="text-xs text-zinc-300 pt-1">
+                  Batting: <span className="text-white font-medium">{selectedPlayer.battingStyle || "Right Handed"}</span> • Bowling: <span className="text-white font-medium">{selectedPlayer.bowlingStyle || "None"}</span>
                 </p>
               </div>
             </div>
 
-            {/* BATTING CAREER SUMMARY */}
-            <div className="mt-6">
-              <div className="flex items-center justify-between mb-3">
+            {/* BATTING CAREER SUMMARY (MULTI-FORMAT) */}
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <TrendingUp className="w-4 h-4 text-emerald-400" />
-                  <h4 className="text-sm font-black uppercase tracking-wider text-emerald-400">Batting Career Summary</h4>
+                  <h4 className="text-xs sm:text-sm font-black uppercase tracking-wider text-emerald-400">
+                    Batting Career Summary
+                  </h4>
                 </div>
-                <span className="text-[11px] font-bold text-zinc-200 uppercase">WPL Tournament</span>
+                <span className="text-[10px] sm:text-[11px] font-bold text-zinc-400 uppercase">
+                  Auto-extracted from Cricbuzz Dossier
+                </span>
               </div>
-              <div className="overflow-x-auto rounded-xl border border-white/10 bg-white/[0.02]">
+              <div className="overflow-x-auto rounded-2xl border border-white/10 bg-white/[0.02]">
                 <table className="w-full text-center text-xs">
-                  <thead className="bg-white/5 text-zinc-200 font-bold uppercase text-[10px]">
+                  <thead className="bg-white/5 text-zinc-300 font-bold uppercase text-[10px]">
                     <tr>
                       <th className="py-2.5 px-3 text-left">Format</th>
-                      <th className="py-2.5 px-2">M</th>
+                      <th className="py-2.5 px-2">Mat</th>
                       <th className="py-2.5 px-2">Inn</th>
                       <th className="py-2.5 px-2">NO</th>
                       <th className="py-2.5 px-2">Runs</th>
-                      <th className="py-2.5 px-2">Balls</th>
                       <th className="py-2.5 px-2">HS</th>
                       <th className="py-2.5 px-2">Avg</th>
+                      <th className="py-2.5 px-2">BF</th>
                       <th className="py-2.5 px-2">SR</th>
+                      <th className="py-2.5 px-2">100</th>
+                      <th className="py-2.5 px-2">50</th>
                       <th className="py-2.5 px-2">4s</th>
                       <th className="py-2.5 px-2">6s</th>
-                      <th className="py-2.5 px-2">50s</th>
-                      <th className="py-2.5 px-2">100s</th>
-                      <th className="py-2.5 px-2">Ducks</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-white/5 font-semibold text-gray-200">
                     {(() => {
-                      const s = selectedPlayer.stats || ({} as any);
-                      const m = s.matches || 0;
-                      const inn = s.battingInnings || 0;
-                      const no = s.notOuts || 0;
-                      const runs = s.runs || 0;
-                      const bf = s.ballsFaced || 0;
-                      const hs = s.highest || 0;
-                      const hsDisplay = s.highestNotOut ? `${hs}*` : `${hs}`;
-                      const dismissals = Math.max(0, inn - no);
-                      const avg = s.average ? Number(s.average).toFixed(2) : (dismissals > 0 && runs > 0 ? (runs / dismissals).toFixed(2) : (runs > 0 ? runs.toFixed(2) : '-'));
-                      const sr = s.strikeRate ? Number(s.strikeRate).toFixed(2) : (bf > 0 && runs > 0 ? ((runs * 100) / bf).toFixed(2) : '-');
-                      return (
-                        <tr className="hover:bg-white/[0.04]">
-                          <td className="py-3 px-3 text-left font-black text-white">WPL</td>
-                          <td className="py-3 px-2">{m}</td>
-                          <td className="py-3 px-2">{inn}</td>
-                          <td className="py-3 px-2">{no}</td>
-                          <td className="py-3 px-2 font-black text-emerald-400">{runs}</td>
-                          <td className="py-3 px-2">{bf}</td>
-                          <td className="py-3 px-2 font-bold">{hsDisplay}</td>
-                          <td className="py-3 px-2 font-bold text-cyan-400">{avg}</td>
-                          <td className="py-3 px-2 font-bold text-amber-400">{sr}</td>
-                          <td className="py-3 px-2">{s.fours || 0}</td>
-                          <td className="py-3 px-2">{s.sixes || 0}</td>
-                          <td className="py-3 px-2">{s.fifties || 0}</td>
-                          <td className="py-3 px-2">{s.hundreds || 0}</td>
-                          <td className="py-3 px-2 text-rose-400">{s.ducks ?? 0}</td>
-                        </tr>
-                      );
+                      const bat = selectedPlayer.careerStats?.batting || {};
+                      const formats = ["Test", "ODI", "T20", "WPL"];
+                      const renderedRows = formats.map((fmt) => {
+                        let row = bat[fmt] || bat[fmt.toLowerCase()] || bat[fmt.toUpperCase()] ||
+                                  (fmt === "T20" ? (bat["T20I"] || bat["t20i"] || bat["wt20"] || bat["WT20"] || bat["wt20i"] || bat["WT20I"]) : undefined) ||
+                                  (fmt === "T20I" ? (bat["T20"] || bat["t20"] || bat["wt20"] || bat["WT20"]) : undefined) ||
+                                  (fmt === "Test" ? (bat["wtest"] || bat["WTEST"]) : undefined) ||
+                                  (fmt === "ODI" ? (bat["wodi"] || bat["WODI"]) : undefined) ||
+                                  (fmt === "WPL" ? (bat["wpl"] || bat["IPL"] || bat["ipl"]) : undefined);
+
+                        if (!row && fmt === "WPL" && selectedPlayer.stats) {
+                          const s = selectedPlayer.stats;
+                          const m = s.matches || 0;
+                          const inn = s.battingInnings || m || 0;
+                          const no = s.notOuts || 0;
+                          const runs = s.runs || 0;
+                          const bf = s.ballsFaced || 0;
+                          const hs = s.highest || 0;
+                          const hsDisplay = s.highestNotOut ? (hs + "*") : ("" + hs);
+                          const dismissals = Math.max(0, inn - no);
+                          const avg = s.average ? Number(s.average).toFixed(2) : (dismissals > 0 && runs > 0 ? (runs / dismissals).toFixed(2) : (runs > 0 ? Number(runs).toFixed(2) : "—"));
+                          const sr = s.strikeRate ? Number(s.strikeRate).toFixed(2) : (bf > 0 && runs > 0 ? ((runs * 100) / bf).toFixed(2) : "—");
+                          row = {
+                            Mat: m,
+                            Inn: inn,
+                            NO: no,
+                            Runs: runs,
+                            HS: hsDisplay,
+                            Avg: avg,
+                            BF: bf || "—",
+                            SR: sr || "—",
+                            "100": s.hundreds ?? 0,
+                            "50": s.fifties ?? 0,
+                            "4s": s.fours ?? 0,
+                            "6s": s.sixes ?? 0
+                          };
+                        }
+
+                        if (!row || (row.Mat === undefined && row.Runs === undefined && row.M === undefined)) return null;
+
+                        return (
+                          <tr key={fmt} className="hover:bg-white/[0.04] transition-colors">
+                            <td className="py-2.5 px-3 text-left font-black text-white">{fmt}</td>
+                            <td className="py-2.5 px-2">{row.Mat ?? row.M ?? row.matches ?? row.Matches ?? "—"}</td>
+                            <td className="py-2.5 px-2">{row.Inn ?? row.inn ?? row.Innings ?? row.innings ?? "—"}</td>
+                            <td className="py-2.5 px-2">{row.NO ?? row.no ?? row.NotOut ?? row["not out"] ?? "—"}</td>
+                            <td className="py-2.5 px-2 font-black text-emerald-400">{row.Runs ?? row.runs ?? row.R ?? row.r ?? "—"}</td>
+                            <td className="py-2.5 px-2 font-bold">{row.HS ?? row.hs ?? row.Highest ?? row.highest ?? "—"}</td>
+                            <td className="py-2.5 px-2 font-bold text-cyan-400">{row.Avg ?? row.avg ?? row.Average ?? row.average ?? "—"}</td>
+                            <td className="py-2.5 px-2">{row.BF ?? row.bf ?? row.Balls ?? row.balls ?? "—"}</td>
+                            <td className="py-2.5 px-2 font-bold text-amber-400">{row.SR ?? row.sr ?? row.strikeRate ?? row["strike rate"] ?? "—"}</td>
+                            <td className="py-2.5 px-2">{row["100"] ?? row["100s"] ?? row.hundreds ?? 0}</td>
+                            <td className="py-2.5 px-2">{row["50"] ?? row["50s"] ?? row.fifties ?? 0}</td>
+                            <td className="py-2.5 px-2">{row["4s"] ?? row.fours ?? 0}</td>
+                            <td className="py-2.5 px-2">{row["6s"] ?? row.sixes ?? 0}</td>
+                          </tr>
+                        );
+                      }).filter(Boolean);
+
+                      if (renderedRows.length === 0) {
+                        return (
+                          <tr>
+                            <td colSpan={13} className="py-4 text-center text-zinc-400 text-xs">
+                              No batting career records found for this player.
+                            </td>
+                          </tr>
+                        );
+                      }
+                      return renderedRows;
                     })()}
                   </tbody>
                 </table>
               </div>
             </div>
 
-            {/* BOWLING CAREER SUMMARY */}
-            <div className="mt-6">
-              <div className="flex items-center justify-between mb-3">
+            {/* BOWLING CAREER SUMMARY (MULTI-FORMAT) */}
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Target className="w-4 h-4 text-teal-400" />
-                  <h4 className="text-sm font-black uppercase tracking-wider text-teal-400">Bowling Career Summary</h4>
+                  <h4 className="text-xs sm:text-sm font-black uppercase tracking-wider text-teal-400">
+                    Bowling Career Summary
+                  </h4>
                 </div>
-                <span className="text-[11px] font-bold text-zinc-200 uppercase">WPL Tournament</span>
+                <span className="text-[10px] sm:text-[11px] font-bold text-zinc-400 uppercase">
+                  Auto-extracted from Cricbuzz Dossier
+                </span>
               </div>
-              <div className="overflow-x-auto rounded-xl border border-white/10 bg-white/[0.02]">
+              <div className="overflow-x-auto rounded-2xl border border-white/10 bg-white/[0.02]">
                 <table className="w-full text-center text-xs">
-                  <thead className="bg-white/5 text-zinc-200 font-bold uppercase text-[10px]">
+                  <thead className="bg-white/5 text-zinc-300 font-bold uppercase text-[10px]">
                     <tr>
                       <th className="py-2.5 px-3 text-left">Format</th>
-                      <th className="py-2.5 px-2">M</th>
+                      <th className="py-2.5 px-2">Mat</th>
                       <th className="py-2.5 px-2">Inn</th>
                       <th className="py-2.5 px-2">Balls</th>
                       <th className="py-2.5 px-2">Runs</th>
-                      <th className="py-2.5 px-2">Maidens</th>
                       <th className="py-2.5 px-2">Wkts</th>
-                      <th className="py-2.5 px-2">Avg</th>
-                      <th className="py-2.5 px-2">Eco</th>
-                      <th className="py-2.5 px-2">SR</th>
                       <th className="py-2.5 px-2">BBI</th>
-                      <th className="py-2.5 px-2">4w</th>
-                      <th className="py-2.5 px-2">5w</th>
+                      <th className="py-2.5 px-2">Econ</th>
+                      <th className="py-2.5 px-2">Avg</th>
+                      <th className="py-2.5 px-2">SR</th>
+                      <th className="py-2.5 px-2">5W</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-white/5 font-semibold text-gray-200">
                     {(() => {
-                      const s = selectedPlayer.stats || ({} as any);
-                      const m = s.matches || 0;
-                      const inn = s.bowlingInnings || 0;
-                      const oversRaw = parseFloat(s.balls || '0') || 0;
-                      const fullOvers = Math.floor(oversRaw);
-                      const remBalls = Math.round((oversRaw - fullOvers) * 10);
-                      const totalBalls = fullOvers * 6 + remBalls;
-                      const runsConceded = s.runsConceded || 0;
-                      const wkts = s.wickets || 0;
-                      const econ = s.economy ? Number(s.economy).toFixed(2) : (totalBalls > 0 ? ((runsConceded * 6) / totalBalls).toFixed(2) : '-');
-                      const bAvg = s.bowlingAverage ? Number(s.bowlingAverage).toFixed(2) : (wkts > 0 && runsConceded > 0 ? (runsConceded / wkts).toFixed(2) : '-');
-                      const bSR = s.bowlingStrikeRate ? Number(s.bowlingStrikeRate).toFixed(1) : (wkts > 0 && totalBalls > 0 ? (totalBalls / wkts).toFixed(1) : '-');
-                      return (
-                        <tr className="hover:bg-white/[0.04]">
-                          <td className="py-3 px-3 text-left font-black text-white">WPL</td>
-                          <td className="py-3 px-2">{m}</td>
-                          <td className="py-3 px-2">{inn}</td>
-                          <td className="py-3 px-2">{totalBalls > 0 ? totalBalls : (s.balls || 0)}</td>
-                          <td className="py-3 px-2">{runsConceded}</td>
-                          <td className="py-3 px-2">{s.maidens || 0}</td>
-                          <td className="py-3 px-2 font-black text-teal-400">{wkts}</td>
-                          <td className="py-3 px-2 font-bold text-purple-400">{bAvg}</td>
-                          <td className="py-3 px-2 font-bold text-amber-400">{econ}</td>
-                          <td className="py-3 px-2 font-bold text-rose-400">{bSR}</td>
-                          <td className="py-3 px-2">{s.bestBowling || '-/-'}</td>
-                          <td className="py-3 px-2">{s.fourWickets || 0}</td>
-                          <td className="py-3 px-2">{s.fiveWickets || 0}</td>
-                        </tr>
-                      );
+                      const bowl = selectedPlayer.careerStats?.bowling || {};
+                      const formats = ["Test", "ODI", "T20", "WPL"];
+                      const renderedRows = formats.map((fmt) => {
+                        let row = bowl[fmt] || bowl[fmt.toLowerCase()] || bowl[fmt.toUpperCase()] ||
+                                  (fmt === "T20" ? (bowl["T20I"] || bowl["t20i"] || bowl["wt20"] || bowl["WT20"] || bowl["wt20i"] || bowl["WT20I"]) : undefined) ||
+                                  (fmt === "T20I" ? (bowl["T20"] || bowl["t20"] || bowl["wt20"] || bowl["WT20"]) : undefined) ||
+                                  (fmt === "Test" ? (bowl["wtest"] || bowl["WTEST"]) : undefined) ||
+                                  (fmt === "ODI" ? (bowl["wodi"] || bowl["WODI"]) : undefined) ||
+                                  (fmt === "WPL" ? (bowl["wpl"] || bowl["IPL"] || bowl["ipl"]) : undefined);
+
+                        if (!row && fmt === "WPL" && selectedPlayer.stats && (selectedPlayer.stats.wickets || selectedPlayer.stats.economy || selectedPlayer.stats.balls)) {
+                          const s = selectedPlayer.stats;
+                          const m = s.matches || 0;
+                          const inn = s.bowlingInnings || "—";
+                          const oversRaw = parseFloat(s.balls || "0") || 0;
+                          const fullOvers = Math.floor(oversRaw);
+                          const remBalls = Math.round((oversRaw - fullOvers) * 10);
+                          const totalBalls = fullOvers * 6 + remBalls;
+                          const runsConceded = s.runsConceded || 0;
+                          const wkts = s.wickets || 0;
+                          const econ = s.economy ? Number(s.economy).toFixed(2) : (totalBalls > 0 ? ((runsConceded * 6) / totalBalls).toFixed(2) : "—");
+                          const bAvg = s.bowlingAverage ? Number(s.bowlingAverage).toFixed(2) : (wkts > 0 && runsConceded > 0 ? (runsConceded / wkts).toFixed(2) : "—");
+                          const bSR = s.bowlingStrikeRate ? Number(s.bowlingStrikeRate).toFixed(1) : (wkts > 0 && totalBalls > 0 ? (totalBalls / wkts).toFixed(1) : "—");
+                          row = {
+                            Mat: m,
+                            Inn: inn,
+                            Balls: totalBalls > 0 ? totalBalls : (s.balls || "—"),
+                            Runs: runsConceded,
+                            Wkts: wkts,
+                            BBI: s.bestBowling || "—/—",
+                            Econ: econ,
+                            Avg: bAvg,
+                            SR: bSR,
+                            "5W": s.fiveWickets || 0
+                          };
+                        }
+
+                        if (!row || (row.Mat === undefined && row.Wkts === undefined && row.Balls === undefined && row.M === undefined)) return null;
+
+                        return (
+                          <tr key={fmt} className="hover:bg-white/[0.04] transition-colors">
+                            <td className="py-2.5 px-3 text-left font-black text-white">{fmt}</td>
+                            <td className="py-2.5 px-2">{row.Mat ?? row.M ?? row.matches ?? row.Matches ?? "—"}</td>
+                            <td className="py-2.5 px-2">{row.Inn ?? row.inn ?? row.Innings ?? row.innings ?? "—"}</td>
+                            <td className="py-2.5 px-2">{row.Balls ?? row.balls ?? row.B ?? row.b ?? "—"}</td>
+                            <td className="py-2.5 px-2">{row.Runs ?? row.runs ?? row.R ?? row.r ?? "—"}</td>
+                            <td className="py-2.5 px-2 font-black text-teal-400">{row.Wkts ?? row.wkts ?? row.W ?? row.w ?? "—"}</td>
+                            <td className="py-2.5 px-2">{row.BBI ?? row.bbi ?? row.bestBowling ?? "—/—"}</td>
+                            <td className="py-2.5 px-2 font-bold text-amber-400">{row.Econ ?? row.econ ?? row.economy ?? "—"}</td>
+                            <td className="py-2.5 px-2 font-bold text-purple-400">{row.Avg ?? row.avg ?? row.average ?? "—"}</td>
+                            <td className="py-2.5 px-2 font-bold text-rose-400">{row.SR ?? row.sr ?? row.strikeRate ?? "—"}</td>
+                            <td className="py-2.5 px-2">{row["5w"] ?? row["5W"] ?? row.fiveWickets ?? 0}</td>
+                          </tr>
+                        );
+                      }).filter(Boolean);
+
+                      if (renderedRows.length === 0) {
+                        return (
+                          <tr>
+                            <td colSpan={11} className="py-4 text-center text-zinc-400 text-xs">
+                              No bowling career records found for this player.
+                            </td>
+                          </tr>
+                        );
+                      }
+                      return renderedRows;
                     })()}
                   </tbody>
                 </table>
               </div>
             </div>
 
-            {/* FIELDING / KEEPING */}
-            {(() => {
-              const s = selectedPlayer.stats || ({} as any);
-              if (s.catches || s.stumpings) {
-                return (
-                  <div className="mt-5 p-3 rounded-xl bg-white/[0.03] border border-white/10 flex items-center gap-6 justify-center text-xs">
-                    <span className="text-zinc-200">Fielding:</span>
-                    <span><strong className="text-white">{s.catches || 0}</strong> Catches</span>
-                    <span><strong className="text-white">{s.stumpings || 0}</strong> Stumpings</span>
-                  </div>
-                );
-              }
-              return null;
-            })()}
+            {/* Contract & Fielding Footer */}
+            <div className="pt-2 flex flex-wrap items-center justify-between gap-3 text-xs border-t border-white/10">
+              <div className="flex items-center gap-4 text-zinc-300">
+                {selectedPlayer.auction?.fee && (
+                  <span>
+                    Contract / Fee: <strong className="text-emerald-400 font-black">{selectedPlayer.auction.fee}</strong>
+                  </span>
+                )}
+                {selectedPlayer.stats?.catches ? (
+                  <span>Catches: <strong className="text-white">{selectedPlayer.stats.catches}</strong></span>
+                ) : null}
+                {selectedPlayer.stats?.stumpings ? (
+                  <span>Stumpings: <strong className="text-white">{selectedPlayer.stats.stumpings}</strong></span>
+                ) : null}
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setSelectedPlayer(null)}
+                  className="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold transition-all"
+                >
+                  Close Dossier
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}

@@ -122,29 +122,7 @@ function json(data, status = 200, extraHeaders = {}) {
 function buildSeedTeams() {
   const wplTeams = [
     {
-      id: '12',
-      name: 'Royal Challengers Bangalore Women',
-      shortName: 'RCB-W',
-      league: 'wpl',
-      logo: '/logos/wpl_rcb_logo_animated.svg',
-      colors: { primary: '#EC1C24', secondary: '#000000' },
-      description: "RCB Women's team",
-      trophies: [{ year: 2024, name: 'WPL Champions' }],
-      homeGrounds: ['M. Chinnaswamy Stadium, Bengaluru'],
-    },
-    {
       id: '11',
-      name: 'Mumbai Indians Women',
-      shortName: 'MI-W',
-      league: 'wpl',
-      logo: '/logos/wpl_mi_logo_animated.svg',
-      colors: { primary: '#004BA0', secondary: '#D1AB3E' },
-      description: "MI Women's team",
-      trophies: [{ year: 2023, name: 'WPL Champions' }],
-      homeGrounds: ['Wankhede Stadium, Mumbai'],
-    },
-    {
-      id: '13',
       name: 'Delhi Capitals Women',
       shortName: 'DC-W',
       league: 'wpl',
@@ -155,7 +133,7 @@ function buildSeedTeams() {
       homeGrounds: ['Arun Jaitley Stadium, Delhi'],
     },
     {
-      id: '14',
+      id: '12',
       name: 'Gujarat Giants Women',
       shortName: 'GG',
       league: 'wpl',
@@ -164,6 +142,28 @@ function buildSeedTeams() {
       description: "Gujarat Giants Women's team",
       trophies: [],
       homeGrounds: ['Narendra Modi Stadium, Ahmedabad'],
+    },
+    {
+      id: '13',
+      name: 'Mumbai Indians Women',
+      shortName: 'MI-W',
+      league: 'wpl',
+      logo: '/logos/wpl_mi_logo_animated.svg',
+      colors: { primary: '#004BA0', secondary: '#D1AB3E' },
+      description: "MI Women's team",
+      trophies: [{ year: 2023, name: 'WPL Champions' }],
+      homeGrounds: ['Wankhede Stadium, Mumbai'],
+    },
+    {
+      id: '14',
+      name: 'Royal Challengers Bengaluru Women',
+      shortName: 'RCB-W',
+      league: 'wpl',
+      logo: '/logos/wpl_rcb_logo_animated.svg',
+      colors: { primary: '#EC1C24', secondary: '#000000' },
+      description: "RCB Women's team",
+      trophies: [{ year: 2024, name: 'WPL Champions' }],
+      homeGrounds: ['M. Chinnaswamy Stadium, Bengaluru'],
     },
     {
       id: '15',
@@ -540,10 +540,34 @@ async function loadTeams(env) {
   const { teams: merged, changed: mergedChanged } = mergeSeedIntoStored(seedTeams, storedDeduped.teams);
   const mergedDeduped = dedupeTeamsByKey(merged);
 
-  if (storedDeduped.changed || mergedChanged || mergedDeduped.changed) {
-    await writeTeamsToKV(env, mergedDeduped.teams);
+  // Auto-heal WPL teams to canonical franchise IDs (DC-W=11, GG=12, MI-W=13, RCB-W=14, UPW=15)
+  let hadWplHealing = false;
+  const healedTeams = mergedDeduped.teams.map(t => {
+    const key = (t.shortName || t.name || '').toLowerCase();
+    const isWpl = t.league === 'wpl' || WPL_TEAM_IDS.has(String(t.id)) ||
+      key.includes('wpl') || key.includes('-w') || key.includes('warrior') || key.includes('giants');
+    if (isWpl) {
+      let canonicalId = String(t.id);
+      if (key.includes('rcb') || key.includes('bengaluru') || key.includes('bangalore')) canonicalId = '14';
+      else if (key.includes('mi') || key.includes('mumbai')) canonicalId = '13';
+      else if (key.includes('dc') || key.includes('delhi')) canonicalId = '11';
+      else if (key.includes('gg') || key.includes('gujarat')) canonicalId = '12';
+      else if (key.includes('up') || key.includes('warrior')) canonicalId = '15';
+
+      if (String(t.id) !== canonicalId) {
+        hadWplHealing = true;
+        return { ...t, id: canonicalId, league: 'wpl' };
+      }
+    }
+    return t;
+  });
+
+  const finalDeduped = dedupeTeamsByKey(healedTeams);
+
+  if (storedDeduped.changed || mergedChanged || mergedDeduped.changed || hadWplHealing) {
+    await writeTeamsToKV(env, finalDeduped.teams);
   }
-  return { teams: mergedDeduped.teams, source: 'kv' };
+  return { teams: finalDeduped.teams, source: 'kv' };
 }
 
 function filterTeamsForQuery(teams, league, includeHistorical) {
