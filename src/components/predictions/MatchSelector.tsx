@@ -93,21 +93,29 @@ export default function MatchSelector({ selectedMatchId, onSelectMatch }: MatchS
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-3">
                   <div className="flex items-center gap-2">
-                    <img
-                      src={match.team1.logo}
-                      alt={match.team1.shortName}
-                      className="w-8 h-8 object-contain"
-                    />
-                    <span className="font-semibold text-white">{match.team1.shortName}</span>
+                    {match.team1?.logo ? (
+                      <img
+                        src={match.team1.logo}
+                        alt={match.team1?.shortName || 'Team 1'}
+                        className="w-8 h-8 object-contain"
+                      />
+                    ) : (
+                      <div className="w-8 h-8 rounded bg-gray-700" />
+                    )}
+                    <span className="font-semibold text-white">{match.team1?.shortName || (match as any).homeShort || 'Team 1'}</span>
                   </div>
                   <span className="text-gray-400">vs</span>
                   <div className="flex items-center gap-2">
-                    <img
-                      src={match.team2.logo}
-                      alt={match.team2.shortName}
-                      className="w-8 h-8 object-contain"
-                    />
-                    <span className="font-semibold text-white">{match.team2.shortName}</span>
+                    {match.team2?.logo ? (
+                      <img
+                        src={match.team2.logo}
+                        alt={match.team2?.shortName || 'Team 2'}
+                        className="w-8 h-8 object-contain"
+                      />
+                    ) : (
+                      <div className="w-8 h-8 rounded bg-gray-700" />
+                    )}
+                    <span className="font-semibold text-white">{match.team2?.shortName || (match as any).awayShort || 'Team 2'}</span>
                   </div>
                 </div>
               </div>

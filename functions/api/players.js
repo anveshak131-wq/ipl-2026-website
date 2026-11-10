@@ -109,7 +109,7 @@ export const onRequest = async (context) => {
         savedPlayer = {
           ...existing,
           ...incoming,
-          id: existing.id || id,
+          id: incoming.id || existing.id || id,
           careerStats: incoming.careerStats && (Object.keys(incoming.careerStats.batting || {}).length > 0 || Object.keys(incoming.careerStats.bowling || {}).length > 0)
             ? incoming.careerStats
             : (existing.careerStats || { batting: {}, bowling: {} }),

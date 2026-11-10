@@ -128,14 +128,18 @@ export default function PredictionForm({ match, existingPrediction, onSuccess }:
             }`}
           >
             <div className="flex items-center gap-3">
-              <img
-                src={match.team1.logo}
-                alt={match.team1.shortName}
-                className="w-12 h-12 object-contain"
-              />
+              {match.team1?.logo ? (
+                <img
+                  src={match.team1.logo}
+                  alt={match.team1?.shortName || 'Team 1'}
+                  className="w-12 h-12 object-contain"
+                />
+              ) : (
+                <div className="w-12 h-12 rounded-lg bg-gray-700" />
+              )}
               <div>
-                <div className="font-semibold text-white">{match.team1.shortName}</div>
-                <div className="text-sm text-gray-400">{match.team1.name}</div>
+                <div className="font-semibold text-white">{match.team1?.shortName || (match as any).homeShort || 'Team 1'}</div>
+                <div className="text-sm text-gray-400">{match.team1?.name || (match as any).homeTeam || 'Team 1'}</div>
               </div>
             </div>
           </motion.button>
@@ -152,14 +156,18 @@ export default function PredictionForm({ match, existingPrediction, onSuccess }:
             }`}
           >
             <div className="flex items-center gap-3">
-              <img
-                src={match.team2.logo}
-                alt={match.team2.shortName}
-                className="w-12 h-12 object-contain"
-              />
+              {match.team2?.logo ? (
+                <img
+                  src={match.team2.logo}
+                  alt={match.team2?.shortName || 'Team 2'}
+                  className="w-12 h-12 object-contain"
+                />
+              ) : (
+                <div className="w-12 h-12 rounded-lg bg-gray-700" />
+              )}
               <div>
-                <div className="font-semibold text-white">{match.team2.shortName}</div>
-                <div className="text-sm text-gray-400">{match.team2.name}</div>
+                <div className="font-semibold text-white">{match.team2?.shortName || (match as any).awayShort || 'Team 2'}</div>
+                <div className="text-sm text-gray-400">{match.team2?.name || (match as any).awayTeam || 'Team 2'}</div>
               </div>
             </div>
           </motion.button>

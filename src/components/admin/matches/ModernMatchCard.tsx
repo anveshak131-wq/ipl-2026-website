@@ -97,7 +97,19 @@ export default function ModernMatchCard({
         }
     };
 
-    const renderTeamLogo = (team: Match['team1'] | Match['team2'], size: number = 48) => {
+    const renderTeamLogo = (team?: Match['team1'] | Match['team2'], size: number = 48) => {
+        if (!team) {
+            return (
+                <Image 
+                    src="/logos/tba_logo.svg" 
+                    alt="TBA" 
+                    width={size} 
+                    height={size} 
+                    className="object-contain" 
+                />
+            );
+        }
+
         const teamIdStr = String(team.id || '');
         const isPlaceholderTeam = 
             teamIdStr.includes('tbd-') || 

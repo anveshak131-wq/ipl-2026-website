@@ -106,7 +106,7 @@ export async function PUT(req: Request) {
       players[idx] = {
         ...existing,
         ...incoming,
-        id: existing.id || id,
+        id: incoming.id || existing.id || id,
         careerStats: incoming.careerStats && (
           Object.keys(incoming.careerStats.batting || {}).length > 0 ||
           Object.keys(incoming.careerStats.bowling || {}).length > 0

@@ -92,8 +92,8 @@ function getTeamScore(match: Match, side: 'team1' | 'team2'): string {
   return `${score.runs}/${score.wickets} (${score.overs})`;
 }
 
-function getTeamLogo(team: Match['team1']) {
-  if (typeof team.logo === 'string' && team.logo.startsWith('/')) return team.logo;
+function getTeamLogo(team?: Match['team1']) {
+  if (team && typeof team.logo === 'string' && team.logo.startsWith('/')) return team.logo;
   return '';
 }
 
@@ -178,8 +178,10 @@ export default function PublicLiveMatchStrip({ league, matches }: PublicLiveMatc
   const isCompleted = featuredMatch.status === 'completed';
   const start = getMatchStartTimestampUTC(featuredMatch);
   const href = `/live-score?league=${league}&matchId=${encodeURIComponent(String(featuredMatch.id))}`;
-  const team1Logo = getTeamLogo(featuredMatch.team1);
-  const team2Logo = getTeamLogo(featuredMatch.team2);
+  const team1Short = featuredMatch.team1?.shortName || (featuredMatch as any).homeShort || 'Team 1';
+  const team2Short = featuredMatch.team2?.shortName || (featuredMatch as any).awayShort || 'Team 2';
+  const team1Logo = getTeamLogo(featuredMatch.team1) || `/logos/${team1Short.toLowerCase()}.svg`;
+  const team2Logo = getTeamLogo(featuredMatch.team2) || `/logos/${team2Short.toLowerCase()}.svg`;
   const team1Score = getTeamScore(featuredMatch, 'team1');
   const team2Score = getTeamScore(featuredMatch, 'team2');
 
@@ -251,7 +253,7 @@ export default function PublicLiveMatchStrip({ league, matches }: PublicLiveMatc
                 <img src={team1Logo} alt="" className="h-7 w-7 rounded-lg object-contain" loading="lazy" />
               ) : null}
               <span className="truncate text-sm font-black sm:text-base" style={{ color: theme.text }}>
-                {featuredMatch.team1.shortName}
+                {team1Short}
               </span>
               {team1Score ? (
                 <motion.span
@@ -275,7 +277,7 @@ export default function PublicLiveMatchStrip({ league, matches }: PublicLiveMatc
                 <img src={team2Logo} alt="" className="h-7 w-7 rounded-lg object-contain" loading="lazy" />
               ) : null}
               <span className="truncate text-sm font-black sm:text-base" style={{ color: theme.text }}>
-                {featuredMatch.team2.shortName}
+                {team2Short}
               </span>
               {team2Score ? (
                 <motion.span

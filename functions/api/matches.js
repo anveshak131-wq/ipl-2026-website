@@ -25,6 +25,34 @@ const DEFAULT_WPL_2027_MATCHES = [
   { id: 'wpl-2027-m22', matchNumber: 22, dayNumber: 25, dayOfWeek: 'Sun', date: '2027-02-07', displayDate: '07 Feb 2027', time: '7:30 PM', homeTeam: 'Table Topper (TBD)', homeTeamId: 'tbd', homeShort: 'TBD', awayTeam: 'Eliminator Winner (TBD)', awayTeamId: 'tbd', awayShort: 'TBD', venue: 'Mumbai - CCI', stage: 'Final', status: 'upcoming', league: 'wpl' }
 ];
 
+function normalizeMatch(m) {
+  if (!m) return m;
+  const home = m.homeTeam || m.team1?.name || 'TBD';
+  const away = m.awayTeam || m.team2?.name || 'TBD';
+  const homeShort = m.homeShort || m.team1?.shortName || (home.includes('Royal') ? 'RCB' : home.includes('Mumbai') ? 'MI' : home.includes('Delhi') ? 'DC' : home.includes('Gujarat') ? 'GG' : home.includes('Warriorz') ? 'UPW' : 'TBD');
+  const awayShort = m.awayShort || m.team2?.shortName || (away.includes('Royal') ? 'RCB' : away.includes('Mumbai') ? 'MI' : away.includes('Delhi') ? 'DC' : away.includes('Gujarat') ? 'GG' : away.includes('Warriorz') ? 'UPW' : 'TBD');
+
+  return {
+    ...m,
+    homeTeam: home,
+    awayTeam: away,
+    homeShort,
+    awayShort,
+    team1: {
+      id: m.homeTeamId || m.team1?.id || 'tbd',
+      name: home,
+      shortName: homeShort,
+      logo: m.team1?.logo || `/logos/${homeShort.toLowerCase()}.svg`
+    },
+    team2: {
+      id: m.awayTeamId || m.team2?.id || 'tbd',
+      name: away,
+      shortName: awayShort,
+      logo: m.team2?.logo || `/logos/${awayShort.toLowerCase()}.svg`
+    }
+  };
+}
+
 function getLeague(request, body) {
   const url = new URL(request.url);
   const qLeague = url.searchParams.get('league');
@@ -86,7 +114,8 @@ export async function onRequest(context) {
     if (method === 'GET') {
       const league = getLeague(request, null);
       const matches = await readMatchesFromKv(env, league);
-      return new Response(JSON.stringify(matches), { status: 200, headers: corsHeaders });
+      const normalized = Array.isArray(matches) ? matches.map(normalizeMatch) : [];
+      return new Response(JSON.stringify(normalized), { status: 200, headers: corsHeaders });
     }
 
     const body = await request.json().catch(() => ({}));

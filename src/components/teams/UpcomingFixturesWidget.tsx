@@ -313,13 +313,13 @@ export default function UpcomingFixturesWidget({ team, matches: providedMatches,
                     <div className="flex items-center gap-3 mb-4">
                       <div className="flex-1">
                         <div className="flex items-center gap-2">
-                          {match.team1.logo ? (
-                            <img src={match.team1.logo} alt={match.team1.shortName} className="w-10 h-10 rounded-md object-contain" />
+                          {match.team1?.logo ? (
+                            <img src={match.team1.logo} alt={match.team1?.shortName || 'Team 1'} className="w-10 h-10 rounded-md object-contain" />
                           ) : (
                             <div className="w-10 h-10 rounded-md bg-slate-700" />
                           )}
                           <div>
-                            <div className={`text-sm font-bold ${match.team1.id === team.id ? 'text-emerald-300' : 'text-gray-200'}`}>{match.team1.shortName || match.team1.name}</div>
+                            <div className={`text-sm font-bold ${match.team1?.id === team.id ? 'text-emerald-300' : 'text-gray-200'}`}>{match.team1?.shortName || match.team1?.name || (match as any).homeShort || 'Team 1'}</div>
                             <div className="text-xs text-gray-400">{match.team1Score || '—'}</div>
                           </div>
                         </div>
@@ -330,11 +330,11 @@ export default function UpcomingFixturesWidget({ team, matches: providedMatches,
                       <div className="flex-1 text-right">
                         <div className="flex items-center justify-end gap-2">
                           <div>
-                            <div className={`text-sm font-bold ${match.team2.id === team.id ? 'text-emerald-300' : 'text-gray-200'}`}>{match.team2.shortName || match.team2.name}</div>
+                            <div className={`text-sm font-bold ${match.team2?.id === team.id ? 'text-emerald-300' : 'text-gray-200'}`}>{match.team2?.shortName || match.team2?.name || (match as any).awayShort || 'Team 2'}</div>
                             <div className="text-xs text-gray-400">{match.team2Score || '—'}</div>
                           </div>
-                          {match.team2.logo ? (
-                            <img src={match.team2.logo} alt={match.team2.shortName} className="w-10 h-10 rounded-md object-contain" />
+                          {match.team2?.logo ? (
+                            <img src={match.team2.logo} alt={match.team2?.shortName || 'Team 2'} className="w-10 h-10 rounded-md object-contain" />
                           ) : (
                             <div className="w-10 h-10 rounded-md bg-slate-700" />
                           )}

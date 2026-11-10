@@ -95,7 +95,19 @@ export default function MatchCard({ match, index = 0, players, detailHref }: Mat
     });
   };
 
-  const renderTeamLogo = (team: Match['team1']) => {
+  const renderTeamLogo = (team?: Match['team1']) => {
+    if (!team) {
+      return (
+        <Image
+          src="/logos/tba_logo.svg"
+          alt="TBA"
+          width={40}
+          height={40}
+          className="object-contain"
+        />
+      );
+    }
+
     // ALWAYS prioritize team.logo first (especially for TBA/TBD teams)
     if (team.logo && team.logo.trim() !== '') {
       // Check for TBA logo
@@ -115,7 +127,7 @@ export default function MatchCard({ match, index = 0, players, detailHref }: Mat
         return (
           <Image
             src={team.logo}
-            alt={`${team.shortName} logo`}
+            alt={`${team.shortName || 'Team'} logo`}
             width={40}
             height={40}
             className="object-contain"
@@ -154,7 +166,7 @@ export default function MatchCard({ match, index = 0, players, detailHref }: Mat
     return (
       <Image
         src={animatedPath}
-        alt={`${team.shortName} logo`}
+        alt={`${team.shortName || 'Team'} logo`}
         width={40}
         height={40}
         className="object-contain transition-transform duration-300 hover:scale-110"

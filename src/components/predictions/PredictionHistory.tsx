@@ -79,19 +79,23 @@ export default function PredictionHistory({ userId }: PredictionHistoryProps) {
                 <div className="flex-1">
                   {match ? (
                     <div className="flex items-center gap-3 mb-2">
-                      <img
-                        src={match.team1.logo}
-                        alt={match.team1.shortName}
-                        className="w-6 h-6 object-contain"
-                      />
-                      <span className="text-white font-semibold">{match.team1.shortName}</span>
+                      {match.team1?.logo && (
+                        <img
+                          src={match.team1.logo}
+                          alt={match.team1.shortName || 'Team 1'}
+                          className="w-6 h-6 object-contain"
+                        />
+                      )}
+                      <span className="text-white font-semibold">{match.team1?.shortName || (match as any).homeShort || 'Team 1'}</span>
                       <span className="text-gray-400">vs</span>
-                      <img
-                        src={match.team2.logo}
-                        alt={match.team2.shortName}
-                        className="w-6 h-6 object-contain"
-                      />
-                      <span className="text-white font-semibold">{match.team2.shortName}</span>
+                      {match.team2?.logo && (
+                        <img
+                          src={match.team2.logo}
+                          alt={match.team2.shortName || 'Team 2'}
+                          className="w-6 h-6 object-contain"
+                        />
+                      )}
+                      <span className="text-white font-semibold">{match.team2?.shortName || (match as any).awayShort || 'Team 2'}</span>
                     </div>
                   ) : (
                     <div className="text-gray-400 text-sm">Match data unavailable</div>

@@ -18,7 +18,7 @@ import GradientText from '@/components/ui/GradientText';
 import BackToTop from '@/components/ui/BackToTop';
 import { TeamsSkeleton, MatchesSkeleton, NewsSkeleton } from '@/components/home/HomePageSkeletons';
 import { useRouter } from 'next/navigation';
-import { api } from '@/lib/data';
+import { api, normalizeWplMatchItem } from '@/lib/data';
 import { useLeague } from '@/contexts/LeagueContext';
 import { isPlaceholderTeam } from '@/lib/playoffUtils';
 import type { Team, Match, News } from '@/types';
@@ -138,16 +138,17 @@ export default function WPLHomePage() {
           const cached = localStorage.getItem('sportsup99_wpl_matches_v1');
           if (cached) {
             const parsed = JSON.parse(cached);
-            if (Array.isArray(parsed) && parsed.length > 0) setMatches(parsed);
+            if (Array.isArray(parsed) && parsed.length > 0) setMatches(parsed.map(normalizeWplMatchItem));
           }
         }
         const res = await fetch('/api/matches?league=wpl&_t=' + Date.now());
         if (res.ok) {
           const data = await res.json();
           if (Array.isArray(data) && data.length > 0) {
-            setMatches(data);
+            const normalized = data.map(normalizeWplMatchItem);
+            setMatches(normalized);
             if (typeof window !== 'undefined') {
-              localStorage.setItem('sportsup99_wpl_matches_v1', JSON.stringify(data));
+              localStorage.setItem('sportsup99_wpl_matches_v1', JSON.stringify(normalized));
             }
           }
         }
@@ -309,7 +310,7 @@ export default function WPLHomePage() {
         );
         
         setTeams(teamsWithPlayers);
-        const seasonMatches = filterSeasonMatches(matchesData);
+        const seasonMatches = filterSeasonMatches(matchesData).map(normalizeWplMatchItem);
         setMatches(seasonMatches);
         setNews(filteredNews);
 
@@ -335,7 +336,7 @@ export default function WPLHomePage() {
         try {
           const matchesData = await api.getMatches('wpl');
           if (matchesData && Array.isArray(matchesData)) {
-            const seasonMatches = filterSeasonMatches(matchesData);
+            const seasonMatches = filterSeasonMatches(matchesData).map(normalizeWplMatchItem);
             setMatches(seasonMatches);
             const liveMatch = seasonMatches.some((match) => match.status === 'live');
             if (liveMatch && !hasLiveMatch) {
@@ -641,8 +642,8 @@ export default function WPLHomePage() {
                       viewport={{ once: true }}
                       transition={{ duration: 0.6, delay: 0.2 }}
                     >
-                      <div className="text-3xl font-black mb-2" style={{ color: WPLColors.textPrimary }}>{featuredLiveMatch.team1.shortName}</div>
-                      <div className="text-sm" style={{ color: WPLColors.textSecondary }}>{featuredLiveMatch.team1.name}</div>
+                      <div className="text-3xl font-black mb-2" style={{ color: WPLColors.textPrimary }}>{featuredLiveMatch.team1?.shortName || (featuredLiveMatch as any).homeShort || 'Team 1'}</div>
+                      <div className="text-sm" style={{ color: WPLColors.textSecondary }}>{featuredLiveMatch.team1?.name || (featuredLiveMatch as any).homeTeam || 'Team 1'}</div>
                     </motion.div>
                     <motion.div
                       className="text-center"
@@ -668,7 +669,7 @@ export default function WPLHomePage() {
                           transition={{ duration: 0.5, delay: 0.5 }}
                         >
                           <div className="font-semibold">
-                            {featuredLiveMatch.matchState.toss.winner === 'team1' ? featuredLiveMatch.team1.shortName : featuredLiveMatch.team2.shortName} won the toss
+                            {featuredLiveMatch.matchState.toss.winner === 'team1' ? (featuredLiveMatch.team1?.shortName || (featuredLiveMatch as any).homeShort) : (featuredLiveMatch.team2?.shortName || (featuredLiveMatch as any).awayShort)} won the toss
                           </div>
                           <div style={{ color: WPLColors.textSecondary }} className="text-xs">
                             chose to {featuredLiveMatch.matchState.toss.decision === 'bat' ? 'bat' : 'bowl'}
@@ -683,8 +684,8 @@ export default function WPLHomePage() {
                       viewport={{ once: true }}
                       transition={{ duration: 0.6, delay: 0.2 }}
                     >
-                      <div className="text-3xl font-black mb-2" style={{ color: WPLColors.textPrimary }}>{featuredLiveMatch.team2.shortName}</div>
-                      <div className="text-sm" style={{ color: WPLColors.textSecondary }}>{featuredLiveMatch.team2.name}</div>
+                      <div className="text-3xl font-black mb-2" style={{ color: WPLColors.textPrimary }}>{featuredLiveMatch.team2?.shortName || (featuredLiveMatch as any).awayShort || 'Team 2'}</div>
+                      <div className="text-sm" style={{ color: WPLColors.textSecondary }}>{featuredLiveMatch.team2?.name || (featuredLiveMatch as any).awayTeam || 'Team 2'}</div>
                     </motion.div>
                   </div>
                 </div>

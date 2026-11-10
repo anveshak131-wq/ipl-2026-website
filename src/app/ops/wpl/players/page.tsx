@@ -134,18 +134,22 @@ export default function WplPlayersCleanOpsPage() {
             );
             if (!localP) return remoteP;
 
-            const localHasCareer = localP.careerStats && (
-              Object.keys(localP.careerStats.batting || {}).length > 0 ||
-              Object.keys(localP.careerStats.bowling || {}).length > 0
-            );
-            const remoteHasCareer = remoteP.careerStats && (
-              Object.keys(remoteP.careerStats.batting || {}).length > 0 ||
-              Object.keys(remoteP.careerStats.bowling || {}).length > 0
-            );
+            const localBatKeys = Object.keys(localP.careerStats?.batting || {});
+            const localBowlKeys = Object.keys(localP.careerStats?.bowling || {});
+            const localTotal = localBatKeys.length + localBowlKeys.length;
+
+            const remoteBatKeys = Object.keys(remoteP.careerStats?.batting || {});
+            const remoteBowlKeys = Object.keys(remoteP.careerStats?.bowling || {});
+            const remoteTotal = remoteBatKeys.length + remoteBowlKeys.length;
+
+            // Retain the richer careerStats (prevent overriding fresh Cricbuzz fetch with partial server payload)
+            const careerStats = (localTotal >= remoteTotal && localTotal > 0)
+              ? localP.careerStats
+              : (remoteTotal > 0 ? remoteP.careerStats : (localP.careerStats || { batting: {}, bowling: {} }));
 
             return {
               ...remoteP,
-              ...(localHasCareer && !remoteHasCareer ? { careerStats: localP.careerStats } : {}),
+              careerStats,
               cricbuzzUrl: remoteP.cricbuzzUrl || localP.cricbuzzUrl || '',
               cricbuzzId: remoteP.cricbuzzId || localP.cricbuzzId || '',
               stats: {
@@ -157,13 +161,17 @@ export default function WplPlayersCleanOpsPage() {
 
           // Retain any locally added squad additions
           const remoteIds = new Set(remoteData.map((p: any) => String(p.id)));
-          const extraLocal = localPlayers.filter((lp) => !remoteIds.has(String(lp.id)));
+          const extraLocal = localPlayers.filter((lp) =>
+            !remoteIds.has(String(lp.id)) &&
+            !remoteData.some(rp => rp.name && lp.name && rp.name.trim().toLowerCase() === lp.name.trim().toLowerCase())
+          );
           const finalPlayers = [...merged, ...extraLocal];
 
           setPlayers(finalPlayers);
           if (typeof window !== 'undefined') {
             try {
               localStorage.setItem(WPL_PLAYERS_STORAGE_KEY, JSON.stringify(finalPlayers));
+              localStorage.setItem('sportsup99_wpl_players_v1', JSON.stringify(finalPlayers));
             } catch (e) {}
           }
         }
@@ -263,14 +271,37 @@ export default function WplPlayersCleanOpsPage() {
     if (current.name?.toLowerCase().includes('perry') && (initialUrl.includes('8734') || initialId === '8734' || !initialUrl)) {
       initialUrl = 'https://www.cricbuzz.com/profiles/9115/ellyse-perry';
       initialId = '9115';
+    } else if (current.name?.toLowerCase().includes('mandhana') && (!initialUrl || !initialId)) {
+      initialUrl = 'https://www.cricbuzz.com/profiles/10012/smriti-mandhana';
+      initialId = '10012';
     }
     setCricbuzzUrlInput(initialUrl);
     setScrapeError(null);
     setScrapeSuccess(null);
     setActiveModalTab('profile');
+
+    // Retrieve best careerStats from state or localStorage
+    let careerStats = current.careerStats || { batting: {}, bowling: {} };
+    const hasCareer = Object.keys(careerStats.batting || {}).length > 0 || Object.keys(careerStats.bowling || {}).length > 0;
+    if (!hasCareer && typeof window !== 'undefined') {
+      try {
+        const raw = localStorage.getItem(WPL_PLAYERS_STORAGE_KEY) || localStorage.getItem('sportsup99_wpl_players_v1');
+        if (raw) {
+          const list = JSON.parse(raw);
+          const cachedP = (Array.isArray(list) ? list : []).find((lp: any) =>
+            String(lp.id) === String(current.id) ||
+            (lp.name && current.name && lp.name.trim().toLowerCase() === current.name.trim().toLowerCase())
+          );
+          if (cachedP?.careerStats && (Object.keys(cachedP.careerStats.batting || {}).length > 0 || Object.keys(cachedP.careerStats.bowling || {}).length > 0)) {
+            careerStats = cachedP.careerStats;
+          }
+        }
+      } catch (e) {}
+    }
+
     setFormData({
       ...current,
-      careerStats: current.careerStats || { batting: {}, bowling: {} },
+      careerStats,
       cricbuzzUrl: initialUrl,
       cricbuzzId: initialId,
       teamId: current.teamId || activeTeam.id,
@@ -382,10 +413,12 @@ export default function WplPlayersCleanOpsPage() {
       Object.keys(formData.careerStats.bowling || {}).length > 0
     ) ? formData.careerStats : ((editingPlayer as any)?.careerStats || { batting: {}, bowling: {} });
 
+    const playerId = editingPlayer?.id || (`wpl_${assignedTeam.slug.replace('-w', '')}_${formData.name.toLowerCase().replace(/[^a-z0-9]/g, '_')}`);
+
     const payload: Player & { stats?: any } = {
       ...(editingPlayer || {}),
-      id: editingPlayer?.id || (`wpl_${assignedTeam.slug.replace('-w', '')}_${formData.name.toLowerCase().replace(/[^a-z0-9]/g, '_')}`),
-      name: formData.name,
+      id: playerId,
+      name: formData.name.trim(),
       teamId: assignedTeam.id,
       team: assignedTeam.name,
       league: 'wpl',
@@ -405,26 +438,23 @@ export default function WplPlayersCleanOpsPage() {
       stats: computedStats
     };
 
-    // 1. Immediately update local state so UI instantly reflects changes
-    setPlayers((prev) => {
-      const filtered = prev.filter((p) =>
-        String(p.id) !== String(payload.id) &&
-        p.name?.toLowerCase() !== payload.name?.toLowerCase()
+    const filterOutPlayer = (list: Player[], pId: string, pName: string) =>
+      (Array.isArray(list) ? list : []).filter((p: any) =>
+        String(p.id) !== String(pId) &&
+        p.name?.trim().toLowerCase() !== pName.trim().toLowerCase()
       );
-      return [...filtered, payload];
-    });
+
+    // 1. Immediately update local state so UI instantly reflects changes
+    setPlayers((prev) => [...filterOutPlayer(prev, payload.id, payload.name), payload]);
 
     // 2. Immediately persist to localStorage so data survives refresh, reload, or network issues
     if (typeof window !== 'undefined') {
       try {
-        const raw = localStorage.getItem(WPL_PLAYERS_STORAGE_KEY);
+        const raw = localStorage.getItem(WPL_PLAYERS_STORAGE_KEY) || localStorage.getItem('sportsup99_wpl_players_v1');
         const list = raw ? JSON.parse(raw) : players;
-        const filtered = (Array.isArray(list) ? list : []).filter((p: any) =>
-          String(p.id) !== String(payload.id) &&
-          p.name?.toLowerCase() !== payload.name?.toLowerCase()
-        );
-        const updated = [...filtered, payload];
+        const updated = [...filterOutPlayer(list, payload.id, payload.name), payload];
         localStorage.setItem(WPL_PLAYERS_STORAGE_KEY, JSON.stringify(updated));
+        localStorage.setItem('sportsup99_wpl_players_v1', JSON.stringify(updated));
       } catch (e) {}
     }
 
@@ -450,16 +480,14 @@ export default function WplPlayersCleanOpsPage() {
           if (payload.careerStats && (!serverSaved.careerStats || Object.keys(serverSaved.careerStats.batting || {}).length === 0)) {
             serverSaved.careerStats = payload.careerStats;
           }
-          setPlayers((prev) => {
-            const filtered = prev.filter((p) => String(p.id) !== String(serverSaved.id));
-            return [...filtered, serverSaved];
-          });
+          setPlayers((prev) => [...filterOutPlayer(prev, serverSaved.id, serverSaved.name), serverSaved]);
           if (typeof window !== 'undefined') {
             try {
               const raw = localStorage.getItem(WPL_PLAYERS_STORAGE_KEY);
               const list = raw ? JSON.parse(raw) : [];
-              const filtered = (Array.isArray(list) ? list : []).filter((p: any) => String(p.id) !== String(serverSaved.id));
-              localStorage.setItem(WPL_PLAYERS_STORAGE_KEY, JSON.stringify([...filtered, serverSaved]));
+              const updated = [...filterOutPlayer(list, serverSaved.id, serverSaved.name), serverSaved];
+              localStorage.setItem(WPL_PLAYERS_STORAGE_KEY, JSON.stringify(updated));
+              localStorage.setItem('sportsup99_wpl_players_v1', JSON.stringify(updated));
             } catch (e) {}
           }
         }
@@ -1059,8 +1087,11 @@ export default function WplPlayersCleanOpsPage() {
                             {availableFormats.map((fmt) => {
                               const bat = formData.careerStats?.batting || {};
                               const row = bat[fmt] || bat[fmt.toLowerCase()] || bat[fmt.toUpperCase()] ||
-                                          (fmt === 'T20' ? (bat['T20I'] || bat['t20i']) : undefined) ||
-                                          (fmt === 'T20I' ? (bat['T20'] || bat['t20']) : undefined) || {};
+                                          (fmt === 'T20' ? (bat['T20I'] || bat['t20i'] || bat['wt20'] || bat['WT20'] || bat['wt20i'] || bat['WT20I']) : undefined) ||
+                                          (fmt === 'T20I' ? (bat['T20'] || bat['t20'] || bat['wt20'] || bat['WT20']) : undefined) ||
+                                          (fmt === 'Test' ? (bat['wtest'] || bat['WTEST']) : undefined) ||
+                                          (fmt === 'ODI' ? (bat['wodi'] || bat['WODI']) : undefined) ||
+                                          (fmt === 'WPL' ? (bat['wpl'] || bat['IPL'] || bat['ipl']) : undefined) || {};
                               const hasData = row.Mat !== undefined || row.Runs !== undefined || row.M !== undefined;
                               if (!hasData) return null;
                               return (
@@ -1115,8 +1146,11 @@ export default function WplPlayersCleanOpsPage() {
                             {availableFormats.map((fmt) => {
                               const bowl = formData.careerStats?.bowling || {};
                               const row = bowl[fmt] || bowl[fmt.toLowerCase()] || bowl[fmt.toUpperCase()] ||
-                                          (fmt === 'T20' ? (bowl['T20I'] || bowl['t20i']) : undefined) ||
-                                          (fmt === 'T20I' ? (bowl['T20'] || bowl['t20']) : undefined) || {};
+                                          (fmt === 'T20' ? (bowl['T20I'] || bowl['t20i'] || bowl['wt20'] || bowl['WT20'] || bowl['wt20i'] || bowl['WT20I']) : undefined) ||
+                                          (fmt === 'T20I' ? (bowl['T20'] || bowl['t20'] || bowl['wt20'] || bowl['WT20']) : undefined) ||
+                                          (fmt === 'Test' ? (bowl['wtest'] || bowl['WTEST']) : undefined) ||
+                                          (fmt === 'ODI' ? (bowl['wodi'] || bowl['WODI']) : undefined) ||
+                                          (fmt === 'WPL' ? (bowl['wpl'] || bowl['IPL'] || bowl['ipl']) : undefined) || {};
                               const hasData = row.Mat !== undefined || row.Wkts !== undefined || row.Balls !== undefined || row.M !== undefined;
                               if (!hasData) return null;
                               return (
