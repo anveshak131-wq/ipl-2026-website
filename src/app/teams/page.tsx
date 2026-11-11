@@ -414,7 +414,7 @@ function TeamsPageContent() {
                         <motion.div
                             className="absolute w-[600px] h-[600px] rounded-full blur-[100px] opacity-30"
                             style={{
-                                background: 'radial-gradient(circle, rgba(168, 85, 247, 0.4), rgba(236, 72, 153, 0.3), transparent)',
+                                background: 'radial-gradient(circle, rgba(56, 189, 248, 0.35), rgba(245, 158, 11, 0.25), transparent)',
                                 bottom: '-15%',
                                 right: '-10%',
                             }}

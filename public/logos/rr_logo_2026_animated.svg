@@ -1,19 +1,19 @@
 <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <linearGradient id="rr-pink" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#EA1A85;stop-opacity:1">
-        <animate attributeName="stop-color" values="#EA1A85;#FA2A95;#EA1A85" dur="3s" repeatCount="indefinite"/>
+    <linearGradient id="rr-royal" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1D4ED8;stop-opacity:1">
+        <animate attributeName="stop-color" values="#1D4ED8;#2563EB;#1D4ED8" dur="3s" repeatCount="indefinite"/>
       </stop>
-      <stop offset="100%" style="stop-color:#CA0A75;stop-opacity:1">
-        <animate attributeName="stop-color" values="#CA0A75;#EA1A85;#CA0A75" dur="3s" repeatCount="indefinite"/>
+      <stop offset="100%" style="stop-color:#0F296D;stop-opacity:1">
+        <animate attributeName="stop-color" values="#0F296D;#1D4ED8;#0F296D" dur="3s" repeatCount="indefinite"/>
       </stop>
     </linearGradient>
-    <linearGradient id="rr-blue" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#004B8D;stop-opacity:1">
-        <animate attributeName="stop-color" values="#004B8D;#005B9D;#004B8D" dur="4s" repeatCount="indefinite"/>
+    <linearGradient id="rr-gold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#F59E0B;stop-opacity:1">
+        <animate attributeName="stop-color" values="#F59E0B;#FBBF24;#F59E0B" dur="4s" repeatCount="indefinite"/>
       </stop>
-      <stop offset="100%" style="stop-color:#003B6D;stop-opacity:1">
-        <animate attributeName="stop-color" values="#003B6D;#004B8D;#003B6D" dur="4s" repeatCount="indefinite"/>
+      <stop offset="100%" style="stop-color:#D97706;stop-opacity:1">
+        <animate attributeName="stop-color" values="#D97706;#F59E0B;#D97706" dur="4s" repeatCount="indefinite"/>
       </stop>
     </linearGradient>
     <filter id="rr-glow">
@@ -29,8 +29,8 @@
   
   <!-- Shield -->
   <path d="M 100 20 L 155 40 L 165 100 L 155 160 L 100 180 L 45 160 L 35 100 L 45 40 Z" 
-        fill="url(#rr-pink)" 
-        stroke="url(#rr-blue)" 
+        fill="url(#rr-royal)" 
+        stroke="url(#rr-gold)" 
         stroke-width="3" 
         filter="url(#rr-glow)">
     <animateTransform attributeName="transform" type="scale" values="1;1.01;1" dur="4s" repeatCount="indefinite"/>

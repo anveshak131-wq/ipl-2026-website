@@ -610,21 +610,21 @@ export default function EnhancedWPLTeamPage({ teamId }: { teamId: string }) {
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 w-full lg:w-auto">
                 <div className="p-3.5 rounded-2xl bg-white/[0.04] border border-white/10 text-center sm:text-left backdrop-blur-md">
                   <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">Captain</span>
-                  <span className="text-sm font-black text-white block mt-0.5 truncate">{(team as any)?.captain || config.captain}</span>
+                  <span className="text-sm font-black text-white block mt-0.5 leading-snug">{(team as any)?.captain || config.captain}</span>
                 </div>
                 <div className="p-3.5 rounded-2xl bg-white/[0.04] border border-white/10 text-center sm:text-left backdrop-blur-md">
                   <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">Head Coach</span>
-                  <span className="text-sm font-black text-white block mt-0.5 truncate">{(team as any)?.coach || config.coach}</span>
+                  <span className="text-sm font-black text-white block mt-0.5 leading-snug">{(team as any)?.coach || config.coach}</span>
                 </div>
                 <div className="p-3.5 rounded-2xl bg-white/[0.04] border border-white/10 text-center sm:text-left backdrop-blur-md">
                   <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">Home City</span>
-                  <span className="text-sm font-black text-white block mt-0.5 truncate" title={config.stadium}>
+                  <span className="text-sm font-black text-white block mt-0.5 leading-snug" title={config.stadium}>
                     {config.city}
                   </span>
                 </div>
                 <div className="p-3.5 rounded-2xl bg-white/[0.04] border border-white/10 text-center sm:text-left backdrop-blur-md">
                   <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">Squad</span>
-                  <span className="text-sm font-black text-emerald-400 block mt-0.5 tabular-nums">{players.length} Athletes</span>
+                  <span className="text-sm font-black text-emerald-400 block mt-0.5 tabular-nums whitespace-nowrap">{players.length} Athletes</span>
                 </div>
               </div>
             </motion.div>

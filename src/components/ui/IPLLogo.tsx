@@ -123,9 +123,9 @@ export default function IPLLogo({ size = 'md', className = '', animated = false 
         {/* Accent sparks */}
         <g className={animated ? 'opacity-100' : 'opacity-85'}>
           <circle cx="100" cy="28" r="3.5" fill="#00FFFF" className={animated ? 'animate-pulse' : ''} />
-          <circle cx="172" cy="100" r="3" fill="#FF3366" className={animated ? 'animate-pulse' : ''} style={{ animationDelay: '0.2s' }} />
+          <circle cx="172" cy="100" r="3" fill="#F59E0B" className={animated ? 'animate-pulse' : ''} style={{ animationDelay: '0.2s' }} />
           <circle cx="100" cy="172" r="3.5" fill="#00FFFF" className={animated ? 'animate-pulse' : ''} style={{ animationDelay: '0.4s' }} />
-          <circle cx="28" cy="100" r="3" fill="#FF3366" className={animated ? 'animate-pulse' : ''} style={{ animationDelay: '0.6s' }} />
+          <circle cx="28" cy="100" r="3" fill="#F59E0B" className={animated ? 'animate-pulse' : ''} style={{ animationDelay: '0.6s' }} />
         </g>
 
         <defs>
@@ -141,7 +141,7 @@ export default function IPLLogo({ size = 'md', className = '', animated = false 
             <stop offset="0%" stopColor="#0066FF" />
             <stop offset="25%" stopColor="#00FFFF" />
             <stop offset="50%" stopColor="#FFD700" />
-            <stop offset="75%" stopColor="#FF3366" />
+            <stop offset="75%" stopColor="#F59E0B" />
             <stop offset="100%" stopColor="#0066FF" />
           </linearGradient>
 
@@ -155,7 +155,7 @@ export default function IPLLogo({ size = 'md', className = '', animated = false 
           <linearGradient id={`${uniqueId}-hex-border`} x1="0%" y1="0%" x2="100%" y2="100%">
             <stop offset="0%" stopColor="#0066FF" />
             <stop offset="50%" stopColor="#FFD700" />
-            <stop offset="100%" stopColor="#FF3366" />
+            <stop offset="100%" stopColor="#38BDF8" />
           </linearGradient>
 
           {/* Inner accent */}
@@ -174,13 +174,13 @@ export default function IPLLogo({ size = 'md', className = '', animated = false 
           {/* Ball glow */}
           <radialGradient id={`${uniqueId}-ball-glow`} cx="50%" cy="50%">
             <stop offset="0%" stopColor="#0066FF" stopOpacity="0.7" />
-            <stop offset="100%" stopColor="#FF3366" stopOpacity="0.3" />
+            <stop offset="100%" stopColor="#F59E0B" stopOpacity="0.3" />
           </radialGradient>
 
           {/* Ball stroke */}
           <linearGradient id={`${uniqueId}-ball-stroke`} x1="0%" y1="0%" x2="100%" y2="100%">
             <stop offset="0%" stopColor="#0066FF" />
-            <stop offset="100%" stopColor="#FF3366" />
+            <stop offset="100%" stopColor="#F59E0B" />
           </linearGradient>
 
           {/* Seam gradient */}
@@ -199,16 +199,16 @@ export default function IPLLogo({ size = 'md', className = '', animated = false 
 
           {/* Energy lines gradient 2 */}
           <linearGradient id={`${uniqueId}-energy-2`} x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#FF3366" />
+            <stop offset="0%" stopColor="#F59E0B" />
             <stop offset="50%" stopColor="#FFD700" />
-            <stop offset="100%" stopColor="#FF3366" />
+            <stop offset="100%" stopColor="#38BDF8" />
           </linearGradient>
         </defs>
       </svg>
 
       {/* Outer glow effect */}
       <div className="absolute inset-0 -z-10 blur-2xl opacity-50 group-hover:opacity-80 transition-opacity duration-300">
-        <div className={`${sizeClass} bg-gradient-to-br from-[#0066FF] via-[#FF3366] to-[#00FFFF] rounded-full ${animated ? 'pulse-glow' : ''}`} />
+        <div className={`${sizeClass} bg-gradient-to-br from-[#0066FF] via-[#F59E0B] to-[#00FFFF] rounded-full ${animated ? 'pulse-glow' : ''}`} />
       </div>
     </div>
   );

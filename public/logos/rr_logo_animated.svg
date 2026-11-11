@@ -5,9 +5,9 @@
         0%, 100% { transform: scale(1); }
         50% { transform: scale(1.05); }
       }
-      @keyframes pinkBlueGlow {
-        0%, 100% { filter: drop-shadow(0 0 15px #EA1A85); }
-        50% { filter: drop-shadow(0 0 30px #EA1A85) drop-shadow(0 0 35px #004B8D); }
+      @keyframes royalBlueGlow {
+        0%, 100% { filter: drop-shadow(0 0 15px #1D4ED8); }
+        50% { filter: drop-shadow(0 0 30px #38BDF8) drop-shadow(0 0 35px #F59E0B); }
       }
       @keyframes crownRotate {
         0% { transform: rotate(0deg); }
@@ -18,13 +18,13 @@
         50% { opacity: 1; }
       }
       .rr-bg { animation: rrPulse 2.5s ease-in-out infinite; }
-      .rr-glow { animation: pinkBlueGlow 2s ease-in-out infinite; }
+      .rr-glow { animation: royalBlueGlow 2s ease-in-out infinite; }
       .crown-rotate { animation: crownRotate 20s linear infinite; transform-origin: 100px 100px; }
       .royal { animation: royalShine 2s ease-in-out infinite; }
     </style>
     <linearGradient id="rrGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#EA1A85;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#C2185B;stop-opacity:1" />
+      <stop offset="0%" style="stop-color:#1D4ED8;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0F296D;stop-opacity:1" />
     </linearGradient>
   </defs>
   

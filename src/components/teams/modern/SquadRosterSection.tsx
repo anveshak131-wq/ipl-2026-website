@@ -378,7 +378,7 @@ export default function SquadRosterSection({
           COMMAND BAR: Role Filters, Search, Sort & Layout Switch
          ==================================================================== */}
       <div className="rounded-2xl border border-white/10 bg-[#0A0F1F]/90 backdrop-blur-xl p-4 sm:p-5 space-y-4">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+        <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4">
           {/* Role Filter Pills with Spring Motion */}
           <div className="flex flex-wrap items-center gap-1.5">
             {roleTabs.map((tab) => {
@@ -388,7 +388,7 @@ export default function SquadRosterSection({
                   key={tab.id}
                   type="button"
                   onClick={() => setRoleFilter(tab.id)}
-                  className={`relative px-3.5 py-2 rounded-xl text-xs font-extrabold uppercase tracking-wider transition-colors ${
+                  className={`relative px-3 py-1.5 rounded-xl text-[11px] font-extrabold uppercase tracking-wider whitespace-nowrap transition-colors ${
                     isActive ? 'text-slate-950' : 'text-slate-300 hover:text-white hover:bg-white/[0.05]'
                   }`}
                 >
