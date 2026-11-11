@@ -52,13 +52,27 @@ ADMIN_PLAYERS_ADMIN_EMAILS = "anvesh.ak.131@gmail.com"
 # # MAILGUN_API_KEY = "your-mailgun-api-key"
 # # MAILGUN_DOMAIN = "your-mailgun-domain"
 
-# KV Namespace Bindings:
-# In Cloudflare Pages, KV bindings are attached via the Cloudflare Dashboard:
-#   Pages > Settings > Functions > KV namespace bindings:
-#     - Binding name: SPORTS_KV
-#     - Binding name: IPL_CACHE
-# Placeholder IDs like "sports_kv_local" cause Error 8000022 on production deploys.
-# If you have real KV IDs, you can define them here:
-# [[env.production.kv_namespaces]]
-# binding = "SPORTS_KV"
-# id = "<your-real-32-char-kv-id>"
+# KV Namespace Bindings (real Cloudflare KV IDs so Pages doesn't unbind Dashboard KV on deploy):
+[[kv_namespaces]]
+binding = "SPORTS_KV"
+id = "a83219e650cb46859e2ebf566e7632c1"
+
+[[kv_namespaces]]
+binding = "IPL_CACHE"
+id = "5c1beb13cd564dd5892612ac9d2e04c4"
+
+[[env.production.kv_namespaces]]
+binding = "SPORTS_KV"
+id = "a83219e650cb46859e2ebf566e7632c1"
+
+[[env.production.kv_namespaces]]
+binding = "IPL_CACHE"
+id = "5c1beb13cd564dd5892612ac9d2e04c4"
+
+[[env.preview.kv_namespaces]]
+binding = "SPORTS_KV"
+id = "de6a22c437444d2eba9e63240f6e1f9b"
+
+[[env.preview.kv_namespaces]]
+binding = "IPL_CACHE"
+id = "de6a22c437444d2eba9e63240f6e1f9b"
