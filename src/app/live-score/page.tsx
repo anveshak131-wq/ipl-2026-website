@@ -4,15 +4,23 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
-import { BarChart3, Clock, MapPin, MessageSquare, RefreshCw, Table2, Trophy, Zap } from 'lucide-react';
+import { BarChart3, CalendarDays, Clock, MapPin, MessageSquare, Radio, RefreshCw, Table2, Trophy, Zap } from 'lucide-react';
 
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import ModernTeamLogo from '@/components/ui/ModernTeamLogo';
 import GradientText from '@/components/ui/GradientText';
+import LiveScoreStandbyView from '@/components/live-score/LiveScoreStandbyView';
 import { useLeague } from '@/contexts/LeagueContext';
 import { api } from '@/lib/data';
+import {
+  getISTDateString,
+  getMatchDayCenterMatches,
+  getMatchStartDate,
+  getNextScheduledMatch,
+  isActivelyLiveMatch,
+} from '@/lib/matchDay';
 import type { League, Match, Player } from '@/types';
 
 type ExtrasRow = {
@@ -175,71 +183,46 @@ function buildResultText(
   return '';
 }
 
-function parseTimeTo24Hour(timeString: string): { hours: number; minutes: number } | null {
-  const clean = String(timeString || '').trim();
-  if (!clean) return null;
+function buildLiveCenterMatches(
+  allMatches: Match[],
+  preferredMatchId?: string | null,
+  nowMs: number = Date.now()
+): Match[] {
+  if (!Array.isArray(allMatches) || allMatches.length === 0) return [];
+  const matchDayList = getMatchDayCenterMatches(allMatches, nowMs);
 
-  const hhmmMatch = clean.match(/^(\d{1,2}):(\d{2})$/);
-  if (hhmmMatch) {
-    const hours = Number.parseInt(hhmmMatch[1], 10);
-    const minutes = Number.parseInt(hhmmMatch[2], 10);
-    if (hours >= 0 && hours <= 23 && minutes >= 0 && minutes <= 59) {
-      return { hours, minutes };
+  // Allow archive replay when navigated directly with ?matchId=<completedMatchId>
+  if (preferredMatchId) {
+    const requested = allMatches.find((m) => m.id === preferredMatchId);
+    if (
+      requested &&
+      requested.status === 'completed' &&
+      !matchDayList.some((m) => m.id === requested.id)
+    ) {
+      return [...matchDayList, requested];
     }
   }
 
-  const ampmMatch = clean.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
-  if (ampmMatch) {
-    let hours = Number.parseInt(ampmMatch[1], 10);
-    const minutes = Number.parseInt(ampmMatch[2], 10);
-    const meridiem = ampmMatch[3].toUpperCase();
-
-    if (hours < 1 || hours > 12 || minutes < 0 || minutes > 59) return null;
-    if (meridiem === 'PM' && hours !== 12) hours += 12;
-    if (meridiem === 'AM' && hours === 12) hours = 0;
-
-    return { hours, minutes };
-  }
-
-  return null;
+  return matchDayList;
 }
 
-function getMatchStartDate(match: Match): Date | null {
-  const parsedTime = parseTimeTo24Hour(match.time);
-  if (!parsedTime) {
-    const fallback = new Date(match.date);
-    return Number.isNaN(fallback.getTime()) ? null : fallback;
+function pickDefaultMatchId(
+  liveCenterMatches: Match[],
+  preferredMatchId?: string | null,
+  nowMs: number = Date.now()
+): string {
+  if (!Array.isArray(liveCenterMatches) || liveCenterMatches.length === 0) return '';
+  if (preferredMatchId && liveCenterMatches.some((m) => m.id === preferredMatchId)) {
+    return preferredMatchId;
   }
 
-  const hh = String(parsedTime.hours).padStart(2, '0');
-  const mm = String(parsedTime.minutes).padStart(2, '0');
+  const activeLive = liveCenterMatches.find((m) => isActivelyLiveMatch(m, nowMs));
+  if (activeLive) return activeLive.id;
 
-  // Match times are stored in IST; interpret them with a +05:30 offset.
-  const dt = new Date(`${match.date}T${hh}:${mm}:00+05:30`);
-  return Number.isNaN(dt.getTime()) ? null : dt;
-}
+  const todayUpcoming = liveCenterMatches.find((m) => m.status === 'upcoming');
+  if (todayUpcoming) return todayUpcoming.id;
 
-function pickDefaultMatchId(matches: Match[], preferredMatchId?: string | null): string {
-  if (!Array.isArray(matches) || matches.length === 0) return '';
-  if (preferredMatchId && matches.some((m) => m.id === preferredMatchId)) return preferredMatchId;
-
-  const sorted = [...matches].sort((a, b) => {
-    const ta = getMatchStartDate(a)?.getTime() ?? 0;
-    const tb = getMatchStartDate(b)?.getTime() ?? 0;
-    return ta - tb;
-  });
-
-  const live = sorted.filter((m) => m.status === 'live');
-  if (live.length > 0) return live[0].id;
-
-  const now = Date.now();
-  const upcoming = sorted.filter((m) => m.status === 'upcoming' && (getMatchStartDate(m)?.getTime() ?? 0) >= now);
-  if (upcoming.length > 0) return upcoming[0].id;
-
-  const completed = sorted.filter((m) => m.status === 'completed');
-  if (completed.length > 0) return completed[completed.length - 1].id;
-
-  return sorted[sorted.length - 1].id;
+  return liveCenterMatches[0].id;
 }
 
 function getBattingTeamKeyForInnings(match: Match, innings: '1' | '2'): 'team1' | 'team2' {
@@ -1355,11 +1338,15 @@ export default function LiveScorePage() {
         });
 
         const preferredMatchId = searchParams.get('matchId');
-        const initialId = pickDefaultMatchId(sorted, preferredMatchId);
+        const centerMatches = buildLiveCenterMatches(sorted, preferredMatchId);
+        const initialId = pickDefaultMatchId(centerMatches, preferredMatchId);
 
         setMatches(sorted);
         setPlayers((playersData || []) as Player[]);
         setSelectedMatchId(initialId);
+        if (!initialId) {
+          setIsLoadingScore(false);
+        }
       } catch (e) {
         console.error('[Live Score] Failed to load matches:', e);
         setError('Failed to load matches.');
@@ -1373,9 +1360,17 @@ export default function LiveScorePage() {
     };
   }, [searchKey, selectedLeague]);
 
+  const preferredMatchId = searchParams.get('matchId');
+  const liveCenterMatches = useMemo(
+    () => buildLiveCenterMatches(matches, preferredMatchId),
+    [matches, preferredMatchId],
+  );
+  const nextUpcomingMatch = useMemo(() => getNextScheduledMatch(matches), [matches]);
+  const isMatchDayActive = liveCenterMatches.length > 0;
+
   const selectedMatch = useMemo(
-    () => matches.find((m) => m.id === selectedMatchId) || null,
-    [matches, selectedMatchId],
+    () => liveCenterMatches.find((m) => m.id === selectedMatchId) || null,
+    [liveCenterMatches, selectedMatchId],
   );
 
   useEffect(() => {
@@ -1705,7 +1700,7 @@ export default function LiveScorePage() {
     if (matchStateName === 'strategic-timeout-1' || matchStateName === 'strategic-timeout-2') {
       return 8000;
     }
-    if (selectedMatch.status === 'live') {
+    if (isActivelyLiveMatch(selectedMatch)) {
       if (hasBowledBalls && (activeOvers.endsWith('.0') || activeOvers.endsWith('.6'))) {
         return 8000;
       }
@@ -1826,189 +1821,177 @@ export default function LiveScorePage() {
                 </GradientText>
               </h1>
               <p className="text-white/70 mt-2 leading-relaxed max-w-xl">
-                Live ball-by-ball, running scores, and key match moments — refreshed every few seconds.
+                {isMatchDayActive
+                  ? 'Live ball-by-ball, running scores, and key match moments — refreshed every few seconds.'
+                  : `Matchday center stays on standby until ${leagueLabel} matches are live or scheduled today.`}
               </p>
             </div>
 
-            <div className="flex items-center gap-3">
-              <button
-                type="button"
-                onClick={() => refresh('manual')}
-                disabled={!selectedMatchId}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/10 hover:bg-white/15 disabled:opacity-60 border border-white/15 text-white text-sm font-semibold transition-colors"
-                title="Refresh now"
-              >
-                <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-                Refresh
-              </button>
-              {lastFetchAt && (
-                <div className="text-xs text-white/60 whitespace-nowrap">
-                  Updated {new Date(lastFetchAt).toLocaleTimeString()}
-                </div>
+            <div className="flex flex-wrap items-center gap-3">
+              {/* League Switcher */}
+              <div className="inline-flex items-center rounded-xl border border-white/15 bg-black/40 p-1">
+                <Link
+                  href="/live-score?league=ipl"
+                  className={`px-3 py-1.5 rounded-lg text-xs font-black uppercase tracking-wider transition-colors ${
+                    selectedLeague === 'ipl'
+                      ? 'bg-blue-600 text-white shadow'
+                      : 'text-white/65 hover:text-white'
+                  }`}
+                >
+                  IPL
+                </Link>
+                <Link
+                  href="/live-score?league=wpl"
+                  className={`px-3 py-1.5 rounded-lg text-xs font-black uppercase tracking-wider transition-colors ${
+                    selectedLeague === 'wpl'
+                      ? 'bg-pink-600 text-white shadow'
+                      : 'text-white/65 hover:text-white'
+                  }`}
+                >
+                  WPL
+                </Link>
+              </div>
+
+              {isMatchDayActive && (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => refresh('manual')}
+                    disabled={!selectedMatchId}
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/10 hover:bg-white/15 disabled:opacity-60 border border-white/15 text-white text-sm font-semibold transition-colors"
+                    title="Refresh now"
+                  >
+                    <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+                    Refresh
+                  </button>
+                  {lastFetchAt && (
+                    <div className="text-xs text-white/60 whitespace-nowrap">
+                      Updated {new Date(lastFetchAt).toLocaleTimeString()}
+                    </div>
+                  )}
+                </>
               )}
             </div>
           </div>
 
-          <div className="mt-6 grid grid-cols-1 lg:grid-cols-[1.15fr_0.85fr] gap-4">
-            <div>
-              <label className="block text-xs font-black text-white/70 uppercase tracking-[0.22em] mb-2">
-                Select match
-              </label>
-              <select
-                value={selectedMatchId}
-                onChange={(e) => setSelectedMatchId(e.target.value)}
-                disabled={isLoadingMatches || matches.length === 0}
-                className="w-full px-4 py-3 rounded-2xl bg-black/30 text-white border border-white/15 focus:outline-none focus:ring-2 focus:ring-cyan-400/30 focus:border-white/25 disabled:opacity-60"
-              >
-                {isLoadingMatches ? (
-                  <option value="">Loading matches…</option>
-                ) : matches.length === 0 ? (
-                  <option value="">No matches yet</option>
-                ) : null}
+          {!isLoadingMatches && isMatchDayActive && (
+            <div className="mt-6 grid grid-cols-1 lg:grid-cols-[1.15fr_0.85fr] gap-4">
+              <div>
+                <label className="block text-xs font-black text-white/70 uppercase tracking-[0.22em] mb-2">
+                  Select matchday fixture
+                </label>
+                <select
+                  value={selectedMatchId}
+                  onChange={(e) => setSelectedMatchId(e.target.value)}
+                  disabled={liveCenterMatches.length === 0}
+                  className="w-full px-4 py-3 rounded-2xl bg-black/30 text-white border border-white/15 focus:outline-none focus:ring-2 focus:ring-cyan-400/30 focus:border-white/25 disabled:opacity-60"
+                >
+                  {liveCenterMatches.filter((m) => isActivelyLiveMatch(m)).length > 0 && (
+                    <optgroup label="Live Now">
+                      {liveCenterMatches
+                        .filter((m) => isActivelyLiveMatch(m))
+                        .map((m) => (
+                          <option key={m.id} value={m.id} className="bg-[#0b0f1a]">
+                            {m.team1.shortName} vs {m.team2.shortName} • {m.date} {m.time}
+                          </option>
+                        ))}
+                    </optgroup>
+                  )}
+                  {liveCenterMatches.filter((m) => m.status === 'upcoming').length > 0 && (
+                    <optgroup label="Today's Upcoming">
+                      {liveCenterMatches
+                        .filter((m) => m.status === 'upcoming')
+                        .map((m) => (
+                          <option key={m.id} value={m.id} className="bg-[#0b0f1a]">
+                            {m.team1.shortName} vs {m.team2.shortName} • {m.date} {m.time}
+                          </option>
+                        ))}
+                    </optgroup>
+                  )}
+                  {liveCenterMatches.filter((m) => m.status === 'completed').length > 0 && (
+                    <optgroup label="Completed">
+                      {liveCenterMatches
+                        .filter((m) => m.status === 'completed')
+                        .map((m) => (
+                          <option key={m.id} value={m.id} className="bg-[#0b0f1a]">
+                            {m.team1.shortName} vs {m.team2.shortName} • {m.date}
+                          </option>
+                        ))}
+                    </optgroup>
+                  )}
+                </select>
+              </div>
 
-                <optgroup label="Live">
-                  {matches
-                    .filter((m) => m.status === 'live')
-                    .map((m) => (
-                      <option key={m.id} value={m.id} className="bg-[#0b0f1a]">
-                        {m.team1.shortName} vs {m.team2.shortName} • {m.date} {m.time}
-                      </option>
-                    ))}
-                </optgroup>
-                <optgroup label="Upcoming">
-                  {matches
-                    .filter((m) => m.status === 'upcoming')
-                    .map((m) => (
-                      <option key={m.id} value={m.id} className="bg-[#0b0f1a]">
-                        {m.team1.shortName} vs {m.team2.shortName} • {m.date} {m.time}
-                      </option>
-                    ))}
-                </optgroup>
-                <optgroup label="Completed">
-                  {matches
-                    .filter((m) => m.status === 'completed')
-                    .map((m) => (
-                      <option key={m.id} value={m.id} className="bg-[#0b0f1a]">
-                        {m.team1.shortName} vs {m.team2.shortName} • {m.date}
-                      </option>
-                    ))}
-                </optgroup>
-              </select>
-            </div>
-
-            {selectedMatch ? (
-              <div className="rounded-2xl border border-white/15 bg-white/5 p-5">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="text-xs font-black uppercase tracking-[0.22em] text-white/70">
-                    Match info
-                  </div>
-                  <div className="inline-flex items-center gap-2 text-xs text-white/70">
-                    <span
-                      className={`inline-flex items-center gap-2 ${
-                        !isMatchComplete && selectedMatch.status === 'live' ? 'text-emerald-200' : 'text-white/70'
-                      }`}
-                    >
+              {selectedMatch ? (
+                <div className="rounded-2xl border border-white/15 bg-white/5 p-5">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="text-xs font-black uppercase tracking-[0.22em] text-white/70">
+                      Match info
+                    </div>
+                    <div className="inline-flex items-center gap-2 text-xs text-white/70">
                       <span
-                        className={`w-2 h-2 rounded-full ${
-                          !isMatchComplete && selectedMatch.status === 'live'
-                            ? 'bg-emerald-400 animate-pulse'
-                            : 'bg-white/30'
+                        className={`inline-flex items-center gap-2 ${
+                          !isMatchComplete && isActivelyLiveMatch(selectedMatch) ? 'text-emerald-200' : 'text-white/70'
                         }`}
-                      />
-                      <span className="capitalize">{isMatchComplete ? 'completed' : selectedMatch.status}</span>
-                    </span>
+                      >
+                        <span
+                          className={`w-2 h-2 rounded-full ${
+                            !isMatchComplete && isActivelyLiveMatch(selectedMatch)
+                              ? 'bg-emerald-400 animate-pulse'
+                              : 'bg-white/30'
+                          }`}
+                        />
+                        <span className="capitalize">
+                          {isMatchComplete ? 'completed' : isActivelyLiveMatch(selectedMatch) ? 'live' : 'matchday'}
+                        </span>
+                      </span>
+                    </div>
                   </div>
-                </div>
 
-                {computedResultText && (
-                  <div className="mt-3 inline-flex items-start gap-2 text-amber-200/90">
-                    <Trophy className="w-4 h-4 mt-[1px]" />
-                    <span className="text-sm font-semibold leading-snug">{computedResultText}</span>
-                  </div>
-                )}
-
-                <div className="mt-4 space-y-2 text-sm text-white/70">
-                  <div className="flex items-center gap-2">
-                    <MapPin className="w-4 h-4 text-white/60" />
-                    <span className="min-w-0 truncate">{selectedMatch.venue}</span>
-                  </div>
-                  {matchStart && (
-                    <div className="flex items-center gap-2">
-                      <Clock className="w-4 h-4 text-white/60" />
-                      <span>{matchStart.toLocaleString()}</span>
+                  {computedResultText && (
+                    <div className="mt-3 inline-flex items-start gap-2 text-amber-200/90">
+                      <Trophy className="w-4 h-4 mt-[1px]" />
+                      <span className="text-sm font-semibold leading-snug">{computedResultText}</span>
                     </div>
                   )}
-                  {matchCenterHref && (
-                    <Link
-                      href={matchCenterHref}
-                      prefetch={false}
-                      className="inline-flex items-center gap-2 text-xs font-semibold text-cyan-200 hover:text-cyan-100 transition-colors"
-                    >
-                      Open match center →
-                    </Link>
-                  )}
+
+                  <div className="mt-4 space-y-2 text-sm text-white/70">
+                    <div className="flex items-center gap-2">
+                      <MapPin className="w-4 h-4 text-white/60" />
+                      <span className="min-w-0 truncate">{selectedMatch.venue}</span>
+                    </div>
+                    {matchStart && (
+                      <div className="flex items-center gap-2">
+                        <Clock className="w-4 h-4 text-white/60" />
+                        <span>{matchStart.toLocaleString()}</span>
+                      </div>
+                    )}
+                    {matchCenterHref && (
+                      <Link
+                        href={matchCenterHref}
+                        prefetch={false}
+                        className="inline-flex items-center gap-2 text-xs font-semibold text-cyan-200 hover:text-cyan-100 transition-colors"
+                      >
+                        Open match center →
+                      </Link>
+                    )}
+                  </div>
                 </div>
-              </div>
-            ) : (
-              <div className="rounded-2xl border border-white/10 bg-white/5 p-5 text-sm text-white/60">
-                Select a match to see the live score.
-              </div>
-            )}
-          </div>
+              ) : null}
+            </div>
+          )}
         </motion.div>
 
         {isLoadingMatches ? (
           <div className="flex items-center justify-center h-64">
             <LoadingSpinner size="lg" />
           </div>
-        ) : matches.length === 0 ? (
-          <div className="rounded-3xl p-8 sm:p-12 bg-black/40 border border-white/15 text-white backdrop-blur-2xl shadow-[0_20px_60px_rgba(0,0,0,0.45)] text-center max-w-3xl mx-auto space-y-6 relative overflow-hidden">
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-80 h-32 bg-pink-500/10 blur-3xl pointer-events-none" />
-
-            <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-pink-500/15 border border-pink-500/30 text-pink-300 text-xs font-black uppercase tracking-wider">
-              <Zap className="w-3.5 h-3.5 text-pink-400" />
-              <span>{selectedLeague === 'wpl' ? 'WPL 2027 Pre-Season Standby' : 'Matches Standby'}</span>
-            </div>
-
-            <div className="space-y-2">
-              <h2 className="text-2xl sm:text-4xl font-black tracking-tight text-white">
-                {selectedLeague === 'wpl' ? 'No Live Matches In Progress' : 'No matches found yet'}
-              </h2>
-              <p className="text-gray-300 text-sm sm:text-base max-w-lg mx-auto leading-relaxed">
-                {selectedLeague === 'wpl' 
-                  ? "The 2027 Women's Premier League tournament window is scheduled for Jan 9 – Feb 5, 2027. Real-time ball-by-ball telemetry, live commentary, and instant scorecards will activate automatically on opening matchday."
-                  : 'Check back soon for upcoming live fixtures and score telemetry.'}
-              </p>
-            </div>
-
-            {selectedLeague === 'wpl' && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-4 border-t border-white/10 text-left max-w-lg mx-auto">
-                <div className="p-4 rounded-xl bg-white/[0.04] border border-white/5">
-                  <span className="text-[11px] font-bold uppercase tracking-wider text-pink-400 block">Season Window</span>
-                  <span className="text-sm font-black text-white mt-1 block">Jan 9 – Feb 5, 2027</span>
-                </div>
-                <div className="p-4 rounded-xl bg-white/[0.04] border border-white/5">
-                  <span className="text-[11px] font-bold uppercase tracking-wider text-cyan-400 block">Active Rosters</span>
-                  <span className="text-sm font-black text-white mt-1 block">5 Contenders Confirmed</span>
-                </div>
-              </div>
-            )}
-
-            <div className="pt-2 flex flex-wrap items-center justify-center gap-3">
-              <Link
-                href="/wpl/teams"
-                className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 text-white font-bold text-xs uppercase tracking-wider transition-all shadow-lg shadow-pink-600/30"
-              >
-                View 2027 Squads
-              </Link>
-              <Link
-                href="/wpl/matches"
-                className="px-5 py-2.5 rounded-xl bg-white/[0.06] hover:bg-white/[0.1] text-gray-300 hover:text-white font-bold text-xs uppercase tracking-wider border border-white/10 transition-all"
-              >
-                Fixture Hub & Archive
-              </Link>
-            </div>
-          </div>
+        ) : !isMatchDayActive ? (
+          <LiveScoreStandbyView
+            league={selectedLeague}
+            nextUpcomingMatch={nextUpcomingMatch}
+            totalSeasonFixtures={matches.length}
+          />
         ) : (
           <>
             {error && (
@@ -2020,6 +2003,57 @@ export default function LiveScorePage() {
             {isLoadingScore || !selectedMatch || !derived ? (
               <div className="flex items-center justify-center h-64">
                 <LoadingSpinner size="lg" />
+              </div>
+            ) : !isMatchComplete && !isActivelyLiveMatch(selectedMatch) && derived.rowsCount === 0 ? (
+              <div className="rounded-3xl p-8 sm:p-10 bg-black/40 border border-white/15 text-white backdrop-blur-2xl shadow-[0_20px_60px_rgba(0,0,0,0.45)] text-center max-w-3xl mx-auto space-y-5">
+                <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-amber-500/15 border border-amber-400/30 text-amber-200 text-xs font-black uppercase tracking-wider">
+                  <CalendarDays className="w-3.5 h-3.5" />
+                  <span>Match Day • Pre-Toss Waiting Room</span>
+                </div>
+                <div className="flex items-center justify-center gap-5 py-2">
+                  <div className="flex items-center gap-2.5">
+                    <ModernTeamLogo
+                      teamId={selectedMatch.team1.id}
+                      shortName={selectedMatch.team1.shortName}
+                      league={selectedMatch.league}
+                      size={44}
+                      showHover={false}
+                    />
+                    <span className="text-lg font-black">{selectedMatch.team1.shortName}</span>
+                  </div>
+                  <span className="text-xs font-black uppercase tracking-widest text-white/50 px-2.5 py-1 rounded-full border border-white/15">
+                    VS
+                  </span>
+                  <div className="flex items-center gap-2.5">
+                    <span className="text-lg font-black">{selectedMatch.team2.shortName}</span>
+                    <ModernTeamLogo
+                      teamId={selectedMatch.team2.id}
+                      shortName={selectedMatch.team2.shortName}
+                      league={selectedMatch.league}
+                      size={44}
+                      showHover={false}
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <h2 className="text-2xl font-black text-white">
+                    {selectedMatch.team1.name} vs {selectedMatch.team2.name}
+                  </h2>
+                  <p className="text-sm text-white/70 max-w-lg mx-auto">
+                    Scheduled today ({selectedMatch.time} IST) at {selectedMatch.venue}. Live ball-by-ball commentary, playing XIs, and scoring telemetry unlock automatically once play begins.
+                  </p>
+                </div>
+                {matchCenterHref && (
+                  <div className="pt-2">
+                    <Link
+                      href={matchCenterHref}
+                      prefetch={false}
+                      className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 border border-white/15 text-xs font-black uppercase tracking-wider text-cyan-200 transition-colors"
+                    >
+                      Open Pre-Match Preview →
+                    </Link>
+                  </div>
+                )}
               </div>
             ) : (
               <>

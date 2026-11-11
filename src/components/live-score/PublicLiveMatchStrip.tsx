@@ -6,6 +6,12 @@ import { motion, useReducedMotion } from 'framer-motion';
 import { ArrowRight, CalendarDays, Clock, Radio, Trophy, Zap } from 'lucide-react';
 
 import { leagueDesign, motionPresets } from '@/lib/leagueDesign';
+import {
+  getISTDateString,
+  getMatchStartDate,
+  isActivelyLiveMatch,
+  parseTimeTo24Hour,
+} from '@/lib/matchDay';
 import type { League, Match } from '@/types';
 
 interface PublicLiveMatchStripProps {
@@ -13,50 +19,12 @@ interface PublicLiveMatchStripProps {
   matches: Match[];
 }
 
-const IST_OFFSET_MS = 5.5 * 60 * 60 * 1000;
-
-function parseTimeTo24Hour(timeString: string): { hours: number; minutes: number } | null {
-  const clean = String(timeString || '').trim();
-  const hhmmMatch = clean.match(/^(\d{1,2}):(\d{2})$/);
-
-  if (hhmmMatch) {
-    const hours = Number.parseInt(hhmmMatch[1], 10);
-    const minutes = Number.parseInt(hhmmMatch[2], 10);
-    if (hours >= 0 && hours <= 23 && minutes >= 0 && minutes <= 59) {
-      return { hours, minutes };
-    }
-  }
-
-  const ampmMatch = clean.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
-  if (ampmMatch) {
-    let hours = Number.parseInt(ampmMatch[1], 10);
-    const minutes = Number.parseInt(ampmMatch[2], 10);
-    const meridiem = ampmMatch[3].toUpperCase();
-
-    if (hours < 1 || hours > 12 || minutes < 0 || minutes > 59) return null;
-    if (meridiem === 'PM' && hours !== 12) hours += 12;
-    if (meridiem === 'AM' && hours === 12) hours = 0;
-
-    return { hours, minutes };
-  }
-
-  return null;
-}
-
 function getMatchStartTimestampUTC(match: Match): number {
-  const [yearStr, monthStr, dayStr] = String(match.date || '').split('-');
+  const dt = getMatchStartDate(match);
+  if (dt) return dt.getTime();
   const parsedTime = parseTimeTo24Hour(match.time);
-  const year = Number(yearStr);
-  const month = Number(monthStr);
-  const day = Number(dayStr);
-
-  if (!year || !month || !day || !parsedTime) {
-    const fallback = new Date(match.date).getTime();
-    return Number.isNaN(fallback) ? 0 : fallback;
-  }
-
-  const istTimestamp = Date.UTC(year, month - 1, day, parsedTime.hours, parsedTime.minutes, 0);
-  return istTimestamp - IST_OFFSET_MS;
+  void parsedTime;
+  return 0;
 }
 
 function formatDateTime(match: Match): string {
@@ -131,7 +99,7 @@ export default function PublicLiveMatchStrip({ league, matches }: PublicLiveMatc
 
   const featuredMatch = useMemo(() => {
     const leagueMatches = matches.filter((match) => (match.league || league) === league);
-    const live = leagueMatches.find((match) => match.status === 'live');
+    const live = leagueMatches.find((match) => isActivelyLiveMatch(match, now));
     if (live) return live;
 
     const upcoming = leagueMatches
@@ -142,7 +110,7 @@ export default function PublicLiveMatchStrip({ league, matches }: PublicLiveMatc
     return leagueMatches
       .filter((match) => match.status === 'completed')
       .sort((a, b) => getMatchStartTimestampUTC(b) - getMatchStartTimestampUTC(a))[0] || null;
-  }, [league, matches]);
+  }, [league, matches, now]);
 
   if (!featuredMatch) {
     return (
@@ -196,10 +164,14 @@ export default function PublicLiveMatchStrip({ league, matches }: PublicLiveMatc
     );
   }
 
-  const isLive = featuredMatch.status === 'live';
+  const isLive = isActivelyLiveMatch(featuredMatch, now);
   const isCompleted = featuredMatch.status === 'completed';
+  const isTodayFixture = featuredMatch.date === getISTDateString(now);
   const start = getMatchStartTimestampUTC(featuredMatch);
-  const href = `/live-score?league=${league}&matchId=${encodeURIComponent(String(featuredMatch.id))}`;
+  const href =
+    isLive || isTodayFixture || isCompleted
+      ? `/live-score?league=${league}&matchId=${encodeURIComponent(String(featuredMatch.id))}`
+      : `${league === 'wpl' ? '/wpl/matches' : '/matches'}/${encodeURIComponent(String(featuredMatch.id))}`;
   const team1Short = featuredMatch.team1?.shortName || (featuredMatch as any).homeShort || 'Team 1';
   const team2Short = featuredMatch.team2?.shortName || (featuredMatch as any).awayShort || 'Team 2';
   const team1Logo = getTeamLogo(featuredMatch.team1, league);
