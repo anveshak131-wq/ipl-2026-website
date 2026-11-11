@@ -172,9 +172,9 @@ export default function WPLPlayerCard({ player, onClick, index = 0 }: WPLPlayerC
               <span
                 className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border"
                 style={{
-                  background: WPLColors.roseRGBA[20],
-                  borderColor: WPLColors.roseRGBA[40],
-                  color: WPLColors.rose,
+                  background: WPLColors.orangeRGBA[20],
+                  borderColor: WPLColors.orangeRGBA[40],
+                  color: WPLColors.warning,
                 }}
               >
                 <span>👑</span> Captain
@@ -184,9 +184,9 @@ export default function WPLPlayerCard({ player, onClick, index = 0 }: WPLPlayerC
               <span
                 className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border"
                 style={{
-                  background: WPLColors.pinkRGBA[20],
-                  borderColor: WPLColors.pinkRGBA[40],
-                  color: WPLColors.pink,
+                  background: WPLColors.blueRGBA[20],
+                  borderColor: WPLColors.blueRGBA[40],
+                  color: WPLColors.blue,
                 }}
               >
                 <CustomEmoji type="globe" size={14} /> Overseas

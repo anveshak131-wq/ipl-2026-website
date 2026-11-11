@@ -338,7 +338,7 @@ export default function PlayerModal({ player, isOpen, onClose, teamColors, teamD
                 <p className="text-xs text-gray-400">Highest Score</p>
               </div>
               <div className="text-center">
-                <p className="text-2xl font-bold text-pink-400">{stats?.fifties || 0}</p>
+                <p className="text-2xl font-bold text-amber-300">{stats?.fifties || 0}</p>
                 <p className="text-xs text-gray-400">Fifties</p>
               </div>
               <div className="text-center">

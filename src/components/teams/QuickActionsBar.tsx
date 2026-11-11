@@ -32,7 +32,7 @@ export default function QuickActionsBar({
       icon: Calendar,
       label: 'Fixtures',
       onClick: onFixturesClick,
-      gradient: 'from-purple-500 to-pink-500',
+      gradient: 'from-cyan-500 to-blue-500',
     },
     {
       icon: Newspaper,

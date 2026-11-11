@@ -236,7 +236,7 @@ export const mockTeams: Team[] = [
     shortName: 'RR',
     logo: '/logos/rr_logo_2026_animated.svg',
     description: 'The inaugural IPL champions known for nurturing young talent',
-    colors: { primary: '#EA1A85', secondary: '#004B8D' },
+    colors: { primary: '#1D4ED8', secondary: '#F59E0B' },
     players: [],
     trophies: [
       { year: 2008, name: 'IPL Champions' }
@@ -297,7 +297,7 @@ export const mockTeams: Team[] = [
     aliases: ['Rising Pune Supergiants'],
     logo: '/logos/tba_logo.svg',
     description: 'Temporary IPL franchise that competed in the 2016 and 2017 seasons',
-    colors: { primary: '#6A1B9A', secondary: '#F06292' },
+    colors: { primary: '#6D28D9', secondary: '#F59E0B' },
     players: [],
     trophies: [],
     homeGrounds: ['Maharashtra Cricket Association Stadium, Pune']

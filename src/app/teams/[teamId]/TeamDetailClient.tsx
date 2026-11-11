@@ -8,8 +8,9 @@ import dynamic from 'next/dynamic';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import IplChampionHighlight from '@/components/champions/IplChampionHighlight';
-import PlayerModal from '@/components/teams/PlayerModal';
-import WPLPlayerCard from '@/components/teams/WPLPlayerCard';
+import PlayerProfileModal from '@/components/teams/modern/PlayerProfileModal';
+import SquadRosterSection from '@/components/teams/modern/SquadRosterSection';
+import { getSafeTeamPalette, sanitizeNoPinkHex } from '@/lib/teamColors';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import AuroraBackground from '@/components/ui/AuroraBackground';
 import TeamAuroraBackground from '@/components/ui/TeamAuroraBackground';
@@ -139,7 +140,7 @@ function buildOverallPlayerRows(squad: Player[]): TeamPlayerStatRow[] {
         ballsFaced: toStatNumber(stat.ballsFaced),
         average: toStatNumber(stat.average ?? stat.battingAverage),
         strikeRate: toStatNumber(stat.strikeRate ?? stat.battingStrikeRate),
-        highestScore: toStatNumber(stat.highest ?? stat.highestScore),
+        highestScore: toStatNumber((stat as any).highest ?? (stat as any).highestScore),
         fours: toStatNumber(stat.fours),
         sixes: toStatNumber(stat.sixes),
         fifties: toStatNumber(stat.fifties),
@@ -183,20 +184,7 @@ const PlayerPerformanceChart = dynamic(() => import('@/components/teams/PlayerPe
 }) as any;
 
 function normalizeHexColor(raw: string | undefined, fallback: string): string {
-  const value = String(raw || '').trim();
-  if (!value) return fallback;
-
-  const withHash = value.startsWith('#') ? value : `#${value}`;
-  const shortMatch = withHash.match(/^#([0-9a-fA-F]{3})$/);
-  if (shortMatch) {
-    const [r, g, b] = shortMatch[1].split('');
-    return `#${r}${r}${g}${g}${b}${b}`.toUpperCase();
-  }
-
-  const longMatch = withHash.match(/^#([0-9a-fA-F]{6})$/);
-  if (longMatch) return withHash.toUpperCase();
-
-  return fallback;
+  return sanitizeNoPinkHex(raw, fallback);
 }
 
 function createColorVariations(hex: string) {
@@ -562,7 +550,7 @@ export default function TeamDetailClient({ teamId, league }: TeamDetailClientPro
         
         const allTeams = await teamsResponse.json();
         console.log('TeamDetailClient: Looking for teamId:', teamId, 'shortNameLower:', shortNameLower, 'shortNameUpper:', shortNameUpper, 'league:', league);
-        console.log('TeamDetailClient: Available teams:', allTeams.map(t => ({ id: t.id, name: t.name, shortName: t.shortName, league: t.league })));
+        console.log('TeamDetailClient: Available teams:', allTeams.map((t: any) => ({ id: t.id, name: t.name, shortName: t.shortName, league: t.league })));
         
         // First, filter teams by league if specified
         const filteredTeams = league ? allTeams.filter((t: Team) => t.league === league) : allTeams;
@@ -708,7 +696,7 @@ export default function TeamDetailClient({ teamId, league }: TeamDetailClientPro
                   bowlers: raw.keyPlayers.bowlers || [],
                   allRoundXFactorIds: raw.keyPlayers.allRoundXFactorIds || [],
                 };
-                setKeyPlayers(normalized);
+                setKeyPlayers(normalized as any);
               } else {
                 setKeyPlayers(null);
               }
@@ -944,8 +932,9 @@ export default function TeamDetailClient({ teamId, league }: TeamDetailClientPro
   const teamLeague = teamData.league || league || 'ipl';
   const isWPL = teamLeague === 'wpl';
 
-  const primaryColor = createColorVariations(teamData.colors.primary);
-  const secondaryColor = createColorVariations(teamData.colors.secondary);
+  const safePalette = getSafeTeamPalette(teamData);
+  const primaryColor = createColorVariations(safePalette.primary);
+  const secondaryColor = createColorVariations(safePalette.secondary);
   const numericId = teamId.replace('team', '');
   const teamLogoPath = getAnimatedLogoPath(teamData.id, teamData.shortName, teamData.league);
   const fallbackLogoPath = getLogoPath(teamData.id);
@@ -1058,8 +1047,8 @@ export default function TeamDetailClient({ teamId, league }: TeamDetailClientPro
                   <span className="text-sm font-bold text-white">{teamData.shortName}</span>
                   <div className="ml-2">
                     <QualifiedBadge
-                      qualified={Boolean(teamData.stats?.qualified)}
-                      eliminated={Boolean(teamData.stats?.eliminated)}
+                      qualified={Boolean((teamData as any).stats?.qualified)}
+                      eliminated={Boolean((teamData as any).stats?.eliminated)}
                       season={SEASON_YEAR}
                       showSeason
                     />
@@ -1276,7 +1265,9 @@ export default function TeamDetailClient({ teamId, league }: TeamDetailClientPro
                         }}
                       />
                       <div className="relative">
-                        <stat.Icon className="w-6 h-6 mb-3" style={{ color: primaryColor.solid }} />
+                        <div className="mb-3" style={{ color: primaryColor.solid }}>
+                          <stat.Icon className="w-6 h-6" color={primaryColor.solid} />
+                        </div>
                         <p className="text-3xl font-black text-white mb-1">{stat.value}</p>
                         <p className="text-xs font-semibold uppercase tracking-wide text-white/60">{stat.label}</p>
                       </div>
@@ -1541,168 +1532,17 @@ export default function TeamDetailClient({ teamId, league }: TeamDetailClientPro
                 </div>
               )}
               
-              {showPlayerCards && (
-              <>
-              {/* Squad Filters */}
-              <div className="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4 p-4 rounded-lg border border-gray-800 bg-gray-900/50">
-                <div className="flex items-center gap-2">
-                  <Filter className="w-4 h-4 text-gray-400" />
-                  <span className="text-sm font-medium text-gray-300">Filters</span>
-                </div>
-
-                <div className="flex flex-wrap items-center gap-4">
-                  {/* Nationality filter */}
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs text-gray-400">Nationality:</span>
-                    <div className="inline-flex rounded-md border border-gray-700 bg-gray-800 p-1 gap-1">
-                      {[
-                        { id: 'all', label: 'All' },
-                        { id: 'indian', label: 'Indian' },
-                        { id: 'overseas', label: 'Overseas' },
-                      ].map((option) => (
-                        <button
-                          key={option.id}
-                          onClick={() => setNationalityFilter(option.id as any)}
-                          className={`px-3 py-1.5 rounded text-xs font-medium transition-colors ${
-                            nationalityFilter === option.id
-                              ? 'bg-white text-blue-600'
-                              : 'text-gray-300 hover:text-white'
-                          }`}
-                        >
-                          {option.label}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Batting style filter */}
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs text-gray-400">Batting:</span>
-                    <div className="inline-flex rounded-md border border-gray-700 bg-gray-800 p-1 gap-1">
-                      {[
-                        { id: 'any', label: 'Any' },
-                        { id: 'right', label: 'Right' },
-                        { id: 'left', label: 'Left' },
-                      ].map((option) => (
-                        <button
-                          key={option.id}
-                          onClick={() => setBattingStyleFilter(option.id as any)}
-                          className={`px-3 py-1.5 rounded text-xs font-medium transition-colors ${
-                            battingStyleFilter === option.id
-                              ? 'bg-white text-blue-600'
-                              : 'text-gray-300 hover:text-white'
-                          }`}
-                        >
-                          {option.label}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Premium Player Sections */}
-              {[
-                { title: 'Batters', players: batsmen, Icon: BatsmanIcon, color: 'amber' },
-                { title: 'Wicket-keepers', players: wicketkeepers, Icon: WicketKeeperIcon, color: 'rose' },
-                { title: 'All-rounders', players: allRounders, Icon: AllRounderIcon, color: 'purple' },
-                { title: 'Bowlers', players: bowlers, Icon: BowlerIcon, color: 'blue' }
-              ].map((section, sectionIndex) => (
-                section.players.length > 0 && (
-                  <AnimatedSection key={sectionIndex} direction="up" delay={sectionIndex * 0.15} className="mb-16">
-                    {/* Premium Section Header */}
-                      <motion.div
-                      className="mb-10 flex items-center gap-6"
-                      initial={{ opacity: 0, x: -30 }}
-                      whileInView={{ opacity: 1, x: 0 }}
-                      viewport={{ once: true }}
-                        transition={{ duration: 0.6 }}
-                      >
-                      <motion.div
-                        className="relative"
-                        whileHover={{ rotate: 360, scale: 1.1 }}
-                        transition={{ duration: 0.6, type: "spring" }}
-                      >
-                        <div className="absolute inset-0 rounded-2xl blur-xl opacity-50"
-                             style={{ background: primaryColor.medium }} />
-                        <div className="relative p-4 rounded-2xl backdrop-blur-xl border-2"
-                             style={{
-                               background: `linear-gradient(135deg, ${primaryColor.light}40, ${secondaryColor.light}40)`,
-                               borderColor: primaryColor.medium,
-                               boxShadow: `0 10px 30px ${primaryColor.glow}30`
-                             }}>
-                          <section.Icon className="w-12 h-12" color={primaryColor.solid} />
-                        </div>
-                      </motion.div>
-                      <div className="flex-1">
-                        <motion.h3 
-                          className="text-4xl md:text-5xl font-black mb-2" 
-                          style={{ 
-                            color: primaryColor.text,
-                            textShadow: `0 4px 20px ${primaryColor.glow}50`
-                          }}
-                          whileHover={{ scale: 1.05 }}
-                          transition={{ duration: 0.2 }}
-                        >
-                      {section.title}
-                    </motion.h3>
-                        <div className="h-1 w-24 rounded-full"
-                             style={{
-                               background: `linear-gradient(to right, ${primaryColor.solid}, ${secondaryColor.solid})`,
-                               boxShadow: `0 0 20px ${primaryColor.glow}`
-                             }} />
-                      </div>
-                      <motion.div
-                        className="px-6 py-3 rounded-2xl backdrop-blur-xl border-2"
-                        style={{
-                          background: `linear-gradient(135deg, ${primaryColor.light}40, ${secondaryColor.light}40)`,
-                          borderColor: primaryColor.medium,
-                          boxShadow: `0 8px 25px ${primaryColor.glow}30`
-                        }}
-                        whileHover={{ scale: 1.1 }}
-                        transition={{ duration: 0.2 }}
-                      >
-                        <span className="text-2xl font-black" style={{ color: primaryColor.text }}>
-                          {section.players.length}
-                        </span>
-                      </motion.div>
-                    </motion.div>
-                    
-                    {/* Premium Player Grid */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                      {section.players.map((player, playerIndex) => {
-                        const playerWithRealStats = getPlayerRealStats(player);
-                        return isWPL ? (
-                          <WPLPlayerCard
-                            key={player.id}
-                            player={playerWithRealStats}
-                            onClick={() => {
-                              setSelectedPlayer(playerWithRealStats);
-                              setIsModalOpen(true);
-                            }}
-                            index={playerIndex}
-                          />
-                        ) : (
-                          <PlayerCard 
-                            key={player.id} 
-                            player={playerWithRealStats} 
-                            primaryColor={primaryColor} 
-                            secondaryColor={secondaryColor}
-                            onClick={() => {
-                              setSelectedPlayer(playerWithRealStats);
-                              setIsModalOpen(true);
-                            }}
-                            index={playerIndex}
-                            keyPlayers={keyPlayers}
-                          />
-                        )
-                      })}
-                    </div>
-                  </AnimatedSection>
-                )
-              ))}
-              </>
-              )}
+              {/* Redesigned Interactive Squad & Player Panels */}
+              <SquadRosterSection
+                players={(teamData.players || []).map(getPlayerRealStats)}
+                league={teamLeague}
+                teamName={teamData.name}
+                teamShortName={teamData.shortName}
+                primaryColor={primaryColor.solid}
+                secondaryColor={secondaryColor.solid}
+                keyPlayersConfig={keyPlayers || undefined}
+                showSpotlight
+              />
               </motion.div>
             )}
 
@@ -1724,7 +1564,7 @@ export default function TeamDetailClient({ teamId, league }: TeamDetailClientPro
                   <TeamPlayersTab 
                     teamId={teamData.id || "rcb"} 
                     teamName={teamData.name || "Royal Challengers Bengaluru"}
-                    initialPlayers={(teamData.players && teamData.players.length > 0) ? teamData.players : (teamData.squad || (sections && sections.flatMap(s => s.players)) || [])}
+                    initialPlayers={(teamData.players && teamData.players.length > 0) ? teamData.players : ((teamData as any).squad || [])}
                     league={teamLeague}
                   />
                 </div>
@@ -1911,15 +1751,18 @@ export default function TeamDetailClient({ teamId, league }: TeamDetailClientPro
 
         <Footer />
 
-      <PlayerModal
+      <PlayerProfileModal
         player={selectedPlayer}
         isOpen={isModalOpen}
         onClose={() => {
           setIsModalOpen(false);
           setSelectedPlayer(null);
         }}
-        teamColors={teamData?.colors}
-        teamData={teamData || undefined}
+        league={teamLeague}
+        teamName={teamData.name}
+        teamShortName={teamData.shortName}
+        primaryColor={primaryColor.solid}
+        secondaryColor={secondaryColor.solid}
       />
 
       {showPlayerComparison && teamData && teamData.players && (
@@ -2466,15 +2309,6 @@ function PlayerCard({ player, primaryColor, secondaryColor, onClick, index, keyP
                 color: '#FCD34D',
                 border: '1px solid rgba(245, 158, 11, 0.5)',
               }}
-              initial={{ opacity: 0, scale: 0.8, x: -10 }}
-              whileInView={{ opacity: 1, scale: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.3, delay: index * 0.05 + 0.65 }}
-              whileHover={{ 
-                scale: 1.1, 
-                y: -2,
-                boxShadow: '0 4px 12px rgba(245, 158, 11, 0.4)'
-              }}
               animate={{
                 boxShadow: [
                   '0 0 0 rgba(245, 158, 11, 0.4)',
@@ -2483,6 +2317,8 @@ function PlayerCard({ player, primaryColor, secondaryColor, onClick, index, keyP
                 ]
               }}
               transition={{
+                duration: 0.3,
+                delay: index * 0.05 + 0.65,
                 boxShadow: {
                   duration: 2,
                   repeat: Infinity,

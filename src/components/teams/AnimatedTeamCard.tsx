@@ -211,7 +211,7 @@ export default function AnimatedTeamCard({ team, onPlayerClick, isFavorite = fal
                   e.stopPropagation();
                   onToggleFavorite();
                 }}
-                className="relative w-10 h-10 rounded-full bg-slate-900/40 backdrop-blur-sm border border-white/20 hover:border-rose-500/50 flex items-center justify-center"
+                className="relative w-10 h-10 rounded-full bg-slate-900/40 backdrop-blur-sm border border-white/20 hover:border-amber-400/60 flex items-center justify-center"
                 whileHover={{ scale: 1.2, rotate: 15 }}
                 whileTap={{ scale: 0.9 }}
                 aria-label={isFavorite ? "Remove from favorites" : "Add to favorites"}
@@ -249,8 +249,8 @@ export default function AnimatedTeamCard({ team, onPlayerClick, isFavorite = fal
               </motion.h3>
               <div>
                 <QualifiedBadge
-                  qualified={Boolean(team.stats?.qualified)}
-                  eliminated={Boolean(team.stats?.eliminated)}
+                  qualified={Boolean((team as any).stats?.qualified)}
+                  eliminated={Boolean((team as any).stats?.eliminated)}
                 />
               </div>
               {trophyCount > 0 && (

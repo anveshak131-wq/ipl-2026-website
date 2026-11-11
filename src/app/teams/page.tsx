@@ -19,6 +19,7 @@ import TeamCardSkeleton from '@/components/teams/TeamCardSkeleton';
 import { CustomEmoji } from '@/components/emoji/Emoji';
 import AnimatedSection from '@/components/ui/AnimatedSection';
 import GradientText from '@/components/ui/GradientText';
+import { getSafeTeamPalette } from '@/lib/teamColors';
 import { Search, Filter, Grid3x3, List, X, Star, Trophy, Users, Globe, Award, TrendingUp, Sparkles } from 'lucide-react';
 
 type SortOption = 'name' | 'titles' | 'players' | 'performance';
@@ -252,10 +253,10 @@ function TeamsPageContent() {
             }
         };
 
-        window.addEventListener('admin-data-updated', handlePlayerUpdate as EventListener);
+        window.addEventListener('admin-data-updated', handlePlayerUpdate as unknown as EventListener);
         
         return () => {
-            window.removeEventListener('admin-data-updated', handlePlayerUpdate as EventListener);
+            window.removeEventListener('admin-data-updated', handlePlayerUpdate as unknown as EventListener);
         };
     }, [currentLeague]);
 
@@ -450,15 +451,15 @@ function TeamsPageContent() {
                             className="mb-8"
                         >
                             <motion.span
-                                className="inline-flex items-center gap-3 px-6 py-3 rounded-full backdrop-blur-2xl border-2 border-white/20 bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-pink-500/20 shadow-2xl"
+                                className="inline-flex items-center gap-3 px-6 py-3 rounded-full backdrop-blur-2xl border-2 border-white/20 bg-gradient-to-r from-sky-500/20 via-indigo-500/20 to-amber-500/20 shadow-2xl"
                                 whileHover={{ scale: 1.05 }}
                                 style={{
                                     boxShadow: '0 10px 40px rgba(59, 130, 246, 0.3)'
                                 }}
                             >
-                                <Sparkles className="w-5 h-5 text-blue-400" />
-                                <span className="text-sm font-black uppercase tracking-widest bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
-                                    {currentLeague === 'wpl' ? 'WPL 2026' : 'IPL 2026'} TEAMS
+                                <Sparkles className="w-5 h-5 text-cyan-400" />
+                                <span className="text-sm font-black uppercase tracking-widest bg-gradient-to-r from-sky-400 via-cyan-300 to-amber-300 bg-clip-text text-transparent">
+                                    {currentLeague === 'wpl' ? 'WPL 2027' : 'IPL 2027'} TEAMS
                                 </span>
                             </motion.span>
                             </motion.div>
@@ -471,7 +472,7 @@ function TeamsPageContent() {
                         >
                             <span className="block text-white mb-4">Elite</span>
                             <GradientText 
-                                gradient="from-blue-400 via-purple-400 to-pink-400" 
+                                gradient="from-sky-400 via-cyan-300 to-amber-300" 
                                 animate 
                                 className="text-8xl md:text-9xl lg:text-[10rem]"
                             >
@@ -581,11 +582,11 @@ function TeamsPageContent() {
                         >
                             <motion.button
                                 onClick={() => setShowComparison(true)}
-                                className="group relative overflow-hidden px-8 py-4 rounded-2xl bg-gradient-to-r from-purple-500 via-pink-500 to-rose-500 text-white font-black text-lg shadow-2xl"
+                                className="group relative overflow-hidden px-8 py-4 rounded-2xl bg-gradient-to-r from-amber-400 via-amber-500 to-orange-500 text-slate-950 font-black text-lg shadow-2xl"
                                 whileHover={{ scale: 1.05, y: -2 }}
                                 whileTap={{ scale: 0.95 }}
                                 style={{
-                                    boxShadow: '0 20px 60px rgba(168, 85, 247, 0.5)'
+                                    boxShadow: '0 20px 60px rgba(245, 158, 11, 0.35)'
                                 }}
                             >
                                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
@@ -631,12 +632,12 @@ function TeamsPageContent() {
                             }}
                         >
                             {/* Animated background */}
-                            <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 via-purple-500/5 to-pink-500/5 opacity-0 hover:opacity-100 transition-opacity duration-500" />
+                            <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 via-cyan-500/5 to-amber-500/5 opacity-0 hover:opacity-100 transition-opacity duration-500" />
                             
                             <div className="relative z-10 p-6 md:p-8">
                                 {/* Premium Search Bar */}
                                 <div className="relative mb-6 group">
-                                    <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-pink-500/20 rounded-2xl blur-2xl opacity-0 group-focus-within:opacity-50 transition-opacity duration-500" />
+                                    <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 via-cyan-500/20 to-amber-500/20 rounded-2xl blur-2xl opacity-0 group-focus-within:opacity-50 transition-opacity duration-500" />
                             <div className="relative">
                                         <Search className="absolute left-6 top-1/2 -translate-y-1/2 w-6 h-6 text-gray-400 group-focus-within:text-blue-400 transition-colors" />
                                 <input
@@ -764,13 +765,13 @@ function TeamsPageContent() {
                                         onClick={() => setShowFavoritesFirst(!showFavoritesFirst)}
                                                 className={`px-5 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center gap-2 ${
                                                     showFavoritesFirst
-                                                        ? 'bg-gradient-to-r from-rose-500/30 to-pink-500/30 text-rose-300 border-2 border-rose-500/50 shadow-lg'
-                                                        : 'bg-slate-800/60 text-gray-300 border-2 border-white/10 hover:border-rose-500/50 hover:bg-slate-700/60'
+                                                        ? 'bg-gradient-to-r from-amber-500/30 to-yellow-500/30 text-amber-300 border-2 border-amber-400/50 shadow-lg'
+                                                        : 'bg-slate-800/60 text-gray-300 border-2 border-white/10 hover:border-amber-400/50 hover:bg-slate-700/60'
                                                 }`}
                                                 whileHover={{ scale: 1.05 }}
                                                 whileTap={{ scale: 0.95 }}
                                             >
-                                                <Star className={`w-4 h-4 ${showFavoritesFirst ? 'fill-rose-300' : ''}`} />
+                                                <Star className={`w-4 h-4 ${showFavoritesFirst ? 'fill-amber-300' : ''}`} />
                                                 Favorites
                                             </motion.button>
                                         </>
@@ -871,22 +872,23 @@ function TeamsPageContent() {
                             }}
                         >
                             <AnimatePresence mode="popLayout">
-                                {filteredAndSortedTeams.map((team, index) => (
+                                {filteredAndSortedTeams.map((team, index) => {
+                                    const safePalette = getSafeTeamPalette(team);
+                                    return (
                                     <motion.div
                                         key={team.id}
                                         layout
-                                            initial={{ opacity: 0, y: 50, scale: 0.9 }}
+                                            initial={{ opacity: 0, y: 30, scale: 0.95 }}
                                             animate={{ opacity: 1, y: 0, scale: 1 }}
-                                            exit={{ opacity: 0, scale: 0.8, y: -20 }}
+                                            exit={{ opacity: 0, scale: 0.9, y: -15 }}
                                         transition={{
-                                                duration: 0.6,
-                                            delay: index * 0.05,
+                                                duration: 0.45,
+                                            delay: index * 0.04,
                                             ease: [0.22, 1, 0.36, 1],
                                         }}
                                         whileHover={{ 
-                                                y: -15, 
-                                                scale: 1.05,
-                                            transition: { duration: 0.3 }
+                                                y: -6,
+                                            transition: { duration: 0.25 }
                                         }}
                                             className="relative group"
                                         >
@@ -894,7 +896,7 @@ function TeamsPageContent() {
                                             <div 
                                                 className="absolute -inset-2 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-2xl -z-10"
                                                 style={{
-                                                    background: `linear-gradient(135deg, ${team.colors.primary}50, ${team.colors.secondary}50)`
+                                                    background: `linear-gradient(135deg, ${safePalette.primary}45, ${safePalette.secondary}45)`
                                                 }}
                                             />
                                             
@@ -905,7 +907,8 @@ function TeamsPageContent() {
                                             onToggleFavorite={() => toggleFavorite(team.id)}
                                         />
                                     </motion.div>
-                                ))}
+                                    );
+                                })}
                             </AnimatePresence>
                         </motion.div>
                     )}
@@ -928,9 +931,9 @@ function TeamsPageContent() {
                             >
                                 {/* Animated Background */}
                                 <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700">
-                                    <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 via-purple-500/10 to-pink-500/10" />
+                                    <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 via-cyan-500/10 to-amber-500/10" />
                                     <div className="absolute top-0 left-0 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2" />
-                                    <div className="absolute bottom-0 right-0 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl translate-x-1/2 translate-y-1/2" />
+                                    <div className="absolute bottom-0 right-0 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl translate-x-1/2 translate-y-1/2" />
                                 </div>
 
                                 <div className="relative z-10">
@@ -942,18 +945,18 @@ function TeamsPageContent() {
                                         transition={{ duration: 0.6 }}
                                     >
                                         <motion.span
-                                            className="inline-flex items-center gap-3 px-6 py-3 rounded-full backdrop-blur-2xl border-2 border-white/20 bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-pink-500/20 mb-8"
+                                            className="inline-flex items-center gap-3 px-6 py-3 rounded-full backdrop-blur-2xl border-2 border-white/20 bg-gradient-to-r from-sky-500/20 via-cyan-500/20 to-amber-500/20 mb-8"
                                             whileHover={{ scale: 1.05 }}
                                         >
-                                            <Trophy className="w-5 h-5 text-blue-400" />
-                                            <span className="text-sm font-black uppercase tracking-widest bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+                                            <Trophy className="w-5 h-5 text-amber-400" />
+                                            <span className="text-sm font-black uppercase tracking-widest bg-gradient-to-r from-sky-400 via-cyan-300 to-amber-300 bg-clip-text text-transparent">
                                                 CHAMPIONSHIP LEGACY
                                         </span>
                                         </motion.span>
                                         
                                         <h2 className="text-5xl md:text-6xl lg:text-7xl font-black text-white mb-6 leading-tight">
                                             Trophy{' '}
-                                            <span className="bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+                                            <span className="bg-gradient-to-r from-sky-400 via-cyan-300 to-amber-300 bg-clip-text text-transparent">
                                                 Champions
                                             </span>
                                     </h2>
@@ -987,7 +990,7 @@ function TeamsPageContent() {
                                                         whileHover={{ scale: 1.15, y: -10 }}
                                                     >
                                                         <div className="mb-6 p-6 rounded-3xl bg-gradient-to-br from-white/5 to-white/0 border-2 border-white/10 group-hover:border-amber-500/50 transition-all duration-300 backdrop-blur-xl">
-                                                            <div className="text-xl font-black text-white mb-4" style={{ color: team.colors.primary }}>
+                                                            <div className="text-xl font-black text-white mb-4" style={{ color: getSafeTeamPalette(team).primary }}>
                                                                 {team.shortName}
                                                             </div>
                                                             <div className="flex items-center justify-center gap-2 mb-3">
@@ -1022,11 +1025,11 @@ function TeamsPageContent() {
                                     >
                                         <motion.button
                                         onClick={() => router.push('/stats')}
-                                            className="group relative overflow-hidden rounded-2xl font-black py-5 px-12 text-lg transition-all duration-500 cursor-pointer bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 text-white shadow-2xl"
+                                            className="group relative overflow-hidden rounded-2xl font-black py-5 px-12 text-lg transition-all duration-500 cursor-pointer bg-gradient-to-r from-amber-400 via-amber-500 to-cyan-400 text-slate-950 shadow-2xl"
                                             whileHover={{ scale: 1.05, y: -2 }}
                                             whileTap={{ scale: 0.95 }}
                                             style={{
-                                                boxShadow: '0 20px 60px rgba(168, 85, 247, 0.5)'
+                                                boxShadow: '0 20px 60px rgba(245, 158, 11, 0.35)'
                                             }}
                                         >
                                             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />

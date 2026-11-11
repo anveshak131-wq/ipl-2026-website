@@ -12,6 +12,7 @@ import { motion } from 'framer-motion';
 import { CustomEmoji } from '@/components/emoji/Emoji';
 import { useState } from 'react';
 import { isIplReigningChampionTeam } from '@/lib/reigningChampion';
+import { getSafeTeamPalette } from '@/lib/teamColors';
 
 interface EnhancedTeamCardProps {
   team: Team;
@@ -23,6 +24,7 @@ interface EnhancedTeamCardProps {
 export default function EnhancedTeamCard({ team, onPlayerClick, isFavorite = false, onToggleFavorite }: EnhancedTeamCardProps) {
   const router = useRouter();
   const [imageError, setImageError] = useState(false);
+  const safePalette = getSafeTeamPalette(team);
   const animatedLogo = getAnimatedLogoPath(team.id, team.shortName, team.league);
   const fallbackLogo = getLogoPath(team.id);
   const isRCBStaticExport = animatedLogo.endsWith('rcb_logo_premium.svg');
@@ -56,19 +58,19 @@ export default function EnhancedTeamCard({ team, onPlayerClick, isFavorite = fal
       className="group relative overflow-hidden rounded-2xl border border-white/10 hover:border-white/20 transition-all duration-500 hover:shadow-2xl"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      whileHover={{ y: -8, scale: 1.02 }}
-      transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+      whileHover={{ y: -6 }}
+      transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
       style={{
-        background: `linear-gradient(135deg, rgba(15, 23, 42, 0.75), rgba(30, 27, 75, 0.75))`,
-        boxShadow: `0 0 0 1px ${team.colors.primary}20`,
-        borderColor: `${team.colors.primary}40`
+        background: `linear-gradient(135deg, rgba(15, 23, 42, 0.85), rgba(15, 23, 42, 0.96))`,
+        boxShadow: `0 0 0 1px ${safePalette.primary}25`,
+        borderColor: `${safePalette.primary}45`
       }}
     >
       {/* Gradient Background Overlay */}
       <div 
-        className="absolute inset-0 opacity-40 group-hover:opacity-60 transition-opacity duration-500"
+        className="absolute inset-0 opacity-35 group-hover:opacity-55 transition-opacity duration-500"
         style={{
-          background: `linear-gradient(135deg, ${team.colors.primary}40 0%, ${team.colors.secondary}60 100%)`
+          background: `linear-gradient(135deg, ${safePalette.primary}38 0%, ${safePalette.secondary}45 100%)`
         }}
       />
 
@@ -89,7 +91,7 @@ export default function EnhancedTeamCard({ team, onPlayerClick, isFavorite = fal
             <div 
               className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-xl rounded-xl"
               style={{
-                background: `radial-gradient(circle, ${team.colors.primary}60, transparent)`
+                background: `radial-gradient(circle, ${safePalette.primary}60, transparent)`
               }}
             />
             
@@ -120,7 +122,7 @@ export default function EnhancedTeamCard({ team, onPlayerClick, isFavorite = fal
                 e.stopPropagation();
                 onToggleFavorite();
               }}
-              className="relative w-10 h-10 rounded-full bg-slate-900/40 backdrop-blur-sm border border-white/20 hover:border-rose-500/50 flex items-center justify-center transition-all duration-300 hover:scale-110"
+              className="relative w-10 h-10 rounded-full bg-slate-900/40 backdrop-blur-sm border border-white/20 hover:border-amber-400/60 flex items-center justify-center transition-all duration-300 hover:scale-110"
               aria-label={isFavorite ? "Remove from favorites" : "Add to favorites"}
             >
               <motion.span
@@ -141,7 +143,7 @@ export default function EnhancedTeamCard({ team, onPlayerClick, isFavorite = fal
               className="text-2xl font-black"
               style={{
                 color: '#FFFFFF',
-                textShadow: `0 2px 8px rgba(0,0,0,0.8), 0 0 20px ${team.colors.primary}60`
+                textShadow: `0 2px 8px rgba(0,0,0,0.8), 0 0 20px ${safePalette.primary}60`
               }}
             >
               {team.shortName}
@@ -192,18 +194,18 @@ export default function EnhancedTeamCard({ team, onPlayerClick, isFavorite = fal
             <div 
               className="w-8 h-8 rounded-lg border-2 border-white/30 hover:scale-125 transition-transform cursor-pointer"
               style={{ 
-                backgroundColor: team.colors.primary,
-                boxShadow: `0 0 15px ${team.colors.primary}40`
+                backgroundColor: safePalette.primary,
+                boxShadow: `0 0 15px ${safePalette.primary}40`
               }}
-              title={team.colors.primary}
+              title={safePalette.primary}
             />
             <div 
               className="w-8 h-8 rounded-lg border-2 border-white/30 hover:scale-125 transition-transform cursor-pointer"
               style={{ 
-                backgroundColor: team.colors.secondary,
-                boxShadow: `0 0 15px ${team.colors.secondary}40`
+                backgroundColor: safePalette.secondary,
+                boxShadow: `0 0 15px ${safePalette.secondary}40`
               }}
-              title={team.colors.secondary}
+              title={safePalette.secondary}
             />
           </div>
         </div>
@@ -220,9 +222,9 @@ export default function EnhancedTeamCard({ team, onPlayerClick, isFavorite = fal
             onClick={handleViewFullSquad}
             className="flex-1 relative overflow-hidden rounded-lg font-bold text-sm py-3 cursor-pointer group/btn"
             style={{
-              background: `linear-gradient(135deg, ${team.colors.primary}, ${team.colors.secondary})`,
-              boxShadow: `0 4px 20px ${team.colors.primary}40`,
-              color: getOptimalTextColorForGradient(`linear-gradient(135deg, ${team.colors.primary}, ${team.colors.secondary})`),
+              background: `linear-gradient(135deg, ${safePalette.primary}, ${safePalette.secondary})`,
+              boxShadow: `0 4px 20px ${safePalette.primary}40`,
+              color: getOptimalTextColorForGradient(`linear-gradient(135deg, ${safePalette.primary}, ${safePalette.secondary})`),
             }}
             whileHover={{ scale: 1.03 }}
             whileTap={{ scale: 0.98 }}
@@ -260,7 +262,7 @@ export default function EnhancedTeamCard({ team, onPlayerClick, isFavorite = fal
       <div 
         className="absolute -inset-px rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 -z-10 blur-lg"
         style={{
-          background: `linear-gradient(135deg, ${team.colors.primary}40, ${team.colors.secondary}40)`
+          background: `linear-gradient(135deg, ${safePalette.primary}40, ${safePalette.secondary}40)`
         }}
       />
     </motion.article>

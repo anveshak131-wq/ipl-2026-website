@@ -18,7 +18,7 @@ export default function Team3DFlipCard({ team, index = 0 }: Team3DFlipCardProps)
     RCB: 'from-red-600 to-red-400',
     KKR: 'from-purple-600 to-purple-400',
     DC: 'from-blue-700 to-blue-500',
-    RR: 'from-pink-600 to-pink-400',
+    RR: 'from-blue-600 to-amber-500',
     SRH: 'from-orange-600 to-orange-400',
     LSG: 'from-green-600 to-green-400',
     GT: 'from-cyan-600 to-cyan-400',

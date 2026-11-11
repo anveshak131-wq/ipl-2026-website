@@ -78,7 +78,7 @@ export default function UpcomingFixturesWidget({ team, matches: providedMatches,
       {/* Upcoming Fixtures - Premium Design */}
       <div className="relative">
         {/* Animated background gradient */}
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-purple-500/5 to-pink-500/5 rounded-3xl blur-3xl -z-10" />
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-cyan-500/5 to-amber-500/5 rounded-3xl blur-3xl -z-10" />
         
         {/* Section Header */}
         <motion.div 

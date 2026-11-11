@@ -3,7 +3,8 @@
 import { useState, useEffect } from 'react';
 import { api } from '@/lib/data';
 import type { Player, Team } from '@/types';
-import ModernPlayersPanel from '../players/ModernPlayersPanel';
+import SquadRosterSection from './modern/SquadRosterSection';
+import { sanitizeNoPinkHex } from '@/lib/teamColors';
 
 interface TeamPlayersTabProps {
   teamId: string;
@@ -107,10 +108,10 @@ export default function TeamPlayersTab({
 
         if (matchedTeam && (matchedTeam as any).colors) {
           setAccentColors((matchedTeam as any).colors);
-        } else if (matchedTeam && matchedTeam.primaryColor) {
+        } else if (matchedTeam && (matchedTeam as any).primaryColor) {
           setAccentColors({
-            primary: matchedTeam.primaryColor,
-            secondary: matchedTeam.secondaryColor || '#E5B80B'
+            primary: (matchedTeam as any).primaryColor,
+            secondary: (matchedTeam as any).secondaryColor || '#E5B80B'
           });
         }
 
@@ -165,16 +166,14 @@ export default function TeamPlayersTab({
         </p>
       </div>
 
-      <ModernPlayersPanel 
+      <SquadRosterSection
         players={players}
-        initialPlayers={players} 
-        teamId={teamId}
-        teams={teams}
-        showHeader={false}
-        showTeamFilter={false}
-        accentColor={accentColors?.primary || '#DA1A32'}
-        accentColorSecondary={accentColors?.secondary || '#E5B80B'}
-        searchPlaceholder={`Search ${teamName} players…`}
+        league={league || 'ipl'}
+        teamName={teamName}
+        teamShortName={String(teamId || 'TEAM').toUpperCase()}
+        primaryColor={sanitizeNoPinkHex(accentColors?.primary, '#1D4ED8')}
+        secondaryColor={sanitizeNoPinkHex(accentColors?.secondary, '#F59E0B')}
+        showSpotlight={false}
       />
     </div>
   );

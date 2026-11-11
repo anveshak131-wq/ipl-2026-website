@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { getAllFormatRatings } from '@/lib/formatRatings';
 import { api } from '@/lib/data';
+import { sanitizeNoPinkHex } from '@/lib/teamColors';
 import PlayerCardModal from '../teams/PlayerCardModal';
 
 interface ModernPlayersPanelProps {
@@ -95,6 +96,7 @@ export default function ModernPlayersPanel({
 
       return () => { active = false; };
     }
+    return undefined;
   }, [teamId, defaultTeamId, sourcePlayers.length]);
 
   const activeTeam = team || teams.find((t: any) => String(t.id).toLowerCase() === String(teamId || 'rcb').toLowerCase());
@@ -559,13 +561,34 @@ export default function ModernPlayersPanel({
         </div>
       )}
 
-      {selectedPlayer && (
-        <PlayerCardModal
-          player={selectedPlayer as any}
-          isOpen={Boolean(selectedPlayer)}
-          onClose={() => setSelectedPlayer(null)}
-        />
-      )}
+      {selectedPlayer && (() => {
+        const selectedIdx = filteredPlayers.findIndex(
+          (p) => (p.id && p.id === selectedPlayer.id) || p.name === selectedPlayer.name
+        );
+        const safePrimary = sanitizeNoPinkHex(activeTeam?.colors?.primary || activeTeam?.primaryColor, '#38BDF8');
+        const safeSecondary = sanitizeNoPinkHex(activeTeam?.colors?.secondary || activeTeam?.secondaryColor, '#F59E0B');
+        return (
+          <PlayerCardModal
+            player={selectedPlayer as any}
+            isOpen={Boolean(selectedPlayer)}
+            onClose={() => setSelectedPlayer(null)}
+            teamPrimary={safePrimary}
+            teamSecondary={safeSecondary}
+            teamShortName={activeTeam?.shortName}
+            teamLogo={activeTeam?.logo}
+            hasPrev={selectedIdx > 0}
+            hasNext={selectedIdx >= 0 && selectedIdx < filteredPlayers.length - 1}
+            onPrev={() => {
+              if (selectedIdx > 0) setSelectedPlayer(filteredPlayers[selectedIdx - 1]);
+            }}
+            onNext={() => {
+              if (selectedIdx >= 0 && selectedIdx < filteredPlayers.length - 1) {
+                setSelectedPlayer(filteredPlayers[selectedIdx + 1]);
+              }
+            }}
+          />
+        );
+      })()}
     </div>
   );
 }

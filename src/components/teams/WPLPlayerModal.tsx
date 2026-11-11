@@ -75,7 +75,7 @@ export default function WPLPlayerModal({ player, team, isOpen, onClose }: WPLPla
             <div
               className="absolute inset-0 opacity-30 transition-opacity duration-500"
               style={{
-                background: `radial-gradient(circle at 50% 50%, ${WPLColors.purpleRGBA[40]}, ${WPLColors.pinkRGBA[40]}, transparent)`,
+                background: `radial-gradient(circle at 50% 50%, ${WPLColors.purpleRGBA[40]}, ${WPLColors.blueRGBA[40]}, transparent)`,
               }}
             />
 
@@ -110,7 +110,7 @@ export default function WPLPlayerModal({ player, team, isOpen, onClose }: WPLPla
               <div
                 className="relative p-8 pb-12"
                 style={{
-                  background: `linear-gradient(135deg, ${WPLColors.purpleRGBA[20]}, ${WPLColors.pinkRGBA[20]})`,
+                  background: `linear-gradient(135deg, ${WPLColors.purpleRGBA[20]}, ${WPLColors.blueRGBA[20]})`,
                 }}
               >
                 {/* Floating particles */}
@@ -120,20 +120,19 @@ export default function WPLPlayerModal({ player, team, isOpen, onClose }: WPLPla
                       key={i}
                       className="absolute w-1.5 h-1.5 rounded-full"
                       style={{
-                        background: WPLColors.pink,
+                        background: WPLColors.active,
                         opacity: 0.4,
                       }}
                       initial={{
-                        x: Math.random() * 100 + '%',
-                        y: Math.random() * 100 + '%',
+                        x: `${(i * 19 + 12) % 90}%`,
+                        y: `${(i * 23 + 15) % 85}%`,
                       }}
                       animate={{
-                        y: [null, Math.random() * 100 + '%'],
-                        x: [null, Math.random() * 100 + '%'],
-                        opacity: [0.4, 0.7, 0.4],
+                        y: [`${(i * 23 + 15) % 85}%`, `${(i * 29 + 35) % 85}%`, `${(i * 23 + 15) % 85}%`],
+                        opacity: [0.3, 0.65, 0.3],
                       }}
                       transition={{
-                        duration: 4 + Math.random() * 2,
+                        duration: 4 + i * 0.5,
                         repeat: Infinity,
                         delay: i * 0.3,
                       }}
@@ -146,7 +145,7 @@ export default function WPLPlayerModal({ player, team, isOpen, onClose }: WPLPla
                   <div
                     className="w-28 h-28 rounded-full flex items-center justify-center text-4xl font-black text-white shadow-2xl relative"
                     style={{
-                      background: `linear-gradient(135deg, ${WPLColors.purple}, ${WPLColors.pink}, ${WPLColors.rose})`,
+                      background: `linear-gradient(135deg, ${WPLColors.purple}, ${WPLColors.blue}, ${WPLColors.warning})`,
                       boxShadow: `0 15px 50px ${WPLColors.purpleRGBA[50]}`,
                     }}
                   >
@@ -155,8 +154,8 @@ export default function WPLPlayerModal({ player, team, isOpen, onClose }: WPLPla
                     <div
                       className="absolute inset-0 rounded-full border-2"
                       style={{
-                        borderColor: WPLColors.pinkRGBA[50],
-                        boxShadow: `0 0 30px ${WPLColors.pinkRGBA[30]}`,
+                        borderColor: WPLColors.blueRGBA[50],
+                        boxShadow: `0 0 30px ${WPLColors.blueRGBA[30]}`,
                       }}
                     />
                   </div>
@@ -184,9 +183,9 @@ export default function WPLPlayerModal({ player, team, isOpen, onClose }: WPLPla
                         <span
                           className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border"
                           style={{
-                            background: WPLColors.roseRGBA[20],
-                            borderColor: WPLColors.roseRGBA[40],
-                            color: WPLColors.rose,
+                            background: WPLColors.orangeRGBA[20],
+                            borderColor: WPLColors.orangeRGBA[40],
+                            color: WPLColors.warning,
                           }}
                         >
                           <span>👑</span> Captain
@@ -196,9 +195,9 @@ export default function WPLPlayerModal({ player, team, isOpen, onClose }: WPLPla
                         <span
                           className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border"
                           style={{
-                            background: WPLColors.pinkRGBA[20],
-                            borderColor: WPLColors.pinkRGBA[40],
-                            color: WPLColors.pink,
+                            background: WPLColors.blueRGBA[20],
+                            borderColor: WPLColors.blueRGBA[40],
+                            color: WPLColors.blue,
                           }}
                         >
                           #{player.jerseyNumber}
@@ -225,7 +224,7 @@ export default function WPLPlayerModal({ player, team, isOpen, onClose }: WPLPla
                     <div
                       className="w-1 h-6 rounded-full"
                       style={{
-                        background: `linear-gradient(to bottom, ${WPLColors.purple}, ${WPLColors.pink})`,
+                        background: `linear-gradient(to bottom, ${WPLColors.purple}, ${WPLColors.blue})`,
                       }}
                     />
                     Personal Information
@@ -254,8 +253,8 @@ export default function WPLPlayerModal({ player, team, isOpen, onClose }: WPLPla
                       <div
                         className="p-4 rounded-xl border"
                         style={{
-                          background: WPLColors.pinkRGBA[10],
-                          borderColor: WPLColors.pinkRGBA[30],
+                          background: WPLColors.blueRGBA[10],
+                          borderColor: WPLColors.blueRGBA[30],
                         }}
                       >
                         <p className="text-xs uppercase mb-1" style={{ color: WPLColors.textMuted }}>
@@ -288,8 +287,8 @@ export default function WPLPlayerModal({ player, team, isOpen, onClose }: WPLPla
                     <div
                       className="p-4 rounded-xl border"
                       style={{
-                        background: WPLColors.pinkRGBA[10],
-                        borderColor: WPLColors.pinkRGBA[30],
+                        background: WPLColors.blueRGBA[10],
+                        borderColor: WPLColors.blueRGBA[30],
                       }}
                     >
                       <p className="text-xs uppercase mb-1" style={{ color: WPLColors.textMuted }}>

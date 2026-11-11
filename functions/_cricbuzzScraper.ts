@@ -84,6 +84,7 @@ const VERIFIED_PLAYER_SEEDS: ProfileSeed[] = [
   ['13658', 'harleen-deol'],
   ['1448809', 'pratika-rawal'],
   ['11093', 'sushma-verma', ['9083']],
+  ['1448841', 'kranti-gaud', ['kranti-goud', 'kranti goud']],
 ];
 
 const KNOWN_PLAYER_PROFILES: Record<string, string> = (() => {

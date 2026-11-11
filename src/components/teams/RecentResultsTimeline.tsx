@@ -60,7 +60,7 @@ export default function RecentResultsTimeline({ team, matches: providedMatches, 
   return (
     <div className="relative">
       {/* Timeline line */}
-      <div className="absolute left-8 top-0 bottom-0 w-0.5 bg-gradient-to-b from-blue-500/50 via-purple-500/50 to-pink-500/50" />
+      <div className="absolute left-8 top-0 bottom-0 w-0.5 bg-gradient-to-b from-blue-500/50 via-cyan-500/50 to-amber-500/50" />
 
       <div className="space-y-6">
         {matches.map((match, index) => {
