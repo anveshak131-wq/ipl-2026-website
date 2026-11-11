@@ -55,7 +55,7 @@ const VERIFIED_PLAYER_SEEDS: ProfileSeed[] = [
   ['12295', 'kirstie-gordon', ['13084']],
   ['13519', 'taniya-bhatia'],
   ['41078', 'shree-charani'],
-  ['1465354', 'uma-kashvi', ['26051']],
+  ['1465354', 'uma-kashvi', ['26051', 'kashvi-kandikuppa', 'uma-kashi']],
   ['1448889', 'nazma-khan', ['26052']],
 
   // GG-W
@@ -523,6 +523,10 @@ function tokensRoughlyMatch(intended: string, candidate: string): boolean {
   return false;
 }
 
+const CRICBUZZ_ALIAS_EQUIVALENCE_GROUPS: ReadonlyArray<ReadonlyArray<string>> = [
+  ['uma kashvi', 'uma kashi', 'kashvi kandikuppa'],
+];
+
 function namesMatchIntended(intendedSlugName: string, scrapedName: string, title: string): boolean {
   if (!intendedSlugName) return true;
   const intendedWords = normalizeWords(intendedSlugName);
@@ -531,6 +535,15 @@ function namesMatchIntended(intendedSlugName: string, scrapedName: string, title
   const candidateText = `${scrapedName} ${title.replace(/\s*Profile.*/i, '')}`.toLowerCase();
   const candidateWords = normalizeWords(candidateText);
   if (candidateWords.length === 0) return false;
+
+  const normalizedIntended = intendedWords.join(' ');
+  const normalizedCandidate = candidateWords.join(' ');
+  const isExemptAliasMatch = CRICBUZZ_ALIAS_EQUIVALENCE_GROUPS.some(
+    (group) =>
+      group.includes(normalizedIntended) &&
+      group.some((alias) => normalizedCandidate.includes(alias)),
+  );
+  if (isExemptAliasMatch) return true;
 
   if (intendedWords.length === 1) {
     return candidateWords.some((cw) => tokensRoughlyMatch(intendedWords[0], cw));
