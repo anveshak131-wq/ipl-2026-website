@@ -495,17 +495,26 @@ export default function EnhancedWPLTeamPage({ teamId }: { teamId: string }) {
             const localTotal = localBatKeys.length + localBowlKeys.length;
             const existingTotal = existingBatKeys.length + existingBowlKeys.length;
 
-            const careerStats = (localTotal >= existingTotal && localTotal > 0)
+            const localTs = lp.updatedAt ? Date.parse(lp.updatedAt) : 0;
+            const existingTs = existing.updatedAt ? Date.parse(existing.updatedAt) : 0;
+            const localIsStrictlyNewer = Boolean(localTs && localTs > existingTs);
+
+            const careerStats = (localIsStrictlyNewer && localTotal > 0) || (existingTotal === 0 && localTotal > 0)
               ? lp.careerStats
               : (existingTotal > 0 ? existing.careerStats : (lp.careerStats || { batting: {}, bowling: {} }));
 
+            const base = localIsStrictlyNewer ? existing : lp;
+            const head = localIsStrictlyNewer ? lp : existing;
+
             mergedMap.set(k, {
-              ...existing,
-              ...lp,
+              ...base,
+              ...head,
               careerStats,
+              cricbuzzUrl: head.cricbuzzUrl || base.cricbuzzUrl || '',
+              cricbuzzId: head.cricbuzzId || base.cricbuzzId || '',
               stats: {
-                ...(existing.stats || {}),
-                ...(lp.stats || {})
+                ...(base.stats || {}),
+                ...(head.stats || {})
               }
             });
           }

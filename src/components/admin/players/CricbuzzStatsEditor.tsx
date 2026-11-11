@@ -1,6 +1,7 @@
 'use client';
 import React, { useState } from 'react';
 import { ExternalLink, RefreshCw, CheckCircle2, AlertCircle } from 'lucide-react';
+import { adminFetchWithCsrfRetry } from '@/lib/admin/csrf';
 
 export default function CricbuzzStatsEditor({ formData, onChange }: { formData: any, onChange: (data: any) => void }) {
   const [cricbuzzInput, setCricbuzzInput] = useState<string>(formData?.cricbuzzUrl || '');
@@ -13,44 +14,51 @@ export default function CricbuzzStatsEditor({ formData, onChange }: { formData: 
       setScrapeError('Please enter a Cricbuzz URL');
       return;
     }
-    
-    let target = cricbuzzInput.trim();
-    if (target.includes('8734/ellyse-perry')) {
-      target = 'https://www.cricbuzz.com/profiles/9115/ellyse-perry';
-      setCricbuzzInput(target);
-    }
-    
+
+    const target = cricbuzzInput.trim();
     setIsScraping(true);
     setScrapeError(null);
     setSyncSuccess(false);
 
     try {
-      const res = await fetch('/api/admin/scrape-cricbuzz', {
+      const res = await adminFetchWithCsrfRetry('/api/admin/scrape-cricbuzz', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ url: target })
       });
       const payload = await res.json();
-      
+
       if (!res.ok || !payload.success) throw new Error(payload.error || 'Fetch failed');
 
       const bio = payload.bio || {};
       const stats = payload.data || { batting: {}, bowling: {} };
+      const hasBatStats = Object.keys(stats.batting || {}).length > 0;
+      const hasBowlStats = Object.keys(stats.bowling || {}).length > 0;
+      const hasNewStats = hasBatStats || hasBowlStats;
 
+      if (!hasNewStats && !bio.name && !bio.dateOfBirth) {
+        throw new Error('Could not extract valid profile details or stats from Cricbuzz.');
+      }
+
+      const nextRole = bio.role || formData.role || 'All-rounder';
       onChange({
         ...formData,
-        cricbuzzUrl: payload.sourceUrl || cricbuzzInput,
+        cricbuzzUrl: payload.sourceUrl || target,
+        cricbuzzId: payload.profileId || formData.cricbuzzId || '',
         name: bio.name || formData.name || '',
         dateOfBirth: bio.dateOfBirth || formData.dateOfBirth || '',
-        age: bio.age || formData.age || '',
+        age: bio.age ? Number(bio.age) : (formData.age || ''),
         nationality: bio.nationality || formData.nationality || 'India',
-        role: bio.role || formData.role || 'All-rounder',
-        allrounderType: bio.allrounderType || formData.allrounderType || '',
+        role: nextRole,
+        allrounderType: nextRole === 'All-rounder' ? (bio.allrounderType || formData.allrounderType || '') : '',
         battingStyle: bio.battingStyle || formData.battingStyle || 'Right-hand bat',
         bowlingStyle: bio.bowlingStyle || formData.bowlingStyle || 'Right-arm medium-fast',
-        careerStats: { batting: stats.batting || {}, bowling: stats.bowling || {} }
+        careerStats: hasNewStats ? { batting: stats.batting || {}, bowling: stats.bowling || {} } : (formData.careerStats || { batting: {}, bowling: {} })
       });
 
+      if (payload.sourceUrl) {
+        setCricbuzzInput(payload.sourceUrl);
+      }
       setSyncSuccess(true);
     } catch (err: any) {
       setScrapeError(err.message || 'Error extracting data');

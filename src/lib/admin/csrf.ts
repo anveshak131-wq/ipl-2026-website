@@ -126,3 +126,45 @@ export function installAdminCsrfFetch(): void {
     });
   }) as typeof window.fetch;
 }
+
+/** Performs an admin fetch with `credentials: 'include'`, retrying once on 403 after refreshing the CSRF token. */
+export async function adminFetchWithCsrfRetry(input: RequestInfo | URL, init?: RequestInit): Promise<Response> {
+  const buildHeaders = () => {
+    const headers = new Headers(init?.headers);
+    const csrfToken = getAdminCsrfToken();
+    if (csrfToken && !headers.has(ADMIN_CSRF_HEADER)) {
+      headers.set(ADMIN_CSRF_HEADER, csrfToken);
+    }
+    return headers;
+  };
+
+  let res = await fetch(input, {
+    ...init,
+    credentials: init?.credentials || 'include',
+    headers: buildHeaders(),
+  });
+
+  if (res.status === 403 && typeof window !== 'undefined') {
+    try {
+      const sessionRes = await fetch('/api/admin/session', {
+        credentials: 'include',
+        cache: 'no-store',
+      });
+      if (sessionRes.ok) {
+        const sessionData = await sessionRes.json().catch(() => null);
+        if (sessionData?.csrfToken) {
+          setAdminCsrfToken(sessionData.csrfToken);
+          res = await fetch(input, {
+            ...init,
+            credentials: init?.credentials || 'include',
+            headers: buildHeaders(),
+          });
+        }
+      }
+    } catch {
+      // Fall through to returning the original 403 response
+    }
+  }
+
+  return res;
+}

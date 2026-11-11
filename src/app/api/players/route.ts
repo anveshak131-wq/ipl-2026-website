@@ -101,6 +101,7 @@ export async function PUT(req: Request) {
       (incomingName && p.name && p.name.trim().toLowerCase() === incomingName)
     );
 
+    const nowIso = new Date().toISOString();
     if (idx >= 0) {
       const existing = players[idx];
       players[idx] = {
@@ -111,9 +112,14 @@ export async function PUT(req: Request) {
           Object.keys(incoming.careerStats.batting || {}).length > 0 ||
           Object.keys(incoming.careerStats.bowling || {}).length > 0
         ) ? incoming.careerStats : (existing.careerStats || { batting: {}, bowling: {} }),
-        stats: incoming.stats || existing.stats || {},
+        stats: {
+          ...(existing.stats || {}),
+          ...(incoming.stats || {}),
+        },
+        dateOfBirth: incoming.dateOfBirth || existing.dateOfBirth || '',
         cricbuzzUrl: incoming.cricbuzzUrl || existing.cricbuzzUrl || '',
         cricbuzzId: incoming.cricbuzzId || existing.cricbuzzId || '',
+        updatedAt: incoming.updatedAt || nowIso,
       };
     } else {
       players.push({
@@ -123,6 +129,7 @@ export async function PUT(req: Request) {
         stats: incoming.stats || {},
         cricbuzzUrl: incoming.cricbuzzUrl || '',
         cricbuzzId: incoming.cricbuzzId || '',
+        updatedAt: incoming.updatedAt || nowIso,
       });
     }
 

@@ -5,6 +5,7 @@ import {
   Search, Plus, RefreshCw, Trash2, Edit2, Shield,
   ExternalLink, Sparkles, User, Check, X, ChevronDown, ChevronUp, BarChart2, RotateCcw
 } from 'lucide-react';
+import { adminFetchWithCsrfRetry } from '@/lib/admin/csrf';
 
 interface Player {
   id: string;
@@ -24,6 +25,7 @@ interface Player {
   squadStatus?: string;
   cricbuzzId?: string;
   cricbuzzUrl?: string;
+  updatedAt?: string;
   careerStats?: {
     batting?: Record<string, any>;
     bowling?: Record<string, any>;
@@ -75,6 +77,8 @@ export default function WplPlayersCleanOpsPage() {
   const [isScraping, setIsScraping] = useState<boolean>(false);
   const [scrapeError, setScrapeError] = useState<string | null>(null);
   const [scrapeSuccess, setScrapeSuccess] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState<boolean>(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
   const [activeModalTab, setActiveModalTab] = useState<'profile' | 'stats'>('profile');
 
   const WPL_PLAYERS_STORAGE_KEY = 'sportsup99_wpl_players_v2';
@@ -126,7 +130,7 @@ export default function WplPlayersCleanOpsPage() {
       if (res.ok) {
         const remoteData = await res.json();
         if (Array.isArray(remoteData) && remoteData.length > 0) {
-          // Merge remote data with local enhancements (so career stats are never lost)
+          // Merge remote data with local enhancements cleanly using updatedAt and richer stats
           const merged = remoteData.map((remoteP: Player) => {
             const localP = localPlayers.find((lp) =>
               String(lp.id) === String(remoteP.id) ||
@@ -142,19 +146,26 @@ export default function WplPlayersCleanOpsPage() {
             const remoteBowlKeys = Object.keys(remoteP.careerStats?.bowling || {});
             const remoteTotal = remoteBatKeys.length + remoteBowlKeys.length;
 
-            // Retain the richer careerStats (prevent overriding fresh Cricbuzz fetch with partial server payload)
-            const careerStats = (localTotal >= remoteTotal && localTotal > 0)
+            const localTs = localP.updatedAt ? Date.parse(localP.updatedAt) : 0;
+            const remoteTs = remoteP.updatedAt ? Date.parse(remoteP.updatedAt) : 0;
+            const localIsStrictlyNewer = Boolean(localTs && localTs > remoteTs);
+
+            const careerStats = (localIsStrictlyNewer && localTotal > 0) || (remoteTotal === 0 && localTotal > 0)
               ? localP.careerStats
               : (remoteTotal > 0 ? remoteP.careerStats : (localP.careerStats || { batting: {}, bowling: {} }));
 
+            const base = localIsStrictlyNewer ? remoteP : localP;
+            const head = localIsStrictlyNewer ? localP : remoteP;
+
             return {
-              ...remoteP,
+              ...base,
+              ...head,
               careerStats,
-              cricbuzzUrl: remoteP.cricbuzzUrl || localP.cricbuzzUrl || '',
-              cricbuzzId: remoteP.cricbuzzId || localP.cricbuzzId || '',
+              cricbuzzUrl: head.cricbuzzUrl || base.cricbuzzUrl || '',
+              cricbuzzId: head.cricbuzzId || base.cricbuzzId || '',
               stats: {
-                ...(localP.stats || {}),
-                ...(remoteP.stats || {})
+                ...((base as any).stats || {}),
+                ...((head as any).stats || {})
               }
             };
           });
@@ -194,7 +205,7 @@ export default function WplPlayersCleanOpsPage() {
       if (typeof window !== 'undefined') {
         localStorage.removeItem(WPL_PLAYERS_STORAGE_KEY);
       }
-      const res = await fetch('/api/players?league=wpl', {
+      const res = await adminFetchWithCsrfRetry('/api/players?league=wpl', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'realign', league: 'wpl' })
@@ -236,6 +247,7 @@ export default function WplPlayersCleanOpsPage() {
     setCricbuzzUrlInput('');
     setScrapeError(null);
     setScrapeSuccess(null);
+    setSaveError(null);
     setActiveModalTab('profile');
     setFormData({
       name: '',
@@ -278,6 +290,7 @@ export default function WplPlayersCleanOpsPage() {
     setCricbuzzUrlInput(initialUrl);
     setScrapeError(null);
     setScrapeSuccess(null);
+    setSaveError(null);
     setActiveModalTab('profile');
 
     // Retrieve best careerStats from state or localStorage
@@ -327,7 +340,7 @@ export default function WplPlayersCleanOpsPage() {
     setScrapeSuccess(null);
 
     try {
-      const res = await fetch('/api/admin/scrape-cricbuzz', {
+      const res = await adminFetchWithCsrfRetry('/api/admin/scrape-cricbuzz', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ url: rawUrl })
@@ -348,28 +361,41 @@ export default function WplPlayersCleanOpsPage() {
       const bio = payload.bio || {};
       const stats = payload.data || { batting: {}, bowling: {} };
 
-      setFormData((prev) => ({
-        ...prev,
-        cricbuzzUrl: payload.sourceUrl || rawUrl,
-        cricbuzzId: payload.profileId || prev.cricbuzzId || '',
-        name: bio.name || prev.name || '',
-        dateOfBirth: bio.dateOfBirth || prev.dateOfBirth || '',
-        age: bio.age ? Number(bio.age) : (prev.age || 25),
-        nationality: bio.nationality || prev.nationality || 'India',
-        role: bio.role || prev.role || 'All-rounder',
-        allrounderType: bio.allrounderType || prev.allrounderType || 'Batting Allrounder',
-        battingStyle: bio.battingStyle || prev.battingStyle || 'Right-hand bat',
-        bowlingStyle: bio.bowlingStyle || prev.bowlingStyle || 'Right-arm medium-fast',
-        careerStats: { batting: stats.batting || {}, bowling: stats.bowling || {} }
-      }));
+      const batCount = Object.keys(stats.batting || {}).filter(k => ['Test', 'ODI', 'T20', 'WPL'].includes(k)).length;
+      const bowlCount = Object.keys(stats.bowling || {}).filter(k => ['Test', 'ODI', 'T20', 'WPL'].includes(k)).length;
+      const hasNewStats = Object.keys(stats.batting || {}).length > 0 || Object.keys(stats.bowling || {}).length > 0;
+
+      if (!hasNewStats && !bio.name && !bio.dateOfBirth) {
+        throw new Error('Could not extract valid profile details or stats from Cricbuzz. Please check the profile URL or player name.');
+      }
+
+      setFormData((prev) => {
+        const nextRole = bio.role || prev.role || 'All-rounder';
+        return {
+          ...prev,
+          cricbuzzUrl: payload.sourceUrl || rawUrl,
+          cricbuzzId: payload.profileId || prev.cricbuzzId || '',
+          name: bio.name || prev.name || '',
+          dateOfBirth: bio.dateOfBirth || prev.dateOfBirth || '',
+          age: bio.age ? Number(bio.age) : (prev.age || 25),
+          nationality: bio.nationality || prev.nationality || 'India',
+          role: nextRole,
+          allrounderType: nextRole === 'All-rounder'
+            ? (bio.allrounderType || prev.allrounderType || 'Batting Allrounder')
+            : '',
+          battingStyle: bio.battingStyle || prev.battingStyle || 'Right-hand bat',
+          bowlingStyle: bio.bowlingStyle || prev.bowlingStyle || 'Right-arm medium-fast',
+          careerStats: hasNewStats
+            ? { batting: stats.batting || {}, bowling: stats.bowling || {} }
+            : (prev.careerStats || { batting: {}, bowling: {} })
+        };
+      });
 
       if (payload.sourceUrl) {
         setCricbuzzUrlInput(payload.sourceUrl);
       }
 
-      const batCount = Object.keys(stats.batting || {}).filter(k => ['Test', 'ODI', 'T20', 'WPL'].includes(k)).length;
-      const bowlCount = Object.keys(stats.bowling || {}).filter(k => ['Test', 'ODI', 'T20', 'WPL'].includes(k)).length;
-      setScrapeSuccess(`✓ Successfully fetched ${bio.name || 'player'}: ${bio.nationality}, ${bio.role}, DOB: ${bio.dateOfBirth || '—'}, Stats (${batCount || 4} Batting, ${bowlCount || 4} Bowling formats)!`);
+      setScrapeSuccess(`✓ Successfully fetched ${bio.name || 'player'}: ${bio.nationality || '—'}, ${bio.role || '—'}, DOB: ${bio.dateOfBirth || '—'}, Stats (${batCount} Batting, ${bowlCount} Bowling formats)!`);
     } catch (err: any) {
       setScrapeError(err.message || 'Error communicating with Cricbuzz scraper');
     } finally {
@@ -383,29 +409,42 @@ export default function WplPlayersCleanOpsPage() {
       return;
     }
 
+    setSaveError(null);
     const assignedTeam = WPL_TEAMS.find((t) => t.id === formData.teamId || t.slug === formData.teamId) || activeTeam;
 
     const wplBat = formData.careerStats?.batting?.['WPL'] || formData.careerStats?.batting?.['wpl'] || {};
     const wplBowl = formData.careerStats?.bowling?.['WPL'] || formData.careerStats?.bowling?.['wpl'] || {};
+    const hasWplBat = wplBat.Mat !== undefined || wplBat.Runs !== undefined;
+    const hasWplBowl = wplBowl.Mat !== undefined || wplBowl.Wkts !== undefined;
 
-    const computedStats = {
+    const prevStats: any = {
       ...(editingPlayer as any)?.stats,
       ...(formData as any)?.stats,
-      matches: Number(wplBat.Mat || wplBat.Matches || wplBowl.Mat || (formData as any)?.stats?.matches || 0),
-      runs: Number(wplBat.Runs || (formData as any)?.stats?.runs || 0),
-      wickets: Number(wplBowl.Wkts || wplBowl.Wickets || (formData as any)?.stats?.wickets || 0),
-      highest: Number(wplBat.HS || (formData as any)?.stats?.highest || 0),
-      average: Number(wplBat.Avg || (formData as any)?.stats?.average || 0),
-      strikeRate: Number(wplBat.SR || (formData as any)?.stats?.strikeRate || 0),
-      economy: Number(wplBowl.Econ || wplBowl.Eco || (formData as any)?.stats?.economy || 0),
-      bestBowling: wplBowl.BBI || (formData as any)?.stats?.bestBowling || '—',
-      fours: Number(wplBat['4s'] || (formData as any)?.stats?.fours || 0),
-      sixes: Number(wplBat['6s'] || (formData as any)?.stats?.sixes || 0),
-      fifties: Number(wplBat['50'] || (formData as any)?.stats?.fifties || 0),
-      hundreds: Number(wplBat['100'] || (formData as any)?.stats?.hundreds || 0),
-      ballsFaced: Number(wplBat.Balls || wplBat.BF || (formData as any)?.stats?.ballsFaced || 0),
-      battingInnings: Number(wplBat.Inn || (formData as any)?.stats?.battingInnings || 0),
-      notOuts: Number(wplBat.NO || (formData as any)?.stats?.notOuts || 0),
+    };
+    const numOrPrev = (val: any, fallback: number) => {
+      const n = Number(val);
+      return val !== undefined && val !== '' && !Number.isNaN(n) ? n : fallback;
+    };
+
+    const computedStats = {
+      ...prevStats,
+      matches: hasWplBat || hasWplBowl
+        ? numOrPrev(wplBat.Mat ?? wplBat.Matches ?? wplBowl.Mat, Number(prevStats.matches || 0))
+        : Number(prevStats.matches || 0),
+      runs: hasWplBat ? numOrPrev(wplBat.Runs, Number(prevStats.runs || 0)) : Number(prevStats.runs || 0),
+      wickets: hasWplBowl ? numOrPrev(wplBowl.Wkts ?? wplBowl.Wickets, Number(prevStats.wickets || 0)) : Number(prevStats.wickets || 0),
+      highest: hasWplBat ? numOrPrev(wplBat.HS, Number(prevStats.highest || 0)) : Number(prevStats.highest || 0),
+      average: hasWplBat ? numOrPrev(wplBat.Avg, Number(prevStats.average || 0)) : Number(prevStats.average || 0),
+      strikeRate: hasWplBat ? numOrPrev(wplBat.SR, Number(prevStats.strikeRate || 0)) : Number(prevStats.strikeRate || 0),
+      economy: hasWplBowl ? numOrPrev(wplBowl.Econ ?? wplBowl.Eco, Number(prevStats.economy || 0)) : Number(prevStats.economy || 0),
+      bestBowling: (hasWplBowl && wplBowl.BBI) ? wplBowl.BBI : (prevStats.bestBowling || '—'),
+      fours: hasWplBat ? numOrPrev(wplBat['4s'], Number(prevStats.fours || 0)) : Number(prevStats.fours || 0),
+      sixes: hasWplBat ? numOrPrev(wplBat['6s'], Number(prevStats.sixes || 0)) : Number(prevStats.sixes || 0),
+      fifties: hasWplBat ? numOrPrev(wplBat['50'], Number(prevStats.fifties || 0)) : Number(prevStats.fifties || 0),
+      hundreds: hasWplBat ? numOrPrev(wplBat['100'], Number(prevStats.hundreds || 0)) : Number(prevStats.hundreds || 0),
+      ballsFaced: hasWplBat ? numOrPrev(wplBat.Balls ?? wplBat.BF, Number(prevStats.ballsFaced || 0)) : Number(prevStats.ballsFaced || 0),
+      battingInnings: hasWplBat ? numOrPrev(wplBat.Inn, Number(prevStats.battingInnings || 0)) : Number(prevStats.battingInnings || 0),
+      notOuts: hasWplBat ? numOrPrev(wplBat.NO, Number(prevStats.notOuts || 0)) : Number(prevStats.notOuts || 0),
     };
 
     const finalCareerStats = formData.careerStats && (
@@ -414,6 +453,7 @@ export default function WplPlayersCleanOpsPage() {
     ) ? formData.careerStats : ((editingPlayer as any)?.careerStats || { batting: {}, bowling: {} });
 
     const playerId = editingPlayer?.id || (`wpl_${assignedTeam.slug.replace('-w', '')}_${formData.name.toLowerCase().replace(/[^a-z0-9]/g, '_')}`);
+    const resolvedCricbuzzId = formData.cricbuzzId || (formData.cricbuzzUrl?.match(/profiles\/(\d+)/)?.[1] || '');
 
     const payload: Player & { stats?: any } = {
       ...(editingPlayer || {}),
@@ -423,7 +463,9 @@ export default function WplPlayersCleanOpsPage() {
       team: assignedTeam.name,
       league: 'wpl',
       role: formData.role || 'All-rounder',
-      allrounderType: formData.allrounderType || (formData.role === 'All-rounder' ? 'Batting Allrounder' : undefined),
+      allrounderType: formData.role === 'All-rounder'
+        ? (formData.allrounderType || 'Batting Allrounder')
+        : '',
       nationality: formData.nationality || 'India',
       battingStyle: formData.battingStyle || 'Right-hand bat',
       bowlingStyle: formData.bowlingStyle || 'Right-arm medium-fast',
@@ -432,10 +474,11 @@ export default function WplPlayersCleanOpsPage() {
       dateOfBirth: formData.dateOfBirth || '',
       squadStatus: formData.squadStatus || 'Active Squad',
       cricbuzzUrl: formData.cricbuzzUrl || '',
-      cricbuzzId: formData.cricbuzzId || '',
+      cricbuzzId: resolvedCricbuzzId,
       auction: formData.auction || { fee: '₹50 Lakh' },
       careerStats: finalCareerStats,
-      stats: computedStats
+      stats: computedStats,
+      updatedAt: new Date().toISOString()
     };
 
     const filterOutPlayer = (list: Player[], pId: string, pName: string) =>
@@ -444,10 +487,9 @@ export default function WplPlayersCleanOpsPage() {
         p.name?.trim().toLowerCase() !== pName.trim().toLowerCase()
       );
 
-    // 1. Immediately update local state so UI instantly reflects changes
+    // 1. Immediately update local state and localStorage cache
     setPlayers((prev) => [...filterOutPlayer(prev, payload.id, payload.name), payload]);
 
-    // 2. Immediately persist to localStorage so data survives refresh, reload, or network issues
     if (typeof window !== 'undefined') {
       try {
         const raw = localStorage.getItem(WPL_PLAYERS_STORAGE_KEY) || localStorage.getItem('sportsup99_wpl_players_v1');
@@ -458,46 +500,60 @@ export default function WplPlayersCleanOpsPage() {
       } catch (e) {}
     }
 
-    // 3. Dispatch broadcast event for sync
+    // 2. Dispatch broadcast event for sync
     try {
       window.dispatchEvent(new CustomEvent('admin-data-updated', {
         detail: { type: 'player-updated', player: payload }
       }));
     } catch (e) {}
 
-    // 4. Send PUT to backend API (Cloudflare KV or Node backend)
+    // 3. Persist to backend API (Cloudflare KV)
+    setIsSaving(true);
     try {
-      const res = await fetch('/api/players?league=wpl', {
+      const res = await adminFetchWithCsrfRetry('/api/players?league=wpl', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       });
 
-      if (res.ok) {
-        const resData = await res.json().catch(() => ({}));
-        if (resData.player) {
-          const serverSaved = { ...payload, ...resData.player };
-          if (payload.careerStats && (!serverSaved.careerStats || Object.keys(serverSaved.careerStats.batting || {}).length === 0)) {
-            serverSaved.careerStats = payload.careerStats;
-          }
-          setPlayers((prev) => [...filterOutPlayer(prev, serverSaved.id, serverSaved.name), serverSaved]);
-          if (typeof window !== 'undefined') {
-            try {
-              const raw = localStorage.getItem(WPL_PLAYERS_STORAGE_KEY);
-              const list = raw ? JSON.parse(raw) : [];
-              const updated = [...filterOutPlayer(list, serverSaved.id, serverSaved.name), serverSaved];
-              localStorage.setItem(WPL_PLAYERS_STORAGE_KEY, JSON.stringify(updated));
-              localStorage.setItem('sportsup99_wpl_players_v1', JSON.stringify(updated));
-            } catch (e) {}
-          }
+      const resData = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        throw new Error(resData?.error || `Server returned HTTP ${res.status}`);
+      }
+
+      if (resData.player) {
+        const serverSaved = { ...payload, ...resData.player };
+        const serverHasStats =
+          Object.keys(serverSaved.careerStats?.batting || {}).length > 0 ||
+          Object.keys(serverSaved.careerStats?.bowling || {}).length > 0;
+        const payloadHasStats =
+          Object.keys(payload.careerStats?.batting || {}).length > 0 ||
+          Object.keys(payload.careerStats?.bowling || {}).length > 0;
+
+        if (payloadHasStats && !serverHasStats) {
+          serverSaved.careerStats = payload.careerStats;
+        }
+        setPlayers((prev) => [...filterOutPlayer(prev, serverSaved.id, serverSaved.name), serverSaved]);
+        if (typeof window !== 'undefined') {
+          try {
+            const raw = localStorage.getItem(WPL_PLAYERS_STORAGE_KEY);
+            const list = raw ? JSON.parse(raw) : [];
+            const updated = [...filterOutPlayer(list, serverSaved.id, serverSaved.name), serverSaved];
+            localStorage.setItem(WPL_PLAYERS_STORAGE_KEY, JSON.stringify(updated));
+            localStorage.setItem('sportsup99_wpl_players_v1', JSON.stringify(updated));
+          } catch (e) {}
         }
       }
 
       setIsModalOpen(false);
-      alert('✓ Player successfully saved!');
+      alert(resData.kvSaved === false
+        ? 'Player updated in browser cache, but Cloudflare KV storage is not bound on this environment.'
+        : '✓ Player successfully saved!'
+      );
     } catch (e: any) {
-      setIsModalOpen(false);
-      alert('✓ Player successfully saved!');
+      setSaveError(e?.message || 'Failed to persist player to server');
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -505,7 +561,7 @@ export default function WplPlayersCleanOpsPage() {
     if (!confirm('Are you sure you want to remove this player from the squad?')) return;
 
     try {
-      await fetch('/api/players?id=' + playerId + '&league=wpl', { method: 'DELETE' });
+      await adminFetchWithCsrfRetry('/api/players?id=' + playerId + '&league=wpl', { method: 'DELETE' });
     } catch (e) {}
 
     setPlayers((prev) => {
@@ -1178,14 +1234,19 @@ export default function WplPlayersCleanOpsPage() {
               </div>
 
               {/* Modal Footer */}
-              <div className="p-4 border-t border-slate-800 flex items-center justify-between bg-slate-950/80">
+              <div className="p-4 border-t border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-950/80">
                 <div className="text-xs text-slate-400">
-                  {Object.keys(formData.careerStats?.batting || {}).length > 0 && (
-                    <span className="text-emerald-400 font-semibold">✓ Career Stats tables attached</span>
+                  {saveError ? (
+                    <span className="text-red-400 font-semibold">⚠ {saveError}</span>
+                  ) : (
+                    (Object.keys(formData.careerStats?.batting || {}).length > 0 ||
+                      Object.keys(formData.careerStats?.bowling || {}).length > 0) && (
+                      <span className="text-emerald-400 font-semibold">✓ Career Stats tables attached</span>
+                    )
                   )}
                 </div>
 
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 self-end sm:self-auto">
                   <button
                     type="button"
                     onClick={() => setIsModalOpen(false)}
@@ -1196,9 +1257,10 @@ export default function WplPlayersCleanOpsPage() {
                   <button
                     type="button"
                     onClick={handleSavePlayer}
-                    className="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-lg"
+                    disabled={isSaving}
+                    className="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white text-xs font-bold shadow-lg"
                   >
-                    Save Player
+                    {isSaving ? 'Saving...' : 'Save Player'}
                   </button>
                 </div>
               </div>

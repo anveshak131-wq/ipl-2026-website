@@ -4,7 +4,7 @@ import { fallbackWplPlayers } from "../data/wplPlayers.js";
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type, Authorization",
+  "Access-Control-Allow-Headers": "Content-Type, Authorization, X-CSRF-Token",
 };
 
 export const onRequest = async (context) => {
@@ -44,6 +44,40 @@ export const onRequest = async (context) => {
         if (isCorrupted || !Array.isArray(players) || players.length === 0 || url.searchParams.get("realign") === "true") {
           players = fallbackWplPlayers;
           if (kv) context.waitUntil(kv.put(kvKey, JSON.stringify(fallbackWplPlayers)).catch(() => {}));
+        } else {
+          const seedById = new Map(fallbackWplPlayers.map(sp => [String(sp.id), sp]));
+          const seedByName = new Map(fallbackWplPlayers.map(sp => [String(sp.name || "").trim().toLowerCase(), sp]));
+          let healedAny = false;
+          players = players.map(p => {
+            if (p.updatedAt) return p;
+            const seed = seedById.get(String(p.id)) || seedByName.get(String(p.name || "").trim().toLowerCase());
+            if (!seed) return p;
+            const hasCareer = Object.keys(p.careerStats?.batting || {}).length > 0 || Object.keys(p.careerStats?.bowling || {}).length > 0;
+            const wrongId = p.cricbuzzId && seed.cricbuzzId && String(p.cricbuzzId) !== String(seed.cricbuzzId);
+            if (!hasCareer || !p.dateOfBirth || wrongId) {
+              healedAny = true;
+              const refreshMeta = !hasCareer || wrongId;
+              return {
+                ...seed,
+                ...p,
+                cricbuzzId: wrongId || !p.cricbuzzId ? seed.cricbuzzId : p.cricbuzzId,
+                cricbuzzUrl: wrongId || !p.cricbuzzUrl ? seed.cricbuzzUrl : p.cricbuzzUrl,
+                dateOfBirth: p.dateOfBirth || seed.dateOfBirth || '',
+                age: refreshMeta ? seed.age : p.age,
+                nationality: refreshMeta ? seed.nationality : p.nationality,
+                role: refreshMeta ? seed.role : (p.role || seed.role),
+                allrounderType: refreshMeta ? seed.allrounderType : (p.allrounderType ?? seed.allrounderType),
+                battingStyle: refreshMeta ? seed.battingStyle : p.battingStyle,
+                bowlingStyle: refreshMeta ? seed.bowlingStyle : p.bowlingStyle,
+                careerStats: hasCareer ? p.careerStats : seed.careerStats,
+                stats: hasCareer ? p.stats : seed.stats,
+              };
+            }
+            return p;
+          });
+          if (healedAny && kv) {
+            context.waitUntil(kv.put(kvKey, JSON.stringify(players)).catch(() => {}));
+          }
         }
       } else if (league === "ipl" && (!Array.isArray(players) || players.length === 0)) {
         players = fallbackIplPlayers;
@@ -104,6 +138,7 @@ export const onRequest = async (context) => {
       );
 
       let savedPlayer;
+      const nowIso = new Date().toISOString();
       if (playerIndex >= 0) {
         const existing = currentPlayers[playerIndex];
         savedPlayer = {
@@ -113,9 +148,14 @@ export const onRequest = async (context) => {
           careerStats: incoming.careerStats && (Object.keys(incoming.careerStats.batting || {}).length > 0 || Object.keys(incoming.careerStats.bowling || {}).length > 0)
             ? incoming.careerStats
             : (existing.careerStats || { batting: {}, bowling: {} }),
-          stats: incoming.stats || existing.stats || {},
+          stats: {
+            ...(existing.stats || {}),
+            ...(incoming.stats || {}),
+          },
+          dateOfBirth: incoming.dateOfBirth || existing.dateOfBirth || '',
           cricbuzzUrl: incoming.cricbuzzUrl || existing.cricbuzzUrl || '',
           cricbuzzId: incoming.cricbuzzId || existing.cricbuzzId || '',
+          updatedAt: incoming.updatedAt || nowIso,
         };
         currentPlayers[playerIndex] = savedPlayer;
       } else {
@@ -124,6 +164,9 @@ export const onRequest = async (context) => {
           id,
           careerStats: incoming.careerStats || { batting: {}, bowling: {} },
           stats: incoming.stats || {},
+          cricbuzzUrl: incoming.cricbuzzUrl || '',
+          cricbuzzId: incoming.cricbuzzId || '',
+          updatedAt: incoming.updatedAt || nowIso,
         };
         currentPlayers.push(savedPlayer);
       }
@@ -132,7 +175,7 @@ export const onRequest = async (context) => {
         await kv.put(kvKey, JSON.stringify(currentPlayers));
       }
 
-      return new Response(JSON.stringify({ success: true, player: savedPlayer, count: currentPlayers.length }), {
+      return new Response(JSON.stringify({ success: true, kvSaved: Boolean(kv), player: savedPlayer, count: currentPlayers.length }), {
         status: 200,
         headers: { "Content-Type": "application/json", "Cache-Control": "no-store", ...corsHeaders }
       });
