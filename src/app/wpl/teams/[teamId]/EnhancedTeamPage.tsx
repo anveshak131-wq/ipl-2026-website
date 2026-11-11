@@ -324,12 +324,34 @@ function getTeamDisplayName(team: any, fallback?: string): string {
   return String(team);
 }
 
-function getTeamLogoUrl(team: any): string | null {
-  if (!team) return null;
-  if (typeof team === 'object' && team.logo && typeof team.logo === 'string') {
-    return team.logo;
+function getTeamLogoUrl(team: any, fallbackName?: string): string {
+  if (typeof team === 'object' && team?.logo && typeof team.logo === 'string') {
+    if (
+      /^\/logos\/wpl_(rcb|mi|dc|gg|upw)_logo_(modern|animated)\.svg$/.test(team.logo) ||
+      team.logo === '/logos/tba_logo.svg' ||
+      team.logo.startsWith('http') ||
+      team.logo.startsWith('data:')
+    ) {
+      return team.logo;
+    }
   }
-  return null;
+  const combined = `${typeof team === 'object' ? `${team?.shortName || ''} ${team?.name || ''} ${team?.id || ''}` : String(team || '')} ${fallbackName || ''}`.toLowerCase();
+  if (combined.includes('rcb') || combined.includes('royal') || combined.includes('bengaluru') || combined.includes('bangalore')) {
+    return FRANCHISES.rcb.logo;
+  }
+  if (combined.includes('mi') || combined.includes('mumbai')) {
+    return FRANCHISES.mi.logo;
+  }
+  if (combined.includes('dc') || combined.includes('delhi')) {
+    return FRANCHISES.dc.logo;
+  }
+  if (combined.includes('gg') || combined.includes('gujarat')) {
+    return FRANCHISES.gg.logo;
+  }
+  if (combined.includes('upw') || combined.includes('up ') || combined.includes('warrior')) {
+    return FRANCHISES.upw.logo;
+  }
+  return '/logos/tba_logo.svg';
 }
 
 function safeCell(val: any, fallback: string = '—'): string | number {
@@ -1089,8 +1111,8 @@ export default function EnhancedWPLTeamPage({ teamId }: { teamId: string }) {
                   const t2Short = getTeamDisplayShort(m.team2, m.team2Short || m.awayShort);
                   const t1Name = getTeamDisplayName(m.team1, m.homeTeam);
                   const t2Name = getTeamDisplayName(m.team2, m.awayTeam);
-                  const t1Logo = getTeamLogoUrl(m.team1);
-                  const t2Logo = getTeamLogoUrl(m.team2);
+                  const t1Logo = getTeamLogoUrl(m.team1, `${t1Short} ${t1Name}`);
+                  const t2Logo = getTeamLogoUrl(m.team2, `${t2Short} ${t2Name}`);
                   const matchVenue = typeof m.venue === 'string' && m.venue ? m.venue : config.stadium;
                   const matchDate = typeof m.displayDate === 'string' && m.displayDate ? m.displayDate : typeof m.date === 'string' && m.date ? m.date : 'TBA 2027';
                   const matchName = typeof m.name === 'string' && m.name ? m.name : `${t1Name} vs ${t2Name}`;
@@ -1108,11 +1130,27 @@ export default function EnhancedWPLTeamPage({ teamId }: { teamId: string }) {
                           <span>{matchDate}</span>
                         </div>
                         <h4 className="text-base font-black text-white flex items-center justify-center sm:justify-start gap-2.5">
-                          {t1Logo && <img src={t1Logo} alt={t1Short} className="w-6 h-6 object-contain inline-block shrink-0" />}
+                          <img
+                            src={t1Logo}
+                            alt={t1Short}
+                            onError={(e) => {
+                              e.currentTarget.onerror = null;
+                              e.currentTarget.src = '/logos/tba_logo.svg';
+                            }}
+                            className="w-6 h-6 object-contain inline-block shrink-0"
+                          />
                           <span>{t1Short}</span>
                           <span className="text-pink-400 text-xs font-bold px-2 py-0.5 rounded bg-pink-500/15 border border-pink-500/30">VS</span>
                           <span>{t2Short}</span>
-                          {t2Logo && <img src={t2Logo} alt={t2Short} className="w-6 h-6 object-contain inline-block shrink-0" />}
+                          <img
+                            src={t2Logo}
+                            alt={t2Short}
+                            onError={(e) => {
+                              e.currentTarget.onerror = null;
+                              e.currentTarget.src = '/logos/tba_logo.svg';
+                            }}
+                            className="w-6 h-6 object-contain inline-block shrink-0"
+                          />
                         </h4>
                         <p className="text-xs text-slate-400">
                           {matchName} • {typeof m.time === 'string' ? m.time : '19:30 IST'}

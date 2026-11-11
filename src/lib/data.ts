@@ -13,6 +13,24 @@ export function getAdminWplMatchesSync(): any[] {
 }
 
 
+function resolveWplLogo(shortName: string, name: string, provided?: string): string {
+  if (provided && typeof provided === 'string') {
+    if (/^\/logos\/wpl_(rcb|mi|dc|gg|upw)_logo_(modern|animated)\.svg$/.test(provided)) {
+      return provided;
+    }
+    if (provided.startsWith('http') || provided.startsWith('data:')) {
+      return provided;
+    }
+  }
+  const key = `${shortName} ${name}`.toLowerCase();
+  if (key.includes('rcb') || key.includes('royal') || key.includes('bengaluru') || key.includes('bangalore')) return '/logos/wpl_rcb_logo_modern.svg';
+  if (key.includes('mi') || key.includes('mumbai')) return '/logos/wpl_mi_logo_modern.svg';
+  if (key.includes('dc') || key.includes('delhi')) return '/logos/wpl_dc_logo_modern.svg';
+  if (key.includes('gg') || key.includes('gujarat')) return '/logos/wpl_gg_logo_modern.svg';
+  if (key.includes('upw') || key.includes('up ') || key.includes('warriorz')) return '/logos/wpl_upw_logo_modern.svg';
+  return '/logos/tba_logo.svg';
+}
+
 export function normalizeWplMatchItem(m: any) {
   const home = m.homeTeam || m.team1?.name || (typeof m.team1 === 'string' ? m.team1 : 'TBD');
   const away = m.awayTeam || m.team2?.name || (typeof m.team2 === 'string' ? m.team2 : 'TBD');
@@ -33,13 +51,13 @@ export function normalizeWplMatchItem(m: any) {
       id: m.homeTeamId || m.team1?.id || 'tbd',
       name: home,
       shortName: homeShort,
-      logo: m.team1?.logo || `/logos/${homeShort.toLowerCase()}.svg`
+      logo: resolveWplLogo(homeShort, home, m.team1?.logo)
     },
     team2: {
       id: m.awayTeamId || m.team2?.id || 'tbd',
       name: away,
       shortName: awayShort,
-      logo: m.team2?.logo || `/logos/${awayShort.toLowerCase()}.svg`
+      logo: resolveWplLogo(awayShort, away, m.team2?.logo)
     },
     date: m.date || '2027-01-14',
     displayDate: m.displayDate || m.date || '14 Jan 2027',

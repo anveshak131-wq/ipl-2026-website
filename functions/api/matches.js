@@ -25,8 +25,41 @@ const DEFAULT_WPL_2027_MATCHES = [
   { id: 'wpl-2027-m22', matchNumber: 22, dayNumber: 25, dayOfWeek: 'Sun', date: '2027-02-07', displayDate: '07 Feb 2027', time: '7:30 PM', homeTeam: 'Table Topper (TBD)', homeTeamId: 'tbd', homeShort: 'TBD', awayTeam: 'Eliminator Winner (TBD)', awayTeamId: 'tbd', awayShort: 'TBD', venue: 'Mumbai - CCI', stage: 'Final', status: 'upcoming', league: 'wpl' }
 ];
 
-function normalizeMatch(m) {
+function resolveMatchTeamLogo(shortName, name, league, providedLogo) {
+  const isWpl = String(league || '').toLowerCase() === 'wpl';
+  if (providedLogo && typeof providedLogo === 'string') {
+    if (providedLogo.startsWith('http') || providedLogo.startsWith('data:')) return providedLogo;
+    if (isWpl && /^\/logos\/wpl_(rcb|mi|dc|gg|upw)_logo_(modern|animated)\.svg$/.test(providedLogo)) return providedLogo;
+    if (!isWpl && providedLogo.startsWith('/logos/') && !/^\/logos\/(rcb|mi|dc|csk|kkr|srh|rr|pbks|gt|lsg|tbd)\.svg$/i.test(providedLogo)) {
+      return providedLogo;
+    }
+  }
+  const s = `${shortName || ''} ${name || ''}`.toLowerCase();
+  if (s.includes('tbd') || s.includes('table topper') || s.includes('eliminator')) return '/logos/tba_logo.svg';
+  if (isWpl) {
+    if (s.includes('rcb') || s.includes('royal') || s.includes('bengaluru') || s.includes('bangalore')) return '/logos/wpl_rcb_logo_modern.svg';
+    if (s.includes('mi') || s.includes('mumbai')) return '/logos/wpl_mi_logo_modern.svg';
+    if (s.includes('dc') || s.includes('delhi')) return '/logos/wpl_dc_logo_modern.svg';
+    if (s.includes('gg') || s.includes('gujarat')) return '/logos/wpl_gg_logo_modern.svg';
+    if (s.includes('upw') || s.includes('up ') || s.includes('warriorz')) return '/logos/wpl_upw_logo_modern.svg';
+    return '/logos/tba_logo.svg';
+  }
+  if (s.includes('rcb') || s.includes('royal') || s.includes('bengaluru') || s.includes('bangalore')) return '/logos/rcb_logo_premium.svg';
+  if (s.includes('mi') || s.includes('mumbai')) return '/logos/mi_logo_2026_modern.svg';
+  if (s.includes('srh') || s.includes('sunrisers') || s.includes('hyderabad')) return '/logos/srh_logo_2026_modern.svg';
+  if (s.includes('gt') || s.includes('gujarat')) return '/logos/gt_logo_2026_modern.svg';
+  if (s.includes('pbks') || s.includes('punjab')) return '/logos/pbks_logo_2026_modern.svg';
+  if (s.includes('dc') || s.includes('delhi')) return '/logos/dc_logo_2026_modern.svg';
+  if (s.includes('lsg') || s.includes('lucknow')) return '/logos/lsg_logo_2026_modern.svg';
+  if (s.includes('rr') || s.includes('rajasthan')) return '/logos/rr_logo_2026_modern.svg';
+  if (s.includes('kkr') || s.includes('kolkata')) return '/logos/kkr_logo_2026_modern.svg';
+  if (s.includes('csk') || s.includes('chennai')) return '/logos/csk_logo_2026_modern.svg';
+  return '/logos/tba_logo.svg';
+}
+
+function normalizeMatch(m, defaultLeague) {
   if (!m) return m;
+  const league = m.league || defaultLeague || 'ipl';
   const home = m.homeTeam || m.team1?.name || 'TBD';
   const away = m.awayTeam || m.team2?.name || 'TBD';
   const homeShort = m.homeShort || m.team1?.shortName || (home.includes('Royal') ? 'RCB' : home.includes('Mumbai') ? 'MI' : home.includes('Delhi') ? 'DC' : home.includes('Gujarat') ? 'GG' : home.includes('Warriorz') ? 'UPW' : 'TBD');
@@ -34,21 +67,24 @@ function normalizeMatch(m) {
 
   return {
     ...m,
+    league,
     homeTeam: home,
     awayTeam: away,
     homeShort,
     awayShort,
+    team1Short: homeShort,
+    team2Short: awayShort,
     team1: {
       id: m.homeTeamId || m.team1?.id || 'tbd',
       name: home,
       shortName: homeShort,
-      logo: m.team1?.logo || `/logos/${homeShort.toLowerCase()}.svg`
+      logo: resolveMatchTeamLogo(homeShort, home, league, m.team1?.logo)
     },
     team2: {
       id: m.awayTeamId || m.team2?.id || 'tbd',
       name: away,
       shortName: awayShort,
-      logo: m.team2?.logo || `/logos/${awayShort.toLowerCase()}.svg`
+      logo: resolveMatchTeamLogo(awayShort, away, league, m.team2?.logo)
     }
   };
 }
@@ -114,7 +150,7 @@ export async function onRequest(context) {
     if (method === 'GET') {
       const league = getLeague(request, null);
       const matches = await readMatchesFromKv(env, league);
-      const normalized = Array.isArray(matches) ? matches.map(normalizeMatch) : [];
+      const normalized = Array.isArray(matches) ? matches.map(m => normalizeMatch(m, league)) : [];
       return new Response(JSON.stringify(normalized), { status: 200, headers: corsHeaders });
     }
 

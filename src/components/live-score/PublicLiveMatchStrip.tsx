@@ -92,9 +92,31 @@ function getTeamScore(match: Match, side: 'team1' | 'team2'): string {
   return `${score.runs}/${score.wickets} (${score.overs})`;
 }
 
-function getTeamLogo(team?: Match['team1']) {
-  if (team && typeof team.logo === 'string' && team.logo.startsWith('/')) return team.logo;
-  return '';
+function getTeamLogo(team?: Match['team1'], league?: League) {
+  if (team && typeof team.logo === 'string' && team.logo.startsWith('/')) {
+    if (!/^\/logos\/(rcb|mi|dc|csk|kkr|srh|rr|pbks|gt|lsg|gg|upw|tbd|rcb-w|mi-w|dc-w)\.svg$/i.test(team.logo)) {
+      return team.logo;
+    }
+  }
+  const s = `${team?.shortName || ''} ${team?.name || ''}`.toLowerCase();
+  if (league === 'wpl') {
+    if (s.includes('rcb') || s.includes('royal') || s.includes('bengaluru')) return '/logos/wpl_rcb_logo_modern.svg';
+    if (s.includes('mi') || s.includes('mumbai')) return '/logos/wpl_mi_logo_modern.svg';
+    if (s.includes('dc') || s.includes('delhi')) return '/logos/wpl_dc_logo_modern.svg';
+    if (s.includes('gg') || s.includes('gujarat')) return '/logos/wpl_gg_logo_modern.svg';
+    if (s.includes('upw') || s.includes('warrior')) return '/logos/wpl_upw_logo_modern.svg';
+  }
+  if (s.includes('rcb') || s.includes('royal')) return '/logos/rcb_logo_premium.svg';
+  if (s.includes('mi') || s.includes('mumbai')) return '/logos/mi_logo_2026_modern.svg';
+  if (s.includes('srh') || s.includes('sunrisers')) return '/logos/srh_logo_2026_modern.svg';
+  if (s.includes('gt') || s.includes('gujarat')) return '/logos/gt_logo_2026_modern.svg';
+  if (s.includes('pbks') || s.includes('punjab')) return '/logos/pbks_logo_2026_modern.svg';
+  if (s.includes('dc') || s.includes('delhi')) return '/logos/dc_logo_2026_modern.svg';
+  if (s.includes('lsg') || s.includes('lucknow')) return '/logos/lsg_logo_2026_modern.svg';
+  if (s.includes('rr') || s.includes('rajasthan')) return '/logos/rr_logo_2026_modern.svg';
+  if (s.includes('kkr') || s.includes('kolkata')) return '/logos/kkr_logo_2026_modern.svg';
+  if (s.includes('csk') || s.includes('chennai')) return '/logos/csk_logo_2026_modern.svg';
+  return '/logos/tba_logo.svg';
 }
 
 export default function PublicLiveMatchStrip({ league, matches }: PublicLiveMatchStripProps) {
@@ -180,8 +202,8 @@ export default function PublicLiveMatchStrip({ league, matches }: PublicLiveMatc
   const href = `/live-score?league=${league}&matchId=${encodeURIComponent(String(featuredMatch.id))}`;
   const team1Short = featuredMatch.team1?.shortName || (featuredMatch as any).homeShort || 'Team 1';
   const team2Short = featuredMatch.team2?.shortName || (featuredMatch as any).awayShort || 'Team 2';
-  const team1Logo = getTeamLogo(featuredMatch.team1) || `/logos/${team1Short.toLowerCase()}.svg`;
-  const team2Logo = getTeamLogo(featuredMatch.team2) || `/logos/${team2Short.toLowerCase()}.svg`;
+  const team1Logo = getTeamLogo(featuredMatch.team1, league);
+  const team2Logo = getTeamLogo(featuredMatch.team2, league);
   const team1Score = getTeamScore(featuredMatch, 'team1');
   const team2Score = getTeamScore(featuredMatch, 'team2');
 

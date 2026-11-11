@@ -36,7 +36,7 @@ export const onRequest = async (context) => {
         league: 'wpl',
         name: 'Royal Challengers Bengaluru (WPL)',
         shortName: 'RCB-W',
-        logo: '/logos/wpl_rcb_logo.svg',
+        logo: '/logos/wpl_rcb_logo_animated.svg',
         description: 'Led by Smriti Mandhana, known for explosive batting',
         colors: { primary: '#EC1C24', secondary: '#000000' },
         homeVenue: 'M Chinnaswamy Stadium, Bengaluru'
@@ -46,7 +46,7 @@ export const onRequest = async (context) => {
         league: 'wpl',
         name: 'UP Warriorz',
         shortName: 'UPW',
-        logo: '/logos/wpl_upw_logo.svg',
+        logo: '/logos/wpl_upw_logo_animated.svg',
         description: 'Dynamic team with young talent',
         colors: { primary: '#FF6B35', secondary: '#1B1B1B' },
         homeVenue: 'Ekana Cricket Stadium, Lucknow'
@@ -56,7 +56,7 @@ export const onRequest = async (context) => {
         league: 'wpl',
         name: 'Gujarat Giants',
         shortName: 'GG',
-        logo: '/logos/wpl_gg_logo.svg',
+        logo: '/logos/wpl_gg_logo_animated.svg',
         description: 'Strong all-round squad led by Ashleigh Gardner',
         colors: { primary: '#1B2130', secondary: '#E15454' },
         homeVenue: 'Narendra Modi Stadium, Ahmedabad'
@@ -66,7 +66,7 @@ export const onRequest = async (context) => {
         league: 'wpl',
         name: 'Delhi Capitals (WPL)',
         shortName: 'DC-W',
-        logo: '/logos/wpl_dc_logo.svg',
+        logo: '/logos/wpl_dc_logo_animated.svg',
         description: 'Aggressive team with international stars',
         colors: { primary: '#0078BC', secondary: '#EF1B26' },
         homeVenue: 'Arun Jaitley Stadium, Delhi'
