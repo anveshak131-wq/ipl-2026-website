@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
@@ -1288,6 +1288,10 @@ export default function LiveScorePage() {
   const [players, setPlayers] = useState<Player[]>([]);
   const [selectedMatchId, setSelectedMatchId] = useState<string>('');
   const [tableState, setTableState] = useState<LiveScoreTableState>({ rows: [] });
+  const liveRowsCacheRef = useRef<{
+    activeKey: string | null;
+    entries: Record<string, { etag: string; state: LiveScoreTableState }>;
+  }>({ activeKey: null, entries: {} });
   const [scorecardResultInfo, setScorecardResultInfo] = useState<ScorecardResultInfo | null>(null);
   const [isLoadingMatches, setIsLoadingMatches] = useState(true);
   const [isLoadingScore, setIsLoadingScore] = useState(true);
@@ -1375,52 +1379,61 @@ export default function LiveScorePage() {
   );
 
   useEffect(() => {
+    liveRowsCacheRef.current.activeKey = null;
+    setTableState({ rows: [] });
     setScorecardResultInfo(null);
     setActiveTab('overview');
     setCommentaryFilter('all');
     setCommentaryOrder('latest');
   }, [selectedMatchId]);
 
-  const fetchLiveRows = useCallback(async (matchId: string, withCommentary: boolean) => {
+  const fetchLiveRows = useCallback(async (matchId: string, withCommentary: boolean): Promise<LiveScoreTableState | null> => {
     const params = new URLSearchParams({
       matchId,
       withCommentary: withCommentary ? '1' : '0',
     });
-    const etagKey = `live_etag_${matchId}`;
-    const cachedEtag = typeof window !== "undefined" ? sessionStorage.getItem(etagKey) : null;
+    const cacheKey = `${selectedLeague}:${matchId}:${withCommentary ? '1' : '0'}`;
+    const cachedEntry = liveRowsCacheRef.current.entries[cacheKey];
     const headers: Record<string, string> = {};
-    if (cachedEtag) headers["If-None-Match"] = cachedEtag;
+    if (cachedEntry?.etag) headers['If-None-Match'] = cachedEntry.etag;
 
     const resp = await fetch(`/api/${selectedLeague}-live-score/save?${params.toString()}`, {
-      cache: "no-store",
+      cache: 'no-store',
       headers,
     });
 
     if (resp.status === 304) {
-      return null; // Content unchanged, skip re-parse
+      if (liveRowsCacheRef.current.activeKey === cacheKey) {
+        return null; // Content unchanged and already active in state
+      }
+      if (cachedEntry) {
+        liveRowsCacheRef.current.activeKey = cacheKey;
+        return cachedEntry.state;
+      }
+      return null;
     }
 
-    const newEtag = resp.headers.get("ETag");
-    if (newEtag && typeof window !== "undefined") {
-      sessionStorage.setItem(etagKey, newEtag);
-    }
+    const newEtag = resp.headers.get('ETag');
     if (!resp.ok) throw new Error(`Failed to fetch live score rows (${resp.status})`);
     const data = await resp.json();
 
-    if (Array.isArray(data?.rows)) {
-      return {
-        rows: data.rows as string[][],
-        extrasData: (data.extrasData || {}) as Record<number, ExtrasRow>,
-        wicketData: (data.wicketData || {}) as Record<number, WicketRow>,
-        commentaryData: (data.commentaryData || {}) as Record<number, string>,
-      };
-    }
+    const parsedState: LiveScoreTableState = Array.isArray(data?.rows)
+      ? {
+          rows: data.rows as string[][],
+          extrasData: (data.extrasData || {}) as Record<number, ExtrasRow>,
+          wicketData: (data.wicketData || {}) as Record<number, WicketRow>,
+          commentaryData: (data.commentaryData || {}) as Record<number, string>,
+        }
+      : Array.isArray(data)
+        ? { rows: data as string[][], extrasData: {}, wicketData: {}, commentaryData: {} }
+        : { rows: [], extrasData: {}, wicketData: {}, commentaryData: {} };
 
-    if (Array.isArray(data)) {
-      return { rows: data as string[][], extrasData: {}, wicketData: {}, commentaryData: {} };
+    if (newEtag) {
+      liveRowsCacheRef.current.entries[cacheKey] = { etag: newEtag, state: parsedState };
     }
+    liveRowsCacheRef.current.activeKey = cacheKey;
 
-    return { rows: [], extrasData: {}, wicketData: {}, commentaryData: {} };
+    return parsedState;
   }, [selectedLeague]);
 
   const fetchMatchFresh = useCallback(async (matchId: string) => {
@@ -1497,7 +1510,9 @@ export default function LiveScorePage() {
         shouldFetchScorecards ? fetchScorecardsForMatch(selectedMatchId) : Promise.resolve([]),
       ]);
 
-      setTableState(next);
+      if (next) {
+        setTableState(next);
+      }
       if (freshMatch) {
         setMatches((prev) => prev.map((m) => (m.id === freshMatch.id ? freshMatch : m)));
       }
@@ -1521,46 +1536,6 @@ export default function LiveScorePage() {
     selectedMatch,
     selectedMatchId,
   ]);
-
-  // Adaptive Polling: 2s active play, 8s over-breaks, 30s innings-breaks, 0s tab hidden
-  const pollIntervalMs = useMemo(() => {
-    if (!isPageVisible) return 0; // 0 signals complete freeze
-    if (!selectedMatch) return 15000;
-    if (selectedMatch.status === "live") {
-      // Over break / strategic timeout check
-      const currentBallStr = String(displayBalls || "");
-      if (currentBallStr.endsWith(".0") || currentBallStr.endsWith(".6")) {
-        return 8000;
-      }
-      return 2000;
-    }
-    if (selectedMatch.status === "innings_break") return 30000;
-    return 30000;
-  }, [isPageVisible, selectedMatch, displayBalls]);
-
-  useEffect(() => {
-    if (!selectedMatchId) return;
-
-    // Freeze completely when tab is backgrounded
-    if (pollIntervalMs === 0 || !isPageVisible) {
-      return;
-    }
-
-    let cancelled = false;
-
-    const tick = async () => {
-      if (cancelled || document.hidden) return;
-      await refresh("auto");
-    };
-
-    tick();
-    const interval = setInterval(tick, pollIntervalMs);
-
-    return () => {
-      cancelled = true;
-      clearInterval(interval);
-    };
-  }, [pollIntervalMs, isPageVisible, refresh, selectedMatchId]);
 
   const computedResultText = useMemo(() => {
     if (!selectedMatch) return '';
@@ -1709,6 +1684,59 @@ export default function LiveScorePage() {
       requiredRate,
     };
   }, [resolvePlayerName, selectedMatch, tableState]);
+
+  const activeInningsTotals = derived
+    ? derived.currentInnings === '2'
+      ? derived.innings2
+      : derived.innings1
+    : null;
+  const activeOvers = activeInningsTotals?.overs || '';
+  const hasBowledBalls = (activeInningsTotals?.legalBalls ?? 0) > 0;
+
+  // Adaptive Polling: 2s active play, 8s over-breaks/timeouts, 30s innings-breaks/idle, 0s tab hidden
+  const pollIntervalMs = useMemo(() => {
+    if (!isPageVisible) return 0; // 0 signals complete freeze
+    if (!selectedMatch) return 15000;
+
+    const matchStateName = String(selectedMatch.matchState?.currentState || '');
+    if (matchStateName === 'break' || String(selectedMatch.status) === 'innings_break') {
+      return 30000;
+    }
+    if (matchStateName === 'strategic-timeout-1' || matchStateName === 'strategic-timeout-2') {
+      return 8000;
+    }
+    if (selectedMatch.status === 'live') {
+      if (hasBowledBalls && (activeOvers.endsWith('.0') || activeOvers.endsWith('.6'))) {
+        return 8000;
+      }
+      return 2000;
+    }
+    return 30000;
+  }, [activeOvers, hasBowledBalls, isPageVisible, selectedMatch]);
+
+  useEffect(() => {
+    if (!selectedMatchId) return;
+
+    // Freeze completely when tab is backgrounded
+    if (pollIntervalMs === 0 || !isPageVisible) {
+      return;
+    }
+
+    let cancelled = false;
+
+    const tick = async () => {
+      if (cancelled || document.hidden) return;
+      await refresh('auto');
+    };
+
+    tick();
+    const interval = setInterval(tick, pollIntervalMs);
+
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
+  }, [pollIntervalMs, isPageVisible, refresh, selectedMatchId]);
 
   const matchStart = useMemo(() => (selectedMatch ? getMatchStartDate(selectedMatch) : null), [selectedMatch]);
   const matchCenterHref = useMemo(() => {
