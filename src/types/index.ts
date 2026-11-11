@@ -218,6 +218,7 @@ export interface Match {
 export interface News {
   id: string;
   league?: League | 'both'; // Optional: can be IPL, WPL, or both (for cross-league news)
+  season?: number;
   title: string;
   summary?: string;
   content: string;
@@ -251,6 +252,8 @@ export interface Admin {
 export interface Content {
   id: string;
   type: 'banner' | 'highlight' | 'news';
+  league?: League | 'both';
+  season?: number;
   title: string;
   content: string;
   imageUrl?: string;
@@ -264,7 +267,7 @@ export interface Content {
   isImportant?: boolean;
   // Optional structured news fields
   summary?: string;
-  category?: 'match' | 'team' | 'player' | 'general';
+  category?: 'match' | 'team' | 'player' | 'general' | 'breaking' | 'inspiration' | 'behind-the-scenes';
   linkedTeamIds?: string[];
   linkedMatchId?: string;
   linkedPlayerIds?: string[];

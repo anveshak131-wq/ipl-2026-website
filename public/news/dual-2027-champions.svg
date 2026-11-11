@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1200" y2="675" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#140821"/>
+      <stop offset="55%" stop-color="#2C0A24"/>
+      <stop offset="100%" stop-color="#140821"/>
+    </linearGradient>
+    <radialGradient id="glow1" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(920 260) rotate(135) scale(460)">
+      <stop offset="0%" stop-color="#FBBF24" stop-opacity="0.34"/>
+      <stop offset="55%" stop-color="#EF4444" stop-opacity="0.12"/>
+      <stop offset="100%" stop-color="#EF4444" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="glow2" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(210 560) rotate(25) scale(420)">
+      <stop offset="0%" stop-color="#EC4899" stop-opacity="0.22"/>
+      <stop offset="100%" stop-color="#EC4899" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="g1" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#FBBF24"/>
+      <stop offset="100%" stop-color="#EF4444"/>
+    </linearGradient>
+    <linearGradient id="g2" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#EF4444"/>
+      <stop offset="100%" stop-color="#EC4899"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="675" fill="url(#bg)"/>
+  <rect width="1200" height="675" fill="url(#glow1)"/>
+  <rect width="1200" height="675" fill="url(#glow2)"/>
+  <g opacity="0.14" stroke="#FFFFFF" stroke-width="1">
+    <line x1="0" y1="135" x2="1200" y2="135"/>
+    <line x1="0" y1="270" x2="1200" y2="270"/>
+    <line x1="0" y1="405" x2="1200" y2="405"/>
+    <line x1="0" y1="540" x2="1200" y2="540"/>
+    <line x1="200" y1="0" x2="200" y2="675"/>
+    <line x1="400" y1="0" x2="400" y2="675"/>
+    <line x1="600" y1="0" x2="600" y2="675"/>
+  </g>
+  <path d="M-40 595 L420 115 M75 695 L535 215" stroke="url(#g1)" stroke-opacity="0.24" stroke-width="36" stroke-linecap="round"/>
+  
+        <g transform="translate(885 320)" opacity="0.94">
+          <circle cx="0" cy="0" r="175" fill="none" stroke="#FBBF24" stroke-opacity="0.22" stroke-width="2" stroke-dasharray="10 10"/>
+          <path d="M-76,-110 L76,-110 L62,8 C56,56 32,84 0,92 C-32,84 -56,56 -62,8 Z" fill="url(#g1)" stroke="#EC4899" stroke-width="2.5"/>
+          <path d="M-74,-88 C-118,-88 -124,-34 -88,-8 C-74,2 -64,4 -58,2" fill="none" stroke="#FBBF24" stroke-width="7" stroke-linecap="round"/>
+          <path d="M74,-88 C118,-88 124,-34 88,-8 C74,2 64,4 58,2" fill="none" stroke="#FBBF24" stroke-width="7" stroke-linecap="round"/>
+          <rect x="-14" y="88" width="28" height="44" rx="8" fill="#FBBF24"/>
+          <rect x="-64" y="128" width="128" height="24" rx="10" fill="url(#g2)" stroke="#EC4899" stroke-width="2"/>
+          <polygon points="0,-64 11,-41 36,-37 18,-20 22,5 0,-7 -22,5 -18,-20 -36,-37 -11,-41" fill="#FFFFFF" fill-opacity="0.88"/>
+        </g>
+      
+  <g transform="translate(88 92)">
+    <rect x="0" y="0" width="330" height="44" rx="22" fill="#0B1120" fill-opacity="0.72" stroke="#FBBF24" stroke-opacity="0.65" stroke-width="1.5"/>
+    <circle cx="24" cy="22" r="6" fill="#FBBF24"/>
+    <text x="44" y="27" fill="#F8FAFC" font-family="ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="14" font-weight="800" letter-spacing="2.2">2027 • DUAL CHAMPIONS</text>
+  </g>
+  <g transform="translate(88 470)" opacity="0.92">
+    <rect x="0" y="0" width="144" height="6" rx="3" fill="url(#g1)"/>
+    <rect x="160" y="0" width="44" height="6" rx="3" fill="#EC4899" fill-opacity="0.7"/>
+    <text x="0" y="48" fill="#FFFFFF" fill-opacity="0.16" font-family="ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="64" font-weight="900" letter-spacing="4">SEASON 2027</text>
+  </g>
+</svg>

@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1200" y2="675" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#070F23"/>
+      <stop offset="55%" stop-color="#1E293B"/>
+      <stop offset="100%" stop-color="#070F23"/>
+    </linearGradient>
+    <radialGradient id="glow1" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(920 260) rotate(135) scale(460)">
+      <stop offset="0%" stop-color="#F59E0B" stop-opacity="0.34"/>
+      <stop offset="55%" stop-color="#3B82F6" stop-opacity="0.12"/>
+      <stop offset="100%" stop-color="#3B82F6" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="glow2" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(210 560) rotate(25) scale(420)">
+      <stop offset="0%" stop-color="#EAB308" stop-opacity="0.22"/>
+      <stop offset="100%" stop-color="#EAB308" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="g1" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#F59E0B"/>
+      <stop offset="100%" stop-color="#3B82F6"/>
+    </linearGradient>
+    <linearGradient id="g2" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#3B82F6"/>
+      <stop offset="100%" stop-color="#EAB308"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="675" fill="url(#bg)"/>
+  <rect width="1200" height="675" fill="url(#glow1)"/>
+  <rect width="1200" height="675" fill="url(#glow2)"/>
+  <g opacity="0.14" stroke="#FFFFFF" stroke-width="1">
+    <line x1="0" y1="135" x2="1200" y2="135"/>
+    <line x1="0" y1="270" x2="1200" y2="270"/>
+    <line x1="0" y1="405" x2="1200" y2="405"/>
+    <line x1="0" y1="540" x2="1200" y2="540"/>
+    <line x1="200" y1="0" x2="200" y2="675"/>
+    <line x1="400" y1="0" x2="400" y2="675"/>
+    <line x1="600" y1="0" x2="600" y2="675"/>
+  </g>
+  <path d="M-40 595 L420 115 M75 695 L535 215" stroke="url(#g1)" stroke-opacity="0.24" stroke-width="36" stroke-linecap="round"/>
+  
+        <g transform="translate(730 160)" opacity="0.92">
+          <rect x="0" y="0" width="340" height="290" rx="28" fill="#091224" fill-opacity="0.82" stroke="#3B82F6" stroke-width="2.5"/>
+          <ellipse cx="170" cy="145" rx="132" ry="104" fill="none" stroke="#EAB308" stroke-opacity="0.45" stroke-width="2" stroke-dasharray="8 8"/>
+          <rect x="150" y="92" width="40" height="106" rx="8" fill="#F59E0B" fill-opacity="0.22" stroke="#F59E0B" stroke-width="2"/>
+          <circle cx="95" cy="95" r="12" fill="#F59E0B"/>
+          <circle cx="236" cy="86" r="12" fill="#3B82F6"/>
+          <circle cx="255" cy="195" r="12" fill="#EAB308"/>
+          <circle cx="102" cy="205" r="12" fill="#3B82F6"/>
+          <path d="M95 95 Q170 60 236 86 T255 195" fill="none" stroke="#F59E0B" stroke-width="3" stroke-dasharray="6 6"/>
+        </g>
+      
+  <g transform="translate(88 92)">
+    <rect x="0" y="0" width="330" height="44" rx="22" fill="#0B1120" fill-opacity="0.72" stroke="#F59E0B" stroke-opacity="0.65" stroke-width="1.5"/>
+    <circle cx="24" cy="22" r="6" fill="#F59E0B"/>
+    <text x="44" y="27" fill="#F8FAFC" font-family="ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="14" font-weight="800" letter-spacing="2.2">IPL 2027 • LEADERSHIP</text>
+  </g>
+  <g transform="translate(88 470)" opacity="0.92">
+    <rect x="0" y="0" width="144" height="6" rx="3" fill="url(#g1)"/>
+    <rect x="160" y="0" width="44" height="6" rx="3" fill="#EAB308" fill-opacity="0.7"/>
+    <text x="0" y="48" fill="#FFFFFF" fill-opacity="0.16" font-family="ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="64" font-weight="900" letter-spacing="4">SEASON 2027</text>
+  </g>
+</svg>

@@ -1,167 +1,324 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import Image from 'next/image';
-import { Content } from '@/types';
+import { useEffect, useRef, useState } from 'react';
+import Link from 'next/link';
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
+import {
+  ArrowLeft,
+  ArrowRight,
+  Bookmark,
+  Check,
+  ExternalLink,
+  Share2,
+  X,
+} from 'lucide-react';
+import type { News, Player, Team } from '@/types';
+import { api } from '@/lib/data';
+import { NEWS_2027_ARTICLES } from '@/lib/news2027';
+import LoadingSpinner from '@/components/ui/LoadingSpinner';
+import NewsArticleBody from './NewsArticleBody';
 
 interface NewsModalProps {
   isOpen: boolean;
-  newsId: string;
   onClose: () => void;
+  newsId: string | null;
+  article?: News | null;
+  allArticles?: News[];
+  teams?: Team[];
+  players?: Player[];
+  onSelectArticle?: (id: string) => void;
+  onFilterByTeam?: (teamId: string) => void;
+  isBookmarked?: boolean;
+  onToggleBookmark?: (id: string) => void;
 }
 
-export default function NewsModal({ isOpen, newsId, onClose }: NewsModalProps) {
-  const [item, setItem] = useState<Content | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+export default function NewsModal({
+  isOpen,
+  onClose,
+  newsId,
+  article: providedArticle,
+  allArticles,
+  teams = [],
+  players = [],
+  onSelectArticle,
+  onFilterByTeam,
+  isBookmarked = false,
+  onToggleBookmark,
+}: NewsModalProps) {
+  const shouldReduceMotion = useReducedMotion();
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
+  const [fetchedArticle, setFetchedArticle] = useState<(News & { videoUrl?: string }) | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [readProgress, setReadProgress] = useState(0);
+  const [copied, setCopied] = useState(false);
+
+  const resolvedArticle = providedArticle ?? fetchedArticle;
+
+  useEffect(() => {
+    if (!isOpen || !newsId || providedArticle) {
+      return;
+    }
+
+    let cancelled = false;
+    const loadArticle = async () => {
+      setIsLoading(true);
+      try {
+        const list = await api.getNews();
+        const found =
+          list.find((item) => item.id === newsId) ||
+          NEWS_2027_ARTICLES.find((item) => item.id === newsId) ||
+          null;
+        if (!cancelled) {
+          setFetchedArticle(found);
+        }
+      } catch {
+        if (!cancelled) {
+          setFetchedArticle(NEWS_2027_ARTICLES.find((item) => item.id === newsId) || null);
+        }
+      } finally {
+        if (!cancelled) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    loadArticle();
+    return () => {
+      cancelled = true;
+    };
+  }, [isOpen, newsId, providedArticle]);
+
+  // Reset scroll & progress whenever active article changes
+  useEffect(() => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTop = 0;
+    }
+    setReadProgress(0);
+  }, [newsId, isOpen]);
+
+  // Prev / Next article indices if navigation list is provided
+  const currentIndex =
+    allArticles && newsId
+      ? allArticles.findIndex((item) => item.id === newsId)
+      : -1;
+  const prevArticle =
+    allArticles && currentIndex > 0 ? allArticles[currentIndex - 1] : null;
+  const nextArticle =
+    allArticles && currentIndex >= 0 && currentIndex < allArticles.length - 1
+      ? allArticles[currentIndex + 1]
+      : null;
+
+  // Body scroll lock & Esc / Arrow key navigation
   useEffect(() => {
     if (!isOpen) return;
 
-    const fetchItem = async () => {
-      setIsLoading(true);
-      try {
-        const res = await fetch('/api/content');
-        if (!res.ok) throw new Error('Failed to fetch');
-        const all: Content[] = await res.json();
-        const found = all.find(c => c.id === newsId);
-        setItem(found || null);
-      } catch (err) {
-        console.error('Failed to fetch news item:', err);
-        setItem(null);
-      } finally {
-        setIsLoading(false);
-      }
-    };
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
 
-    fetchItem();
-  }, [isOpen, newsId]);
-
-  // Close modal on Escape key
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' || e.key === 'Esc' || e.keyCode === 27) {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
         onClose();
+      } else if (e.key === 'ArrowLeft' && prevArticle && onSelectArticle) {
+        onSelectArticle(prevArticle.id);
+      } else if (e.key === 'ArrowRight' && nextArticle && onSelectArticle) {
+        onSelectArticle(nextArticle.id);
       }
     };
 
-    if (isOpen) {
-      window.addEventListener('keydown', handleKeyDown);
-    }
-
+    window.addEventListener('keydown', onKeyDown);
     return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-    
-    return undefined;};
-  }, [isOpen, onClose]);
+      document.body.style.overflow = prevOverflow;
+      window.removeEventListener('keydown', onKeyDown);
+    };
+  }, [isOpen, onClose, prevArticle, nextArticle, onSelectArticle]);
 
-  const getImageSrc = (url?: string) => {
-    if (!url) return '';
-    const trimmed = url.trim();
-    if (trimmed.startsWith('//')) return window.location.protocol + trimmed;
-    return trimmed;
+  const handleScroll = () => {
+    const el = scrollContainerRef.current;
+    if (!el) return;
+    const maxScroll = el.scrollHeight - el.clientHeight;
+    if (maxScroll <= 0) {
+      setReadProgress(100);
+      return;
+    }
+    setReadProgress(Math.min(100, Math.round((el.scrollTop / maxScroll) * 100)));
   };
 
-  if (!isOpen) return null;
+  const handleCopyShareLink = async () => {
+    if (!resolvedArticle) return;
+    const shareUrl = `${window.location.origin}/news/${resolvedArticle.id}`;
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1800);
+    } catch {
+      // Ignore clipboard failures
+    }
+  };
 
   return (
-    <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center z-50 p-4 animate-fadeIn">
-      <div className="glass-effect rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
-        {/* Header with close button */}
-        <div className="sticky top-0 flex justify-between items-center p-6 border-b border-white/10 bg-black/40 backdrop-blur">
-          <h2 className="text-2xl font-bold text-white truncate">
-            {isLoading ? 'Loading...' : item?.title || 'News Article'}
-          </h2>
-          <button
-            onClick={onClose}
-            className="text-gray-400 hover:text-white text-3xl w-10 h-10 flex items-center justify-center rounded-lg hover:bg-white/10 transition-all flex-shrink-0"
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div
+          role="dialog"
+          aria-modal="true"
+          aria-label={resolvedArticle?.title || '2027 Season Dispatch'}
+          initial={shouldReduceMotion ? false : { opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
+          onClick={onClose}
+          className="fixed inset-0 z-[70] flex items-center justify-center bg-black/80 backdrop-blur-md p-3 sm:p-6"
+        >
+          <motion.div
+            initial={shouldReduceMotion ? false : { opacity: 0, y: 20, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 16, scale: 0.98 }}
+            transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+            onClick={(e) => e.stopPropagation()}
+            className="relative flex max-h-[90vh] w-full max-w-4xl flex-col overflow-hidden rounded-3xl border border-white/15 bg-slate-950 shadow-2xl shadow-black"
           >
-            ×
-          </button>
-        </div>
-
-        {/* Content */}
-        <div className="p-8">
-          {isLoading ? (
-            <div className="flex items-center justify-center h-96">
-              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-ipl-gold"></div>
-            </div>
-          ) : item ? (
-            <div className="space-y-6">
-              {/* Image */}
-              {item.imageUrl && (
-                <div className="relative w-full h-96 rounded-xl overflow-hidden bg-gradient-to-br from-gray-800 to-black">
-                  <Image
-                    src={getImageSrc(item.imageUrl)}
-                    alt={item.title}
-                    fill
-                    className="object-cover hover:scale-105 transition-transform duration-300"
-                    priority
-                    sizes="(max-width: 768px) 100vw, 768px"
-                    onError={(e) => {
-                      e.currentTarget.style.display = 'none';
-                    }}
-                  />
-                </div>
-              )}
-
-              {/* Meta information */}
-              <div className="flex flex-wrap gap-4 text-sm">
-                <span className="px-3 py-1 rounded-full bg-ipl-gold/20 text-ipl-gold border border-ipl-gold/30">
-                  {item.type.toUpperCase()}
-                </span>
-                <span className={`px-3 py-1 rounded-full border ${
-                  item.isActive
-                    ? 'bg-green-500/20 text-green-400 border-green-500/30'
-                    : 'bg-gray-500/20 text-gray-400 border-gray-500/30'
-                }`}>
-                  {item.isActive ? 'Published' : 'Draft'}
+            {/* Top Sticky Reader Bar + Progress */}
+            <div className="relative border-b border-white/10 bg-slate-950/95 px-4 sm:px-6 py-3.5 flex items-center justify-between gap-3">
+              <div className="flex items-center gap-2 min-w-0">
+                <span className="text-xs font-bold uppercase tracking-wider text-amber-300 truncate">
+                  Season 2027 Briefing
                 </span>
               </div>
 
-              {/* Title */}
-              <div>
-                <h1 className="text-4xl font-black text-white mb-2">{item.title}</h1>
-              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                {resolvedArticle && onToggleBookmark && (
+                  <button
+                    type="button"
+                    aria-label={isBookmarked ? 'Remove bookmark' : 'Save story'}
+                    onClick={() => onToggleBookmark(resolvedArticle.id)}
+                    className={`inline-flex items-center gap-1.5 rounded-xl border px-3 py-1.5 text-xs font-bold transition-colors ${
+                      isBookmarked
+                        ? 'bg-amber-400 text-slate-950 border-amber-300'
+                        : 'border-white/15 bg-white/[0.04] text-slate-200 hover:bg-white/10'
+                    }`}
+                  >
+                    <Bookmark className={`w-3.5 h-3.5 ${isBookmarked ? 'fill-current' : ''}`} />
+                    <span className="hidden sm:inline">{isBookmarked ? 'Saved' : 'Save'}</span>
+                  </button>
+                )}
 
-              {/* Content */}
-              <div className="prose prose-invert max-w-none text-gray-200 leading-relaxed">
-                <div className="whitespace-pre-wrap text-base">{item.content}</div>
-              </div>
+                {resolvedArticle && (
+                  <button
+                    type="button"
+                    onClick={handleCopyShareLink}
+                    className="inline-flex items-center gap-1.5 rounded-xl border border-white/15 bg-white/[0.04] px-3 py-1.5 text-xs font-bold text-slate-200 hover:bg-white/10 transition-colors"
+                  >
+                    {copied ? (
+                      <>
+                        <Check className="w-3.5 h-3.5 text-emerald-400" />
+                        <span className="hidden sm:inline text-emerald-300">Copied</span>
+                      </>
+                    ) : (
+                      <>
+                        <Share2 className="w-3.5 h-3.5" />
+                        <span className="hidden sm:inline">Share</span>
+                      </>
+                    )}
+                  </button>
+                )}
 
-              {/* Video if available */}
-              {item.videoUrl && (
-                <div className="mt-8">
-                  <h3 className="text-xl font-bold text-white mb-4">Video Content</h3>
-                  <div className="w-full rounded-xl overflow-hidden bg-black">
-                    <video
-                      controls
-                      className="w-full h-96 object-cover"
-                      controlsList="nodownload"
-                    >
-                      <source src={item.videoUrl} type="video/mp4" />
-                      Your browser does not support the video tag.
-                    </video>
-                  </div>
-                </div>
-              )}
+                {resolvedArticle && (
+                  <Link
+                    href={`/news/${resolvedArticle.id}`}
+                    className="hidden sm:inline-flex items-center gap-1.5 rounded-xl border border-white/15 bg-white/[0.04] px-3 py-1.5 text-xs font-bold text-slate-200 hover:bg-white/10 transition-colors"
+                  >
+                    <ExternalLink className="w-3.5 h-3.5" />
+                    <span>Open Page</span>
+                  </Link>
+                )}
 
-              {/* Footer actions */}
-              <div className="pt-6 border-t border-white/10 flex gap-4">
                 <button
+                  type="button"
+                  aria-label="Close reader"
                   onClick={onClose}
-                  className="flex-1 bg-gradient-to-r from-ipl-gold to-ipl-purple text-white font-semibold py-3 px-6 rounded-xl hover:shadow-xl hover:scale-[1.02] transition-all duration-200"
+                  className="p-2 rounded-xl border border-white/15 bg-white/[0.04] text-slate-300 hover:bg-white/15 hover:text-white transition-colors"
                 >
-                  Close
+                  <X className="w-4 h-4" />
                 </button>
               </div>
+
+              {/* Scroll Reading Progress Bar */}
+              <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-white/5">
+                <div
+                  className="h-full bg-gradient-to-r from-amber-400 via-fuchsia-500 to-cyan-400 transition-[width] duration-100"
+                  style={{ width: `${readProgress}%` }}
+                />
+              </div>
             </div>
-          ) : (
-            <div className="text-center py-12">
-              <p className="text-gray-300 text-lg">Article not found</p>
+
+            {/* Scrollable Body */}
+            <div
+              ref={scrollContainerRef}
+              onScroll={handleScroll}
+              className="flex-1 overflow-y-auto px-5 sm:px-8 py-6 sm:py-8"
+            >
+              {isLoading ? (
+                <div className="flex justify-center py-20">
+                  <LoadingSpinner size="lg" />
+                </div>
+              ) : resolvedArticle ? (
+                <NewsArticleBody
+                  article={resolvedArticle}
+                  teams={teams}
+                  players={players}
+                  onTeamClick={
+                    onFilterByTeam
+                      ? (teamId) => {
+                          onFilterByTeam(teamId);
+                          onClose();
+                        }
+                      : undefined
+                  }
+                />
+              ) : (
+                <div className="text-center py-16 space-y-4">
+                  <h3 className="text-xl font-bold text-white">Dispatch Not Found</h3>
+                  <p className="text-sm text-slate-400">
+                    This news item could not be loaded or is no longer active.
+                  </p>
+                </div>
+              )}
             </div>
-          )}
-        </div>
-      </div>
-    </div>
+
+            {/* Bottom Prev / Next Reader Footer */}
+            {(prevArticle || nextArticle) && onSelectArticle && (
+              <div className="border-t border-white/10 bg-slate-950/95 px-4 sm:px-6 py-3 flex items-center justify-between gap-3">
+                {prevArticle ? (
+                  <button
+                    type="button"
+                    onClick={() => onSelectArticle(prevArticle.id)}
+                    className="group flex items-center gap-2 text-left min-w-0 max-w-[46%] text-xs font-semibold text-slate-300 hover:text-amber-300 transition-colors"
+                  >
+                    <ArrowLeft className="w-4 h-4 shrink-0 group-hover:-translate-x-0.5 transition-transform" />
+                    <span className="truncate">{prevArticle.title}</span>
+                  </button>
+                ) : (
+                  <span />
+                )}
+
+                {nextArticle ? (
+                  <button
+                    type="button"
+                    onClick={() => onSelectArticle(nextArticle.id)}
+                    className="group flex items-center justify-end gap-2 text-right min-w-0 max-w-[46%] text-xs font-semibold text-slate-300 hover:text-amber-300 transition-colors"
+                  >
+                    <span className="truncate">{nextArticle.title}</span>
+                    <ArrowRight className="w-4 h-4 shrink-0 group-hover:translate-x-0.5 transition-transform" />
+                  </button>
+                ) : (
+                  <span />
+                )}
+              </div>
+            )}
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 }

@@ -11,8 +11,8 @@ export default function WPLNewsPage() {
   useEffect(() => {
     // Set league to WPL
     setCurrentLeague('wpl');
-    // Redirect to main news page which handles league-aware filtering
-    router.replace('/news');
+    // Redirect to main news hub with explicit WPL 2027 filter
+    router.replace('/news?league=wpl');
   }, [router, setCurrentLeague]);
 
   return null;

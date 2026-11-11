@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1200" y2="675" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#070B1E"/>
+      <stop offset="55%" stop-color="#1B1446"/>
+      <stop offset="100%" stop-color="#070B1E"/>
+    </linearGradient>
+    <radialGradient id="glow1" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(920 260) rotate(135) scale(460)">
+      <stop offset="0%" stop-color="#F59E0B" stop-opacity="0.34"/>
+      <stop offset="55%" stop-color="#6366F1" stop-opacity="0.12"/>
+      <stop offset="100%" stop-color="#6366F1" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="glow2" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(210 560) rotate(25) scale(420)">
+      <stop offset="0%" stop-color="#38BDF8" stop-opacity="0.22"/>
+      <stop offset="100%" stop-color="#38BDF8" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="g1" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#F59E0B"/>
+      <stop offset="100%" stop-color="#6366F1"/>
+    </linearGradient>
+    <linearGradient id="g2" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#6366F1"/>
+      <stop offset="100%" stop-color="#38BDF8"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="675" fill="url(#bg)"/>
+  <rect width="1200" height="675" fill="url(#glow1)"/>
+  <rect width="1200" height="675" fill="url(#glow2)"/>
+  <g opacity="0.14" stroke="#FFFFFF" stroke-width="1">
+    <line x1="0" y1="135" x2="1200" y2="135"/>
+    <line x1="0" y1="270" x2="1200" y2="270"/>
+    <line x1="0" y1="405" x2="1200" y2="405"/>
+    <line x1="0" y1="540" x2="1200" y2="540"/>
+    <line x1="200" y1="0" x2="200" y2="675"/>
+    <line x1="400" y1="0" x2="400" y2="675"/>
+    <line x1="600" y1="0" x2="600" y2="675"/>
+  </g>
+  <path d="M-40 595 L420 115 M75 695 L535 215" stroke="url(#g1)" stroke-opacity="0.24" stroke-width="36" stroke-linecap="round"/>
+  
+        <g transform="translate(860 295) rotate(-18)" opacity="0.92">
+          <rect x="-110" y="-44" width="160" height="68" rx="18" fill="url(#g1)" stroke="#F59E0B" stroke-width="2.5"/>
+          <rect x="-94" y="-54" width="24" height="88" rx="10" fill="#F59E0B"/>
+          <rect x="20" y="-54" width="24" height="88" rx="10" fill="#F59E0B"/>
+          <rect x="-32" y="24" width="24" height="175" rx="12" fill="url(#g2)"/>
+        </g>
+        <rect x="750" y="455" width="230" height="24" rx="12" fill="#6366F1" fill-opacity="0.35" stroke="#F59E0B" stroke-width="2"/>
+        <circle cx="865" cy="310" r="190" fill="none" stroke="#38BDF8" stroke-opacity="0.22" stroke-width="2" stroke-dasharray="10 10"/>
+      
+  <g transform="translate(88 92)">
+    <rect x="0" y="0" width="330" height="44" rx="22" fill="#0B1120" fill-opacity="0.72" stroke="#F59E0B" stroke-opacity="0.65" stroke-width="1.5"/>
+    <circle cx="24" cy="22" r="6" fill="#F59E0B"/>
+    <text x="44" y="27" fill="#F8FAFC" font-family="ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="14" font-weight="800" letter-spacing="2.2">IPL 2027 • GOA AUCTION</text>
+  </g>
+  <g transform="translate(88 470)" opacity="0.92">
+    <rect x="0" y="0" width="144" height="6" rx="3" fill="url(#g1)"/>
+    <rect x="160" y="0" width="44" height="6" rx="3" fill="#38BDF8" fill-opacity="0.7"/>
+    <text x="0" y="48" fill="#FFFFFF" fill-opacity="0.16" font-family="ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="64" font-weight="900" letter-spacing="4">SEASON 2027</text>
+  </g>
+</svg>

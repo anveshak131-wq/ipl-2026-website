@@ -1,6 +1,8 @@
 import type { League, Match, News, Team } from '@/types';
 
 export const SEASON_YEAR = 2026 as const;
+export const NEWS_SEASON_YEAR = 2027 as const;
+export const NEWS_2027_CYCLE_START_MS = Date.parse('2026-10-01T00:00:00.000Z');
 
 const ACTIVE_IPL_TEAM_IDS_2026 = new Set(['1', '2', '3', '4', '5', '6', '7', '8', '9', '10']);
 const ACTIVE_WPL_TEAM_IDS_2026 = new Set(['11', '12', '13', '14', '15']);
@@ -78,9 +80,22 @@ export function filterMatchesForSeason(matches: Match[], year: number = SEASON_Y
   return matches.filter((match) => isActiveMatchForSeason(match, year));
 }
 
-export function filterNewsForSeason(items: News[], year: number = SEASON_YEAR): News[] {
-  return items.filter((item) => {
+export function isNewsForSeason(item: News, year: number = NEWS_SEASON_YEAR): boolean {
+  if (year >= 2027) {
+    if (typeof item.season === 'number') {
+      return item.season >= 2027;
+    }
     const stamp = item.publishedAt || item.createdAt;
-    return isSeasonYear(stamp, year);
-  });
+    if (!stamp) return false;
+    const ms = Date.parse(stamp);
+    if (Number.isNaN(ms)) return false;
+    return ms >= NEWS_2027_CYCLE_START_MS;
+  }
+
+  const stamp = item.publishedAt || item.createdAt;
+  return isSeasonYear(stamp, year);
+}
+
+export function filterNewsForSeason(items: News[], year: number = NEWS_SEASON_YEAR): News[] {
+  return items.filter((item) => isNewsForSeason(item, year));
 }

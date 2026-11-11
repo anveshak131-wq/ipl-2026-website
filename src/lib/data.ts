@@ -74,7 +74,14 @@ export function normalizeWplMatchItem(m: any) {
 
 import { Team, Player, Match, News, Highlight, Content } from '@/types';
 import { sortPlayersByRoleAndAge } from '@/lib/playerSort';
-import { filterMatchesForSeason, filterNewsForSeason, filterTeamsForSeason, SEASON_YEAR } from '@/lib/season';
+import {
+  filterMatchesForSeason,
+  filterNewsForSeason,
+  filterTeamsForSeason,
+  NEWS_SEASON_YEAR,
+  SEASON_YEAR,
+} from '@/lib/season';
+import { NEWS_2027_ARTICLES } from '@/lib/news2027';
 
 const MATCH_CACHE_KEY_PREFIX = 'matches_cache_';
 
@@ -494,26 +501,7 @@ export const mockPlayers: Player[] = [
 // Users must create matches through the admin panel
 export const mockMatches: Match[] = [];
 
-export const mockNews: News[] = [
-  {
-    id: '1',
-    title: 'IPL 2026 Schedule Announced',
-    summary: 'The complete schedule for IPL 2026 has been released with exciting matches lined up.',
-    content: 'The Board of Control for Cricket in India (BCCI) has announced the complete schedule for IPL 2026...',
-    image: '/news/schedule.jpg',
-    publishedAt: '2026-02-15T10:00:00Z',
-    category: 'general'
-  },
-  {
-    id: '2',
-    title: 'RCB Retains Core Squad for 2026',
-    summary: 'Royal Challengers Bangalore have retained their key players ahead of the auction.',
-    content: 'RCB management has decided to retain their core group including Virat Kohli, Faf du Plessis...',
-    image: '/news/rcb-retains.jpg',
-    publishedAt: '2026-02-10T14:30:00Z',
-    category: 'team'
-  }
-];
+export const mockNews: News[] = NEWS_2027_ARTICLES;
 
 export const mockHighlights: Highlight[] = [
   {
@@ -833,11 +821,12 @@ export const api = {
           return dateB - dateA;
         });
 
-      return filterNewsForSeason(newsItems as unknown as News[], SEASON_YEAR);
+      const seasonNews = filterNewsForSeason(newsItems as unknown as News[], NEWS_SEASON_YEAR);
+      return seasonNews.length > 0 ? seasonNews : NEWS_2027_ARTICLES;
     } catch (error) {
       console.error('Error fetching news:', error);
-      // Fallback to mock data if API fails
-      return filterNewsForSeason(mockNews, SEASON_YEAR);
+      // Fallback to curated 2027 season newsroom feed if API fails
+      return NEWS_2027_ARTICLES;
     }
   },
 

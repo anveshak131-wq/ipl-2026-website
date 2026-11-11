@@ -72,7 +72,7 @@ export const onRequest = async (context) => {
       if (league && (league === 'ipl' || league === 'wpl')) {
         content = content.filter(c => {
           const contentLeague = c.league || 'ipl';
-          return contentLeague === league;
+          return contentLeague === league || contentLeague === 'both';
         });
       }
 

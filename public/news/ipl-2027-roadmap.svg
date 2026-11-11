@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1200" y2="675" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#061024"/>
+      <stop offset="55%" stop-color="#10224A"/>
+      <stop offset="100%" stop-color="#061024"/>
+    </linearGradient>
+    <radialGradient id="glow1" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(920 260) rotate(135) scale(460)">
+      <stop offset="0%" stop-color="#38BDF8" stop-opacity="0.34"/>
+      <stop offset="55%" stop-color="#FBBF24" stop-opacity="0.12"/>
+      <stop offset="100%" stop-color="#FBBF24" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="glow2" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(210 560) rotate(25) scale(420)">
+      <stop offset="0%" stop-color="#818CF8" stop-opacity="0.22"/>
+      <stop offset="100%" stop-color="#818CF8" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="g1" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#38BDF8"/>
+      <stop offset="100%" stop-color="#FBBF24"/>
+    </linearGradient>
+    <linearGradient id="g2" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#FBBF24"/>
+      <stop offset="100%" stop-color="#818CF8"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="675" fill="url(#bg)"/>
+  <rect width="1200" height="675" fill="url(#glow1)"/>
+  <rect width="1200" height="675" fill="url(#glow2)"/>
+  <g opacity="0.14" stroke="#FFFFFF" stroke-width="1">
+    <line x1="0" y1="135" x2="1200" y2="135"/>
+    <line x1="0" y1="270" x2="1200" y2="270"/>
+    <line x1="0" y1="405" x2="1200" y2="405"/>
+    <line x1="0" y1="540" x2="1200" y2="540"/>
+    <line x1="200" y1="0" x2="200" y2="675"/>
+    <line x1="400" y1="0" x2="400" y2="675"/>
+    <line x1="600" y1="0" x2="600" y2="675"/>
+  </g>
+  <path d="M-40 595 L420 115 M75 695 L535 215" stroke="url(#g1)" stroke-opacity="0.24" stroke-width="36" stroke-linecap="round"/>
+  
+        <g transform="translate(740 165)" opacity="0.95">
+          <rect x="0" y="22" width="320" height="270" rx="28" fill="#0B1228" fill-opacity="0.82" stroke="#38BDF8" stroke-width="2.5"/>
+          <rect x="0" y="22" width="320" height="64" rx="28" fill="url(#g1)" fill-opacity="0.85"/>
+          <rect x="64" y="0" width="20" height="44" rx="10" fill="#818CF8"/>
+          <rect x="236" y="0" width="20" height="44" rx="10" fill="#818CF8"/>
+          <g fill="#FBBF24" fill-opacity="0.45">
+            <rect x="34" y="114" width="54" height="40" rx="10"/>
+            <rect x="104" y="114" width="54" height="40" rx="10"/>
+            <rect x="174" y="114" width="54" height="40" rx="10"/>
+            <rect x="244" y="114" width="44" height="40" rx="10"/>
+            <rect x="34" y="172" width="54" height="40" rx="10"/>
+            <rect x="104" y="172" width="54" height="40" rx="10" fill="#38BDF8" fill-opacity="0.95"/>
+            <rect x="174" y="172" width="54" height="40" rx="10"/>
+            <rect x="244" y="172" width="44" height="40" rx="10"/>
+            <rect x="34" y="230" width="54" height="40" rx="10"/>
+            <rect x="104" y="230" width="54" height="40" rx="10"/>
+            <rect x="174" y="230" width="54" height="40" rx="10" fill="#818CF8" fill-opacity="0.85"/>
+          </g>
+        </g>
+      
+  <g transform="translate(88 92)">
+    <rect x="0" y="0" width="330" height="44" rx="22" fill="#0B1120" fill-opacity="0.72" stroke="#38BDF8" stroke-opacity="0.65" stroke-width="1.5"/>
+    <circle cx="24" cy="22" r="6" fill="#38BDF8"/>
+    <text x="44" y="27" fill="#F8FAFC" font-family="ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="14" font-weight="800" letter-spacing="2.2">IPL 2027 • ROADMAP</text>
+  </g>
+  <g transform="translate(88 470)" opacity="0.92">
+    <rect x="0" y="0" width="144" height="6" rx="3" fill="url(#g1)"/>
+    <rect x="160" y="0" width="44" height="6" rx="3" fill="#818CF8" fill-opacity="0.7"/>
+    <text x="0" y="48" fill="#FFFFFF" fill-opacity="0.16" font-family="ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="64" font-weight="900" letter-spacing="4">SEASON 2027</text>
+  </g>
+</svg>
