@@ -385,7 +385,7 @@ function WPLTeamsContent() {
               <div className="space-y-3">
                 <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-500/10 border border-amber-400/30 text-amber-300 text-xs font-black uppercase tracking-wider backdrop-blur-md">
                   <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-                  <span>WPL Season 5 • Jan 9 – Feb 5, 2027</span>
+                  <span>WPL Season 5 • Jan 14 – Feb 7, 2027</span>
                 </div>
 
                 <h1 className="text-4xl sm:text-6xl font-black text-white tracking-tight">

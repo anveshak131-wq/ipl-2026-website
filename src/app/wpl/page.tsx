@@ -52,29 +52,29 @@ const HERO_BACKGROUND_IMAGE = '/images/wpl-oil-stadium-hero.webp';
 const SEASON_PULSE_CARDS = [
   {
     label: 'Season Window',
-    value: 'Jan 9 - Feb 5',
-    detail: 'Confirmed 28-day WPL 2027 championship window built for prime-time T20 action.',
+    value: 'Jan 14 – Feb 7',
+    detail: 'Confirmed 25-day WPL 2027 championship window built for 7:30 PM IST prime-time T20 action.',
     icon: Calendar,
     accent: 'from-cyan-400 to-blue-500',
   },
   {
     label: 'Host Cities',
-    value: 'TBA',
-    detail: 'Official venues and touring caravan hubs are yet to be confirmed by the BCCI.',
+    value: 'Vadodara & Mumbai',
+    detail: 'Opening leg in Vadodara (BCA Stadium, Kotambi) before closing leg & playoffs at Brabourne Stadium (CCI, Mumbai).',
     icon: MapPin,
     accent: 'from-emerald-400 to-teal-500',
   },
   {
     label: 'Tournament Shape',
-    value: 'TBA',
-    detail: 'Fixture count, layout, and match schedule are pending official announcement.',
+    value: '22 Matches • 7:30 PM',
+    detail: '20 league clashes (Jan 14 – Feb 3), Eliminator (Feb 5), and Final (Feb 7) with zero double-headers.',
     icon: Trophy,
     accent: 'from-amber-300 to-orange-500',
   },
   {
-    label: 'Final Story',
-    value: 'Awaiting Kickoff',
-    detail: 'The 2027 championship narrative begins once the tournament gets underway.',
+    label: 'Playoff Dates',
+    value: 'Feb 5 & Feb 7, 2027',
+    detail: 'Top finishers collide in Mumbai on Feb 5 (Eliminator) and Feb 7 (Final) to decide the Season 5 crown.',
     icon: Star,
     accent: 'from-amber-400 to-yellow-500',
   },
@@ -464,7 +464,7 @@ export default function WPLHomePage() {
                   transition={{ duration: 0.55, delay: 0.1 }}
                   className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg border border-white/10 bg-white/[0.08] backdrop-blur-2xl shadow-[0_20px_80px_rgba(0,0,0,0.32)]"
                 >
-                  <Sparkles className="w-5 h-5" className="text-amber-400" />
+                  <Sparkles className="w-5 h-5 text-amber-400" />
                   <span className="text-xs sm:text-sm font-black uppercase tracking-[0.2em] text-amber-300 font-bold">
                     Women's Premier League Season Hub
                   </span>
@@ -565,7 +565,7 @@ export default function WPLHomePage() {
                     <div className="mt-6 rounded-lg border border-amber-400/20 bg-amber-400/[0.06] p-4">
                       <div className="flex items-center gap-2 text-amber-200">
                         <Star className="h-4 w-4" />
-                        <p className="text-xs font-black uppercase tracking-[0.16em]">Final Storyline</p>
+                        <p className="text-xs font-black uppercase tracking-[0.16em]">2026 Final Recap</p>
                       </div>
                       <p className="mt-3 text-2xl font-black text-white">RCB-W chased 204</p>
                       <p className="mt-2 text-sm leading-relaxed text-slate-200">
@@ -807,7 +807,7 @@ export default function WPLHomePage() {
           <MatchesSkeleton />
         ) : (
           <section className="relative py-28 overflow-hidden">
-            <StadiumNightCanvas glowColor="gold" showPitchGrid={true} />
+            <StadiumNightCanvas glowColor="gold" variant="matches" />
             <div 
               className="absolute inset-0"
               style={{
@@ -861,7 +861,7 @@ export default function WPLHomePage() {
                   <ArrowRight className="w-5 h-5 group-hover:translate-x-2 transition-transform" />
                 </Link>
               </motion.div>
-              <ModernMatchesGrid matches={matches} initialFilter={matchGridInitialFilter} />
+              <ModernMatchesGrid matches={matches} selectedFilter={matchGridInitialFilter} />
             </div>
           </section>
         )}
@@ -940,7 +940,7 @@ export default function WPLHomePage() {
           <NewsSkeleton />
         ) : news.length > 0 ? (
           <section className="relative py-28 overflow-hidden">
-            <StadiumNightCanvas glowColor="gold" showPitchGrid={true} />
+            <StadiumNightCanvas glowColor="gold" variant="matches" />
             <div 
               className="absolute inset-0"
               style={{
@@ -1035,7 +1035,7 @@ export default function WPLHomePage() {
                       border: `1px solid ${WPLColors.pinkRGBA[40]}`,
                     }}
                   >
-                    <Target className="w-5 h-5" className="text-amber-400" />
+                    <Target className="w-5 h-5 text-amber-400" />
                     <span className="text-sm font-bold uppercase tracking-wider" style={{ color: WPLColors.textPrimary }}>Match Predictions</span>
                   </motion.div>
                   <h2 className="text-4xl md:text-5xl font-black mb-4" style={{ color: WPLColors.textPrimary }}>

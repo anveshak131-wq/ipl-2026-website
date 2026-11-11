@@ -36,7 +36,7 @@ export default function Footer() {
             </div>
             <p className="text-gray-300 text-sm leading-relaxed">
               {isWPL
-                ? "SportsUP18 brings WPL 2026 scorecards, squads, standings, predictions, and matchday context together for women's T20 cricket fans."
+                ? "SportsUP18 brings WPL 2027 scorecards, squads, standings, predictions, and matchday context together for women's T20 cricket fans."
                 : "SportsUP18 is your IPL 2026 experience platform, built for live scores, fixtures, teams, news, and T20 cricket insights."}
             </p>
           </div>

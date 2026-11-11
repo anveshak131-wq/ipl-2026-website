@@ -87,7 +87,9 @@ export default function ModernMatchesGrid({
         </div>
 
         <p className="mt-3.5 text-xs text-slate-400/90 font-medium tracking-wide">
-          Fixtures and start times synchronize automatically upon official league release.
+          {matches.length > 0
+            ? 'Official fixtures, toss updates, and matchday statuses synchronize automatically throughout the season.'
+            : 'Fixtures and start times synchronize automatically upon official league release.'}
         </p>
       </div>
 

@@ -487,7 +487,7 @@ export default function EnhancedWPLTeamPage({ teamId }: { teamId: string }) {
       team1Short: config.shortName,
       team2Short: opp.shortName,
       venue: idx % 2 === 0 ? config.stadium : opp.stadium,
-      date: `2027-01-${10 + idx * 4}`,
+      date: `2027-01-${14 + idx * 3}`,
       time: '19:30 IST',
       status: 'Upcoming',
       league: 'wpl',
@@ -743,7 +743,7 @@ export default function EnhancedWPLTeamPage({ teamId }: { teamId: string }) {
                 <div className="p-6 rounded-3xl bg-gradient-to-r from-[#0F172A] via-[#0B1226] to-[#080C18] border border-white/12 flex flex-col sm:flex-row items-center justify-between gap-4">
                   <div>
                     <h2 className="text-lg font-black text-white">
-                      Season 5 Match Schedule (Jan 9 – Feb 5, 2027)
+                      Season 5 Match Schedule (Jan 14 – Feb 7, 2027)
                     </h2>
                     <p className="text-xs text-slate-400 mt-1">
                       Official league fixtures and franchise matchups.

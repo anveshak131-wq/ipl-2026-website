@@ -10,8 +10,8 @@ interface WPLSeasonHeaderProps {
 }
 
 export default function WPLSeasonHeader({ selectedSeason, onSeasonChange }: WPLSeasonHeaderProps) {
-  // Target: January 9, 2027 (WPL 2027 Confirmed Season Window Start)
-  const targetDate = new Date('2027-01-09T19:30:00+05:30').getTime();
+  // Target: January 14, 2027 (WPL 2027 Confirmed Season Kickoff - RCB vs MI at 7:30 PM IST)
+  const targetDate = new Date('2027-01-14T19:30:00+05:30').getTime();
 
   const [timeLeft, setTimeLeft] = useState({
     days: 0,
@@ -94,13 +94,13 @@ export default function WPLSeasonHeader({ selectedSeason, onSeasonChange }: WPLS
             <div>
               <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-md bg-amber-500/15 text-amber-300 border border-amber-500/30 text-xs font-bold uppercase tracking-wider mb-2">
                 <Flame className="w-3.5 h-3.5 text-amber-400" />
-                Locked Window • Jan 9 – Feb 5, 2027
+                Confirmed Window • Jan 14 – Feb 7, 2027
               </div>
               <h3 className="text-xl sm:text-2xl font-black text-white">
                 Road to WPL 2027 Kickoff
               </h3>
               <p className="mt-1 text-xs sm:text-sm text-gray-300 max-w-xl">
-                A compact 28-day season window running January 9 through February 5, 2027. Franchise retention lists and auction movements will finalize the 2027 title race.
+                22 evening T20 fixtures across a 25-day window running January 14 through February 7, 2027 in Vadodara &amp; Mumbai — all 7:30 PM IST starts with zero double-headers.
               </p>
             </div>
 
