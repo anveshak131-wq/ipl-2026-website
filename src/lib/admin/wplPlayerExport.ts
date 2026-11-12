@@ -1343,6 +1343,7 @@ function exportPdfReport(
 
     autoTable(doc, {
       startY: cursorY,
+      rowPageBreak: 'avoid',
       margin: { left: 14, right: 14, top: 16, bottom: 16 },
       head: [[
         'Code', 'Franchise', 'Players', 'Bat', 'AR', 'Bowl', 'WK', 'IND', 'OS', 'Capt', 'Stats', 'Cov%', 'Known Purse'
@@ -1398,7 +1399,7 @@ function exportPdfReport(
     const palette = getTeamPdfPalette(team.id);
 
     // Prevent orphaned team header cards at bottom of a page
-    if (cursorY > 162 || (groupIdx > 0 && cursorY > 152)) {
+    if (cursorY > 162 || (groupIdx > 0 && cursorY > 142)) {
       doc.addPage();
       cursorY = 16;
     }
@@ -1433,6 +1434,7 @@ function exportPdfReport(
 
     autoTable(doc, {
       startY: cursorY,
+      rowPageBreak: 'avoid',
       margin: { left: 14, right: 14, top: 16, bottom: 16 },
       head: [[
         '#',
@@ -1461,10 +1463,10 @@ function exportPdfReport(
         const dobLabel =
           r.dateOfBirth !== '—'
             ? r.age !== '—'
-              ? `${r.dateOfBirth}\n(${r.age} yrs)`
+              ? `${r.dateOfBirth}\nAge ${r.age}`
               : r.dateOfBirth
             : r.age !== '—'
-              ? `(${r.age} yrs)`
+              ? `Age ${r.age}`
               : '-';
         const styleLabel = `${r.battingStyle.replace(' bat', '')} /\n${r.bowlingStyle}`;
         const statusShort = r.squadStatus.replace(' Squad', '');
@@ -1542,7 +1544,7 @@ function exportPdfReport(
   });
 
   // ── Section 03: Multi-Format Career Statistics Annex (Grouped by Player) ────
-  const annexRows: Array<{ cells: string[]; playerParity: number }> = [];
+  const annexRows: Array<{ cells: string[]; playerParity: number; isFirstFormat: boolean }> = [];
   let playerParityIdx = 0;
 
   teamGroups.forEach((group) => {
@@ -1560,9 +1562,10 @@ function exportPdfReport(
         const bowl = r.bowlingByFormat[fmt];
         annexRows.push({
           playerParity: parity,
+          isFirstFormat: fmtIdx === 0,
           cells: [
-            fmtIdx === 0 ? pdfSafe(r.name) : '',
-            fmtIdx === 0 ? pdfSafe(r.teamShort) : '',
+            pdfSafe(r.name),
+            pdfSafe(r.teamShort),
             fmt,
             pdfSafe(bat?.matches || bowl?.matches || '-'),
             pdfSafe(bat?.innings || bowl?.innings || '-'),
@@ -1595,6 +1598,7 @@ function exportPdfReport(
 
     autoTable(doc, {
       startY: annexStartY,
+      rowPageBreak: 'avoid',
       margin: { left: 14, right: 14, top: 16, bottom: 16 },
       head: [[
         'Player', 'Team', 'Format', 'Mat', 'Inn', 'NO', 'Runs', 'HS', 'Bat Avg', 'Bat SR', '50s/100s', 'Wkts', 'BBI', 'Econ', 'Bowl Avg', '5W'
@@ -1633,6 +1637,10 @@ function exportPdfReport(
             data.cell.styles.fillColor = [248, 250, 252];
           } else {
             data.cell.styles.fillColor = [255, 255, 255];
+          }
+          if (entry && !entry.isFirstFormat && (data.column.index === 0 || data.column.index === 1)) {
+            data.cell.styles.fontStyle = 'normal';
+            data.cell.styles.textColor = [148, 163, 184];
           }
         }
       },
