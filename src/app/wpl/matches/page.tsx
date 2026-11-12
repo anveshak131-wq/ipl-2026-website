@@ -54,7 +54,7 @@ function getTeamMeta(teamName: string) {
   return TEAM_METAS['TBD'];
 }
 
-const OFFICIAL_WPL_2027_SCHEDULE: WplMatch[] = [
+export const OFFICIAL_WPL_2027_SCHEDULE: WplMatch[] = [
   { id: 'wpl-2027-m01', matchNumber: 1, dayNumber: 1, dayOfWeek: 'Thu', date: '2027-01-14', displayDate: '14 Jan 2027', time: '7:30 PM', homeTeam: 'Royal Challengers Bengaluru', homeTeamId: '14', homeShort: 'RCB', awayTeam: 'Mumbai Indians', awayTeamId: '13', awayShort: 'MI', venue: 'Vadodara', stage: 'League', status: 'upcoming', league: 'wpl' },
   { id: 'wpl-2027-m02', matchNumber: 2, dayNumber: 2, dayOfWeek: 'Fri', date: '2027-01-15', displayDate: '15 Jan 2027', time: '7:30 PM', homeTeam: 'Gujarat Giants', homeTeamId: '12', homeShort: 'GG', awayTeam: 'UP Warriorz', awayTeamId: '15', awayShort: 'UPW', venue: 'Vadodara', stage: 'League', status: 'upcoming', league: 'wpl' },
   { id: 'wpl-2027-m03', matchNumber: 3, dayNumber: 3, dayOfWeek: 'Sat', date: '2027-01-16', displayDate: '16 Jan 2027', time: '7:30 PM', homeTeam: 'Delhi Capitals', homeTeamId: '11', homeShort: 'DC', awayTeam: 'Royal Challengers Bengaluru', awayTeamId: '14', awayShort: 'RCB', venue: 'Vadodara', stage: 'League', status: 'upcoming', league: 'wpl' },

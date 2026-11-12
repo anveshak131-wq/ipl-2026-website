@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { Calendar, Clock, MapPin, ArrowLeft, Trophy, ShieldCheck } from 'lucide-react';
 import Link from 'next/link';
 import WplStadiumTrigger from '@/components/wpl/WplStadiumTrigger';
+import { OFFICIAL_WPL_2027_SCHEDULE } from '@/app/wpl/matches/page';
 
 export default function WplMatchDetailPage() {
   const params = useParams();
@@ -33,6 +34,10 @@ export default function WplMatchDetailPage() {
             const data = await res.json();
             if (Array.isArray(data)) schedule = data;
           }
+        }
+
+        if (schedule.length === 0) {
+          schedule = OFFICIAL_WPL_2027_SCHEDULE;
         }
 
         const found = schedule.find(

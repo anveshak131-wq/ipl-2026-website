@@ -78,12 +78,32 @@ function WplScorecardPageContent() {
 
     try {
       const url = isManualRefresh ? '/api/scorecards?league=wpl&nocache=1' : '/api/scorecards?league=wpl';
-      const res = await fetch(url, { cache: 'no-store' });
-      if (!res.ok) {
-        throw new Error(`Unable to load scorecards (${res.status})`);
+      let items: WplScorecard[] = [];
+
+      try {
+        const res = await fetch(url, { cache: 'no-store' });
+        if (res.ok) {
+          const raw = await res.json();
+          if (Array.isArray(raw)) items = raw;
+        }
+      } catch {
+        // Fall back to client storage if API endpoint is unavailable on static host
       }
-      const raw = await res.json();
-      const items: WplScorecard[] = Array.isArray(raw) ? raw : [];
+
+      if (items.length === 0 && typeof window !== 'undefined') {
+        const rawLocal =
+          localStorage.getItem('sportsup99_wpl_scorecards_v1') ||
+          localStorage.getItem('wpl_scorecards_v1');
+        if (rawLocal) {
+          try {
+            const parsed = JSON.parse(rawLocal);
+            if (Array.isArray(parsed)) items = parsed;
+          } catch {
+            // ignore malformed local data
+          }
+        }
+      }
+
       const published = filterAndSortPublishedWplScorecards(items);
       setScorecards(published);
     } catch (err) {
