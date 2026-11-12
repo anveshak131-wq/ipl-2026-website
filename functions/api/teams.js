@@ -514,7 +514,18 @@ function mergeSeedIntoStored(seedTeams, storedTeams) {
       return { ...seed, id, league };
     }
     if (stored.id !== id || stored.league !== league) changed = true;
-    return { ...seed, ...stored, id, league };
+    const seedTrophies = Array.isArray(seed.trophies) ? seed.trophies : [];
+    const storedTrophies = Array.isArray(stored.trophies) ? stored.trophies : [];
+    let mergedTrophies = storedTrophies;
+    if (seedTrophies.length > 0) {
+      const seen = new Set(storedTrophies.map((t) => `${t?.year}:${t?.name || ''}`));
+      const missing = seedTrophies.filter((t) => !seen.has(`${t?.year}:${t?.name || ''}`));
+      if (missing.length > 0) {
+        mergedTrophies = [...storedTrophies, ...missing].sort((a, b) => (a?.year || 0) - (b?.year || 0));
+        changed = true;
+      }
+    }
+    return { ...seed, ...stored, id, league, trophies: mergedTrophies };
   });
 
   for (const [key, stored] of storedById.entries()) {

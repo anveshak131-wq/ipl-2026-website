@@ -12,7 +12,10 @@ export const wplTeams: Omit<Team, 'id' | 'players'>[] = [
       primary: '#004BA0', // Blue (Mumbai Indians)
       secondary: '#FFD700' // Gold
     },
-    trophies: [],
+    trophies: [
+      { year: 2023, name: 'WPL Champions' },
+      { year: 2025, name: 'WPL Champions' },
+    ],
     homeGrounds: ['Wankhede Stadium, Mumbai']
   },
   {
@@ -25,7 +28,10 @@ export const wplTeams: Omit<Team, 'id' | 'players'>[] = [
       primary: '#C8102E', // Red (RCB)
       secondary: '#FFD700' // Gold
     },
-    trophies: [],
+    trophies: [
+      { year: 2024, name: 'WPL Champions' },
+      { year: 2026, name: 'WPL Champions' },
+    ],
     homeGrounds: ['M. Chinnaswamy Stadium, Bengaluru']
   },
   {
