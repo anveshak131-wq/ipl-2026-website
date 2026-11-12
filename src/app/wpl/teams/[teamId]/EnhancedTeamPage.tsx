@@ -21,7 +21,7 @@ import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import SquadRosterSection from '@/components/teams/modern/SquadRosterSection';
 import { api, mockTeams } from '@/lib/data';
-import { hexToRgba, sanitizeNoPinkHex } from '@/lib/teamColors';
+import { getTeamAccentTheme, hexToRgba, sanitizeNoPinkHex } from '@/lib/teamColors';
 import type { Team, Player, Match } from '@/types';
 
 const WPL_PLAYERS_STORAGE_KEY = 'sportsup99_wpl_players_v2';
@@ -65,14 +65,14 @@ const FRANCHISES: Record<'rcb' | 'mi' | 'dc' | 'gg' | 'upw', FranchiseConfig> = 
     name: 'Royal Challengers Bengaluru (WPL)',
     shortName: 'RCB-W',
     logo: '/logos/wpl_rcb_logo_modern.svg',
-    primary: '#DC2626',
-    secondary: '#F59E0B',
-    accent: '#FACC15',
+    primary: '#C8102E',
+    secondary: '#B45309',
+    accent: '#F59E0B',
     badgeBg: 'bg-red-500/15 text-red-300 border-red-500/35',
     stadium: 'M. Chinnaswamy Stadium, Bengaluru',
     city: 'Bengaluru',
     captain: 'Smriti Mandhana',
-    coach: 'Luke Williams',
+    coach: 'Malolan Rangarajan',
     motto: 'Play Bold',
     championships: ['2024', '2026'],
     stats: {
@@ -97,13 +97,13 @@ const FRANCHISES: Record<'rcb' | 'mi' | 'dc' | 'gg' | 'upw', FranchiseConfig> = 
     shortName: 'MI-W',
     logo: '/logos/wpl_mi_logo_modern.svg',
     primary: '#004BA0',
-    secondary: '#D1AB3E',
-    accent: '#38BDF8',
+    secondary: '#B45309',
+    accent: '#60A5FA',
     badgeBg: 'bg-blue-500/15 text-blue-300 border-blue-500/35',
     stadium: 'Wankhede Stadium, Mumbai',
     city: 'Mumbai',
     captain: 'Harmanpreet Kaur',
-    coach: 'Charlotte Edwards',
+    coach: 'Luke Williams',
     motto: 'Duniya Hila Denge',
     championships: ['2023', '2025'],
     stats: {
@@ -159,8 +159,8 @@ const FRANCHISES: Record<'rcb' | 'mi' | 'dc' | 'gg' | 'upw', FranchiseConfig> = 
     shortName: 'GG',
     logo: '/logos/wpl_gg_logo_modern.svg',
     primary: '#EA580C',
-    secondary: '#FACC15',
-    accent: '#14B8A6',
+    secondary: '#B45309',
+    accent: '#FB923C',
     badgeBg: 'bg-orange-500/15 text-orange-300 border-orange-500/35',
     stadium: 'Narendra Modi Stadium, Ahmedabad',
     city: 'Ahmedabad',
@@ -190,13 +190,13 @@ const FRANCHISES: Record<'rcb' | 'mi' | 'dc' | 'gg' | 'upw', FranchiseConfig> = 
     shortName: 'UPW',
     logo: '/logos/wpl_upw_logo_modern.svg',
     primary: '#6D28D9',
-    secondary: '#F59E0B',
-    accent: '#EAB308',
+    secondary: '#B45309',
+    accent: '#A78BFA',
     badgeBg: 'bg-indigo-500/15 text-indigo-300 border-indigo-500/35',
     stadium: 'BRSABV Ekana Cricket Stadium, Lucknow',
     city: 'Lucknow',
     captain: 'Alyssa Healy',
-    coach: 'Jon Lewis',
+    coach: 'Abhishek Nayar',
     motto: 'Gazab Andaz',
     championships: [],
     stats: {
@@ -313,7 +313,12 @@ export default function EnhancedWPLTeamPage({ teamId }: { teamId: string }) {
   const franchiseKey = useMemo(() => getFranchiseKey(teamId), [teamId]);
   const config = FRANCHISES[franchiseKey];
   const primaryHex = sanitizeNoPinkHex(config.primary, '#1D4ED8');
-  const secondaryHex = sanitizeNoPinkHex(config.secondary, '#F59E0B');
+  const secondaryHex = sanitizeNoPinkHex(config.secondary, '#B45309');
+  const accentHex = sanitizeNoPinkHex(config.accent, primaryHex);
+  const teamTheme = useMemo(
+    () => getTeamAccentTheme(primaryHex, secondaryHex),
+    [primaryHex, secondaryHex]
+  );
 
   const [team, setTeam] = useState<Team | null>(null);
   const [players, setPlayers] = useState<Player[]>([]);
@@ -591,7 +596,14 @@ export default function EnhancedWPLTeamPage({ teamId }: { teamId: string }) {
                         Season 5 Contender
                       </span>
                     )}
-                    <span className="px-2.5 py-1 rounded-full bg-cyan-500/10 border border-cyan-400/25 text-cyan-300 text-xs font-bold">
+                    <span
+                      className="px-2.5 py-1 rounded-full text-xs font-bold border"
+                      style={{
+                        backgroundColor: teamTheme.subtleBg,
+                        borderColor: teamTheme.subtleBorder,
+                        color: teamTheme.highlightText,
+                      }}
+                    >
                       WPL 2027
                     </span>
                   </div>
@@ -636,7 +648,10 @@ export default function EnhancedWPLTeamPage({ teamId }: { teamId: string }) {
            ===================================================================== */}
         <section className="sticky top-16 z-30 bg-[#070B18]/95 backdrop-blur-xl border-b border-white/10 shadow-lg">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex flex-col md:flex-row items-center justify-between gap-4">
-            <div className="inline-flex p-1 rounded-2xl bg-[#0D1326] border border-white/10 w-full md:w-auto overflow-x-auto">
+            <div
+              className="inline-flex p-1 rounded-2xl bg-[#0D1326] border w-full md:w-auto overflow-x-auto"
+              style={{ borderColor: hexToRgba(primaryHex, 0.25) }}
+            >
               {[
                 { id: 'squad', label: 'Squad & Profiles', icon: Users, badge: `${players.length}` },
                 { id: 'fixtures', label: 'Match Schedule', icon: Calendar },
@@ -651,13 +666,18 @@ export default function EnhancedWPLTeamPage({ teamId }: { teamId: string }) {
                     type="button"
                     onClick={() => setActiveTab(tab.id as any)}
                     className={`relative shrink-0 flex-1 md:flex-initial flex items-center justify-center gap-2 px-4 sm:px-5 py-2.5 rounded-xl text-xs sm:text-sm font-extrabold transition-colors ${
-                      isActive ? 'text-slate-950' : 'text-slate-300 hover:text-white'
+                      isActive ? '' : 'text-slate-300 hover:text-white'
                     }`}
+                    style={isActive ? { color: teamTheme.textColor } : undefined}
                   >
                     {isActive && (
                       <motion.div
                         layoutId="wpl-franchise-active-tab"
-                        className="absolute inset-0 rounded-xl bg-gradient-to-r from-amber-400 via-amber-300 to-cyan-300 shadow-lg shadow-amber-500/20"
+                        className="absolute inset-0 rounded-xl shadow-lg border border-white/15"
+                        style={{
+                          background: teamTheme.gradient,
+                          boxShadow: teamTheme.shadow,
+                        }}
                         transition={{ type: 'spring', stiffness: 450, damping: 34 }}
                       />
                     )}
@@ -666,9 +686,12 @@ export default function EnhancedWPLTeamPage({ teamId }: { teamId: string }) {
                       <span>{tab.label}</span>
                       {tab.badge && (
                         <span
-                          className={`ml-0.5 px-1.5 py-0.5 rounded-md text-[10px] font-black tabular-nums ${
-                            isActive ? 'bg-slate-950/15 text-slate-950' : 'bg-white/10 text-slate-300'
-                          }`}
+                          className="ml-0.5 px-1.5 py-0.5 rounded-md text-[10px] font-black tabular-nums"
+                          style={
+                            isActive
+                              ? { backgroundColor: teamTheme.badgeBg, color: teamTheme.badgeText }
+                              : { backgroundColor: 'rgba(255,255,255,0.1)', color: '#CBD5E1' }
+                          }
                         >
                           {tab.badge}
                         </span>
@@ -749,7 +772,14 @@ export default function EnhancedWPLTeamPage({ teamId }: { teamId: string }) {
                       Official league fixtures and franchise matchups.
                     </p>
                   </div>
-                  <span className="px-3.5 py-1.5 rounded-xl bg-cyan-500/15 text-cyan-300 text-xs font-black uppercase tracking-wider border border-cyan-400/35 tabular-nums">
+                  <span
+                    className="px-3.5 py-1.5 rounded-xl text-xs font-black uppercase tracking-wider border tabular-nums"
+                    style={{
+                      backgroundColor: teamTheme.subtleBg,
+                      borderColor: teamTheme.subtleBorder,
+                      color: teamTheme.highlightText,
+                    }}
+                  >
                     {displayMatches.length} Fixtures Scheduled
                   </span>
                 </div>
@@ -782,7 +812,10 @@ export default function EnhancedWPLTeamPage({ teamId }: { teamId: string }) {
                         className="p-5 rounded-2xl bg-[#0A1021] border border-white/10 hover:border-cyan-400/45 transition-all flex flex-col sm:flex-row items-center justify-between gap-4 shadow-lg"
                       >
                         <div className="space-y-1.5 text-center sm:text-left">
-                          <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 text-xs font-bold text-cyan-300 uppercase tracking-wider">
+                          <div
+                            className="flex flex-wrap items-center justify-center sm:justify-start gap-2 text-xs font-bold uppercase tracking-wider"
+                            style={{ color: teamTheme.highlightText }}
+                          >
                             <MapPin className="w-3.5 h-3.5" />
                             <span>{matchVenue}</span>
                             <span>•</span>
@@ -799,7 +832,14 @@ export default function EnhancedWPLTeamPage({ teamId }: { teamId: string }) {
                               className="w-6 h-6 object-contain inline-block shrink-0"
                             />
                             <span>{t1Short}</span>
-                            <span className="text-amber-300 text-xs font-black px-2 py-0.5 rounded bg-amber-400/15 border border-amber-400/30">
+                            <span
+                              className="text-xs font-black px-2 py-0.5 rounded border"
+                              style={{
+                                backgroundColor: teamTheme.subtleBg,
+                                borderColor: teamTheme.subtleBorder,
+                                color: teamTheme.highlightText,
+                              }}
+                            >
                               VS
                             </span>
                             <span>{t2Short}</span>
@@ -830,7 +870,12 @@ export default function EnhancedWPLTeamPage({ teamId }: { teamId: string }) {
                           </span>
                           <Link
                             href={`/wpl/matches/${m.id || ''}`}
-                            className="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-300 text-slate-950 hover:brightness-105 text-xs font-black uppercase tracking-wider transition-all shadow-md"
+                            className="px-4 py-2 rounded-xl hover:brightness-110 text-xs font-black uppercase tracking-wider transition-all shadow-md"
+                            style={{
+                              background: teamTheme.gradient,
+                              color: teamTheme.textColor,
+                              boxShadow: teamTheme.shadow,
+                            }}
                           >
                             Match Center
                           </Link>
@@ -970,8 +1015,21 @@ export default function EnhancedWPLTeamPage({ teamId }: { teamId: string }) {
                 transition={{ duration: 0.22 }}
                 className="space-y-8 max-w-4xl mx-auto"
               >
-                <div className="p-8 rounded-3xl bg-gradient-to-r from-amber-950/30 via-[#0A1021] to-amber-950/20 border border-amber-500/30 text-center space-y-4">
-                  <div className="w-16 h-16 mx-auto rounded-2xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 shadow-xl">
+                <div
+                  className="p-8 rounded-3xl border text-center space-y-4"
+                  style={{
+                    background: `linear-gradient(135deg, ${hexToRgba(primaryHex, 0.16)} 0%, #0A1021 55%, ${hexToRgba(secondaryHex, 0.14)} 100%)`,
+                    borderColor: teamTheme.subtleBorder,
+                  }}
+                >
+                  <div
+                    className="w-16 h-16 mx-auto rounded-2xl border flex items-center justify-center shadow-xl"
+                    style={{
+                      backgroundColor: teamTheme.subtleBg,
+                      borderColor: teamTheme.subtleBorder,
+                      color: accentHex,
+                    }}
+                  >
                     <Trophy className="w-8 h-8" />
                   </div>
                   <div>
@@ -986,11 +1044,17 @@ export default function EnhancedWPLTeamPage({ teamId }: { teamId: string }) {
                       {config.championships.map((year) => (
                         <div
                           key={year}
-                          className="p-5 rounded-2xl bg-[#070B18] border-2 border-amber-400/50 shadow-2xl flex items-center gap-4 min-w-[240px]"
+                          className="p-5 rounded-2xl bg-[#070B18] border-2 shadow-2xl flex items-center gap-4 min-w-[240px]"
+                          style={{ borderColor: teamTheme.subtleBorder }}
                         >
-                          <Trophy className="w-8 h-8 text-amber-400 shrink-0" />
+                          <Trophy className="w-8 h-8 shrink-0" style={{ color: accentHex }} />
                           <div className="text-left">
-                            <span className="text-xs font-bold uppercase text-amber-400 block">WPL Champions</span>
+                            <span
+                              className="text-xs font-bold uppercase block"
+                              style={{ color: teamTheme.highlightText }}
+                            >
+                              WPL Champions
+                            </span>
                             <span className="text-xl font-black text-white">{year} Season</span>
                           </div>
                         </div>
@@ -1005,7 +1069,7 @@ export default function EnhancedWPLTeamPage({ teamId }: { teamId: string }) {
 
                 <div className="p-6 sm:p-8 rounded-3xl bg-[#0A1021] border border-white/10 space-y-4 text-xs sm:text-sm text-slate-300 leading-relaxed">
                   <h3 className="text-base font-black text-white flex items-center gap-2">
-                    <Shield className="w-4 h-4 text-cyan-400" />
+                    <Shield className="w-4 h-4" style={{ color: teamTheme.highlightText }} />
                     <span>About {team?.name || config.name}</span>
                   </h3>
                   <p>

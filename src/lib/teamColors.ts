@@ -100,3 +100,52 @@ export function hexToRgba(hex: string, alpha: number): string {
   const b = parseInt(safe.slice(5, 7), 16);
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
+
+export function getHexLuminance(hex: string): number {
+  const safe = sanitizeNoPinkHex(hex, '#1D4ED8');
+  const channels = [1, 3, 5].map((i) => {
+    const c = parseInt(safe.slice(i, i + 2), 16) / 255;
+    return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+  });
+  return 0.2126 * channels[0] + 0.7152 * channels[1] + 0.0722 * channels[2];
+}
+
+export function mixHex(hexA: string, hexB: string, ratioB: number): string {
+  const a = normalizeHex(hexA, '#1D4ED8');
+  const b = normalizeHex(hexB, '#FFFFFF');
+  const t = Math.max(0, Math.min(1, ratioB));
+  const lerp = (idx: number) =>
+    Math.round(parseInt(a.slice(idx, idx + 2), 16) * (1 - t) + parseInt(b.slice(idx, idx + 2), 16) * t)
+      .toString(16)
+      .padStart(2, '0');
+  return `#${lerp(1)}${lerp(3)}${lerp(5)}`.toUpperCase();
+}
+
+export function getTeamAccentTheme(primary?: string, secondary?: string) {
+  const safePrimary = sanitizeNoPinkHex(primary, '#1D4ED8');
+  const rawSecondary = sanitizeNoPinkHex(secondary, safePrimary);
+  // Avoid near-black secondary collapsing a pill gradient into black
+  const safeSecondary =
+    getHexLuminance(rawSecondary) < 0.03 || rawSecondary === safePrimary
+      ? mixHex(safePrimary, '#0F172A', 0.28)
+      : rawSecondary;
+
+  const avgLum = (getHexLuminance(safePrimary) + getHexLuminance(safeSecondary)) / 2;
+  const isLightGradient = avgLum > 0.36;
+
+  return {
+    primary: safePrimary,
+    secondary: safeSecondary,
+    gradient: `linear-gradient(135deg, ${safePrimary} 0%, ${safeSecondary} 100%)`,
+    borderColor: hexToRgba(safePrimary, 0.55),
+    subtleBg: hexToRgba(safePrimary, 0.14),
+    subtleBorder: hexToRgba(safePrimary, 0.35),
+    shadow: `0 8px 24px ${hexToRgba(safePrimary, 0.35)}`,
+    highlightText: getHexLuminance(safePrimary) < 0.28 ? mixHex(safePrimary, '#FFFFFF', 0.42) : safePrimary,
+    secondaryHighlight:
+      getHexLuminance(safeSecondary) < 0.28 ? mixHex(safeSecondary, '#FFFFFF', 0.48) : safeSecondary,
+    textColor: isLightGradient ? '#0F172A' : '#FFFFFF',
+    badgeBg: isLightGradient ? 'rgba(15, 23, 42, 0.16)' : 'rgba(0, 0, 0, 0.28)',
+    badgeText: isLightGradient ? '#0F172A' : '#FFFFFF',
+  };
+}

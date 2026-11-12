@@ -43,7 +43,7 @@ const INITIAL_WPL_TEAMS: WPLTeamData[] = [
     shortName: "MI-W",
     city: "Mumbai, Maharashtra",
     captain: "Harmanpreet Kaur",
-    coach: "Lisa Keightley",
+    coach: "Luke Williams",
     homeGround: "Wankhede Stadium / Brabourne Stadium, Mumbai",
     colors: { primary: "#004BA0", secondary: "#FFD700" },
     trophies: [2023, 2025],

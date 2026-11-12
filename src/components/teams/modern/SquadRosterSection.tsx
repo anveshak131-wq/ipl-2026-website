@@ -15,7 +15,7 @@ import {
   User,
   X,
 } from 'lucide-react';
-import { hexToRgba, sanitizeNoPinkHex } from '@/lib/teamColors';
+import { getTeamAccentTheme, hexToRgba, sanitizeNoPinkHex } from '@/lib/teamColors';
 import {
   getInitials,
   getPlayerLeagueStats,
@@ -64,6 +64,10 @@ export default function SquadRosterSection({
 }: SquadRosterSectionProps) {
   const safePrimary = sanitizeNoPinkHex(primaryColor, '#1D4ED8');
   const safeSecondary = sanitizeNoPinkHex(secondaryColor, '#F59E0B');
+  const teamTheme = useMemo(
+    () => getTeamAccentTheme(safePrimary, safeSecondary),
+    [safePrimary, safeSecondary]
+  );
 
   const [internalSearch, setInternalSearch] = useState('');
   const searchQuery = externalSearchQuery !== undefined ? externalSearchQuery : internalSearch;
@@ -228,8 +232,11 @@ export default function SquadRosterSection({
                   {/* Left: Identity */}
                   <div className="space-y-4 flex-1 min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className="inline-flex items-center gap-1.5 text-[11px] font-black uppercase tracking-widest text-cyan-300">
-                        <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                      <span
+                        className="inline-flex items-center gap-1.5 text-[11px] font-black uppercase tracking-widest"
+                        style={{ color: teamTheme.highlightText }}
+                      >
+                        <Sparkles className="w-3.5 h-3.5" style={{ color: teamTheme.highlightText }} />
                         Featured Athlete
                       </span>
                       <span className={`px-2.5 py-0.5 rounded-lg text-[11px] font-extrabold uppercase tracking-wider border ${roleMeta.badgeClass}`}>
@@ -273,7 +280,12 @@ export default function SquadRosterSection({
                       <button
                         type="button"
                         onClick={() => openModalForPlayer(hero)}
-                        className="px-5 py-2.5 rounded-xl font-black text-xs uppercase tracking-wider text-slate-950 bg-gradient-to-r from-amber-400 via-amber-300 to-yellow-300 hover:brightness-105 active:scale-95 transition-all shadow-lg shadow-amber-500/20 flex items-center gap-2"
+                        className="px-5 py-2.5 rounded-xl font-black text-xs uppercase tracking-wider hover:brightness-110 active:scale-95 transition-all shadow-lg flex items-center gap-2"
+                        style={{
+                          background: teamTheme.gradient,
+                          color: teamTheme.textColor,
+                          boxShadow: teamTheme.shadow,
+                        }}
                       >
                         <span>View Full Profile</span>
                         <ChevronRight className="w-4 h-4" />
@@ -389,22 +401,30 @@ export default function SquadRosterSection({
                   type="button"
                   onClick={() => setRoleFilter(tab.id)}
                   className={`relative px-3 py-1.5 rounded-xl text-[11px] font-extrabold uppercase tracking-wider whitespace-nowrap transition-colors ${
-                    isActive ? 'text-slate-950' : 'text-slate-300 hover:text-white hover:bg-white/[0.05]'
+                    isActive ? '' : 'text-slate-300 hover:text-white hover:bg-white/[0.05]'
                   }`}
+                  style={isActive ? { color: teamTheme.textColor } : undefined}
                 >
                   {isActive && (
                     <motion.div
                       layoutId={`squad-role-pill-${league}-${teamShortName}`}
                       transition={{ type: 'spring', stiffness: 420, damping: 32 }}
-                      className="absolute inset-0 rounded-xl bg-gradient-to-r from-amber-400 via-amber-300 to-cyan-300 shadow-lg shadow-amber-500/20"
+                      className="absolute inset-0 rounded-xl shadow-lg border border-white/15"
+                      style={{
+                        background: teamTheme.gradient,
+                        boxShadow: teamTheme.shadow,
+                      }}
                     />
                   )}
                   <span className="relative z-10 flex items-center gap-1.5">
                     <span>{tab.label}</span>
                     <span
-                      className={`px-1.5 py-0.5 rounded-md text-[10px] font-black ${
-                        isActive ? 'bg-slate-950/15 text-slate-950' : 'bg-white/10 text-slate-300'
-                      }`}
+                      className="px-1.5 py-0.5 rounded-md text-[10px] font-black"
+                      style={
+                        isActive
+                          ? { backgroundColor: teamTheme.badgeBg, color: teamTheme.badgeText }
+                          : { backgroundColor: 'rgba(255,255,255,0.1)', color: '#CBD5E1' }
+                      }
                     >
                       {tab.count}
                     </span>
@@ -474,8 +494,9 @@ export default function SquadRosterSection({
                 onClick={() => setViewMode('grid')}
                 aria-label="Card grid view"
                 className={`p-1.5 rounded-lg transition-colors ${
-                  viewMode === 'grid' ? 'bg-white/15 text-amber-300' : 'text-slate-400 hover:text-white'
+                  viewMode === 'grid' ? 'bg-white/15' : 'text-slate-400 hover:text-white'
                 }`}
+                style={viewMode === 'grid' ? { color: teamTheme.highlightText } : undefined}
               >
                 <LayoutGrid className="w-4 h-4" />
               </button>
@@ -484,8 +505,9 @@ export default function SquadRosterSection({
                 onClick={() => setViewMode('table')}
                 aria-label="Statistics table view"
                 className={`p-1.5 rounded-lg transition-colors ${
-                  viewMode === 'table' ? 'bg-white/15 text-amber-300' : 'text-slate-400 hover:text-white'
+                  viewMode === 'table' ? 'bg-white/15' : 'text-slate-400 hover:text-white'
                 }`}
+                style={viewMode === 'table' ? { color: teamTheme.highlightText } : undefined}
               >
                 <List className="w-4 h-4" />
               </button>
@@ -518,7 +540,12 @@ export default function SquadRosterSection({
               setRoleFilter('all');
               setOnlyOverseas(false);
             }}
-            className="mt-4 px-4 py-2 rounded-xl bg-amber-400 text-slate-950 font-black text-xs uppercase tracking-wider hover:brightness-105 transition-all"
+            className="mt-4 px-4 py-2 rounded-xl font-black text-xs uppercase tracking-wider hover:brightness-110 transition-all"
+            style={{
+              background: teamTheme.gradient,
+              color: teamTheme.textColor,
+              boxShadow: teamTheme.shadow,
+            }}
           >
             Reset All Filters
           </button>
@@ -576,9 +603,17 @@ export default function SquadRosterSection({
                 onClick={() => openModalForPlayer(player)}
                 className={`group relative flex flex-col justify-between overflow-hidden rounded-2xl border p-5 cursor-pointer transition-colors duration-200 bg-[#0B1021]/95 hover:bg-[#101730] ${
                   isSpotlighted
-                    ? 'border-cyan-400/70 ring-1 ring-cyan-400/40 shadow-xl shadow-cyan-950/30'
+                    ? 'shadow-xl'
                     : 'border-white/10 hover:border-white/25 shadow-lg shadow-black/40'
                 }`}
+                style={
+                  isSpotlighted
+                    ? {
+                        borderColor: teamTheme.borderColor,
+                        boxShadow: `0 0 0 1px ${teamTheme.borderColor}, ${teamTheme.shadow}`,
+                      }
+                    : undefined
+                }
               >
                 {/* Crisp Top Gradient Accent Line */}
                 <div className={`absolute inset-x-0 top-0 h-1 bg-gradient-to-r ${roleMeta.topBarClass} opacity-80`} />
