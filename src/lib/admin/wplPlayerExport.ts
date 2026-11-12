@@ -214,6 +214,72 @@ function cleanStr(value: unknown, fallback = '—'): string {
   return s.length > 0 ? s : fallback;
 }
 
+export function formatIndianDate(raw?: string): string {
+  if (!raw) return '—';
+  const s = String(raw).trim();
+  if (!s || s === '—' || s === '-' || s.toUpperCase() === 'N/A') return '—';
+
+  // Already DD/MM/YYYY or D/M/YYYY
+  const dmySlash = s.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})$/);
+  if (dmySlash) {
+    const day = Number(dmySlash[1]);
+    const month = Number(dmySlash[2]);
+    const year = Number(dmySlash[3]);
+    if (month >= 1 && month <= 12 && day >= 1 && day <= 31) {
+      return `${String(day).padStart(2, '0')}/${String(month).padStart(2, '0')}/${year}`;
+    }
+  }
+
+  // ISO YYYY-MM-DD or YYYY/MM/DD (with optional time suffix)
+  const ymdMatch = s.match(/^(\d{4})[-/](\d{1,2})[-/](\d{1,2})(?:[T\s].*)?$/);
+  if (ymdMatch) {
+    const year = ymdMatch[1];
+    const month = String(Number(ymdMatch[2])).padStart(2, '0');
+    const day = String(Number(ymdMatch[3])).padStart(2, '0');
+    return `${day}/${month}/${year}`;
+  }
+
+  // Natural date strings e.g. "Apr 26, 1999" or "26 April 1999"
+  const parsed = new Date(s);
+  if (!Number.isNaN(parsed.getTime())) {
+    const day = String(parsed.getDate()).padStart(2, '0');
+    const month = String(parsed.getMonth() + 1).padStart(2, '0');
+    const year = parsed.getFullYear();
+    return `${day}/${month}/${year}`;
+  }
+
+  return s;
+}
+
+function formatIndianTimestamp(date: Date = new Date()): string {
+  const day = String(date.getDate()).padStart(2, '0');
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const year = date.getFullYear();
+  const hours24 = date.getHours();
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+  const period = hours24 >= 12 ? 'PM' : 'AM';
+  const hours12 = String(hours24 % 12 || 12).padStart(2, '0');
+  return `${day}/${month}/${year}, ${hours12}:${minutes} ${period}`;
+}
+
+function formatPurseInr(lakhs: number): string {
+  if (!lakhs || lakhs <= 0) return '-';
+  if (lakhs >= 100) return `INR ${(lakhs / 100).toFixed(2)} Cr`;
+  return `INR ${lakhs} L`;
+}
+
+function pdfSafe(value: unknown): string {
+  return String(value ?? '-')
+    .replace(/₹\s*/g, 'INR ')
+    .replace(/[—–]/g, '-')
+    .replace(/•/g, '|')
+    .replace(/[‘’]/g, "'")
+    .replace(/[“”]/g, '"')
+    .replace(/[^\x20-\x7E\xA9]/g, ' ')
+    .replace(/\s{2,}/g, ' ')
+    .trim() || '-';
+}
+
 function statVal(row: Record<string, any> | undefined, keys: string[], fallback = '—'): string {
   if (!row) return fallback;
   for (const key of keys) {
@@ -506,7 +572,7 @@ export function normalizeWplPlayerForExport(
     nationality,
     isOverseas,
     age: player.age !== undefined && player.age !== null && String(player.age).trim() !== '' ? String(player.age) : '—',
-    dateOfBirth: cleanStr(player.dateOfBirth),
+    dateOfBirth: formatIndianDate(cleanStr(player.dateOfBirth)),
     battingStyle: cleanStr(player.battingStyle),
     bowlingStyle: cleanStr(player.bowlingStyle),
     jerseyNumber: cleanStr(player.jerseyNumber, 'N/A'),
@@ -806,7 +872,7 @@ function buildFlatRows(records: NormalizedWplExportRecord[]) {
       'Nationality': r.nationality,
       'Slot Type': r.isOverseas ? 'Overseas' : 'Domestic (IND)',
       'Age': r.age,
-      'Date of Birth': r.dateOfBirth,
+      'Date of Birth (DD/MM/YYYY)': r.dateOfBirth,
       'Batting Style': r.battingStyle,
       'Bowling Style': r.bowlingStyle,
       'Jersey #': r.jerseyNumber,
@@ -978,7 +1044,8 @@ async function exportExcelWorkbook(
     ]);
   });
   summarySheet.addRow([]);
-  summarySheet.addRow(['Filter Scope', scopeLabel, 'Exported At', new Date().toISOString()]);
+  summarySheet.addRow(['Filter Scope', scopeLabel, 'Exported At (IST)', formatIndianTimestamp(new Date())]);
+  summarySheet.addRow(['DOB Format', 'DD/MM/YYYY', 'Copyright', WPL_COPYRIGHT_NOTICE]);
   styleSheet(summarySheet, sumHeaders, [12, 28, 13, 10, 13, 10, 15, 10, 10, 10, 12, 18], accentFill);
 
   const buffer = await workbook.xlsx.writeBuffer();
@@ -988,161 +1055,591 @@ async function exportExcelWorkbook(
   return fileName;
 }
 
+const WPL_COPYRIGHT_NOTICE =
+  '© 2026-2027 SportsUP18 · WPL Operations & Analytics Desk. All Rights Reserved.';
+
+const TEAM_PDF_PALETTES: Record<string, { primary: [number, number, number]; accent: [number, number, number] }> = {
+  '14': { primary: [153, 27, 27], accent: [217, 119, 6] },   // RCB-W Crimson & Gold
+  '13': { primary: [30, 58, 138], accent: [245, 158, 11] },  // MI-W Royal Blue & Gold
+  '11': { primary: [29, 78, 216], accent: [220, 38, 38] },   // DC-W Blue & Red
+  '12': { primary: [180, 83, 9], accent: [245, 158, 11] },   // GG Amber & Gold
+  '15': { primary: [67, 56, 202], accent: [217, 119, 6] },   // UPW Indigo & Gold
+};
+
+function getTeamPdfPalette(teamId: string) {
+  return TEAM_PDF_PALETTES[teamId] || { primary: [30, 41, 59], accent: [16, 185, 129] };
+}
+
+function getLastAutoTableY(doc: jsPDF, fallbackY: number): number {
+  const y = (doc as unknown as { lastAutoTable?: { finalY?: number } }).lastAutoTable?.finalY;
+  return typeof y === 'number' && Number.isFinite(y) ? y : fallbackY;
+}
+
+function drawPdfSectionHeading(doc: jsPDF, y: number, indexNum: string, title: string, subtitle: string): number {
+  doc.setFillColor(241, 245, 249);
+  doc.roundedRect(14, y, 269, 9, 1.5, 1.5, 'F');
+  doc.setFillColor(16, 185, 129);
+  doc.rect(14, y, 2.2, 9, 'F');
+
+  doc.setTextColor(15, 23, 42);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(9);
+  doc.text(pdfSafe(`${indexNum}  ${title}`), 19, y + 5.8);
+
+  doc.setTextColor(100, 116, 139);
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(7.5);
+  doc.text(pdfSafe(subtitle), 279, y + 5.7, { align: 'right' });
+
+  return y + 12;
+}
+
+function stampPdfRunningHeadersAndFooters(doc: jsPDF, scopeLabel: string, generatedAtStr: string, totalPlayers: number) {
+  const totalPages = doc.getNumberOfPages();
+  const shortScope = pdfSafe(scopeLabel).slice(0, 56);
+
+  for (let pageNum = 1; pageNum <= totalPages; pageNum++) {
+    doc.setPage(pageNum);
+
+    // Slim running header on pages 2+ so continuation pages remain anchored
+    if (pageNum > 1) {
+      doc.setFillColor(15, 23, 42);
+      doc.rect(0, 0, 297, 11, 'F');
+      doc.setFillColor(16, 185, 129);
+      doc.rect(0, 11, 297, 0.8, 'F');
+
+      doc.setTextColor(255, 255, 255);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(8.5);
+      doc.text('SPORTSUP18  |  WPL SQUAD & PERFORMANCE DOSSIER', 14, 7.2);
+
+      doc.setTextColor(203, 213, 225);
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(7.2);
+      doc.text(pdfSafe(`Scope: ${shortScope}  |  DOB: DD/MM/YYYY  |  Generated: ${generatedAtStr}`), 283, 7.2, {
+        align: 'right',
+      });
+    }
+
+    // Copyright & pagination footer across every single page
+    doc.setDrawColor(203, 213, 225);
+    doc.setLineWidth(0.3);
+    doc.line(14, 196.5, 283, 196.5);
+
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(7);
+    doc.setTextColor(51, 65, 85);
+    doc.text(pdfSafe(WPL_COPYRIGHT_NOTICE), 14, 201.5);
+
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(100, 116, 139);
+    doc.text(pdfSafe(`DOB Format: DD/MM/YYYY  |  ${totalPlayers} Matched Records`), 168, 201.5, {
+      align: 'center',
+    });
+
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(15, 23, 42);
+    doc.text(`Page ${pageNum} of ${totalPages}`, 283, 201.5, { align: 'right' });
+  }
+}
+
+function groupRecordsByTeam(records: NormalizedWplExportRecord[], teams: WplTeamRef[]) {
+  const buckets = new Map<string, NormalizedWplExportRecord[]>();
+  teams.forEach((t) => buckets.set(t.id, []));
+
+  for (const r of records) {
+    if (!buckets.has(r.teamId)) buckets.set(r.teamId, []);
+    buckets.get(r.teamId)!.push(r);
+  }
+
+  return Array.from(buckets.entries())
+    .filter(([, list]) => list.length > 0)
+    .map(([teamId, list]) => {
+      const teamMeta = teams.find((t) => t.id === teamId) || {
+        id: teamId,
+        short: list[0].teamShort,
+        name: list[0].teamName,
+      };
+      return { team: teamMeta, players: list };
+    });
+}
+
 function exportPdfReport(
   records: NormalizedWplExportRecord[],
   summary: WplExportSummary,
   filters: WplExportFilterOptions,
+  teams: WplTeamRef[],
   scopeSlug: string,
   scopeLabel: string,
   dateStamp: string
 ): string {
   const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+  const generatedAtStr = formatIndianTimestamp(new Date());
+  const formatFocusLabel =
+    filters.formatFocus === 'BEST_T20' ? 'Smart Best (WPL -> T20)' : filters.formatFocus;
 
-  // Slate-indigo header banner with emerald rule (no pink anywhere)
+  doc.setProperties({
+    title: 'SportsUP18 WPL Squad, Profile & Performance Dossier',
+    subject: pdfSafe(`Scope: ${scopeLabel}`),
+    author: 'SportsUP18 WPL Operations & Analytics Desk',
+    creator: 'SportsUP18 Admin Export Studio',
+    keywords: 'WPL, Cricket, Squad Roster, Player Bio, Career Stats, SportsUP18',
+  });
+
+  // ── Page 1 Executive Masthead ────────────────────────────────────────────────
   doc.setFillColor(15, 23, 42);
-  doc.rect(0, 0, 297, 28, 'F');
+  doc.rect(0, 0, 297, 31, 'F');
   doc.setFillColor(16, 185, 129);
-  doc.rect(0, 28, 297, 1.5, 'F');
+  doc.rect(0, 31, 297, 1.4, 'F');
+
+  // Brand Tag Pill
+  doc.setFillColor(14, 165, 233);
+  doc.roundedRect(14, 5.5, 34, 5.5, 1.2, 1.2, 'F');
+  doc.setTextColor(255, 255, 255);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(7.2);
+  doc.text('SPORTSUP18 OPS', 31, 9.3, { align: 'center' });
+
+  doc.setTextColor(148, 163, 184);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(7.2);
+  doc.text('WOMEN\'S PREMIER LEAGUE  |  OFFICIAL ADMIN DOSSIER', 51, 9.3);
 
   doc.setTextColor(255, 255, 255);
-  doc.setFontSize(15);
   doc.setFont('helvetica', 'bold');
-  doc.text('WPL SQUAD, BIO & PERFORMANCE EXPORT', 14, 12);
+  doc.setFontSize(15.5);
+  doc.text('WPL SQUAD ROSTERS, PROFILES & CAREER STATISTICS', 14, 18.2);
 
-  doc.setFontSize(8.5);
-  doc.setFont('helvetica', 'normal');
   doc.setTextColor(203, 213, 225);
-  doc.text(`Scope: ${scopeLabel}  |  Format Focus: ${filters.formatFocus === 'BEST_T20' ? 'WPL -> T20 Best' : filters.formatFocus}`, 14, 19);
-  doc.text(`Generated: ${new Date().toLocaleString()}`, 14, 24.5);
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(8);
+  doc.text(
+    pdfSafe(`Scope: ${scopeLabel}   |   Format Focus: ${formatFocusLabel}`),
+    14,
+    25.2
+  );
 
-  // KPI summary bar
-  const kpiItems = [
-    { label: 'PLAYERS', val: String(summary.totalPlayers) },
-    { label: 'TEAMS', val: String(summary.teamCount) },
-    { label: 'BATTERS', val: String(summary.byRole.Batter) },
-    { label: 'ALL-ROUNDERS', val: String(summary.byRole['All-rounder']) },
-    { label: 'BOWLERS', val: String(summary.byRole.Bowler) },
-    { label: 'WK', val: String(summary.byRole['Wicket-keeper']) },
-    { label: 'INDIA / OS', val: `${summary.indiaCount} / ${summary.overseasCount}` },
-    { label: 'WITH STATS', val: `${summary.withStatsCount}/${summary.totalPlayers}` },
+  // Right metadata badge block on Page 1 masthead
+  doc.setFillColor(30, 41, 59);
+  doc.roundedRect(216, 6, 67, 20.5, 1.8, 1.8, 'F');
+  doc.setTextColor(16, 185, 129);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(6.8);
+  doc.text('EXPORT METADATA (IST)', 220, 10.8);
+  doc.setTextColor(248, 250, 252);
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(7.2);
+  doc.text(pdfSafe(`Generated: ${generatedAtStr}`), 220, 15.8);
+  doc.text('DOB Standard: DD/MM/YYYY', 220, 20.2);
+  doc.text(pdfSafe(`Purse Covered: ${formatPurseInr(summary.totalPurseLakhs)}`), 220, 24.4);
+
+  // ── Executive KPI Summary Strip ─────────────────────────────────────────────
+  const kpiCards: Array<{ label: string; value: string; sub: string; accent: [number, number, number] }> = [
+    {
+      label: 'MATCHED PLAYERS',
+      value: String(summary.totalPlayers),
+      sub: `${summary.teamCount} Franchise${summary.teamCount === 1 ? '' : 's'}`,
+      accent: [16, 185, 129],
+    },
+    {
+      label: 'ROLE COMPOSITION',
+      value: `${summary.byRole.Batter}B / ${summary.byRole['All-rounder']}AR / ${summary.byRole.Bowler}BW`,
+      sub: `${summary.byRole['Wicket-keeper']} Wicket-keeper${summary.byRole['Wicket-keeper'] === 1 ? '' : 's'}`,
+      accent: [14, 165, 233],
+    },
+    {
+      label: 'INDIA VS OVERSEAS',
+      value: `${summary.indiaCount} IND  |  ${summary.overseasCount} OS`,
+      sub: `${summary.captainsCount} Captain${summary.captainsCount === 1 ? '' : 's'} Included`,
+      accent: [99, 102, 241],
+    },
+    {
+      label: 'CAREER STATS VERIFIED',
+      value: `${summary.withStatsCount} / ${summary.totalPlayers}`,
+      sub: `${summary.totalPlayers > 0 ? Math.round((summary.withStatsCount / summary.totalPlayers) * 100) : 0}% Profile Coverage`,
+      accent: [5, 150, 105],
+    },
+    {
+      label: 'KNOWN CONTRACT VALUE',
+      value: formatPurseInr(summary.totalPurseLakhs),
+      sub: 'Aggregate Auction Value',
+      accent: [217, 119, 6],
+    },
   ];
 
-  const boxWidth = 32.5;
-  kpiItems.forEach((kpi, i) => {
-    const x = 14 + i * (boxWidth + 1.5);
-    doc.setFillColor(241, 245, 249);
-    doc.roundedRect(x, 33, boxWidth, 13, 1.5, 1.5, 'F');
+  const cardGap = 3;
+  const cardWidth = (269 - cardGap * (kpiCards.length - 1)) / kpiCards.length;
+  kpiCards.forEach((card, idx) => {
+    const x = 14 + idx * (cardWidth + cardGap);
+    doc.setFillColor(248, 250, 252);
+    doc.setDrawColor(226, 232, 240);
+    doc.setLineWidth(0.25);
+    doc.roundedRect(x, 35.5, cardWidth, 16.5, 1.5, 1.5, 'FD');
+
+    doc.setFillColor(card.accent[0], card.accent[1], card.accent[2]);
+    doc.rect(x, 35.5, cardWidth, 1.3, 'F');
+
     doc.setTextColor(100, 116, 139);
-    doc.setFontSize(6.5);
     doc.setFont('helvetica', 'bold');
-    doc.text(kpi.label, x + 2.5, 37.5);
+    doc.setFontSize(6.3);
+    doc.text(card.label, x + 2.8, 40.3);
+
     doc.setTextColor(15, 23, 42);
-    doc.setFontSize(10);
-    doc.text(kpi.val, x + 2.5, 43.2);
-  });
-
-  // Main Roster + Bio + Headline Stats table
-  autoTable(doc, {
-    startY: 50,
-    head: [[
-      '#', 'Player', 'Team', 'Role', 'Country', 'DOB / Age', 'Bat / Bowl Style', 'Status', 'Fee',
-      'Fmt', 'Mat', 'Runs', 'HS', 'Avg', 'SR', 'Wkts', 'Econ', 'BBI'
-    ]],
-    body: records.map((r, i) => [
-      String(i + 1),
-      r.isCaptain ? `${r.name} (C)` : r.name,
-      r.teamShort,
-      r.role,
-      r.nationality,
-      r.dateOfBirth !== '—' ? `${r.dateOfBirth} (${r.age})` : r.age,
-      `${r.battingStyle.replace(' bat', '')} / ${r.bowlingStyle}`,
-      r.squadStatus.replace(' Squad', ''),
-      r.auctionFee,
-      r.headlineBatting || r.headlineBowling ? r.headlineFormatUsed : '—',
-      r.headlineBatting?.matches || r.headlineBowling?.matches || '—',
-      r.headlineBatting?.runs || '—',
-      r.headlineBatting?.hs || '—',
-      r.headlineBatting?.avg || '—',
-      r.headlineBatting?.sr || '—',
-      r.headlineBowling?.wickets || '—',
-      r.headlineBowling?.econ || '—',
-      r.headlineBowling?.bbi || '—',
-    ]),
-    styles: { fontSize: 7, cellPadding: 1.8, textColor: [15, 23, 42] },
-    headStyles: { fillColor: [30, 41, 59], textColor: [255, 255, 255], fontStyle: 'bold', fontSize: 7 },
-    alternateRowStyles: { fillColor: [248, 250, 252] },
-    columnStyles: {
-      0: { cellWidth: 7, halign: 'center' },
-      1: { cellWidth: 31, fontStyle: 'bold' },
-      2: { cellWidth: 13 },
-      3: { cellWidth: 20 },
-      4: { cellWidth: 17 },
-      5: { cellWidth: 22 },
-      6: { cellWidth: 37 },
-      7: { cellWidth: 15 },
-      8: { cellWidth: 17 },
-      9: { cellWidth: 10, halign: 'center' },
-      10: { cellWidth: 9, halign: 'right' },
-      11: { cellWidth: 11, halign: 'right' },
-      12: { cellWidth: 10, halign: 'right' },
-      13: { cellWidth: 11, halign: 'right' },
-      14: { cellWidth: 11, halign: 'right' },
-      15: { cellWidth: 10, halign: 'right' },
-      16: { cellWidth: 11, halign: 'right' },
-      17: { cellWidth: 11, halign: 'right' },
-    },
-    didDrawPage: (data) => {
-      const pageCount = doc.getNumberOfPages();
-      doc.setFontSize(7.5);
-      doc.setTextColor(100, 116, 139);
-      doc.text(`WPL Operations Admin Export • ${records.length} Players`, 14, 203);
-      doc.text(`Page ${data.pageNumber} of ${pageCount}`, 265, 203);
-    },
-  });
-
-  // Page 2+: Multi-format stats annex when players have career rows
-  const multiFormatRows: string[][] = [];
-  records.forEach((r) => {
-    WPL_FORMATS_ORDER.forEach((fmt) => {
-      const bat = r.battingByFormat[fmt];
-      const bowl = r.bowlingByFormat[fmt];
-      if (!bat && !bowl) return;
-      multiFormatRows.push([
-        r.name,
-        r.teamShort,
-        fmt,
-        bat?.matches || bowl?.matches || '—',
-        bat?.runs || '—',
-        bat?.hs || '—',
-        bat?.avg || '—',
-        bat?.sr || '—',
-        bat ? `${bat.fifties}/${bat.hundreds}` : '—',
-        bowl?.wickets || '—',
-        bowl?.bbi || '—',
-        bowl?.econ || '—',
-        bowl?.avg || '—',
-      ]);
-    });
-  });
-
-  if (multiFormatRows.length > 0) {
-    doc.addPage();
-    doc.setFillColor(15, 23, 42);
-    doc.rect(0, 0, 297, 16, 'F');
-    doc.setTextColor(255, 255, 255);
-    doc.setFontSize(11);
     doc.setFont('helvetica', 'bold');
-    doc.text('MULTI-FORMAT CAREER STATISTICS ANNEX (WPL • T20 • ODI • TEST)', 14, 10.5);
+    doc.setFontSize(9.5);
+    doc.text(pdfSafe(card.value), x + 2.8, 45.8);
+
+    doc.setTextColor(71, 85, 105);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(6.6);
+    doc.text(pdfSafe(card.sub), x + 2.8, 49.8);
+  });
+
+  let cursorY = 56;
+
+  // ── Section 01: Franchise Distribution Matrix ───────────────────────────────
+  if (summary.byTeam.length > 0) {
+    cursorY = drawPdfSectionHeading(
+      doc,
+      cursorY,
+      '01',
+      'FRANCHISE DISTRIBUTION & PURSE OVERVIEW',
+      `${summary.byTeam.length} Franchise(s) Breakdown`
+    );
+
+    const summaryBody = summary.byTeam.map((t) => [
+      pdfSafe(t.teamShort),
+      pdfSafe(t.teamName),
+      String(t.total),
+      String(t.batters),
+      String(t.allRounders),
+      String(t.bowlers),
+      String(t.wicketKeepers),
+      String(t.india),
+      String(t.overseas),
+      String(t.captains),
+      `${t.withStats}/${t.total}`,
+      `${t.total > 0 ? Math.round((t.withStats / t.total) * 100) : 0}%`,
+      pdfSafe(formatPurseInr(t.totalPurseLakhs)),
+    ]);
+
+    if (summary.byTeam.length > 1) {
+      summaryBody.push([
+        'TOTAL',
+        'All Filtered Franchises',
+        String(summary.totalPlayers),
+        String(summary.byRole.Batter),
+        String(summary.byRole['All-rounder']),
+        String(summary.byRole.Bowler),
+        String(summary.byRole['Wicket-keeper']),
+        String(summary.indiaCount),
+        String(summary.overseasCount),
+        String(summary.captainsCount),
+        `${summary.withStatsCount}/${summary.totalPlayers}`,
+        `${summary.totalPlayers > 0 ? Math.round((summary.withStatsCount / summary.totalPlayers) * 100) : 0}%`,
+        pdfSafe(formatPurseInr(summary.totalPurseLakhs)),
+      ]);
+    }
 
     autoTable(doc, {
-      startY: 22,
-      head: [['Player', 'Team', 'Format', 'Mat', 'Runs', 'HS', 'Bat Avg', 'Bat SR', '50s/100s', 'Wkts', 'BBI', 'Econ', 'Bowl Avg']],
-      body: multiFormatRows,
-      styles: { fontSize: 7.2, cellPadding: 1.8, textColor: [15, 23, 42] },
-      headStyles: { fillColor: [6, 95, 70], textColor: [255, 255, 255], fontStyle: 'bold' },
+      startY: cursorY,
+      margin: { left: 14, right: 14, top: 16, bottom: 16 },
+      head: [[
+        'Code', 'Franchise', 'Players', 'Bat', 'AR', 'Bowl', 'WK', 'IND', 'OS', 'Capt', 'Stats', 'Cov%', 'Known Purse'
+      ]],
+      body: summaryBody,
+      styles: { fontSize: 7.4, cellPadding: 2, textColor: [15, 23, 42], lineColor: [226, 232, 240], lineWidth: 0.1 },
+      headStyles: { fillColor: [30, 41, 59], textColor: [255, 255, 255], fontStyle: 'bold', fontSize: 7.2 },
       alternateRowStyles: { fillColor: [248, 250, 252] },
+      columnStyles: {
+        0: { cellWidth: 16, fontStyle: 'bold' },
+        1: { cellWidth: 56, fontStyle: 'bold' },
+        2: { cellWidth: 16, halign: 'center', fontStyle: 'bold' },
+        3: { cellWidth: 14, halign: 'center' },
+        4: { cellWidth: 14, halign: 'center' },
+        5: { cellWidth: 14, halign: 'center' },
+        6: { cellWidth: 14, halign: 'center' },
+        7: { cellWidth: 15, halign: 'center' },
+        8: { cellWidth: 18, halign: 'center' },
+        9: { cellWidth: 17, halign: 'center' },
+        10: { cellWidth: 21, halign: 'center' },
+        11: { cellWidth: 19, halign: 'center' },
+        12: { cellWidth: 35, halign: 'right', fontStyle: 'bold' },
+      },
+      didParseCell: (data) => {
+        if (summary.byTeam.length > 1 && data.section === 'body' && data.row.index === summaryBody.length - 1) {
+          data.cell.styles.fillColor = [236, 253, 245];
+          data.cell.styles.textColor = [6, 95, 70];
+          data.cell.styles.fontStyle = 'bold';
+        }
+      },
+    });
+
+    cursorY = getLastAutoTableY(doc, cursorY) + 7;
+  }
+
+  // ── Section 02: Team-by-Team Organized Squad & Headline Performance ──────────
+  const teamGroups = groupRecordsByTeam(records, teams);
+  if (cursorY > 158) {
+    doc.addPage();
+    cursorY = 16;
+  }
+
+  cursorY = drawPdfSectionHeading(
+    doc,
+    cursorY,
+    '02',
+    'TEAM-WISE ORGANIZED SQUADS, BIOS & HEADLINE STATS',
+    `DOB Format: DD/MM/YYYY  |  Focus: ${formatFocusLabel}`
+  );
+
+  teamGroups.forEach((group, groupIdx) => {
+    const { team, players: groupPlayers } = group;
+    const palette = getTeamPdfPalette(team.id);
+
+    // Prevent orphaned team header cards at bottom of a page
+    if (cursorY > 162 || (groupIdx > 0 && cursorY > 152)) {
+      doc.addPage();
+      cursorY = 16;
+    }
+
+    const groupSummary = summarizeWplExportRecords(groupPlayers, teams).byTeam[0];
+
+    // Team Header Card
+    doc.setFillColor(palette.primary[0], palette.primary[1], palette.primary[2]);
+    doc.roundedRect(14, cursorY, 269, 9.5, 1.4, 1.4, 'F');
+    doc.setFillColor(palette.accent[0], palette.accent[1], palette.accent[2]);
+    doc.rect(14, cursorY + 8.5, 269, 1, 'F');
+
+    doc.setTextColor(255, 255, 255);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(9.2);
+    doc.text(pdfSafe(`${team.name.toUpperCase()} (${team.short})`), 18, cursorY + 6.1);
+
+    if (groupSummary) {
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(7.4);
+      doc.text(
+        pdfSafe(
+          `${groupSummary.total} Players  |  ${groupSummary.batters} Bat / ${groupSummary.allRounders} AR / ${groupSummary.bowlers} Bowl / ${groupSummary.wicketKeepers} WK  |  ${groupSummary.india} IND / ${groupSummary.overseas} OS  |  Purse: ${formatPurseInr(groupSummary.totalPurseLakhs)}`
+        ),
+        279,
+        cursorY + 6.1,
+        { align: 'right' }
+      );
+    }
+
+    cursorY += 10.8;
+
+    autoTable(doc, {
+      startY: cursorY,
+      margin: { left: 14, right: 14, top: 16, bottom: 16 },
+      head: [[
+        '#',
+        'Player',
+        'Role & Spec',
+        'Country',
+        'DOB (DD/MM/YYYY)',
+        'Bat / Bowl Style',
+        'Status / #',
+        'Fee',
+        'Fmt',
+        'Mat',
+        'Runs (HS)',
+        'Avg / SR',
+        'Wkts (BBI)',
+        'Econ / Avg',
+      ]],
+      body: groupPlayers.map((r, idx) => {
+        const nameLabel = [r.name, r.isCaptain ? '(C)' : '', r.isOverseas ? '[OS]' : '']
+          .filter(Boolean)
+          .join(' ');
+        const roleLabel =
+          r.role === 'All-rounder' && r.allrounderType !== '—' && r.allrounderType !== 'All-rounder'
+            ? `${r.role}\n(${r.allrounderType.replace(' Allrounder', ' AR')})`
+            : r.role;
+        const dobLabel =
+          r.dateOfBirth !== '—'
+            ? r.age !== '—'
+              ? `${r.dateOfBirth}\n(${r.age} yrs)`
+              : r.dateOfBirth
+            : r.age !== '—'
+              ? `(${r.age} yrs)`
+              : '-';
+        const styleLabel = `${r.battingStyle.replace(' bat', '')} /\n${r.bowlingStyle}`;
+        const statusShort = r.squadStatus.replace(' Squad', '');
+        const statusJersey =
+          r.jerseyNumber && r.jerseyNumber !== 'N/A' && r.jerseyNumber !== '—'
+            ? `${statusShort} (#${r.jerseyNumber})`
+            : statusShort;
+
+        const hasStats = Boolean(r.headlineBatting || r.headlineBowling);
+        const matchesStr = r.headlineBatting?.matches || r.headlineBowling?.matches || '-';
+        const runsHs = r.headlineBatting
+          ? `${r.headlineBatting.runs} (${r.headlineBatting.hs})`
+          : '-';
+        const batAvgSr = r.headlineBatting
+          ? `${r.headlineBatting.avg} / ${r.headlineBatting.sr}`
+          : '-';
+        const wktsBbi = r.headlineBowling
+          ? `${r.headlineBowling.wickets} (${r.headlineBowling.bbi})`
+          : '-';
+        const bowlEconAvg = r.headlineBowling
+          ? `${r.headlineBowling.econ} / ${r.headlineBowling.avg}`
+          : '-';
+
+        return [
+          String(idx + 1),
+          pdfSafe(nameLabel),
+          pdfSafe(roleLabel),
+          pdfSafe(r.nationality),
+          pdfSafe(dobLabel),
+          pdfSafe(styleLabel),
+          pdfSafe(statusJersey),
+          pdfSafe(r.auctionFee),
+          hasStats ? pdfSafe(r.headlineFormatUsed) : '-',
+          pdfSafe(matchesStr),
+          pdfSafe(runsHs),
+          pdfSafe(batAvgSr),
+          pdfSafe(wktsBbi),
+          pdfSafe(bowlEconAvg),
+        ];
+      }),
+      styles: {
+        fontSize: 6.9,
+        cellPadding: 1.7,
+        valign: 'middle',
+        textColor: [15, 23, 42],
+        lineColor: [226, 232, 240],
+        lineWidth: 0.1,
+      },
+      headStyles: {
+        fillColor: [30, 41, 59],
+        textColor: [255, 255, 255],
+        fontStyle: 'bold',
+        fontSize: 6.8,
+      },
+      alternateRowStyles: { fillColor: [248, 250, 252] },
+      columnStyles: {
+        0: { cellWidth: 7, halign: 'center' },
+        1: { cellWidth: 33, fontStyle: 'bold' },
+        2: { cellWidth: 22 },
+        3: { cellWidth: 17 },
+        4: { cellWidth: 22 },
+        5: { cellWidth: 35 },
+        6: { cellWidth: 17 },
+        7: { cellWidth: 17 },
+        8: { cellWidth: 10, halign: 'center', fontStyle: 'bold' },
+        9: { cellWidth: 9, halign: 'right' },
+        10: { cellWidth: 21, halign: 'right' },
+        11: { cellWidth: 21, halign: 'right' },
+        12: { cellWidth: 19, halign: 'right' },
+        13: { cellWidth: 19, halign: 'right' },
+      },
+    });
+
+    cursorY = getLastAutoTableY(doc, cursorY) + 6;
+  });
+
+  // ── Section 03: Multi-Format Career Statistics Annex (Grouped by Player) ────
+  const annexRows: Array<{ cells: string[]; playerParity: number }> = [];
+  let playerParityIdx = 0;
+
+  teamGroups.forEach((group) => {
+    group.players.forEach((r) => {
+      const playerFormats = WPL_FORMATS_ORDER.filter(
+        (fmt) => r.battingByFormat[fmt] !== null || r.bowlingByFormat[fmt] !== null
+      );
+      if (playerFormats.length === 0) return;
+
+      const parity = playerParityIdx % 2;
+      playerParityIdx++;
+
+      playerFormats.forEach((fmt, fmtIdx) => {
+        const bat = r.battingByFormat[fmt];
+        const bowl = r.bowlingByFormat[fmt];
+        annexRows.push({
+          playerParity: parity,
+          cells: [
+            fmtIdx === 0 ? pdfSafe(r.name) : '',
+            fmtIdx === 0 ? pdfSafe(r.teamShort) : '',
+            fmt,
+            pdfSafe(bat?.matches || bowl?.matches || '-'),
+            pdfSafe(bat?.innings || bowl?.innings || '-'),
+            pdfSafe(bat?.notOut || '-'),
+            pdfSafe(bat?.runs || '-'),
+            pdfSafe(bat?.hs || '-'),
+            pdfSafe(bat?.avg || '-'),
+            pdfSafe(bat?.sr || '-'),
+            bat ? pdfSafe(`${bat.fifties}/${bat.hundreds}`) : '-',
+            pdfSafe(bowl?.wickets || '-'),
+            pdfSafe(bowl?.bbi || '-'),
+            pdfSafe(bowl?.econ || '-'),
+            pdfSafe(bowl?.avg || '-'),
+            pdfSafe(bowl?.fiveWickets || '-'),
+          ],
+        });
+      });
+    });
+  });
+
+  if (annexRows.length > 0) {
+    doc.addPage();
+    const annexStartY = drawPdfSectionHeading(
+      doc,
+      16,
+      '03',
+      'COMPLETE MULTI-FORMAT CAREER STATISTICS ANNEX',
+      'Grouped by Player across WPL | T20 | ODI | Test'
+    );
+
+    autoTable(doc, {
+      startY: annexStartY,
+      margin: { left: 14, right: 14, top: 16, bottom: 16 },
+      head: [[
+        'Player', 'Team', 'Format', 'Mat', 'Inn', 'NO', 'Runs', 'HS', 'Bat Avg', 'Bat SR', '50s/100s', 'Wkts', 'BBI', 'Econ', 'Bowl Avg', '5W'
+      ]],
+      body: annexRows.map((entry) => entry.cells),
+      styles: {
+        fontSize: 7,
+        cellPadding: 1.6,
+        textColor: [15, 23, 42],
+        lineColor: [226, 232, 240],
+        lineWidth: 0.1,
+      },
+      headStyles: { fillColor: [6, 95, 70], textColor: [255, 255, 255], fontStyle: 'bold', fontSize: 6.9 },
+      columnStyles: {
+        0: { cellWidth: 36, fontStyle: 'bold' },
+        1: { cellWidth: 14, fontStyle: 'bold' },
+        2: { cellWidth: 14, fontStyle: 'bold', halign: 'center' },
+        3: { cellWidth: 12, halign: 'right' },
+        4: { cellWidth: 12, halign: 'right' },
+        5: { cellWidth: 11, halign: 'right' },
+        6: { cellWidth: 16, halign: 'right' },
+        7: { cellWidth: 14, halign: 'right' },
+        8: { cellWidth: 17, halign: 'right' },
+        9: { cellWidth: 17, halign: 'right' },
+        10: { cellWidth: 18, halign: 'center' },
+        11: { cellWidth: 14, halign: 'right' },
+        12: { cellWidth: 17, halign: 'right' },
+        13: { cellWidth: 16, halign: 'right' },
+        14: { cellWidth: 17, halign: 'right' },
+        15: { cellWidth: 14, halign: 'center' },
+      },
+      didParseCell: (data) => {
+        if (data.section === 'body') {
+          const entry = annexRows[data.row.index];
+          if (entry && entry.playerParity === 1) {
+            data.cell.styles.fillColor = [248, 250, 252];
+          } else {
+            data.cell.styles.fillColor = [255, 255, 255];
+          }
+        }
+      },
     });
   }
+
+  stampPdfRunningHeadersAndFooters(doc, scopeLabel, generatedAtStr, records.length);
 
   const fileName = `${scopeSlug}_${dateStamp}.pdf`;
   doc.save(fileName);
@@ -1180,7 +1677,10 @@ function exportJsonDatabase(
 
   const payload = {
     schemaVersion: 'wpl-players-db-v2',
-    exportedAt: new Date().toISOString(),
+    copyright: WPL_COPYRIGHT_NOTICE,
+    dateOfBirthFormat: 'DD/MM/YYYY',
+    exportedAt: formatIndianTimestamp(new Date()),
+    exportedAtIso: new Date().toISOString(),
     league: 'WPL',
     filterScope: scopeLabel,
     filters,
@@ -1355,16 +1855,17 @@ function exportMarkdownDossier(
   dateStamp: string
 ): string {
   const lines: string[] = [
-    `# WPL Players, Profiles & Career Stats Report`,
+    `# SportsUP18 · WPL Players, Profiles & Career Stats Report`,
     '',
     `- **Scope:** ${scopeLabel}`,
-    `- **Generated:** ${new Date().toISOString()}`,
+    `- **Generated:** ${formatIndianTimestamp(new Date())}`,
+    `- **DOB Standard:** DD/MM/YYYY`,
     `- **Total Players:** ${summary.totalPlayers} across ${summary.teamCount} franchise(s)`,
     `- **Breakdown:** ${summary.byRole.Batter} Batters | ${summary.byRole['All-rounder']} All-rounders | ${summary.byRole.Bowler} Bowlers | ${summary.byRole['Wicket-keeper']} Wicket-keepers`,
     `- **Squad Split:** ${summary.indiaCount} India | ${summary.overseasCount} Overseas | ${summary.withStatsCount} With Stats`,
     '',
-    '| # | Player | Team | Role | Nationality | Bat / Bowl Style | Fee | Fmt | Mat | Runs | HS | SR | Wkts | Econ |',
-    '|---|--------|------|------|-------------|------------------|-----|-----|-----|------|----|----|------|------|',
+    '| # | Player | Team | Role | Nationality | DOB (DD/MM/YYYY) | Bat / Bowl Style | Fee | Fmt | Mat | Runs | HS | SR | Wkts | Econ |',
+    '|---|--------|------|------|-------------|------------------|------------------|-----|-----|-----|------|----|----|------|------|',
   ];
 
   records.forEach((r, idx) => {
@@ -1372,9 +1873,11 @@ function exportMarkdownDossier(
     const bat = r.headlineBatting;
     const bowl = r.headlineBowling;
     lines.push(
-      `| ${idx + 1} | ${r.name}${captainBadge} | ${r.teamShort} | ${r.role} | ${r.nationality} | ${r.battingStyle} / ${r.bowlingStyle} | ${r.auctionFee} | ${bat || bowl ? r.headlineFormatUsed : '—'} | ${bat?.matches || bowl?.matches || '—'} | ${bat?.runs || '—'} | ${bat?.hs || '—'} | ${bat?.sr || '—'} | ${bowl?.wickets || '—'} | ${bowl?.econ || '—'} |`
+      `| ${idx + 1} | ${r.name}${captainBadge} | ${r.teamShort} | ${r.role} | ${r.nationality} | ${r.dateOfBirth} | ${r.battingStyle} / ${r.bowlingStyle} | ${r.auctionFee} | ${bat || bowl ? r.headlineFormatUsed : '—'} | ${bat?.matches || bowl?.matches || '—'} | ${bat?.runs || '—'} | ${bat?.hs || '—'} | ${bat?.sr || '—'} | ${bowl?.wickets || '—'} | ${bowl?.econ || '—'} |`
     );
   });
+
+  lines.push('', `---`, `*${WPL_COPYRIGHT_NOTICE}*`);
 
   const fileName = `${scopeSlug}_dossier_${dateStamp}.md`;
   const blob = new Blob([lines.join('\n')], { type: 'text/markdown;charset=utf-8;' });
@@ -1397,7 +1900,7 @@ export async function runWplPlayerExport(params: {
   let fileName = '';
   switch (params.format) {
     case 'pdf':
-      fileName = exportPdfReport(records, summary, params.filters, scopeSlug, scopeLabel, dateStamp);
+      fileName = exportPdfReport(records, summary, params.filters, teams, scopeSlug, scopeLabel, dateStamp);
       break;
     case 'excel':
       fileName = await exportExcelWorkbook(records, summary, scopeSlug, scopeLabel, dateStamp);

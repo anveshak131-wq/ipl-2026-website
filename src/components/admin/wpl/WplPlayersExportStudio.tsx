@@ -59,7 +59,7 @@ const EXPORT_BUTTONS: Array<{
     id: 'pdf',
     label: 'PDF Dossier',
     ext: '.pdf',
-    hint: 'A4 landscape report + career annex',
+    hint: 'Team-grouped A4 · DD/MM/YYYY · ©',
     icon: FileText,
     accentClass: 'bg-red-500/10 hover:bg-red-500/20 text-red-300 border-red-500/30',
   },
