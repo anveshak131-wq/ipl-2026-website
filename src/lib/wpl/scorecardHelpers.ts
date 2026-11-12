@@ -435,6 +435,37 @@ export function parsePartnershipStats(totalRuns: string | number | undefined): {
   return { runs: leading, balls: null, display: `${leading}` };
 }
 
+export function getScorecardSeasonYear(scorecard: WplScorecard): number {
+  const dateMatch = (scorecard.matchInfo?.date || '').match(/^(20\d{2})-/);
+  if (dateMatch) return Number.parseInt(dateMatch[1], 10);
+
+  const idMatch = `${scorecard.matchId || ''} ${scorecard.id || ''}`.match(/\b(20\d{2})\b/);
+  if (idMatch) return Number.parseInt(idMatch[1], 10);
+
+  const stampMatch = (scorecard.publishedAt || scorecard.createdAt || '').match(/^(20\d{2})-/);
+  if (stampMatch) return Number.parseInt(stampMatch[1], 10);
+
+  return 2026;
+}
+
+export function partitionScorecardsBySeason(scorecards: WplScorecard[]): {
+  season2027: WplScorecard[];
+  season2026: WplScorecard[];
+} {
+  const season2027: WplScorecard[] = [];
+  const season2026: WplScorecard[] = [];
+
+  for (const sc of scorecards) {
+    if (getScorecardSeasonYear(sc) >= 2027) {
+      season2027.push(sc);
+    } else {
+      season2026.push(sc);
+    }
+  }
+
+  return { season2027, season2026 };
+}
+
 export function filterAndSortPublishedWplScorecards(items: WplScorecard[]): WplScorecard[] {
   const published = items.filter((sc) => sc && sc.draft === false && Array.isArray(sc.innings) && sc.innings.length > 0);
   const byMatchId = new Map<string, WplScorecard>();

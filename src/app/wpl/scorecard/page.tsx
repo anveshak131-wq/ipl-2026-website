@@ -8,6 +8,7 @@ import {
   ArrowLeft,
   Calendar,
   FileSpreadsheet,
+  History,
   RefreshCw,
   Search,
   Sparkles,
@@ -27,10 +28,12 @@ import {
   getTeamLogoUrl,
   getTeamVisualTheme,
   normalizeWplTeamCode,
+  partitionScorecardsBySeason,
   WPL_FRANCHISE_THEMES,
   WplScorecard,
 } from '@/lib/wpl/scorecardHelpers';
 import WplScorecardViewer from '@/components/wpl/WplScorecardViewer';
+import WplScorecardStandbyBanner from '@/components/wpl/WplScorecardStandbyBanner';
 
 const TEAM_FILTERS: Array<{ id: CanonicalWplCode | 'ALL'; label: string }> = [
   { id: 'ALL', label: 'All Teams' },
@@ -45,8 +48,12 @@ function WplScorecardPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const requestedMatchId = searchParams.get('matchId');
+  const requestedSeason = searchParams.get('season');
   const { currentLeague, setCurrentLeague } = useLeague();
 
+  const [selectedSeason, setSelectedSeason] = useState<2027 | 2026>(
+    requestedSeason === '2026' ? 2026 : 2027
+  );
   const [scorecards, setScorecards] = useState<WplScorecard[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -91,17 +98,46 @@ function WplScorecardPageContent() {
     loadScorecards(false);
   }, [loadScorecards]);
 
-  const filteredScorecards = useMemo(
-    () => filterScorecards(scorecards, teamFilter, searchQuery),
-    [scorecards, teamFilter, searchQuery]
+  const { season2027, season2026 } = useMemo(
+    () => partitionScorecardsBySeason(scorecards),
+    [scorecards]
   );
 
-  // Sync selected match from query param or default to the first visible scorecard
+  // If deep-linked via ?matchId=... to a 2026 scorecard, honor it cleanly
   useEffect(() => {
-    if (scorecards.length === 0) return;
+    if (!requestedMatchId || scorecards.length === 0) return;
+    const in2027 = season2027.some(
+      (sc) => String(sc.matchId) === String(requestedMatchId) || String(sc.id) === String(requestedMatchId)
+    );
+    const in2026 = season2026.some(
+      (sc) => String(sc.matchId) === String(requestedMatchId) || String(sc.id) === String(requestedMatchId)
+    );
+    if (!in2027 && in2026 && requestedSeason !== '2027') {
+      setSelectedSeason(2026);
+    }
+  }, [requestedMatchId, requestedSeason, scorecards.length, season2027, season2026]);
+
+  const activeSeasonScorecards = useMemo(
+    () => (selectedSeason === 2027 ? season2027 : season2026),
+    [selectedSeason, season2027, season2026]
+  );
+
+  const isPreSeasonStandby = !loading && !error && selectedSeason === 2027 && season2027.length === 0;
+
+  const filteredScorecards = useMemo(
+    () => filterScorecards(activeSeasonScorecards, teamFilter, searchQuery),
+    [activeSeasonScorecards, teamFilter, searchQuery]
+  );
+
+  // Sync selected match from query param or default to the first visible scorecard in active season
+  useEffect(() => {
+    if (activeSeasonScorecards.length === 0) {
+      setSelectedMatchId('');
+      return;
+    }
 
     if (requestedMatchId) {
-      const matchByQuery = scorecards.find(
+      const matchByQuery = activeSeasonScorecards.find(
         (sc) => String(sc.matchId) === String(requestedMatchId) || String(sc.id) === String(requestedMatchId)
       );
       if (matchByQuery) {
@@ -116,21 +152,37 @@ function WplScorecardPageContent() {
         setSelectedMatchId(filteredScorecards[0].matchId);
       }
     }
-  }, [scorecards, filteredScorecards, requestedMatchId, selectedMatchId]);
+  }, [activeSeasonScorecards, filteredScorecards, requestedMatchId, selectedMatchId]);
 
   const activeScorecard = useMemo(() => {
+    if (activeSeasonScorecards.length === 0) return null;
     return (
       filteredScorecards.find((sc) => sc.matchId === selectedMatchId) ||
-      scorecards.find((sc) => sc.matchId === selectedMatchId) ||
+      activeSeasonScorecards.find((sc) => sc.matchId === selectedMatchId) ||
       filteredScorecards[0] ||
-      scorecards[0] ||
+      activeSeasonScorecards[0] ||
       null
     );
-  }, [filteredScorecards, scorecards, selectedMatchId]);
+  }, [filteredScorecards, activeSeasonScorecards, selectedMatchId]);
+
+  const handleSeasonChange = (season: 2027 | 2026) => {
+    setSelectedSeason(season);
+    setTeamFilter('ALL');
+    setSearchQuery('');
+    setSelectedMatchId('');
+    if (season === 2027) {
+      router.replace('/wpl/scorecard', { scroll: false });
+    } else {
+      router.replace('/wpl/scorecard?season=2026', { scroll: false });
+    }
+  };
 
   const handleSelectMatch = (matchId: string) => {
     setSelectedMatchId(matchId);
-    router.replace(`/wpl/scorecard?matchId=${encodeURIComponent(matchId)}`, { scroll: false });
+    const seasonParam = selectedSeason === 2026 ? '&season=2026' : '';
+    router.replace(`/wpl/scorecard?matchId=${encodeURIComponent(matchId)}${seasonParam}`, {
+      scroll: false,
+    });
   };
 
   return (
@@ -177,38 +229,99 @@ function WplScorecardPageContent() {
             <div>
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-400/15 border border-amber-400/35 text-amber-300 text-xs font-black uppercase tracking-[0.16em]">
                 <FileSpreadsheet className="w-3.5 h-3.5" />
-                Official Match Records
+                {selectedSeason === 2027 ? 'WPL 2027 • Official Scorecards' : 'WPL 2026 Archive'}
               </div>
               <h1 className="text-3xl sm:text-4xl font-black text-white tracking-tight mt-3">
                 WPL Match Scorecards
               </h1>
               <p className="text-sm sm:text-base text-slate-300 max-w-2xl mt-2">
-                Full innings batting cards, bowling figures, fall of wickets, partnerships, and official match summaries published directly from WPL match records.
+                {selectedSeason === 2027 && season2027.length === 0
+                  ? 'WPL 2027 opens on 14 January 2027. Full 2027 batting cards, bowling figures, fall of wickets, and partnerships will go live here once the tournament begins.'
+                  : 'Full innings batting cards, bowling figures, fall of wickets, partnerships, and official match summaries published directly from WPL match records.'}
               </p>
             </div>
 
             <div className="grid grid-cols-2 gap-3 shrink-0">
               <div className="rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-center">
                 <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
-                  Published
+                  {selectedSeason === 2027 && season2027.length === 0 ? 'Kickoff' : 'Published'}
                 </div>
                 <div className="text-2xl font-black text-amber-300 tabular-nums mt-0.5">
-                  {scorecards.length}
+                  {selectedSeason === 2027 && season2027.length === 0
+                    ? '14 Jan'
+                    : activeSeasonScorecards.length}
                 </div>
-                <div className="text-[11px] text-slate-400">Scorecards</div>
+                <div className="text-[11px] text-slate-400">
+                  {selectedSeason === 2027 && season2027.length === 0 ? '2027 Season' : 'Scorecards'}
+                </div>
               </div>
               <div className="rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-center">
                 <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
-                  Franchises
+                  {selectedSeason === 2027 ? 'Fixtures' : 'Franchises'}
                 </div>
-                <div className="text-2xl font-black text-sky-300 tabular-nums mt-0.5">5</div>
-                <div className="text-[11px] text-slate-400">WPL Teams</div>
+                <div className="text-2xl font-black text-sky-300 tabular-nums mt-0.5">
+                  {selectedSeason === 2027 ? 22 : 5}
+                </div>
+                <div className="text-[11px] text-slate-400">
+                  {selectedSeason === 2027 ? 'Scheduled' : 'WPL Teams'}
+                </div>
               </div>
             </div>
           </div>
+
+          {/* Season Switcher */}
+          <div className="mt-6 pt-4 border-t border-white/10 flex flex-wrap items-center justify-between gap-3">
+            <div className="inline-flex p-1 rounded-xl bg-white/[0.05] border border-white/10">
+              <button
+                type="button"
+                onClick={() => handleSeasonChange(2027)}
+                className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-black transition-all ${
+                  selectedSeason === 2027
+                    ? 'bg-amber-400 text-slate-950 shadow-md'
+                    : 'text-slate-300 hover:text-white hover:bg-white/[0.05]'
+                }`}
+              >
+                <Sparkles className="w-3.5 h-3.5" />
+                <span>2027 Season</span>
+                <span
+                  className={`px-1.5 py-0.5 rounded text-[10px] font-black uppercase ${
+                    selectedSeason === 2027
+                      ? 'bg-slate-950/15 text-slate-950'
+                      : 'bg-sky-500/20 text-sky-200'
+                  }`}
+                >
+                  {season2027.length > 0 ? `${season2027.length} Live` : 'Upcoming'}
+                </span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => handleSeasonChange(2026)}
+                className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-black transition-all ${
+                  selectedSeason === 2026
+                    ? 'bg-white/20 text-white shadow-inner'
+                    : 'text-slate-300 hover:text-white hover:bg-white/[0.05]'
+                }`}
+              >
+                <History className="w-3.5 h-3.5 text-amber-300" />
+                <span>2026 Archive</span>
+                {season2026.length > 0 && (
+                  <span className="text-[10px] opacity-80 tabular-nums">({season2026.length})</span>
+                )}
+              </button>
+            </div>
+
+            {selectedSeason === 2026 && (
+              <div className="inline-flex items-center gap-2 text-xs text-amber-200">
+                <Trophy className="w-3.5 h-3.5 text-amber-300" />
+                <span>Archived WPL 2026 matches (Jan 2026)</span>
+              </div>
+            )}
+          </div>
         </motion.div>
 
-        {/* Filter & Search Bar */}
+        {/* Filter & Search Bar (hidden when 2027 pre-season standby banner is active) */}
+        {!isPreSeasonStandby && !loading && !error && (
         <div className="rounded-2xl border border-white/10 bg-[#0A1021]/90 p-4 backdrop-blur-xl space-y-4">
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
             {/* Team Filter Pills */}
@@ -343,8 +456,9 @@ function WplScorecardPageContent() {
             </div>
           )}
         </div>
+        )}
 
-        {/* Main Viewer / Loading / Error / Empty States */}
+        {/* Main Viewer / Pre-Season Banner / Loading / Error / Empty States */}
         {loading ? (
           <div className="rounded-3xl border border-white/10 bg-[#0B1020]/90 p-10 text-center space-y-3">
             <div className="w-9 h-9 border-2 border-amber-400/30 border-t-amber-400 rounded-full animate-spin mx-auto" />
@@ -361,6 +475,11 @@ function WplScorecardPageContent() {
               Try Again
             </button>
           </div>
+        ) : isPreSeasonStandby ? (
+          <WplScorecardStandbyBanner
+            archiveCount={season2026.length}
+            onOpenArchive={() => handleSeasonChange(2026)}
+          />
         ) : activeScorecard ? (
           <WplScorecardViewer scorecard={activeScorecard} />
         ) : (
