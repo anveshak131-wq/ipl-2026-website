@@ -151,7 +151,10 @@ function buildSeedTeams() {
       logo: '/logos/wpl_mi_logo_animated.svg',
       colors: { primary: '#004BA0', secondary: '#D1AB3E' },
       description: "MI Women's team",
-      trophies: [{ year: 2023, name: 'WPL Champions' }],
+      trophies: [
+        { year: 2023, name: 'WPL Champions' },
+        { year: 2025, name: 'WPL Champions' },
+      ],
       homeGrounds: ['Wankhede Stadium, Mumbai'],
     },
     {
@@ -162,7 +165,10 @@ function buildSeedTeams() {
       logo: '/logos/wpl_rcb_logo_animated.svg',
       colors: { primary: '#EC1C24', secondary: '#000000' },
       description: "RCB Women's team",
-      trophies: [{ year: 2024, name: 'WPL Champions' }],
+      trophies: [
+        { year: 2024, name: 'WPL Champions' },
+        { year: 2026, name: 'WPL Champions' },
+      ],
       homeGrounds: ['M. Chinnaswamy Stadium, Bengaluru'],
     },
     {

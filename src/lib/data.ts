@@ -378,6 +378,10 @@ export const mockTeams: Team[] = [
       {
         year: 2023,
         name: 'WPL Champions'
+      },
+      {
+        year: 2025,
+        name: 'WPL Champions'
       }
     ],
     homeGrounds: ['Wankhede Stadium, Mumbai']
@@ -394,6 +398,10 @@ export const mockTeams: Team[] = [
     trophies: [
       {
         year: 2024,
+        name: 'WPL Champions'
+      },
+      {
+        year: 2026,
         name: 'WPL Champions'
       }
     ],

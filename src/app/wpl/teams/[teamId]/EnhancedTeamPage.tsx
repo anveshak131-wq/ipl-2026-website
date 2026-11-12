@@ -74,7 +74,7 @@ const FRANCHISES: Record<'rcb' | 'mi' | 'dc' | 'gg' | 'upw', FranchiseConfig> = 
     captain: 'Smriti Mandhana',
     coach: 'Luke Williams',
     motto: 'Play Bold',
-    championships: ['2024'],
+    championships: ['2024', '2026'],
     stats: {
       played: 36,
       wins: 21,
@@ -105,7 +105,7 @@ const FRANCHISES: Record<'rcb' | 'mi' | 'dc' | 'gg' | 'upw', FranchiseConfig> = 
     captain: 'Harmanpreet Kaur',
     coach: 'Charlotte Edwards',
     motto: 'Duniya Hila Denge',
-    championships: ['2023'],
+    championships: ['2023', '2025'],
     stats: {
       played: 37,
       wins: 23,
