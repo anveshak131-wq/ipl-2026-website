@@ -178,7 +178,7 @@ export default function CustomSelect({
                 }}
               >
               {/* Gradient accent line */}
-              <div className="h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500"></div>
+              <div className="h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-indigo-500"></div>
 
               {/* Search input (if searchable) */}
               {searchable && (

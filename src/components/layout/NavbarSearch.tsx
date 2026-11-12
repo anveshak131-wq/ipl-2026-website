@@ -263,7 +263,7 @@ export default function NavbarSearch({ onClose }: NavbarSearchProps) {
   const getTypeColor = (type: string) => {
     const colors: Record<string, string> = {
       team: 'from-blue-500 to-cyan-500',
-      player: 'from-purple-500 to-pink-500',
+      player: 'from-purple-500 to-indigo-500',
       match: 'from-green-500 to-emerald-500',
       news: 'from-orange-500 to-red-500',
     };

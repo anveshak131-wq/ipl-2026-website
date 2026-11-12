@@ -71,10 +71,10 @@ export default function NewsHeroHeader({
 
   const heroGradient =
     leagueScope === 'wpl'
-      ? 'from-fuchsia-500/20 via-purple-600/10 to-cyan-500/15 border-fuchsia-400/25'
+      ? 'from-indigo-500/20 via-violet-600/10 to-sky-500/15 border-indigo-400/25'
       : leagueScope === 'ipl'
       ? 'from-blue-600/20 via-indigo-600/10 to-amber-500/15 border-blue-400/25'
-      : 'from-purple-600/20 via-amber-500/10 to-fuchsia-500/15 border-white/15';
+      : 'from-indigo-600/20 via-violet-500/10 to-sky-500/15 border-white/15';
 
   const wireItems = tickerArticles.slice(0, 6);
 
@@ -94,7 +94,7 @@ export default function NewsHeroHeader({
         />
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute -bottom-24 -left-24 h-72 w-72 rounded-full bg-fuchsia-500/10 blur-3xl"
+          className="pointer-events-none absolute -bottom-24 -left-24 h-72 w-72 rounded-full bg-indigo-500/10 blur-3xl"
         />
 
         <div className="relative z-10 flex flex-col lg:flex-row lg:items-end justify-between gap-6">
@@ -147,7 +147,7 @@ export default function NewsHeroHeader({
                       }
                       className={`absolute inset-0 rounded-xl border ${
                         tab.id === 'wpl'
-                          ? 'bg-gradient-to-r from-fuchsia-600/80 to-pink-600/80 border-fuchsia-400/50'
+                          ? 'bg-gradient-to-r from-indigo-600/80 to-violet-600/80 border-indigo-400/50'
                           : tab.id === 'ipl'
                           ? 'bg-gradient-to-r from-blue-600/80 to-indigo-600/80 border-blue-400/50'
                           : 'bg-gradient-to-r from-amber-500/80 to-orange-500/80 border-amber-300/60'
@@ -187,7 +187,7 @@ export default function NewsHeroHeader({
                 className={`group text-left rounded-2xl border p-4 transition-all bg-slate-950/70 backdrop-blur-md flex items-center justify-between gap-3 ${
                   isHighlightedLeague
                     ? milestone.league === 'wpl'
-                      ? 'border-fuchsia-400/50 shadow-lg shadow-fuchsia-500/10'
+                      ? 'border-indigo-400/50 shadow-lg shadow-indigo-500/10'
                       : 'border-amber-400/50 shadow-lg shadow-amber-500/10'
                     : 'border-white/10 hover:border-white/25'
                 }`}
@@ -197,7 +197,7 @@ export default function NewsHeroHeader({
                     <span
                       className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border ${
                         milestone.league === 'wpl'
-                          ? 'bg-fuchsia-500/20 text-fuchsia-300 border-fuchsia-400/35'
+                          ? 'bg-indigo-500/20 text-indigo-300 border-indigo-400/35'
                           : 'bg-blue-500/20 text-amber-300 border-blue-400/35'
                       }`}
                     >
@@ -234,7 +234,7 @@ export default function NewsHeroHeader({
       {/* Breaking Dispatch Ticker */}
       {wireItems.length > 0 && (
         <div className="rounded-2xl border border-white/10 bg-slate-950/75 backdrop-blur-md px-3.5 py-2.5 flex items-center gap-3 overflow-hidden">
-          <span className="shrink-0 inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-rose-500 to-amber-500 px-3 py-1 text-[11px] font-black uppercase tracking-wider text-white shadow">
+          <span className="shrink-0 inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-red-600 to-orange-500 px-3 py-1 text-[11px] font-black uppercase tracking-wider text-white shadow">
             <Flame className="w-3.5 h-3.5" />
             2027 Wire
           </span>

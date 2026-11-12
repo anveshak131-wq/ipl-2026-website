@@ -209,7 +209,7 @@ export default function WPLStatsPage() {
                 </span>
               </div>
               <h1 className="text-5xl md:text-6xl font-black text-white mb-4 tracking-tight">
-                WPL 2027 <GradientText gradient="from-purple-400 via-pink-400 to-rose-400" animate>Statistics</GradientText>
+                WPL 2027 <GradientText gradient="from-purple-400 via-indigo-400 to-indigo-400" animate>Statistics</GradientText>
               </h1>
               <p className="text-slate-200 text-lg max-w-2xl leading-relaxed">
                 Franchise statistics and official leaderboards preparing for the Women's Premier League 2027 championship
@@ -281,7 +281,7 @@ export default function WPLStatsPage() {
           <AnimatedSection direction="up" delay={0.2}>
             <div className="mb-12">
               <h2 className="text-3xl font-black text-white mb-6">
-                Top <GradientText gradient="from-purple-400 to-pink-400">Run Scorers</GradientText>
+                Top <GradientText gradient="from-purple-400 to-indigo-400">Run Scorers</GradientText>
               </h2>
               <div className="rounded-xl bg-slate-900/60 border border-purple-500/20 backdrop-blur-sm overflow-hidden">
                 <div className="overflow-x-auto">
@@ -316,23 +316,23 @@ export default function WPLStatsPage() {
           <AnimatedSection direction="up" delay={0.3}>
             <div className="mb-12">
               <h2 className="text-3xl font-black text-white mb-6">
-                Top <GradientText gradient="from-pink-400 to-rose-400">Wicket Takers</GradientText>
+                Top <GradientText gradient="from-indigo-400 to-indigo-400">Wicket Takers</GradientText>
               </h2>
-              <div className="rounded-xl bg-slate-900/60 border border-pink-500/20 backdrop-blur-sm overflow-hidden">
+              <div className="rounded-xl bg-slate-900/60 border border-indigo-500/20 backdrop-blur-sm overflow-hidden">
                 <div className="overflow-x-auto">
                   <table className="w-full">
-                    <thead className="bg-pink-500/20">
+                    <thead className="bg-indigo-500/20">
                       <tr>
-                        <th className="px-6 py-4 text-left text-xs font-bold text-pink-300 uppercase tracking-wider">Rank</th>
-                        <th className="px-6 py-4 text-left text-xs font-bold text-pink-300 uppercase tracking-wider">Player</th>
-                        <th className="px-6 py-4 text-right text-xs font-bold text-pink-300 uppercase tracking-wider">Wickets</th>
-                        <th className="px-6 py-4 text-right text-xs font-bold text-pink-300 uppercase tracking-wider">Matches</th>
-                        <th className="px-6 py-4 text-right text-xs font-bold text-pink-300 uppercase tracking-wider">Economy</th>
+                        <th className="px-6 py-4 text-left text-xs font-bold text-indigo-300 uppercase tracking-wider">Rank</th>
+                        <th className="px-6 py-4 text-left text-xs font-bold text-indigo-300 uppercase tracking-wider">Player</th>
+                        <th className="px-6 py-4 text-right text-xs font-bold text-indigo-300 uppercase tracking-wider">Wickets</th>
+                        <th className="px-6 py-4 text-right text-xs font-bold text-indigo-300 uppercase tracking-wider">Matches</th>
+                        <th className="px-6 py-4 text-right text-xs font-bold text-indigo-300 uppercase tracking-wider">Economy</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-pink-500/10">
+                    <tbody className="divide-y divide-indigo-500/10">
                       {topWicketTakers.map((player, index) => (
-                        <tr key={player.id} className="hover:bg-pink-500/10 transition-colors">
+                        <tr key={player.id} className="hover:bg-indigo-500/10 transition-colors">
                           <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-white">#{index + 1}</td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-200">{player.name}</td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-white text-right">{player.stats.wickets}</td>
@@ -352,22 +352,22 @@ export default function WPLStatsPage() {
             <AnimatedSection direction="up" delay={0.4}>
               <div className="mb-12">
                 <h2 className="text-3xl font-black text-white mb-6">
-                  Best <GradientText gradient="from-purple-400 via-pink-400 to-rose-400">Strike Rates</GradientText>
+                  Best <GradientText gradient="from-purple-400 via-indigo-400 to-indigo-400">Strike Rates</GradientText>
                 </h2>
-                <div className="rounded-xl bg-slate-900/60 border border-rose-500/20 backdrop-blur-sm overflow-hidden">
+                <div className="rounded-xl bg-slate-900/60 border border-indigo-500/20 backdrop-blur-sm overflow-hidden">
                   <div className="overflow-x-auto">
                     <table className="w-full">
-                      <thead className="bg-rose-500/20">
+                      <thead className="bg-indigo-500/20">
                         <tr>
-                          <th className="px-6 py-4 text-left text-xs font-bold text-rose-300 uppercase tracking-wider">Rank</th>
-                          <th className="px-6 py-4 text-left text-xs font-bold text-rose-300 uppercase tracking-wider">Player</th>
-                          <th className="px-6 py-4 text-right text-xs font-bold text-rose-300 uppercase tracking-wider">Strike Rate</th>
-                          <th className="px-6 py-4 text-right text-xs font-bold text-rose-300 uppercase tracking-wider">Runs</th>
+                          <th className="px-6 py-4 text-left text-xs font-bold text-indigo-300 uppercase tracking-wider">Rank</th>
+                          <th className="px-6 py-4 text-left text-xs font-bold text-indigo-300 uppercase tracking-wider">Player</th>
+                          <th className="px-6 py-4 text-right text-xs font-bold text-indigo-300 uppercase tracking-wider">Strike Rate</th>
+                          <th className="px-6 py-4 text-right text-xs font-bold text-indigo-300 uppercase tracking-wider">Runs</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-rose-500/10">
+                      <tbody className="divide-y divide-indigo-500/10">
                         {bestStrikeRates.map((player, index) => (
-                          <tr key={player.id} className="hover:bg-rose-500/10 transition-colors">
+                          <tr key={player.id} className="hover:bg-indigo-500/10 transition-colors">
                             <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-white">#{index + 1}</td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-200">{player.name}</td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-white text-right">{player.stats.strikeRate.toFixed(2)}</td>
@@ -387,7 +387,7 @@ export default function WPLStatsPage() {
             <AnimatedSection direction="up" delay={0.5}>
               <div className="mb-12">
                 <h2 className="text-3xl font-black text-white mb-6">
-                  Best <GradientText gradient="from-purple-400 to-pink-400">Economy Rates</GradientText>
+                  Best <GradientText gradient="from-purple-400 to-indigo-400">Economy Rates</GradientText>
                 </h2>
                 <div className="rounded-xl bg-slate-900/60 border border-purple-500/20 backdrop-blur-sm overflow-hidden">
                   <div className="overflow-x-auto">

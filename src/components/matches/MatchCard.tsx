@@ -957,7 +957,7 @@ export default function MatchCard({ match, index = 0, players, detailHref }: Mat
 
                         {/* Innings Total */}
                         {inning.totalRuns !== undefined && (
-                          <div className="mb-6 p-4 bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-500/30 rounded-xl">
+                          <div className="mb-6 p-4 bg-gradient-to-r from-purple-500/20 to-indigo-500/20 border border-purple-500/30 rounded-xl">
                             <div className="text-3xl font-bold text-white text-center">
                               {inning.totalRuns}/{inning.totalWickets || 0} ({inning.totalOvers || '0.0'} overs)
                             </div>

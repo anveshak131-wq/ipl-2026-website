@@ -399,7 +399,7 @@ export default function TermsAcceptanceModal({
             >
               <div className="w-full md:max-w-md bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 rounded-2xl border border-white/10 shadow-2xl overflow-hidden">
                 <div className="px-6 py-6 border-b border-white/10 bg-gradient-to-r from-white/5 to-white/3">
-                  <div className="absolute top-0 left-0 h-1 w-full bg-gradient-to-r from-red-500 via-pink-500 to-rose-500" />
+                  <div className="absolute top-0 left-0 h-1 w-full bg-gradient-to-r from-red-500 via-indigo-500 to-indigo-500" />
                   
                   <motion.h3
                     initial={{ x: -10, opacity: 0 }}
@@ -443,7 +443,7 @@ export default function TermsAcceptanceModal({
                   </button>
                   <button
                     onClick={handleSubmitDeclineFeedback}
-                    className="flex-1 px-4 py-2.5 rounded-lg text-sm font-semibold bg-gradient-to-r from-red-600 to-pink-600 text-white hover:from-red-500 hover:to-pink-500 transition-all shadow-lg shadow-red-900/40"
+                    className="flex-1 px-4 py-2.5 rounded-lg text-sm font-semibold bg-gradient-to-r from-red-600 to-indigo-600 text-white hover:from-red-500 hover:to-indigo-500 transition-all shadow-lg shadow-red-900/40"
                   >
                     {t.sendAndExit}
                   </button>

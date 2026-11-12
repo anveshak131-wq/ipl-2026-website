@@ -260,7 +260,7 @@ export default function WPLLeaderboardPage() {
               }}
             >
               <h2 className="text-3xl font-bold mb-6 flex items-center gap-3">
-                <Target className="text-pink-400" size={32} />
+                <Target className="text-indigo-400" size={32} />
                 <span>Top Batters</span>
               </h2>
               
@@ -313,7 +313,7 @@ export default function WPLLeaderboardPage() {
                           <td className="py-4 px-4 font-semibold text-white">{stat.playerName}</td>
                           <td className="py-4 px-4 text-gray-300">{stat.teamName}</td>
                           <td className="py-4 px-4 text-center">{stat.matches}</td>
-                          <td className="py-4 px-4 text-center font-bold text-pink-400">{stat.runs}</td>
+                          <td className="py-4 px-4 text-center font-bold text-indigo-400">{stat.runs}</td>
                           <td className="py-4 px-4 text-center">{stat.average.toFixed(2)}</td>
                           <td className="py-4 px-4 text-center">{stat.strikeRate.toFixed(2)}</td>
                           <td className="py-4 px-4 text-center">{stat.highScore}</td>

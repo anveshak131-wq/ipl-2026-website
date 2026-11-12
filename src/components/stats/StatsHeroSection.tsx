@@ -18,7 +18,7 @@ export default function StatsHeroSection({
 }: StatsHeroSectionProps) {
   const stats = [
     { icon: Trophy, label: 'Registered players', value: totalPlayers, color: 'from-amber-300 to-orange-500' },
-    { icon: Target, label: 'IPL franchises', value: totalTeams, color: 'from-fuchsia-400 to-violet-500' },
+    { icon: Target, label: 'IPL franchises', value: totalTeams, color: 'from-violet-400 to-violet-500' },
     { icon: TrendingUp, label: 'Runs recorded', value: totalRuns.toLocaleString(), color: 'from-sky-300 to-cyan-500' },
     { icon: Zap, label: 'Wickets taken', value: totalWickets.toLocaleString(), color: 'from-emerald-300 to-lime-500' },
   ];

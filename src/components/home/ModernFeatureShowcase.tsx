@@ -32,7 +32,7 @@ export default function ModernFeatureShowcase() {
       icon: <Users className="w-8 h-8" />,
       title: 'Fan Predictions',
       description: 'Pick winners, compare form, and follow leaderboard swings through the league stage and playoffs.',
-      color: 'from-violet-500 to-fuchsia-500',
+      color: 'from-violet-500 to-violet-500',
     },
     {
       icon: <Shield className="w-8 h-8" />,
@@ -50,7 +50,7 @@ export default function ModernFeatureShowcase() {
       icon: <Sparkles className="w-8 h-8" />,
       title: 'AI Match Notes',
       description: 'Turn live moments into readable summaries for milestones, collapses, chase pressure, and title-race context.',
-      color: 'from-rose-500 to-orange-500',
+      color: 'from-indigo-500 to-orange-500',
     },
   ];
 

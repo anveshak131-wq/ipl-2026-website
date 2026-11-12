@@ -106,7 +106,7 @@ export default function WPLMatchDayPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-pink-900 to-purple-900">
+    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-indigo-900 to-purple-900">
       <AuroraBackground />
       <WPLFloatingParticles />
       
@@ -114,7 +114,7 @@ export default function WPLMatchDayPage() {
         <div className="max-w-7xl mx-auto px-4 py-8">
           <AnimatedSection>
             <div className="text-center mb-8">
-              <GradientText className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-purple-400 to-pink-400">
+              <GradientText className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-purple-400 to-indigo-400">
                 WPL Match Day Experience
               </GradientText>
               <p className="text-gray-300 text-lg">

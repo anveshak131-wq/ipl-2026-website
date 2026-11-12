@@ -40,7 +40,7 @@ export default function StatsTabs({ activeTab, onTabChange }: StatsTabsProps) {
               {isActive && (
                 <motion.div
                   layoutId="activeStatsTab"
-                  className="absolute inset-0 rounded-md bg-gradient-to-br from-amber-500/[0.28] via-emerald-500/[0.18] to-cyan-500/20"
+                  className="absolute inset-0 rounded-md bg-gradient-to-br from-blue-500/[0.28] via-indigo-500/[0.18] to-sky-500/20"
                   initial={false}
                   transition={{ type: 'spring', stiffness: 520, damping: 36 }}
                 />

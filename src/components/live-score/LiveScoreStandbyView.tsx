@@ -100,9 +100,9 @@ export default function LiveScoreStandbyView({
   const pointsHref = isWpl ? '/wpl/points-table' : '/ipl/points-table';
   const newsHref = `/news?league=${league}`;
 
-  const accentBorder = isWpl ? 'border-pink-400/30' : 'border-cyan-400/30';
+  const accentBorder = isWpl ? 'border-indigo-400/30' : 'border-cyan-400/30';
   const accentGlow = isWpl
-    ? 'bg-gradient-to-br from-fuchsia-500/15 via-slate-950/85 to-purple-900/20'
+    ? 'bg-gradient-to-br from-indigo-500/15 via-slate-950/85 to-violet-900/20'
     : 'bg-gradient-to-br from-blue-600/15 via-slate-950/85 to-amber-500/10';
 
   return (
@@ -119,7 +119,7 @@ export default function LiveScoreStandbyView({
         <div
           aria-hidden="true"
           className={`pointer-events-none absolute -top-28 right-0 h-72 w-72 rounded-full blur-3xl ${
-            isWpl ? 'bg-pink-500/15' : 'bg-cyan-500/15'
+            isWpl ? 'bg-indigo-500/15' : 'bg-cyan-500/15'
           }`}
         />
 
@@ -129,7 +129,7 @@ export default function LiveScoreStandbyView({
             <span
               className={`inline-flex items-center gap-2 rounded-full border px-3.5 py-1.5 text-xs font-black uppercase tracking-wider ${
                 isWpl
-                  ? 'border-pink-400/35 bg-pink-500/15 text-pink-200'
+                  ? 'border-indigo-400/35 bg-indigo-500/15 text-indigo-200'
                   : 'border-cyan-400/35 bg-cyan-500/15 text-cyan-200'
               }`}
             >
@@ -209,7 +209,7 @@ export default function LiveScoreStandbyView({
             <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-4">
               <span
                 className={`text-[11px] font-bold uppercase tracking-wider block ${
-                  isWpl ? 'text-pink-300' : 'text-amber-300'
+                  isWpl ? 'text-indigo-300' : 'text-amber-300'
                 }`}
               >
                 {isWpl ? 'Season 5 Window' : 'Key Dates'}
@@ -254,7 +254,7 @@ export default function LiveScoreStandbyView({
               href={scheduleHref}
               className={`inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-xs font-black uppercase tracking-wider text-white transition-all shadow-lg ${
                 isWpl
-                  ? 'bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 shadow-pink-600/25'
+                  ? 'bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 shadow-indigo-600/25'
                   : 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 shadow-blue-600/25'
               }`}
             >

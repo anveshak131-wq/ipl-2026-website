@@ -63,7 +63,7 @@ export default function ModernStatsCard({
   const borderColor = isBatting ? 'border-amber-300/[0.35]' : 'border-violet-300/[0.35]';
   const leaderSurface = isBatting
     ? 'bg-gradient-to-r from-amber-500/20 via-orange-500/[0.14] to-black/[0.35]'
-    : 'bg-gradient-to-r from-violet-500/20 via-fuchsia-500/[0.12] to-black/[0.35]';
+    : 'bg-gradient-to-r from-violet-500/20 via-violet-500/[0.12] to-black/[0.35]';
 
   const primary =
     resolvedMetric === 'strikeRate'

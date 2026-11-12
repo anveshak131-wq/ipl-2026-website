@@ -105,13 +105,13 @@ const OIL_NOISE_BG = `url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns
 const LIVE_SCORE_OIL_THEME = {
   base: 'linear-gradient(155deg, #0b0713 0%, #140b1d 34%, #0b2238 72%, #050a15 100%)',
   hazeA:
-    'radial-gradient(85% 70% at 16% 12%, rgba(251,146,60,0.28) 0%, rgba(236,72,153,0.12) 55%, transparent 78%)',
+    'radial-gradient(85% 70% at 16% 12%, rgba(251,146,60,0.28) 0%, rgba(99,102,241,0.12) 55%, transparent 78%)',
   hazeB:
     'radial-gradient(80% 64% at 86% 86%, rgba(34,211,238,0.22) 0%, rgba(99,102,241,0.12) 55%, transparent 78%)',
   conic:
-    'conic-gradient(from 220deg at 50% 35%, rgba(34,211,238,0.10), rgba(168,85,247,0.14), rgba(251,146,60,0.10), rgba(236,72,153,0.10), rgba(99,102,241,0.10), transparent 62%)',
+    'conic-gradient(from 220deg at 50% 35%, rgba(34,211,238,0.10), rgba(168,85,247,0.14), rgba(251,146,60,0.10), rgba(99,102,241,0.10), rgba(59,130,246,0.10), transparent 62%)',
   ring:
-    'conic-gradient(from 0deg at 50% 50%, rgba(34,211,238,0.22), rgba(168,85,247,0.22), rgba(251,146,60,0.18), rgba(236,72,153,0.18), rgba(99,102,241,0.22), rgba(34,211,238,0.22))',
+    'conic-gradient(from 0deg at 50% 50%, rgba(34,211,238,0.22), rgba(168,85,247,0.22), rgba(251,146,60,0.18), rgba(99,102,241,0.18), rgba(59,130,246,0.22), rgba(34,211,238,0.22))',
   brush:
     'linear-gradient(112deg, rgba(251,146,60,0.18), rgba(168,85,247,0.12), rgba(34,211,238,0.08), rgba(99,102,241,0.05))',
   accentLine: 'linear-gradient(90deg, rgba(34,211,238,0.65), rgba(168,85,247,0.62), rgba(251,146,60,0.6))',
@@ -1816,7 +1816,7 @@ export default function LiveScorePage() {
             <div>
               <h1 className="text-3xl md:text-5xl font-black tracking-tight text-white">
                 {leagueLabel}{' '}
-                <GradientText gradient="from-cyan-300 via-purple-300 to-amber-300" animate={motionEnabled}>
+                <GradientText gradient="from-sky-300 via-indigo-300 to-emerald-300" animate={motionEnabled}>
                   Live Score
                 </GradientText>
               </h1>
@@ -1844,7 +1844,7 @@ export default function LiveScorePage() {
                   href="/live-score?league=wpl"
                   className={`px-3 py-1.5 rounded-lg text-xs font-black uppercase tracking-wider transition-colors ${
                     selectedLeague === 'wpl'
-                      ? 'bg-pink-600 text-white shadow'
+                      ? 'bg-indigo-600 text-white shadow'
                       : 'text-white/65 hover:text-white'
                   }`}
                 >

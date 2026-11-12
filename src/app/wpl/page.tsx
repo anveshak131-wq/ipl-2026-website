@@ -97,7 +97,7 @@ const WPL_TOOLS = [
     title: 'Squads and roles',
     description: 'Move from franchise cards to player pages with batting roles, bowling styles, all-rounders, and wicketkeeper context.',
     icon: Users,
-    accent: 'from-violet-400 to-fuchsia-500',
+    accent: 'from-violet-400 to-violet-500',
   },
   {
     title: 'Prediction checks',
@@ -440,7 +440,7 @@ export default function WPLHomePage() {
           <motion.div
             className="absolute right-[-20%] bottom-[10%] -z-10 h-32 w-[70%] rotate-[-10deg] blur-2xl"
             style={{
-              background: 'linear-gradient(90deg, transparent, rgba(244,63,94,0.18), rgba(124,58,237,0.16), rgba(16,185,129,0.08))',
+              background: 'linear-gradient(90deg, transparent, rgba(99,102,241,0.18), rgba(124,58,237,0.16), rgba(16,185,129,0.08))',
             }}
             animate={prefersReducedMotion ? undefined : { x: [0, -18, 0], opacity: [0.28, 0.58, 0.28] }}
             transition={{ duration: 18, repeat: Infinity, ease: 'easeInOut' }}
@@ -530,7 +530,7 @@ export default function WPLHomePage() {
                 transition={{ duration: 0.75, delay: 0.22, type: 'spring', stiffness: 90 }}
                 className="relative hidden lg:block"
               >
-                <div className="absolute inset-0 translate-x-4 translate-y-4 rounded-lg bg-gradient-to-br from-cyan-500/15 via-blue-500/10 to-amber-300/10 blur-xl" />
+                <div className="absolute inset-0 translate-x-4 translate-y-4 rounded-lg bg-gradient-to-br from-indigo-500/15 via-blue-500/10 to-violet-500/10 blur-xl" />
                 <div className="relative overflow-hidden rounded-lg border border-white/10 bg-slate-950/58 p-5 sm:p-6 backdrop-blur-2xl shadow-[0_24px_90px_rgba(0,0,0,0.42)]">
                   <div className="absolute inset-0 opacity-[0.10]" style={{ backgroundImage: `url('${HERO_BACKGROUND_IMAGE}')`, backgroundSize: 'cover', backgroundPosition: 'center right' }} />
                   <div className="absolute inset-0 bg-gradient-to-b from-slate-950/40 via-slate-950/78 to-slate-950/95" />
@@ -902,7 +902,7 @@ export default function WPLHomePage() {
                     <span className="text-xs font-bold uppercase tracking-wider" style={{ color: WPLColors.textPrimary }}>Performance Analytics</span>
                   </motion.div>
                   <h2 className="text-5xl md:text-7xl font-black" style={{ color: WPLColors.textPrimary }}>
-                    League <GradientText gradient="from-purple-400 via-pink-400 to-rose-400" animate>Statistics</GradientText>
+                    League <GradientText gradient="from-purple-400 via-indigo-400 to-indigo-400" animate>Statistics</GradientText>
                   </h2>
                 </div>
                 <Link
@@ -1059,10 +1059,10 @@ export default function WPLHomePage() {
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   {[
-                    { label: 'Match Winner', icon: Trophy, color: 'from-amber-500 to-rose-500' },
-                    { label: 'Top Run-Scorer', icon: Star, color: 'from-rose-500 to-purple-500' },
+                    { label: 'Match Winner', icon: Trophy, color: 'from-amber-500 to-indigo-500' },
+                    { label: 'Top Run-Scorer', icon: Star, color: 'from-indigo-500 to-purple-500' },
                     { label: 'Most Wickets', icon: Activity, color: 'from-purple-500 to-amber-500' },
-                    { label: 'Player of the Match', icon: Target, color: 'from-amber-500 to-rose-500' },
+                    { label: 'Player of the Match', icon: Target, color: 'from-amber-500 to-indigo-500' },
                   ].map((feature, idx) => (
                     <motion.div
                       key={feature.label}
@@ -1129,7 +1129,7 @@ export default function WPLHomePage() {
                   <span className="text-xs font-black uppercase tracking-[0.18em] text-white">WPL Matchday Tools</span>
                 </div>
                 <h2 className="text-4xl md:text-5xl font-black text-white">
-                  Built for Women's <GradientText gradient="from-cyan-300 via-pink-300 to-amber-200" animate>T20 Cricket</GradientText>
+                  Built for Women's <GradientText gradient="from-sky-300 via-indigo-300 to-violet-300" animate>T20 Cricket</GradientText>
                 </h2>
                 <p className="mx-auto mt-4 max-w-3xl text-lg leading-relaxed text-slate-300">
                   Everything on this page is organized for the way WPL matches move: fast starts, middle-over matchups, death-over pressure, and table-changing results.

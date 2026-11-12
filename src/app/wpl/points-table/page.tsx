@@ -183,7 +183,7 @@ export default function WPLPointsTablePage() {
   }, [matches]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-950 via-pink-900 to-black overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-purple-950 via-indigo-900 to-black overflow-hidden">
       <Navbar />
       <AuroraBackground />
 
@@ -206,11 +206,11 @@ export default function WPLPointsTablePage() {
               className="mb-8"
             >
               <motion.span
-                className="inline-flex items-center gap-3 px-6 py-3 rounded-full backdrop-blur-2xl border-2 border-white/20 bg-gradient-to-r from-purple-500/20 via-pink-500/20 to-purple-500/20 shadow-2xl"
+                className="inline-flex items-center gap-3 px-6 py-3 rounded-full backdrop-blur-2xl border-2 border-white/20 bg-gradient-to-r from-purple-500/20 via-indigo-500/20 to-purple-500/20 shadow-2xl"
                 whileHover={{ scale: 1.05 }}
               >
-                <Trophy className="w-5 h-5 text-pink-400" />
-                <span className="text-sm font-black uppercase tracking-widest bg-gradient-to-r from-purple-400 via-pink-400 to-purple-400 bg-clip-text text-transparent">
+                <Trophy className="w-5 h-5 text-indigo-400" />
+                <span className="text-sm font-black uppercase tracking-widest bg-gradient-to-r from-purple-400 via-indigo-400 to-purple-400 bg-clip-text text-transparent">
                   WPL 2027 POINTS TABLE (PRE-SEASON)
                 </span>
               </motion.span>
@@ -222,7 +222,7 @@ export default function WPLPointsTablePage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 1, delay: 0.2 }}
             >
-              <GradientText gradient="from-purple-400 via-pink-400 to-purple-400" animate>
+              <GradientText gradient="from-purple-400 via-indigo-400 to-purple-400" animate>
                 Championship Standings
               </GradientText>
             </motion.h1>
@@ -245,10 +245,10 @@ export default function WPLPointsTablePage() {
               transition={{ duration: 0.8, delay: 0.5 }}
             >
               {[
-                { label: 'Teams', value: teams.length, icon: Users, color: 'from-purple-500 to-pink-500' },
-                { label: 'Matches Played', value: matches.filter(m => m.status === 'completed').length, icon: Calendar, color: 'from-pink-500 to-purple-500' },
-                { label: 'Upcoming', value: upcomingMatches.length, icon: Clock, color: 'from-purple-500 to-pink-500' },
-                { label: 'Total Points', value: pointsTable.reduce((sum, team) => sum + team.points, 0), icon: Award, color: 'from-pink-500 to-purple-500' }
+                { label: 'Teams', value: teams.length, icon: Users, color: 'from-purple-500 to-indigo-500' },
+                { label: 'Matches Played', value: matches.filter(m => m.status === 'completed').length, icon: Calendar, color: 'from-indigo-500 to-purple-500' },
+                { label: 'Upcoming', value: upcomingMatches.length, icon: Clock, color: 'from-purple-500 to-indigo-500' },
+                { label: 'Total Points', value: pointsTable.reduce((sum, team) => sum + team.points, 0), icon: Award, color: 'from-indigo-500 to-purple-500' }
               ].map((stat, index) => (
                 <motion.div
                   key={index}
@@ -294,7 +294,7 @@ export default function WPLPointsTablePage() {
                     <select
                       value={selectedYear}
                       onChange={(e) => setSelectedYear(parseInt(e.target.value))}
-                      className="w-full px-4 py-3 bg-slate-800/60 border-2 border-white/15 text-white rounded-xl focus:outline-none focus:border-pink-500 focus:ring-4 focus:ring-pink-500/20 transition-all text-lg font-medium"
+                      className="w-full px-4 py-3 bg-slate-800/60 border-2 border-white/15 text-white rounded-xl focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/20 transition-all text-lg font-medium"
                     >
                       {availableYears.map(year => (
                         <option key={year} value={year}>{year}</option>
@@ -305,15 +305,15 @@ export default function WPLPointsTablePage() {
 
                 {/* Search Bar */}
                 <div className="relative mb-6 group">
-                  <div className="absolute inset-0 bg-gradient-to-r from-purple-500/20 via-pink-500/20 to-purple-500/20 rounded-2xl blur-2xl opacity-0 group-focus-within:opacity-50 transition-opacity duration-500" />
+                  <div className="absolute inset-0 bg-gradient-to-r from-purple-500/20 via-indigo-500/20 to-purple-500/20 rounded-2xl blur-2xl opacity-0 group-focus-within:opacity-50 transition-opacity duration-500" />
                   <div className="relative">
-                    <Search className="absolute left-6 top-1/2 -translate-y-1/2 w-6 h-6 text-gray-400 group-focus-within:text-pink-400 transition-colors" />
+                    <Search className="absolute left-6 top-1/2 -translate-y-1/2 w-6 h-6 text-gray-400 group-focus-within:text-indigo-400 transition-colors" />
                     <input
                       type="text"
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
                       placeholder="Search teams by name or abbreviation..."
-                      className="w-full pl-16 pr-14 py-4 rounded-2xl bg-slate-800/60 border-2 border-white/15 text-white placeholder-gray-400 focus:outline-none focus:border-pink-500 focus:ring-4 focus:ring-pink-500/20 transition-all text-lg font-medium"
+                      className="w-full pl-16 pr-14 py-4 rounded-2xl bg-slate-800/60 border-2 border-white/15 text-white placeholder-gray-400 focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/20 transition-all text-lg font-medium"
                     />
                     {searchTerm && (
                       <motion.button
@@ -336,7 +336,7 @@ export default function WPLPointsTablePage() {
                     <select
                       value={sortBy}
                       onChange={(e) => setSortBy(e.target.value as 'points' | 'wins' | 'losses' | 'nrr')}
-                      className="px-5 py-2.5 rounded-xl text-sm font-bold bg-slate-800/60 text-white border-2 border-white/10 focus:border-pink-500 focus:outline-none focus:ring-2 focus:ring-pink-500/20 hover:border-pink-500/50 transition-all cursor-pointer"
+                      className="px-5 py-2.5 rounded-xl text-sm font-bold bg-slate-800/60 text-white border-2 border-white/10 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 hover:border-indigo-500/50 transition-all cursor-pointer"
                     >
                       <option value="points">Points (High to Low)</option>
                       <option value="wins">Wins (Most first)</option>
@@ -353,7 +353,7 @@ export default function WPLPointsTablePage() {
                         onClick={() => setShowFavoritesFirst(!showFavoritesFirst)}
                         className={`px-5 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center gap-2 ${
                           showFavoritesFirst
-                            ? 'bg-gradient-to-r from-purple-500/30 to-pink-500/30 text-purple-300 border-2 border-purple-500/50 shadow-lg'
+                            ? 'bg-gradient-to-r from-purple-500/30 to-indigo-500/30 text-purple-300 border-2 border-purple-500/50 shadow-lg'
                             : 'bg-slate-800/60 text-gray-300 border-2 border-white/10 hover:border-purple-500/50 hover:bg-slate-700/60'
                         }`}
                         whileHover={{ scale: 1.05 }}
@@ -435,7 +435,7 @@ export default function WPLPointsTablePage() {
                 </p>
                 <motion.button
                   onClick={clearFilters}
-                  className="px-10 py-5 rounded-2xl bg-gradient-to-r from-purple-500 to-pink-500 text-white font-black text-lg hover:shadow-2xl transition-all flex items-center gap-3 mx-auto"
+                  className="px-10 py-5 rounded-2xl bg-gradient-to-r from-purple-500 to-indigo-500 text-white font-black text-lg hover:shadow-2xl transition-all flex items-center gap-3 mx-auto"
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
@@ -495,22 +495,22 @@ export default function WPLPointsTablePage() {
                           transition: { duration: 0.3 }
                         }}
                         className={`relative group grid grid-cols-[40px_200px_1fr_100px_100px_100px_100px_100px_60px] gap-4 items-center px-6 py-5 rounded-3xl backdrop-blur-2xl border-2 border-white/10 bg-gradient-to-br from-slate-900/80 via-slate-800/70 to-slate-900/80 transition-all duration-300 cursor-pointer ${
-                          isTop3 ? 'border-pink-500/50 bg-gradient-to-br from-pink-900/30 via-purple-800/20 to-pink-900/30' :
-                          isBottom2 ? 'border-purple-500/50 bg-gradient-to-br from-purple-900/30 via-pink-800/20 to-purple-900/30' :
-                          'hover:border-pink-500/50 hover:bg-gradient-to-br from-pink-900/20 via-purple-800/10 to-pink-900/20'
+                          isTop3 ? 'border-indigo-500/50 bg-gradient-to-br from-indigo-900/30 via-purple-800/20 to-indigo-900/30' :
+                          isBottom2 ? 'border-purple-500/50 bg-gradient-to-br from-purple-900/30 via-indigo-800/20 to-purple-900/30' :
+                          'hover:border-indigo-500/50 hover:bg-gradient-to-br from-indigo-900/20 via-purple-800/10 to-indigo-900/20'
                         }`}
                         onClick={() => router.push(`/teams/${team.id}`)}
                       >
                         {/* Rank */}
                         <div className={`flex items-center justify-center text-2xl font-black ${
-                          isTop3 ? 'text-pink-400' : isBottom2 ? 'text-purple-400' : 'text-white'
+                          isTop3 ? 'text-indigo-400' : isBottom2 ? 'text-purple-400' : 'text-white'
                         }`}>
                           {rank}
                         </div>
 
                         {/* Team Logo */}
                         <div className="flex items-center gap-3">
-                          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white font-black text-lg shadow-lg">
+                          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-indigo-500 flex items-center justify-center text-white font-black text-lg shadow-lg">
                             {team.shortName.slice(0, 2)}
                           </div>
                           <span className="text-xl font-black text-white">{team.shortName}</span>
@@ -535,7 +535,7 @@ export default function WPLPointsTablePage() {
                         </div>
 
                         {/* Points */}
-                        <div className="text-pink-400 font-black text-xl">{team.points}</div>
+                        <div className="text-indigo-400 font-black text-xl">{team.points}</div>
 
                         {/* Net Run Rate */}
                         <div className={`font-bold ${
@@ -552,7 +552,7 @@ export default function WPLPointsTablePage() {
                               toggleFavorite(team.id);
                             }}
                             className={`p-2 rounded-full transition-all ${
-                              isFavorite ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white' : 'bg-slate-800/60 text-gray-400 hover:bg-slate-700/60'
+                              isFavorite ? 'bg-gradient-to-r from-purple-500 to-indigo-500 text-white' : 'bg-slate-800/60 text-gray-400 hover:bg-slate-700/60'
                             }`}
                             whileHover={{ scale: 1.2, rotate: isFavorite ? 0 : 15 }}
                             whileTap={{ scale: 0.9 }}
@@ -563,9 +563,9 @@ export default function WPLPointsTablePage() {
 
                         {/* Hover effects */}
                         <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 -z-10 rounded-3xl blur-2xl" style={{
-                          background: isTop3 ? 'linear-gradient(135deg, rgba(236, 72, 153, 0.3), rgba(168, 85, 247, 0.3))' :
-                                      isBottom2 ? 'linear-gradient(135deg, rgba(168, 85, 247, 0.3), rgba(236, 72, 153, 0.3))' :
-                                      'linear-gradient(135deg, rgba(236, 72, 153, 0.2), rgba(168, 85, 247, 0.2))'
+                          background: isTop3 ? 'linear-gradient(135deg, rgba(99, 102, 241, 0.3), rgba(168, 85, 247, 0.3))' :
+                                      isBottom2 ? 'linear-gradient(135deg, rgba(168, 85, 247, 0.3), rgba(99, 102, 241, 0.3))' :
+                                      'linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(168, 85, 247, 0.2))'
                         }} />
                       </motion.div>
                     );
@@ -596,17 +596,17 @@ export default function WPLPointsTablePage() {
                     transition={{ duration: 0.6 }}
                   >
                     <motion.span
-                      className="inline-flex items-center gap-3 px-6 py-3 rounded-full backdrop-blur-2xl border-2 border-white/20 bg-gradient-to-r from-purple-500/20 via-pink-500/20 to-purple-500/20 mb-8"
+                      className="inline-flex items-center gap-3 px-6 py-3 rounded-full backdrop-blur-2xl border-2 border-white/20 bg-gradient-to-r from-purple-500/20 via-indigo-500/20 to-purple-500/20 mb-8"
                       whileHover={{ scale: 1.05 }}
                     >
-                      <Calendar className="w-5 h-5 text-pink-400" />
-                      <span className="text-sm font-black uppercase tracking-widest bg-gradient-to-r from-purple-400 via-pink-400 to-purple-400 bg-clip-text text-transparent">
+                      <Calendar className="w-5 h-5 text-indigo-400" />
+                      <span className="text-sm font-black uppercase tracking-widest bg-gradient-to-r from-purple-400 via-indigo-400 to-purple-400 bg-clip-text text-transparent">
                         UPCOMING FIXTURES
                       </span>
                     </motion.span>
 
                     <h2 className="text-5xl md:text-6xl lg:text-7xl font-black text-white mb-6 leading-tight">
-                      Next <GradientText gradient="from-purple-400 via-pink-400 to-purple-400" animate>Matches</GradientText>
+                      Next <GradientText gradient="from-purple-400 via-indigo-400 to-purple-400" animate>Matches</GradientText>
                     </h2>
 
                     <p className="text-gray-300 text-xl md:text-2xl max-w-3xl mx-auto leading-relaxed">
@@ -624,7 +624,7 @@ export default function WPLPointsTablePage() {
                     {upcomingMatches.map((match, index) => (
                       <motion.div
                         key={match.id}
-                        className="group relative overflow-hidden rounded-2xl backdrop-blur-2xl border-2 border-white/10 bg-gradient-to-br from-slate-900/80 via-slate-800/70 to-slate-900/80 p-6 hover:border-pink-500/50 transition-all duration-300"
+                        className="group relative overflow-hidden rounded-2xl backdrop-blur-2xl border-2 border-white/10 bg-gradient-to-br from-slate-900/80 via-slate-800/70 to-slate-900/80 p-6 hover:border-indigo-500/50 transition-all duration-300"
                         initial={{ opacity: 0, y: 20 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
@@ -634,7 +634,7 @@ export default function WPLPointsTablePage() {
                         <div className="relative z-10">
                           <div className="flex items-center justify-between mb-4">
                             <div className="flex items-center gap-4">
-                              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white font-black text-lg shadow-lg">
+                              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-indigo-500 flex items-center justify-center text-white font-black text-lg shadow-lg">
                                 {match.team1.shortName.slice(0, 2)}
                               </div>
                               <div>
@@ -655,7 +655,7 @@ export default function WPLPointsTablePage() {
                                 <div className="text-xl font-black text-white">{match.team2.shortName}</div>
                                 <div className="text-sm text-gray-400">{match.team2.name}</div>
                               </div>
-                              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white font-black text-lg shadow-lg">
+                              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-indigo-500 flex items-center justify-center text-white font-black text-lg shadow-lg">
                                 {match.team2.shortName.slice(0, 2)}
                               </div>
                             </div>
@@ -677,7 +677,7 @@ export default function WPLPointsTablePage() {
                         </div>
 
                         <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 -z-10 rounded-2xl blur-2xl" style={{
-                          background: 'linear-gradient(135deg, rgba(236, 72, 153, 0.2), rgba(168, 85, 247, 0.2))'
+                          background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(168, 85, 247, 0.2))'
                         }} />
                       </motion.div>
                     ))}

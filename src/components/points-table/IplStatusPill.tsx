@@ -15,8 +15,8 @@ const STATUS_STYLES = {
   eliminated: {
     label: 'Eliminated',
     letter: 'E',
-    outer: 'border-rose-400/35 bg-rose-500/12 text-rose-200',
-    inner: 'bg-rose-300 text-rose-950',
+    outer: 'border-red-400/35 bg-red-500/12 text-red-200',
+    inner: 'bg-red-300 text-red-950',
   },
 } as const;
 

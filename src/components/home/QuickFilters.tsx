@@ -51,7 +51,7 @@ export default function QuickFilters({ matches, onFilterChange }: QuickFiltersPr
       count: upcomingMatches.length,
       icon: Clock,
       emoji: 'clock' as const,
-      color: 'from-purple-500 to-pink-500',
+      color: 'from-purple-500 to-indigo-500',
       href: '/matches?filter=upcoming',
     },
   ];

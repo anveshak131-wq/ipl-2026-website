@@ -52,28 +52,28 @@ export default function ModernStatsSection({
           label: 'Fixtures & Results',
           value: matches.toString(),
           change: 'League stage and playoffs',
-          color: 'from-purple-500 to-pink-500',
+          color: 'from-purple-500 to-indigo-500',
         },
         {
           icon: <Users className="w-6 h-6" />,
           label: 'Squad Players',
           value: players,
           change: `Across ${teams} teams`,
-          color: 'from-pink-500 to-rose-500',
+          color: 'from-indigo-500 to-indigo-500',
         },
         {
           icon: <Zap className="w-6 h-6" />,
           label: 'Live Scorecards',
           value: 'Ball by ball',
           change: 'Runs, wickets, and overs',
-          color: 'from-rose-500 to-purple-500',
+          color: 'from-indigo-500 to-purple-500',
         },
         {
           icon: <TrendingUp className="w-6 h-6" />,
           label: 'Table Signals',
           value: tableSignal,
           change: 'Qualification and form guide',
-          color: 'from-violet-500 to-fuchsia-500',
+          color: 'from-violet-500 to-violet-500',
         },
       ]);
     } else {
@@ -98,7 +98,7 @@ export default function ModernStatsSection({
         label: 'Live Scorecards',
         value: 'Ball by ball',
         change: 'Runs, wickets, and overs',
-        color: 'from-purple-500 to-pink-500',
+        color: 'from-purple-500 to-indigo-500',
       },
       {
         icon: <TrendingUp className="w-6 h-6" />,

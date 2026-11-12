@@ -67,7 +67,7 @@ export default function QuickStatsWidget({ matches, isLoading = false }: QuickSt
       label: 'Upcoming',
       value: stats.upcoming,
       icon: Clock,
-      color: 'from-purple-500 to-pink-500',
+      color: 'from-purple-500 to-indigo-500',
       href: '/matches?filter=upcoming',
       emoji: 'clock' as const,
     },

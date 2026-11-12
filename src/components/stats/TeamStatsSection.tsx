@@ -353,7 +353,7 @@ export default function TeamStatsSection({
                   <div className="grid grid-cols-2 gap-3">
                     <div className="h-2 rounded-full bg-white/10 overflow-hidden">
                       <div
-                        className="h-full rounded-full bg-gradient-to-r from-purple-500 to-pink-500"
+                        className="h-full rounded-full bg-gradient-to-r from-purple-500 to-indigo-500"
                         style={{ width: `${row.aPct}%` }}
                       />
                     </div>

@@ -246,7 +246,7 @@ export default function NewsModal({
               {/* Scroll Reading Progress Bar */}
               <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-white/5">
                 <div
-                  className="h-full bg-gradient-to-r from-amber-400 via-fuchsia-500 to-cyan-400 transition-[width] duration-100"
+                  className="h-full bg-gradient-to-r from-sky-400 via-indigo-500 to-emerald-400 transition-[width] duration-100"
                   style={{ width: `${readProgress}%` }}
                 />
               </div>

@@ -84,7 +84,7 @@ export default function Playing11Display({ match, players }: Playing11DisplayPro
       </div>
 
       {/* Team 2 */}
-      <div className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 border border-purple-500/20 rounded-lg p-4 backdrop-blur-sm">
+      <div className="bg-gradient-to-br from-purple-500/10 to-indigo-500/10 border border-purple-500/20 rounded-lg p-4 backdrop-blur-sm">
         <h3 className="text-lg font-bold text-white mb-3">{match.team2.name}</h3>
         <div className="space-y-2">
           {team2Players.map((player) => (

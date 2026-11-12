@@ -18,7 +18,7 @@ const BADGE_STYLES = {
   },
   eliminated: {
     label: 'Eliminated',
-    className: 'bg-rose-600/90 text-white border border-rose-500/40',
+    className: 'bg-red-600/90 text-white border border-red-500/40',
     icon: (
       <>
         <path d="M18 6L6 18" stroke="white" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />

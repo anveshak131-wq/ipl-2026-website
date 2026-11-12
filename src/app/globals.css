@@ -17,7 +17,7 @@
     /* Premium gradient background with vibrant colors */
     background: 
       radial-gradient(ellipse at top, rgba(99, 102, 241, 0.15) 0%, transparent 50%),
-      radial-gradient(ellipse at bottom right, rgba(236, 72, 153, 0.12) 0%, transparent 50%),
+      radial-gradient(ellipse at bottom right, rgba(99, 102, 241, 0.12) 0%, transparent 50%),
       radial-gradient(ellipse at bottom left, rgba(59, 130, 246, 0.1) 0%, transparent 50%),
       linear-gradient(135deg, #0f172a 0%, #1e293b 25%, #1e1b4b 50%, #312e81 75%, #0f172a 100%);
     background-attachment: fixed;
@@ -612,7 +612,7 @@
   position: relative;
   background: 
     radial-gradient(ellipse 80% 50% at 50% -20%, rgba(99, 102, 241, 0.3), transparent),
-    radial-gradient(ellipse 60% 50% at 50% 100%, rgba(236, 72, 153, 0.2), transparent),
+    radial-gradient(ellipse 60% 50% at 50% 100%, rgba(99, 102, 241, 0.2), transparent),
     linear-gradient(135deg, #0f172a 0%, #1e293b 25%, #1e1b4b 50%, #312e81 75%, #0f172a 100%);
   overflow: hidden;
 }
@@ -626,7 +626,7 @@
   bottom: 0;
   background: 
     radial-gradient(circle at 20% 30%, rgba(99, 102, 241, 0.2) 0%, transparent 50%),
-    radial-gradient(circle at 80% 70%, rgba(236, 72, 153, 0.15) 0%, transparent 50%),
+    radial-gradient(circle at 80% 70%, rgba(99, 102, 241, 0.15) 0%, transparent 50%),
     radial-gradient(circle at 40% 20%, rgba(59, 130, 246, 0.12) 0%, transparent 50%);
   animation: gradient-xy 20s ease infinite;
   pointer-events: none;
@@ -648,7 +648,7 @@
   position: relative;
   background: 
     radial-gradient(ellipse 70% 40% at 30% 20%, rgba(59, 130, 246, 0.2), transparent),
-    radial-gradient(ellipse 60% 40% at 70% 80%, rgba(236, 72, 153, 0.15), transparent),
+    radial-gradient(ellipse 60% 40% at 70% 80%, rgba(99, 102, 241, 0.15), transparent),
     linear-gradient(135deg, #1e293b 0%, #1e1b4b 50%, #312e81 100%);
   overflow: hidden;
 }
@@ -662,7 +662,7 @@
   bottom: -50%;
   background: 
     radial-gradient(circle at 30% 40%, rgba(99, 102, 241, 0.15) 0%, transparent 60%),
-    radial-gradient(circle at 70% 60%, rgba(236, 72, 153, 0.12) 0%, transparent 60%);
+    radial-gradient(circle at 70% 60%, rgba(99, 102, 241, 0.12) 0%, transparent 60%);
   animation: morph-gradient 25s ease infinite;
   pointer-events: none;
 }
@@ -671,7 +671,7 @@
   position: relative;
   background: 
     radial-gradient(ellipse 60% 50% at 0% 0%, rgba(99, 102, 241, 0.15), transparent),
-    radial-gradient(ellipse 60% 50% at 100% 100%, rgba(236, 72, 153, 0.12), transparent),
+    radial-gradient(ellipse 60% 50% at 100% 100%, rgba(99, 102, 241, 0.12), transparent),
     linear-gradient(135deg, #0f172a 0%, #1e293b 30%, #1e1b4b 60%, #312e81 100%);
   overflow: hidden;
 }
@@ -685,7 +685,7 @@
   bottom: 0;
   background: 
     linear-gradient(45deg, transparent 30%, rgba(99, 102, 241, 0.08) 50%, transparent 70%),
-    linear-gradient(-45deg, transparent 30%, rgba(236, 72, 153, 0.08) 50%, transparent 70%);
+    linear-gradient(-45deg, transparent 30%, rgba(99, 102, 241, 0.08) 50%, transparent 70%);
   background-size: 200% 200%;
   animation: gradient-xy 30s ease infinite;
   pointer-events: none;
@@ -755,7 +755,7 @@
   }
 
   .glass-vibrant {
-    background: linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(236, 72, 153, 0.1) 100%);
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(99, 102, 241, 0.1) 100%);
     backdrop-filter: blur(20px) saturate(180%);
     -webkit-backdrop-filter: blur(20px) saturate(180%);
     border: 1px solid rgba(255, 255, 255, 0.2);
@@ -1039,7 +1039,7 @@
     font-family: 'Manrope', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     background:
       radial-gradient(1200px 700px at 10% -10%, rgba(139, 92, 246, 0.3), transparent 60%),
-      radial-gradient(900px 600px at 90% 10%, rgba(236, 72, 153, 0.22), transparent 55%),
+      radial-gradient(900px 600px at 90% 10%, rgba(99, 102, 241, 0.22), transparent 55%),
       linear-gradient(180deg, #0a0e27 0%, #1a1f3a 45%, #1e293b 100%);
   }
 
@@ -1049,7 +1049,7 @@
     inset: -20%;
     background:
       radial-gradient(circle at 20% 20%, rgba(59, 130, 246, 0.18), transparent 45%),
-      radial-gradient(circle at 80% 10%, rgba(236, 72, 153, 0.2), transparent 40%),
+      radial-gradient(circle at 80% 10%, rgba(99, 102, 241, 0.2), transparent 40%),
       radial-gradient(circle at 50% 80%, rgba(14, 116, 144, 0.2), transparent 45%);
     animation: wpl-aurora 22s ease-in-out infinite;
     pointer-events: none;
@@ -1096,7 +1096,7 @@
     content: '';
     position: absolute;
     inset: -30% 0 0 -10%;
-    background: radial-gradient(circle at top, rgba(129, 140, 248, 0.25), rgba(236, 72, 153, 0.18), transparent 60%);
+    background: radial-gradient(circle at top, rgba(129, 140, 248, 0.25), rgba(99, 102, 241, 0.18), transparent 60%);
     animation: wpl-sheen 18s ease-in-out infinite;
     pointer-events: none;
   }
@@ -1232,7 +1232,7 @@
 
   /* Legacy button styles for backward compatibility */
   .btn-primary {
-    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #ec4899 100%);
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #6366f1 100%);
     background-size: 200% auto;
     color: white;
     font-weight: 700;
@@ -1333,7 +1333,7 @@
 
   /* Premium gradient text with vibrant colors */
   .gradient-text {
-    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 25%, #ec4899 50%, #f59e0b 75%, #6366f1 100%);
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 25%, #6366f1 50%, #f59e0b 75%, #6366f1 100%);
     background-size: 200% auto;
     -webkit-background-clip: text;
     background-clip: text;
@@ -1342,7 +1342,7 @@
   }
 
   .gradient-text-warm {
-    background: linear-gradient(135deg, #f59e0b 0%, #ef4444 30%, #ec4899 60%, #f43f5e 100%);
+    background: linear-gradient(135deg, #f59e0b 0%, #ef4444 30%, #6366f1 60%, #4f46e5 100%);
     background-size: 200% auto;
     -webkit-background-clip: text;
     background-clip: text;
@@ -2596,8 +2596,8 @@
   --wpl-text-secondary: #94a3b8;
   --wpl-text-muted: #64748b;
   --wpl-header-bg: rgba(11, 14, 23, 0.85);
-  --wpl-badge-bg: rgba(236, 72, 153, 0.15);
-  --wpl-badge-text: #f472b6;
+  --wpl-badge-bg: rgba(99, 102, 241, 0.15);
+  --wpl-badge-text: #818cf8;
 }
 
 .wpl-theme-light {
@@ -2609,8 +2609,8 @@
   --wpl-text-secondary: #475569;
   --wpl-text-muted: #94a3b8;
   --wpl-header-bg: rgba(255, 255, 255, 0.9);
-  --wpl-badge-bg: rgba(219, 39, 119, 0.1);
-  --wpl-badge-text: #db2777;
+  --wpl-badge-bg: rgba(79, 70, 229, 0.1);
+  --wpl-badge-text: #4f46e5;
 }
 
 

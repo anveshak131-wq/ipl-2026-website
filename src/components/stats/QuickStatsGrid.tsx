@@ -47,7 +47,7 @@ export default function QuickStatsGrid({ players }: QuickStatsGridProps) {
       label: 'Sixes hit',
       value: stats.totalSixes.toLocaleString(),
       helper: 'Maximums cleared',
-      color: 'from-rose-400 to-fuchsia-500',
+      color: 'from-indigo-400 to-violet-500',
     },
     {
       icon: Gauge,

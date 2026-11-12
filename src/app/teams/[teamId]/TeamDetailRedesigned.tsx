@@ -773,7 +773,7 @@ export default function TeamDetailRedesigned({ teamId }: TeamDetailRedesignedPro
                     { icon: 'star', text: 'Nurturing talent and creating future cricket champions', color: 'from-yellow-500 to-orange-500' },
                     { icon: 'heart', text: 'Unwavering support from millions of passionate fans', color: 'from-amber-400 to-orange-500' },
                     { icon: 'fire', text: 'Known for bold, fearless cricket and never-give-up spirit', color: 'from-orange-500 to-red-500' },
-                    { icon: 'crown', text: 'Consistently competitive in the IPL tournament', color: 'from-cyan-400 to-amber-400' }
+                    { icon: 'crown', text: 'Consistently competitive in the IPL tournament', color: 'from-blue-500 to-indigo-500' }
                   ].map((achievement, i) => (
                     <div key={i} className="group flex items-center gap-4 p-6 rounded-2xl bg-white/5 hover:bg-white/10 transition-all hover:scale-105 cursor-pointer">
                       <div className={`transform group-hover:scale-125 group-hover:rotate-12 transition-all duration-300`}>

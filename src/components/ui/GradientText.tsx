@@ -12,7 +12,7 @@ interface GradientTextProps {
 
 export default function GradientText({
   children,
-  gradient = 'from-blue-400 via-purple-400 to-pink-400',
+  gradient = 'from-blue-400 via-purple-400 to-indigo-400',
   className = '',
   animate = false,
 }: GradientTextProps) {

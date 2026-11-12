@@ -10,8 +10,8 @@ export interface CategoryMeta {
 const CATEGORY_MAP: Record<string, CategoryMeta> = {
   breaking: {
     label: 'Breaking',
-    badgeClass: 'bg-rose-500/15 text-rose-300 border-rose-500/35',
-    dotClass: 'bg-rose-400',
+    badgeClass: 'bg-red-500/15 text-red-300 border-red-500/35',
+    dotClass: 'bg-red-400',
   },
   match: {
     label: 'Schedule & Match',
@@ -35,8 +35,8 @@ const CATEGORY_MAP: Record<string, CategoryMeta> = {
   },
   inspiration: {
     label: 'Feature',
-    badgeClass: 'bg-pink-500/15 text-pink-300 border-pink-500/35',
-    dotClass: 'bg-pink-400',
+    badgeClass: 'bg-indigo-500/15 text-indigo-300 border-indigo-500/35',
+    dotClass: 'bg-indigo-400',
   },
   general: {
     label: '2027 Outlook',
@@ -60,15 +60,15 @@ export function getLeagueMeta(league?: string): LeagueMeta {
   if (league === 'wpl') {
     return {
       label: 'WPL 2027',
-      pillClass: 'bg-fuchsia-500/20 text-fuchsia-200 border-fuchsia-400/40',
-      accentGradient: 'from-fuchsia-500 via-pink-500 to-cyan-400',
+      pillClass: 'bg-indigo-500/20 text-indigo-200 border-indigo-400/40',
+      accentGradient: 'from-indigo-500 via-violet-500 to-sky-400',
     };
   }
   if (league === 'both') {
     return {
       label: 'IPL & WPL 2027',
       pillClass: 'bg-purple-500/20 text-amber-200 border-purple-400/40',
-      accentGradient: 'from-amber-400 via-fuchsia-500 to-cyan-400',
+      accentGradient: 'from-blue-500 via-indigo-500 to-emerald-400',
     };
   }
   return {

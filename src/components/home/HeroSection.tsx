@@ -109,7 +109,7 @@ export default function HeroSection() {
                 <span className="block bg-gradient-to-r from-white via-blue-200 to-purple-200 bg-clip-text text-transparent">
                   CRICKET
                 </span>
-                <span className="block bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+                <span className="block bg-gradient-to-r from-blue-400 via-purple-400 to-indigo-400 bg-clip-text text-transparent">
                   2026
                 </span>
               </motion.h1>
@@ -196,10 +196,10 @@ export default function HeroSection() {
                 className="relative w-80 h-80 lg:w-96 lg:h-96"
               >
                 {/* Glow Ring */}
-                <div className="absolute inset-0 rounded-full bg-gradient-to-r from-blue-500/30 via-purple-500/30 to-pink-500/30 blur-3xl animate-pulse" />
+                <div className="absolute inset-0 rounded-full bg-gradient-to-r from-blue-500/30 via-purple-500/30 to-indigo-500/30 blur-3xl animate-pulse" />
                 
                 {/* Main Circle */}
-                <div className="relative w-full h-full rounded-full bg-gradient-to-br from-blue-600/20 via-purple-600/20 to-pink-600/20 backdrop-blur-2xl border border-white/20 flex items-center justify-center shadow-2xl">
+                <div className="relative w-full h-full rounded-full bg-gradient-to-br from-blue-600/20 via-purple-600/20 to-indigo-600/20 backdrop-blur-2xl border border-white/20 flex items-center justify-center shadow-2xl">
                   <div className="text-center space-y-4">
                     <Trophy className="w-24 h-24 mx-auto text-yellow-400 drop-shadow-2xl" />
                     <div className="text-4xl font-black text-white">2026</div>

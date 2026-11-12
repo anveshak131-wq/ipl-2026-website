@@ -45,7 +45,7 @@ export default function NotificationItem({
       case 'match':
         return 'from-blue-500 to-cyan-500';
       case 'news':
-        return 'from-purple-500 to-pink-500';
+        return 'from-purple-500 to-indigo-500';
       case 'prediction':
         return 'from-orange-500 to-red-500';
       default:

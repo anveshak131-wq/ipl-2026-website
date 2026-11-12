@@ -390,7 +390,7 @@ function WPLTeamsContent() {
 
                 <h1 className="text-4xl sm:text-6xl font-black text-white tracking-tight">
                   Franchises &{' '}
-                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-yellow-200 to-cyan-300">
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-sky-300 via-blue-200 to-indigo-300">
                     Squads
                   </span>
                 </h1>
@@ -438,13 +438,13 @@ function WPLTeamsContent() {
                       type="button"
                       onClick={() => setTitleFilter(tab.id as any)}
                       className={`relative px-4 py-2 rounded-xl text-xs font-extrabold uppercase tracking-wider transition-colors ${
-                        isActive ? 'text-slate-950' : 'text-slate-300 bg-white/[0.04] border border-white/10 hover:text-white'
+                        isActive ? 'text-white' : 'text-slate-300 bg-white/[0.04] border border-white/10 hover:text-white'
                       }`}
                     >
                       {isActive && (
                         <motion.div
                           layoutId="wpl-teams-filter-pill"
-                          className="absolute inset-0 rounded-xl bg-gradient-to-r from-amber-400 to-cyan-300 shadow-lg shadow-amber-500/20"
+                          className="absolute inset-0 rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 shadow-lg shadow-indigo-500/25 border border-white/15"
                           transition={{ type: 'spring', stiffness: 420, damping: 32 }}
                         />
                       )}
@@ -643,7 +643,7 @@ function WPLTeamsContent() {
 
                       <Link
                         href={`/wpl/teams/${team.id}`}
-                        className="relative z-10 mt-auto w-full py-3 px-4 rounded-xl bg-white/[0.06] hover:bg-gradient-to-r hover:from-amber-400 hover:to-cyan-300 hover:text-slate-950 border border-white/15 text-white font-extrabold text-xs uppercase tracking-wider flex items-center justify-between transition-all"
+                        className="relative z-10 mt-auto w-full py-3 px-4 rounded-xl bg-white/[0.06] hover:bg-gradient-to-r hover:from-blue-600 hover:to-indigo-600 hover:text-white border border-white/15 text-white font-extrabold text-xs uppercase tracking-wider flex items-center justify-between transition-all"
                       >
                         <span>Explore Squad & Profiles</span>
                         <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />

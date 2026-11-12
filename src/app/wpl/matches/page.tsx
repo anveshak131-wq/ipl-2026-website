@@ -150,9 +150,9 @@ export default function WplPublicMatchesPage() {
 
       {/* Hero Section */}
       <section className="relative overflow-hidden bg-gradient-to-b from-purple-950/60 via-slate-950 to-slate-950 border-b border-slate-800/80 py-10 md:py-14">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(236,72,153,0.15),rgba(255,255,255,0))]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(99, 102, 241,0.15),rgba(255,255,255,0))]" />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center space-y-3">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-pink-500/10 border border-pink-500/30 text-pink-400 text-xs font-bold tracking-wide uppercase">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 text-xs font-bold tracking-wide uppercase">
             <Trophy className="w-3.5 h-3.5" />
             Official Tournament Fixtures
           </div>
@@ -188,7 +188,7 @@ export default function WplPublicMatchesPage() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search by team (RCB, MI, DC, GG, UPW), date, or venue..."
-                className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-950 border border-slate-700/80 text-sm text-white placeholder-slate-400 focus:outline-none focus:border-pink-500"
+                className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-950 border border-slate-700/80 text-sm text-white placeholder-slate-400 focus:outline-none focus:border-indigo-500"
               />
             </div>
 
@@ -204,7 +204,7 @@ export default function WplPublicMatchesPage() {
                   onClick={() => setVenueFilter(vf.key)}
                   className={`px-3.5 py-2 rounded-xl text-xs font-semibold transition-all ${
                     venueFilter === vf.key
-                      ? 'bg-gradient-to-r from-pink-600 to-purple-600 text-white shadow-md shadow-pink-950/40'
+                      ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-md shadow-indigo-950/40'
                       : 'bg-slate-800 hover:bg-slate-700 text-slate-300'
                   }`}
                 >
@@ -236,7 +236,7 @@ export default function WplPublicMatchesPage() {
 
           <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-slate-800/60 text-xs">
             <span className="text-slate-400 font-semibold mr-1 flex items-center gap-1">
-              <Filter className="w-3.5 h-3.5 text-pink-400" /> Filter Team:
+              <Filter className="w-3.5 h-3.5 text-indigo-400" /> Filter Team:
             </span>
             {['ALL', 'RCB', 'MI', 'DC', 'GG', 'UPW'].map((t) => (
               <button
@@ -257,7 +257,7 @@ export default function WplPublicMatchesPage() {
               <button
                 type="button"
                 onClick={resetFilters}
-                className="ml-auto inline-flex items-center gap-1 px-3 py-1 rounded-lg bg-pink-500/10 hover:bg-pink-500/20 text-pink-300 font-semibold transition-colors"
+                className="ml-auto inline-flex items-center gap-1 px-3 py-1 rounded-lg bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-300 font-semibold transition-colors"
               >
                 <RotateCcw className="w-3 h-3" />
                 Reset Filters
@@ -273,7 +273,7 @@ export default function WplPublicMatchesPage() {
             <button
               type="button"
               onClick={resetFilters}
-              className="px-4 py-2 rounded-xl bg-pink-600 hover:bg-pink-500 text-white text-xs font-bold transition-colors"
+              className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold transition-colors"
             >
               Reset All Filters
             </button>
@@ -297,7 +297,7 @@ export default function WplPublicMatchesPage() {
                 >
                   <div className="p-4 border-b border-slate-800/80 bg-slate-950/40 flex items-center justify-between text-xs">
                     <div className="flex items-center gap-2">
-                      <span className="font-extrabold text-pink-400">
+                      <span className="font-extrabold text-indigo-400">
                         #{match.matchNumber}
                       </span>
                       <span
@@ -314,7 +314,7 @@ export default function WplPublicMatchesPage() {
                     </div>
 
                     <div className="flex items-center gap-1.5 text-slate-300 font-semibold">
-                      <Calendar className="w-3.5 h-3.5 text-pink-400" />
+                      <Calendar className="w-3.5 h-3.5 text-indigo-400" />
                       <span>{match.displayDate}</span>
                       <span className="text-slate-500">({match.dayOfWeek})</span>
                     </div>
@@ -377,7 +377,7 @@ export default function WplPublicMatchesPage() {
 
                     <Link
                       href={`/wpl/matches/${match.id}`}
-                      className="px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-pink-600 text-white font-semibold flex items-center gap-1 transition-colors"
+                      className="px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-indigo-600 text-white font-semibold flex items-center gap-1 transition-colors"
                     >
                       Match Center
                       <ChevronRight className="w-3.5 h-3.5" />

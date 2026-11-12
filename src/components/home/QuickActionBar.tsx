@@ -55,8 +55,8 @@ export default function QuickActionBar() {
       label: 'News',
       icon: Flame,
       href: '/news',
-      color: 'from-purple-500 to-pink-500',
-      hoverColor: 'hover:from-purple-600 hover:to-pink-600'
+      color: 'from-purple-500 to-indigo-500',
+      hoverColor: 'hover:from-purple-600 hover:to-indigo-600'
     },
   ];
 
@@ -80,7 +80,7 @@ export default function QuickActionBar() {
                   className={`flex items-center gap-2 px-4 py-2 rounded-xl font-bold text-sm transition-all duration-300 ${
                     currentLeague === 'ipl'
                       ? 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white'
-                      : 'bg-gradient-to-r from-purple-500 to-pink-500 text-white'
+                      : 'bg-gradient-to-r from-purple-500 to-indigo-500 text-white'
                   }`}
                 >
                   {currentLeague === 'ipl' ? (
@@ -121,7 +121,7 @@ export default function QuickActionBar() {
                         onClick={toggleLeague}
                         className={`w-full px-4 py-3 flex items-center gap-2 font-semibold text-sm transition-all duration-200 ${
                           currentLeague === 'ipl'
-                            ? 'bg-gradient-to-r from-purple-500/20 to-pink-500/20 text-purple-300 hover:from-purple-500/30 hover:to-pink-500/30'
+                            ? 'bg-gradient-to-r from-purple-500/20 to-indigo-500/20 text-purple-300 hover:from-purple-500/30 hover:to-indigo-500/30'
                             : 'text-gray-300 hover:bg-white/5'
                         }`}
                       >

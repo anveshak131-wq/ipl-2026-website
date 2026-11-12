@@ -1025,7 +1025,7 @@ function TeamsPageContent() {
                                     >
                                         <motion.button
                                         onClick={() => router.push('/stats')}
-                                            className="group relative overflow-hidden rounded-2xl font-black py-5 px-12 text-lg transition-all duration-500 cursor-pointer bg-gradient-to-r from-amber-400 via-amber-500 to-cyan-400 text-slate-950 shadow-2xl"
+                                            className="group relative overflow-hidden rounded-2xl font-black py-5 px-12 text-lg transition-all duration-500 cursor-pointer bg-gradient-to-r from-blue-600 via-indigo-600 to-sky-500 text-white shadow-2xl"
                                             whileHover={{ scale: 1.05, y: -2 }}
                                             whileTap={{ scale: 0.95 }}
                                             style={{

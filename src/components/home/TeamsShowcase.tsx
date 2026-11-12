@@ -116,13 +116,13 @@ export default function TeamsShowcase() {
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="text-center mb-16 space-y-6">
-          <div className="inline-flex items-center space-x-2 bg-gradient-to-r from-orange-600/20 to-pink-600/20 backdrop-blur-sm px-6 py-3 rounded-full border border-orange-500/30">
+          <div className="inline-flex items-center space-x-2 bg-gradient-to-r from-orange-600/20 to-indigo-600/20 backdrop-blur-sm px-6 py-3 rounded-full border border-orange-500/30">
             <span className="w-2 h-2 bg-orange-500 rounded-full animate-pulse" />
             <span className="text-sm font-bold text-orange-400 tracking-wider">10 ELITE FRANCHISES</span>
           </div>
           
           <h2 className="text-5xl md:text-7xl font-black text-white leading-tight">
-            THE <span className="bg-gradient-to-r from-orange-500 via-red-600 to-pink-600 bg-clip-text text-transparent">POWERHOUSES</span>
+            THE <span className="bg-gradient-to-r from-orange-500 via-red-600 to-indigo-600 bg-clip-text text-transparent">POWERHOUSES</span>
           </h2>
           
           <p className="text-xl text-gray-400 max-w-3xl mx-auto leading-relaxed">

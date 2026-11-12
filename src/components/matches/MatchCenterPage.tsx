@@ -795,15 +795,15 @@ export default function MatchCenterPage({ backHref = '/matches', preferredLeague
   const pageOilTheme = match.league === 'wpl'
     ? {
         base: 'linear-gradient(155deg, #10071d 0%, #1c0b2d 38%, #142244 72%, #0a172f 100%)',
-        hazeA: 'radial-gradient(82% 70% at 14% 12%, rgba(236,72,153,0.26) 0%, rgba(168,85,247,0.1) 55%, transparent 80%)',
+        hazeA: 'radial-gradient(82% 70% at 14% 12%, rgba(99, 102, 241,0.26) 0%, rgba(168,85,247,0.1) 55%, transparent 80%)',
         hazeB: 'radial-gradient(75% 66% at 88% 88%, rgba(34,211,238,0.22) 0%, rgba(56,189,248,0.09) 55%, transparent 80%)',
-        brush: 'linear-gradient(112deg, rgba(244,114,182,0.18), rgba(147,51,234,0.08), rgba(56,189,248,0.04))',
+        brush: 'linear-gradient(112deg, rgba(129, 140, 248,0.18), rgba(147,51,234,0.08), rgba(56,189,248,0.04))',
       }
     : {
         base: 'linear-gradient(155deg, #120a12 0%, #221018 38%, #1a2845 72%, #0d1c33 100%)',
-        hazeA: 'radial-gradient(82% 70% at 14% 12%, rgba(251,146,60,0.24) 0%, rgba(236,72,153,0.09) 55%, transparent 80%)',
+        hazeA: 'radial-gradient(82% 70% at 14% 12%, rgba(251,146,60,0.24) 0%, rgba(99, 102, 241,0.09) 55%, transparent 80%)',
         hazeB: 'radial-gradient(74% 66% at 88% 88%, rgba(99,102,241,0.2) 0%, rgba(56,189,248,0.08) 55%, transparent 80%)',
-        brush: 'linear-gradient(112deg, rgba(245,158,11,0.16), rgba(236,72,153,0.08), rgba(99,102,241,0.04))',
+        brush: 'linear-gradient(112deg, rgba(245,158,11,0.16), rgba(99, 102, 241,0.08), rgba(99,102,241,0.04))',
       };
 
   return (
@@ -1023,7 +1023,7 @@ export default function MatchCenterPage({ backHref = '/matches', preferredLeague
                   className={`rounded-2xl border p-4 ${
                     team.accent === 'cyan'
                       ? 'border-cyan-300/25 bg-cyan-500/10'
-                      : 'border-fuchsia-300/25 bg-fuchsia-500/10'
+                      : 'border-violet-300/25 bg-violet-500/10'
                   }`}
                 >
                   <div className="flex items-center gap-4">
@@ -1109,8 +1109,8 @@ export default function MatchCenterPage({ backHref = '/matches', preferredLeague
                   </ul>
                 </div>
 
-                <div className="rounded-2xl border border-fuchsia-300/25 bg-fuchsia-500/10 p-4">
-                  <h3 className="font-bold text-fuchsia-100 mb-3">{team2Name}</h3>
+                <div className="rounded-2xl border border-violet-300/25 bg-violet-500/10 p-4">
+                  <h3 className="font-bold text-violet-100 mb-3">{team2Name}</h3>
                   <ul className="space-y-2 text-sm">
                     {team2Playing11.map((name) => (
                       <li key={name} className="rounded-lg border border-white/10 bg-white/5 px-3 py-2">
@@ -1373,7 +1373,7 @@ export default function MatchCenterPage({ backHref = '/matches', preferredLeague
                           {/* Innings Header Strip */}
                           <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-4 bg-[#141b30] border-b-2 border-slate-700">
                             <div className="flex items-center gap-3">
-                              <span className="px-2.5 py-1 rounded-lg bg-pink-600/30 border border-pink-500/50 text-pink-300 text-xs font-black uppercase tracking-wide">
+                              <span className="px-2.5 py-1 rounded-lg bg-indigo-600/30 border border-indigo-500/50 text-indigo-300 text-xs font-black uppercase tracking-wide">
                                 Innings {inning.inningsNumber || index + 1}
                               </span>
                               <h3 className="text-lg md:text-xl font-black text-white">{battingTeam}</h3>
@@ -1448,7 +1448,7 @@ export default function MatchCenterPage({ backHref = '/matches', preferredLeague
                               <div className="flex flex-wrap gap-2 text-xs">
                                 {inning.fallOfWickets.map((fow: any, fowIdx: number) => (
                                   <span key={fowIdx} className="px-2.5 py-1 rounded-md bg-[#141b2e] border border-slate-700 text-slate-200">
-                                    <strong className="text-pink-400 font-black">{fow.score || fow.runs}</strong>
+                                    <strong className="text-indigo-400 font-black">{fow.score || fow.runs}</strong>
                                     <span className="text-slate-400 ml-1">({fow.batterName || fow.name}, {fow.over || fow.overs} ov)</span>
                                   </span>
                                 ))}

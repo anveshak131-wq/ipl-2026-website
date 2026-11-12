@@ -22,7 +22,7 @@ export default function FloatingBadge({
   const colorMap = {
     gold: 'from-ipl-gold to-yellow-400 text-black',
     blue: 'from-blue-500 to-cyan-500 text-white',
-    purple: 'from-purple-500 to-pink-500 text-white',
+    purple: 'from-purple-500 to-indigo-500 text-white',
     green: 'from-green-500 to-emerald-500 text-white',
     red: 'from-red-500 to-orange-500 text-white',
   };

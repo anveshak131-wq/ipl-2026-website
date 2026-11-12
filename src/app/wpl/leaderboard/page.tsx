@@ -231,7 +231,7 @@ export default function WPLLeaderboardPage() {
   const bestEconomy = useMemo(() => [...bowlingStats].sort((a, b) => a.economy - b.economy)[0], [bowlingStats]);
 
   const tabs = [
-    { id: 'batting', label: 'Batting Leaders', icon: Target, color: 'from-pink-500 to-rose-500' },
+    { id: 'batting', label: 'Batting Leaders', icon: Target, color: 'from-indigo-500 to-indigo-500' },
     { id: 'bowling', label: 'Bowling Leaders', icon: Award, color: 'from-purple-500 to-indigo-500' },
     { id: 'points', label: 'Standings', icon: Trophy, color: 'from-amber-500 to-yellow-500' }
   ];
@@ -287,7 +287,7 @@ export default function WPLLeaderboardPage() {
                 border: `1px solid ${WPLColors.accent}40`
               }}
             >
-              <Sparkles size={16} className="text-pink-400" />
+              <Sparkles size={16} className="text-indigo-400" />
               <span className="text-sm font-semibold text-gray-300">Season 2027</span>
             </motion.div>
             <h1 className="text-4xl md:text-6xl font-bold mb-3">
@@ -417,7 +417,7 @@ export default function WPLLeaderboardPage() {
                     activeTab === tab.id ? 'text-white shadow-xl' : 'text-gray-400 hover:text-white'
                   }`}
                   style={activeTab === tab.id ? {
-                    background: `linear-gradient(135deg, ${tab.id === 'batting' ? WPLColors.accent : tab.id === 'bowling' ? WPLColors.secondary : '#f59e0b'}, ${tab.id === 'batting' ? '#f43f5e' : tab.id === 'bowling' ? '#6366f1' : '#eab308'})`,
+                    background: `linear-gradient(135deg, ${tab.id === 'batting' ? WPLColors.accent : tab.id === 'bowling' ? WPLColors.secondary : '#f59e0b'}, ${tab.id === 'batting' ? '#6366f1' : tab.id === 'bowling' ? '#6366f1' : '#eab308'})`,
                     boxShadow: `0 8px 25px ${tab.id === 'batting' ? WPLColors.accent : tab.id === 'bowling' ? WPLColors.secondary : '#f59e0b'}40`
                   } : {}}
                 >
@@ -497,7 +497,7 @@ export default function WPLLeaderboardPage() {
                     {Object.entries(battingStatsByTeam).map(([teamName, teamStats]) => (
                       <div key={teamName} className="mb-8 last:mb-0">
                         {/* Team Header */}
-                        <div className="px-6 py-4 bg-gradient-to-r from-pink-500/20 to-purple-500/20 border-b border-white/20">
+                        <div className="px-6 py-4 bg-gradient-to-r from-indigo-500/20 to-purple-500/20 border-b border-white/20">
                           <h3 className="text-xl font-bold text-white">{teamName}</h3>
                         </div>
                         
@@ -508,7 +508,7 @@ export default function WPLLeaderboardPage() {
                               <th className="py-4 px-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">Rank</th>
                               <th className="py-4 px-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">Player</th>
                               <th className="py-4 px-4 text-center text-xs font-bold text-gray-400 uppercase tracking-wider hidden lg:table-cell">M</th>
-                              <th className="py-4 px-4 text-center text-xs font-bold text-pink-400 uppercase tracking-wider">Runs</th>
+                              <th className="py-4 px-4 text-center text-xs font-bold text-indigo-400 uppercase tracking-wider">Runs</th>
                               <th className="py-4 px-4 text-center text-xs font-bold text-gray-400 uppercase tracking-wider hidden sm:table-cell">Avg</th>
                               <th className="py-4 px-4 text-center text-xs font-bold text-gray-400 uppercase tracking-wider hidden sm:table-cell">SR</th>
                               <th className="py-4 px-4 text-center text-xs font-bold text-gray-400 uppercase tracking-wider hidden xl:table-cell">HS</th>
@@ -542,11 +542,11 @@ export default function WPLLeaderboardPage() {
                                     </div>
                                   </td>
                                   <td className="py-5 px-4">
-                                    <div className="font-bold text-white group-hover:text-pink-400 transition-colors">{stat.playerName}</div>
+                                    <div className="font-bold text-white group-hover:text-indigo-400 transition-colors">{stat.playerName}</div>
                                   </td>
                                   <td className="py-5 px-4 text-center text-sm text-gray-400 hidden lg:table-cell">{stat.matches}</td>
                                   <td className="py-5 px-4 text-center">
-                                    <div className="text-lg font-black text-pink-400">{stat.runs}</div>
+                                    <div className="text-lg font-black text-indigo-400">{stat.runs}</div>
                                   </td>
                                   <td className="py-5 px-4 text-center text-sm text-gray-300 hidden sm:table-cell">{stat.average.toFixed(2)}</td>
                                   <td className="py-5 px-4 text-center text-sm text-gray-300 hidden sm:table-cell">{stat.strikeRate.toFixed(2)}</td>
@@ -591,7 +591,7 @@ export default function WPLLeaderboardPage() {
                     {Object.entries(bowlingStatsByTeam).map(([teamName, teamStats]) => (
                       <div key={teamName} className="mb-8 last:mb-0">
                         {/* Team Header */}
-                        <div className="px-6 py-4 bg-gradient-to-r from-purple-500/20 to-pink-500/20 border-b border-white/20">
+                        <div className="px-6 py-4 bg-gradient-to-r from-purple-500/20 to-indigo-500/20 border-b border-white/20">
                           <h3 className="text-xl font-bold text-white">{teamName}</h3>
                         </div>
                         
@@ -713,7 +713,7 @@ export default function WPLLeaderboardPage() {
                           <div className={`absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 ${
                             isChampion ? 'bg-gradient-to-r from-amber-500/10 via-yellow-500/10 to-amber-500/10' :
                             isQualifyingPosition ? 'bg-gradient-to-r from-green-500/10 via-emerald-500/10 to-green-500/10' :
-                            'bg-gradient-to-r from-purple-500/10 via-pink-500/10 to-purple-500/10'
+                            'bg-gradient-to-r from-purple-500/10 via-indigo-500/10 to-purple-500/10'
                           }`}></div>
                           
                           {/* Qualifying badge */}
@@ -756,7 +756,7 @@ export default function WPLLeaderboardPage() {
                                   index === 1 ? 'bg-gradient-to-br from-gray-300 via-gray-400 to-gray-500 text-gray-900 shadow-xl shadow-gray-500/30' :
                                   index === 2 ? 'bg-gradient-to-br from-orange-400 via-orange-500 to-orange-600 text-white shadow-xl shadow-orange-500/30' :
                                   isQualifyingPosition ? 'bg-gradient-to-br from-green-400 via-emerald-500 to-green-600 text-white shadow-xl shadow-green-500/30' :
-                                  'bg-gradient-to-br from-purple-500/20 to-pink-500/20 text-white border-2 border-white/20'
+                                  'bg-gradient-to-br from-purple-500/20 to-indigo-500/20 text-white border-2 border-white/20'
                                 }`}>
                                   {isChampion && (
                                     <motion.div
@@ -783,7 +783,7 @@ export default function WPLLeaderboardPage() {
                                 <motion.h3 
                                   className={`text-xl md:text-2xl font-black mb-2 truncate ${
                                     isChampion ? 'text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-yellow-500' :
-                                    'text-white group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-pink-400 group-hover:to-purple-400'
+                                    'text-white group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-indigo-400 group-hover:to-purple-400'
                                   }`}
                                   transition={{ duration: 0.3 }}
                                 >

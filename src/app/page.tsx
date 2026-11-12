@@ -521,7 +521,7 @@ export default function Home() {
 	                    IPL 2026
 	                  </motion.span>
 	                  <motion.span
-	                    className="block bg-gradient-to-r from-cyan-200 via-emerald-200 to-amber-200 bg-clip-text text-transparent"
+	                    className="block bg-gradient-to-r from-sky-200 via-blue-200 to-indigo-300 bg-clip-text text-transparent"
 	                    initial={{ opacity: 0, y: 18 }}
 	                    animate={{ opacity: 1, y: 0 }}
 	                    transition={{ duration: 0.8, delay: 0.6 }}
@@ -838,7 +838,7 @@ export default function Home() {
                 <span className="text-sm font-bold text-white uppercase tracking-wider">Choose Your Competition</span>
               </motion.div>
               <h2 className="text-5xl md:text-7xl font-black text-white mb-6">
-                IPL and WPL <span className="bg-gradient-to-r from-cyan-300 via-emerald-300 to-amber-300 bg-clip-text text-transparent">Match Hubs</span>
+                IPL and WPL <span className="bg-gradient-to-r from-sky-300 via-blue-300 to-indigo-300 bg-clip-text text-transparent">Match Hubs</span>
               </h2>
               <p className="text-gray-300 text-xl">Jump into fixtures, squads, results, scorecards, and leaderboard races.</p>
             </motion.div>
@@ -1451,7 +1451,7 @@ export default function Home() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-100px" }}
               transition={{ duration: 0.8 }}
-              className="relative overflow-hidden rounded-lg bg-gradient-to-r from-amber-500/20 via-emerald-500/10 to-cyan-500/20 backdrop-blur-2xl border-2 border-amber-400/35 p-8 md:p-10 shadow-2xl"
+              className="relative overflow-hidden rounded-lg bg-gradient-to-r from-amber-500/20 via-orange-500/12 to-indigo-500/20 backdrop-blur-2xl border-2 border-amber-400/35 p-8 md:p-10 shadow-2xl"
             >
               <motion.div
                 className="absolute top-0 right-0 w-96 h-96 bg-yellow-500/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"
@@ -1474,7 +1474,7 @@ export default function Home() {
                     <span className="text-sm font-bold text-yellow-200 uppercase tracking-wider">Match Predictions</span>
                   </motion.div>
                   <h2 className="text-4xl md:text-5xl font-black text-white mb-4">
-                    Read the Match <span className="bg-gradient-to-r from-amber-300 via-emerald-300 to-cyan-300 bg-clip-text text-transparent">Before It Turns</span>
+                    Read the Match <span className="bg-gradient-to-r from-amber-300 via-orange-300 to-red-300 bg-clip-text text-transparent">Before It Turns</span>
                   </h2>
                   <p className="text-gray-200 text-lg mb-6 leading-relaxed">
                     Make cricket calls on the toss, powerplay tempo, top scorer, strike bowler, and Player of the Match. Compare your picks with the leaderboard after every fixture.
@@ -1739,7 +1739,7 @@ export default function Home() {
                 <span className="text-xs font-bold text-white uppercase tracking-wider">Score Intelligence</span>
               </motion.div>
               <h2 className="text-5xl md:text-7xl font-black text-white mb-6">
-                Numbers That <span className="bg-gradient-to-r from-cyan-300 via-emerald-300 to-amber-300 bg-clip-text text-transparent">Shape the Table</span>
+                Numbers That <span className="bg-gradient-to-r from-sky-300 via-emerald-300 to-teal-200 bg-clip-text text-transparent">Shape the Table</span>
               </h2>
               <p className="text-gray-300 text-xl">Track runs, wickets, NRR, team form, and live match momentum.</p>
             </motion.div>
@@ -1766,19 +1766,19 @@ export default function Home() {
               >
                 <div>
                   <motion.div
-                    className="inline-flex items-center gap-2 mb-6 px-6 py-3 rounded-full bg-pink-500/20 border border-pink-500/30 backdrop-blur-sm"
+                    className="inline-flex items-center gap-2 mb-6 px-6 py-3 rounded-full bg-indigo-500/20 border border-indigo-500/30 backdrop-blur-sm"
                     whileHover={{ scale: 1.05 }}
                   >
-                    <Flame className="w-5 h-5 text-pink-400" />
-                    <span className="text-xs font-bold text-pink-300 uppercase tracking-wider">Match Reports & News</span>
+                    <Flame className="w-5 h-5 text-indigo-400" />
+                    <span className="text-xs font-bold text-indigo-300 uppercase tracking-wider">Match Reports & News</span>
                   </motion.div>
                   <h2 className="text-5xl md:text-7xl font-black text-white">
-                    Cricket <span className="bg-gradient-to-r from-pink-300 via-amber-200 to-cyan-300 bg-clip-text text-transparent">Storylines</span>
+                    Cricket <span className="bg-gradient-to-r from-sky-300 via-indigo-300 to-violet-300 bg-clip-text text-transparent">Storylines</span>
                   </h2>
                 </div>
                 <Link
                   href="/news"
-                  className="group flex items-center gap-2 px-8 py-4 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-white hover:text-pink-400 transition-all duration-300 hover:scale-105"
+                  className="group flex items-center gap-2 px-8 py-4 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-white hover:text-indigo-400 transition-all duration-300 hover:scale-105"
                 >
                   View All
                   <ArrowRight className="w-5 h-5 group-hover:translate-x-2 transition-transform" />
