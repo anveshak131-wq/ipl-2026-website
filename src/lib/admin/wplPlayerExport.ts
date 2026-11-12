@@ -1058,16 +1058,166 @@ async function exportExcelWorkbook(
 const WPL_COPYRIGHT_NOTICE =
   '© 2026-2027 SportsUP18 · WPL Operations & Analytics Desk. All Rights Reserved.';
 
-const TEAM_PDF_PALETTES: Record<string, { primary: [number, number, number]; accent: [number, number, number] }> = {
-  '14': { primary: [153, 27, 27], accent: [217, 119, 6] },   // RCB-W Crimson & Gold
-  '13': { primary: [30, 58, 138], accent: [245, 158, 11] },  // MI-W Royal Blue & Gold
-  '11': { primary: [29, 78, 216], accent: [220, 38, 38] },   // DC-W Blue & Red
-  '12': { primary: [180, 83, 9], accent: [245, 158, 11] },   // GG Amber & Gold
-  '15': { primary: [67, 56, 202], accent: [217, 119, 6] },   // UPW Indigo & Gold
+const TEAM_PDF_PALETTES: Record<
+  string,
+  {
+    primary: [number, number, number];
+    tableHead: [number, number, number];
+    accent: [number, number, number];
+    softTint: [number, number, number];
+  }
+> = {
+  '14': {
+    primary: [153, 27, 27],     // RCB-W Deep Crimson
+    tableHead: [127, 29, 29],
+    accent: [245, 158, 11],     // Championship Gold
+    softTint: [254, 242, 242],
+  },
+  '13': {
+    primary: [23, 37, 84],      // MI-W Royal Navy
+    tableHead: [30, 58, 138],
+    accent: [251, 191, 36],     // Gold Accent
+    softTint: [239, 246, 255],
+  },
+  '11': {
+    primary: [29, 78, 216],     // DC-W Electric Blue
+    tableHead: [30, 64, 175],
+    accent: [220, 38, 38],      // Crimson Slash
+    softTint: [239, 246, 255],
+  },
+  '12': {
+    primary: [180, 83, 9],      // GG Vibrant Tangerine Amber
+    tableHead: [146, 64, 14],
+    accent: [250, 204, 21],     // Bright Gold
+    softTint: [255, 251, 235],
+  },
+  '15': {
+    primary: [55, 48, 163],     // UPW Royal Indigo
+    tableHead: [49, 46, 129],
+    accent: [245, 158, 11],     // Gold Trim
+    softTint: [238, 242, 255],
+  },
 };
 
 function getTeamPdfPalette(teamId: string) {
-  return TEAM_PDF_PALETTES[teamId] || { primary: [30, 41, 59], accent: [16, 185, 129] };
+  return (
+    TEAM_PDF_PALETTES[teamId] || {
+      primary: [15, 23, 42] as [number, number, number],
+      tableHead: [30, 41, 59] as [number, number, number],
+      accent: [16, 185, 129] as [number, number, number],
+      softTint: [241, 245, 249] as [number, number, number],
+    }
+  );
+}
+
+interface CachedPoppinsFonts {
+  regular: string;
+  semiBold: string;
+  bold: string;
+}
+
+let cachedPoppinsPromise: Promise<CachedPoppinsFonts | null> | null = null;
+
+function arrayBufferToBase64(buffer: ArrayBuffer): string {
+  const bytes = new Uint8Array(buffer);
+  let binary = '';
+  const chunkSize = 0x4000;
+  for (let i = 0; i < bytes.length; i += chunkSize) {
+    const slice = bytes.subarray(i, Math.min(i + chunkSize, bytes.length));
+    binary += String.fromCharCode.apply(null, Array.from(slice));
+  }
+  return btoa(binary);
+}
+
+async function loadPoppinsFonts(): Promise<CachedPoppinsFonts | null> {
+  if (typeof window === 'undefined' || typeof fetch === 'undefined') return null;
+  if (!cachedPoppinsPromise) {
+    cachedPoppinsPromise = (async () => {
+      try {
+        const [regRes, semiRes, boldRes] = await Promise.all([
+          fetch('/fonts/pdf/Poppins-Regular.ttf'),
+          fetch('/fonts/pdf/Poppins-SemiBold.ttf'),
+          fetch('/fonts/pdf/Poppins-Bold.ttf'),
+        ]);
+        if (!regRes.ok || !boldRes.ok) return null;
+        const [regBuf, boldBuf, semiBuf] = await Promise.all([
+          regRes.arrayBuffer(),
+          boldRes.arrayBuffer(),
+          semiRes.ok ? semiRes.arrayBuffer() : boldRes.arrayBuffer(),
+        ]);
+        return {
+          regular: arrayBufferToBase64(regBuf),
+          semiBold: arrayBufferToBase64(semiBuf),
+          bold: arrayBufferToBase64(boldBuf),
+        };
+      } catch {
+        return null;
+      }
+    })();
+  }
+  return cachedPoppinsPromise;
+}
+
+async function registerPdfFontFamily(doc: jsPDF): Promise<{ bodyFont: string; displayFont: string }> {
+  const fonts = await loadPoppinsFonts();
+  if (!fonts) {
+    return { bodyFont: 'helvetica', displayFont: 'times' };
+  }
+  try {
+    doc.addFileToVFS('Poppins-Regular.ttf', fonts.regular);
+    doc.addFont('Poppins-Regular.ttf', 'Poppins', 'normal');
+    doc.addFileToVFS('Poppins-Bold.ttf', fonts.bold);
+    doc.addFont('Poppins-Bold.ttf', 'Poppins', 'bold');
+    doc.addFileToVFS('Poppins-SemiBold.ttf', fonts.semiBold);
+    doc.addFont('Poppins-SemiBold.ttf', 'Poppins', 'italic');
+    return { bodyFont: 'Poppins', displayFont: 'Poppins' };
+  } catch {
+    return { bodyFont: 'helvetica', displayFont: 'times' };
+  }
+}
+
+function drawPdfPageCanvasBackground(doc: jsPDF, fontFamily: string) {
+  // Rich tinted folio background (#EEF2F7 soft glacial slate)
+  doc.setFillColor(238, 242, 247);
+  doc.rect(0, 0, 297, 210, 'F');
+
+  // Subtle decorative top-right stepped diagonal accents
+  doc.setFillColor(226, 232, 240);
+  doc.triangle(242, 0, 297, 0, 297, 52, 'F');
+  doc.setFillColor(219, 234, 254);
+  doc.triangle(264, 0, 297, 0, 297, 32, 'F');
+
+  // Elevated folio content frame outline (#FFFFFF rounded sheet shadow edge + border)
+  doc.setFillColor(255, 255, 255);
+  doc.setDrawColor(203, 213, 225);
+  doc.setLineWidth(0.25);
+  doc.roundedRect(9.5, 13, 281, 182.5, 2, 2, 'FD');
+
+  // Architectural deep midnight obsidian binding spine on far left
+  doc.setFillColor(11, 17, 32);
+  doc.rect(0, 0, 5.2, 210, 'F');
+
+  // Dual emerald & gold vertical spine highlight strips
+  doc.setFillColor(16, 185, 129);
+  doc.rect(5.2, 0, 1.1, 140, 'F');
+  doc.setFillColor(245, 158, 11);
+  doc.rect(5.2, 140, 1.1, 70, 'F');
+
+  // Soft watermark behind sheet area (low-contrast pale slate)
+  doc.setTextColor(236, 241, 247);
+  doc.setFont(fontFamily, 'bold');
+  doc.setFontSize(34);
+  doc.text('SPORTSUP18  |  WPL', 150, 116, { align: 'center', angle: 24 });
+}
+
+function installPdfPageBackgroundHook(doc: jsPDF, fontFamily: string) {
+  drawPdfPageCanvasBackground(doc, fontFamily);
+  const originalAddPage = doc.addPage.bind(doc);
+  (doc as unknown as { addPage: (...args: any[]) => jsPDF }).addPage = (...args: any[]) => {
+    const result = originalAddPage(...args);
+    drawPdfPageCanvasBackground(doc, fontFamily);
+    return result;
+  };
 }
 
 function getLastAutoTableY(doc: jsPDF, fallbackY: number): number {
@@ -1075,71 +1225,100 @@ function getLastAutoTableY(doc: jsPDF, fallbackY: number): number {
   return typeof y === 'number' && Number.isFinite(y) ? y : fallbackY;
 }
 
-function drawPdfSectionHeading(doc: jsPDF, y: number, indexNum: string, title: string, subtitle: string): number {
+function drawPdfSectionHeading(
+  doc: jsPDF,
+  y: number,
+  indexNum: string,
+  title: string,
+  subtitle: string,
+  fontFamily: string
+): number {
   doc.setFillColor(241, 245, 249);
-  doc.roundedRect(14, y, 269, 9, 1.5, 1.5, 'F');
-  doc.setFillColor(16, 185, 129);
-  doc.rect(14, y, 2.2, 9, 'F');
+  doc.setDrawColor(203, 213, 225);
+  doc.setLineWidth(0.2);
+  doc.roundedRect(14, y, 271, 9.2, 1.4, 1.4, 'FD');
+
+  // Emerald index badge pill
+  doc.setFillColor(6, 95, 70);
+  doc.roundedRect(15.5, y + 1.4, 8.5, 6.4, 1, 1, 'F');
+  doc.setTextColor(255, 255, 255);
+  doc.setFont(fontFamily, 'bold');
+  doc.setFontSize(7.5);
+  doc.text(indexNum, 19.75, y + 5.9, { align: 'center' });
 
   doc.setTextColor(15, 23, 42);
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(9);
-  doc.text(pdfSafe(`${indexNum}  ${title}`), 19, y + 5.8);
+  doc.setFont(fontFamily, 'bold');
+  doc.setFontSize(8.8);
+  doc.text(pdfSafe(title), 26.5, y + 6);
 
-  doc.setTextColor(100, 116, 139);
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(7.5);
-  doc.text(pdfSafe(subtitle), 279, y + 5.7, { align: 'right' });
+  doc.setTextColor(71, 85, 105);
+  doc.setFont(fontFamily, 'normal');
+  doc.setFontSize(7.2);
+  doc.text(pdfSafe(subtitle), 282, y + 5.9, { align: 'right' });
 
-  return y + 12;
+  return y + 11.8;
 }
 
-function stampPdfRunningHeadersAndFooters(doc: jsPDF, scopeLabel: string, generatedAtStr: string, totalPlayers: number) {
+function stampPdfRunningHeadersAndFooters(
+  doc: jsPDF,
+  scopeLabel: string,
+  generatedAtStr: string,
+  totalPlayers: number,
+  fontFamily: string
+) {
   const totalPages = doc.getNumberOfPages();
-  const shortScope = pdfSafe(scopeLabel).slice(0, 56);
+  const shortScope = pdfSafe(scopeLabel).slice(0, 52);
 
   for (let pageNum = 1; pageNum <= totalPages; pageNum++) {
     doc.setPage(pageNum);
 
-    // Slim running header on pages 2+ so continuation pages remain anchored
+    // Slim running header on continuation pages (covers top strip cleanly)
     if (pageNum > 1) {
-      doc.setFillColor(15, 23, 42);
-      doc.rect(0, 0, 297, 11, 'F');
+      doc.setFillColor(11, 17, 32);
+      doc.rect(6.3, 0, 290.7, 11.2, 'F');
       doc.setFillColor(16, 185, 129);
-      doc.rect(0, 11, 297, 0.8, 'F');
+      doc.rect(6.3, 11.2, 220, 0.8, 'F');
+      doc.setFillColor(245, 158, 11);
+      doc.rect(226.3, 11.2, 70.7, 0.8, 'F');
 
       doc.setTextColor(255, 255, 255);
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(8.5);
-      doc.text('SPORTSUP18  |  WPL SQUAD & PERFORMANCE DOSSIER', 14, 7.2);
+      doc.setFont(fontFamily, 'bold');
+      doc.setFontSize(8.2);
+      doc.text('SPORTSUP18  |  WPL SQUAD ROSTERS, BIOS & PERFORMANCE DOSSIER', 14, 7.2);
 
       doc.setTextColor(203, 213, 225);
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(7.2);
-      doc.text(pdfSafe(`Scope: ${shortScope}  |  DOB: DD/MM/YYYY  |  Generated: ${generatedAtStr}`), 283, 7.2, {
+      doc.setFont(fontFamily, 'normal');
+      doc.setFontSize(6.9);
+      doc.text(pdfSafe(`Scope: ${shortScope}  |  DOB: DD/MM/YYYY  |  ${generatedAtStr}`), 285, 7.2, {
         align: 'right',
       });
     }
 
-    // Copyright & pagination footer across every single page
-    doc.setDrawColor(203, 213, 225);
-    doc.setLineWidth(0.3);
-    doc.line(14, 196.5, 283, 196.5);
+    // Crisp copyright & page footer tray on every page
+    doc.setFillColor(226, 232, 240);
+    doc.rect(6.3, 197.2, 290.7, 12.8, 'F');
+    doc.setDrawColor(16, 185, 129);
+    doc.setLineWidth(0.35);
+    doc.line(6.3, 197.2, 297, 197.2);
 
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(7);
-    doc.setTextColor(51, 65, 85);
-    doc.text(pdfSafe(WPL_COPYRIGHT_NOTICE), 14, 201.5);
+    doc.setFont(fontFamily, 'bold');
+    doc.setFontSize(6.9);
+    doc.setTextColor(15, 23, 42);
+    doc.text(pdfSafe(WPL_COPYRIGHT_NOTICE), 14, 203.8);
 
-    doc.setFont('helvetica', 'normal');
-    doc.setTextColor(100, 116, 139);
-    doc.text(pdfSafe(`DOB Format: DD/MM/YYYY  |  ${totalPlayers} Matched Records`), 168, 201.5, {
+    doc.setFont(fontFamily, 'normal');
+    doc.setTextColor(71, 85, 105);
+    doc.text(pdfSafe(`DOB Format: DD/MM/YYYY  |  ${totalPlayers} Matched Records`), 173, 203.8, {
       align: 'center',
     });
 
-    doc.setFont('helvetica', 'bold');
-    doc.setTextColor(15, 23, 42);
-    doc.text(`Page ${pageNum} of ${totalPages}`, 283, 201.5, { align: 'right' });
+    // Dark pill page counter badge
+    doc.setFillColor(15, 23, 42);
+    doc.roundedRect(256, 199.5, 29, 6.4, 1.2, 1.2, 'F');
+    doc.setFont(fontFamily, 'bold');
+    doc.setFontSize(6.8);
+    doc.setTextColor(255, 255, 255);
+    doc.text(`Page ${pageNum} of ${totalPages}`, 270.5, 203.7, { align: 'center' });
   }
 }
 
@@ -1164,7 +1343,35 @@ function groupRecordsByTeam(records: NormalizedWplExportRecord[], teams: WplTeam
     });
 }
 
-function exportPdfReport(
+function findScopeLeaders(records: NormalizedWplExportRecord[]) {
+  let topBatter: NormalizedWplExportRecord | null = null;
+  let topRuns = 0;
+  let topBowler: NormalizedWplExportRecord | null = null;
+  let topWkts = 0;
+  let topSigning: NormalizedWplExportRecord | null = null;
+  let topFee = 0;
+
+  for (const r of records) {
+    const runs = toNumber(r.headlineBatting?.runs || '0');
+    if (runs > topRuns) {
+      topRuns = runs;
+      topBatter = r;
+    }
+    const wkts = toNumber(r.headlineBowling?.wickets || '0');
+    if (wkts > topWkts) {
+      topWkts = wkts;
+      topBowler = r;
+    }
+    if (r.auctionFeeLakhs > topFee) {
+      topFee = r.auctionFeeLakhs;
+      topSigning = r;
+    }
+  }
+
+  return { topBatter, topRuns, topBowler, topWkts, topSigning };
+}
+
+async function exportPdfReport(
   records: NormalizedWplExportRecord[],
   summary: WplExportSummary,
   filters: WplExportFilterOptions,
@@ -1172,8 +1379,11 @@ function exportPdfReport(
   scopeSlug: string,
   scopeLabel: string,
   dateStamp: string
-): string {
+): Promise<string> {
   const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+  const { bodyFont, displayFont } = await registerPdfFontFamily(doc);
+  installPdfPageBackgroundHook(doc, bodyFont);
+
   const generatedAtStr = formatIndianTimestamp(new Date());
   const formatFocusLabel =
     filters.formatFocus === 'BEST_T20' ? 'Smart Best (WPL -> T20)' : filters.formatFocus;
@@ -1186,54 +1396,65 @@ function exportPdfReport(
     keywords: 'WPL, Cricket, Squad Roster, Player Bio, Career Stats, SportsUP18',
   });
 
-  // ── Page 1 Executive Masthead ────────────────────────────────────────────────
-  doc.setFillColor(15, 23, 42);
-  doc.rect(0, 0, 297, 31, 'F');
+  // ── Page 1 Layered Midnight-Emerald Hero Masthead ───────────────────────────
+  doc.setFillColor(11, 17, 32);
+  doc.rect(6.3, 0, 290.7, 32.5, 'F');
+  doc.setFillColor(17, 24, 39);
+  doc.triangle(195, 0, 297, 0, 297, 32.5, 'F');
+
+  // Dual emerald & gold horizon accent rule
   doc.setFillColor(16, 185, 129);
-  doc.rect(0, 31, 297, 1.4, 'F');
+  doc.rect(6.3, 32.5, 200, 1.4, 'F');
+  doc.setFillColor(245, 158, 11);
+  doc.rect(206.3, 32.5, 90.7, 1.4, 'F');
 
   // Brand Tag Pill
   doc.setFillColor(14, 165, 233);
-  doc.roundedRect(14, 5.5, 34, 5.5, 1.2, 1.2, 'F');
+  doc.roundedRect(14, 5.2, 34, 5.6, 1.2, 1.2, 'F');
   doc.setTextColor(255, 255, 255);
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(7.2);
-  doc.text('SPORTSUP18 OPS', 31, 9.3, { align: 'center' });
+  doc.setFont(displayFont, 'bold');
+  doc.setFontSize(7);
+  doc.text('SPORTSUP18 OPS', 31, 9.1, { align: 'center' });
 
-  doc.setTextColor(148, 163, 184);
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(7.2);
-  doc.text('WOMEN\'S PREMIER LEAGUE  |  OFFICIAL ADMIN DOSSIER', 51, 9.3);
+  doc.setTextColor(245, 158, 11);
+  doc.setFont(bodyFont, 'bold');
+  doc.setFontSize(7.1);
+  doc.text('WOMEN\'S PREMIER LEAGUE  |  OFFICIAL ADMIN & SCOUTING DOSSIER', 51, 9.1);
 
   doc.setTextColor(255, 255, 255);
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(15.5);
+  doc.setFont(displayFont, 'bold');
+  doc.setFontSize(15.2);
   doc.text('WPL SQUAD ROSTERS, PROFILES & CAREER STATISTICS', 14, 18.2);
 
   doc.setTextColor(203, 213, 225);
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(8);
+  doc.setFont(bodyFont, 'normal');
+  doc.setFontSize(7.8);
   doc.text(
     pdfSafe(`Scope: ${scopeLabel}   |   Format Focus: ${formatFocusLabel}`),
     14,
-    25.2
+    25.8
   );
 
-  // Right metadata badge block on Page 1 masthead
+  // Right frosted-slate metadata card on Page 1 masthead
   doc.setFillColor(30, 41, 59);
-  doc.roundedRect(216, 6, 67, 20.5, 1.8, 1.8, 'F');
-  doc.setTextColor(16, 185, 129);
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(6.8);
-  doc.text('EXPORT METADATA (IST)', 220, 10.8);
-  doc.setTextColor(248, 250, 252);
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(7.2);
-  doc.text(pdfSafe(`Generated: ${generatedAtStr}`), 220, 15.8);
-  doc.text('DOB Standard: DD/MM/YYYY', 220, 20.2);
-  doc.text(pdfSafe(`Purse Covered: ${formatPurseInr(summary.totalPurseLakhs)}`), 220, 24.4);
+  doc.setDrawColor(51, 65, 85);
+  doc.setLineWidth(0.25);
+  doc.roundedRect(216, 5.5, 69, 22, 1.8, 1.8, 'FD');
+  doc.setFillColor(16, 185, 129);
+  doc.rect(216, 5.5, 1.6, 22, 'F');
 
-  // ── Executive KPI Summary Strip ─────────────────────────────────────────────
+  doc.setTextColor(52, 211, 153);
+  doc.setFont(bodyFont, 'bold');
+  doc.setFontSize(6.6);
+  doc.text('EXPORT METADATA (IST)', 220.5, 10.4);
+  doc.setTextColor(248, 250, 252);
+  doc.setFont(bodyFont, 'normal');
+  doc.setFontSize(7);
+  doc.text(pdfSafe(`Generated: ${generatedAtStr}`), 220.5, 15.6);
+  doc.text('DOB Standard: DD/MM/YYYY', 220.5, 20.1);
+  doc.text(pdfSafe(`Purse Covered: ${formatPurseInr(summary.totalPurseLakhs)}`), 220.5, 24.5);
+
+  // ── Elevated Executive KPI Summary Cards ────────────────────────────────────
   const kpiCards: Array<{ label: string; value: string; sub: string; accent: [number, number, number] }> = [
     {
       label: 'MATCHED PLAYERS',
@@ -1257,7 +1478,7 @@ function exportPdfReport(
       label: 'CAREER STATS VERIFIED',
       value: `${summary.withStatsCount} / ${summary.totalPlayers}`,
       sub: `${summary.totalPlayers > 0 ? Math.round((summary.withStatsCount / summary.totalPlayers) * 100) : 0}% Profile Coverage`,
-      accent: [5, 150, 105],
+      accent: [13, 148, 136],
     },
     {
       label: 'KNOWN CONTRACT VALUE',
@@ -1267,35 +1488,39 @@ function exportPdfReport(
     },
   ];
 
-  const cardGap = 3;
-  const cardWidth = (269 - cardGap * (kpiCards.length - 1)) / kpiCards.length;
+  const cardGap = 3.2;
+  const cardWidth = (271 - cardGap * (kpiCards.length - 1)) / kpiCards.length;
   kpiCards.forEach((card, idx) => {
     const x = 14 + idx * (cardWidth + cardGap);
-    doc.setFillColor(248, 250, 252);
-    doc.setDrawColor(226, 232, 240);
-    doc.setLineWidth(0.25);
-    doc.roundedRect(x, 35.5, cardWidth, 16.5, 1.5, 1.5, 'FD');
+    // Subtle card drop-shadow
+    doc.setFillColor(226, 232, 240);
+    doc.roundedRect(x + 0.5, 37.8, cardWidth, 16.8, 1.5, 1.5, 'F');
+    // Elevated crisp white KPI card
+    doc.setFillColor(255, 255, 255);
+    doc.setDrawColor(203, 213, 225);
+    doc.setLineWidth(0.2);
+    doc.roundedRect(x, 37.2, cardWidth, 16.8, 1.5, 1.5, 'FD');
 
     doc.setFillColor(card.accent[0], card.accent[1], card.accent[2]);
-    doc.rect(x, 35.5, cardWidth, 1.3, 'F');
+    doc.rect(x, 37.2, 1.6, 16.8, 'F');
 
     doc.setTextColor(100, 116, 139);
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(6.3);
-    doc.text(card.label, x + 2.8, 40.3);
+    doc.setFont(bodyFont, 'bold');
+    doc.setFontSize(6.1);
+    doc.text(card.label, x + 3.6, 41.8);
 
     doc.setTextColor(15, 23, 42);
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(9.5);
-    doc.text(pdfSafe(card.value), x + 2.8, 45.8);
+    doc.setFont(displayFont, 'bold');
+    doc.setFontSize(9.4);
+    doc.text(pdfSafe(card.value), x + 3.6, 47.2);
 
     doc.setTextColor(71, 85, 105);
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(6.6);
-    doc.text(pdfSafe(card.sub), x + 2.8, 49.8);
+    doc.setFont(bodyFont, 'normal');
+    doc.setFontSize(6.4);
+    doc.text(pdfSafe(card.sub), x + 3.6, 51.3);
   });
 
-  let cursorY = 56;
+  let cursorY = 57.5;
 
   // ── Section 01: Franchise Distribution Matrix ───────────────────────────────
   if (summary.byTeam.length > 0) {
@@ -1304,7 +1529,8 @@ function exportPdfReport(
       cursorY,
       '01',
       'FRANCHISE DISTRIBUTION & PURSE OVERVIEW',
-      `${summary.byTeam.length} Franchise(s) Breakdown`
+      `${summary.byTeam.length} Franchise(s) Breakdown`,
+      bodyFont
     );
 
     const summaryBody = summary.byTeam.map((t) => [
@@ -1344,17 +1570,30 @@ function exportPdfReport(
     autoTable(doc, {
       startY: cursorY,
       rowPageBreak: 'avoid',
-      margin: { left: 14, right: 14, top: 16, bottom: 16 },
+      margin: { left: 14, right: 12, top: 16.5, bottom: 16.5 },
       head: [[
         'Code', 'Franchise', 'Players', 'Bat', 'AR', 'Bowl', 'WK', 'IND', 'OS', 'Capt', 'Stats', 'Cov%', 'Known Purse'
       ]],
       body: summaryBody,
-      styles: { fontSize: 7.4, cellPadding: 2, textColor: [15, 23, 42], lineColor: [226, 232, 240], lineWidth: 0.1 },
-      headStyles: { fillColor: [30, 41, 59], textColor: [255, 255, 255], fontStyle: 'bold', fontSize: 7.2 },
+      styles: {
+        font: bodyFont,
+        fontSize: 7.2,
+        cellPadding: 1.9,
+        textColor: [15, 23, 42],
+        lineColor: [226, 232, 240],
+        lineWidth: 0.12,
+      },
+      headStyles: {
+        font: bodyFont,
+        fillColor: [15, 23, 42],
+        textColor: [255, 255, 255],
+        fontStyle: 'bold',
+        fontSize: 7,
+      },
       alternateRowStyles: { fillColor: [248, 250, 252] },
       columnStyles: {
         0: { cellWidth: 16, fontStyle: 'bold' },
-        1: { cellWidth: 56, fontStyle: 'bold' },
+        1: { cellWidth: 58, fontStyle: 'bold' },
         2: { cellWidth: 16, halign: 'center', fontStyle: 'bold' },
         3: { cellWidth: 14, halign: 'center' },
         4: { cellWidth: 14, halign: 'center' },
@@ -1369,21 +1608,82 @@ function exportPdfReport(
       },
       didParseCell: (data) => {
         if (summary.byTeam.length > 1 && data.section === 'body' && data.row.index === summaryBody.length - 1) {
-          data.cell.styles.fillColor = [236, 253, 245];
-          data.cell.styles.textColor = [6, 95, 70];
+          data.cell.styles.fillColor = [209, 250, 229];
+          data.cell.styles.textColor = [6, 78, 59];
           data.cell.styles.fontStyle = 'bold';
         }
       },
     });
 
-    cursorY = getLastAutoTableY(doc, cursorY) + 7;
+    cursorY = getLastAutoTableY(doc, cursorY) + 5.5;
+  }
+
+  // ── Scope Leaders Spotlight Strip (when multiple players matched) ───────────
+  const leaders = findScopeLeaders(records);
+  if (records.length > 1 && (leaders.topBatter || leaders.topBowler || leaders.topSigning) && cursorY < 164) {
+    const leaderPills: Array<{ badge: string; title: string; detail: string; accent: [number, number, number] }> = [];
+    if (leaders.topBatter) {
+      leaderPills.push({
+        badge: 'TOP RUN SCORER',
+        title: `${leaders.topBatter.name} (${leaders.topBatter.teamShort})`,
+        detail: `${leaders.topRuns} runs (${leaders.topBatter.headlineFormatUsed}) | SR ${leaders.topBatter.headlineBatting?.sr || '-'}`,
+        accent: [16, 185, 129],
+      });
+    }
+    if (leaders.topBowler) {
+      leaderPills.push({
+        badge: 'LEADING WICKET TAKER',
+        title: `${leaders.topBowler.name} (${leaders.topBowler.teamShort})`,
+        detail: `${leaders.topWkts} wkts (${leaders.topBowler.headlineFormatUsed}) | Econ ${leaders.topBowler.headlineBowling?.econ || '-'}`,
+        accent: [14, 165, 233],
+      });
+    }
+    if (leaders.topSigning) {
+      leaderPills.push({
+        badge: 'HIGHEST SIGNING',
+        title: `${leaders.topSigning.name} (${leaders.topSigning.teamShort})`,
+        detail: `${leaders.topSigning.auctionFee} | ${leaders.topSigning.role}`,
+        accent: [217, 119, 6],
+      });
+    }
+
+    if (leaderPills.length > 0) {
+      const gap = 3;
+      const w = (271 - gap * (leaderPills.length - 1)) / leaderPills.length;
+      leaderPills.forEach((pill, i) => {
+        const px = 14 + i * (w + gap);
+        doc.setFillColor(248, 250, 252);
+        doc.setDrawColor(203, 213, 225);
+        doc.setLineWidth(0.2);
+        doc.roundedRect(px, cursorY, w, 13.2, 1.3, 1.3, 'FD');
+
+        doc.setFillColor(pill.accent[0], pill.accent[1], pill.accent[2]);
+        doc.rect(px, cursorY, w, 1.1, 'F');
+
+        doc.setTextColor(pill.accent[0], pill.accent[1], pill.accent[2]);
+        doc.setFont(bodyFont, 'bold');
+        doc.setFontSize(5.9);
+        doc.text(pill.badge, px + 3, cursorY + 4.3);
+
+        doc.setTextColor(15, 23, 42);
+        doc.setFont(bodyFont, 'bold');
+        doc.setFontSize(7.6);
+        doc.text(pdfSafe(pill.title), px + 3, cursorY + 8.3);
+
+        doc.setTextColor(71, 85, 105);
+        doc.setFont(bodyFont, 'normal');
+        doc.setFontSize(6.5);
+        doc.text(pdfSafe(pill.detail), px + 3, cursorY + 11.7);
+      });
+      cursorY += 17.5;
+    }
   }
 
   // ── Section 02: Team-by-Team Organized Squad & Headline Performance ──────────
   const teamGroups = groupRecordsByTeam(records, teams);
-  if (cursorY > 158) {
+  if (cursorY > 152) {
     doc.addPage();
-    cursorY = 16;
+    cursorY = 16.5;
   }
 
   cursorY = drawPdfSectionHeading(
@@ -1391,51 +1691,52 @@ function exportPdfReport(
     cursorY,
     '02',
     'TEAM-WISE ORGANIZED SQUADS, BIOS & HEADLINE STATS',
-    `DOB Format: DD/MM/YYYY  |  Focus: ${formatFocusLabel}`
+    `DOB Format: DD/MM/YYYY  |  Focus: ${formatFocusLabel}`,
+    bodyFont
   );
 
   teamGroups.forEach((group, groupIdx) => {
     const { team, players: groupPlayers } = group;
     const palette = getTeamPdfPalette(team.id);
 
-    // Prevent orphaned team header cards at bottom of a page
-    if (cursorY > 162 || (groupIdx > 0 && cursorY > 142)) {
+    // Keep each franchise header attached to its squad table
+    if (cursorY > 158 || (groupIdx > 0 && cursorY > 136)) {
       doc.addPage();
-      cursorY = 16;
+      cursorY = 16.5;
     }
 
     const groupSummary = summarizeWplExportRecords(groupPlayers, teams).byTeam[0];
 
-    // Team Header Card
+    // Team Broadcast Header Card
     doc.setFillColor(palette.primary[0], palette.primary[1], palette.primary[2]);
-    doc.roundedRect(14, cursorY, 269, 9.5, 1.4, 1.4, 'F');
+    doc.roundedRect(14, cursorY, 271, 9.8, 1.4, 1.4, 'F');
     doc.setFillColor(palette.accent[0], palette.accent[1], palette.accent[2]);
-    doc.rect(14, cursorY + 8.5, 269, 1, 'F');
+    doc.rect(14, cursorY + 8.6, 271, 1.2, 'F');
 
     doc.setTextColor(255, 255, 255);
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(9.2);
+    doc.setFont(displayFont, 'bold');
+    doc.setFontSize(9.1);
     doc.text(pdfSafe(`${team.name.toUpperCase()} (${team.short})`), 18, cursorY + 6.1);
 
     if (groupSummary) {
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(7.4);
+      doc.setFont(bodyFont, 'normal');
+      doc.setFontSize(7.1);
       doc.text(
         pdfSafe(
           `${groupSummary.total} Players  |  ${groupSummary.batters} Bat / ${groupSummary.allRounders} AR / ${groupSummary.bowlers} Bowl / ${groupSummary.wicketKeepers} WK  |  ${groupSummary.india} IND / ${groupSummary.overseas} OS  |  Purse: ${formatPurseInr(groupSummary.totalPurseLakhs)}`
         ),
-        279,
+        281,
         cursorY + 6.1,
         { align: 'right' }
       );
     }
 
-    cursorY += 10.8;
+    cursorY += 11;
 
     autoTable(doc, {
       startY: cursorY,
       rowPageBreak: 'avoid',
-      margin: { left: 14, right: 14, top: 16, bottom: 16 },
+      margin: { left: 14, right: 12, top: 16.5, bottom: 16.5 },
       head: [[
         '#',
         'Player',
@@ -1475,20 +1776,25 @@ function exportPdfReport(
             ? `${statusShort} (#${r.jerseyNumber})`
             : statusShort;
 
+        const matNum = toNumber(r.headlineBatting?.matches || r.headlineBowling?.matches || '0');
         const hasStats = Boolean(r.headlineBatting || r.headlineBowling);
         const matchesStr = r.headlineBatting?.matches || r.headlineBowling?.matches || '-';
-        const runsHs = r.headlineBatting
-          ? `${r.headlineBatting.runs} (${r.headlineBatting.hs})`
-          : '-';
-        const batAvgSr = r.headlineBatting
-          ? `${r.headlineBatting.avg} / ${r.headlineBatting.sr}`
-          : '-';
-        const wktsBbi = r.headlineBowling
-          ? `${r.headlineBowling.wickets} (${r.headlineBowling.bbi})`
-          : '-';
-        const bowlEconAvg = r.headlineBowling
-          ? `${r.headlineBowling.econ} / ${r.headlineBowling.avg}`
-          : '-';
+        const runsHs =
+          r.headlineBatting && (matNum > 0 || toNumber(r.headlineBatting.runs) > 0)
+            ? `${r.headlineBatting.runs} (${r.headlineBatting.hs})`
+            : '-';
+        const batAvgSr =
+          r.headlineBatting && (matNum > 0 || toNumber(r.headlineBatting.runs) > 0)
+            ? `${r.headlineBatting.avg} / ${r.headlineBatting.sr}`
+            : '-';
+        const wktsBbi =
+          r.headlineBowling && (matNum > 0 || toNumber(r.headlineBowling.wickets) > 0)
+            ? `${r.headlineBowling.wickets} (${r.headlineBowling.bbi})`
+            : '-';
+        const bowlEconAvg =
+          r.headlineBowling && (matNum > 0 || toNumber(r.headlineBowling.wickets) > 0)
+            ? `${r.headlineBowling.econ} / ${r.headlineBowling.avg}`
+            : '-';
 
         return [
           String(idx + 1),
@@ -1508,27 +1814,29 @@ function exportPdfReport(
         ];
       }),
       styles: {
-        fontSize: 6.9,
-        cellPadding: 1.7,
+        font: bodyFont,
+        fontSize: 6.7,
+        cellPadding: 1.65,
         valign: 'middle',
         textColor: [15, 23, 42],
         lineColor: [226, 232, 240],
         lineWidth: 0.1,
       },
       headStyles: {
-        fillColor: [30, 41, 59],
+        font: bodyFont,
+        fillColor: palette.tableHead,
         textColor: [255, 255, 255],
         fontStyle: 'bold',
-        fontSize: 6.8,
+        fontSize: 6.6,
       },
-      alternateRowStyles: { fillColor: [248, 250, 252] },
+      alternateRowStyles: { fillColor: palette.softTint },
       columnStyles: {
         0: { cellWidth: 7, halign: 'center' },
-        1: { cellWidth: 33, fontStyle: 'bold' },
+        1: { cellWidth: 34, fontStyle: 'bold' },
         2: { cellWidth: 22 },
         3: { cellWidth: 17 },
         4: { cellWidth: 22 },
-        5: { cellWidth: 35 },
+        5: { cellWidth: 36 },
         6: { cellWidth: 17 },
         7: { cellWidth: 17 },
         8: { cellWidth: 10, halign: 'center', fontStyle: 'bold' },
@@ -1537,6 +1845,23 @@ function exportPdfReport(
         11: { cellWidth: 21, halign: 'right' },
         12: { cellWidth: 19, halign: 'right' },
         13: { cellWidth: 19, halign: 'right' },
+      },
+      didParseCell: (data) => {
+        if (data.section === 'body') {
+          const playerRec = groupPlayers[data.row.index];
+          if (playerRec?.isCaptain) {
+            data.cell.styles.fillColor = [254, 249, 231];
+            if (data.column.index === 1) {
+              data.cell.styles.textColor = [146, 64, 14];
+            }
+          }
+          if (data.column.index === 8 && playerRec && (playerRec.headlineBatting || playerRec.headlineBowling)) {
+            const fmt = playerRec.headlineFormatUsed;
+            if (fmt === 'WPL') data.cell.styles.textColor = [3, 105, 161];
+            else if (fmt === 'T20') data.cell.styles.textColor = [6, 95, 70];
+            else if (fmt === 'ODI') data.cell.styles.textColor = [180, 83, 9];
+          }
+        }
       },
     });
 
@@ -1590,30 +1915,38 @@ function exportPdfReport(
     doc.addPage();
     const annexStartY = drawPdfSectionHeading(
       doc,
-      16,
+      16.5,
       '03',
       'COMPLETE MULTI-FORMAT CAREER STATISTICS ANNEX',
-      'Grouped by Player across WPL | T20 | ODI | Test'
+      'Grouped by Player across WPL | T20 | ODI | Test',
+      bodyFont
     );
 
     autoTable(doc, {
       startY: annexStartY,
       rowPageBreak: 'avoid',
-      margin: { left: 14, right: 14, top: 16, bottom: 16 },
+      margin: { left: 14, right: 12, top: 16.5, bottom: 16.5 },
       head: [[
         'Player', 'Team', 'Format', 'Mat', 'Inn', 'NO', 'Runs', 'HS', 'Bat Avg', 'Bat SR', '50s/100s', 'Wkts', 'BBI', 'Econ', 'Bowl Avg', '5W'
       ]],
       body: annexRows.map((entry) => entry.cells),
       styles: {
-        fontSize: 7,
-        cellPadding: 1.6,
+        font: bodyFont,
+        fontSize: 6.8,
+        cellPadding: 1.55,
         textColor: [15, 23, 42],
         lineColor: [226, 232, 240],
         lineWidth: 0.1,
       },
-      headStyles: { fillColor: [6, 95, 70], textColor: [255, 255, 255], fontStyle: 'bold', fontSize: 6.9 },
+      headStyles: {
+        font: bodyFont,
+        fillColor: [6, 78, 59],
+        textColor: [255, 255, 255],
+        fontStyle: 'bold',
+        fontSize: 6.7,
+      },
       columnStyles: {
-        0: { cellWidth: 36, fontStyle: 'bold' },
+        0: { cellWidth: 38, fontStyle: 'bold' },
         1: { cellWidth: 14, fontStyle: 'bold' },
         2: { cellWidth: 14, fontStyle: 'bold', halign: 'center' },
         3: { cellWidth: 12, halign: 'right' },
@@ -1634,7 +1967,7 @@ function exportPdfReport(
         if (data.section === 'body') {
           const entry = annexRows[data.row.index];
           if (entry && entry.playerParity === 1) {
-            data.cell.styles.fillColor = [248, 250, 252];
+            data.cell.styles.fillColor = [239, 246, 255];
           } else {
             data.cell.styles.fillColor = [255, 255, 255];
           }
@@ -1647,7 +1980,7 @@ function exportPdfReport(
     });
   }
 
-  stampPdfRunningHeadersAndFooters(doc, scopeLabel, generatedAtStr, records.length);
+  stampPdfRunningHeadersAndFooters(doc, scopeLabel, generatedAtStr, records.length, bodyFont);
 
   const fileName = `${scopeSlug}_${dateStamp}.pdf`;
   doc.save(fileName);
@@ -1908,7 +2241,7 @@ export async function runWplPlayerExport(params: {
   let fileName = '';
   switch (params.format) {
     case 'pdf':
-      fileName = exportPdfReport(records, summary, params.filters, teams, scopeSlug, scopeLabel, dateStamp);
+      fileName = await exportPdfReport(records, summary, params.filters, teams, scopeSlug, scopeLabel, dateStamp);
       break;
     case 'excel':
       fileName = await exportExcelWorkbook(records, summary, scopeSlug, scopeLabel, dateStamp);
