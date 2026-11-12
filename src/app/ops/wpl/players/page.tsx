@@ -2,10 +2,11 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import {
-  Search, Plus, RefreshCw, Trash2, Edit2, Shield,
+  Search, Plus, RefreshCw, Trash2, Edit2, Shield, Download,
   ExternalLink, Sparkles, User, Check, X, ChevronDown, ChevronUp, BarChart2, RotateCcw
 } from 'lucide-react';
 import { adminFetchWithCsrfRetry } from '@/lib/admin/csrf';
+import WplPlayersExportStudio from '@/components/admin/wpl/WplPlayersExportStudio';
 
 interface Player {
   id: string;
@@ -197,6 +198,8 @@ export default function WplPlayersCleanOpsPage() {
   useEffect(() => {
     loadPlayers();
   }, []);
+
+  const [showExportStudio, setShowExportStudio] = useState(false);
 
   const handleRealignSquads = async () => {
     if (!confirm('This will synchronize all 5 WPL franchise squads to their authentic official rosters. Continue?')) return;
@@ -606,7 +609,25 @@ export default function WplPlayersCleanOpsPage() {
             </p>
           </div>
 
-          <div className="flex items-center gap-3 self-start md:self-auto">
+          <div className="flex flex-wrap items-center gap-3 self-start md:self-auto">
+            <button
+              type="button"
+              data-testid="toggle-export-studio-btn"
+              onClick={() => setShowExportStudio((v) => !v)}
+              className={
+                'px-4 py-2.5 rounded-xl text-xs font-bold flex items-center gap-2 border transition-all ' +
+                (showExportStudio
+                  ? 'bg-sky-600 text-white border-sky-400 shadow-lg shadow-sky-950/40'
+                  : 'bg-slate-800 hover:bg-slate-700 text-sky-300 hover:text-white border-sky-500/40')
+              }
+              title="Export filtered WPL players, details, and stats to PDF, Excel, CSV, SQL, or JSON"
+            >
+              <Download className="w-3.5 h-3.5" />
+              Export Players & Stats
+              <span className="px-1.5 py-0.5 rounded-md bg-slate-950/60 text-[10px] font-extrabold">
+                {players.length}
+              </span>
+            </button>
             <button
               onClick={handleRealignSquads}
               disabled={isRealigning}
@@ -624,6 +645,17 @@ export default function WplPlayersCleanOpsPage() {
             </button>
           </div>
         </div>
+
+        {/* Multi-Format Export & Filter Studio */}
+        {showExportStudio && (
+          <WplPlayersExportStudio
+            players={players}
+            teams={WPL_TEAMS}
+            activeTeamId={activeTeam.id}
+            activeSearchQuery={searchQuery}
+            onClose={() => setShowExportStudio(false)}
+          />
+        )}
 
         {/* Team Selector Tabs */}
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
