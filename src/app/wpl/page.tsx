@@ -500,7 +500,7 @@ export default function WPLHomePage() {
                   className="mt-6 flex flex-wrap gap-3"
                 >
                   <Link
-                    href="/wpl/matches"
+                    href="/wpl/scorecard"
                     className="group inline-flex items-center gap-2 rounded-lg px-5 py-3 text-sm font-black text-slate-950 bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 shadow-[0_18px_60px_rgba(245,158,11,0.35)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_20px_65px_rgba(245,158,11,0.5)]"
                   >
                     <Play className="w-4 h-4" />

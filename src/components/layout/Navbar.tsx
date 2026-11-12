@@ -82,7 +82,10 @@ export default function Navbar() {
     // { href: '/stories', label: 'Fan Stories', emoji: 'people' },
     // Analytics & Insights - WPL gets leaderboard, IPL gets stats
     ...(currentLeague === 'wpl' 
-      ? [{ href: '/wpl/leaderboard', label: 'Leaderboard', emoji: 'chart' as NavEmojiName }] 
+      ? [
+          { href: '/wpl/scorecard', label: 'Scorecard', emoji: 'target' as NavEmojiName },
+          { href: '/wpl/leaderboard', label: 'Leaderboard', emoji: 'chart' as NavEmojiName },
+        ] 
       : [{ href: '/stats', label: 'Stats', emoji: 'chart' as NavEmojiName }]
     ),
   ];
@@ -103,6 +106,7 @@ export default function Navbar() {
   const getNavTooltip = (href: string): string | null => {
     if (href === '/live-score') return 'Ball-by-ball updates and match situation';
     if (href === '/stats') return 'Leaderboards, records, and team comparisons';
+    if (href === '/wpl/scorecard') return 'Official WPL match scorecards, innings & partnerships';
     if (href === '/wpl/leaderboard') return 'Player stats and points table';
     return null;
   };

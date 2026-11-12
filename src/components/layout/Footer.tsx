@@ -10,6 +10,7 @@ export default function Footer() {
   const isWPL = currentLeague === 'wpl';
   const quickLinks = isWPL
     ? [
+        { href: '/wpl/scorecard', label: 'WPL Scorecards' },
         { href: '/wpl/matches', label: 'WPL Match Schedule' },
         { href: '/wpl/teams', label: 'WPL Teams' },
         { href: '/wpl/news', label: 'WPL News' },
