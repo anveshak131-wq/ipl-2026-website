@@ -245,6 +245,17 @@ export function normalizeWplRole(rawRole?: string): WplRoleCategory {
   return 'Batter';
 }
 
+export function normalizeWplSquadStatus(rawStatus?: string): string {
+  const status = String(rawStatus || '').toLowerCase().trim();
+  if (!status || status === 'active' || status === 'active squad' || status === 'available') {
+    return 'Active Squad';
+  }
+  if (status.includes('injur')) return 'Injured';
+  if (status.includes('reserve') || status.includes('bench') || status.includes('standby')) return 'Reserve';
+  if (status.includes('unavail') || status.includes('ruled out') || status.includes('withdrawn')) return 'Unavailable';
+  return String(rawStatus).trim();
+}
+
 export function resolveWplTeam(player: WplExportPlayerInput, teams: WplTeamRef[] = WPL_CANONICAL_TEAMS): WplTeamRef {
   const rawTeamId = String(player.teamId || '').trim().toLowerCase();
   const rawTeamName = String(player.team || '').trim().toLowerCase();
@@ -499,7 +510,7 @@ export function normalizeWplPlayerForExport(
     battingStyle: cleanStr(player.battingStyle),
     bowlingStyle: cleanStr(player.bowlingStyle),
     jerseyNumber: cleanStr(player.jerseyNumber, 'N/A'),
-    squadStatus: cleanStr(player.squadStatus, 'Active Squad'),
+    squadStatus: normalizeWplSquadStatus(player.squadStatus),
     auctionFee,
     auctionFeeLakhs: parseAuctionFeeLakhs(auctionFee),
     cricbuzzUrl: cleanStr(player.cricbuzzUrl, ''),
