@@ -78,6 +78,89 @@ export function safeText(val: unknown, fallback = '—'): string {
   return String(val);
 }
 
+/**
+ * Parse a player's birth date into UTC milliseconds for accurate oldest-first sorting.
+ * Supports ISO/YYYY-MM-DD, DD/MM/YYYY, DD-MM-YYYY, and readable date strings.
+ */
+export function parsePlayerDobMs(player: any): number | null {
+  const raw = String(player?.dateOfBirth || player?.dob || player?.birthDate || '').trim();
+  if (!raw || raw === 'TBA' || raw === '—') return null;
+
+  // YYYY-MM-DD or YYYY/MM/DD
+  const isoMatch = raw.match(/^(\d{4})[-/](\d{1,2})[-/](\d{1,2})/);
+  if (isoMatch) {
+    const [, y, m, d] = isoMatch;
+    const ms = Date.UTC(Number(y), Number(m) - 1, Number(d));
+    return Number.isFinite(ms) ? ms : null;
+  }
+
+  // DD/MM/YYYY or DD-MM-YYYY
+  const dmyMatch = raw.match(/^(\d{1,2})[-/](\d{1,2})[-/](\d{4})/);
+  if (dmyMatch) {
+    const [, d, m, y] = dmyMatch;
+    const ms = Date.UTC(Number(y), Number(m) - 1, Number(d));
+    return Number.isFinite(ms) ? ms : null;
+  }
+
+  const parsed = Date.parse(raw);
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
+/**
+ * Compute integer age from explicit `player.age` or fall back to birth date.
+ */
+export function getPlayerAgeNumeric(player: any): number | null {
+  const rawAge = player?.age;
+  if (typeof rawAge === 'number' && Number.isFinite(rawAge) && rawAge > 0 && rawAge < 80) {
+    return Math.floor(rawAge);
+  }
+  if (typeof rawAge === 'string') {
+    const parsedAge = Number.parseInt(rawAge, 10);
+    if (Number.isFinite(parsedAge) && parsedAge > 0 && parsedAge < 80) {
+      return parsedAge;
+    }
+  }
+
+  const dobMs = parsePlayerDobMs(player);
+  if (dobMs === null) return null;
+  const dob = new Date(dobMs);
+  const now = new Date();
+  let age = now.getUTCFullYear() - dob.getUTCFullYear();
+  const monthDiff = now.getUTCMonth() - dob.getUTCMonth();
+  if (monthDiff < 0 || (monthDiff === 0 && now.getUTCDate() < dob.getUTCDate())) {
+    age -= 1;
+  }
+  return age > 0 && age < 80 ? age : null;
+}
+
+/**
+ * Compare two players by age descending (oldest first).
+ * Uses exact birth timestamp when available, then integer age, then name A–Z.
+ */
+export function comparePlayersByAgeDesc(a: any, b: any): number {
+  const dobA = parsePlayerDobMs(a);
+  const dobB = parsePlayerDobMs(b);
+
+  if (dobA !== null && dobB !== null && dobA !== dobB) {
+    return dobA - dobB; // Earlier timestamp = older athlete
+  }
+
+  const ageA = getPlayerAgeNumeric(a);
+  const ageB = getPlayerAgeNumeric(b);
+
+  if (ageA !== null && ageB !== null && ageA !== ageB) {
+    return ageB - ageA; // Higher integer age = older athlete
+  }
+
+  if (dobA !== null || ageA !== null) {
+    if (dobB === null && ageB === null) return -1;
+  } else if (dobB !== null || ageB !== null) {
+    return 1;
+  }
+
+  return String(a?.name || '').localeCompare(String(b?.name || ''));
+}
+
 function toNum(val: unknown): number {
   if (typeof val === 'number') return Number.isFinite(val) ? val : 0;
   if (typeof val === 'string') {
@@ -378,4 +461,65 @@ export function extractMultiFormatBowlingRows(
   }
 
   return rows;
+}
+
+/**
+ * Determine whether an all-rounder is predominantly a bowling all-rounder vs batting all-rounder.
+ */
+export function isBowlingAllRounder(player: any, league: 'ipl' | 'wpl' = 'ipl'): boolean {
+  const roleStr = String(player?.role || '').toLowerCase();
+  if (roleStr.includes('bowling all') || roleStr.includes('bowl-ar')) return true;
+  if (roleStr.includes('batting all') || roleStr.includes('bat-ar')) return false;
+
+  const leagueStats = getPlayerLeagueStats(player, league);
+  let runs = leagueStats.runs;
+  let wickets = leagueStats.wickets;
+
+  // Fall back to broader career formats when league stats are empty (e.g. new signings)
+  if (runs === 0 && wickets === 0) {
+    const cs = (player?.careerStats && typeof player.careerStats === 'object') ? player.careerStats : {};
+    const batRows = Object.values((cs.batting && typeof cs.batting === 'object') ? cs.batting : {}) as any[];
+    const bowlRows = Object.values((cs.bowling && typeof cs.bowling === 'object') ? cs.bowling : {}) as any[];
+    runs = batRows.reduce((sum, row) => sum + toNum(row?.Runs ?? row?.runs ?? row?.R), 0);
+    wickets = bowlRows.reduce((sum, row) => sum + toNum(row?.Wkts ?? row?.wkts ?? row?.W), 0);
+  }
+
+  if (runs > 0 || wickets > 0) {
+    return wickets * 20 > runs;
+  }
+
+  return false;
+}
+
+/**
+ * Canonical squad sort tiers:
+ * 0 = Batter, 1 = Wicketkeeper, 2 = Batting All-Rounder, 3 = Bowling All-Rounder, 4 = Bowler
+ */
+export function getPlayerRoleSortTier(player: any, league: 'ipl' | 'wpl' = 'ipl'): number {
+  const category = getRoleMeta(player?.role).category;
+  if (category === 'batter') return 0;
+  if (category === 'wicketkeeper') return 1;
+  if (category === 'all-rounder') return isBowlingAllRounder(player, league) ? 3 : 2;
+  return 4;
+}
+
+/**
+ * Display-ready role label distinguishing Batting vs Bowling All-Rounders cleanly.
+ */
+export function getPlayerDisplayRoleLabel(player: any, league: 'ipl' | 'wpl' = 'ipl'): string {
+  const meta = getRoleMeta(player?.role);
+  if (meta.category !== 'all-rounder') return meta.label;
+  return isBowlingAllRounder(player, league) ? 'Bowling All-Rounder' : 'Batting All-Rounder';
+}
+
+/**
+ * Sort squad athletes by Role tier (Batting -> Wicketkeeper -> Batting AR -> Bowling AR -> Bowler),
+ * and within each tier sort oldest to youngest.
+ */
+export function sortPlayersByRoleAndAge<T = any>(list: T[], league: 'ipl' | 'wpl' = 'ipl'): T[] {
+  return [...list].sort((a, b) => {
+    const tierDiff = getPlayerRoleSortTier(a, league) - getPlayerRoleSortTier(b, league);
+    if (tierDiff !== 0) return tierDiff;
+    return comparePlayersByAgeDesc(a, b);
+  });
 }

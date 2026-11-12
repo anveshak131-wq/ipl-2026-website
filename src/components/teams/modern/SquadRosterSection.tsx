@@ -17,11 +17,15 @@ import {
 } from 'lucide-react';
 import { getTeamAccentTheme, hexToRgba, sanitizeNoPinkHex } from '@/lib/teamColors';
 import {
+  comparePlayersByAgeDesc,
   getInitials,
+  getPlayerAgeNumeric,
+  getPlayerDisplayRoleLabel,
   getPlayerLeagueStats,
   getRoleMeta,
   isOverseasPlayer,
   safeText,
+  sortPlayersByRoleAndAge,
 } from './playerHelpers';
 import PlayerProfileModal from './PlayerProfileModal';
 
@@ -46,8 +50,8 @@ export interface SquadRosterSectionProps {
   onExternalSearchChange?: (q: string) => void;
 }
 
-type RoleFilter = 'all' | 'batter' | 'all-rounder' | 'wicketkeeper' | 'bowler';
-type SortOption = 'featured' | 'runs' | 'wickets' | 'matches' | 'name';
+type RoleFilter = 'all' | 'batter' | 'wicketkeeper' | 'all-rounder' | 'bowler';
+type SortOption = 'role-age' | 'age' | 'runs' | 'wickets' | 'matches' | 'name';
 
 export default function SquadRosterSection({
   players,
@@ -75,7 +79,7 @@ export default function SquadRosterSection({
 
   const [roleFilter, setRoleFilter] = useState<RoleFilter>('all');
   const [onlyOverseas, setOnlyOverseas] = useState(false);
-  const [sortBy, setSortBy] = useState<SortOption>('featured');
+  const [sortBy, setSortBy] = useState<SortOption>('role-age');
   const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid');
 
   const [spotlightPlayer, setSpotlightPlayer] = useState<any | null>(null);
@@ -140,12 +144,12 @@ export default function SquadRosterSection({
       return true;
     });
 
-    if (sortBy === 'featured') {
-      return [...list].sort((a, b) => {
-        if (a.isCaptain && !b.isCaptain) return -1;
-        if (!a.isCaptain && b.isCaptain) return 1;
-        return 0;
-      });
+    if (sortBy === 'role-age') {
+      return sortPlayersByRoleAndAge(list, league);
+    }
+
+    if (sortBy === 'age') {
+      return [...list].sort(comparePlayersByAgeDesc);
     }
 
     return [...list].sort((a, b) => {
@@ -183,8 +187,8 @@ export default function SquadRosterSection({
   const roleTabs: { id: RoleFilter; label: string; count: number }[] = [
     { id: 'all', label: 'All Squad', count: roleCounts.all },
     { id: 'batter', label: 'Batters', count: roleCounts.batter },
-    { id: 'all-rounder', label: 'All-Rounders', count: roleCounts['all-rounder'] },
     { id: 'wicketkeeper', label: 'WK-Keepers', count: roleCounts.wicketkeeper },
+    { id: 'all-rounder', label: 'All-Rounders', count: roleCounts['all-rounder'] },
     { id: 'bowler', label: 'Bowlers', count: roleCounts.bowler },
   ];
 
@@ -480,7 +484,8 @@ export default function SquadRosterSection({
                 aria-label="Sort players"
                 className="bg-transparent text-slate-200 font-semibold focus:outline-none cursor-pointer"
               >
-                <option value="featured" className="bg-[#0A0F1F]">Sort: Squad Order</option>
+                <option value="role-age" className="bg-[#0A0F1F]">Sort: Role &amp; Age</option>
+                <option value="age" className="bg-[#0A0F1F]">Sort: Oldest Age First</option>
                 <option value="runs" className="bg-[#0A0F1F]">Sort: Most Runs</option>
                 <option value="wickets" className="bg-[#0A0F1F]">Sort: Most Wickets</option>
                 <option value="matches" className="bg-[#0A0F1F]">Sort: Most Matches</option>
@@ -557,6 +562,8 @@ export default function SquadRosterSection({
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
           {filteredPlayers.map((player, idx) => {
             const roleMeta = getRoleMeta(player.role);
+            const displayRoleLabel = getPlayerDisplayRoleLabel(player, league);
+            const playerAge = getPlayerAgeNumeric(player);
             const stats = getPlayerLeagueStats(player, league);
             const overseas = isOverseasPlayer(player.nationality);
             const initials = getInitials(player.name);
@@ -622,7 +629,7 @@ export default function SquadRosterSection({
                   {/* Top Badge Bar (Clean Flex Wrap - Zero Overlap) */}
                   <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
                     <span className={`px-2.5 py-0.5 rounded-lg text-[10px] font-black uppercase tracking-wider border ${roleMeta.badgeClass}`}>
-                      {roleMeta.label}
+                      {displayRoleLabel}
                     </span>
 
                     <div className="flex items-center gap-1.5">
@@ -674,7 +681,8 @@ export default function SquadRosterSection({
                         {player.name}
                       </h3>
                       <p className="text-xs text-slate-400 truncate mt-0.5">
-                        {safeText(player.nationality, 'India')} • {safeText(player.battingStyle, 'Right-hand bat')}
+                        {safeText(player.nationality, 'India')}
+                        {playerAge !== null ? ` • ${playerAge}y` : ''} • {safeText(player.battingStyle, 'Right-hand bat')}
                       </p>
                       {player.bowlingStyle && player.bowlingStyle !== 'None' && (
                         <p className="text-[11px] text-slate-500 truncate mt-0.5">
@@ -747,6 +755,7 @@ export default function SquadRosterSection({
                 <tr>
                   <th className="py-3.5 px-4">Athlete</th>
                   <th className="py-3.5 px-3">Role</th>
+                  <th className="py-3.5 px-2 text-center">Age</th>
                   <th className="py-3.5 px-3">Nation</th>
                   <th className="py-3.5 px-2 text-center">Caps</th>
                   <th className="py-3.5 px-2 text-center text-amber-300">Runs</th>
@@ -760,6 +769,8 @@ export default function SquadRosterSection({
               <tbody className="divide-y divide-white/[0.06] text-slate-200">
                 {filteredPlayers.map((player, idx) => {
                   const roleMeta = getRoleMeta(player.role);
+                  const displayRoleLabel = getPlayerDisplayRoleLabel(player, league);
+                  const playerAge = getPlayerAgeNumeric(player);
                   const stats = getPlayerLeagueStats(player, league);
                   const overseas = isOverseasPlayer(player.nationality);
 
@@ -782,8 +793,11 @@ export default function SquadRosterSection({
                       </td>
                       <td className="py-3.5 px-3">
                         <span className={`px-2 py-0.5 rounded text-[10px] font-bold border ${roleMeta.badgeClass}`}>
-                          {roleMeta.label}
+                          {displayRoleLabel}
                         </span>
+                      </td>
+                      <td className="py-3.5 px-2 text-center text-slate-300">
+                        {playerAge !== null ? `${playerAge}y` : '—'}
                       </td>
                       <td className="py-3.5 px-3 text-slate-300">
                         <span className="inline-flex items-center gap-1">
