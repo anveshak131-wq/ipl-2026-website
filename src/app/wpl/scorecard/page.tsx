@@ -15,6 +15,8 @@ import {
   X,
 } from 'lucide-react';
 import { useLeague } from '@/contexts/LeagueContext';
+import Navbar from '@/components/layout/Navbar';
+import Footer from '@/components/layout/Footer';
 import {
   CanonicalWplCode,
   cleanTeamDisplayName,
@@ -132,15 +134,17 @@ function WplScorecardPageContent() {
   };
 
   return (
-    <div className="min-h-screen bg-[#060A17] text-white">
-      {/* Subtle Stadium Ambient Backdrop (indigo / emerald / amber accents — zero pink) */}
+    <div className="min-h-screen bg-[#060A17] text-white flex flex-col">
+      <Navbar />
+
+      {/* Subtle Stadium Ambient Backdrop (indigo / emerald / amber accents) */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
         <div className="absolute -top-32 left-1/4 w-[540px] h-[540px] rounded-full bg-indigo-600/10 blur-[130px]" />
         <div className="absolute top-1/3 right-1/5 w-[440px] h-[440px] rounded-full bg-amber-500/8 blur-[130px]" />
         <div className="absolute bottom-0 left-1/3 w-[480px] h-[480px] rounded-full bg-sky-500/8 blur-[140px]" />
       </div>
 
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 space-y-6">
+      <main className="relative z-10 flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 space-y-6">
         {/* Top Breadcrumb + Utility Row */}
         <div className="flex flex-wrap items-center justify-between gap-3">
           <Link
@@ -383,6 +387,10 @@ function WplScorecardPageContent() {
             )}
           </div>
         )}
+      </main>
+
+      <div className="relative z-10">
+        <Footer />
       </div>
     </div>
   );

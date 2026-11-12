@@ -385,10 +385,10 @@ export default function WplScorecardViewer({ scorecard }: WplScorecardViewerProp
         {activeTab === 'overview' && inn1 && inn2 && inn1Teams && inn2Teams && inn1Summary && inn2Summary ? (
           <motion.div
             key="overview"
-            initial={{ opacity: 0, y: 12 }}
+            initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            transition={{ duration: 0.25 }}
+            exit={{ opacity: 0, y: -4 }}
+            transition={{ duration: 0.16 }}
             className="grid grid-cols-1 lg:grid-cols-2 gap-6"
           >
             {[
