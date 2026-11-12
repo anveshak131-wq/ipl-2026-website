@@ -15,6 +15,7 @@ import {
   Users,
 } from 'lucide-react';
 import { WPL_FRANCHISE_THEMES } from '@/lib/wpl/scorecardHelpers';
+import WplStadiumTrigger from './WplStadiumTrigger';
 
 interface WplScorecardStandbyBannerProps {
   archiveCount: number;
@@ -94,8 +95,15 @@ export default function WplScorecardStandbyBanner({
             </h2>
             <p className="text-sm sm:text-base text-slate-300 leading-relaxed max-w-2xl">
               The 2027 Women&apos;s Premier League season gets underway on{' '}
-              <strong className="text-white">14 January 2027</strong> across Vadodara and Mumbai.
-              Complete 2027 batting cards, bowling figures, fall of wickets, partnerships, and Player
+              <strong className="text-white">14 January 2027</strong> across{' '}
+              <WplStadiumTrigger venue="Vadodara" showIcon={false} className="text-amber-300 font-bold">
+                Vadodara
+              </WplStadiumTrigger>{' '}
+              and{' '}
+              <WplStadiumTrigger venue="Mumbai - CCI" showIcon={false} className="text-sky-300 font-bold">
+                Mumbai - CCI
+              </WplStadiumTrigger>
+              . Complete 2027 batting cards, bowling figures, fall of wickets, partnerships, and Player
               of the Match records will appear here automatically as fixtures are completed.
             </p>
 
@@ -155,10 +163,11 @@ export default function WplScorecardStandbyBanner({
             <div className="rounded-xl border border-white/10 bg-white/[0.03] p-3.5 space-y-2.5">
               <div className="flex items-center justify-between text-[11px] font-bold text-slate-400">
                 <span className="text-sky-300 uppercase tracking-wider">Season Opener</span>
-                <span className="inline-flex items-center gap-1">
-                  <MapPin className="w-3 h-3 text-emerald-300" />
-                  Vadodara
-                </span>
+                <WplStadiumTrigger
+                  venue="Vadodara"
+                  iconClassName="w-3 h-3 text-emerald-300 shrink-0"
+                  className="text-slate-300"
+                />
               </div>
 
               <div className="flex items-center justify-between gap-2">

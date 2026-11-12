@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { Calendar, Clock, MapPin, ArrowLeft, Trophy, ShieldCheck } from 'lucide-react';
 import Link from 'next/link';
+import WplStadiumTrigger from '@/components/wpl/WplStadiumTrigger';
 
 export default function WplMatchDetailPage() {
   const params = useParams();
@@ -134,10 +135,11 @@ export default function WplMatchDetailPage() {
               <Calendar className="w-4 h-4 text-indigo-400" />
               <span>{match.dayOfWeek}, {match.displayDate}</span>
             </div>
-            <div className="flex items-center gap-2">
-              <MapPin className="w-4 h-4 text-cyan-400" />
-              <span>{match.venue}</span>
-            </div>
+            <WplStadiumTrigger
+              venue={match.venue}
+              iconClassName="w-4 h-4 text-cyan-400 shrink-0"
+              className="text-slate-200 font-semibold"
+            />
             <div className="flex items-center gap-2 text-slate-400">
               <ShieldCheck className="w-4 h-4 text-emerald-400" />
               <span>Official BCCI WPL Fixture</span>

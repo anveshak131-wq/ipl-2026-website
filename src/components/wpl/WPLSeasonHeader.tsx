@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { Sparkles, Trophy, Calendar, Clock, Flame, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
+import WplStadiumTrigger from './WplStadiumTrigger';
 
 interface WPLSeasonHeaderProps {
   selectedSeason: number;
@@ -100,7 +101,15 @@ export default function WPLSeasonHeader({ selectedSeason, onSeasonChange }: WPLS
                 Road to WPL 2027 Kickoff
               </h3>
               <p className="mt-1 text-xs sm:text-sm text-gray-300 max-w-xl">
-                22 evening T20 fixtures across a 25-day window running January 14 through February 7, 2027 in Vadodara &amp; Mumbai — all 7:30 PM IST starts with zero double-headers.
+                22 evening T20 fixtures across a 25-day window running January 14 through February 7, 2027 in{' '}
+                <WplStadiumTrigger venue="Vadodara" showIcon={false} className="text-amber-300 font-bold">
+                  Vadodara
+                </WplStadiumTrigger>{' '}
+                &amp;{' '}
+                <WplStadiumTrigger venue="Mumbai - CCI" showIcon={false} className="text-sky-300 font-bold">
+                  Mumbai - CCI
+                </WplStadiumTrigger>{' '}
+                — all 7:30 PM IST starts with zero double-headers.
               </p>
             </div>
 

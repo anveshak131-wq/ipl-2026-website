@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Navbar from '@/components/layout/Navbar'
+import WplStadiumTrigger from '@/components/wpl/WplStadiumTrigger';
 import {
   Calendar,
   Clock,
@@ -164,12 +165,20 @@ export default function WplPublicMatchesPage() {
           </p>
 
           <div className="pt-2 flex flex-wrap items-center justify-center gap-3 text-xs text-slate-400 font-medium">
-            <span className="px-3 py-1 rounded-full bg-slate-900 border border-slate-800">
+            <WplStadiumTrigger
+              venue="Vadodara"
+              iconClassName="w-3.5 h-3.5 text-amber-400 shrink-0"
+              className="px-3 py-1 rounded-full bg-slate-900 border border-slate-800 hover:border-amber-400/50 text-slate-200"
+            >
               Vadodara: Matches 1–11
-            </span>
-            <span className="px-3 py-1 rounded-full bg-slate-900 border border-slate-800">
+            </WplStadiumTrigger>
+            <WplStadiumTrigger
+              venue="Mumbai - CCI"
+              iconClassName="w-3.5 h-3.5 text-sky-400 shrink-0"
+              className="px-3 py-1 rounded-full bg-slate-900 border border-slate-800 hover:border-sky-400/50 text-slate-200"
+            >
               Mumbai - CCI: Matches 12–20
-            </span>
+            </WplStadiumTrigger>
             <span className="px-3 py-1 rounded-full bg-purple-900/40 border border-purple-500/30 text-purple-300">
               Playoffs: 05 &amp; 07 Feb 2027
             </span>
@@ -369,10 +378,11 @@ export default function WplPublicMatchesPage() {
                         <Clock className="w-3.5 h-3.5" />
                         <span>{match.time} IST</span>
                       </div>
-                      <div className="flex items-center gap-1.5 text-cyan-300 font-medium text-[11px]">
-                        <MapPin className="w-3.5 h-3.5 text-cyan-400" />
-                        <span>{match.venue}</span>
-                      </div>
+                      <WplStadiumTrigger
+                        venue={match.venue}
+                        iconClassName="w-3.5 h-3.5 text-cyan-400 shrink-0"
+                        className="text-cyan-300 font-medium text-[11px]"
+                      />
                     </div>
 
                     <Link

@@ -15,6 +15,7 @@ import {
   Trophy
 } from 'lucide-react';
 import StadiumNightCanvas from '@/components/wpl/StadiumNightCanvas';
+import WplStadiumTrigger from '@/components/wpl/WplStadiumTrigger';
 import type { Match } from '@/types';
 
 interface ModernMatchesGridProps {
@@ -164,7 +165,11 @@ export default function ModernMatchesGrid({
                 <div className="h-full p-6 rounded-3xl bg-[#090d1a]/80 border border-white/10 hover:border-amber-400/40 backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 shadow-lg hover:shadow-amber-500/10">
                   <div className="flex items-center justify-between text-xs text-slate-400 mb-4">
                     <span>{match.date}</span>
-                    <span className="font-bold text-amber-300 uppercase">{match.venue}</span>
+                    <WplStadiumTrigger
+                      venue={match.venue}
+                      showIcon={false}
+                      className="font-bold text-amber-300 uppercase tracking-wider text-[11px]"
+                    />
                   </div>
                   <div className="space-y-3">
                     <div className="flex items-center justify-between text-white font-black text-lg">
