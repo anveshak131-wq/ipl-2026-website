@@ -181,7 +181,7 @@ export default function TeamStatsSection({
       >
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
           <div className="flex items-center gap-4">
-            <div className="rounded-md bg-gradient-to-br from-amber-400 to-emerald-500 p-3 shadow-lg">
+            <div className="rounded-md bg-gradient-to-br from-blue-500 to-indigo-600 p-3 shadow-lg">
               <Users className="w-8 h-8 text-white" />
             </div>
             <div>

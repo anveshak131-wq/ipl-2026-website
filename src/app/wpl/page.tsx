@@ -590,14 +590,14 @@ export default function WPLHomePage() {
                 transition={{ duration: 0.8, type: "spring" }}
                 className="relative overflow-hidden rounded-lg backdrop-blur-2xl border p-10 shadow-2xl"
                 style={{
-                  background: `linear-gradient(135deg, ${WPLColors.roseRGBA[30]}, ${WPLColors.pinkRGBA[30]}, ${WPLColors.roseRGBA[30]})`,
-                  borderColor: WPLColors.roseRGBA[40],
+                  background: `linear-gradient(135deg, ${WPLColors.purpleRGBA[30]}, ${WPLColors.blueRGBA[30]}, ${WPLColors.purpleRGBA[30]})`,
+                  borderColor: WPLColors.purpleRGBA[40],
                 }}
               >
                 <motion.div
                   className="absolute -right-28 top-8 h-28 w-[70%] rotate-6 blur-2xl"
                   style={{
-                    background: WPLColors.roseRGBA[20],
+                    background: WPLColors.purpleRGBA[20],
                   }}
                   animate={{
                     x: [0, -16, 0],
@@ -615,7 +615,7 @@ export default function WPLHomePage() {
                       <motion.div
                         className="w-4 h-4 rounded-full"
                         style={{
-                          background: WPLColors.rose,
+                          background: WPLColors.blue,
                         }}
                         animate={{ scale: [1, 1.5, 1], opacity: [1, 0.5, 1] }}
                         transition={{ duration: 1.5, repeat: Infinity }}
@@ -626,8 +626,8 @@ export default function WPLHomePage() {
                       href="/live-score?league=wpl"
                       className="group flex items-center gap-2 px-6 py-3 rounded-xl border text-white font-semibold transition-all hover:scale-105"
                       style={{
-                        background: WPLColors.roseRGBA[20],
-                        borderColor: WPLColors.roseRGBA[40],
+                        background: WPLColors.purpleRGBA[20],
+                        borderColor: WPLColors.purpleRGBA[40],
                       }}
                     >
                       Watch Live
@@ -661,7 +661,7 @@ export default function WPLHomePage() {
                         <motion.div 
                           className="text-xs px-3 py-2 rounded-lg inline-block"
                           style={{
-                            background: WPLColors.roseRGBA[30],
+                            background: WPLColors.purpleRGBA[30],
                             color: WPLColors.textPrimary,
                           }}
                           initial={{ opacity: 0 }}
@@ -844,17 +844,17 @@ export default function WPLHomePage() {
                   href="/wpl/matches"
                   className="group flex items-center gap-2 px-8 py-4 rounded-xl border transition-all duration-300 hover:scale-105"
                   style={{
-                    background: WPLColors.pinkRGBA[10],
-                    borderColor: WPLColors.pinkRGBA[30],
-                    color: WPLColors.pink,
+                    background: WPLColors.blueRGBA[10],
+                    borderColor: WPLColors.blueRGBA[30],
+                    color: WPLColors.blue,
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.background = WPLColors.pinkRGBA[20];
+                    e.currentTarget.style.background = WPLColors.blueRGBA[20];
                     e.currentTarget.style.color = WPLColors.textPrimary;
                   }}
                   onMouseLeave={(e) => {
-                    e.currentTarget.style.background = WPLColors.pinkRGBA[10];
-                    e.currentTarget.style.color = WPLColors.pink;
+                    e.currentTarget.style.background = WPLColors.blueRGBA[10];
+                    e.currentTarget.style.color = WPLColors.blue;
                   }}
                 >
                   View All
@@ -872,7 +872,7 @@ export default function WPLHomePage() {
             {/* Rich Stadium Aura & Ambient Glows */}
             <div className="absolute inset-0 pointer-events-none -z-10">
               <div className="absolute top-1/2 left-1/4 -translate-y-1/2 w-[550px] h-[350px] bg-sky-600/[0.07] blur-[150px]" />
-              <div className="absolute top-1/2 right-1/4 -translate-y-1/2 w-[550px] h-[350px] bg-amber-500/[0.07] blur-[150px]" />
+              <div className="absolute top-1/2 right-1/4 -translate-y-1/2 w-[550px] h-[350px] bg-indigo-600/[0.07] blur-[150px]" />
               <div 
                 className="absolute inset-0 opacity-[0.03]"
                 style={{
@@ -893,12 +893,12 @@ export default function WPLHomePage() {
                   <motion.div
                     className="inline-flex items-center gap-2 mb-6 px-6 py-3 rounded-lg backdrop-blur-sm"
                     style={{
-                      background: WPLColors.roseRGBA[20],
-                      border: `1px solid ${WPLColors.roseRGBA[30]}`,
+                      background: WPLColors.purpleRGBA[20],
+                      border: `1px solid ${WPLColors.purpleRGBA[30]}`,
                     }}
                     whileHover={{ scale: 1.05 }}
                   >
-                    <TrendingUp className="w-5 h-5" style={{ color: WPLColors.rose }} />
+                    <TrendingUp className="w-5 h-5" style={{ color: WPLColors.purple }} />
                     <span className="text-xs font-bold uppercase tracking-wider" style={{ color: WPLColors.textPrimary }}>Performance Analytics</span>
                   </motion.div>
                   <h2 className="text-5xl md:text-7xl font-black" style={{ color: WPLColors.textPrimary }}>
@@ -909,17 +909,17 @@ export default function WPLHomePage() {
                   href="/wpl/stats"
                   className="group flex items-center gap-2 px-8 py-4 rounded-xl border transition-all duration-300 hover:scale-105"
                   style={{
-                    background: WPLColors.roseRGBA[10],
-                    borderColor: WPLColors.roseRGBA[30],
-                    color: WPLColors.rose,
+                    background: WPLColors.purpleRGBA[10],
+                    borderColor: WPLColors.purpleRGBA[30],
+                    color: WPLColors.purple,
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.background = WPLColors.roseRGBA[20];
+                    e.currentTarget.style.background = WPLColors.purpleRGBA[20];
                     e.currentTarget.style.color = WPLColors.textPrimary;
                   }}
                   onMouseLeave={(e) => {
-                    e.currentTarget.style.background = WPLColors.roseRGBA[10];
-                    e.currentTarget.style.color = WPLColors.rose;
+                    e.currentTarget.style.background = WPLColors.purpleRGBA[10];
+                    e.currentTarget.style.color = WPLColors.purple;
                   }}
                 >
                   View All
@@ -1007,14 +1007,14 @@ export default function WPLHomePage() {
               transition={{ duration: 0.8 }}
               className="relative overflow-hidden rounded-lg backdrop-blur-2xl border p-10 shadow-2xl"
               style={{
-                background: `linear-gradient(135deg, ${WPLColors.pinkRGBA[20]}, ${WPLColors.roseRGBA[20]}, ${WPLColors.pinkRGBA[20]})`,
-                borderColor: WPLColors.pinkRGBA[40],
+                background: `linear-gradient(135deg, ${WPLColors.purpleRGBA[20]}, ${WPLColors.blueRGBA[20]}, ${WPLColors.purpleRGBA[20]})`,
+                borderColor: WPLColors.purpleRGBA[40],
               }}
             >
               <motion.div
                 className="absolute -right-28 top-8 h-28 w-[70%] rotate-6 blur-2xl"
                 style={{
-                  background: WPLColors.pinkRGBA[20],
+                  background: WPLColors.blueRGBA[20],
                 }}
                 animate={{
                   x: [0, -16, 0],
@@ -1031,15 +1031,15 @@ export default function WPLHomePage() {
                   <motion.div
                     className="inline-flex items-center gap-2 mb-6 px-6 py-3 rounded-lg backdrop-blur-sm"
                     style={{
-                      background: WPLColors.pinkRGBA[30],
-                      border: `1px solid ${WPLColors.pinkRGBA[40]}`,
+                      background: WPLColors.purpleRGBA[30],
+                      border: `1px solid ${WPLColors.purpleRGBA[40]}`,
                     }}
                   >
-                    <Target className="w-5 h-5 text-amber-400" />
+                    <Target className="w-5 h-5 text-indigo-400" />
                     <span className="text-sm font-bold uppercase tracking-wider" style={{ color: WPLColors.textPrimary }}>Match Predictions</span>
                   </motion.div>
                   <h2 className="text-4xl md:text-5xl font-black mb-4" style={{ color: WPLColors.textPrimary }}>
-                    Predict & <GradientText gradient="from-amber-300 via-yellow-400 to-amber-500" animate>Win</GradientText>
+                    Predict & <GradientText gradient="from-blue-400 via-indigo-400 to-violet-400" animate>Win</GradientText>
                   </h2>
                   <p className="text-lg mb-6 leading-relaxed" style={{ color: WPLColors.textSecondary }}>
                     Use toss calls, venue conditions, powerplay starts, death-over form, and player roles to make sharper WPL predictions and climb the leaderboard.
@@ -1048,8 +1048,8 @@ export default function WPLHomePage() {
                     href="/predictions"
                     className="group inline-flex items-center gap-3 px-8 py-4 rounded-xl text-white font-bold text-lg shadow-2xl transition-all hover:scale-105"
                     style={{
-                      background: `linear-gradient(135deg, ${WPLColors.pink}, ${WPLColors.rose})`,
-                      boxShadow: `0 10px 40px ${WPLColors.pinkRGBA[50]}, 0 0 60px ${WPLColors.roseRGBA[30]}`,
+                      background: `linear-gradient(135deg, ${WPLColors.purple}, ${WPLColors.blue})`,
+                      boxShadow: `0 10px 40px ${WPLColors.purpleRGBA[50]}, 0 0 60px ${WPLColors.blueRGBA[30]}`,
                     }}
                   >
                     <Target className="w-6 h-6" />

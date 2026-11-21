@@ -1787,7 +1787,7 @@ export default function Playing11Page() {
                     px-8 py-4 rounded-xl font-bold flex items-center gap-2 transition-all
                     ${team1Playing11.length === 11 && team2Playing11.length === 11
                       ? isWPL
-                        ? 'bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white shadow-lg hover:shadow-xl'
+                        ? 'bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white shadow-lg hover:shadow-xl'
                         : 'bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white shadow-lg hover:shadow-xl'
                       : 'bg-slate-700 text-gray-400 cursor-not-allowed'
                     }

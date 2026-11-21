@@ -110,12 +110,12 @@ export default function WPLStatsPage() {
         <WPLFloatingParticles />
         <div className="flex items-center justify-center h-96">
           <div className="text-center">
-            <p className="text-lg mb-4" style={{ color: WPLColors.rose }}>{error}</p>
+            <p className="text-lg mb-4" style={{ color: WPLColors.danger }}>{error}</p>
             <button
               onClick={() => window.location.reload()}
               className="px-6 py-3 rounded-xl text-white font-bold hover:shadow-xl transition-all"
               style={{
-                background: `linear-gradient(to right, ${WPLColors.purple}, ${WPLColors.pink})`,
+                background: `linear-gradient(to right, ${WPLColors.purple}, ${WPLColors.blue})`,
               }}
             >
               Retry
@@ -143,7 +143,7 @@ export default function WPLStatsPage() {
         <div 
           className="absolute inset-0 pointer-events-none"
           style={{
-            background: `linear-gradient(135deg, ${WPLColors.gradientMid}1A, ${WPLColors.pinkRGBA[10]}, ${WPLColors.roseRGBA[10]})`,
+            background: `linear-gradient(135deg, ${WPLColors.gradientMid}1A, ${WPLColors.blueRGBA[10]}, ${WPLColors.purpleRGBA[10]})`,
           }}
         />
         <div 
@@ -156,7 +156,7 @@ export default function WPLStatsPage() {
         <motion.div 
           className="absolute top-20 left-10 w-96 h-96 rounded-full blur-3xl"
           style={{ 
-            background: `radial-gradient(circle, ${WPLColors.purpleRGBA[20]}, ${WPLColors.pinkRGBA[15]}, transparent)`,
+            background: `radial-gradient(circle, ${WPLColors.purpleRGBA[20]}, ${WPLColors.blueRGBA[15]}, transparent)`,
           }}
           animate={{
             y: [0, -25, 0],
@@ -172,7 +172,7 @@ export default function WPLStatsPage() {
         <motion.div 
           className="absolute bottom-10 right-20 w-96 h-96 rounded-full blur-3xl"
           style={{ 
-            background: `radial-gradient(circle, ${WPLColors.pinkRGBA[20]}, ${WPLColors.roseRGBA[10]}, transparent)`,
+            background: `radial-gradient(circle, ${WPLColors.blueRGBA[20]}, ${WPLColors.purpleRGBA[10]}, transparent)`,
           }}
           animate={{
             y: [0, 25, 0],
@@ -235,33 +235,33 @@ export default function WPLStatsPage() {
             <motion.div 
               className="rounded-xl px-6 py-4 cursor-pointer"
               style={{
-                ...getWPLGlassmorphism('pink', 20),
+                ...getWPLGlassmorphism('blue', 20),
               }}
               whileHover={{ 
                 scale: 1.05,
-                ...getWPLHoverGlow('pink'),
+                ...getWPLHoverGlow('blue'),
               }}
             >
-              <p className="text-xs uppercase tracking-wide font-semibold mb-1" style={{ color: WPLColors.pink }}>Teams</p>
+              <p className="text-xs uppercase tracking-wide font-semibold mb-1" style={{ color: WPLColors.blue }}>Teams</p>
               <p className="text-3xl font-black" style={{ color: WPLColors.textPrimary }}>{teams.length}</p>
             </motion.div>
             <motion.div 
               className="rounded-xl px-6 py-4 cursor-pointer"
               style={{
-                ...getWPLGlassmorphism('rose', 20),
+                ...getWPLGlassmorphism('purple', 20),
               }}
               whileHover={{ 
                 scale: 1.05,
-                ...getWPLHoverGlow('rose'),
+                ...getWPLHoverGlow('purple'),
               }}
             >
-              <p className="text-xs uppercase tracking-wide font-semibold mb-1" style={{ color: WPLColors.rose }}>Total Runs</p>
+              <p className="text-xs uppercase tracking-wide font-semibold mb-1" style={{ color: WPLColors.purple }}>Total Runs</p>
               <p className="text-3xl font-black" style={{ color: WPLColors.textPrimary }}>{players.reduce((sum, p) => sum + p.stats.runs, 0).toLocaleString()}</p>
             </motion.div>
             <motion.div 
               className="rounded-xl px-6 py-4 cursor-pointer"
               style={{
-                background: `linear-gradient(135deg, ${WPLColors.purpleRGBA[20]}, ${WPLColors.pinkRGBA[10]})`,
+                background: `linear-gradient(135deg, ${WPLColors.purpleRGBA[20]}, ${WPLColors.blueRGBA[10]})`,
                 backdropFilter: 'blur(20px) saturate(180%)',
                 WebkitBackdropFilter: 'blur(20px) saturate(180%)',
                 border: `1px solid ${WPLColors.violetRGBA[30]}`,

@@ -47,7 +47,7 @@ export const inputStyle = "w-full px-4 py-2 rounded-lg bg-slate-800/50 border bo
 export const roleColors = {
   'Batsman': 'from-orange-500 to-amber-500',
   'Bowler': 'from-blue-500 to-cyan-400',
-  'All-Rounder': 'from-purple-500 to-pink-500',
+  'All-Rounder': 'from-purple-500 to-indigo-500',
   'Wicket-Keeper': 'from-green-500 to-emerald-400',
   'default': 'from-slate-500 to-slate-400'
 };

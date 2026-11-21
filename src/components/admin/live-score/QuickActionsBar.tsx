@@ -51,7 +51,7 @@ export default function QuickActionsBar({
       primary: 'bg-purple-600 hover:bg-purple-700',
       secondary: 'bg-purple-500/20 hover:bg-purple-500/30 border-purple-500/30',
       text: 'text-purple-300',
-      icon: 'text-pink-400',
+      icon: 'text-indigo-400',
     },
   };
 
@@ -82,7 +82,7 @@ export default function QuickActionsBar({
       label: isSaving ? 'Saving...' : 'Save',
       onClick: onSave,
       disabled: isSaving,
-      color: `bg-gradient-to-r ${league === 'ipl' ? 'from-blue-600 to-cyan-600' : 'from-purple-600 to-pink-600'} ${isSaving ? 'animate-pulse' : ''}`,
+      color: `bg-gradient-to-r ${league === 'ipl' ? 'from-blue-600 to-cyan-600' : 'from-purple-600 to-indigo-600'} ${isSaving ? 'animate-pulse' : ''}`,
       primary: true,
     },
   ];

@@ -15,10 +15,10 @@ export const WPLColors = {
   
   // Team-Specific Colors - Enhanced Visibility
   purple: '#8B5CF6',       // RCB Purple - Enhanced
-  pink: '#F59E0B',         // Bright Pink - High Contrast
-  rose: '#EAB308',         // Rose Red - Vibrant
+  pink: '#3B82F6',         // Royal Blue (Zero Pink)
+  rose: '#6366F1',         // Indigo (Zero Pink)
   violet: '#7C3AED',       // Deep Violet - Rich
-  fuchsia: '#38BDF8',      // Fuchsia - Bold
+  fuchsia: '#38BDF8',      // Sky Blue - Bold
   orange: '#FB923C',       // Orange - Warm
   blue: '#3B82F6',         // Blue - Clear
   green: '#10B981',        // Green - Fresh
@@ -35,7 +35,7 @@ export const WPLColors = {
   textPrimary: '#FFFFFF',    // Pure White
   textSecondary: '#F1F5F9',  // Light Slate
   textMuted: '#CBD5E1',      // Muted Light
-  textAccent: '#FBBF24',     // Accent Yellow
+  textAccent: '#60A5FA',     // Accent Sky/Blue
   textInverse: '#0F172A',     // Dark Text
 
   // Status Colors - Clear Indicators
@@ -54,20 +54,20 @@ export const WPLColors = {
     50: 'rgba(139, 92, 246, 0.5)',
   },
   pinkRGBA: {
-    10: 'rgba(245, 158, 11, 0.1)',
-    15: 'rgba(245, 158, 11, 0.15)',
-    20: 'rgba(245, 158, 11, 0.2)',
-    30: 'rgba(245, 158, 11, 0.3)',
-    40: 'rgba(245, 158, 11, 0.4)',
-    50: 'rgba(245, 158, 11, 0.5)',
+    10: 'rgba(59, 130, 246, 0.1)',
+    15: 'rgba(59, 130, 246, 0.15)',
+    20: 'rgba(59, 130, 246, 0.2)',
+    30: 'rgba(59, 130, 246, 0.3)',
+    40: 'rgba(59, 130, 246, 0.4)',
+    50: 'rgba(59, 130, 246, 0.5)',
   },
   roseRGBA: {
-    10: 'rgba(234, 179, 8, 0.1)',
-    15: 'rgba(234, 179, 8, 0.15)',
-    20: 'rgba(234, 179, 8, 0.2)',
-    30: 'rgba(234, 179, 8, 0.3)',
-    40: 'rgba(234, 179, 8, 0.4)',
-    50: 'rgba(234, 179, 8, 0.5)',
+    10: 'rgba(99, 102, 241, 0.1)',
+    15: 'rgba(99, 102, 241, 0.15)',
+    20: 'rgba(99, 102, 241, 0.2)',
+    30: 'rgba(99, 102, 241, 0.3)',
+    40: 'rgba(99, 102, 241, 0.4)',
+    50: 'rgba(99, 102, 241, 0.5)',
   },
   violetRGBA: {
     10: 'rgba(124, 58, 237, 0.1)',

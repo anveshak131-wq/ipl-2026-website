@@ -3092,7 +3092,7 @@ export default function AdminMatches() {
                                                         <span className={`text-xs font-bold ${formStep === step.num ? 'text-white' : 'text-gray-500'}`}>{step.num}</span>
                                                     )}
                                                 </motion.div>
-                                                <span className={`text-[10px] font-medium hidden sm:block ${formStep === step.num ? 'text-yellow-400' : formStep > step.num ? 'text-emerald-400' : 'text-gray-600'}`}>
+                                                <span className={`text-[10px] font-medium hidden sm:block ${formStep === step.num ? 'text-blue-400' : formStep > step.num ? 'text-indigo-400' : 'text-gray-600'}`}>
                                                     {step.label}
                                                 </span>
                                             </div>
@@ -3100,7 +3100,7 @@ export default function AdminMatches() {
                                                 <div className="flex-1 mx-2 mt-[-10px]">
                                                     <div className="h-px w-full bg-white/8 relative overflow-hidden rounded-full">
                                                         <motion.div
-                                                            className="absolute inset-y-0 left-0 bg-gradient-to-r from-yellow-400 to-emerald-400 rounded-full"
+                                                            className="absolute inset-y-0 left-0 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full"
                                                             initial={{ width: '0%' }}
                                                             animate={{ width: formStep > step.num ? '100%' : '0%' }}
                                                             transition={{ duration: 0.4, ease: 'easeOut' }}

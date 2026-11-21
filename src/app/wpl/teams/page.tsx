@@ -81,9 +81,9 @@ const WPL_THEMES: Record<
   },
   upw: {
     accent: '#6D28D9',
-    secondary: '#F59E0B',
+    secondary: '#3B82F6',
     glow: 'rgba(109, 40, 217, 0.28)',
-    border: 'border-indigo-500/30 hover:border-amber-400/50',
+    border: 'border-indigo-500/30 hover:border-indigo-400/50',
     badge: 'bg-indigo-500/15 text-indigo-300 border-indigo-500/35',
     championships: [],
     captain: 'Alyssa Healy',
@@ -93,9 +93,9 @@ const WPL_THEMES: Record<
 
 const DEFAULT_THEME = {
   accent: '#38BDF8',
-  secondary: '#F59E0B',
+  secondary: '#6366F1',
   glow: 'rgba(56, 189, 248, 0.22)',
-  border: 'border-slate-700/60 hover:border-cyan-400/50',
+  border: 'border-slate-700/60 hover:border-indigo-400/50',
   badge: 'bg-slate-800 text-slate-300 border-slate-700',
   championships: [] as string[],
   captain: 'Team Captain',
@@ -355,14 +355,14 @@ function WPLTeamsContent() {
   }
 
   return (
-    <div className="min-h-screen bg-[#050814] text-slate-100 flex flex-col relative selection:bg-cyan-400 selection:text-slate-950 overflow-x-clip">
+    <div className="min-h-screen bg-[#050814] text-slate-100 flex flex-col relative selection:bg-indigo-500 selection:text-white overflow-x-clip">
       <Navbar />
 
-      {/* Atmospheric Stadium Lighting (ZERO PINK) */}
+      {/* Atmospheric Stadium Lighting (ZERO PINK, ZERO YELLOW-CYAN) */}
       <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
-        <div className="absolute -top-24 left-1/4 w-[620px] h-[440px] bg-cyan-500/[0.06] blur-[150px]" />
+        <div className="absolute -top-24 left-1/4 w-[620px] h-[440px] bg-blue-600/[0.07] blur-[150px]" />
         <div className="absolute top-1/3 right-1/4 w-[560px] h-[460px] bg-indigo-500/[0.06] blur-[150px]" />
-        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[780px] h-[320px] bg-amber-500/[0.04] blur-[130px]" />
+        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[780px] h-[320px] bg-indigo-600/[0.05] blur-[130px]" />
         <div
           className="absolute inset-0 opacity-[0.03]"
           style={{
@@ -383,8 +383,8 @@ function WPLTeamsContent() {
               className="flex flex-col md:flex-row md:items-end md:justify-between gap-6"
             >
               <div className="space-y-3">
-                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-500/10 border border-amber-400/30 text-amber-300 text-xs font-black uppercase tracking-wider backdrop-blur-md">
-                  <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-500/10 border border-blue-400/30 text-blue-300 text-xs font-black uppercase tracking-wider backdrop-blur-md">
+                  <Sparkles className="w-3.5 h-3.5 text-blue-400" />
                   <span>WPL Season 5 • Jan 14 – Feb 7, 2027</span>
                 </div>
 
@@ -409,13 +409,13 @@ function WPLTeamsContent() {
                   <span className="text-xl font-black text-white tabular-nums">{teams.length}</span>
                 </div>
                 <div className="pr-3 border-r border-white/10">
-                  <span className="block text-[10px] font-bold uppercase tracking-widest text-cyan-400">
+                  <span className="block text-[10px] font-bold uppercase tracking-widest text-blue-400">
                     Athletes
                   </span>
                   <span className="text-xl font-black text-white tabular-nums">{players.length || 56}</span>
                 </div>
                 <div>
-                  <span className="block text-[10px] font-bold uppercase tracking-widest text-amber-400">
+                  <span className="block text-[10px] font-bold uppercase tracking-widest text-indigo-400">
                     Season
                   </span>
                   <span className="text-xl font-black text-white tabular-nums">2027</span>
@@ -462,7 +462,7 @@ function WPLTeamsContent() {
                     placeholder="Search team, city, or stadium..."
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white/[0.04] border border-white/10 text-white placeholder-slate-500 text-xs sm:text-sm font-medium focus:outline-none focus:border-cyan-400/60 transition-colors"
+                    className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white/[0.04] border border-white/10 text-white placeholder-slate-500 text-xs sm:text-sm font-medium focus:outline-none focus:border-indigo-400/60 transition-colors"
                   />
                 </div>
 
@@ -471,7 +471,7 @@ function WPLTeamsContent() {
                     value={selectedVenue}
                     onChange={(e) => setSelectedVenue(e.target.value)}
                     aria-label="Filter by venue"
-                    className="px-3 py-2.5 rounded-xl bg-[#0B1020] border border-white/10 text-slate-300 text-xs font-semibold focus:outline-none focus:border-cyan-400/60"
+                    className="px-3 py-2.5 rounded-xl bg-[#0B1020] border border-white/10 text-slate-300 text-xs font-semibold focus:outline-none focus:border-indigo-400/60"
                   >
                     <option value="all">All Venues</option>
                     {uniqueVenues.map((v) => (
@@ -487,7 +487,7 @@ function WPLTeamsContent() {
                     type="button"
                     onClick={() => setViewMode('grid')}
                     className={`p-1.5 rounded-lg transition-all ${
-                      viewMode === 'grid' ? 'bg-white/15 text-amber-300' : 'text-slate-400 hover:text-white'
+                      viewMode === 'grid' ? 'bg-white/15 text-indigo-300' : 'text-slate-400 hover:text-white'
                     }`}
                     title="Grid View"
                     aria-label="Grid view"
@@ -498,7 +498,7 @@ function WPLTeamsContent() {
                     type="button"
                     onClick={() => setViewMode('list')}
                     className={`p-1.5 rounded-lg transition-all ${
-                      viewMode === 'list' ? 'bg-white/15 text-amber-300' : 'text-slate-400 hover:text-white'
+                      viewMode === 'list' ? 'bg-white/15 text-indigo-300' : 'text-slate-400 hover:text-white'
                     }`}
                     title="List View"
                     aria-label="List view"
@@ -524,7 +524,7 @@ function WPLTeamsContent() {
                   setSelectedVenue('all');
                   setTitleFilter('all');
                 }}
-                className="mt-4 px-5 py-2 rounded-xl bg-amber-400 text-slate-950 font-black text-xs uppercase tracking-wider"
+                className="mt-4 px-5 py-2 rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 text-white font-black text-xs uppercase tracking-wider shadow-md shadow-indigo-500/20 hover:brightness-110"
               >
                 Reset Filters
               </button>
@@ -667,7 +667,7 @@ function WPLTeamsContent() {
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.04 }}
-                    className="p-4 sm:p-5 rounded-2xl bg-[#0A0F1F] border border-white/10 hover:border-cyan-400/40 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+                    className="p-4 sm:p-5 rounded-2xl bg-[#0A0F1F] border border-white/10 hover:border-indigo-400/40 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4"
                   >
                     <div className="flex items-center gap-4">
                       <div className="w-12 h-12 rounded-xl bg-black/45 border border-white/10 p-2 flex items-center justify-center shrink-0">
@@ -701,7 +701,7 @@ function WPLTeamsContent() {
                       )}
                       <Link
                         href={`/wpl/teams/${team.id}`}
-                        className="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-300 text-slate-950 font-black text-xs uppercase tracking-wider flex items-center gap-1.5 transition-all hover:brightness-105"
+                        className="px-4 py-2 rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 text-white font-black text-xs uppercase tracking-wider flex items-center gap-1.5 transition-all shadow-md shadow-indigo-500/20 hover:brightness-110"
                       >
                         <span>Explore Squad</span>
                         <ArrowRight className="w-3.5 h-3.5" />

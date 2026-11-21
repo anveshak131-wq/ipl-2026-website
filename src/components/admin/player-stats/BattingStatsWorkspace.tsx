@@ -1192,7 +1192,7 @@ const BattingStatsPage = () => {
           variant="default"
           size="lg"
           icon={
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-700 via-cyan-700 to-sky-700 flex items-center justify-center shadow-lg">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-700 via-indigo-700 to-violet-700 flex items-center justify-center shadow-lg">
               <Download className="w-6 h-6 text-white" />
             </div>
           }
