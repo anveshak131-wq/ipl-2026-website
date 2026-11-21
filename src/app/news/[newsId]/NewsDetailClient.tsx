@@ -110,13 +110,27 @@ export default function NewsDetailClient({ newsId }: { newsId: string }) {
 
       <main className="relative z-10 flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-20 space-y-12">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <Link
-            href="/news"
-            className="inline-flex items-center gap-2 rounded-xl border border-white/15 bg-white/[0.04] px-4 py-2 text-xs sm:text-sm font-bold text-slate-200 hover:bg-white/10 hover:text-white transition-colors"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            <span>Back to 2027 News Hub</span>
-          </Link>
+          <div className="flex items-center gap-2">
+            <Link
+              href={article?.league === 'wpl' ? '/wpl/news' : article?.league === 'ipl' ? '/ipl/news' : '/news'}
+              className="inline-flex items-center gap-2 rounded-xl border border-white/15 bg-white/[0.04] px-4 py-2 text-xs sm:text-sm font-bold text-slate-200 hover:bg-white/10 hover:text-white transition-colors"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              <span>
+                {article?.league === 'wpl'
+                  ? 'Back to WPL News'
+                  : article?.league === 'ipl'
+                  ? 'Back to IPL News'
+                  : 'Back to News Hub'}
+              </span>
+            </Link>
+            <Link
+              href="/news"
+              className="hidden sm:inline-flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/[0.02] px-3 py-2 text-xs font-semibold text-slate-400 hover:text-white hover:bg-white/5 transition-colors"
+            >
+              <span>All News</span>
+            </Link>
+          </div>
 
           {article && (
             <div className="flex items-center gap-2">
@@ -177,10 +191,10 @@ export default function NewsDetailClient({ newsId }: { newsId: string }) {
                     More 2027 Season Dispatches
                   </h2>
                   <Link
-                    href="/news"
+                    href={article?.league === 'wpl' ? '/wpl/news' : article?.league === 'ipl' ? '/ipl/news' : '/news'}
                     className="text-xs sm:text-sm font-bold text-amber-300 hover:text-amber-200"
                   >
-                    View all stories →
+                    View more {article?.league === 'wpl' ? 'WPL' : article?.league === 'ipl' ? 'IPL' : '2027'} stories →
                   </Link>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

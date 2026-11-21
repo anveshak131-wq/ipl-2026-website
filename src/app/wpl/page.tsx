@@ -972,7 +972,7 @@ export default function WPLHomePage() {
                   </h2>
                 </div>
                 <Link
-                  href="/news"
+                  href="/wpl/news"
                   className="group flex items-center gap-2 px-8 py-4 rounded-xl border transition-all duration-300 hover:scale-105"
                   style={{
                     background: WPLColors.purpleRGBA[10],

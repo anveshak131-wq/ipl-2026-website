@@ -927,7 +927,7 @@ export default function IPLHomePage() {
                     </h2>
                   </div>
                   <Link
-                    href="/news"
+                    href="/ipl/news"
                   className="group inline-flex items-center gap-2 rounded-xl border border-[#e66f2f]/30 bg-white/[0.055] px-6 py-3 text-sm font-black text-[#f5d7a3] transition-all duration-300 hover:bg-white/[0.10]"
                   >
                     News archive

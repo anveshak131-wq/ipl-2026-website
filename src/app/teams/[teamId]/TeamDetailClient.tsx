@@ -1123,7 +1123,7 @@ export default function TeamDetailClient({ teamId, league }: TeamDetailClientPro
                     setActiveTab('overview');
                     setPendingScrollTarget({ tab: 'overview', section: 'fixtures' });
                   }}
-                  onNewsClick={() => router.push(isWPL ? '/wpl/news' : '/news')}
+                  onNewsClick={() => router.push(isWPL ? '/wpl/news' : '/ipl/news')}
                   league={teamLeague}
                   showPlayerCards={activeTab === 'squad' && showPlayerCards}
                 />

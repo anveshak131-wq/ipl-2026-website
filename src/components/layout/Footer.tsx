@@ -18,7 +18,7 @@ export default function Footer() {
     : [
         { href: '/matches', label: 'Match Schedule' },
         { href: '/teams', label: 'Teams' },
-        { href: '/news', label: 'News' },
+        { href: '/ipl/news', label: 'IPL News' },
       ];
 
   return (

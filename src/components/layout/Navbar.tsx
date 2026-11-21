@@ -50,6 +50,14 @@ export default function Navbar() {
     if (!pathname) return false;
     const hrefPath = href.split('?')[0] || href;
     if (hrefPath === '/') return pathname === '/';
+    if (hrefPath === '/ipl/news' || hrefPath === '/wpl/news' || hrefPath === '/news') {
+      if (pathname === hrefPath) return true;
+      if (pathname.startsWith('/news/')) {
+        if (currentLeague === 'ipl' && hrefPath === '/ipl/news') return true;
+        if (currentLeague === 'wpl' && hrefPath === '/wpl/news') return true;
+        if (hrefPath === '/news') return true;
+      }
+    }
     return pathname === hrefPath || pathname.startsWith(`${hrefPath}/`);
   };
 
@@ -63,6 +71,12 @@ export default function Navbar() {
       // For WPL, use /wpl prefix for teams, matches, news
       if (baseHref === '/teams' || baseHref === '/matches' || baseHref === '/news') {
         return `/wpl${baseHref}`;
+      }
+    }
+    if (currentLeague === 'ipl' && baseHref !== '/') {
+      // For IPL, use dedicated /ipl/news page instead of generic common page
+      if (baseHref === '/news') {
+        return `/ipl/news`;
       }
     }
     return baseHref;
@@ -108,6 +122,9 @@ export default function Navbar() {
     if (href === '/stats') return 'Leaderboards, records, and team comparisons';
     if (href === '/wpl/scorecard') return 'Official WPL match scorecards, innings & partnerships';
     if (href === '/wpl/leaderboard') return 'Player stats and points table';
+    if (href === '/ipl/news') return 'Official IPL 2026-27 news, trade wire & mini-auction updates';
+    if (href === '/wpl/news') return 'Official WPL Season 5 news, fixtures & team updates';
+    if (href === '/news') return 'Comprehensive IPL & WPL 2027 cricket news hub';
     return null;
   };
 

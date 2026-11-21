@@ -14,6 +14,7 @@ interface NewsHeroHeaderProps {
   counts: { all: number; ipl: number; wpl: number };
   tickerArticles: News[];
   onOpenArticle: (articleId: string) => void;
+  pageContext?: 'ipl' | 'wpl' | 'common';
 }
 
 function formatCountdown(targetIso: string, nowMs: number | null): { value: string; unit: string } {
@@ -39,6 +40,7 @@ export default function NewsHeroHeader({
   counts,
   tickerArticles,
   onOpenArticle,
+  pageContext = 'common',
 }: NewsHeroHeaderProps) {
   const shouldReduceMotion = useReducedMotion();
   const [nowMs, setNowMs] = useState<number | null>(null);
@@ -102,11 +104,19 @@ export default function NewsHeroHeader({
             <div className="inline-flex flex-wrap items-center gap-2">
               <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-400/35 bg-emerald-500/15 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-emerald-300">
                 <Radio className="w-3.5 h-3.5 animate-pulse" />
-                2027 Editorial Desk
+                {pageContext === 'ipl'
+                  ? 'IPL Official Newsroom'
+                  : pageContext === 'wpl'
+                  ? 'WPL Official Newsroom'
+                  : '2027 Editorial Desk'}
               </span>
               <span className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-slate-300">
                 <Trophy className="w-3.5 h-3.5 text-amber-400" />
-                Reigning Double Holders: Bengaluru
+                {pageContext === 'wpl'
+                  ? 'Reigning Champions: Bengaluru (2024, 2026)'
+                  : pageContext === 'ipl'
+                  ? 'IPL Season 20 Intelligence & Mini-Auction'
+                  : 'Season 2027 Cricket Wire'}
               </span>
             </div>
 
