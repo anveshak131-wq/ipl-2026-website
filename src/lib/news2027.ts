@@ -13,14 +13,14 @@ export interface SeasonMilestone {
 
 export const SEASON_MILESTONES_2027: SeasonMilestone[] = [
   {
-    id: 'ipl-retention-lock',
+    id: 'ipl-retentions-locked',
     league: 'ipl',
-    title: 'IPL 2027 Retention Lock',
-    subtitle: '₹157 Cr purse ceiling • Final released lists due',
-    dateLabel: '17 Nov 2026',
+    title: 'IPL 2027 Squads Locked',
+    subtitle: '184 stars retained • ₹298 Cr left for 66 slots',
+    dateLabel: 'Finalized 17 Nov',
     targetIso: '2026-11-17T11:30:00.000Z',
-    location: 'Mumbai • BCCI',
-    badge: 'Retentions',
+    location: 'BCCI • Mumbai',
+    badge: 'Retentions In',
   },
   {
     id: 'ipl-goa-auction',
@@ -52,6 +52,208 @@ export const DEFAULT_NEWS_FALLBACK_IMAGE = '/news/dual-2027-champions.svg';
  * and paired directly with Cloudflare KV `ipl:content`.
  */
 export const NEWS_2027_ARTICLES: News[] = [
+  {
+    id: 'ipl-2027-dhoni-retires-playing-career-csk-team-mentor',
+    league: 'ipl',
+    category: 'breaking',
+    isImportant: true,
+    publishedAt: '2026-11-19T10:30:00.000Z',
+    createdAt: '2026-11-19T10:30:00.000Z',
+    imageUrl: '/news/ipl-2027-dhoni-legacy.svg',
+    image: '/news/ipl-2027-dhoni-legacy.svg',
+    linkedTeamIds: ['10'],
+    title: 'End of an Era: MS Dhoni Officially Retires from Playing in IPL; Named Chennai Super Kings Team Mentor',
+    summary:
+      'Following an unmatched 19-season playing tenure featuring five IPL championships, MS Dhoni draws the curtain on his competitive career and steps into the Chennai Super Kings dugout as full-time Team Mentor.',
+    content: `In a defining watershed moment for Indian cricket, MS Dhoni has officially retired from playing in the Indian Premier League, bringing an iconic 19-season playing career to a close ahead of the IPL 2027 mini-auction.
+
+The 45-year-old stalwart will not enter the player pool or feature on the team sheet for the 2027 campaign. Instead, Chennai Super Kings management confirmed that Dhoni will immediately transition into the role of full-time Team Mentor, working closely with captain Ruturaj Gaikwad, Head Coach Stephen Fleming, and the franchise backroom staff.
+
+DHONI'S MONUMENTAL IPL PLAYING LEGACY
+• 5 IPL Championships Lifted: 2010, 2011, 2018, 2021, and 2023
+• 10 Final Appearances & 12 Playoff Qualifications as Captain
+• Record Dismissals: Over 190 dismissals behind the stumps as wicketkeeper
+• Legendary Finisher: Renowned for masterminding unforgettable last-over chases and ice-cool tactical maneuvers
+
+Persistent physical wear and tear — culminating in recurring knee concerns and a severe calf injury that sidelined him throughout the 2026 tournament — drove Dhoni's measured choice to step aside from active competition. Franchise officials noted that while his presence on the turf will be deeply missed by millions of fans worldwide, his tactical brain and dressing-room composure will continue steering Chennai Super Kings into their next era.
+
+"Thala has given everything to this franchise since the inaugural whistle in 2008," CSK CEO Kasi Viswanathan stated. "His mentorship will be the guiding compass as Ruturaj and our new generation build toward another championship cycle."`,
+  },
+  {
+    id: 'ipl-2027-official-team-wise-retentions-and-releases-complete-list',
+    league: 'ipl',
+    category: 'breaking',
+    isImportant: true,
+    publishedAt: '2026-11-18T18:45:00.000Z',
+    createdAt: '2026-11-18T18:45:00.000Z',
+    imageUrl: '/news/ipl-2027-retention-board.svg',
+    image: '/news/ipl-2027-retention-board.svg',
+    linkedTeamIds: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10'],
+    title: 'IPL 2027 Retentions & Released List Revealed: 184 Players Retained, ₹298 Cr Left in Purse Across 10 Teams',
+    summary:
+      'BCCI confirms the finalized rosters for all 10 franchises ahead of the December 16 Goa mini-auction — 184 players retained, 66 slots vacant, with LSG holding the biggest war chest (₹47.45 Cr) and big names like Boult, Pathirana, and Head released.',
+    content: `All ten Indian Premier League franchises have formally submitted their final player retention, trade, and release rosters to the BCCI ahead of the December 16, 2026 mini-auction in Goa.
+
+Across the league, franchises committed a combined ₹1,002.05 crore to retain 184 cricketers, leaving an aggregate remaining purse of ₹297.95 crore to compete for 66 open slots (including 21 overseas vacancies) under the ₹157 crore salary cap.
+
+COMPLETE 10-FRANCHISE RETENTION & PURSE STATUS
+
+1. LUCKNOW SUPER GIANTS (LSG)
+• Retained (18): Nicholas Pooran, Mayank Yadav, Mohsin Khan, Ayush Badoni, and traded-in wrist-spinner Kuldeep Yadav.
+• Remaining Purse: ₹47.45 crore (Highest in IPL 2027) • 7 Slots Open.
+
+2. KOLKATA KNIGHT RIDERS (KKR)
+• Retained (13): Rinku Singh, Sunil Narine, Varun Chakaravarthy, Harshit Rana, Ramandeep Singh.
+• Key Releases: Matheesha Pathirana (₹18 Cr), Mustafizur Rahman, Rachin Ravindra, Ajinkya Rahane, Rahul Tripathi.
+• Remaining Purse: ₹42.20 crore • 12 Slots Open.
+
+3. MUMBAI INDIANS (MI)
+• Retained (16): Jasprit Bumrah, Rohit Sharma, Suryakumar Yadav, Tilak Varma, and trade-in pacer Arshdeep Singh.
+• Key Releases: Trent Boult (₹12.5 Cr), Deepak Chahar (₹9.25 Cr), Allah Ghazanfar, Mayank Markande.
+• Remaining Purse: ₹35.10 crore • 9 Slots Open.
+
+4. DELHI CAPITALS (DC)
+• Retained (16): Axar Patel, KL Rahul, Rishabh Pant (homecoming trade), Prithvi Shaw, Mukesh Kumar, Ashutosh Sharma.
+• Key Releases: Mitchell Starc (opted out/unavailable), Nitish Rana, Abishek Porel, Pathum Nissanka.
+• Remaining Purse: ₹32.60 crore • 9 Slots Open.
+
+5. SUNRISERS HYDERABAD (SRH)
+• Retained (17): Heinrich Klaasen, Pat Cummins, Abhishek Sharma, Nitish Kumar Reddy, and traded-in T. Natarajan.
+• Key Releases: Travis Head, Kamindu Mendis, Gerald Coetzee, Jaydev Unadkat, Shivam Mavi.
+• Remaining Purse: ₹25.50 crore • 8 Slots Open.
+
+6. CHENNAI SUPER KINGS (CSK)
+• Retained (19): Ruturaj Gaikwad (c), Sanju Samson, Shivam Dube, Rahul Chahar, Noor Ahmad, Dewald Brevis, Jamie Overton, plus trade arrivals Liam Livingstone & Jack Edwards.
+• Transition / Releases: MS Dhoni officially retired as player to assume Team Mentor role. Released Spencer Johnson, Akash Madhwal, Matt Henry, Prashant Veer.
+• Remaining Purse: ₹23.80 crore • 6 Slots Open.
+
+7. PUNJAB KINGS (PBKS)
+• Retained (19): Shreyas Iyer (c), Yuzvendra Chahal, Shashank Singh, Prabhsimran Singh, Marco Jansen, and blockbuster trade arrival Hardik Pandya.
+• Key Releases: Lockie Ferguson, Nehal Wadhera, Mitchell Owen.
+• Remaining Purse: ₹21.75 crore • 6 Slots Open.
+
+8. RAJASTHAN ROYALS (RR)
+• Retained (19): Riyan Parag, Yashasvi Jaiswal, Sandeep Sharma, Dhruv Jurel, Shimron Hetmyer.
+• Key Releases: Tushar Deshpande, Kwena Maphaka, Kuldeep Sen.
+• Remaining Purse: ₹19.40 crore • 6 Slots Open.
+
+9. ROYAL CHALLENGERS BENGALURU (RCB)
+• Retained (20): Rajat Patidar (c), Virat Kohli, Josh Hazlewood, Phil Salt, Krunal Pandya, Yash Dayal, Tim David (retained 7 overseas players).
+• Key Releases: Jacob Bethell (withdrew due to knee surgery), Richard Gleeson, Mangesh Yadav.
+• Remaining Purse: ₹18.25 crore • 5 Slots Open.
+
+10. GUJARAT TITANS (GT)
+• Retained (22): Shubman Gill (c), Rashid Khan, Sai Sudharsan, Rahul Tewatia, R. Sai Kishore, Mohammed Siraj.
+• Key Releases: Ishant Sharma, Shahrukh Khan, Luke Wood.
+• Remaining Purse: ₹8.75 crore (Smallest in IPL 2027) • 3 Slots Open.`,
+  },
+  {
+    id: 'ipl-2027-jacob-bethell-pulls-out-knee-surgery-rcb-release',
+    league: 'ipl',
+    category: 'player',
+    isImportant: true,
+    publishedAt: '2026-11-17T14:15:00.000Z',
+    createdAt: '2026-11-17T14:15:00.000Z',
+    imageUrl: '/news/ipl-2027-bethell-rcb.svg',
+    image: '/news/ipl-2027-bethell-rcb.svg',
+    linkedTeamIds: ['1'],
+    title: 'Jacob Bethell Pulls Out of IPL 2027 Due to Knee Surgery; Defending Champions RCB Release Young All-Rounder',
+    summary:
+      'England rising star Jacob Bethell withdraws from the IPL 2027 season to undergo right-knee cartilage surgery, prompting Royal Challengers Bengaluru to release him ahead of the Goa mini-auction.',
+    content: `England all-rounder Jacob Bethell has formally pulled out of the upcoming IPL 2027 tournament to undergo corrective surgery and comprehensive rehabilitation for a chronic right-knee cartilage injury.
+
+Following detailed medical consultations between the England & Wales Cricket Board (ECB) and RCB's sports science division, defending champions Royal Challengers Bengaluru agreed to release Bethell ahead of the November 17 retention cutoff.
+
+THE MEDICAL CONTEXT & RECOVERY TIMELINE
+• Nature of Injury: Chronic cartilage defect (chondral lesion) in his right knee that flared up repeatedly during recent international assignments
+• Medical Action: Undergoing arthroscopic reparative surgery followed by an estimated four-to-six month recovery and strengthening program
+• IPL Impact: Opted out of the player auction registry to focus fully on returning to peak physical fitness for the English summer and future cycles
+
+RCB Director of Cricket Mo Bobat acknowledged the emotional difficulty of the decision:
+"Releasing Jacob was an incredibly hard call because of his world-class ceiling, high character, and the immense affection the squad has for him. However, with surgery scheduled and significant uncertainty around his match availability in March and April, prioritizing Jacob's long-term well-being was the only responsible decision. We will monitor his recovery closely and wish him a swift rehabilitation."
+
+Bethell, who was part of Bengaluru's back-to-back championship squads, posted an emotional message to fans on social media:
+"Deeply gutted to miss IPL 2027. Playing in front of the Chinnaswamy crowd has been the greatest thrill of my young career. Thank you to everyone at RCB for the love, support, and memories. I will be cheering the boys on from home and hope to wear the red and gold again down the road."
+
+Bethell's release frees up an overseas berth and ₹2.60 crore in auction capital for RCB as they prepare their scouting shortlist for Goa on December 16.`,
+  },
+  {
+    id: 'ipl-2027-trade-window-deep-dive-pandya-arshdeep-pant',
+    league: 'ipl',
+    category: 'team',
+    isImportant: false,
+    publishedAt: '2026-11-16T11:00:00.000Z',
+    createdAt: '2026-11-16T11:00:00.000Z',
+    imageUrl: '/news/ipl-2027-trades.svg',
+    image: '/news/ipl-2027-trades.svg',
+    linkedTeamIds: ['2', '5', '6', '7', '10', '3'],
+    title: 'Tactical Trade Analysis: How Hardik-Arshdeep Swap & Pant’s Return Rebalance the IPL Power Axis',
+    summary:
+      'Dissecting the trade mechanics and tactical ripple effects of Mumbai Indians parting with Hardik Pandya for Arshdeep Singh, Rishabh Pant’s homecoming to Delhi, and CSK’s twin acquisitions from Hyderabad.',
+    content: `The IPL 2027 pre-auction trading window produced unprecedented seismic shifts as four marquee franchises reshuffled high-profile Indian and overseas match-winners in one-for-one direct transfers.
+
+THE HARDIK PANDYA ↔ ARSHDEEP SINGH SWAP (₹18 CR EQUAL VALUE)
+Mumbai Indians and Punjab Kings concluded one of the most consequential trades in tournament history. For Mumbai, landing India's premier T20 death bowler Arshdeep Singh solves their longstanding need for a left-arm wicket-taker to partner Jasprit Bumrah in the Powerplay and death overs. For Punjab Kings, securing Hardik Pandya gives captain Shreyas Iyer an experienced pace-bowling all-rounder capable of batting at No. 5 or No. 6 and closing out tight games.
+
+RISHABH PANT RETURNS TO DELHI; KULDEEP YADAV JOINS LSG
+In another blockbuster exchange, wicketkeeper-batter Rishabh Pant returned to Delhi Capitals at ₹15 crore after a single campaign with Lucknow. Under Head Coach Sourav Ganguly, Pant reassumes leadership duties in Delhi's batting engine room. In return, Lucknow Super Giants acquired world-class left-arm wrist-spinner Kuldeep Yadav (₹13.50 crore), handing coach Justin Langer an elite spin weapon perfectly tailored for the Ekana Stadium surface.
+
+CSK & SRH MULTI-PLAYER ALIGNMENT
+Chennai Super Kings fortified their middle-order power by acquiring England star Liam Livingstone (₹6 Cr) and Australian pace all-rounder Jack Edwards (₹3 Cr) from Sunrisers Hyderabad. In parallel transactions, Hyderabad bolstered their seam arsenal by welcoming back left-arm specialist T. Natarajan alongside Khaleel Ahmed and Nathan Ellis.
+
+These dynamic pre-auction exchanges ensure that several heavyweights walk into the Goa auction with settled starting elevens, allowing them to bid with surgical precision on December 16.`,
+  },
+  {
+    id: 'ipl-2027-team-wise-auction-purses-slots-outlook',
+    league: 'ipl',
+    category: 'team',
+    isImportant: false,
+    publishedAt: '2026-11-15T15:20:00.000Z',
+    createdAt: '2026-11-15T15:20:00.000Z',
+    imageUrl: '/news/ipl-2027-strategy-board.svg',
+    image: '/news/ipl-2027-strategy-board.svg',
+    linkedTeamIds: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10'],
+    title: 'Goa Mini-Auction War Chests: Complete Team-Wise Purse Balances, Open Slots & Target Strategies',
+    summary:
+      'Financial breakdown and tactical needs for all 10 franchises ahead of December 16 in Goa — who has the bidding power, who needs overseas quicks, and who will drive the price wars.',
+    content: `With the submission of official retention sheets on November 17, the financial playing field for the IPL 2027 mini-auction in Goa is now crystal clear. 
+
+Franchises will enter the ITC Grand Goa bidding hall with an aggregate wallet of ₹297.95 crore to fill 66 open slots. However, the distribution of that capital is heavily asymmetric, creating sharp tactical battlegrounds between cash-rich contenders and cap-constrained rosters.
+
+AUCTION WAR CHESTS RANKED BY PURSE REMAINING
+
+1. Lucknow Super Giants: ₹47.45 Cr (7 slots, 3 overseas)
+• Target: High-impact overseas finisher and an aggressive top-order opening partner for Nicholas Pooran.
+
+2. Kolkata Knight Riders: ₹42.20 Cr (12 slots, 4 overseas)
+• Target: With Matheesha Pathirana released, KKR possesses massive bidding power to pursue frontline international quicks.
+
+3. Mumbai Indians: ₹35.10 Cr (9 slots, 4 overseas)
+• Target: Rebuilding pace backups after releasing Trent Boult and Deepak Chahar to partner Bumrah and Arshdeep.
+
+4. Delhi Capitals: ₹32.60 Cr (9 slots, 4 overseas)
+• Target: An elite overseas strike bowler following Mitchell Starc's absence, plus middle-overs power hitting.
+
+5. Sunrisers Hyderabad: ₹25.50 Cr (8 slots, 3 overseas)
+• Target: Overseas explosive opener to replace Travis Head, plus spin backups.
+
+6. Chennai Super Kings: ₹23.80 Cr (6 slots, 2 overseas)
+• Target: Domestic pace all-rounder and middle-order insurance under Ruturaj Gaikwad and Team Mentor MS Dhoni.
+
+7. Punjab Kings: ₹21.75 Cr (6 slots, 2 overseas)
+• Target: Specialist death bowler and middle-order Indian batting depth.
+
+8. Rajasthan Royals: ₹19.40 Cr (6 slots, 2 overseas)
+• Target: Experienced middle-order finisher following Shimron Hetmyer's release.
+
+9. Royal Challengers Bengaluru: ₹18.25 Cr (5 slots, 1 overseas)
+• Target: Overseas seam all-rounder following Jacob Bethell's injury withdrawal to reinforce the title defense.
+
+10. Gujarat Titans: ₹8.75 Cr (3 slots, 1 overseas)
+• Target: Surgical domestic backups with the tightest salary cap in the room.
+
+The presence of headline released stars like Trent Boult, Matheesha Pathirana, Deepak Chahar, and Travis Head guarantees fierce bidding duels right from Set 1 in Goa.`,
+  },
   {
     id: 'ipl-2027-goa-auction-purse-retentions',
     league: 'ipl',
