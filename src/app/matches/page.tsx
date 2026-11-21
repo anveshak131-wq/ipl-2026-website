@@ -42,6 +42,12 @@ export default function MatchesPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'playoffs' | 'rcb' | 'csk' | 'mi' | 'completed'>('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [visibleCount, setVisibleCount] = useState(24);
+
+  // Reset pagination on filter or search change
+  useEffect(() => {
+    setVisibleCount(24);
+  }, [filter, searchQuery]);
 
   const getMatchYear = (dateString: string): number | null => {
     const parsed = new Date(dateString);
@@ -159,12 +165,12 @@ export default function MatchesPage() {
     exportToICal(keyDates, 'ipl-2027-milestones.ics');
   };
 
-  // Default to IPL for matches page
+  // Ensure IPL league context for IPL matches
   useEffect(() => {
-    if (typeof window !== 'undefined' && !window.location.pathname.startsWith('/wpl/')) {
+    if (currentLeague !== 'ipl') {
       setCurrentLeague('ipl');
     }
-  }, [setCurrentLeague]);
+  }, [currentLeague, setCurrentLeague]);
 
   useEffect(() => {
     const fetchMatches = async () => {
@@ -221,6 +227,10 @@ export default function MatchesPage() {
   }, [filter, searchQuery, season2026Matches]);
 
   const deferredMatches = useDeferredValue(filteredMatches);
+
+  const displayedMatches = useMemo(() => {
+    return deferredMatches.slice(0, visibleCount);
+  }, [deferredMatches, visibleCount]);
 
   if (isLoading) {
     return (
@@ -456,7 +466,8 @@ export default function MatchesPage() {
 
                 <div className="flex items-center justify-between text-xs text-slate-400 pt-1 border-t border-white/5">
                   <span>
-                    Showing <strong className="text-white">{deferredMatches.length}</strong> match{deferredMatches.length === 1 ? '' : 'es'}
+                    Showing <strong className="text-white">{Math.min(visibleCount, deferredMatches.length)}</strong> of{' '}
+                    <strong className="text-white">{deferredMatches.length}</strong> match{deferredMatches.length === 1 ? '' : 'es'}
                   </span>
                   <span>Click any card to open the live match center & scorecard</span>
                 </div>
@@ -465,35 +476,53 @@ export default function MatchesPage() {
               {/* Matches Grid */}
               <AnimatePresence mode="wait">
                 {deferredMatches.length > 0 ? (
-                  <motion.div
-                    className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-                    initial="hidden"
-                    animate="visible"
-                    exit="exit"
-                    variants={{
-                      visible: {
-                        transition: {
-                          staggerChildren: 0.03,
-                        },
-                      },
-                    }}
-                  >
-                    {deferredMatches.map((match, index) => (
-                      <motion.div
-                        key={match.id}
-                        initial={{ opacity: 0, y: 24 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, scale: 0.95 }}
-                        transition={{
-                          duration: 0.4,
-                          delay: index * 0.02,
-                          ease: [0.22, 1, 0.36, 1],
-                        }}
-                      >
-                        <MatchCard match={match} index={index} />
-                      </motion.div>
-                    ))}
-                  </motion.div>
+                  <div className="space-y-8">
+                    <motion.div
+                      className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+                      initial="hidden"
+                      animate="visible"
+                      exit="exit"
+                    >
+                      {displayedMatches.map((match, index) => (
+                        <motion.div
+                          key={match.id}
+                          initial={{ opacity: 0, y: 16 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, scale: 0.98 }}
+                          transition={{
+                            duration: 0.25,
+                            delay: Math.min(index * 0.015, 0.2),
+                            ease: [0.22, 1, 0.36, 1],
+                          }}
+                        >
+                          <MatchCard match={match} index={index} />
+                        </motion.div>
+                      ))}
+                    </motion.div>
+
+                    {/* Load More Fixtures Controller */}
+                    {deferredMatches.length > visibleCount && (
+                      <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-4 pb-2">
+                        <button
+                          type="button"
+                          onClick={() => setVisibleCount((prev) => prev + 24)}
+                          className="px-6 py-3 rounded-2xl bg-slate-900 border border-white/15 text-white font-bold text-xs uppercase tracking-wider hover:bg-slate-800 hover:border-amber-400/50 transition-all cursor-pointer shadow-lg flex items-center gap-2 group"
+                        >
+                          <span>Load Next 24 Fixtures</span>
+                          <span className="text-amber-400 text-[11px] font-mono">
+                            (Showing {Math.min(visibleCount, deferredMatches.length)} of {deferredMatches.length})
+                          </span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setVisibleCount(deferredMatches.length)}
+                          className="px-5 py-3 rounded-2xl bg-amber-400/10 border border-amber-400/30 text-amber-300 font-bold text-xs uppercase tracking-wider hover:bg-amber-400/20 transition-all cursor-pointer"
+                        >
+                          Show All ({deferredMatches.length})
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 ) : (
                   <div className="text-center py-20 rounded-3xl bg-slate-900/60 border border-white/10 max-w-lg mx-auto p-10 space-y-4 shadow-xl">
                     <ShieldCheck className="w-14 h-14 text-slate-500 mx-auto" />

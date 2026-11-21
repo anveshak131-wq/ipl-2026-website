@@ -1,7 +1,7 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback, useMemo, ReactNode } from 'react';
 import { League } from '@/types';
 
 interface LeagueContextType {
@@ -25,10 +25,15 @@ export function LeagueProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!pathname) return;
     if (pathname.includes("/wpl-admin-2026") || pathname.includes("/ops/wpl") || pathname.startsWith("/wpl")) {
-      setCurrentLeagueState("wpl");
+      setCurrentLeagueState((prev) => (prev === "wpl" ? prev : "wpl"));
       if (typeof window !== "undefined") localStorage.setItem(LEAGUE_STORAGE_KEY, "wpl");
-    } else if (pathname.includes("/ipl-admin-2026") || pathname.includes("/ops/ipl") || pathname.startsWith("/ipl")) {
-      setCurrentLeagueState("ipl");
+    } else if (
+      pathname.includes("/ipl-admin-2026") ||
+      pathname.includes("/ops/ipl") ||
+      pathname.startsWith("/ipl") ||
+      pathname.startsWith("/matches")
+    ) {
+      setCurrentLeagueState((prev) => (prev === "ipl" ? prev : "ipl"));
       if (typeof window !== "undefined") localStorage.setItem(LEAGUE_STORAGE_KEY, "ipl");
     }
   }, [pathname]);
@@ -67,21 +72,24 @@ export function LeagueProvider({ children }: { children: ReactNode }) {
     }
   }, [currentLeague, initialized]);
 
-  const setCurrentLeague = (league: League) => {
-    setCurrentLeagueState(league);
-  };
+  const setCurrentLeague = useCallback((league: League) => {
+    setCurrentLeagueState((prev) => (prev === league ? prev : league));
+  }, []);
 
-  const toggleLeague = () => {
-    setCurrentLeagueState(prev => prev === 'ipl' ? 'wpl' : 'ipl');
-  };
+  const toggleLeague = useCallback(() => {
+    setCurrentLeagueState((prev) => (prev === 'ipl' ? 'wpl' : 'ipl'));
+  }, []);
 
-  const value: LeagueContextType = {
-    currentLeague,
-    setCurrentLeague,
-    isIPL: currentLeague === 'ipl',
-    isWPL: currentLeague === 'wpl',
-    toggleLeague,
-  };
+  const value = useMemo<LeagueContextType>(
+    () => ({
+      currentLeague,
+      setCurrentLeague,
+      isIPL: currentLeague === 'ipl',
+      isWPL: currentLeague === 'wpl',
+      toggleLeague,
+    }),
+    [currentLeague, setCurrentLeague, toggleLeague]
+  );
 
   return (
     <LeagueContext.Provider value={value}>
