@@ -6,6 +6,7 @@ import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import MatchCard from '@/components/matches/MatchCard';
 import PublicPlayoffOverview from '@/components/matches/PublicPlayoffOverview';
+import Ipl2027SeasonStandby from '@/components/matches/Ipl2027SeasonStandby';
 import { Match, Team } from '@/types';
 import { api } from '@/lib/data';
 import { useLeague } from '@/contexts/LeagueContext';
@@ -14,16 +15,27 @@ import Icon from '@/components/ui/Icon';
 import GradientText from '@/components/ui/GradientText';
 import { getMatchNumberDisplay } from '@/lib/matchNumberUtils';
 import { exportToICal, type CalendarEvent } from '@/lib/admin/exportUtils';
+import {
+  Calendar,
+  History,
+  Sparkles,
+  Search,
+  Filter,
+  ArrowRight,
+  ShieldCheck,
+  Download,
+} from 'lucide-react';
 
 export default function MatchesPage() {
-  const TARGET_CALENDAR_SEASON = 2026;
   const MATCH_DURATION_MINUTES = 240;
 
   const { currentLeague, setCurrentLeague } = useLeague();
+  const [selectedSeason, setSelectedSeason] = useState<2027 | 2026>(2027);
   const [matches, setMatches] = useState<Match[]>([]);
   const [teams, setTeams] = useState<Team[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'upcoming' | 'live' | 'completed'>('all');
+  const [searchQuery, setSearchQuery] = useState('');
 
   const getMatchYear = (dateString: string): number | null => {
     const parsed = new Date(dateString);
@@ -74,7 +86,7 @@ export default function MatchesPage() {
 
       // Match times are stored in IST; convert IST to UTC for calendar standards.
       const istTimestamp = Date.UTC(year, month - 1, day, parsedTime.hours, parsedTime.minutes, 0);
-      const utcTimestamp = istTimestamp - (5.5 * 60 * 60 * 1000);
+      const utcTimestamp = istTimestamp - 5.5 * 60 * 60 * 1000;
       return new Date(utcTimestamp);
     } catch {
       return null;
@@ -113,11 +125,11 @@ export default function MatchesPage() {
   };
 
   const season2026MatchCount = useMemo(
-    () => matches.filter((match) => getMatchYear(match.date) === TARGET_CALENDAR_SEASON).length,
+    () => matches.filter((match) => getMatchYear(match.date) === 2026).length,
     [matches]
   );
 
-  const handleDownloadIcalSeason = (season: number = TARGET_CALENDAR_SEASON) => {
+  const handleDownloadIcalSeason = (season: number = 2026) => {
     const events = buildSeasonCalendarEvents(season);
     if (events.length === 0) {
       alert(`No matches found for season ${season} to export.`);
@@ -128,7 +140,7 @@ export default function MatchesPage() {
     exportToICal(events, `${leagueCode}-${season}-fixtures.ics`);
   };
 
-  const handleAddSeasonToGoogleCalendar = (season: number = TARGET_CALENDAR_SEASON) => {
+  const handleAddSeasonToGoogleCalendar = (season: number = 2026) => {
     const events = buildSeasonCalendarEvents(season);
     if (events.length === 0) {
       alert(`No matches found for season ${season} to export.`);
@@ -141,22 +153,34 @@ export default function MatchesPage() {
     alert('ICS downloaded. In Google Calendar, go to Settings > Import & export > Import and upload the file.');
   };
 
-  const seasonLabel = TARGET_CALENDAR_SEASON;
-  const subtitleSeason = `${TARGET_CALENDAR_SEASON} season`;
+  const handleDownload2027KeyDates = () => {
+    const keyDates: CalendarEvent[] = [
+      {
+        title: 'IPL 2027 Player Mini-Auction (Goa)',
+        description: 'BCCI IPL 2027 Player Mini-Auction at ITC Grand Goa. 184 cricketers retained across 10 franchises; 66 vacancies (21 overseas) to be filled with ₹297.95 Cr purse.',
+        location: 'ITC Grand Goa Resort & Spa, Arossim Beach, Goa, India',
+        startDate: new Date('2026-12-16T11:00:00+05:30'),
+        endDate: new Date('2026-12-16T19:00:00+05:30'),
+      },
+      {
+        title: 'IPL 2027 Opening Match: Defending Champions RCB vs TBD',
+        description: 'Projected tournament opener of the 20th Indian Premier League edition hosted by reigning titleholders Royal Challengers Bengaluru at M. Chinnaswamy Stadium.',
+        location: 'M. Chinnaswamy Stadium, Bengaluru, Karnataka, India',
+        startDate: new Date('2027-03-14T19:30:00+05:30'),
+        endDate: new Date('2027-03-14T23:30:00+05:30'),
+      },
+    ];
 
-  const pageOilTheme = currentLeague === 'wpl'
-    ? {
-        base: 'linear-gradient(155deg, #10071d 0%, #1c0b2d 38%, #142244 72%, #0a172f 100%)',
-        hazeA: 'radial-gradient(82% 70% at 14% 12%, rgba(236,72,153,0.26) 0%, rgba(168,85,247,0.1) 55%, transparent 80%)',
-        hazeB: 'radial-gradient(75% 66% at 88% 88%, rgba(34,211,238,0.22) 0%, rgba(56,189,248,0.09) 55%, transparent 80%)',
-        brush: 'linear-gradient(112deg, rgba(244,114,182,0.18), rgba(147,51,234,0.08), rgba(56,189,248,0.04))',
-      }
-    : {
-        base: 'linear-gradient(155deg, #120a12 0%, #221018 38%, #1a2845 72%, #0d1c33 100%)',
-        hazeA: 'radial-gradient(82% 70% at 14% 12%, rgba(251,146,60,0.24) 0%, rgba(236,72,153,0.09) 55%, transparent 80%)',
-        hazeB: 'radial-gradient(74% 66% at 88% 88%, rgba(99,102,241,0.2) 0%, rgba(56,189,248,0.08) 55%, transparent 80%)',
-        brush: 'linear-gradient(112deg, rgba(245,158,11,0.16), rgba(236,72,153,0.08), rgba(99,102,241,0.04))',
-      };
+    exportToICal(keyDates, 'ipl-2027-milestones.ics');
+  };
+
+  // Clean stadium atmospheric lighting (Zero Pink, Zero Yellow-Cyan)
+  const pageOilTheme = {
+    base: 'linear-gradient(155deg, #050814 0%, #0A0F24 45%, #0B122C 75%, #050814 100%)',
+    hazeA: 'radial-gradient(82% 70% at 14% 12%, rgba(59,130,246,0.18) 0%, rgba(99,102,241,0.08) 55%, transparent 80%)',
+    hazeB: 'radial-gradient(75% 66% at 88% 88%, rgba(99,102,241,0.18) 0%, rgba(139,92,246,0.08) 55%, transparent 80%)',
+    brush: 'linear-gradient(112deg, rgba(59,130,246,0.12), rgba(99,102,241,0.08), rgba(139,92,246,0.04))',
+  };
 
   // Default to IPL for matches page (unless on /wpl/matches)
   useEffect(() => {
@@ -167,19 +191,10 @@ export default function MatchesPage() {
 
   useEffect(() => {
     const fetchMatches = async () => {
-        try {
-          const wplCached = typeof window !== 'undefined' ? localStorage.getItem('sportsup99_wpl_matches_v1') : null;
-          if (wplCached) {
-            const parsed = JSON.parse(wplCached);
-            if (Array.isArray(parsed) && parsed.length > 0) {
-              setMatches(parsed);
-            }
-          }
-        } catch (e) {}
       try {
         const [matchesData, teamsData] = await Promise.all([
-          api.getMatches(currentLeague),
-          api.getTeams(currentLeague),
+          api.getMatches('ipl'),
+          api.getTeams('ipl'),
         ]);
         setMatches(matchesData);
         setTeams(teamsData);
@@ -191,24 +206,33 @@ export default function MatchesPage() {
     };
 
     fetchMatches();
-  }, [currentLeague]); // Re-fetch when league changes
+  }, []);
 
-  const seasonMatches = useMemo(() => {
-    return matches.filter((match) => getMatchYear(match.date) === TARGET_CALENDAR_SEASON);
+  const season2026Matches = useMemo(() => {
+    return matches.filter((match) => getMatchYear(match.date) === 2026);
   }, [matches]);
 
-  const filteredMatches = useMemo(() => {
-    return seasonMatches.filter(match => {
+  const filtered2026Matches = useMemo(() => {
+    return season2026Matches.filter((match) => {
       const matchesStatus = filter === 'all' || match.status === filter;
-      return matchesStatus;
-    });
-  }, [filter, seasonMatches]);
+      const q = searchQuery.toLowerCase().trim();
+      const matchesSearch =
+        !q ||
+        match.team1?.name?.toLowerCase().includes(q) ||
+        match.team1?.shortName?.toLowerCase().includes(q) ||
+        match.team2?.name?.toLowerCase().includes(q) ||
+        match.team2?.shortName?.toLowerCase().includes(q) ||
+        match.venue?.toLowerCase().includes(q);
 
-  const deferredMatches = useDeferredValue(filteredMatches);
+      return matchesStatus && matchesSearch;
+    });
+  }, [filter, searchQuery, season2026Matches]);
+
+  const deferred2026Matches = useDeferredValue(filtered2026Matches);
 
   if (isLoading) {
     return (
-      <div className="min-h-screen">
+      <div className="min-h-screen bg-[#050814]">
         <Navbar />
         <div className="flex items-center justify-center h-96">
           <LoadingSpinner size="lg" />
@@ -219,30 +243,30 @@ export default function MatchesPage() {
   }
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-[#050814] text-slate-100 flex flex-col selection:bg-indigo-500 selection:text-white">
       <Navbar />
-      
-      <main className="relative py-16 min-h-screen overflow-hidden section-match-bg">
-        {/* Clean oil-canvas background */}
-        <div className="absolute inset-0" style={{ background: pageOilTheme.base }} />
-        <div className="absolute inset-0" style={{ background: pageOilTheme.hazeA, mixBlendMode: 'screen' }} />
-        <div className="absolute inset-0" style={{ background: pageOilTheme.hazeB, mixBlendMode: 'screen' }} />
+
+      <main className="relative py-12 sm:py-16 min-h-screen overflow-hidden flex-1">
+        {/* Clean Atmospheric Stadium Background (Zero Pink, Zero Yellow-Cyan) */}
+        <div className="absolute inset-0 pointer-events-none" style={{ background: pageOilTheme.base }} />
+        <div className="absolute inset-0 pointer-events-none" style={{ background: pageOilTheme.hazeA, mixBlendMode: 'screen' }} />
+        <div className="absolute inset-0 pointer-events-none" style={{ background: pageOilTheme.hazeB, mixBlendMode: 'screen' }} />
 
         <motion.div
-          className="absolute -top-28 left-[-14%] w-[74%] h-[36%] rounded-[120px] blur-2xl opacity-85"
+          className="absolute -top-28 left-[-14%] w-[74%] h-[36%] rounded-[120px] blur-3xl opacity-80 pointer-events-none"
           style={{ background: pageOilTheme.brush, transform: 'rotate(-9deg)' }}
           animate={{ x: [0, 10, 0], y: [0, -8, 0] }}
           transition={{ duration: 18, repeat: Infinity, ease: 'easeInOut' }}
         />
         <motion.div
-          className="absolute -bottom-24 right-[-10%] w-[70%] h-[34%] rounded-[120px] blur-2xl opacity-70"
+          className="absolute -bottom-24 right-[-10%] w-[70%] h-[34%] rounded-[120px] blur-3xl opacity-70 pointer-events-none"
           style={{ background: pageOilTheme.brush, transform: 'rotate(8deg)' }}
           animate={{ x: [0, -10, 0], y: [0, 8, 0] }}
           transition={{ duration: 21, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
         />
 
         <div
-          className="absolute inset-0 opacity-[0.08]"
+          className="absolute inset-0 opacity-[0.04] pointer-events-none"
           style={{
             backgroundImage:
               'repeating-linear-gradient(0deg, rgba(255,255,255,0.05) 0px, rgba(255,255,255,0.05) 1px, transparent 1px, transparent 4px), repeating-linear-gradient(90deg, rgba(255,255,255,0.04) 0px, rgba(255,255,255,0.04) 1px, transparent 1px, transparent 4px)',
@@ -250,237 +274,239 @@ export default function MatchesPage() {
           }}
         />
 
-        <motion.div
-          className="absolute top-16 right-16 w-20 h-20 rounded-full blur-2xl"
-          style={{
-            background: currentLeague === 'wpl'
-              ? 'radial-gradient(circle, rgba(236,72,153,0.3), rgba(168,85,247,0.08), transparent 75%)'
-              : 'radial-gradient(circle, rgba(251,146,60,0.28), rgba(236,72,153,0.08), transparent 75%)',
-          }}
-          animate={{ y: [0, -10, 0] }}
-          transition={{ duration: 11, repeat: Infinity, ease: 'easeInOut' }}
-        />
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+          {/* Season Selector Bar */}
+          <section className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-2xl bg-white/[0.03] border border-white/10 backdrop-blur-xl">
+            <div className="flex items-center gap-2">
+              <span className="text-[11px] uppercase tracking-widest text-slate-400 font-bold mr-1">
+                Select Season
+              </span>
+              <div className="inline-flex p-1 rounded-xl bg-black/40 border border-white/10">
+                <button
+                  type="button"
+                  onClick={() => setSelectedSeason(2027)}
+                  className={`px-4 py-2 rounded-lg text-xs font-black uppercase tracking-wider transition-all flex items-center gap-2 cursor-pointer ${
+                    selectedSeason === 2027
+                      ? 'bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 text-white shadow-lg shadow-indigo-500/25'
+                      : 'text-slate-300 hover:text-white'
+                  }`}
+                >
+                  <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+                  <span>2027 Season</span>
+                  <span className="px-1.5 py-0.5 rounded text-[10px] bg-amber-400/20 text-amber-300 border border-amber-400/30 font-bold">
+                    Upcoming
+                  </span>
+                </button>
 
-        <div
-          className="absolute inset-0"
-          style={{ background: 'radial-gradient(circle at 50% 42%, transparent 0%, rgba(2,6,23,0.24) 64%, rgba(2,6,23,0.58) 100%)' }}
-        />
-        
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Header */}
-          <motion.div
-            className="mb-8 rounded-3xl border border-white/15 bg-black/30 backdrop-blur-xl shadow-[0_20px_60px_rgba(0,0,0,0.35)] p-6 md:p-8"
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.45 }}
-          >
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold border mb-4"
-                 style={currentLeague === 'wpl'
-                   ? { background: 'rgba(168,85,247,0.15)', borderColor: 'rgba(168,85,247,0.35)', color: '#e9d5ff' }
-                   : { background: 'rgba(245,158,11,0.14)', borderColor: 'rgba(245,158,11,0.32)', color: '#fde68a' }}>
-              <Icon name="cricket" size={14} />
-              {currentLeague === 'wpl' ? 'WPL MATCH SCHEDULE' : 'IPL MATCH SCHEDULE'}
+                <button
+                  type="button"
+                  onClick={() => setSelectedSeason(2026)}
+                  className={`px-4 py-2 rounded-lg text-xs font-black uppercase tracking-wider transition-all flex items-center gap-2 cursor-pointer ${
+                    selectedSeason === 2026
+                      ? 'bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 text-white shadow-lg shadow-indigo-500/25'
+                      : 'text-slate-300 hover:text-white'
+                  }`}
+                >
+                  <History className="w-3.5 h-3.5" />
+                  <span>2026 Archive</span>
+                  <span className="px-1.5 py-0.5 rounded text-[10px] bg-white/10 text-slate-300 font-semibold">
+                    74 Matches
+                  </span>
+                </button>
+              </div>
             </div>
 
-            <motion.h1
-              className="text-4xl md:text-5xl font-black mb-3 tracking-tight"
-              initial={{ opacity: 0, y: -12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-              style={{
-                background: 'linear-gradient(135deg, #ffffff 0%, #e5e7eb 55%, #cbd5e1 100%)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text',
-              }}
-            >
-              {currentLeague === 'wpl' ? (
-                <>WPL {seasonLabel} <GradientText gradient="from-fuchsia-300 via-pink-300 to-rose-300" animate>Fixtures</GradientText></>
+            <div className="text-xs text-slate-400">
+              {selectedSeason === 2027 ? (
+                <span className="flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                  <span>2027 Pre-Season Active • Countdown Live</span>
+                </span>
               ) : (
-                <>IPL {seasonLabel} <GradientText gradient="from-amber-300 via-orange-300 to-rose-300" animate>Fixtures</GradientText></>
+                <span>2026 Season Archive • 74 Completed Matches</span>
               )}
-            </motion.h1>
-
-            <p className="text-slate-200/90 text-base md:text-lg max-w-3xl leading-relaxed">
-              {currentLeague === 'wpl'
-                ? `Live scores, upcoming matches, and full fixture details for the ${subtitleSeason} of the WPL.`
-                : `Live scores, upcoming matches, and full fixture details for the ${subtitleSeason} of the IPL.`}
-            </p>
-
-            <div className="mt-4 inline-flex items-center rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-slate-200">
-              Showing {TARGET_CALENDAR_SEASON} season · {filteredMatches.length} match{filteredMatches.length === 1 ? '' : 'es'}
             </div>
-          </motion.div>
+          </section>
 
-          {/* Season + Calendar Actions */}
-          <div className="mb-6 rounded-2xl border border-white/12 bg-black/25 backdrop-blur-xl p-4 md:p-5 shadow-[0_12px_32px_rgba(0,0,0,0.28)]">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div className="flex flex-wrap items-center gap-2.5">
-                <span className="text-[11px] uppercase tracking-[0.28em] text-slate-400 font-semibold mr-1">Season</span>
-                <span
-                  className="px-4 py-2 rounded-lg text-sm font-semibold border text-white"
-                  style={{
-                    background: currentLeague === 'wpl'
-                      ? 'linear-gradient(135deg, rgba(168,85,247,0.42), rgba(236,72,153,0.35))'
-                      : 'linear-gradient(135deg, rgba(245,158,11,0.42), rgba(236,72,153,0.32))',
-                    borderColor: 'rgba(255,255,255,0.3)',
-                    boxShadow: '0 8px 20px rgba(0,0,0,0.25)',
-                  }}
-                >
-                  {TARGET_CALENDAR_SEASON}
-                </span>
-                <span className="text-xs text-slate-400">
-                  {season2026MatchCount} match{season2026MatchCount === 1 ? '' : 'es'}
-                </span>
-              </div>
-
-              <div className="flex flex-wrap items-center gap-2.5">
-                <button
-                  onClick={() => handleDownloadIcalSeason(TARGET_CALENDAR_SEASON)}
-                  className="px-4 py-2.5 rounded-lg text-sm font-semibold border transition-colors"
-                  style={{
-                    background: 'rgba(16,185,129,0.16)',
-                    borderColor: 'rgba(16,185,129,0.38)',
-                    color: '#d1fae5',
-                  }}
-                >
-                  Add {TARGET_CALENDAR_SEASON} to iCal
-                </button>
-
-                <button
-                  onClick={() => handleAddSeasonToGoogleCalendar(TARGET_CALENDAR_SEASON)}
-                  className="px-4 py-2.5 rounded-lg text-sm font-semibold border transition-colors"
-                  style={{
-                    background: 'rgba(59,130,246,0.16)',
-                    borderColor: 'rgba(59,130,246,0.38)',
-                    color: '#dbeafe',
-                  }}
-                >
-                  Add {TARGET_CALENDAR_SEASON} to Google Calendar
-                </button>
-              </div>
-            </div>
-
-            <p className="text-slate-400 text-sm mt-3">
-              Only {TARGET_CALENDAR_SEASON} fixtures are shown on this page.
-            </p>
-          </div>
-
-          <PublicPlayoffOverview
-            league={currentLeague}
-            season={TARGET_CALENDAR_SEASON}
-            matches={seasonMatches}
-            teams={teams}
-          />
-
-          {/* Filter Tabs */}
-          <div className="mb-10 rounded-2xl border border-white/12 bg-black/20 backdrop-blur-xl p-3 shadow-[0_12px_30px_rgba(0,0,0,0.26)]">
-            <div className="flex flex-wrap gap-2">
-              {[
-                { key: 'all', label: 'All Matches', icon: 'stats' as const, color: '#94a3b8' },
-                { key: 'upcoming', label: 'Upcoming', icon: 'target' as const, color: '#3b82f6' },
-                { key: 'live', label: 'Live', icon: 'cricket' as const, color: '#ef4444' },
-                { key: 'completed', label: 'Completed', icon: 'trophy' as const, color: '#10b981' }
-              ].map((tab) => {
-                const isActive = filter === tab.key;
-                return (
-                  <button
-                    key={tab.key}
-                    onClick={() => setFilter(tab.key as 'all' | 'upcoming' | 'live' | 'completed')}
-                    className="px-4 py-2.5 rounded-lg text-sm font-semibold whitespace-nowrap flex items-center gap-2 border transition-all duration-200"
-                    style={isActive ? {
-                      background: `linear-gradient(135deg, ${tab.color}66, ${tab.color}33)`,
-                      color: '#ffffff',
-                      borderColor: `${tab.color}aa`,
-                      boxShadow: `0 6px 18px ${tab.color}35`,
-                    } : {
-                      background: 'rgba(255,255,255,0.04)',
-                      color: '#cbd5e1',
-                      borderColor: 'rgba(255,255,255,0.12)',
-                    }}
-                  >
-                    <Icon name={tab.icon} size={15} />
-                    {tab.label}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Matches Grid */}
-          <AnimatePresence mode="wait">
-            {deferredMatches.length > 0 ? (
-              <motion.div 
-                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-                initial="hidden"
-                animate="visible"
-                exit="exit"
-                variants={{
-                  visible: {
-                    transition: {
-                      staggerChildren: 0.1,
-                    },
-                  },
-                }}
-              >
-                {deferredMatches.map((match, index) => (
-                  <motion.div
-                    key={match.id}
-                    initial={{ opacity: 0, y: 50, scale: 0.9 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.8 }}
-                    transition={{
-                      duration: 0.5,
-                      delay: index * 0.05,
-                      ease: [0.22, 1, 0.36, 1],
-                    }}
-                    whileHover={{ y: -8, transition: { duration: 0.2 } }}
-                  >
-                    <MatchCard match={match} index={index} />
-                  </motion.div>
-                ))}
-              </motion.div>
+          {/* Conditional View by Season */}
+          {selectedSeason === 2027 ? (
+            /* 2027 Season Standby View with Live Countdown & Roadmap */
+            <Ipl2027SeasonStandby
+              teams={teams}
+              onViewArchive={() => setSelectedSeason(2026)}
+              onDownloadKeyDates={handleDownload2027KeyDates}
+            />
           ) : (
-            <div className="text-center py-12 animate-fade-in" style={{ animationDelay: '220ms' }}>
-              <div className="relative overflow-hidden rounded-2xl bg-black/25 backdrop-blur-xl border border-white/12 p-8 max-w-md mx-auto">
-                <svg className="w-16 h-16 mx-auto mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
-                <p className="text-gray-300 text-lg font-semibold">
-                  No {filter} matches found
-                </p>
-                <p className="text-gray-400 text-sm mt-2">
-                  Try selecting a different filter
-                </p>
-              </div>
-            </div>
-          )}
-          </AnimatePresence>
-
-          {/* Pagination */}
-          {deferredMatches.length > 0 && (
-            <div className="text-center mt-12 animate-fade-in" style={{ animationDelay: '200ms' }}>
-              <button 
-                onClick={() => alert('Loading more matches...')} 
-                className="group relative overflow-hidden rounded-xl font-semibold text-base px-8 py-3.5 transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
-                style={{
-                  background: currentLeague === 'wpl'
-                    ? 'linear-gradient(135deg, rgba(168,85,247,0.8), rgba(236,72,153,0.75))'
-                    : 'linear-gradient(135deg, rgba(245,158,11,0.82), rgba(236,72,153,0.72))',
-                  boxShadow: '0 12px 28px rgba(0,0,0,0.3)',
-                  border: '1px solid rgba(255,255,255,0.22)',
-                  color: '#fff',
-                }}
+            /* 2026 Season Archive View */
+            <div className="space-y-8 animate-fade-in">
+              {/* Header */}
+              <motion.div
+                className="rounded-3xl border border-white/15 bg-black/35 backdrop-blur-xl shadow-[0_20px_60px_rgba(0,0,0,0.35)] p-6 md:p-8 space-y-4"
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.45 }}
               >
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold border bg-blue-500/10 border-blue-400/30 text-blue-300">
+                    <History className="w-3.5 h-3.5" />
+                    <span>IPL 2026 COMPLETED SEASON ARCHIVE</span>
+                  </div>
 
-                <span className="relative z-10 flex items-center justify-center gap-2">
-                  Load More Matches
-                  <svg className="w-4 h-4 transform group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                  </svg>
-                </span>
-              </button>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedSeason(2027)}
+                    className="self-start sm:self-auto px-4 py-1.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:brightness-110 text-white font-black text-xs uppercase tracking-wider flex items-center gap-1.5 transition-all shadow-md shadow-indigo-500/20 cursor-pointer"
+                  >
+                    <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+                    <span>Switch to 2027 Season & Countdown</span>
+                  </button>
+                </div>
+
+                <h1 className="text-3xl md:text-5xl font-black text-white tracking-tight">
+                  IPL 2026{' '}
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-sky-400 via-blue-300 to-indigo-300">
+                    Matches & Scorecards
+                  </span>
+                </h1>
+
+                <p className="text-slate-300 text-sm md:text-base max-w-3xl leading-relaxed">
+                  Full official records of all 74 matches from the 2026 Indian Premier League season. Royal Challengers Bengaluru captured the title defeating Kolkata Knight Riders in the championship final.
+                </p>
+
+                <div className="inline-flex items-center rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-slate-300">
+                  Showing 2026 Archive • {filtered2026Matches.length} match{filtered2026Matches.length === 1 ? '' : 'es'}
+                </div>
+              </motion.div>
+
+              {/* Calendar Actions Bar */}
+              <div className="rounded-2xl border border-white/12 bg-black/25 backdrop-blur-xl p-4 md:p-5 shadow-lg">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-slate-300 font-bold">
+                      Export 2026 Match Records:
+                    </span>
+                    <span className="text-xs text-slate-400">
+                      {season2026MatchCount} matches available
+                    </span>
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-2.5">
+                    <button
+                      onClick={() => handleDownloadIcalSeason(2026)}
+                      className="px-4 py-2.5 rounded-xl text-xs font-bold border transition-colors bg-emerald-500/15 border-emerald-500/35 text-emerald-300 hover:bg-emerald-500/25 flex items-center gap-1.5 cursor-pointer"
+                    >
+                      <Download className="w-3.5 h-3.5" />
+                      <span>Add 2026 to iCal</span>
+                    </button>
+
+                    <button
+                      onClick={() => handleAddSeasonToGoogleCalendar(2026)}
+                      className="px-4 py-2.5 rounded-xl text-xs font-bold border transition-colors bg-blue-500/15 border-blue-500/35 text-blue-300 hover:bg-blue-500/25 flex items-center gap-1.5 cursor-pointer"
+                    >
+                      <Calendar className="w-3.5 h-3.5" />
+                      <span>Add 2026 to Google Calendar</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* 2026 Playoff Bracket Overview */}
+              <PublicPlayoffOverview
+                league="ipl"
+                season={2026}
+                matches={season2026Matches}
+                teams={teams}
+              />
+
+              {/* Search & Filter Controls */}
+              <div className="rounded-2xl border border-white/12 bg-black/25 backdrop-blur-xl p-4 space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  {/* Status Tabs */}
+                  <div className="flex flex-wrap gap-2">
+                    {[
+                      { key: 'all', label: 'All Matches', color: 'from-slate-600 to-slate-700' },
+                      { key: 'completed', label: 'Completed (74)', color: 'from-emerald-600 to-teal-700' },
+                      { key: 'upcoming', label: 'Upcoming (0)', color: 'from-blue-600 to-indigo-700' },
+                      { key: 'live', label: 'Live (0)', color: 'from-red-600 to-rose-700' },
+                    ].map((tab) => {
+                      const isActive = filter === tab.key;
+                      return (
+                        <button
+                          key={tab.key}
+                          onClick={() => setFilter(tab.key as any)}
+                          className={`px-4 py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
+                            isActive
+                              ? 'bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 text-white border-white/20 shadow-md shadow-indigo-500/20'
+                              : 'bg-white/[0.04] text-slate-300 border-white/10 hover:text-white'
+                          }`}
+                        >
+                          {tab.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {/* Team/Venue Search */}
+                  <div className="relative sm:w-72">
+                    <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                    <input
+                      type="text"
+                      placeholder="Search team, venue, city..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="w-full pl-10 pr-4 py-2 rounded-xl bg-white/[0.04] border border-white/10 text-white placeholder-slate-500 text-xs font-medium focus:outline-none focus:border-indigo-400 transition-colors"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* 2026 Matches Grid */}
+              <AnimatePresence mode="wait">
+                {deferred2026Matches.length > 0 ? (
+                  <motion.div
+                    className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+                    initial="hidden"
+                    animate="visible"
+                    exit="exit"
+                    variants={{
+                      visible: {
+                        transition: {
+                          staggerChildren: 0.05,
+                        },
+                      },
+                    }}
+                  >
+                    {deferred2026Matches.map((match, index) => (
+                      <motion.div
+                        key={match.id}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.95 }}
+                        transition={{
+                          duration: 0.35,
+                          delay: index * 0.02,
+                        }}
+                      >
+                        <MatchCard match={match} index={index} />
+                      </motion.div>
+                    ))}
+                  </motion.div>
+                ) : (
+                  <div className="text-center py-16 rounded-2xl bg-black/20 border border-white/10 max-w-md mx-auto p-8 space-y-3">
+                    <ShieldCheck className="w-12 h-12 text-slate-500 mx-auto" />
+                    <p className="text-base font-bold text-white">No matches match your filter</p>
+                    <button
+                      onClick={() => {
+                        setFilter('all');
+                        setSearchQuery('');
+                      }}
+                      className="px-4 py-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-xs font-bold uppercase tracking-wider"
+                    >
+                      Reset Filters
+                    </button>
+                  </div>
+                )}
+              </AnimatePresence>
             </div>
           )}
         </div>

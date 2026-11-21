@@ -228,7 +228,7 @@ export default function PublicPlayoffOverview({
         team2Hint = 'Winner of Qualifier 2';
         if (team1 && team2) {
           stateLabel = 'Finalists confirmed';
-          stateTone = 'text-fuchsia-200 bg-fuchsia-500/12 border-fuchsia-500/30';
+          stateTone = 'text-indigo-200 bg-indigo-500/15 border-indigo-500/30';
         } else {
           stateLabel = 'Awaiting finalists';
         }
