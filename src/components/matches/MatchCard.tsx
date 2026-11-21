@@ -13,6 +13,7 @@ import { getMatchNumberDisplay } from '@/lib/matchNumberUtils';
 import { getMatchAdvisory } from '@/lib/matchAdvisory';
 import CountdownTimer from '@/components/ui/CountdownTimer';
 import Playing11Display from '@/components/matches/Playing11Display';
+import MatchTeamCrest from '@/components/matches/MatchTeamCrest';
 import { X, MapPin, Calendar, Clock, Trophy, Zap, Users, ChevronRight, AlertTriangle, CloudRain, Info } from 'lucide-react';
 
 interface MatchCardProps {
@@ -96,85 +97,7 @@ export default function MatchCard({ match, index = 0, players, detailHref }: Mat
   };
 
   const renderTeamLogo = (team?: Match['team1']) => {
-    if (!team) {
-      return (
-        <Image
-          src="/logos/tba_logo.svg"
-          alt="TBA"
-          width={40}
-          height={40}
-          className="object-contain"
-        />
-      );
-    }
-
-    // ALWAYS prioritize team.logo first (especially for TBA/TBD teams)
-    if (team.logo && team.logo.trim() !== '') {
-      // Check for TBA logo
-      if (team.logo.includes('tba_logo.svg')) {
-        return (
-          <Image
-            src={team.logo}
-            alt="TBA"
-            width={40}
-            height={40}
-            className="object-contain"
-          />
-        );
-      }
-      // If team has a logo, use it directly (unless it's a special case)
-      if (!team.logo.endsWith('.json') && !team.logo.includes('rcb_logo_premium.svg')) {
-        return (
-          <Image
-            src={team.logo}
-            alt={`${team.shortName || 'Team'} logo`}
-            width={40}
-            height={40}
-            className="object-contain"
-            onError={(e) => {
-              // Fallback to animated path if team.logo fails
-              const teamLeague = team.league || match.league || 'ipl';
-              const animatedPath = getAnimatedLogoPath(team.id, team.shortName || '', teamLeague);
-              (e.target as HTMLImageElement).src = animatedPath;
-            }}
-          />
-        );
-      }
-    }
-
-    // Check if it's a TBD team by ID or shortName
-    const teamIdStr = String(team.id || '');
-    if (teamIdStr.includes('tbd-') || team.shortName === 'TBD' || team.shortName?.includes('Place') || team.name?.includes('Place Team')) {
-      return (
-        <Image
-          src="/logos/tba_logo.svg"
-          alt="TBA"
-          width={40}
-          height={40}
-          className="object-contain"
-        />
-      );
-    }
-
-    // Get league from team, match, or default to 'ipl'
-    const teamLeague = team.league || match.league || 'ipl';
-    const teamShortName = team.shortName || '';
-    const animatedPath = getAnimatedLogoPath(team.id, teamShortName, teamLeague);
-    const fallbackPath = getLogoPath(team.id);
-
-    // Use modern logo component for better animations
-    return (
-      <Image
-        src={animatedPath}
-        alt={`${team.shortName || 'Team'} logo`}
-        width={40}
-        height={40}
-        className="object-contain transition-transform duration-300 hover:scale-110"
-        onError={(e) => {
-          (e.target as HTMLImageElement).src = fallbackPath;
-        }}
-      />
-    );
+    return <MatchTeamCrest team={team as any} size={48} glow={false} />;
   };
 
   const isLive = match.status === 'live';

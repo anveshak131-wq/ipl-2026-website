@@ -2,11 +2,12 @@
 
 import { useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { Calendar, Clock, MapPin, Sparkles, Trophy } from 'lucide-react';
+import { Calendar, Clock, MapPin, Sparkles, Trophy, Shield } from 'lucide-react';
 import IplChampionHighlight from '@/components/champions/IplChampionHighlight';
 import { getIplSeasonTeamIds, buildComputedIplRow } from '@/lib/iplPointsTable';
 import { getPlayoffMatchDetails, isPlaceholderTeam } from '@/lib/playoffUtils';
 import { League, Match, PlayoffType, Team } from '@/types';
+import MatchTeamCrest from './MatchTeamCrest';
 
 type PlayoffKey = Exclude<PlayoffType, null>;
 
@@ -35,6 +36,7 @@ type TeamWithStats = Team & {
 type PlayoffCard = {
   key: PlayoffKey;
   title: string;
+  stageBadge: string;
   date: string;
   time: string;
   venue: string;
@@ -44,6 +46,7 @@ type PlayoffCard = {
   team2Hint: string;
   stateLabel: string;
   stateTone: string;
+  isFinal: boolean;
 };
 
 const PLAYOFF_ORDER: PlayoffKey[] = ['qualifier1', 'eliminator', 'qualifier2', 'final'];
@@ -188,25 +191,26 @@ export default function PublicPlayoffOverview({
       let team1Hint = 'TBD';
       let team2Hint = 'TBD';
       let stateLabel = 'Awaiting confirmation';
-      let stateTone = 'text-amber-200 bg-amber-500/12 border-amber-500/30';
+      let stateTone = 'text-amber-200 bg-amber-500/15 border-amber-500/35';
+      const isFinal = playoffType === 'final';
 
       if (playoffType === 'qualifier1') {
         team1 = resolveDisplayTeam(match?.team1, seededStandings[0] || null);
         team2 = resolveDisplayTeam(match?.team2, seededStandings[1] || null);
-        team1Hint = '1st place';
-        team2Hint = '2nd place';
+        team1Hint = '1st in Standings';
+        team2Hint = '2nd in Standings';
         if (team1 && team2) {
-          stateLabel = 'Confirmed matchup';
-          stateTone = 'text-emerald-200 bg-emerald-500/12 border-emerald-500/30';
+          stateLabel = 'Confirmed Clash';
+          stateTone = 'text-emerald-200 bg-emerald-500/15 border-emerald-500/35';
         }
       } else if (playoffType === 'eliminator') {
         team1 = resolveDisplayTeam(match?.team1, seededStandings[2] || null);
         team2 = resolveDisplayTeam(match?.team2, seededStandings[3] || null);
-        team1Hint = '3rd place';
-        team2Hint = team2 ? '4th place' : '4th place not confirmed';
+        team1Hint = '3rd in Standings';
+        team2Hint = team2 ? '4th in Standings' : '4th slot unconfirmed';
         if (team1 && team2) {
-          stateLabel = 'Confirmed matchup';
-          stateTone = 'text-emerald-200 bg-emerald-500/12 border-emerald-500/30';
+          stateLabel = 'Confirmed Clash';
+          stateTone = 'text-emerald-200 bg-emerald-500/15 border-emerald-500/35';
         } else if (team1) {
           stateLabel = 'Awaiting 4th team';
         }
@@ -216,10 +220,10 @@ export default function PublicPlayoffOverview({
         team1Hint = 'Loser of Qualifier 1';
         team2Hint = 'Winner of Eliminator';
         if (team1 && team2) {
-          stateLabel = 'Ready after earlier results';
-          stateTone = 'text-sky-200 bg-sky-500/12 border-sky-500/30';
+          stateLabel = 'Matchup Confirmed';
+          stateTone = 'text-sky-200 bg-sky-500/15 border-sky-500/35';
         } else {
-          stateLabel = 'Awaiting playoff results';
+          stateLabel = 'Awaiting prior rounds';
         }
       } else if (playoffType === 'final') {
         team1 = resolveDisplayTeam(match?.team1, qualifier1Winner);
@@ -227,16 +231,17 @@ export default function PublicPlayoffOverview({
         team1Hint = 'Winner of Qualifier 1';
         team2Hint = 'Winner of Qualifier 2';
         if (team1 && team2) {
-          stateLabel = 'Finalists confirmed';
-          stateTone = 'text-indigo-200 bg-indigo-500/15 border-indigo-500/30';
+          stateLabel = 'Championship Finalists';
+          stateTone = 'text-amber-200 bg-amber-500/20 border-amber-500/40 shadow-sm';
         } else {
-          stateLabel = 'Awaiting finalists';
+          stateLabel = 'Grand Final';
         }
       }
 
       return {
         key: playoffType,
         title: preset?.title || 'Playoff',
+        stageBadge: playoffType === 'final' ? 'Championship' : 'Knockout Stage',
         date: match?.date || preset?.date || '',
         time: match?.time || preset?.time || '',
         venue: match?.venue || preset?.venue || '',
@@ -246,6 +251,7 @@ export default function PublicPlayoffOverview({
         team2Hint,
         stateLabel,
         stateTone,
+        isFinal,
       };
     });
   }, [matches, seededStandings, season]);
@@ -253,109 +259,136 @@ export default function PublicPlayoffOverview({
   if (league !== 'ipl') return null;
 
   return (
-    <section className="mb-10 rounded-[28px] border border-white/12 bg-black/25 backdrop-blur-xl overflow-hidden shadow-[0_18px_50px_rgba(0,0,0,0.32)]">
+    <section className="mb-10 rounded-[32px] border border-white/12 bg-black/40 backdrop-blur-2xl overflow-hidden shadow-[0_24px_70px_rgba(2,6,23,0.55)]">
+      {/* Top Gold Gradient Accent */}
       <div
         className="h-1.5 w-full"
-        style={{ background: 'linear-gradient(90deg, rgba(251,191,36,0.95), rgba(249,115,22,0.82), rgba(244,63,94,0.82))' }}
+        style={{
+          background: 'linear-gradient(90deg, #f59e0b, #ef4444, #8b5cf6, #3b82f6)',
+        }}
       />
 
-      <div className="p-5 md:p-7">
-        <div className="flex flex-col xl:flex-row xl:items-end xl:justify-between gap-4 mb-6">
-          <div>
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-amber-400/30 bg-amber-400/10 text-amber-200 text-xs font-bold tracking-[0.22em] uppercase">
-              <Sparkles className="w-3.5 h-3.5" />
-              Playoffs
+      <div className="p-6 md:p-8 space-y-6">
+        {/* Playoff Section Header */}
+        <div className="flex flex-col xl:flex-row xl:items-end xl:justify-between gap-4">
+          <div className="space-y-2">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-amber-400/35 bg-amber-400/10 text-amber-300 text-xs font-black tracking-widest uppercase">
+              <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+              <span>Championship Playoffs</span>
             </div>
 
-            <h2 className="mt-4 text-2xl md:text-3xl font-black text-white tracking-tight">
-              IPL 2026 Playoff Picture
+            <h2 className="text-2xl md:text-4xl font-black text-white tracking-tight">
+              IPL {season} Playoff Picture & Finals
             </h2>
-            <p className="mt-2 text-slate-300 max-w-3xl leading-relaxed">
-              Built around the official IPL playoff schedule format: stage cards first, then confirmed teams where known,
-              with unresolved slots kept as TBD.
+            <p className="text-slate-300 text-sm md:text-base max-w-3xl leading-relaxed">
+              Official 4-match playoff bracket: Qualifier 1 and Eliminator feed into Qualifier 2, culminating in the Grand Championship Final.
             </p>
           </div>
 
           <div className="flex flex-wrap gap-2">
             {hasExplicitQualifiedTeams && (
-              <div className="inline-flex items-center px-3 py-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/12 text-emerald-200 text-xs font-semibold">
-                {qualifiedStandings.length}/4 teams confirmed
+              <div className="inline-flex items-center px-3.5 py-1.5 rounded-full border border-emerald-500/35 bg-emerald-500/15 text-emerald-200 text-xs font-bold">
+                {qualifiedStandings.length}/4 teams locked
               </div>
             )}
-            <div className="inline-flex items-center px-3 py-1.5 rounded-full border border-white/12 bg-white/5 text-slate-200 text-xs font-semibold">
-              Official venues and dates included
+            <div className="inline-flex items-center px-3.5 py-1.5 rounded-full border border-white/15 bg-white/5 text-slate-200 text-xs font-semibold">
+              Official BCCI Knockout Venues
             </div>
           </div>
         </div>
 
-        <IplChampionHighlight
-          variant="compact"
-          showLinks={false}
-          className="mb-6"
-        />
+        {/* Reigning Champion Highlight Banner */}
+        <IplChampionHighlight variant="compact" showLinks={false} />
 
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+        {/* 4 Playoff Bracket Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5">
           {playoffCards.map((card, index) => (
             <motion.div
               key={card.key}
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.38, delay: index * 0.05 }}
-              className="rounded-3xl border border-white/12 p-4 md:p-5"
-              style={{ background: 'linear-gradient(155deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.025) 100%)' }}
+              transition={{ duration: 0.4, delay: index * 0.05 }}
+              whileHover={{ y: -4, transition: { duration: 0.2 } }}
+              className={`rounded-3xl border p-5 flex flex-col justify-between transition-all duration-300 ${
+                card.isFinal
+                  ? 'border-amber-500/40 bg-gradient-to-b from-amber-500/[0.08] via-black/40 to-black/60 shadow-[0_12px_36px_rgba(245,158,11,0.12)]'
+                  : 'border-white/12 bg-gradient-to-b from-white/[0.05] to-black/40 shadow-lg'
+              }`}
             >
-              <div className="flex items-start justify-between gap-3 mb-4">
-                <div>
-                  <div className="text-[11px] uppercase tracking-[0.24em] text-amber-200/80 font-bold">
-                    Knockout
+              <div>
+                {/* Stage & Status Tag */}
+                <div className="flex items-start justify-between gap-2 mb-4">
+                  <div>
+                    <span className="text-[10px] uppercase tracking-widest text-amber-300/80 font-black">
+                      {card.stageBadge}
+                    </span>
+                    <h3 className="text-base font-black text-white mt-0.5">{card.title}</h3>
                   </div>
-                  <h3 className="text-lg font-black text-white mt-1">{card.title}</h3>
+                  <span className={`px-2.5 py-1 rounded-full border text-[10px] font-bold uppercase tracking-wider ${card.stateTone}`}>
+                    {card.stateLabel}
+                  </span>
                 </div>
-                <span className={`px-2.5 py-1 rounded-full border text-[11px] font-semibold ${card.stateTone}`}>
-                  {card.stateLabel}
-                </span>
+
+                {/* Team 1 vs Team 2 Clash Pods */}
+                <div className="space-y-2.5 mb-5">
+                  {/* Team 1 */}
+                  <div className="flex items-center gap-3 p-3 rounded-2xl bg-black/40 border border-white/10 hover:border-white/20 transition-colors">
+                    <MatchTeamCrest team={card.team1} size={42} glow={false} />
+                    <div className="min-w-0">
+                      <div className="text-white font-black text-sm sm:text-base leading-tight truncate">
+                        {getTeamName(card.team1)}
+                      </div>
+                      <div className="text-[11px] text-slate-400 mt-0.5 font-medium">
+                        {card.team1Hint}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* VS Divider */}
+                  <div className="flex items-center justify-center text-[10px] font-black uppercase tracking-widest text-slate-500 py-0.5">
+                    VS
+                  </div>
+
+                  {/* Team 2 */}
+                  <div className="flex items-center gap-3 p-3 rounded-2xl bg-black/40 border border-white/10 hover:border-white/20 transition-colors">
+                    <MatchTeamCrest team={card.team2} size={42} glow={false} />
+                    <div className="min-w-0">
+                      <div className="text-white font-black text-sm sm:text-base leading-tight truncate">
+                        {getTeamName(card.team2)}
+                      </div>
+                      <div className="text-[11px] text-slate-400 mt-0.5 font-medium">
+                        {card.team2Hint}
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
 
-              <div className="space-y-3 mb-4">
-                <div className="rounded-2xl border border-white/8 bg-black/20 px-4 py-3">
-                  <div className="text-white font-black text-lg">{getTeamName(card.team1)}</div>
-                  <div className="text-xs text-slate-400 mt-1">{card.team1Hint}</div>
+              {/* Match Venue & Time Metadata */}
+              <div className="space-y-2 pt-3 border-t border-white/10 text-xs">
+                <div className="flex items-center gap-2 text-slate-200">
+                  <Calendar className="w-3.5 h-3.5 text-amber-300 shrink-0" />
+                  <span className="font-semibold">{formatDate(card.date)}</span>
                 </div>
-
-                <div className="flex items-center justify-center text-[11px] font-black uppercase tracking-[0.28em] text-slate-500">
-                  vs
-                </div>
-
-                <div className="rounded-2xl border border-white/8 bg-black/20 px-4 py-3">
-                  <div className="text-white font-black text-lg">{getTeamName(card.team2)}</div>
-                  <div className="text-xs text-slate-400 mt-1">{card.team2Hint}</div>
-                </div>
-              </div>
-
-              <div className="space-y-2.5 text-sm">
-                <div className="flex items-start gap-2 text-slate-200">
-                  <Calendar className="w-4 h-4 mt-0.5 text-amber-300" />
-                  <span>{formatDate(card.date)}</span>
-                </div>
-                <div className="flex items-start gap-2 text-slate-200">
-                  <Clock className="w-4 h-4 mt-0.5 text-amber-300" />
+                <div className="flex items-center gap-2 text-slate-300">
+                  <Clock className="w-3.5 h-3.5 text-amber-300 shrink-0" />
                   <span>{formatTimeIST(card.time)}</span>
                 </div>
-                <div className="flex items-start gap-2 text-slate-200">
-                  <MapPin className="w-4 h-4 mt-0.5 text-amber-300" />
-                  <span>{card.venue || 'Venue TBA'}</span>
+                <div className="flex items-start gap-2 text-slate-300">
+                  <MapPin className="w-3.5 h-3.5 mt-0.5 text-amber-300 shrink-0" />
+                  <span className="line-clamp-1">{card.venue || 'Venue TBA'}</span>
                 </div>
               </div>
             </motion.div>
           ))}
         </div>
 
-        <div className="mt-5 flex items-start gap-3 rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
-          <Trophy className="w-4 h-4 mt-0.5 text-amber-300 flex-shrink-0" />
-          <p className="text-sm text-slate-300 leading-relaxed">
-            Current public state: Qualifier 1 is locked as the top-two clash, the Eliminator shows the confirmed 3rd-place
-            team plus a TBD slot until 4th place is sealed, and later rounds remain TBD until earlier results are known.
-          </p>
+        {/* Footer Note */}
+        <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.03] p-4 text-xs text-slate-300 leading-relaxed">
+          <Trophy className="w-4 h-4 text-amber-400 shrink-0" />
+          <span>
+            Playoff Format: Winner of Qualifier 1 advances directly to the Grand Final. Loser of Qualifier 1 battles Winner of Eliminator in Qualifier 2 for the remaining Final berth.
+          </span>
         </div>
       </div>
     </section>
