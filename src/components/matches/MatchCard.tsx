@@ -233,15 +233,31 @@ export default function MatchCard({ match, index = 0, detailHref }: MatchCardPro
           </div>
         )}
 
-        {/* ── UPCOMING COUNTDOWN ── */}
+        {/* ── UPCOMING COUNTDOWN OR SCHEDULE NOTIFICATION ── */}
         {isUpcoming && (
           <div className="pt-1">
-            <CountdownTimer
-              targetDate={match.date}
-              matchTime={match.time}
-              variant="compact"
-              className="w-full"
-            />
+            {(() => {
+              const d = new Date(match.time ? `${match.date}T${match.time}:00+05:30` : match.date);
+              const isInFuture = !Number.isNaN(d.getTime()) && d.getTime() > Date.now();
+
+              if (isInFuture) {
+                return (
+                  <CountdownTimer
+                    targetDate={match.date}
+                    matchTime={match.time}
+                    variant="compact"
+                    className="w-full"
+                  />
+                );
+              }
+              return (
+                <div className="py-2 px-3 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-center">
+                  <span className="text-xs font-semibold text-indigo-300">
+                    Fixture Confirmed • Telecast Live on Star Sports & JioCinema
+                  </span>
+                </div>
+              );
+            })()}
           </div>
         )}
 

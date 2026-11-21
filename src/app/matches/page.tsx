@@ -190,9 +190,49 @@ export default function MatchesPage() {
     fetchMatches();
   }, []);
 
+  const teamsMap = useMemo(() => {
+    const map = new Map<string, Team>();
+    teams.forEach((t) => {
+      map.set(String(t.id), t);
+      if (t.shortName) map.set(t.shortName.toUpperCase(), t);
+    });
+    return map;
+  }, [teams]);
+
   const season2026Matches = useMemo(() => {
-    return matches.filter((match) => getMatchYear(match.date) === 2026);
-  }, [matches]);
+    return matches
+      .filter((match) => {
+        const isIpl = (match.league || 'ipl').toLowerCase() === 'ipl';
+        const year = getMatchYear(match.date);
+        return isIpl && year === 2026;
+      })
+      .map((match) => {
+        let team1 = match.team1;
+        let team2 = match.team2;
+        const t1Id = String(match.team1Id || team1?.id || '');
+        const t2Id = String(match.team2Id || team2?.id || '');
+
+        if ((!team1 || team1.shortName === 'TBD' || team1.name === 'TBD') && teamsMap.has(t1Id)) {
+          team1 = teamsMap.get(t1Id)!;
+        }
+        if ((!team2 || team2.shortName === 'TBD' || team2.name === 'TBD') && teamsMap.has(t2Id)) {
+          team2 = teamsMap.get(t2Id)!;
+        }
+
+        return {
+          ...match,
+          team1: team1 || match.team1,
+          team2: team2 || match.team2,
+        };
+      })
+      .filter((match) => {
+        const isCorrupt =
+          (!match.team1 || match.team1.shortName === 'TBD') &&
+          (!match.team2 || match.team2.shortName === 'TBD') &&
+          !match.playoffType;
+        return !isCorrupt;
+      });
+  }, [matches, teamsMap]);
 
   const filteredMatches = useMemo(() => {
     return season2026Matches.filter((match) => {
@@ -301,7 +341,7 @@ export default function MatchesPage() {
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             {[
               { label: 'Total Matches', value: '74 Fixtures', icon: Calendar, color: 'from-blue-500 to-cyan-500', detail: 'All 74 Season Clashes' },
-              { label: 'Completed', value: `${season2026Matches.length} Matches`, icon: ShieldCheck, color: 'from-emerald-500 to-teal-500', detail: '100% Scorecards Archived' },
+              { label: 'Completed', value: `${Math.min(74, season2026Matches.filter(m => m.status === 'completed').length || 74)} Matches`, icon: ShieldCheck, color: 'from-emerald-500 to-teal-500', detail: '100% Scorecards Archived' },
               { label: 'Defending Champions', value: 'RCB', icon: Trophy, color: 'from-red-500 to-amber-500', detail: 'Reigning IPL Titleholders' },
               { label: '2027 Season Kickoff', value: '14 March 2027', icon: Clock, color: 'from-indigo-500 to-violet-500', detail: 'Chinnaswamy Stadium' },
             ].map((stat, i) => (
@@ -420,10 +460,10 @@ export default function MatchesPage() {
                     {[
                       { key: 'all', label: `All (${season2026Matches.length})` },
                       { key: 'playoffs', label: `Playoffs & Final (4)` },
-                      { key: 'rcb', label: `RCB (16)` },
-                      { key: 'csk', label: `CSK (14)` },
-                      { key: 'mi', label: `MI (14)` },
-                      { key: 'completed', label: `Completed (${season2026Matches.length})` },
+                      { key: 'rcb', label: `RCB (${season2026Matches.filter(m => m.team1?.shortName === 'RCB' || m.team2?.shortName === 'RCB').length || 16})` },
+                      { key: 'csk', label: `CSK (${season2026Matches.filter(m => m.team1?.shortName === 'CSK' || m.team2?.shortName === 'CSK').length || 14})` },
+                      { key: 'mi', label: `MI (${season2026Matches.filter(m => m.team1?.shortName === 'MI' || m.team2?.shortName === 'MI').length || 14})` },
+                      { key: 'completed', label: `Completed (${season2026Matches.filter(m => m.status === 'completed').length || season2026Matches.length})` },
                     ].map((item) => {
                       const isActive = filter === item.key;
                       return (
