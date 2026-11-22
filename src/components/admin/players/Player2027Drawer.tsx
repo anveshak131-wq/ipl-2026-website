@@ -40,12 +40,14 @@ export default function Player2027Drawer({
     setSyncMessage(null);
     try {
       const targetQuery = player.cricbuzzUrl || player.name;
+      const cleanQuery = (player.cricbuzzUrl || player.name).trim();
       const res = await fetch('/api/admin/scrape-cricbuzz', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          cricbuzzUrl: player.cricbuzzUrl || undefined,
-          targetInput: targetQuery,
+          url: cleanQuery,
+          cricbuzzUrl: cleanQuery,
+          targetInput: cleanQuery,
         }),
       });
 

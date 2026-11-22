@@ -776,7 +776,7 @@ function jsonResponse(payload: unknown, status = 200): Response {
 export async function handleScrapeCricbuzzRequest(req: Request): Promise<Response> {
   try {
     const body = await req.json().catch(() => ({}));
-    let targetInput = String(body.url || '').trim();
+    let targetInput = String(body.url || body.cricbuzzUrl || body.targetInput || body.name || body.input || '').trim();
 
     if (!targetInput && body.profileId) {
       targetInput = `https://www.cricbuzz.com/profiles/${body.profileId}`;

@@ -102,12 +102,14 @@ export default function SmartIntakeModal({
     setScrapeSuccess(null);
 
     try {
+      const cleanInput = cricbuzzInput.trim();
       const res = await fetch('/api/admin/scrape-cricbuzz', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          cricbuzzUrl: cricbuzzInput.includes('http') ? cricbuzzInput : undefined,
-          targetInput: cricbuzzInput,
+          url: cleanInput,
+          cricbuzzUrl: cleanInput,
+          targetInput: cleanInput,
         }),
       });
 
