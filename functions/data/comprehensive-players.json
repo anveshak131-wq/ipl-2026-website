@@ -16,8 +16,8 @@
     "battingStyle": "Right-handed bat",
     "bowlingStyle": "Right-arm off-break",
     "transferAcquiredVia": "auction",
-    "transferFee": "",
-    "transferNotes": "",
+    "transferFee": "₹16.30 Cr",
+    "transferNotes": "Retained by MI (₹16.30 Cr)",
     "lastAuctionYear": null,
     "stats": {
       "matches": 272,
@@ -46,16 +46,17 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained",
+    "cricbuzzUrl": "https://www.cricbuzz.com/profiles/84/rohit-sharma"
   },
   {
     "id": "189",
     "name": "Ajinkya Rahane",
     "role": "Batsman",
     "allRounderType": "",
-    "teamId": "9",
-    "team": "Kolkata Knight Riders",
-    "teamShortName": "KKR",
+    "teamId": "",
+    "team": "Auction Pool 2027",
+    "teamShortName": "Pool",
     "league": "ipl",
     "age": 37,
     "dateOfBirth": "1988-06-06",
@@ -66,7 +67,7 @@
     "bowlingStyle": "Right-arm medium",
     "transferAcquiredVia": "",
     "transferFee": "",
-    "transferNotes": "",
+    "transferNotes": "Released by KKR ahead of 2027 Auction",
     "lastAuctionYear": null,
     "stats": {
       "matches": 198,
@@ -95,7 +96,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Released"
   },
   {
     "id": "78",
@@ -114,8 +115,8 @@
     "battingStyle": "Right-handed bat",
     "bowlingStyle": "Right-arm medium",
     "transferAcquiredVia": "",
-    "transferFee": "",
-    "transferNotes": "",
+    "transferFee": "₹21.00 Cr",
+    "transferNotes": "Retained by RCB (Slab 1 · ₹21.00 Cr)",
     "lastAuctionYear": null,
     "stats": {
       "matches": 267,
@@ -144,7 +145,8 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained",
+    "cricbuzzUrl": "https://www.cricbuzz.com/profiles/1413/virat-kohli"
   },
   {
     "id": "21",
@@ -193,7 +195,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "221",
@@ -242,7 +244,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "82",
@@ -261,8 +263,8 @@
     "battingStyle": "Right-handed bat",
     "bowlingStyle": "Right-arm off-break",
     "transferAcquiredVia": "auction",
-    "transferFee": "",
-    "transferNotes": "",
+    "transferFee": "₹16.35 Cr",
+    "transferNotes": "Retained by MI (Captain)",
     "lastAuctionYear": null,
     "stats": {
       "matches": 166,
@@ -291,7 +293,8 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained",
+    "cricbuzzUrl": "https://www.cricbuzz.com/profiles/7915/suryakumar-yadav"
   },
   {
     "id": "43",
@@ -340,7 +343,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "155",
@@ -389,7 +392,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "79",
@@ -438,7 +441,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "188",
@@ -487,7 +490,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "193",
@@ -536,16 +539,16 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "89",
     "name": "Travis Head",
     "role": "Batsman",
     "allRounderType": "",
-    "teamId": "3",
-    "team": "Sunrisers Hyderabad",
-    "teamShortName": "SRH",
+    "teamId": "",
+    "team": "Auction Pool 2027",
+    "teamShortName": "Pool",
     "league": "ipl",
     "age": 32,
     "dateOfBirth": "1993-12-29",
@@ -556,7 +559,7 @@
     "bowlingStyle": "Right-arm off-break",
     "transferAcquiredVia": "auction",
     "transferFee": "",
-    "transferNotes": "",
+    "transferNotes": "Opted out / Released by SRH for international workload management",
     "lastAuctionYear": null,
     "stats": {
       "matches": 38,
@@ -585,7 +588,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Released"
   },
   {
     "id": "205",
@@ -634,7 +637,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "134",
@@ -683,7 +686,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "26",
@@ -732,7 +735,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "122",
@@ -781,7 +784,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "314",
@@ -830,7 +833,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "225",
@@ -879,7 +882,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "51",
@@ -928,7 +931,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "207",
@@ -977,16 +980,16 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "109",
     "name": "Shimron Hetmyer",
     "role": "Batsman",
     "allRounderType": "",
-    "teamId": "8",
-    "team": "Rajasthan Royals",
-    "teamShortName": "RR",
+    "teamId": "",
+    "team": "Auction Pool 2027",
+    "teamShortName": "Pool",
     "league": "ipl",
     "age": 29,
     "dateOfBirth": "1996-12-26",
@@ -997,7 +1000,7 @@
     "bowlingStyle": "N/A (Batsman)",
     "transferAcquiredVia": "",
     "transferFee": "",
-    "transferNotes": "",
+    "transferNotes": "Released by RR ahead of 2027 Auction",
     "lastAuctionYear": null,
     "stats": {
       "matches": 86,
@@ -1026,7 +1029,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Released"
   },
   {
     "id": "91",
@@ -1045,8 +1048,8 @@
     "battingStyle": "Right-handed bat",
     "bowlingStyle": "Right-arm off-break",
     "transferAcquiredVia": "auction",
-    "transferFee": "",
-    "transferNotes": "",
+    "transferFee": "₹18.00 Cr",
+    "transferNotes": "Retained by CSK (Captain · ₹18.00 Cr)",
     "lastAuctionYear": null,
     "stats": {
       "matches": 71,
@@ -1075,7 +1078,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "99",
@@ -1094,8 +1097,8 @@
     "battingStyle": "Left-handed bat",
     "bowlingStyle": "Right-arm off-break",
     "transferAcquiredVia": "auction",
-    "transferFee": "",
-    "transferNotes": "",
+    "transferFee": "₹13.00 Cr",
+    "transferNotes": "Retained by KKR (Slab 1 · ₹13.00 Cr)",
     "lastAuctionYear": null,
     "stats": {
       "matches": 58,
@@ -1124,7 +1127,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "41",
@@ -1173,7 +1176,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "14",
@@ -1222,7 +1225,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "29",
@@ -1271,7 +1274,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "111",
@@ -1290,8 +1293,8 @@
     "battingStyle": "Right-handed bat",
     "bowlingStyle": "Right-arm off-break",
     "transferAcquiredVia": "",
-    "transferFee": "",
-    "transferNotes": "",
+    "transferFee": "₹16.50 Cr",
+    "transferNotes": "Retained by GT (Captain · ₹16.50 Cr)",
     "lastAuctionYear": null,
     "stats": {
       "matches": 118,
@@ -1320,7 +1323,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "42",
@@ -1369,7 +1372,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "160",
@@ -1418,7 +1421,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "300",
@@ -1467,7 +1470,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "135",
@@ -1516,7 +1519,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "279",
@@ -1565,7 +1568,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "158",
@@ -1614,7 +1617,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "253",
@@ -1663,7 +1666,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "112",
@@ -1712,7 +1715,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "106",
@@ -1761,7 +1764,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "267",
@@ -1810,7 +1813,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "85",
@@ -1859,7 +1862,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "237",
@@ -1908,7 +1911,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "294",
@@ -1957,7 +1960,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "301",
@@ -2006,7 +2009,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "19",
@@ -2055,7 +2058,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "162",
@@ -2104,7 +2107,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "70",
@@ -2153,7 +2156,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "156",
@@ -2202,7 +2205,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "72",
@@ -2251,7 +2254,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "73",
@@ -2300,7 +2303,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "311",
@@ -2349,7 +2352,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "295",
@@ -2398,7 +2401,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "283",
@@ -2447,12 +2450,12 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "94",
     "name": "MS Dhoni",
-    "role": "Wicket-keeper",
+    "role": "Mentor & Wicketkeeper",
     "allRounderType": "",
     "teamId": "10",
     "team": "Chennai Super Kings",
@@ -2467,7 +2470,7 @@
     "bowlingStyle": "Right-arm medium",
     "transferAcquiredVia": "auction",
     "transferFee": "",
-    "transferNotes": "",
+    "transferNotes": "Retired from active playing; CSK Mentor for 2027 season",
     "lastAuctionYear": null,
     "stats": {
       "matches": 278,
@@ -2496,7 +2499,8 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Mentor",
+    "cricbuzzUrl": "https://www.cricbuzz.com/profiles/265/ms-dhoni"
   },
   {
     "id": "121",
@@ -2545,7 +2549,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "86",
@@ -2564,8 +2568,8 @@
     "battingStyle": "Right-handed bat",
     "bowlingStyle": "Right-arm off-break",
     "transferAcquiredVia": "auction",
-    "transferFee": "",
-    "transferNotes": "",
+    "transferFee": "₹23.00 Cr",
+    "transferNotes": "Retained by SRH (Slab 1 · ₹23.00 Cr)",
     "lastAuctionYear": null,
     "stats": {
       "matches": 49,
@@ -2594,7 +2598,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "128",
@@ -2643,7 +2647,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "36",
@@ -2692,7 +2696,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "144",
@@ -2741,7 +2745,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "172",
@@ -2790,7 +2794,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "105",
@@ -2839,7 +2843,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "33",
@@ -2888,7 +2892,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "7",
@@ -2937,7 +2941,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "115",
@@ -2956,8 +2960,8 @@
     "battingStyle": "Left-handed bat",
     "bowlingStyle": "Right-arm off-break",
     "transferAcquiredVia": "",
-    "transferFee": "",
-    "transferNotes": "",
+    "transferFee": "₹21.00 Cr",
+    "transferNotes": "Retained by LSG (Slab 1 · ₹21.00 Cr)",
     "lastAuctionYear": null,
     "stats": {
       "matches": 90,
@@ -2986,7 +2990,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "196",
@@ -3035,7 +3039,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "143",
@@ -3084,7 +3088,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "123",
@@ -3133,7 +3137,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "142",
@@ -3182,7 +3186,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "195",
@@ -3231,7 +3235,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "296",
@@ -3280,7 +3284,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "245",
@@ -3329,7 +3333,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "307",
@@ -3378,7 +3382,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "170",
@@ -3427,7 +3431,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "171",
@@ -3476,7 +3480,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "120",
@@ -3525,7 +3529,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "97",
@@ -3574,7 +3578,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "98",
@@ -3623,7 +3627,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "71",
@@ -3672,7 +3676,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "108",
@@ -3721,7 +3725,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "38",
@@ -3770,7 +3774,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "141",
@@ -3819,7 +3823,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "15",
@@ -3868,7 +3872,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "169",
@@ -3917,7 +3921,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "17",
@@ -3966,7 +3970,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "168",
@@ -4015,7 +4019,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "290",
@@ -4064,7 +4068,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "315",
@@ -4113,7 +4117,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "31",
@@ -4162,7 +4166,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "140",
@@ -4211,7 +4215,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "137",
@@ -4260,7 +4264,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "119",
@@ -4309,7 +4313,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "113",
@@ -4358,7 +4362,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "93",
@@ -4407,16 +4411,16 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "299",
     "name": "Liam Livingstone",
     "role": "All-rounder",
     "allRounderType": "Batting All-rounder",
-    "teamId": "3",
-    "team": "Sunrisers Hyderabad",
-    "teamShortName": "SRH",
+    "teamId": "10",
+    "team": "Chennai Super Kings",
+    "teamShortName": "CSK",
     "league": "ipl",
     "age": 32,
     "dateOfBirth": "1993-08-04",
@@ -4425,9 +4429,9 @@
     "isCaptain": false,
     "battingStyle": "Right-handed bat",
     "bowlingStyle": "Right-arm leg-break",
-    "transferAcquiredVia": "",
-    "transferFee": "",
-    "transferNotes": "",
+    "transferAcquiredVia": "trade",
+    "transferFee": "₹8.75 Cr",
+    "transferNotes": "Official Trade to CSK for ₹8.75 Cr",
     "lastAuctionYear": null,
     "stats": {
       "matches": 49,
@@ -4456,16 +4460,16 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Traded"
   },
   {
     "id": "83",
     "name": "Hardik Pandya",
     "role": "All-rounder",
     "allRounderType": "Batting All-rounder",
-    "teamId": "2",
-    "team": "Mumbai Indians",
-    "teamShortName": "MI",
+    "teamId": "5",
+    "team": "Punjab Kings",
+    "teamShortName": "PBKS",
     "league": "ipl",
     "age": 32,
     "dateOfBirth": "1993-10-11",
@@ -4474,9 +4478,9 @@
     "isCaptain": true,
     "battingStyle": "Right-handed bat",
     "bowlingStyle": "Right-arm fast-medium",
-    "transferAcquiredVia": "auction",
-    "transferFee": "",
-    "transferNotes": "",
+    "transferAcquiredVia": "trade",
+    "transferFee": "₹18.00 Cr",
+    "transferNotes": "Blockbuster Trade: MI ➔ PBKS (₹18.00 Cr player swap with Arshdeep Singh)",
     "lastAuctionYear": null,
     "stats": {
       "matches": 152,
@@ -4505,7 +4509,8 @@
       "fiveWickets": 1
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Traded",
+    "cricbuzzUrl": "https://www.cricbuzz.com/profiles/9647/hardik-pandya"
   },
   {
     "id": "280",
@@ -4554,7 +4559,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "230",
@@ -4603,7 +4608,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "10",
@@ -4652,7 +4657,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "114",
@@ -4701,7 +4706,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "187",
@@ -4750,7 +4755,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "104",
@@ -4799,7 +4804,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "222",
@@ -4848,7 +4853,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "165",
@@ -4897,7 +4902,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "263",
@@ -4946,7 +4951,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "227",
@@ -4995,7 +5000,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "211",
@@ -5044,7 +5049,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "20",
@@ -5093,7 +5098,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "118",
@@ -5142,7 +5147,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "68",
@@ -5191,7 +5196,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "88",
@@ -5240,7 +5245,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "285",
@@ -5289,7 +5294,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "308",
@@ -5338,7 +5343,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "163",
@@ -5387,7 +5392,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "107",
@@ -5436,7 +5441,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "304",
@@ -5485,7 +5490,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "268",
@@ -5534,7 +5539,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "271",
@@ -5583,7 +5588,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "90",
@@ -5632,7 +5637,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "16",
@@ -5681,7 +5686,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "260",
@@ -5701,7 +5706,7 @@
     "bowlingStyle": "Left-arm orthodox",
     "transferAcquiredVia": "",
     "transferFee": "",
-    "transferNotes": "",
+    "transferNotes": "Knee surgery rehabilitation; withdrawn from IPL 2027 season",
     "lastAuctionYear": null,
     "stats": {
       "matches": 2,
@@ -5730,7 +5735,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Withdrawn"
   },
   {
     "id": "166",
@@ -5779,7 +5784,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "241",
@@ -5828,7 +5833,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "269",
@@ -5877,7 +5882,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "102",
@@ -5926,7 +5931,7 @@
       "fiveWickets": 1
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "101",
@@ -5975,7 +5980,7 @@
       "fiveWickets": 1
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "92",
@@ -5994,8 +5999,8 @@
     "battingStyle": "Left-handed bat",
     "bowlingStyle": "Left-arm orthodox",
     "transferAcquiredVia": "",
-    "transferFee": "",
-    "transferNotes": "",
+    "transferFee": "₹18.00 Cr",
+    "transferNotes": "Retained by CSK (Slab 1 · ₹18.00 Cr)",
     "lastAuctionYear": null,
     "stats": {
       "matches": 254,
@@ -6024,7 +6029,7 @@
       "fiveWickets": 1
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "247",
@@ -6073,7 +6078,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "212",
@@ -6122,7 +6127,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "192",
@@ -6171,7 +6176,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "291",
@@ -6220,7 +6225,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "11",
@@ -6269,7 +6274,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "246",
@@ -6318,7 +6323,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "255",
@@ -6367,7 +6372,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "95",
@@ -6416,7 +6421,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "274",
@@ -6465,7 +6470,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "292",
@@ -6514,7 +6519,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "223",
@@ -6563,7 +6568,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "256",
@@ -6612,7 +6617,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "8",
@@ -6661,7 +6666,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "229",
@@ -6710,7 +6715,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "49",
@@ -6759,16 +6764,16 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "22",
     "name": "Wanindu Hasaranga",
     "role": "All-rounder",
     "allRounderType": "Bowling All-rounder",
-    "teamId": "7",
-    "team": "Lucknow Super Giants",
-    "teamShortName": "LSG",
+    "teamId": "",
+    "team": "Auction Pool 2027",
+    "teamShortName": "Pool",
     "league": "ipl",
     "age": 28,
     "dateOfBirth": "1997-07-29",
@@ -6779,7 +6784,7 @@
     "bowlingStyle": "Right-arm leg-break",
     "transferAcquiredVia": "",
     "transferFee": "",
-    "transferNotes": "",
+    "transferNotes": "Released by LSG ahead of 2027 Auction",
     "lastAuctionYear": null,
     "stats": {
       "matches": 37,
@@ -6808,7 +6813,7 @@
       "fiveWickets": 1
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Released"
   },
   {
     "id": "209",
@@ -6857,16 +6862,16 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "190",
     "name": "Sam Curran",
     "role": "All-rounder",
     "allRounderType": "Bowling All-rounder",
-    "teamId": "8",
-    "team": "Rajasthan Royals",
-    "teamShortName": "RR",
+    "teamId": "7",
+    "team": "Lucknow Super Giants",
+    "teamShortName": "LSG",
     "league": "ipl",
     "age": 27,
     "dateOfBirth": "1998-06-03",
@@ -6875,9 +6880,9 @@
     "isCaptain": false,
     "battingStyle": "Left-handed bat",
     "bowlingStyle": "Left-arm fast-medium",
-    "transferAcquiredVia": "",
-    "transferFee": "",
-    "transferNotes": "",
+    "transferAcquiredVia": "trade",
+    "transferFee": "₹18.50 Cr",
+    "transferNotes": "Official Trade: PBKS ➔ LSG for ₹18.50 Cr",
     "lastAuctionYear": null,
     "stats": {
       "matches": 64,
@@ -6906,7 +6911,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Traded"
   },
   {
     "id": "110",
@@ -6925,8 +6930,8 @@
     "battingStyle": "Right-handed bat",
     "bowlingStyle": "Right-arm leg-break",
     "transferAcquiredVia": "",
-    "transferFee": "",
-    "transferNotes": "",
+    "transferFee": "₹18.00 Cr",
+    "transferNotes": "Retained by GT (Slab 1 · ₹18.00 Cr)",
     "lastAuctionYear": null,
     "stats": {
       "matches": 136,
@@ -6955,7 +6960,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "217",
@@ -7004,7 +7009,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "194",
@@ -7053,7 +7058,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "228",
@@ -7102,7 +7107,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "191",
@@ -7151,7 +7156,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "54",
@@ -7200,7 +7205,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "208",
@@ -7249,7 +7254,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "44",
@@ -7298,7 +7303,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "302",
@@ -7347,7 +7352,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "12",
@@ -7396,7 +7401,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "50",
@@ -7445,7 +7450,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "286",
@@ -7494,7 +7499,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "60",
@@ -7543,7 +7548,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "309",
@@ -7592,7 +7597,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "59",
@@ -7641,7 +7646,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "224",
@@ -7690,7 +7695,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "233",
@@ -7739,16 +7744,16 @@
       "fiveWickets": 1
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "126",
     "name": "Mitchell Starc",
     "role": "Bowler",
     "allRounderType": "",
-    "teamId": "6",
-    "team": "Delhi Capitals",
-    "teamShortName": "DC",
+    "teamId": "",
+    "team": "Auction Pool 2027",
+    "teamShortName": "Pool",
     "league": "ipl",
     "age": 36,
     "dateOfBirth": "1990-01-30",
@@ -7759,7 +7764,7 @@
     "bowlingStyle": "Left-arm fast",
     "transferAcquiredVia": "",
     "transferFee": "",
-    "transferNotes": "",
+    "transferNotes": "Released by DC into 2027 Auction Pool",
     "lastAuctionYear": null,
     "stats": {
       "matches": 51,
@@ -7788,7 +7793,7 @@
       "fiveWickets": 1
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Released"
   },
   {
     "id": "201",
@@ -7837,7 +7842,7 @@
       "fiveWickets": 2
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "127",
@@ -7886,16 +7891,16 @@
       "fiveWickets": 1
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "288",
     "name": "Mohammed Shami",
     "role": "Bowler",
     "allRounderType": "",
-    "teamId": "7",
-    "team": "Lucknow Super Giants",
-    "teamShortName": "LSG",
+    "teamId": "8",
+    "team": "Rajasthan Royals",
+    "teamShortName": "RR",
     "league": "ipl",
     "age": 35,
     "dateOfBirth": "1990-09-03",
@@ -7904,9 +7909,9 @@
     "isCaptain": false,
     "battingStyle": "Right-handed bat",
     "bowlingStyle": "Right-arm fast",
-    "transferAcquiredVia": "",
-    "transferFee": "",
-    "transferNotes": "",
+    "transferAcquiredVia": "trade",
+    "transferFee": "₹10.00 Cr",
+    "transferNotes": "Official Trade: GT ➔ RR for ₹10.00 Cr",
     "lastAuctionYear": null,
     "stats": {
       "matches": 119,
@@ -7935,7 +7940,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Traded"
   },
   {
     "id": "139",
@@ -7984,7 +7989,7 @@
       "fiveWickets": 1
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "147",
@@ -8033,7 +8038,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "150",
@@ -8082,7 +8087,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "200",
@@ -8131,7 +8136,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "100",
@@ -8180,7 +8185,7 @@
       "fiveWickets": 1
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "303",
@@ -8229,7 +8234,7 @@
       "fiveWickets": 2
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "27",
@@ -8278,7 +8283,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "264",
@@ -8327,7 +8332,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "18",
@@ -8376,16 +8381,16 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "197",
     "name": "Deepak Chahar",
     "role": "Bowler",
     "allRounderType": "",
-    "teamId": "2",
-    "team": "Mumbai Indians",
-    "teamShortName": "MI",
+    "teamId": "",
+    "team": "Auction Pool 2027",
+    "teamShortName": "Pool",
     "league": "ipl",
     "age": 33,
     "dateOfBirth": "1992-08-07",
@@ -8396,7 +8401,7 @@
     "bowlingStyle": "Right-arm fast-medium",
     "transferAcquiredVia": "auction",
     "transferFee": "",
-    "transferNotes": "",
+    "transferNotes": "Released by MI ahead of 2027 Auction",
     "lastAuctionYear": null,
     "stats": {
       "matches": 95,
@@ -8425,7 +8430,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Released"
   },
   {
     "id": "293",
@@ -8474,7 +8479,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "28",
@@ -8523,7 +8528,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "306",
@@ -8542,8 +8547,8 @@
     "battingStyle": "Right-handed bat",
     "bowlingStyle": "Right-arm fast",
     "transferAcquiredVia": "",
-    "transferFee": "",
-    "transferNotes": "",
+    "transferFee": "₹18.00 Cr",
+    "transferNotes": "Retained by SRH (Captain · ₹18.00 Cr)",
     "lastAuctionYear": null,
     "stats": {
       "matches": 72,
@@ -8572,7 +8577,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "48",
@@ -8621,7 +8626,7 @@
       "fiveWickets": 1
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "180",
@@ -8670,7 +8675,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "202",
@@ -8719,7 +8724,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "23",
@@ -8768,7 +8773,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "130",
@@ -8817,7 +8822,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "310",
@@ -8866,7 +8871,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "30",
@@ -8915,7 +8920,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "234",
@@ -8964,7 +8969,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "265",
@@ -9013,16 +9018,16 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "96",
     "name": "Kuldeep Yadav",
     "role": "Bowler",
     "allRounderType": "",
-    "teamId": "6",
-    "team": "Delhi Capitals",
-    "teamShortName": "DC",
+    "teamId": "7",
+    "team": "Lucknow Super Giants",
+    "teamShortName": "LSG",
     "league": "ipl",
     "age": 31,
     "dateOfBirth": "1994-12-14",
@@ -9031,9 +9036,9 @@
     "isCaptain": false,
     "battingStyle": "Left-handed bat",
     "bowlingStyle": "Left-arm wrist-spin",
-    "transferAcquiredVia": "",
-    "transferFee": "",
-    "transferNotes": "",
+    "transferAcquiredVia": "trade",
+    "transferFee": "₹13.25 Cr",
+    "transferNotes": "Official Trade: DC ➔ LSG for ₹13.25 Cr",
     "lastAuctionYear": null,
     "stats": {
       "matches": 98,
@@ -9062,7 +9067,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Traded"
   },
   {
     "id": "24",
@@ -9111,7 +9116,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "287",
@@ -9160,7 +9165,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "199",
@@ -9209,7 +9214,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "124",
@@ -9258,7 +9263,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "261",
@@ -9307,7 +9312,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "289",
@@ -9356,7 +9361,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "6",
@@ -9405,7 +9410,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "159",
@@ -9454,7 +9459,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "231",
@@ -9503,7 +9508,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "149",
@@ -9552,7 +9557,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "25",
@@ -9601,7 +9606,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "216",
@@ -9650,7 +9655,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "244",
@@ -9699,7 +9704,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "313",
@@ -9748,7 +9753,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "250",
@@ -9797,16 +9802,16 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "148",
     "name": "Avesh Khan",
     "role": "Bowler",
     "allRounderType": "",
-    "teamId": "7",
-    "team": "Lucknow Super Giants",
-    "teamShortName": "LSG",
+    "teamId": "",
+    "team": "Auction Pool 2027",
+    "teamShortName": "Pool",
     "league": "ipl",
     "age": 29,
     "dateOfBirth": "1996-12-13",
@@ -9817,7 +9822,7 @@
     "bowlingStyle": "Right-arm fast",
     "transferAcquiredVia": "",
     "transferFee": "",
-    "transferNotes": "",
+    "transferNotes": "Released by LSG ahead of 2027 Auction",
     "lastAuctionYear": null,
     "stats": {
       "matches": 75,
@@ -9846,7 +9851,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Released"
   },
   {
     "id": "35",
@@ -9895,7 +9900,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "179",
@@ -9944,7 +9949,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "277",
@@ -9993,7 +9998,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "239",
@@ -10042,7 +10047,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "181",
@@ -10091,7 +10096,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "145",
@@ -10140,7 +10145,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "80",
@@ -10189,7 +10194,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "173",
@@ -10238,7 +10243,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "219",
@@ -10287,7 +10292,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "117",
@@ -10336,7 +10341,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "46",
@@ -10385,7 +10390,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "312",
@@ -10434,7 +10439,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "275",
@@ -10483,7 +10488,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "178",
@@ -10532,16 +10537,16 @@
       "fiveWickets": 1
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "125",
     "name": "Arshdeep Singh",
     "role": "Bowler",
     "allRounderType": "",
-    "teamId": "5",
-    "team": "Punjab Kings",
-    "teamShortName": "PBKS",
+    "teamId": "2",
+    "team": "Mumbai Indians",
+    "teamShortName": "MI",
     "league": "ipl",
     "age": 27,
     "dateOfBirth": "1999-02-05",
@@ -10550,9 +10555,9 @@
     "isCaptain": false,
     "battingStyle": "Left-handed bat",
     "bowlingStyle": "Left-arm fast-medium",
-    "transferAcquiredVia": "",
-    "transferFee": "",
-    "transferNotes": "",
+    "transferAcquiredVia": "trade",
+    "transferFee": "₹18.00 Cr",
+    "transferNotes": "Blockbuster Trade: PBKS ➔ MI (₹18.00 Cr player swap with Hardik Pandya)",
     "lastAuctionYear": null,
     "stats": {
       "matches": 82,
@@ -10581,7 +10586,8 @@
       "fiveWickets": 1
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Traded",
+    "cricbuzzUrl": "https://www.cricbuzz.com/profiles/13217/arshdeep-singh"
   },
   {
     "id": "13",
@@ -10630,7 +10636,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "232",
@@ -10679,7 +10685,7 @@
       "fiveWickets": 1
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "220",
@@ -10728,7 +10734,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "305",
@@ -10777,7 +10783,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "62",
@@ -10826,7 +10832,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "174",
@@ -10875,7 +10881,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "215",
@@ -10924,7 +10930,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "9",
@@ -10973,7 +10979,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "64",
@@ -11022,7 +11028,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "40",
@@ -11071,7 +11077,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "284",
@@ -11120,7 +11126,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "61",
@@ -11169,7 +11175,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "242",
@@ -11218,7 +11224,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "273",
@@ -11267,7 +11273,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "103",
@@ -11316,7 +11322,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "298",
@@ -11365,7 +11371,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "243",
@@ -11414,7 +11420,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "116",
@@ -11463,7 +11469,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "39",
@@ -11512,7 +11518,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "185",
@@ -11561,7 +11567,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "56",
@@ -11610,7 +11616,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "74",
@@ -11659,7 +11665,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "55",
@@ -11708,16 +11714,16 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "2",
     "name": "Matheesha Pathirana",
     "role": "Bowler",
     "allRounderType": "",
-    "teamId": "9",
-    "team": "Kolkata Knight Riders",
-    "teamShortName": "KKR",
+    "teamId": "",
+    "team": "Auction Pool 2027",
+    "teamShortName": "Pool",
     "league": "ipl",
     "age": 23,
     "dateOfBirth": "2002-12-18",
@@ -11728,7 +11734,7 @@
     "bowlingStyle": "Right-arm fast",
     "transferAcquiredVia": "auction",
     "transferFee": "",
-    "transferNotes": "",
+    "transferNotes": "Released by KKR ahead of 2027 Auction (opens ₹18.00 Cr purse)",
     "lastAuctionYear": null,
     "stats": {
       "matches": 32,
@@ -11757,7 +11763,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Released"
   },
   {
     "id": "182",
@@ -11806,7 +11812,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "57",
@@ -11855,7 +11861,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "52",
@@ -11904,7 +11910,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "257",
@@ -11953,7 +11959,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "297",
@@ -12002,7 +12008,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "151",
@@ -12051,7 +12057,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "37",
@@ -12100,7 +12106,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "316",
@@ -12149,7 +12155,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "203",
@@ -12198,7 +12204,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "249",
@@ -12247,7 +12253,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "63",
@@ -12296,7 +12302,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "81",
@@ -12315,8 +12321,8 @@
     "battingStyle": "",
     "bowlingStyle": "",
     "transferAcquiredVia": "",
-    "transferFee": "",
-    "transferNotes": "",
+    "transferFee": "₹18.00 Cr",
+    "transferNotes": "Retained by MI (Slab 1 · ₹18.00 Cr)",
     "lastAuctionYear": null,
     "stats": {
       "matches": 145,
@@ -12345,16 +12351,17 @@
       "fiveWickets": 2
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained",
+    "cricbuzzUrl": "https://www.cricbuzz.com/profiles/9311/jasprit-bumrah"
   },
   {
     "id": "146",
     "name": "Trent Boult",
     "role": "Bowler",
     "allRounderType": "",
-    "teamId": "2",
-    "team": "Mumbai Indians",
-    "teamShortName": "MI",
+    "teamId": "",
+    "team": "Auction Pool 2027",
+    "teamShortName": "Pool",
     "league": "ipl",
     "age": null,
     "dateOfBirth": "",
@@ -12365,7 +12372,7 @@
     "bowlingStyle": "",
     "transferAcquiredVia": "",
     "transferFee": "",
-    "transferNotes": "",
+    "transferNotes": "Released by MI ahead of 2027 Auction",
     "lastAuctionYear": null,
     "stats": {
       "matches": 119,
@@ -12394,7 +12401,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Released"
   },
   {
     "id": "45",
@@ -12443,7 +12450,7 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   },
   {
     "id": "67",
@@ -12492,6 +12499,6 @@
       "fiveWickets": 0
     },
     "isActiveInSquad": true,
-    "squadStatus": "active"
+    "squadStatus": "Retained"
   }
 ]

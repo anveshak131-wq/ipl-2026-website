@@ -16,8 +16,8 @@
     "battingStyle": "Right-handed bat",
     "bowlingStyle": "Right-arm off-break",
     "transferAcquiredVia": "auction",
-    "transferFee": "",
-    "transferNotes": "",
+    "transferFee": "₹16.30 Cr",
+    "transferNotes": "Retained by MI (₹16.30 Cr)",
     "lastAuctionYear": null,
     "stats": {
       "matches": 281,
@@ -34,7 +34,7 @@
       "bestBowling": "4/6"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "rohit-sharma",
     "bio": {
@@ -200,16 +200,17 @@
     "economy": 8.02,
     "teamName": "Mumbai Indians",
     "highestScore": 109,
-    "bestBowling": "4/6"
+    "bestBowling": "4/6",
+    "cricbuzzUrl": "https://www.cricbuzz.com/profiles/84/rohit-sharma"
   },
   {
     "id": "189",
     "name": "Ajinkya Rahane",
     "role": "Batsman",
     "allRounderType": "",
-    "teamId": "9",
-    "team": "9",
-    "teamShortName": "KKR",
+    "teamId": "",
+    "team": "Auction Pool 2027",
+    "teamShortName": "Pool",
     "league": "ipl",
     "age": 37,
     "dateOfBirth": "1988-06-06",
@@ -220,7 +221,7 @@
     "bowlingStyle": "Right-arm medium",
     "transferAcquiredVia": "",
     "transferFee": "",
-    "transferNotes": "",
+    "transferNotes": "Released by KKR ahead of 2027 Auction",
     "lastAuctionYear": null,
     "stats": {
       "matches": 212,
@@ -237,7 +238,7 @@
       "bestBowling": "1/5"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Released",
     "isKeeper": false,
     "slug": "ajinkya-rahane",
     "bio": {
@@ -422,8 +423,8 @@
     "battingStyle": "Right-handed bat",
     "bowlingStyle": "Right-arm medium",
     "transferAcquiredVia": "",
-    "transferFee": "",
-    "transferNotes": "",
+    "transferFee": "₹21.00 Cr",
+    "transferNotes": "Retained by RCB (Slab 1 · ₹21.00 Cr)",
     "lastAuctionYear": null,
     "stats": {
       "matches": 283,
@@ -440,7 +441,7 @@
       "bestBowling": "2/25"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "virat-kohli",
     "bio": {
@@ -606,7 +607,8 @@
     "economy": 8.8,
     "teamName": "Royal Challengers Bangalore",
     "highestScore": 113,
-    "bestBowling": "2/25"
+    "bestBowling": "2/25",
+    "cricbuzzUrl": "https://www.cricbuzz.com/profiles/1413/virat-kohli"
   },
   {
     "id": "21",
@@ -643,7 +645,7 @@
       "bestBowling": "-/-"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "david-miller",
     "bio": {
@@ -846,7 +848,7 @@
       "bestBowling": "-/-"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "manish-pandey",
     "bio": {
@@ -1031,8 +1033,8 @@
     "battingStyle": "Right-handed bat",
     "bowlingStyle": "Right-arm off-break",
     "transferAcquiredVia": "auction",
-    "transferFee": "",
-    "transferNotes": "",
+    "transferFee": "₹16.35 Cr",
+    "transferNotes": "Retained by MI (Captain)",
     "lastAuctionYear": null,
     "stats": {
       "matches": 179,
@@ -1049,7 +1051,7 @@
       "bestBowling": "0/8"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "suryakumar-yadav",
     "bio": {
@@ -1215,7 +1217,8 @@
     "economy": 8,
     "teamName": "Mumbai Indians",
     "highestScore": 103,
-    "bestBowling": "0/8"
+    "bestBowling": "0/8",
+    "cricbuzzUrl": "https://www.cricbuzz.com/profiles/7915/suryakumar-yadav"
   },
   {
     "id": "43",
@@ -1252,7 +1255,7 @@
       "bestBowling": "0/12"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "rahul-tripathi",
     "bio": {
@@ -1455,7 +1458,7 @@
       "bestBowling": "-/-"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "karun-nair",
     "bio": {
@@ -1658,7 +1661,7 @@
       "bestBowling": "-/-"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "rajat-patidar",
     "bio": {
@@ -1861,7 +1864,7 @@
       "bestBowling": "1/18"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "rovman-powell",
     "bio": {
@@ -2064,7 +2067,7 @@
       "bestBowling": "2/11"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "nitish-rana",
     "bio": {
@@ -2237,9 +2240,9 @@
     "name": "Travis Head",
     "role": "Batsman",
     "allRounderType": "",
-    "teamId": "3",
-    "team": "3",
-    "teamShortName": "SRH",
+    "teamId": "",
+    "team": "Auction Pool 2027",
+    "teamShortName": "Pool",
     "league": "ipl",
     "age": 32,
     "dateOfBirth": "1993-12-29",
@@ -2250,7 +2253,7 @@
     "bowlingStyle": "Right-arm off-break",
     "transferAcquiredVia": "auction",
     "transferFee": "",
-    "transferNotes": "",
+    "transferNotes": "Opted out / Released by SRH for international workload management",
     "lastAuctionYear": null,
     "stats": {
       "matches": 53,
@@ -2267,7 +2270,7 @@
       "bestBowling": "2/30"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Released",
     "isKeeper": false,
     "slug": "travis-head",
     "bio": {
@@ -2470,7 +2473,7 @@
       "bestBowling": "-/-"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "shubham-dubey",
     "bio": {
@@ -2673,7 +2676,7 @@
       "bestBowling": "2/30"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "aiden-markram",
     "bio": {
@@ -2876,7 +2879,7 @@
       "bestBowling": "-/-"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "ben-duckett",
     "bio": {
@@ -3079,7 +3082,7 @@
       "bestBowling": "0/7"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "shreyas-iyer",
     "bio": {
@@ -3282,7 +3285,7 @@
       "bestBowling": "0/1"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "matthew-short",
     "bio": {
@@ -3485,7 +3488,7 @@
       "bestBowling": "0/18"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "tim-david",
     "bio": {
@@ -3688,7 +3691,7 @@
       "bestBowling": "-"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "sarthak-ranjan",
     "bio": {
@@ -3891,7 +3894,7 @@
       "bestBowling": "-/-"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "himmat-singh",
     "bio": {
@@ -4064,9 +4067,9 @@
     "name": "Shimron Hetmyer",
     "role": "Batsman",
     "allRounderType": "",
-    "teamId": "8",
-    "team": "8",
-    "teamShortName": "RR",
+    "teamId": "",
+    "team": "Auction Pool 2027",
+    "teamShortName": "Pool",
     "league": "ipl",
     "age": 29,
     "dateOfBirth": "1996-12-26",
@@ -4077,7 +4080,7 @@
     "bowlingStyle": "N/A (Batsman)",
     "transferAcquiredVia": "",
     "transferFee": "",
-    "transferNotes": "",
+    "transferNotes": "Released by RR ahead of 2027 Auction",
     "lastAuctionYear": null,
     "stats": {
       "matches": 94,
@@ -4094,7 +4097,7 @@
       "bestBowling": "-/-"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Released",
     "isKeeper": false,
     "slug": "shimron-hetmyer",
     "bio": {
@@ -4279,8 +4282,8 @@
     "battingStyle": "Right-handed bat",
     "bowlingStyle": "Right-arm off-break",
     "transferAcquiredVia": "auction",
-    "transferFee": "",
-    "transferNotes": "",
+    "transferFee": "₹18.00 Cr",
+    "transferNotes": "Retained by CSK (Captain · ₹18.00 Cr)",
     "lastAuctionYear": null,
     "stats": {
       "matches": 85,
@@ -4297,7 +4300,7 @@
       "bestBowling": "-/-"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "ruturaj-gaikwad",
     "bio": {
@@ -4482,8 +4485,8 @@
     "battingStyle": "Left-handed bat",
     "bowlingStyle": "Right-arm off-break",
     "transferAcquiredVia": "auction",
-    "transferFee": "",
-    "transferNotes": "",
+    "transferFee": "₹13.00 Cr",
+    "transferNotes": "Retained by KKR (Slab 1 · ₹13.00 Cr)",
     "lastAuctionYear": null,
     "stats": {
       "matches": 72,
@@ -4500,7 +4503,7 @@
       "bestBowling": "-/-"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "rinku-singh",
     "bio": {
@@ -4703,7 +4706,7 @@
       "bestBowling": "0/6"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "sarfaraz-khan",
     "bio": {
@@ -4906,7 +4909,7 @@
       "bestBowling": "-/-"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "pathum-nissanka",
     "bio": {
@@ -5109,7 +5112,7 @@
       "bestBowling": "-/-"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "finn-allen",
     "bio": {
@@ -5294,8 +5297,8 @@
     "battingStyle": "Right-handed bat",
     "bowlingStyle": "Right-arm off-break",
     "transferAcquiredVia": "",
-    "transferFee": "",
-    "transferNotes": "",
+    "transferFee": "₹16.50 Cr",
+    "transferNotes": "Retained by GT (Captain · ₹16.50 Cr)",
     "lastAuctionYear": null,
     "stats": {
       "matches": 134,
@@ -5312,7 +5315,7 @@
       "bestBowling": "-/-"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "shubman-gill",
     "bio": {
@@ -5515,7 +5518,7 @@
       "bestBowling": "-/-"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "prithvi-shaw",
     "bio": {
@@ -5718,7 +5721,7 @@
       "bestBowling": "0/9"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "naman-dhir",
     "bio": {
@@ -5921,7 +5924,7 @@
       "bestBowling": "-/-"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "jack-edwards",
     "bio": {
@@ -6124,7 +6127,7 @@
       "bestBowling": "-/-"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "devdutt-padikkal",
     "bio": {
@@ -6327,7 +6330,7 @@
       "bestBowling": "-"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "pyla-avinash",
     "bio": {
@@ -6530,7 +6533,7 @@
       "bestBowling": "0/9"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "nehal-wadhera",
     "bio": {
@@ -6733,7 +6736,7 @@
       "bestBowling": "-/-"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "priyansh-arya",
     "bio": {
@@ -6936,7 +6939,7 @@
       "bestBowling": "-/-"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "sai-sudharsan",
     "bio": {
@@ -7139,7 +7142,7 @@
       "bestBowling": "0/6"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "yashasvi-jaiswal",
     "bio": {
@@ -7342,7 +7345,7 @@
       "bestBowling": "-/-"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "aniket-verma",
     "bio": {
@@ -7545,7 +7548,7 @@
       "bestBowling": "0/6"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "tilak-varma",
     "bio": {
@@ -7748,7 +7751,7 @@
       "bestBowling": "-"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "harnoor-singh",
     "bio": {
@@ -7951,7 +7954,7 @@
       "bestBowling": "1/8"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "dewald-brevis",
     "bio": {
@@ -8154,7 +8157,7 @@
       "bestBowling": "-/-"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "smaran-ravichandran",
     "bio": {
@@ -8357,7 +8360,7 @@
       "bestBowling": "-/-"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "akshat-raghuwanshi",
     "bio": {
@@ -8560,7 +8563,7 @@
       "bestBowling": "-/-"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "sameer-rizvi",
     "bio": {
@@ -8763,7 +8766,7 @@
       "bestBowling": "-"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "aman-rao-perala",
     "bio": {
@@ -8966,7 +8969,7 @@
       "bestBowling": "-/-"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "angkrish-raghuvanshi",
     "bio": {
@@ -9169,7 +9172,7 @@
       "bestBowling": "-"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "kanishk-chouhan",
     "bio": {
@@ -9372,7 +9375,7 @@
       "bestBowling": "-"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "vihaan-malhotra",
     "bio": {
@@ -9575,7 +9578,7 @@
       "bestBowling": "-/-"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "sahil-parakh",
     "bio": {
@@ -9778,7 +9781,7 @@
       "bestBowling": "-/-"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "ayush-mhatre",
     "bio": {
@@ -9981,7 +9984,7 @@
       "bestBowling": "-/-"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "vaibhav-sooryavanshi",
     "bio": {
@@ -10152,7 +10155,7 @@
   {
     "id": "94",
     "name": "MS Dhoni",
-    "role": "Wicket-keeper",
+    "role": "Mentor & Wicketkeeper",
     "allRounderType": "",
     "teamId": "10",
     "team": "10",
@@ -10167,7 +10170,7 @@
     "bowlingStyle": "Right-arm medium",
     "transferAcquiredVia": "auction",
     "transferFee": "",
-    "transferNotes": "",
+    "transferNotes": "Retired from active playing; CSK Mentor for 2027 season",
     "lastAuctionYear": null,
     "stats": {
       "matches": 278,
@@ -10184,7 +10187,7 @@
       "bestBowling": "-/-"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Mentor",
     "isKeeper": true,
     "slug": "ms-dhoni",
     "bio": {
@@ -10350,7 +10353,8 @@
     "economy": 0,
     "teamName": "Chennai Super Kings",
     "highestScore": 84,
-    "bestBowling": "-/-"
+    "bestBowling": "-/-",
+    "cricbuzzUrl": "https://www.cricbuzz.com/profiles/265/ms-dhoni"
   },
   {
     "id": "121",
@@ -10387,7 +10391,7 @@
       "bestBowling": "-/-"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": true,
     "slug": "jos-buttler",
     "bio": {
@@ -10572,8 +10576,8 @@
     "battingStyle": "Right-handed bat",
     "bowlingStyle": "Right-arm off-break",
     "transferAcquiredVia": "auction",
-    "transferFee": "",
-    "transferNotes": "",
+    "transferFee": "₹23.00 Cr",
+    "transferNotes": "Retained by SRH (Slab 1 · ₹23.00 Cr)",
     "lastAuctionYear": null,
     "stats": {
       "matches": 64,
@@ -10590,7 +10594,7 @@
       "bestBowling": "-/-"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": true,
     "slug": "heinrich-klaasen",
     "bio": {
@@ -10793,7 +10797,7 @@
       "bestBowling": "-/-"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": true,
     "slug": "kl-rahul",
     "bio": {
@@ -10996,7 +11000,7 @@
       "bestBowling": "-/-"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": true,
     "slug": "quinton-de-kock",
     "bio": {
@@ -11199,7 +11203,7 @@
       "bestBowling": "-/-"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": true,
     "slug": "jitesh-sharma",
     "bio": {
@@ -11402,7 +11406,7 @@
       "bestBowling": "-/-"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "vishnu-vinod",
     "bio": {
@@ -11605,7 +11609,7 @@
       "bestBowling": "-/-"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": true,
     "slug": "sanju-samson",
     "bio": {
@@ -11808,7 +11812,7 @@
       "bestBowling": "-/-"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "tim-seifert",
     "bio": {
@@ -12011,7 +12015,7 @@
       "bestBowling": "-/-"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "josh-inglis",
     "bio": {
@@ -12196,8 +12200,8 @@
     "battingStyle": "Left-handed bat",
     "bowlingStyle": "Right-arm off-break",
     "transferAcquiredVia": "",
-    "transferFee": "",
-    "transferNotes": "",
+    "transferFee": "₹21.00 Cr",
+    "transferNotes": "Retained by LSG (Slab 1 · ₹21.00 Cr)",
     "lastAuctionYear": null,
     "stats": {
       "matches": 104,
@@ -12214,7 +12218,7 @@
       "bestBowling": "-/-"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": true,
     "slug": "nicholas-pooran",
     "bio": {
@@ -12417,7 +12421,7 @@
       "bestBowling": "-/-"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": true,
     "slug": "ryan-rickelton",
     "bio": {
@@ -12620,7 +12624,7 @@
       "bestBowling": "-/-"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": true,
     "slug": "phil-salt",
     "bio": {
@@ -12823,7 +12827,7 @@
       "bestBowling": "-/-"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "rishabh-pant",
     "bio": {
@@ -13026,7 +13030,7 @@
       "bestBowling": "0/4"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": true,
     "slug": "ishan-kishan",
     "bio": {
@@ -13229,7 +13233,7 @@
       "bestBowling": "1/14"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "donovan-ferreira",
     "bio": {
@@ -13432,7 +13436,7 @@
       "bestBowling": "-/-"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "urvil-patel",
     "bio": {
@@ -13635,7 +13639,7 @@
       "bestBowling": "-/-"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "matthew-breetzke",
     "bio": {
@@ -13838,7 +13842,7 @@
       "bestBowling": "-/-"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "tom-banton",
     "bio": {
@@ -14041,7 +14045,7 @@
       "bestBowling": "-/-"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "anuj-rawat",
     "bio": {
@@ -14244,7 +14248,7 @@
       "bestBowling": "-"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "luvnith-sisodia",
     "bio": {
@@ -14447,7 +14451,7 @@
       "bestBowling": "-/-"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "prabhsimran-singh",
     "bio": {
@@ -14650,7 +14654,7 @@
       "bestBowling": "2/11"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "tristan-stubbs",
     "bio": {
@@ -14853,7 +14857,7 @@
       "bestBowling": "-/-"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": true,
     "slug": "abishek-porel",
     "bio": {
@@ -15056,7 +15060,7 @@
       "bestBowling": "-/-"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "jordan-cox",
     "bio": {
@@ -15259,7 +15263,7 @@
       "bestBowling": "-/-"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": true,
     "slug": "dhruv-jurel",
     "bio": {
@@ -15462,7 +15466,7 @@
       "bestBowling": "-/-"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "ravi-singh",
     "bio": {
@@ -15665,7 +15669,7 @@
       "bestBowling": "-/-"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": true,
     "slug": "rahmanullah-gurbaz",
     "bio": {
@@ -15868,7 +15872,7 @@
       "bestBowling": "-/-"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "tejasvi-dahiya",
     "bio": {
@@ -16071,7 +16075,7 @@
       "bestBowling": "-/-"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": true,
     "slug": "robin-minz",
     "bio": {
@@ -16274,7 +16278,7 @@
       "bestBowling": "-/-"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "mukul-choudhary",
     "bio": {
@@ -16477,7 +16481,7 @@
       "bestBowling": "-/-"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "kumar-kushagra",
     "bio": {
@@ -16680,7 +16684,7 @@
       "bestBowling": "-/-"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "lhuan-dre-pretorius",
     "bio": {
@@ -16883,7 +16887,7 @@
       "bestBowling": "-/-"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "kartik-sharma",
     "bio": {
@@ -17086,7 +17090,7 @@
       "bestBowling": "-/-"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": true,
     "slug": "salil-arora",
     "bio": {
@@ -17289,7 +17293,7 @@
       "bestBowling": "4/15"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "marcus-stoinis",
     "bio": {
@@ -17492,7 +17496,7 @@
       "bestBowling": "4/25"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "mitchell-marsh",
     "bio": {
@@ -17695,7 +17699,7 @@
       "bestBowling": "2/20"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "shashank-singh",
     "bio": {
@@ -17898,7 +17902,7 @@
       "bestBowling": "3/18"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "rahul-tewatia",
     "bio": {
@@ -18101,7 +18105,7 @@
       "bestBowling": "2/15"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "shivam-dube",
     "bio": {
@@ -18274,9 +18278,9 @@
     "name": "Liam Livingstone",
     "role": "All-rounder",
     "allRounderType": "Batting All-rounder",
-    "teamId": "3",
-    "team": "3",
-    "teamShortName": "SRH",
+    "teamId": "10",
+    "team": "Chennai Super Kings",
+    "teamShortName": "CSK",
     "league": "ipl",
     "age": 32,
     "dateOfBirth": "1993-08-04",
@@ -18285,9 +18289,9 @@
     "isCaptain": false,
     "battingStyle": "Right-handed bat",
     "bowlingStyle": "Right-arm leg-break",
-    "transferAcquiredVia": "",
-    "transferFee": "",
-    "transferNotes": "",
+    "transferAcquiredVia": "trade",
+    "transferFee": "₹8.75 Cr",
+    "transferNotes": "Official Trade to CSK for ₹8.75 Cr",
     "lastAuctionYear": null,
     "stats": {
       "matches": 51,
@@ -18304,7 +18308,7 @@
       "bestBowling": "3/27"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Traded",
     "isKeeper": false,
     "slug": "liam-livingstone",
     "bio": {
@@ -18477,9 +18481,9 @@
     "name": "Hardik Pandya",
     "role": "All-rounder",
     "allRounderType": "Batting All-rounder",
-    "teamId": "2",
-    "team": "2",
-    "teamShortName": "MI",
+    "teamId": "5",
+    "team": "Punjab Kings",
+    "teamShortName": "PBKS",
     "league": "ipl",
     "age": 32,
     "dateOfBirth": "1993-10-11",
@@ -18488,9 +18492,9 @@
     "isCaptain": true,
     "battingStyle": "Right-handed bat",
     "bowlingStyle": "Right-arm fast-medium",
-    "transferAcquiredVia": "auction",
-    "transferFee": "",
-    "transferNotes": "",
+    "transferAcquiredVia": "trade",
+    "transferFee": "₹18.00 Cr",
+    "transferNotes": "Blockbuster Trade: MI ➔ PBKS (₹18.00 Cr player swap with Arshdeep Singh)",
     "lastAuctionYear": null,
     "stats": {
       "matches": 162,
@@ -18507,7 +18511,7 @@
       "bestBowling": "5/36"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Traded",
     "isKeeper": false,
     "slug": "hardik-pandya",
     "bio": {
@@ -18673,7 +18677,8 @@
     "economy": 9.36,
     "teamName": "Mumbai Indians",
     "highestScore": 91,
-    "bestBowling": "5/36"
+    "bestBowling": "5/36",
+    "cricbuzzUrl": "https://www.cricbuzz.com/profiles/9647/hardik-pandya"
   },
   {
     "id": "280",
@@ -18710,7 +18715,7 @@
       "bestBowling": "1/24"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "ramakrishna-ghosh",
     "bio": {
@@ -18913,7 +18918,7 @@
       "bestBowling": "3/54"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "romario-shepherd",
     "bio": {
@@ -19116,7 +19121,7 @@
       "bestBowling": "2/29"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "venkatesh-iyer",
     "bio": {
@@ -19319,7 +19324,7 @@
       "bestBowling": "1/27"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "m-shahrukh-khan",
     "bio": {
@@ -19522,7 +19527,7 @@
       "bestBowling": "1/10"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "glenn-phillips",
     "bio": {
@@ -19725,7 +19730,7 @@
       "bestBowling": "3/20"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "ramandeep-singh",
     "bio": {
@@ -19928,7 +19933,7 @@
       "bestBowling": "1/6"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "sherfane-rutherford",
     "bio": {
@@ -20131,7 +20136,7 @@
       "bestBowling": "-/-"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "ashutosh-sharma",
     "bio": {
@@ -20334,7 +20339,7 @@
       "bestBowling": "1/4"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "kamindu-mendis",
     "bio": {
@@ -20537,7 +20542,7 @@
       "bestBowling": "2/14"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "will-jacks",
     "bio": {
@@ -20740,7 +20745,7 @@
       "bestBowling": "2/19"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "anukul-roy",
     "bio": {
@@ -20943,7 +20948,7 @@
       "bestBowling": "0/3"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "rachin-ravindra",
     "bio": {
@@ -21146,7 +21151,7 @@
       "bestBowling": "2/4"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "ayush-badoni",
     "bio": {
@@ -21349,7 +21354,7 @@
       "bestBowling": "-/-"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "mayank-rawat",
     "bio": {
@@ -21552,7 +21557,7 @@
       "bestBowling": "2/4"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "abhishek-sharma",
     "bio": {
@@ -21755,7 +21760,7 @@
       "bestBowling": "0/29"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "tripurana-vijay",
     "bio": {
@@ -21958,7 +21963,7 @@
       "bestBowling": "-/-"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "mitchell-owen",
     "bio": {
@@ -22161,7 +22166,7 @@
       "bestBowling": "1/9"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "abdul-samad",
     "bio": {
@@ -22364,7 +22369,7 @@
       "bestBowling": "1/5"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "riyan-parag",
     "bio": {
@@ -22567,7 +22572,7 @@
       "bestBowling": "3/33"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "shivang-kumar",
     "bio": {
@@ -22770,7 +22775,7 @@
       "bestBowling": "1/11"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "raj-bawa",
     "bio": {
@@ -22973,7 +22978,7 @@
       "bestBowling": "0/40"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "suryansh-shedge",
     "bio": {
@@ -23176,7 +23181,7 @@
       "bestBowling": "2/17"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "nitish-kumar-reddy",
     "bio": {
@@ -23379,7 +23384,7 @@
       "bestBowling": "-/-"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "cooper-connolly",
     "bio": {
@@ -23565,7 +23570,7 @@
     "bowlingStyle": "Left-arm orthodox",
     "transferAcquiredVia": "",
     "transferFee": "",
-    "transferNotes": "",
+    "transferNotes": "Knee surgery rehabilitation; withdrawn from IPL 2027 season",
     "lastAuctionYear": null,
     "stats": {
       "matches": 9,
@@ -23582,7 +23587,7 @@
       "bestBowling": "-/-"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Withdrawn",
     "isKeeper": false,
     "slug": "jacob-bethell",
     "bio": {
@@ -23785,7 +23790,7 @@
       "bestBowling": "-/-"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "nishant-sindhu",
     "bio": {
@@ -23988,7 +23993,7 @@
       "bestBowling": "-/-"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "arshin-kulkarni",
     "bio": {
@@ -24191,7 +24196,7 @@
       "bestBowling": "1/27"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "musheer-khan",
     "bio": {
@@ -24394,7 +24399,7 @@
       "bestBowling": "5/15"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "andre-russell",
     "bio": {
@@ -24597,7 +24602,7 @@
       "bestBowling": "5/19"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "sunil-narine",
     "bio": {
@@ -24782,8 +24787,8 @@
     "battingStyle": "Left-handed bat",
     "bowlingStyle": "Left-arm orthodox",
     "transferAcquiredVia": "",
-    "transferFee": "",
-    "transferNotes": "",
+    "transferFee": "₹18.00 Cr",
+    "transferNotes": "Retained by CSK (Slab 1 · ₹18.00 Cr)",
     "lastAuctionYear": null,
     "stats": {
       "matches": 268,
@@ -24800,7 +24805,7 @@
       "bestBowling": "5/16"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "ravindra-jadeja",
     "bio": {
@@ -25003,7 +25008,7 @@
       "bestBowling": "1/8"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "jayant-yadav",
     "bio": {
@@ -25206,7 +25211,7 @@
       "bestBowling": "2/28"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "swapnil-singh",
     "bio": {
@@ -25409,7 +25414,7 @@
       "bestBowling": "4/45"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "krunal-pandya",
     "bio": {
@@ -25612,7 +25617,7 @@
       "bestBowling": "4/34"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "shardul-thakur",
     "bio": {
@@ -25815,7 +25820,7 @@
       "bestBowling": "4/24"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "jason-holder",
     "bio": {
@@ -26018,7 +26023,7 @@
       "bestBowling": "3/11"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "mitchell-santner",
     "bio": {
@@ -26221,7 +26226,7 @@
       "bestBowling": "1/19"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "praveen-dubey",
     "bio": {
@@ -26424,7 +26429,7 @@
       "bestBowling": "4/21"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "axar-patel",
     "bio": {
@@ -26627,7 +26632,7 @@
       "bestBowling": "4/18"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "jamie-overton",
     "bio": {
@@ -26830,7 +26835,7 @@
       "bestBowling": "4/26"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "corbin-bosch",
     "bio": {
@@ -27033,7 +27038,7 @@
       "bestBowling": "3/7"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "shahbaz-ahmed",
     "bio": {
@@ -27236,7 +27241,7 @@
       "bestBowling": "-"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "ajay-mandal",
     "bio": {
@@ -27439,7 +27444,7 @@
       "bestBowling": "0/17"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "auqib-nabi",
     "bio": {
@@ -27642,7 +27647,7 @@
       "bestBowling": "4/33"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "sai-kishore",
     "bio": {
@@ -27845,7 +27850,7 @@
       "bestBowling": "4/24"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "aman-khan",
     "bio": {
@@ -28018,9 +28023,9 @@
     "name": "Wanindu Hasaranga",
     "role": "All-rounder",
     "allRounderType": "Bowling All-rounder",
-    "teamId": "7",
-    "team": "7",
-    "teamShortName": "LSG",
+    "teamId": "",
+    "team": "Auction Pool 2027",
+    "teamShortName": "Pool",
     "league": "ipl",
     "age": 28,
     "dateOfBirth": "1997-07-29",
@@ -28031,7 +28036,7 @@
     "bowlingStyle": "Right-arm leg-break",
     "transferAcquiredVia": "",
     "transferFee": "",
-    "transferNotes": "",
+    "transferNotes": "Released by LSG ahead of 2027 Auction",
     "lastAuctionYear": null,
     "stats": {
       "matches": 37,
@@ -28048,7 +28053,7 @@
       "bestBowling": "5/18"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Released",
     "isKeeper": false,
     "slug": "wanindu-hasaranga",
     "bio": {
@@ -28251,7 +28256,7 @@
       "bestBowling": "3/22"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "arshad-khan",
     "bio": {
@@ -28424,9 +28429,9 @@
     "name": "Sam Curran",
     "role": "All-rounder",
     "allRounderType": "Bowling All-rounder",
-    "teamId": "8",
-    "team": "8",
-    "teamShortName": "RR",
+    "teamId": "7",
+    "team": "Lucknow Super Giants",
+    "teamShortName": "LSG",
     "league": "ipl",
     "age": 27,
     "dateOfBirth": "1998-06-03",
@@ -28435,9 +28440,9 @@
     "isCaptain": false,
     "battingStyle": "Left-handed bat",
     "bowlingStyle": "Left-arm fast-medium",
-    "transferAcquiredVia": "",
-    "transferFee": "",
-    "transferNotes": "",
+    "transferAcquiredVia": "trade",
+    "transferFee": "₹18.50 Cr",
+    "transferNotes": "Official Trade: PBKS ➔ LSG for ₹18.50 Cr",
     "lastAuctionYear": null,
     "stats": {
       "matches": 64,
@@ -28454,7 +28459,7 @@
       "bestBowling": "4/11"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Traded",
     "isKeeper": false,
     "slug": "sam-curran",
     "bio": {
@@ -28639,8 +28644,8 @@
     "battingStyle": "Right-handed bat",
     "bowlingStyle": "Right-arm leg-break",
     "transferAcquiredVia": "",
-    "transferFee": "",
-    "transferNotes": "",
+    "transferFee": "₹18.00 Cr",
+    "transferNotes": "Retained by GT (Slab 1 · ₹18.00 Cr)",
     "lastAuctionYear": null,
     "stats": {
       "matches": 153,
@@ -28657,7 +28662,7 @@
       "bestBowling": "4/24"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "rashid-khan",
     "bio": {
@@ -28860,7 +28865,7 @@
       "bestBowling": "1/9"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "arjun-tendulkar",
     "bio": {
@@ -29063,7 +29068,7 @@
       "bestBowling": "3/16"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "washington-sundar",
     "bio": {
@@ -29266,7 +29271,7 @@
       "bestBowling": "2/27"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "azmatullah-omarzai",
     "bio": {
@@ -29469,7 +29474,7 @@
       "bestBowling": "3/17"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "marco-jansen",
     "bio": {
@@ -29672,7 +29677,7 @@
       "bestBowling": "-"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "atharva-ankolekar",
     "bio": {
@@ -29875,7 +29880,7 @@
       "bestBowling": "3/13"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "anshul-kamboj",
     "bio": {
@@ -30078,7 +30083,7 @@
       "bestBowling": "-/-"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "zak-foulkes",
     "bio": {
@@ -30281,7 +30286,7 @@
       "bestBowling": "3/12"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "harsh-dubey",
     "bio": {
@@ -30484,7 +30489,7 @@
       "bestBowling": "-"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "mangesh-yadav",
     "bio": {
@@ -30687,7 +30692,7 @@
       "bestBowling": "-"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "daksh-kamra",
     "bio": {
@@ -30890,7 +30895,7 @@
       "bestBowling": "2/27"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "madhav-tiwari",
     "bio": {
@@ -31093,7 +31098,7 @@
       "bestBowling": "-/-"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "danish-malewar",
     "bio": {
@@ -31296,7 +31301,7 @@
       "bestBowling": "-"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "vishal-nishad",
     "bio": {
@@ -31499,7 +31504,7 @@
       "bestBowling": "-"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "satvik-deswal",
     "bio": {
@@ -31702,7 +31707,7 @@
       "bestBowling": "4/26"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "moeen-ali",
     "bio": {
@@ -31905,7 +31910,7 @@
       "bestBowling": "5/12"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "ishant-sharma",
     "bio": {
@@ -32078,9 +32083,9 @@
     "name": "Mitchell Starc",
     "role": "Bowler",
     "allRounderType": "",
-    "teamId": "6",
-    "team": "6",
-    "teamShortName": "DC",
+    "teamId": "",
+    "team": "Auction Pool 2027",
+    "teamShortName": "Pool",
     "league": "ipl",
     "age": 36,
     "dateOfBirth": "1990-01-30",
@@ -32091,7 +32096,7 @@
     "bowlingStyle": "Left-arm fast",
     "transferAcquiredVia": "",
     "transferFee": "",
-    "transferNotes": "",
+    "transferNotes": "Released by DC into 2027 Auction Pool",
     "lastAuctionYear": null,
     "stats": {
       "matches": 57,
@@ -32108,7 +32113,7 @@
       "bestBowling": "5/35"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Released",
     "isKeeper": false,
     "slug": "mitchell-starc",
     "bio": {
@@ -32311,7 +32316,7 @@
       "bestBowling": "5/19"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "bhuvneshwar-kumar",
     "bio": {
@@ -32514,7 +32519,7 @@
       "bestBowling": "5/40"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "yuzvendra-chahal",
     "bio": {
@@ -32687,9 +32692,9 @@
     "name": "Mohammed Shami",
     "role": "Bowler",
     "allRounderType": "",
-    "teamId": "7",
-    "team": "7",
-    "teamShortName": "LSG",
+    "teamId": "8",
+    "team": "Rajasthan Royals",
+    "teamShortName": "RR",
     "league": "ipl",
     "age": 35,
     "dateOfBirth": "1990-09-03",
@@ -32698,9 +32703,9 @@
     "isCaptain": false,
     "battingStyle": "Right-handed bat",
     "bowlingStyle": "Right-arm fast",
-    "transferAcquiredVia": "",
-    "transferFee": "",
-    "transferNotes": "",
+    "transferAcquiredVia": "trade",
+    "transferFee": "₹10.00 Cr",
+    "transferNotes": "Official Trade: GT ➔ RR for ₹10.00 Cr",
     "lastAuctionYear": null,
     "stats": {
       "matches": 132,
@@ -32717,7 +32722,7 @@
       "bestBowling": "4/11"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Traded",
     "isKeeper": false,
     "slug": "mohammed-shami",
     "bio": {
@@ -32920,7 +32925,7 @@
       "bestBowling": "5/27"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "harshal-patel",
     "bio": {
@@ -33123,7 +33128,7 @@
       "bestBowling": "4/12"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "josh-hazlewood",
     "bio": {
@@ -33326,7 +33331,7 @@
       "bestBowling": "4/19"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "t-natarajan",
     "bio": {
@@ -33529,7 +33534,7 @@
       "bestBowling": "4/28"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "lockie-ferguson",
     "bio": {
@@ -33732,7 +33737,7 @@
       "bestBowling": "5/20"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "varun-chakaravarthy",
     "bio": {
@@ -33935,7 +33940,7 @@
       "bestBowling": "5/25"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "jaydev-unadkat",
     "bio": {
@@ -34138,7 +34143,7 @@
       "bestBowling": "2/54"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "matt-henry",
     "bio": {
@@ -34341,7 +34346,7 @@
       "bestBowling": "2/17"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "dushmantha-chameera",
     "bio": {
@@ -34544,7 +34549,7 @@
       "bestBowling": "2/21"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "adam-milne",
     "bio": {
@@ -34717,9 +34722,9 @@
     "name": "Deepak Chahar",
     "role": "Bowler",
     "allRounderType": "",
-    "teamId": "2",
-    "team": "2",
-    "teamShortName": "MI",
+    "teamId": "",
+    "team": "Auction Pool 2027",
+    "teamShortName": "Pool",
     "league": "ipl",
     "age": 33,
     "dateOfBirth": "1992-08-07",
@@ -34730,7 +34735,7 @@
     "bowlingStyle": "Right-arm fast-medium",
     "transferAcquiredVia": "auction",
     "transferFee": "",
-    "transferNotes": "",
+    "transferNotes": "Released by MI ahead of 2027 Auction",
     "lastAuctionYear": null,
     "stats": {
       "matches": 103,
@@ -34747,7 +34752,7 @@
       "bestBowling": "4/13"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Released",
     "isKeeper": false,
     "slug": "deepak-chahar",
     "bio": {
@@ -34950,7 +34955,7 @@
       "bestBowling": "1/36"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "raghu-sharma",
     "bio": {
@@ -35153,7 +35158,7 @@
       "bestBowling": "4/17"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "akeal-hosein",
     "bio": {
@@ -35338,8 +35343,8 @@
     "battingStyle": "Right-handed bat",
     "bowlingStyle": "Right-arm fast",
     "transferAcquiredVia": "",
-    "transferFee": "",
-    "transferNotes": "",
+    "transferFee": "₹18.00 Cr",
+    "transferNotes": "Retained by SRH (Captain · ₹18.00 Cr)",
     "lastAuctionYear": null,
     "stats": {
       "matches": 80,
@@ -35356,7 +35361,7 @@
       "bestBowling": "4/34"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "pat-cummins",
     "bio": {
@@ -35559,7 +35564,7 @@
       "bestBowling": "5/18"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "sandeep-sharma",
     "bio": {
@@ -35762,7 +35767,7 @@
       "bestBowling": "4/16"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "shreyas-gopal",
     "bio": {
@@ -35965,7 +35970,7 @@
       "bestBowling": "4/33"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "mukesh-kumar",
     "bio": {
@@ -36168,7 +36173,7 @@
       "bestBowling": "3/33"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "anrich-nortje",
     "bio": {
@@ -36371,7 +36376,7 @@
       "bestBowling": "4/17"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "mohammed-siraj",
     "bio": {
@@ -36574,7 +36579,7 @@
       "bestBowling": "1/51"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "ben-dwarshuis",
     "bio": {
@@ -36777,7 +36782,7 @@
       "bestBowling": "3/22"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "jacob-duffy",
     "bio": {
@@ -36980,7 +36985,7 @@
       "bestBowling": "3/28"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "nuwan-thushara",
     "bio": {
@@ -37183,7 +37188,7 @@
       "bestBowling": "4/30"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "nathan-ellis",
     "bio": {
@@ -37356,9 +37361,9 @@
     "name": "Kuldeep Yadav",
     "role": "Bowler",
     "allRounderType": "",
-    "teamId": "6",
-    "team": "6",
-    "teamShortName": "DC",
+    "teamId": "7",
+    "team": "Lucknow Super Giants",
+    "teamShortName": "LSG",
     "league": "ipl",
     "age": 31,
     "dateOfBirth": "1994-12-14",
@@ -37367,9 +37372,9 @@
     "isCaptain": false,
     "battingStyle": "Left-handed bat",
     "bowlingStyle": "Left-arm wrist-spin",
-    "transferAcquiredVia": "",
-    "transferFee": "",
-    "transferNotes": "",
+    "transferAcquiredVia": "trade",
+    "transferFee": "₹13.25 Cr",
+    "transferNotes": "Official Trade: DC ➔ LSG for ₹13.25 Cr",
     "lastAuctionYear": null,
     "stats": {
       "matches": 110,
@@ -37386,7 +37391,7 @@
       "bestBowling": "4/14"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Traded",
     "isKeeper": false,
     "slug": "kuldeep-yadav",
     "bio": {
@@ -37589,7 +37594,7 @@
       "bestBowling": "3/41"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "kyle-jamieson",
     "bio": {
@@ -37792,7 +37797,7 @@
       "bestBowling": "3/15"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "jofra-archer",
     "bio": {
@@ -37995,7 +38000,7 @@
       "bestBowling": "4/27"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "tushar-deshpande",
     "bio": {
@@ -38198,7 +38203,7 @@
       "bestBowling": "4/21"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "kagiso-rabada",
     "bio": {
@@ -38401,7 +38406,7 @@
       "bestBowling": "-/-"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "brydon-carse",
     "bio": {
@@ -38604,7 +38609,7 @@
       "bestBowling": "2/21"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "nandre-burger",
     "bio": {
@@ -38807,7 +38812,7 @@
       "bestBowling": "4/29"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "mustafizur-rahman",
     "bio": {
@@ -39010,7 +39015,7 @@
       "bestBowling": "4/30"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "harpreet-brar",
     "bio": {
@@ -39213,7 +39218,7 @@
       "bestBowling": "-"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "spencer-johnson",
     "bio": {
@@ -39416,7 +39421,7 @@
       "bestBowling": "4/28"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "prasidh-krishna",
     "bio": {
@@ -39619,7 +39624,7 @@
       "bestBowling": "4/10"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "lungi-ngidi",
     "bio": {
@@ -39822,7 +39827,7 @@
       "bestBowling": "4/46"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "mukesh-choudhary",
     "bio": {
@@ -40025,7 +40030,7 @@
       "bestBowling": "1/7"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "gurjapneet-singh",
     "bio": {
@@ -40228,7 +40233,7 @@
       "bestBowling": "-"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "blessing-muzarabani",
     "bio": {
@@ -40431,7 +40436,7 @@
       "bestBowling": "4/20"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "kuldeep-sen",
     "bio": {
@@ -40604,9 +40609,9 @@
     "name": "Avesh Khan",
     "role": "Bowler",
     "allRounderType": "",
-    "teamId": "7",
-    "team": "7",
-    "teamShortName": "LSG",
+    "teamId": "",
+    "team": "Auction Pool 2027",
+    "teamShortName": "Pool",
     "league": "ipl",
     "age": 29,
     "dateOfBirth": "1996-12-13",
@@ -40617,7 +40622,7 @@
     "bowlingStyle": "Right-arm fast",
     "transferAcquiredVia": "",
     "transferFee": "",
-    "transferNotes": "",
+    "transferNotes": "Released by LSG ahead of 2027 Auction",
     "lastAuctionYear": null,
     "stats": {
       "matches": 82,
@@ -40634,7 +40639,7 @@
       "bestBowling": "4/24"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Released",
     "isKeeper": false,
     "slug": "avesh-khan",
     "bio": {
@@ -40837,7 +40842,7 @@
       "bestBowling": "3/45"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "akash-deep",
     "bio": {
@@ -41040,7 +41045,7 @@
       "bestBowling": "3/20"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "vijaykumar-vyshak",
     "bio": {
@@ -41243,7 +41248,7 @@
       "bestBowling": "2/30"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "abhinandan-singh",
     "bio": {
@@ -41446,7 +41451,7 @@
       "bestBowling": "-"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "yudhvir-singh",
     "bio": {
@@ -41649,7 +41654,7 @@
       "bestBowling": "4/15"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "mayank-markande",
     "bio": {
@@ -41852,7 +41857,7 @@
       "bestBowling": "3/21"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "khaleel-ahmed",
     "bio": {
@@ -42055,7 +42060,7 @@
       "bestBowling": "3/20"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "yash-dayal",
     "bio": {
@@ -42258,7 +42263,7 @@
       "bestBowling": "3/27"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "vaibhav-arora",
     "bio": {
@@ -42461,7 +42466,7 @@
       "bestBowling": "2/35"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "manimaran-siddharth",
     "bio": {
@@ -42664,7 +42669,7 @@
       "bestBowling": "5/23"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "mohsin-khan",
     "bio": {
@@ -42867,7 +42872,7 @@
       "bestBowling": "4/21"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "shivam-mavi",
     "bio": {
@@ -43070,7 +43075,7 @@
       "bestBowling": "2/18"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "brijesh-sharma",
     "bio": {
@@ -43273,7 +43278,7 @@
       "bestBowling": "2/9"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "xavier-bartlett",
     "bio": {
@@ -43476,7 +43481,7 @@
       "bestBowling": "5/30"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "yash-thakur",
     "bio": {
@@ -43649,9 +43654,9 @@
     "name": "Arshdeep Singh",
     "role": "Bowler",
     "allRounderType": "",
-    "teamId": "5",
-    "team": "5",
-    "teamShortName": "PBKS",
+    "teamId": "2",
+    "team": "Mumbai Indians",
+    "teamShortName": "MI",
     "league": "ipl",
     "age": 27,
     "dateOfBirth": "1999-02-05",
@@ -43660,9 +43665,9 @@
     "isCaptain": false,
     "battingStyle": "Left-handed bat",
     "bowlingStyle": "Left-arm fast-medium",
-    "transferAcquiredVia": "",
-    "transferFee": "",
-    "transferNotes": "",
+    "transferAcquiredVia": "trade",
+    "transferFee": "₹18.00 Cr",
+    "transferNotes": "Blockbuster Trade: PBKS ➔ MI (₹18.00 Cr player swap with Hardik Pandya)",
     "lastAuctionYear": null,
     "stats": {
       "matches": 96,
@@ -43679,7 +43684,7 @@
       "bestBowling": "5/32"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Traded",
     "isKeeper": false,
     "slug": "arshdeep-singh",
     "bio": {
@@ -43845,7 +43850,8 @@
     "economy": 9.19,
     "teamName": "Punjab Kings",
     "highestScore": 10,
-    "bestBowling": "5/32"
+    "bestBowling": "5/32",
+    "cricbuzzUrl": "https://www.cricbuzz.com/profiles/13217/arshdeep-singh"
   },
   {
     "id": "13",
@@ -43882,7 +43888,7 @@
       "bestBowling": "4/27"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "rahul-chahar",
     "bio": {
@@ -44085,7 +44091,7 @@
       "bestBowling": "5/25"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "umran-malik",
     "bio": {
@@ -44288,7 +44294,7 @@
       "bestBowling": "-"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "digvesh-singh",
     "bio": {
@@ -44491,7 +44497,7 @@
       "bestBowling": "3/42"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "zeeshan-ansari",
     "bio": {
@@ -44694,7 +44700,7 @@
       "bestBowling": "2/20"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "prashant-solanki",
     "bio": {
@@ -44897,7 +44903,7 @@
       "bestBowling": "-/-"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "rasikh-salam",
     "bio": {
@@ -45100,7 +45106,7 @@
       "bestBowling": "0/42"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "gurnoor-brar",
     "bio": {
@@ -45303,7 +45309,7 @@
       "bestBowling": "4/41"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "ravi-bishnoi",
     "bio": {
@@ -45506,7 +45512,7 @@
       "bestBowling": "3/22"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "kartik-tyagi",
     "bio": {
@@ -45709,7 +45715,7 @@
       "bestBowling": "2/21"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "sushant-mishra",
     "bio": {
@@ -45912,7 +45918,7 @@
       "bestBowling": "4/32"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "eshan-malinga",
     "bio": {
@@ -46115,7 +46121,7 @@
       "bestBowling": "3/32"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "vignesh-puthur",
     "bio": {
@@ -46318,7 +46324,7 @@
       "bestBowling": "4/24"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "ashwani-kumar",
     "bio": {
@@ -46521,7 +46527,7 @@
       "bestBowling": "3/32"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "prince-yadav",
     "bio": {
@@ -46724,7 +46730,7 @@
       "bestBowling": "3/24"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "harshit-rana",
     "bio": {
@@ -46927,7 +46933,7 @@
       "bestBowling": "4/34"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "praful-hinge",
     "bio": {
@@ -47130,7 +47136,7 @@
       "bestBowling": "2/30"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "akash-singh",
     "bio": {
@@ -47333,7 +47339,7 @@
       "bestBowling": "3/14"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "mayank-yadav",
     "bio": {
@@ -47536,7 +47542,7 @@
       "bestBowling": "2/32"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "ashok-sharma",
     "bio": {
@@ -47739,7 +47745,7 @@
       "bestBowling": "1/19"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "manav-suthar",
     "bio": {
@@ -47942,7 +47948,7 @@
       "bestBowling": "-"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "onkar-tarmale",
     "bio": {
@@ -48145,7 +48151,7 @@
       "bestBowling": "-"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "vicky-ostwal",
     "bio": {
@@ -48348,7 +48354,7 @@
       "bestBowling": "-"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "amit-kumar",
     "bio": {
@@ -48521,9 +48527,9 @@
     "name": "Matheesha Pathirana",
     "role": "Bowler",
     "allRounderType": "",
-    "teamId": "9",
-    "team": "9",
-    "teamShortName": "KKR",
+    "teamId": "",
+    "team": "Auction Pool 2027",
+    "teamShortName": "Pool",
     "league": "ipl",
     "age": 23,
     "dateOfBirth": "2002-12-18",
@@ -48534,7 +48540,7 @@
     "bowlingStyle": "Right-arm fast",
     "transferAcquiredVia": "auction",
     "transferFee": "",
-    "transferNotes": "",
+    "transferNotes": "Released by KKR ahead of 2027 Auction (opens ₹18.00 Cr purse)",
     "lastAuctionYear": null,
     "stats": {
       "matches": 33,
@@ -48551,7 +48557,7 @@
       "bestBowling": "4/28"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Released",
     "isKeeper": false,
     "slug": "matheesha-pathirana",
     "bio": {
@@ -48754,7 +48760,7 @@
       "bestBowling": "3/17"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "suyash-sharma",
     "bio": {
@@ -48957,7 +48963,7 @@
       "bestBowling": "-"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "mohammed-salahuddin-izhar",
     "bio": {
@@ -49160,7 +49166,7 @@
       "bestBowling": "-"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "krains-fuletra",
     "bio": {
@@ -49363,7 +49369,7 @@
       "bestBowling": "2/18"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "vipraj-nigam",
     "bio": {
@@ -49566,7 +49572,7 @@
       "bestBowling": "4/24"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "sakib-hussain",
     "bio": {
@@ -49769,7 +49775,7 @@
       "bestBowling": "4/18"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "noor-ahmad",
     "bio": {
@@ -49972,7 +49978,7 @@
       "bestBowling": "-"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "naman-tiwari",
     "bio": {
@@ -50175,7 +50181,7 @@
       "bestBowling": "0/25"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "prashant-veer",
     "bio": {
@@ -50378,7 +50384,7 @@
       "bestBowling": "2/17"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "allah-ghazanfar",
     "bio": {
@@ -50581,7 +50587,7 @@
       "bestBowling": "1/23"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "kwena-maphaka",
     "bio": {
@@ -50784,7 +50790,7 @@
       "bestBowling": "2/35"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "yash-raj-punja",
     "bio": {
@@ -50969,8 +50975,8 @@
     "battingStyle": "",
     "bowlingStyle": "",
     "transferAcquiredVia": "",
-    "transferFee": "",
-    "transferNotes": "",
+    "transferFee": "₹18.00 Cr",
+    "transferNotes": "Retained by MI (Slab 1 · ₹18.00 Cr)",
     "lastAuctionYear": null,
     "stats": {
       "matches": 158,
@@ -50987,7 +50993,7 @@
       "bestBowling": "5/10"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "jasprit-bumrah",
     "bio": {
@@ -51153,16 +51159,17 @@
     "economy": 7.34,
     "teamName": "Mumbai Indians",
     "highestScore": 16,
-    "bestBowling": "5/10"
+    "bestBowling": "5/10",
+    "cricbuzzUrl": "https://www.cricbuzz.com/profiles/9311/jasprit-bumrah"
   },
   {
     "id": "146",
     "name": "Trent Boult",
     "role": "Bowler",
     "allRounderType": "",
-    "teamId": "2",
-    "team": "2",
-    "teamShortName": "MI",
+    "teamId": "",
+    "team": "Auction Pool 2027",
+    "teamShortName": "Pool",
     "league": "ipl",
     "age": null,
     "dateOfBirth": "",
@@ -51173,7 +51180,7 @@
     "bowlingStyle": "",
     "transferAcquiredVia": "",
     "transferFee": "",
-    "transferNotes": "",
+    "transferNotes": "Released by MI ahead of 2027 Auction",
     "lastAuctionYear": null,
     "stats": {
       "matches": 124,
@@ -51190,7 +51197,7 @@
       "bestBowling": "4/18"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Released",
     "isKeeper": false,
     "slug": "trent-boult",
     "bio": {
@@ -51393,7 +51400,7 @@
       "bestBowling": "1/68"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "luke-wood",
     "bio": {
@@ -51596,7 +51603,7 @@
       "bestBowling": "1/29"
     },
     "isActiveInSquad": true,
-    "squadStatus": "active",
+    "squadStatus": "Retained",
     "isKeeper": false,
     "slug": "prithviraj-yarra",
     "bio": {
