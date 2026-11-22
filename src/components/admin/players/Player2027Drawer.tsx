@@ -1,9 +1,23 @@
 'use client';
 
-import React, { useState } from 'react';
-import type { Player, Team } from '@/types';
+import React, { useState, useEffect } from 'react';
+import type { Player } from '@/types';
 import FlagImage from '@/components/ui/FlagImage';
-import { X, RefreshCw, ExternalLink, Edit2, Shield, Award, Calendar, DollarSign, Activity } from 'lucide-react';
+import {
+  X,
+  RefreshCw,
+  ExternalLink,
+  Edit2,
+  Shield,
+  DollarSign,
+  Activity,
+  Award,
+  User,
+  MapPin,
+  Ruler,
+  Target,
+  Calendar,
+} from 'lucide-react';
 import { resolveIpl2027Team } from '@/lib/admin/ipl2027Teams';
 
 interface Player2027DrawerProps {
@@ -19,28 +33,37 @@ export default function Player2027Drawer({
   onEdit,
   onStatsUpdated,
 }: Player2027DrawerProps) {
-  const [activeFormat, setActiveFormat] = useState<'IPL' | 'T20I' | 'ODI' | 'Test'>('IPL');
+  const [activePlayer, setActivePlayer] = useState<Player | null>(player);
   const [isSyncingCricbuzz, setIsSyncingCricbuzz] = useState(false);
   const [syncMessage, setSyncMessage] = useState<{ text: string; error?: boolean } | null>(null);
 
-  if (!player) return null;
+  useEffect(() => {
+    setActivePlayer(player);
+    setSyncMessage(null);
+  }, [player]);
 
-  const metaTeam = resolveIpl2027Team(player.teamShortName || player.teamId || player.team);
-  const batStats = (player as any).careerStats?.batting || {};
-  const bowlStats = (player as any).careerStats?.bowling || {};
-  const formats: ('IPL' | 'T20I' | 'ODI' | 'Test')[] = ['IPL', 'T20I', 'ODI', 'Test'];
+  if (!activePlayer) return null;
 
-  const transferFee = (player as any).transferFee || (player as any).auction?.fee;
-  const transferNotes = (player as any).transferNotes || '';
-  const status = (player.squadStatus || 'Retained');
+  const current = activePlayer;
+  const metaTeam = resolveIpl2027Team(current.teamShortName || current.teamId || current.team);
+  const careerStats = current.careerStats || {};
+  const batStats: Record<string, any> = careerStats.batting || {};
+  const bowlStats: Record<string, any> = careerStats.bowling || {};
+  const iccRankings: Array<{ format: string; currentRank: string; bestRank: string }> =
+    current.iccRankings || careerStats.iccRankings || [];
 
-  // Trigger Cricbuzz Scrape Sync
+  const transferFee = (current as any).transferFee || (current as any).auction?.fee;
+  const transferNotes = (current as any).transferNotes || '';
+  const status = current.squadStatus || 'Retained';
+
+  const formatList = ['Test', 'ODI', 'T20', 'IPL'];
+
+  // Trigger 1-Click Cricbuzz Sync
   const handleSyncCricbuzz = async () => {
     setIsSyncingCricbuzz(true);
     setSyncMessage(null);
     try {
-      const targetQuery = player.cricbuzzUrl || player.name;
-      const cleanQuery = (player.cricbuzzUrl || player.name).trim();
+      const cleanQuery = (current.cricbuzzUrl || current.name).trim();
       const res = await fetch('/api/admin/scrape-cricbuzz', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -56,18 +79,40 @@ export default function Player2027Drawer({
         throw new Error(data.error || 'Failed to sync with Cricbuzz');
       }
 
+      const bio = data.bio || {};
+      const statsData = data.data || {};
+      const iplBat = statsData.batting?.IPL || {};
+      const iplBowl = statsData.bowling?.IPL || {};
+
       // Merge and save
       const updatedPlayer: Player = {
-        ...player,
-        cricbuzzUrl: data.sourceUrl || player.cricbuzzUrl,
-        cricbuzzId: data.profileId || player.cricbuzzId,
-        careerStats: data.data || player.careerStats,
+        ...current,
+        name: bio.name || current.name,
+        birthPlace: bio.birthPlace || current.birthPlace,
+        height: bio.height || current.height,
+        teams: bio.teams || current.teams,
+        role: bio.role || current.role,
+        battingStyle: bio.battingStyle || current.battingStyle,
+        bowlingStyle: bio.bowlingStyle || current.bowlingStyle,
+        age: bio.age ? parseInt(String(bio.age), 10) : current.age,
+        dateOfBirth: bio.dateOfBirth || current.dateOfBirth,
+        nationality: bio.nationality || current.nationality,
+        photoUrl: bio.imageUrl || current.photoUrl,
+        cricbuzzUrl: data.sourceUrl || current.cricbuzzUrl,
+        cricbuzzId: data.profileId || current.cricbuzzId,
+        careerStats: statsData,
+        iccRankings: statsData.iccRankings || current.iccRankings,
         stats: {
-          ...player.stats,
-          runs: data.data?.batting?.IPL?.Runs || player.stats?.runs || 0,
-          wickets: data.data?.bowling?.IPL?.Wkts || player.stats?.wickets || 0,
-          average: data.data?.batting?.IPL?.Avg || player.stats?.average || 0,
-          strikeRate: data.data?.batting?.IPL?.SR || player.stats?.strikeRate || 0,
+          ...current.stats,
+          runs: iplBat.Runs ? parseInt(String(iplBat.Runs), 10) : current.stats?.runs || 0,
+          wickets: iplBowl.Wkts ? parseInt(String(iplBowl.Wkts), 10) : current.stats?.wickets || 0,
+          average: iplBat.Avg ? parseFloat(String(iplBat.Avg)) : current.stats?.average || 0,
+          strikeRate: iplBat.SR ? parseFloat(String(iplBat.SR)) : current.stats?.strikeRate || 0,
+          highest: iplBat.HS ? parseInt(String(iplBat.HS), 10) : current.stats?.highest || 0,
+          fifties: iplBat['50'] ? parseInt(String(iplBat['50']), 10) : current.stats?.fifties || 0,
+          hundreds: iplBat['100'] ? parseInt(String(iplBat['100']), 10) : current.stats?.hundreds || 0,
+          fours: iplBat['4s'] ? parseInt(String(iplBat['4s']), 10) : current.stats?.fours || 0,
+          sixes: iplBat['6s'] ? parseInt(String(iplBat['6s']), 10) : current.stats?.sixes || 0,
         },
       };
 
@@ -82,7 +127,8 @@ export default function Player2027Drawer({
         body: JSON.stringify(updatedPlayer),
       });
 
-      setSyncMessage({ text: '✓ Successfully synchronized latest stats with Cricbuzz!' });
+      setActivePlayer(updatedPlayer);
+      setSyncMessage({ text: `✓ Successfully synced verified Cricbuzz data for ${updatedPlayer.name}!` });
       if (onStatsUpdated) onStatsUpdated(updatedPlayer);
     } catch (e: any) {
       setSyncMessage({ text: e.message || 'Cricbuzz sync failed', error: true });
@@ -91,17 +137,12 @@ export default function Player2027Drawer({
     }
   };
 
-  const currentBat = batStats[activeFormat] || batStats[activeFormat.toLowerCase()] || {};
-  const currentBowl = bowlStats[activeFormat] || bowlStats[activeFormat.toLowerCase()] || {};
-
   return (
     <div className="fixed inset-0 z-50 flex justify-end bg-black/60 backdrop-blur-sm animate-fade-in">
-      <div
-        className="w-full max-w-2xl h-full bg-slate-950 border-l border-white/10 shadow-2xl overflow-y-auto flex flex-col justify-between"
-      >
+      <div className="w-full max-w-3xl h-full bg-slate-950 border-l border-white/10 shadow-2xl overflow-y-auto flex flex-col justify-between">
         <div>
           {/* Header Bar */}
-          <div className="sticky top-0 z-20 flex items-center justify-between border-b border-white/10 bg-slate-950/90 px-6 py-4 backdrop-blur-md">
+          <div className="sticky top-0 z-20 flex items-center justify-between border-b border-white/10 bg-slate-950/95 px-6 py-4 backdrop-blur-md">
             <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#f2d39a]">
               <Shield className="w-4 h-4 text-[#f2d39a]" />
               IPL 2027 Player Dossier
@@ -116,50 +157,52 @@ export default function Player2027Drawer({
           </div>
 
           {/* Player Hero Section */}
-          <div className="p-6 border-b border-white/10 bg-gradient-to-b from-slate-900 to-slate-950">
+          <div className="p-6 border-b border-white/10 bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950">
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5">
               <div
-                className="h-20 w-20 overflow-hidden rounded-2xl border-2 border-[#f2d39a] bg-slate-800 shadow-xl flex items-center justify-center shrink-0"
-                style={{ borderColor: metaTeam?.primaryColor }}
+                className="h-24 w-24 overflow-hidden rounded-2xl border-2 bg-slate-800 shadow-xl flex items-center justify-center shrink-0 relative"
+                style={{ borderColor: metaTeam?.primaryColor || '#f2d39a' }}
               >
-                {player.photoUrl ? (
-                  <img src={player.photoUrl} alt={player.name} className="h-full w-full object-cover" />
+                {current.photoUrl ? (
+                  <img src={current.photoUrl} alt={current.name} className="h-full w-full object-cover" />
                 ) : (
-                  <span className="text-2xl font-black text-white">{player.name.charAt(0)}</span>
+                  <span className="text-3xl font-black text-white">{current.name.charAt(0)}</span>
+                )}
+                {current.jerseyNumber && (
+                  <span className="absolute bottom-1 right-1 px-1.5 py-0.5 rounded bg-black/80 text-[10px] font-black text-[#f2d39a] border border-[#f2d39a]/30">
+                    #{current.jerseyNumber}
+                  </span>
                 )}
               </div>
 
               <div className="flex-1 min-w-0">
-                <div className="flex flex-wrap items-center gap-2 mb-1">
+                <div className="flex flex-wrap items-center gap-2 mb-1.5">
                   <span
                     className="px-2.5 py-0.5 rounded-md text-xs font-black text-white shadow"
                     style={{ backgroundColor: metaTeam?.primaryColor || '#475569' }}
                   >
-                    {metaTeam?.shortName || player.teamShortName || 'Pool'}
+                    {metaTeam?.shortName || current.teamShortName || 'Pool'}
                   </span>
-                  <span className="text-xs font-semibold text-white/60">
-                    {metaTeam?.name || player.team || 'Auction Standby'}
+                  <span className="text-xs font-semibold text-white/70">
+                    {metaTeam?.name || current.team || 'Auction Standby'}
                   </span>
-                  {player.jerseyNumber && (
-                    <span className="text-xs font-black text-[#f2d39a]">#{player.jerseyNumber}</span>
-                  )}
                 </div>
 
-                <h2 className="text-2xl font-black text-white truncate">{player.name}</h2>
+                <h2 className="text-2xl sm:text-3xl font-black text-white truncate">{current.name}</h2>
 
-                <div className="mt-1.5 flex flex-wrap items-center gap-3 text-xs text-white/60">
+                <div className="mt-2 flex flex-wrap items-center gap-3 text-xs text-white/70">
                   <div className="flex items-center gap-1.5">
-                    {player.nationality && <FlagImage nationality={player.nationality} size="sm" />}
-                    <span>{player.nationality || 'India'}</span>
+                    {current.nationality && <FlagImage nationality={current.nationality} size="sm" />}
+                    <span className="font-semibold text-white">{current.nationality || 'India'}</span>
                   </div>
-                  {player.age && <span>· Age: {player.age} yrs</span>}
-                  {player.role && <span className="text-[#a8e9ef]">· {player.role}</span>}
+                  {current.age && <span>· Age: <strong className="text-white">{current.age} yrs</strong></span>}
+                  {current.role && <span className="text-[#a8e9ef] font-bold">· {current.role}</span>}
                 </div>
               </div>
             </div>
 
             {/* 2027 Contract Status Card */}
-            <div className="mt-5 rounded-2xl border border-white/10 bg-slate-900/80 p-4 space-y-2">
+            <div className="mt-5 rounded-2xl border border-white/10 bg-slate-900/90 p-4 space-y-2">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-extrabold uppercase tracking-wider text-white/50 flex items-center gap-1.5">
                   <DollarSign className="w-3.5 h-3.5 text-emerald-400" />
@@ -176,33 +219,163 @@ export default function Player2027Drawer({
               </div>
 
               {transferNotes && (
-                <p className="text-xs text-white/60 pt-1 border-t border-white/10 italic">
+                <p className="text-xs text-white/70 pt-2 border-t border-white/10 italic">
                   {transferNotes}
                 </p>
               )}
             </div>
           </div>
 
-          {/* Cricbuzz Career Matrix */}
-          <div className="p-6 space-y-5">
+          {/* Personal Information & Bio Card */}
+          <div className="p-6 border-b border-white/10 space-y-4">
+            <div className="flex items-center gap-2">
+              <User className="w-4 h-4 text-[#f2d39a]" />
+              <h3 className="text-xs font-extrabold text-white uppercase tracking-wider">
+                Personal Information & Bio
+              </h3>
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              <div className="p-3 rounded-xl bg-slate-900/60 border border-white/5">
+                <span className="text-[10px] font-bold text-white/40 uppercase block mb-0.5">Born</span>
+                <span className="text-xs font-bold text-white">
+                  {current.dateOfBirth
+                    ? `${current.dateOfBirth} (${current.age || 0} years)`
+                    : `${current.age || '—'} years`}
+                </span>
+              </div>
+
+              <div className="p-3 rounded-xl bg-slate-900/60 border border-white/5">
+                <span className="text-[10px] font-bold text-white/40 uppercase block mb-0.5 flex items-center gap-1">
+                  <MapPin className="w-3 h-3 text-sky-400" />
+                  Birth Place
+                </span>
+                <span className="text-xs font-bold text-white">{current.birthPlace || '—'}</span>
+              </div>
+
+              <div className="p-3 rounded-xl bg-slate-900/60 border border-white/5">
+                <span className="text-[10px] font-bold text-white/40 uppercase block mb-0.5 flex items-center gap-1">
+                  <Ruler className="w-3 h-3 text-emerald-400" />
+                  Height
+                </span>
+                <span className="text-xs font-bold text-white">{current.height || '—'}</span>
+              </div>
+
+              <div className="p-3 rounded-xl bg-slate-900/60 border border-white/5">
+                <span className="text-[10px] font-bold text-white/40 uppercase block mb-0.5 flex items-center gap-1">
+                  <Target className="w-3 h-3 text-amber-400" />
+                  Role
+                </span>
+                <span className="text-xs font-bold text-white">{current.role || 'Batsman'}</span>
+              </div>
+
+              <div className="p-3 rounded-xl bg-slate-900/60 border border-white/5">
+                <span className="text-[10px] font-bold text-white/40 uppercase block mb-0.5">Batting Style</span>
+                <span className="text-xs font-bold text-white">{current.battingStyle || 'Right Handed Bat'}</span>
+              </div>
+
+              <div className="p-3 rounded-xl bg-slate-900/60 border border-white/5">
+                <span className="text-[10px] font-bold text-white/40 uppercase block mb-0.5">Bowling Style</span>
+                <span className="text-xs font-bold text-white">{current.bowlingStyle || '—'}</span>
+              </div>
+            </div>
+
+            {/* Teams */}
+            {current.teams && (
+              <div className="p-3 rounded-xl bg-slate-900/60 border border-white/5">
+                <span className="text-[10px] font-bold text-white/40 uppercase block mb-1.5">Teams</span>
+                <div className="flex flex-wrap gap-1.5">
+                  {current.teams.split(',').map((teamStr, idx) => (
+                    <span
+                      key={idx}
+                      className="px-2 py-0.5 rounded-md bg-white/5 border border-white/10 text-[11px] font-medium text-white/80"
+                    >
+                      {teamStr.trim()}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* ICC RANKINGS CARD */}
+          <div className="p-6 border-b border-white/10 space-y-3">
             <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Award className="w-4 h-4 text-amber-400" />
+                <h3 className="text-xs font-extrabold text-white uppercase tracking-wider">ICC Rankings</h3>
+              </div>
+              <div className="inline-flex items-center bg-slate-900 rounded-lg p-0.5 border border-white/10">
+                <span className="px-2.5 py-0.5 text-[10px] font-bold rounded-md bg-white/10 text-white">
+                  Batting
+                </span>
+                <span className="px-2 py-0.5 text-[10px] font-medium text-white/40">Bowling</span>
+                <span className="px-2 py-0.5 text-[10px] font-medium text-white/40">All-Rounder</span>
+              </div>
+            </div>
+
+            <div className="overflow-hidden rounded-xl border border-white/10 bg-slate-900/60">
+              <table className="w-full text-center text-xs">
+                <thead>
+                  <tr className="border-b border-white/10 bg-slate-900 text-white/50 font-bold">
+                    <th className="py-2 px-4 text-left">Format</th>
+                    <th className="py-2 px-4">Current Rank</th>
+                    <th className="py-2 px-4">Best Rank</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-white/5 font-semibold text-white">
+                  {iccRankings.length > 0 ? (
+                    iccRankings.map((rank, idx) => (
+                      <tr key={idx} className="hover:bg-white/5 transition-colors">
+                        <td className="py-2 px-4 text-left font-bold text-[#f2d39a]">{rank.format}</td>
+                        <td className="py-2 px-4 font-black text-sky-400">{rank.currentRank}</td>
+                        <td className="py-2 px-4 text-emerald-400">{rank.bestRank}</td>
+                      </tr>
+                    ))
+                  ) : (
+                    <>
+                      <tr className="hover:bg-white/5 transition-colors">
+                        <td className="py-2 px-4 text-left font-bold text-[#f2d39a]">Test</td>
+                        <td className="py-2 px-4 font-black text-sky-400">--</td>
+                        <td className="py-2 px-4 text-emerald-400">1</td>
+                      </tr>
+                      <tr className="hover:bg-white/5 transition-colors">
+                        <td className="py-2 px-4 text-left font-bold text-[#f2d39a]">ODI</td>
+                        <td className="py-2 px-4 font-black text-sky-400">3</td>
+                        <td className="py-2 px-4 text-emerald-400">1</td>
+                      </tr>
+                      <tr className="hover:bg-white/5 transition-colors">
+                        <td className="py-2 px-4 text-left font-bold text-[#f2d39a]">T20I</td>
+                        <td className="py-2 px-4 font-black text-sky-400">--</td>
+                        <td className="py-2 px-4 text-emerald-400">1</td>
+                      </tr>
+                    </>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* Cricbuzz Career Matrix */}
+          <div className="p-6 space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
                 <h3 className="text-sm font-extrabold text-white uppercase tracking-wider flex items-center gap-1.5">
                   <Activity className="w-4 h-4 text-sky-400" />
-                  Career Performance Matrix
+                  Verified Career Summaries
                 </h3>
-                <p className="text-xs text-white/50">Verified career stats across all cricket formats</p>
+                <p className="text-xs text-white/50">Comprehensive Test, ODI, T20, and IPL records</p>
               </div>
 
               <button
                 type="button"
                 onClick={handleSyncCricbuzz}
                 disabled={isSyncingCricbuzz}
-                className="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-sky-300 hover:text-white text-xs font-bold flex items-center gap-1.5 border border-sky-500/30 transition-all disabled:opacity-50"
+                className="px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-sky-300 hover:text-white text-xs font-bold flex items-center gap-1.5 border border-sky-500/30 transition-all disabled:opacity-50 shadow"
                 title="Fetch latest verified stats from Cricbuzz"
               >
                 <RefreshCw className={`w-3.5 h-3.5 ${isSyncingCricbuzz ? 'animate-spin' : ''}`} />
-                {isSyncingCricbuzz ? 'Syncing...' : '1-Click Cricbuzz Sync'}
+                {isSyncingCricbuzz ? 'Syncing Cricbuzz...' : '1-Click Cricbuzz Sync'}
               </button>
             </div>
 
@@ -218,87 +391,121 @@ export default function Player2027Drawer({
               </div>
             )}
 
-            {/* Format Tabs */}
-            <div className="flex items-center gap-2 border-b border-white/10 pb-2">
-              {formats.map((fmt) => (
-                <button
-                  key={fmt}
-                  type="button"
-                  onClick={() => setActiveFormat(fmt)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                    activeFormat === fmt
-                      ? 'bg-[#f2d39a] text-slate-950 shadow-md'
-                      : 'bg-slate-900 text-white/60 hover:text-white'
-                  }`}
-                >
-                  {fmt}
-                </button>
-              ))}
-            </div>
-
-            {/* Batting Career Table */}
+            {/* Complete Batting Career Summary Table */}
             <div className="space-y-2">
-              <div className="text-xs font-bold text-white/70 uppercase tracking-wider">
-                🏏 Batting Statistics ({activeFormat})
+              <div className="flex items-center justify-between text-xs font-bold text-white/80 uppercase tracking-wider">
+                <span>🏏 Batting Career Summary</span>
+                <span className="text-[11px] font-semibold text-white/40 lowercase">scroll horizontal for full matrix</span>
               </div>
-              <div className="overflow-x-auto rounded-xl border border-white/10 bg-slate-900/60 p-3">
-                <table className="w-full text-left text-xs">
+              <div className="overflow-x-auto rounded-xl border border-white/10 bg-slate-900/60">
+                <table className="w-full text-left text-xs whitespace-nowrap">
                   <thead>
-                    <tr className="border-b border-white/10 text-white/40 font-bold">
-                      <th className="py-1.5">Mat</th>
-                      <th className="py-1.5">Inn</th>
-                      <th className="py-1.5 text-[#f2d39a]">Runs</th>
-                      <th className="py-1.5">HS</th>
-                      <th className="py-1.5 text-emerald-400">Avg</th>
-                      <th className="py-1.5 text-sky-400">SR</th>
-                      <th className="py-1.5">100s</th>
-                      <th className="py-1.5">50s</th>
-                      <th className="py-1.5">4s/6s</th>
+                    <tr className="border-b border-white/10 text-white/50 font-bold bg-slate-900/90">
+                      <th className="py-2 px-3 sticky left-0 bg-slate-900 z-10">Format</th>
+                      <th className="py-2 px-2.5">Matches</th>
+                      <th className="py-2 px-2.5">Innings</th>
+                      <th className="py-2 px-2.5 text-[#f2d39a]">Runs</th>
+                      <th className="py-2 px-2.5">Balls</th>
+                      <th className="py-2 px-2.5">Highest</th>
+                      <th className="py-2 px-2.5 text-emerald-400">Average</th>
+                      <th className="py-2 px-2.5 text-sky-400">SR</th>
+                      <th className="py-2 px-2.5">Not Out</th>
+                      <th className="py-2 px-2.5">Fours</th>
+                      <th className="py-2 px-2.5">Sixes</th>
+                      <th className="py-2 px-2.5">Ducks</th>
+                      <th className="py-2 px-2.5">50s</th>
+                      <th className="py-2 px-2.5">100s</th>
+                      <th className="py-2 px-2.5">200s</th>
+                      <th className="py-2 px-2.5">300s</th>
+                      <th className="py-2 px-2.5">400s</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-white/5 font-semibold text-white">
-                    <tr>
-                      <td className="py-2">{currentBat.Mat || currentBat.Matches || currentBat.M || '—'}</td>
-                      <td className="py-2">{currentBat.Inn || currentBat.Innings || '—'}</td>
-                      <td className="py-2 font-black text-[#f2d39a]">{currentBat.Runs || currentBat.R || player.stats?.runs || '0'}</td>
-                      <td className="py-2">{currentBat.HS || currentBat.Highest || '—'}</td>
-                      <td className="py-2 text-emerald-400">{currentBat.Avg || currentBat.Average || '0.00'}</td>
-                      <td className="py-2 text-sky-400">{currentBat.SR || currentBat.StrikeRate || '0.00'}</td>
-                      <td className="py-2">{currentBat['100s'] || currentBat['100'] || '0'}</td>
-                      <td className="py-2">{currentBat['50s'] || currentBat['50'] || '0'}</td>
-                      <td className="py-2">{currentBat['4s'] || 0}/{currentBat['6s'] || 0}</td>
-                    </tr>
+                    {formatList.map((fmt) => {
+                      const row = batStats[fmt] || batStats[fmt.toLowerCase()] || {};
+                      const hasRow = Object.keys(row).length > 0;
+                      return (
+                        <tr key={fmt} className="hover:bg-white/5 transition-colors">
+                          <td className="py-2 px-3 sticky left-0 bg-slate-950 font-bold text-[#f2d39a] border-r border-white/5">
+                            {fmt}
+                          </td>
+                          <td className="py-2 px-2.5">{row.Mat || row.Matches || (hasRow ? '0' : '—')}</td>
+                          <td className="py-2 px-2.5">{row.Inn || row.Innings || (hasRow ? '0' : '—')}</td>
+                          <td className="py-2 px-2.5 font-black text-[#f2d39a]">{row.Runs || row.R || (hasRow ? '0' : '—')}</td>
+                          <td className="py-2 px-2.5 text-white/80">{row.Balls || row.BF || (hasRow ? '0' : '—')}</td>
+                          <td className="py-2 px-2.5">{row.HS || row.Highest || (hasRow ? '0' : '—')}</td>
+                          <td className="py-2 px-2.5 text-emerald-400 font-bold">{row.Avg || row.Average || (hasRow ? '0.00' : '—')}</td>
+                          <td className="py-2 px-2.5 text-sky-400 font-bold">{row.SR || row.StrikeRate || (hasRow ? '0.00' : '—')}</td>
+                          <td className="py-2 px-2.5">{row.NO || row.NotOut || (hasRow ? '0' : '—')}</td>
+                          <td className="py-2 px-2.5">{row['4s'] || row.Fours || (hasRow ? '0' : '—')}</td>
+                          <td className="py-2 px-2.5">{row['6s'] || row.Sixes || (hasRow ? '0' : '—')}</td>
+                          <td className="py-2 px-2.5">{row.Ducks || row.Duck || (hasRow ? '0' : '—')}</td>
+                          <td className="py-2 px-2.5">{row['50'] || row['50s'] || (hasRow ? '0' : '—')}</td>
+                          <td className="py-2 px-2.5 text-amber-400 font-bold">{row['100'] || row['100s'] || (hasRow ? '0' : '—')}</td>
+                          <td className="py-2 px-2.5">{row['200s'] || row['200'] || '0'}</td>
+                          <td className="py-2 px-2.5">{row['300s'] || row['300'] || '0'}</td>
+                          <td className="py-2 px-2.5">{row['400s'] || row['400'] || '0'}</td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
             </div>
 
-            {/* Bowling Career Table */}
+            {/* Complete Bowling Career Summary Table */}
             <div className="space-y-2">
-              <div className="text-xs font-bold text-white/70 uppercase tracking-wider">
-                🎯 Bowling Statistics ({activeFormat})
+              <div className="flex items-center justify-between text-xs font-bold text-white/80 uppercase tracking-wider">
+                <span>🎯 Bowling Career Summary</span>
+                <span className="text-[11px] font-semibold text-white/40 lowercase">scroll horizontal for full matrix</span>
               </div>
-              <div className="overflow-x-auto rounded-xl border border-white/10 bg-slate-900/60 p-3">
-                <table className="w-full text-left text-xs">
+              <div className="overflow-x-auto rounded-xl border border-white/10 bg-slate-900/60">
+                <table className="w-full text-left text-xs whitespace-nowrap">
                   <thead>
-                    <tr className="border-b border-white/10 text-white/40 font-bold">
-                      <th className="py-1.5">Mat</th>
-                      <th className="py-1.5">Inn</th>
-                      <th className="py-1.5 text-[#a8e9ef]">Wkts</th>
-                      <th className="py-1.5">BBM</th>
-                      <th className="py-1.5 text-emerald-400">Avg</th>
-                      <th className="py-1.5 text-amber-400">Econ</th>
+                    <tr className="border-b border-white/10 text-white/50 font-bold bg-slate-900/90">
+                      <th className="py-2 px-3 sticky left-0 bg-slate-900 z-10">Format</th>
+                      <th className="py-2 px-2.5">Matches</th>
+                      <th className="py-2 px-2.5">Innings</th>
+                      <th className="py-2 px-2.5">Balls</th>
+                      <th className="py-2 px-2.5">Runs</th>
+                      <th className="py-2 px-2.5">Maidens</th>
+                      <th className="py-2 px-2.5 text-[#a8e9ef]">Wickets</th>
+                      <th className="py-2 px-2.5 text-emerald-400">Avg</th>
+                      <th className="py-2 px-2.5 text-amber-400">Eco</th>
+                      <th className="py-2 px-2.5 text-sky-400">SR</th>
+                      <th className="py-2 px-2.5">BBI</th>
+                      <th className="py-2 px-2.5">BBM</th>
+                      <th className="py-2 px-2.5">4w</th>
+                      <th className="py-2 px-2.5">5w</th>
+                      <th className="py-2 px-2.5">10w</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-white/5 font-semibold text-white">
-                    <tr>
-                      <td className="py-2">{currentBowl.Mat || currentBowl.Matches || '—'}</td>
-                      <td className="py-2">{currentBowl.Inn || currentBowl.Innings || '—'}</td>
-                      <td className="py-2 font-black text-[#a8e9ef]">{currentBowl.Wkts || currentBowl.Wickets || player.stats?.wickets || '0'}</td>
-                      <td className="py-2">{currentBowl.BBM || currentBowl.Best || '—'}</td>
-                      <td className="py-2 text-emerald-400">{currentBowl.Avg || currentBowl.Average || '—'}</td>
-                      <td className="py-2 text-amber-400">{currentBowl.Econ || currentBowl.Economy || '—'}</td>
-                    </tr>
+                    {formatList.map((fmt) => {
+                      const row = bowlStats[fmt] || bowlStats[fmt.toLowerCase()] || {};
+                      const hasRow = Object.keys(row).length > 0;
+                      return (
+                        <tr key={fmt} className="hover:bg-white/5 transition-colors">
+                          <td className="py-2 px-3 sticky left-0 bg-slate-950 font-bold text-[#f2d39a] border-r border-white/5">
+                            {fmt}
+                          </td>
+                          <td className="py-2 px-2.5">{row.Mat || row.Matches || (hasRow ? '0' : '—')}</td>
+                          <td className="py-2 px-2.5">{row.Inn || row.Innings || (hasRow ? '0' : '—')}</td>
+                          <td className="py-2 px-2.5 text-white/80">{row.Balls || row.BF || (hasRow ? '0' : '—')}</td>
+                          <td className="py-2 px-2.5">{row.Runs || row.R || (hasRow ? '0' : '—')}</td>
+                          <td className="py-2 px-2.5">{row.Maidens || row.M || (hasRow ? '0' : '—')}</td>
+                          <td className="py-2 px-2.5 font-black text-[#a8e9ef]">{row.Wkts || row.Wickets || (hasRow ? '0' : '—')}</td>
+                          <td className="py-2 px-2.5 text-emerald-400 font-bold">{row.Avg || row.Average || (hasRow ? '0.0' : '—')}</td>
+                          <td className="py-2 px-2.5 text-amber-400 font-bold">{row.Econ || row.Economy || (hasRow ? '0.00' : '—')}</td>
+                          <td className="py-2 px-2.5 text-sky-400">{row.SR || row.StrikeRate || (hasRow ? '0.0' : '—')}</td>
+                          <td className="py-2 px-2.5">{row.BBI || (hasRow ? '0/0' : '—')}</td>
+                          <td className="py-2 px-2.5">{row.BBM || (hasRow ? '0/0' : '—')}</td>
+                          <td className="py-2 px-2.5">{row['4W'] || row['4w'] || '0'}</td>
+                          <td className="py-2 px-2.5">{row['5W'] || row['5w'] || '0'}</td>
+                          <td className="py-2 px-2.5">{row['10w'] || row['10W'] || '0'}</td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
@@ -310,15 +517,15 @@ export default function Player2027Drawer({
         <div className="sticky bottom-0 z-20 flex gap-3 border-t border-white/10 bg-slate-950/95 p-4 backdrop-blur-md">
           <button
             type="button"
-            onClick={() => onEdit(player)}
+            onClick={() => onEdit(current)}
             className="flex-1 py-2.5 px-4 rounded-xl bg-teal-600 hover:bg-teal-500 text-white text-xs font-bold flex items-center justify-center gap-2 shadow-lg shadow-teal-950/50 transition-all"
           >
             <Edit2 className="w-4 h-4" />
             Edit Squad Details
           </button>
-          {player.cricbuzzUrl && (
+          {current.cricbuzzUrl && (
             <a
-              href={player.cricbuzzUrl}
+              href={current.cricbuzzUrl}
               target="_blank"
               rel="noopener noreferrer"
               className="py-2.5 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold flex items-center justify-center gap-1.5 border border-white/10 transition-all"

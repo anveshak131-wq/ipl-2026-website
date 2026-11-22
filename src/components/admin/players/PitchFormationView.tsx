@@ -19,10 +19,10 @@ export default function PitchFormationView({
   const metaTeam = resolveIpl2027Team(selectedTeamId);
 
   // Group into cricket positions
-  const batsmen = players.filter((p) => p.role === 'Batsman');
-  const allrounders = players.filter((p) => p.role === 'All-Rounder');
-  const keepers = players.filter((p) => p.role === 'Wicket-Keeper');
-  const bowlers = players.filter((p) => p.role === 'Bowler');
+  const batsmen = players.filter((p) => (p.role as string)?.toLowerCase().includes('bat'));
+  const allrounders = players.filter((p) => (p.role as string)?.toLowerCase().includes('all'));
+  const keepers = players.filter((p) => (p.role as string)?.toLowerCase().includes('keeper') || (p.role as string)?.toLowerCase().includes('wk'));
+  const bowlers = players.filter((p) => (p.role as string)?.toLowerCase().includes('bowl'));
 
   // Build projected 11
   const playing11: { pos: string; label: string; player?: Player }[] = [

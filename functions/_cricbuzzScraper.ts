@@ -749,6 +749,39 @@ function parseProfileHtml(html: string) {
   const htmlBatting = Object.keys(rscBatting).length > 0 ? rscBatting : parseTargetedHtmlTable(html, 'Batting Career Summary');
   const htmlBowling = Object.keys(rscBowling).length > 0 ? rscBowling : parseTargetedHtmlTable(html, 'Bowling Career Summary');
 
+  // 7. Birth Place, Height, Teams & Profile Image
+  const bpMatch = html.match(/Birth Place<\/div>\s*<div[^>]*>([\s\S]*?)<\/div>/i);
+  const birthPlace = bpMatch ? bpMatch[1].replace(/<[^>]+>/g, '').trim() : (bioMap['birth place'] || String(playerData?.birthPlace || ''));
+
+  const htMatch = html.match(/Height<\/div>\s*<div[^>]*>([\s\S]*?)<\/div>/i);
+  const height = htMatch ? htMatch[1].replace(/<[^>]+>/g, '').trim() : (bioMap['height'] || String(playerData?.height || ''));
+
+  const teamsMatch = html.match(/Teams<\/span>\s*<span[^>]*>([\s\S]*?)<\/span>/i) ||
+                     html.match(/Teams<\/div>[\s\S]*?<div[^>]*class="[^"]*w-2\/3[^"]*"[^>]*>([\s\S]*?)<\/div>/i) ||
+                     html.match(/Teams<\/div>\s*<div[^>]*>([\s\S]*?)<\/div>/i);
+  const teams = teamsMatch ? teamsMatch[1].replace(/<[^>]+>/g, '').trim() : String(playerData?.teams || bioMap['teams'] || '');
+
+  const imgMatch = html.match(/src="(https:\/\/static\.cricbuzz\.com\/a\/matches\/players\/[^"]+)"/i) ||
+                   html.match(/<img[^>]*src="([^"]+)"[^>]*alt="[^"]*Profile[^"]*"/i);
+  const imageUrl = imgMatch ? imgMatch[1] : (playerData?.image || '');
+
+  // 8. ICC Rankings Table
+  const iccMatch = html.match(/ICC RANKINGS[\s\S]*?<table[^>]*>([\s\S]*?)<\/table>/i);
+  const iccRankings: Array<{ format: string; currentRank: string; bestRank: string }> = [];
+  if (iccMatch) {
+    const rows = iccMatch[1].match(/<tr[^>]*>[\s\S]*?<\/tr>/gi) || [];
+    for (const row of rows) {
+      const cells = (row.match(/<td[^>]*>[\s\S]*?<\/td>/gi) || []).map(c => c.replace(/<[^>]+>/g, '').trim());
+      if (cells.length >= 3) {
+        iccRankings.push({
+          format: cells[0],
+          currentRank: cells[1],
+          bestRank: cells[2],
+        });
+      }
+    }
+  }
+
   return {
     title,
     scrapedName,
@@ -756,15 +789,20 @@ function parseProfileHtml(html: string) {
       name: scrapedName,
       dateOfBirth,
       age,
+      birthPlace,
+      height,
       nationality,
       role,
       allrounderType,
       battingStyle,
       bowlingStyle,
+      teams,
+      imageUrl,
     },
     data: {
       batting: htmlBatting,
       bowling: htmlBowling,
+      iccRankings,
     },
   };
 }

@@ -31,13 +31,28 @@ export interface Player {
   role: 'Batsman' | 'Bowler' | 'All-rounder' | 'Wicket-keeper';
   allrounderType?: 'Batting All-rounder' | 'Bowling All-rounder'; // Only for All-rounder role
   teamId: string;
+  team?: string;
   age: number;
   dateOfBirth?: string; // Format: YYYY-MM-DD, if provided age auto-increments
   nationality: string;
-  jerseyNumber: number;
+  jerseyNumber: number | string;
   isCaptain: boolean;
   bowlingStyle: string;
   battingStyle: string;
+  birthPlace?: string;
+  height?: string;
+  teams?: string;
+  cricbuzzUrl?: string;
+  cricbuzzId?: string;
+  iccRankings?: Array<{ format: string; currentRank: string; bestRank: string; category?: string }>;
+  careerStats?: {
+    batting?: Record<string, Record<string, any>>;
+    bowling?: Record<string, Record<string, any>>;
+    iccRankings?: Array<{ format: string; currentRank: string; bestRank: string }>;
+  };
+  transferFee?: string | number;
+  transferNotes?: string;
+  teamShortName?: string;
   photoUrl?: string; // Optional player photo URL
   statsAudit?: Record<string, {
     updatedBy?: string;
@@ -99,7 +114,7 @@ export interface Player {
   // Squad availability state for the active season. Inactive players are excluded
   // from team selections but still retained for profile/history use.
   isActiveInSquad?: boolean;
-  squadStatus?: 'active' | 'inactive' | 'retained' | 'released' | 'auction';
+  squadStatus?: 'active' | 'inactive' | 'retained' | 'released' | 'auction' | 'Retained' | 'Traded' | 'Released' | 'Active Squad' | 'Mentor' | 'Withdrawn' | string;
   squadExitReason?: 'contract_terminated' | 'injury_replacement' | 'released' | 'unavailable' | 'other';
   squadExitDate?: string; // ISO date (YYYY-MM-DD)
   // Team-season history entry is recorded only if player has >= 1 appearance.
