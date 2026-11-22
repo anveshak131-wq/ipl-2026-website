@@ -91,6 +91,7 @@ export default function Navbar() {
     { href: getLeagueAwareHref('/matches'), label: 'Matches', emoji: 'cricket-bat' },
     // Explore & Discover
     { href: getLeagueAwareHref('/teams'), label: 'Teams', emoji: 'trophy' },
+    ...(currentLeague === 'ipl' ? [{ href: '/retentions', label: 'Retentions', emoji: 'sparkles' as NavEmojiName }] : []),
     { href: getLeagueAwareHref('/news'), label: 'News', emoji: 'fire' },
     // Fan Stories temporarily hidden from end-user navigation
     // { href: '/stories', label: 'Fan Stories', emoji: 'people' },
@@ -122,6 +123,7 @@ export default function Navbar() {
     if (href === '/stats') return 'Leaderboards, records, and team comparisons';
     if (href === '/wpl/scorecard') return 'Official WPL match scorecards, innings & partnerships';
     if (href === '/wpl/leaderboard') return 'Player stats and points table';
+    if (href === '/retentions') return 'IPL 2027 Player Retentions, Trades & Auction Purse Hub';
     if (href === '/ipl/news') return 'Official IPL 2026-27 news, trade wire & mini-auction updates';
     if (href === '/wpl/news') return 'Official WPL Season 5 news, fixtures & team updates';
     if (href === '/news') return 'Comprehensive IPL & WPL 2027 cricket news hub';
