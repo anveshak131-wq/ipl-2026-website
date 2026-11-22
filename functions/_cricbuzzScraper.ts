@@ -85,6 +85,57 @@ const VERIFIED_PLAYER_SEEDS: ProfileSeed[] = [
   ['1448809', 'pratika-rawal'],
   ['11093', 'sushma-verma', ['9083']],
   ['1448841', 'kranti-gaud', ['kranti-goud', 'kranti goud']],
+
+  // IPL Marquee Seeds
+  ['1413', 'virat-kohli', ['kohli', 'virat']],
+  ['576', 'rohit-sharma', ['rohit']],
+  ['265', 'ms-dhoni', ['dhoni', 'thala', 'msd']],
+  ['9311', 'jasprit-bumrah', ['bumrah']],
+  ['9647', 'hardik-pandya', ['hardik']],
+  ['7909', 'suryakumar-yadav', ['sky', 'surya']],
+  ['11813', 'ruturaj-gaikwad', ['ruturaj']],
+  ['11808', 'shubman-gill', ['shubman', 'gill']],
+  ['8271', 'sanju-samson', ['samson', 'sanju']],
+  ['10744', 'rishabh-pant', ['pant', 'rishabh']],
+  ['8733', 'kl-rahul', ['rahul', 'kl rahul']],
+  ['9428', 'shreyas-iyer', ['iyer', 'shreyas']],
+  ['10209', 'heinrich-klaasen', ['klaasen']],
+  ['10023', 'nicholas-pooran', ['pooran']],
+  ['10738', 'rashid-khan', ['rashid']],
+  ['8095', 'pat-cummins', ['cummins']],
+  ['10200', 'travis-head', ['head']],
+  ['10896', 'rinku-singh', ['rinku']],
+  ['13217', 'arshdeep-singh', ['arshdeep']],
+  ['8292', 'kuldeep-yadav', ['kuldeep']],
+  ['10808', 'mohammed-siraj', ['siraj']],
+  ['7915', 'mohammed-shami', ['shami']],
+  ['8808', 'axar-patel', ['axar']],
+  ['587', 'ravindra-jadeja', ['jadeja', 'jaddu']],
+  ['13942', 'yashasvi-jaiswal', ['jaiswal', 'yashasvi']],
+  ['14316', 'tilak-varma', ['tilak']],
+  ['11995', 'riyan-parag', ['parag']],
+  ['22002', 'sai-sudharsan', ['sudharsan']],
+  ['10260', 'rajat-patidar', ['patidar']],
+  ['12087', 'abhishek-sharma', ['abhishek']],
+  ['12926', 'varun-chakaravarthy', ['chakaravarthy', 'varun c']],
+  ['22644', 'harshit-rana', ['harshit']],
+  ['22642', 'mayank-yadav', ['mayank']],
+  ['14309', 'nitish-kumar-reddy', ['nitish reddy', 'nitish kumar']],
+  ['7736', 'andre-russell', ['russell', 'dre russ']],
+  ['8290', 'sunil-narine', ['narine']],
+  ['8117', 'trent-boult', ['boult']],
+  ['9585', 'kagiso-rabada', ['rabada']],
+  ['7734', 'mitchell-starc', ['starc']],
+  ['7662', 'glenn-maxwell', ['maxwell', 'maxi']],
+  ['8989', 'marcus-stoinis', ['stoinis']],
+  ['10926', 'liam-livingstone', ['livingstone']],
+  ['10931', 'sam-curran', ['curran']],
+  ['7825', 'faf-du-plessis', ['faf', 'du plessis']],
+  ['8314', 'quinton-de-kock', ['qdk', 'de kock']],
+  ['8293', 'jos-buttler', ['buttler', 'jos']],
+  ['8313', 'david-miller', ['miller', 'killer miller']],
+  ['10420', 'shimron-hetmyer', ['hetmyer']],
+  ['14488', 'matheesha-pathirana', ['pathirana']],
 ];
 
 const KNOWN_PLAYER_PROFILES: Record<string, string> = (() => {
@@ -761,9 +812,12 @@ function parseProfileHtml(html: string) {
                      html.match(/Teams<\/div>\s*<div[^>]*>([\s\S]*?)<\/div>/i);
   const teams = teamsMatch ? teamsMatch[1].replace(/<[^>]+>/g, '').trim() : String(playerData?.teams || bioMap['teams'] || '');
 
-  const imgMatch = html.match(/src="(https:\/\/static\.cricbuzz\.com\/a\/matches\/players\/[^"]+)"/i) ||
+  const imgMatch = html.match(/src="(https:\/\/static\.cricbuzz\.com\/a\/img\/v1\/i1\/[^"]+)"/i) ||
+                   html.match(/srcSet="(https:\/\/static\.cricbuzz\.com\/a\/img\/v1\/i1\/[^"]+?)\s/i) ||
+                   html.match(/src="(https:\/\/static\.cricbuzz\.com\/a\/matches\/players\/[^"]+)"/i) ||
                    html.match(/<img[^>]*src="([^"]+)"[^>]*alt="[^"]*Profile[^"]*"/i);
-  const imageUrl = imgMatch ? imgMatch[1] : (playerData?.image || '');
+  const rawImageUrl = imgMatch ? imgMatch[1].replace(/&amp;/g, '&') : (playerData?.image || '');
+  const imageUrl = rawImageUrl.replace(/^http:\/\//i, 'https://');
 
   // 8. ICC Rankings Table
   const iccMatch = html.match(/ICC RANKINGS[\s\S]*?<table[^>]*>([\s\S]*?)<\/table>/i);

@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState, useEffect, useMemo, useTransition } from 'react';
+import React, { useState, useEffect, useMemo, useTransition, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import type { Player, Team } from '@/types';
 import {
   Search,
@@ -25,9 +26,12 @@ import SmartIntakeModal from '@/components/admin/players/SmartIntakeModal';
 import PitchFormationView from '@/components/admin/players/PitchFormationView';
 import Player2027DenseTable from '@/components/admin/players/Player2027DenseTable';
 import PlayerExportBar from '@/components/admin/players/PlayerExportBar';
+import PlayersStatsSubNav from '@/components/admin/PlayersStatsSubNav';
+import BattingStatsWorkspace from '@/components/admin/player-stats/BattingStatsWorkspace';
+import BowlingStatsWorkspace from '@/components/admin/player-stats/BowlingStatsWorkspace';
 import { IPL_2027_TEAMS, resolveIpl2027Team } from '@/lib/admin/ipl2027Teams';
 
-export default function Ipl2027OpsPlayersPage() {
+function Ipl2027OpsPlayersPage() {
   const [players, setPlayers] = useState<Player[]>([]);
   const [teams, setTeams] = useState<Team[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -57,25 +61,22 @@ export default function Ipl2027OpsPlayersPage() {
     return () => clearTimeout(handler);
   }, [searchQuery]);
 
-  // Load Players & Teams
+  // Load Players and Teams
   const loadData = async () => {
     setIsLoading(true);
     try {
-      const [playersRes, teamsRes] = await Promise.all([
-        fetch(`/api/players?league=ipl&_t=${Date.now()}`, { cache: 'no-store' }),
-        fetch('/api/teams?league=ipl', { cache: 'no-store' }),
+      const [resPlayers, resTeams] = await Promise.all([
+        fetch('/api/players?league=ipl&includeInactive=true').then((r) => (r.ok ? r.json() : [])),
+        fetch('/api/teams?league=ipl').then((r) => (r.ok ? r.json() : [])),
       ]);
 
-      if (playersRes.ok) {
-        const pData = await playersRes.json();
-        if (Array.isArray(pData)) setPlayers(pData);
-      }
-      if (teamsRes.ok) {
-        const tData = await teamsRes.json();
-        if (Array.isArray(tData)) setTeams(tData);
-      }
-    } catch (err) {
-      console.error('Failed to load IPL 2027 squad data:', err);
+      const rawPlayers = Array.isArray(resPlayers) ? resPlayers : resPlayers?.data || [];
+      const rawTeams = Array.isArray(resTeams) ? resTeams : resTeams?.data || [];
+
+      setPlayers(rawPlayers);
+      setTeams(rawTeams);
+    } catch (e) {
+      console.error('Failed to load IPL 2027 players data:', e);
     } finally {
       setIsLoading(false);
     }
@@ -85,203 +86,218 @@ export default function Ipl2027OpsPlayersPage() {
     loadData();
   }, []);
 
-  // Team player count index for Franchise bar
-  const { playersCountByTeam, poolCount } = useMemo(() => {
-    const counts: Record<string, number> = {};
-    let pool = 0;
-
-    for (const p of players) {
-      const status = (p.squadStatus || '').toLowerCase();
-      const metaTeam = resolveIpl2027Team(p.teamShortName || p.teamId || p.team);
-
-      if (status.includes('release') || !p.teamId || p.team === 'Auction Pool 2027') {
-        pool++;
-      }
-
-      if (metaTeam) {
-        counts[metaTeam.id] = (counts[metaTeam.id] || 0) + 1;
-        counts[metaTeam.shortName] = (counts[metaTeam.shortName] || 0) + 1;
-      }
-    }
-    return { playersCountByTeam: counts, poolCount: pool };
-  }, [players]);
-
-  // High-performance memoized filter pipeline
+  // Filter Pipeline with high-performance useMemo
   const filteredPlayers = useMemo(() => {
-    const searchLower = debouncedSearch.trim().toLowerCase();
+    return players.filter((player) => {
+      // 1. Franchise Selector Filter
+      if (selectedTeamId !== 'all') {
+        if (selectedTeamId === 'STANDBY_2027') {
+          const isPool =
+            !player.teamId ||
+            String(player.teamId).trim() === '' ||
+            player.team === 'Auction Pool 2027' ||
+            (player.squadStatus || '').toLowerCase().includes('release');
+          if (!isPool) return false;
+        } else {
+          const pTeamId = String(player.teamId || '');
+          const pTeamShort = (player.teamShortName || '').toUpperCase();
+          const targetMeta = resolveIpl2027Team(selectedTeamId);
 
-    return players.filter((p) => {
-      const status = (p.squadStatus || 'Retained').toLowerCase();
-      const metaTeam = resolveIpl2027Team(p.teamShortName || p.teamId || p.team);
+          const matchesId = pTeamId === selectedTeamId;
+          const matchesShort = targetMeta ? pTeamShort === targetMeta.shortName : false;
+          const matchesName = targetMeta ? (player.team || '').includes(targetMeta.name) : false;
 
-      // Franchise Scope
-      if (selectedTeamId === 'pool') {
-        if (!status.includes('release') && p.teamId && p.team !== 'Auction Pool 2027') {
-          return false;
+          if (!matchesId && !matchesShort && !matchesName) return false;
         }
-      } else if (selectedTeamId !== 'all') {
-        if (!metaTeam) return false;
-        if (metaTeam.id !== selectedTeamId && metaTeam.shortName !== selectedTeamId) {
+      }
+
+      // 2. Search Query (debounced)
+      if (debouncedSearch.trim()) {
+        const q = debouncedSearch.toLowerCase().trim();
+        const nameMatch = player.name.toLowerCase().includes(q);
+        const jerseyMatch = String(player.jerseyNumber || '').includes(q);
+        const roleMatch = (player.role || '').toLowerCase().includes(q);
+        const natMatch = (player.nationality || '').toLowerCase().includes(q);
+        const teamMatch = (player.team || '').toLowerCase().includes(q);
+        if (!nameMatch && !jerseyMatch && !roleMatch && !natMatch && !teamMatch) {
           return false;
         }
       }
 
-      // Status Filter
-      if (statusFilter === 'RETAINED') {
-        if (!status.includes('retain')) return false;
-      } else if (statusFilter === 'TRADED') {
-        if (!status.includes('trade')) return false;
-      } else if (statusFilter === 'RELEASED') {
-        if (!status.includes('release') && p.teamId && p.team !== 'Auction Pool 2027') return false;
-      } else if (statusFilter === 'OVERSEAS') {
-        if (!p.nationality || p.nationality.toLowerCase() === 'india') return false;
+      // 3. Squad Status Filter Chip
+      if (statusFilter !== 'ALL') {
+        const s = (player.squadStatus || 'Retained').toLowerCase();
+        const fee = (player as any).transferFee || '';
+        const notes = (player as any).transferNotes || '';
+
+        if (statusFilter === 'RETAINED') {
+          if (!s.includes('retained')) return false;
+        } else if (statusFilter === 'TRADED') {
+          if (!s.includes('traded') && !notes.toLowerCase().includes('trade')) return false;
+        } else if (statusFilter === 'RELEASED') {
+          if (!s.includes('release') && selectedTeamId !== 'STANDBY_2027') return false;
+        } else if (statusFilter === 'OVERSEAS') {
+          const nat = (player.nationality || 'India').toLowerCase();
+          if (nat === 'india' || nat === 'ind' || nat === 'indian') return false;
+        } else if (statusFilter === 'MENTOR') {
+          if (!s.includes('mentor')) return false;
+        }
       }
 
-      // Role Filter
+      // 4. Role Filter Chip
       if (roleFilter !== 'ALL') {
-        if ((p.role || '').toLowerCase() !== roleFilter.toLowerCase()) return false;
-      }
-
-      // Search Filter
-      if (searchLower) {
-        const nameMatch = p.name.toLowerCase().includes(searchLower);
-        const natMatch = (p.nationality || '').toLowerCase().includes(searchLower);
-        const teamMatch = (p.team || p.teamShortName || '').toLowerCase().includes(searchLower);
-        const jerseyMatch = String(p.jerseyNumber || '') === searchLower;
-        if (!nameMatch && !natMatch && !teamMatch && !jerseyMatch) return false;
+        const role = (player.role || '').toLowerCase();
+        if (roleFilter === 'BATSMAN' && !role.includes('bat')) return false;
+        if (roleFilter === 'BOWLER' && !role.includes('bowl')) return false;
+        if (roleFilter === 'ALLROUNDER' && !role.includes('all')) return false;
+        if (roleFilter === 'KEEPER' && !role.includes('keeper') && !role.includes('wk')) return false;
       }
 
       return true;
     });
-  }, [players, selectedTeamId, statusFilter, roleFilter, debouncedSearch]);
+  }, [players, selectedTeamId, debouncedSearch, statusFilter, roleFilter]);
 
-  // Handlers
-  const handleOpenAdd = () => {
-    setEditingPlayer(null);
-    setModalOpen(true);
+  // Franchise counts for fast lookup
+  const currentTeamMeta = useMemo(() => {
+    return resolveIpl2027Team(selectedTeamId);
+  }, [selectedTeamId]);
+
+  const playersCountByTeam = useMemo(() => {
+    const counts: Record<string, number> = {};
+    players.forEach((p) => {
+      if (p.teamId) {
+        counts[String(p.teamId)] = (counts[String(p.teamId)] || 0) + 1;
+      }
+      if (p.teamShortName) {
+        counts[p.teamShortName] = (counts[p.teamShortName] || 0) + 1;
+      }
+      if (p.franchise) {
+        counts[p.franchise] = (counts[p.franchise] || 0) + 1;
+      }
+    });
+    return counts;
+  }, [players]);
+
+  const poolPlayersCount = useMemo(() => {
+    return players.filter(
+      (p) =>
+        p.squadStatus === 'Released' ||
+        p.squadStatus === 'Draft Pool' ||
+        !p.teamId ||
+        p.teamId === 'pool'
+    ).length;
+  }, [players]);
+
+  // Handler for saving/updating player
+  const handlePlayerSaved = (savedPlayer: Player) => {
+    setPlayers((prev) => {
+      const exists = prev.some((p) => p.id === savedPlayer.id);
+      if (exists) {
+        return prev.map((p) => (p.id === savedPlayer.id ? savedPlayer : p));
+      }
+      return [savedPlayer, ...prev];
+    });
   };
 
+  // Handler for delete/release player
+  const handleDeletePlayer = async (id: string, name: string) => {
+    if (!confirm(`Are you sure you want to release "${name}" to the 2027 Auction Standby Pool?`)) {
+      return;
+    }
+    try {
+      const token = typeof window !== 'undefined' ? localStorage.getItem('adminToken') : null;
+      await fetch(`/api/players?id=${id}`, {
+        method: 'DELETE',
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      setPlayers((prev) => prev.filter((p) => p.id !== id));
+    } catch (e) {
+      console.error('Failed to release player:', e);
+    }
+  };
+
+  // Handler for opening edit modal
   const handleOpenEdit = (player: Player) => {
     setEditingPlayer(player);
     setModalOpen(true);
   };
 
-  const handleDeletePlayer = async (id: string, name: string) => {
-    if (!confirm(`Are you sure you want to delete ${name} from squad records?`)) return;
-
-    try {
-      const token = typeof window !== 'undefined' ? localStorage.getItem('adminToken') : null;
-      const res = await fetch(`/api/players?id=${id}&league=ipl`, {
-        method: 'DELETE',
-        headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}) },
-      });
-
-      if (res.ok) {
-        setPlayers((prev) => prev.filter((p) => String(p.id) !== String(id)));
-        if (drawerPlayer && String(drawerPlayer.id) === String(id)) {
-          setDrawerPlayer(null);
-        }
-      } else {
-        alert('Failed to delete player from database');
-      }
-    } catch (e: any) {
-      alert('Error deleting player: ' + e.message);
-    }
-  };
-
-  const handlePlayerSaved = (saved: Player) => {
-    setPlayers((prev) => {
-      const idx = prev.findIndex((p) => String(p.id) === String(saved.id));
-      if (idx >= 0) {
-        const clone = [...prev];
-        clone[idx] = saved;
-        return clone;
-      }
-      return [saved, ...prev];
-    });
-    if (drawerPlayer && String(drawerPlayer.id) === String(saved.id)) {
-      setDrawerPlayer(saved);
-    }
+  const handleOpenNew = () => {
+    setEditingPlayer(null);
+    setModalOpen(true);
   };
 
   return (
     <div className="min-h-screen bg-slate-950 text-white p-4 sm:p-6 md:p-8 space-y-6">
-      {/* Hero Header */}
+      {/* 3-Segment Top Navigation Hub: Players | Batting Stats | Bowling Stats */}
+      <PlayersStatsSubNav />
+
+      {/* Top Hero Command Center */}
       <div className="rounded-3xl border border-white/10 bg-gradient-to-r from-slate-900 via-slate-950 to-slate-900 p-6 md:p-8 shadow-2xl relative overflow-hidden">
         <div className="absolute right-0 top-0 h-full w-96 bg-gradient-to-l from-[#f2d39a]/5 to-transparent pointer-events-none" />
 
         <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-5">
           <div>
-            <div className="flex items-center gap-2 text-xs font-black uppercase tracking-wider text-[#f2d39a]">
-              <Shield className="w-4 h-4 text-[#f2d39a]" />
-              IPL 2027 Operations Desk & Auction War Room
+            <div className="flex items-center gap-2 mb-2">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                <Shield className="w-3.5 h-3.5" />
+                IPL 2027 Season Verified
+              </span>
+              <span className="text-xs font-bold text-white/50">· 255 Contracted Players</span>
             </div>
-            <h1 className="text-2xl sm:text-3xl md:text-4xl font-black text-white tracking-tight mt-1">
-              Squad Management Hub
+            <h1 className="text-3xl md:text-4xl font-black text-white tracking-tight">
+              IPL 2027 Squad Intelligence & Players Ops
             </h1>
-            <p className="text-xs sm:text-sm text-white/50 mt-1 max-w-2xl">
-              Official 2027 franchise rosters, retention slabs, blockbuster trades, and 1-click Cricbuzz intelligence.
+            <p className="text-sm text-white/60 mt-1.5 max-w-2xl">
+              Real-time franchise retentions, mega trades, and verified Cricbuzz statistics engine.
             </p>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2.5">
+          <div className="flex flex-wrap items-center gap-3">
             <button
               type="button"
-              onClick={() => setShowExportStudio((v) => !v)}
-              className={`px-4 py-2.5 rounded-xl text-xs font-bold flex items-center gap-2 border transition-all ${
-                showExportStudio
-                  ? 'bg-sky-600 text-white border-sky-400 shadow-lg shadow-sky-950/50'
-                  : 'bg-slate-900 hover:bg-slate-800 text-sky-300 border-sky-500/40'
-              }`}
+              onClick={() => setShowExportStudio(!showExportStudio)}
+              className="px-4 py-2.5 rounded-2xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold flex items-center gap-2 border border-white/10 shadow-lg transition-all"
             >
-              <Download className="w-3.5 h-3.5" />
-              <span>Export Roster ({filteredPlayers.length})</span>
+              <Download className="w-4 h-4 text-[#f2d39a]" />
+              <span>Export Dossier</span>
             </button>
 
             <button
               type="button"
-              onClick={loadData}
-              disabled={isLoading}
-              className="px-3.5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold border border-white/10 flex items-center gap-1.5 transition-colors disabled:opacity-50"
-              title="Refresh database"
-            >
-              <RotateCcw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin' : ''}`} />
-            </button>
-
-            <button
-              type="button"
-              onClick={handleOpenAdd}
-              className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-black flex items-center gap-2 shadow-lg shadow-emerald-950/50 transition-all hover:scale-[1.02]"
+              onClick={handleOpenNew}
+              className="px-5 py-2.5 rounded-2xl bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-500 hover:to-emerald-500 text-white text-xs font-black flex items-center gap-2 shadow-lg shadow-teal-950/50 transition-all hover:scale-[1.02] active:scale-[0.98]"
             >
               <Plus className="w-4 h-4" />
-              <span>1-Click Add Player</span>
+              <span>Add Player</span>
             </button>
           </div>
         </div>
-
-        {/* Export Studio Tray */}
-        {showExportStudio && (
-          <div className="mt-6 pt-6 border-t border-white/10 animate-fade-in">
-            <PlayerExportBar players={filteredPlayers} league="IPL" teams={teams} />
-          </div>
-        )}
       </div>
 
-      {/* Franchise Selector Bar (10 Teams + All + Pool) */}
+      {/* Export Bar Panel */}
+      {showExportStudio && (
+        <PlayerExportBar
+          players={filteredPlayers}
+          selectedTeamName={currentTeamMeta?.name || 'All IPL Franchises'}
+        />
+      )}
+
+      {/* Franchise Selector Bar (10 IPL Teams + All + Standby Pool) */}
       <Franchise2027Bar
         selectedTeamId={selectedTeamId}
         onSelectTeam={(teamId) => setSelectedTeamId(teamId)}
         playersCountByTeam={playersCountByTeam}
         totalPlayersCount={players.length}
-        poolPlayersCount={poolCount}
+        poolPlayersCount={poolPlayersCount}
       />
 
-      {/* Control & Filter Strip */}
+      {/* Search, Filter Chips & View Mode Controls */}
       <div className="rounded-2xl border border-white/10 bg-slate-900/60 p-4 space-y-3">
-        <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3">
-          {/* Search Input */}
+        <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
+          {/* Instant Search Bar */}
           <div className="relative flex-1">
-            <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-white/40" />
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40" />
             <input
               type="text"
               value={searchQuery}
@@ -293,128 +309,133 @@ export default function Ipl2027OpsPlayersPage() {
               <button
                 type="button"
                 onClick={() => setSearchQuery('')}
-                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-white/40 hover:text-white"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-white"
               >
                 <X className="w-3.5 h-3.5" />
               </button>
             )}
           </div>
 
-          {/* View Mode Switcher */}
-          <div className="flex items-center gap-1.5 p-1 rounded-xl bg-slate-950 border border-white/10 self-start lg:self-auto shrink-0">
+          {/* View Mode Toggle: Grid, Dense Table, Pitch Formation */}
+          <div className="flex items-center gap-1.5 p-1 rounded-xl bg-slate-950 border border-white/10 self-start md:self-auto shrink-0">
             <button
               type="button"
               onClick={() => setViewMode('grid')}
               className={`px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all ${
                 viewMode === 'grid'
-                  ? 'bg-[#f2d39a] text-slate-950 shadow'
+                  ? 'bg-[#f2d39a] text-slate-950 shadow-md'
                   : 'text-white/60 hover:text-white'
               }`}
             >
               <LayoutGrid className="w-3.5 h-3.5" />
-              <span>Cards</span>
+              <span>Cards ({filteredPlayers.length})</span>
             </button>
+
             <button
               type="button"
               onClick={() => setViewMode('table')}
               className={`px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all ${
                 viewMode === 'table'
-                  ? 'bg-[#f2d39a] text-slate-950 shadow'
+                  ? 'bg-[#f2d39a] text-slate-950 shadow-md'
                   : 'text-white/60 hover:text-white'
               }`}
             >
               <Table2 className="w-3.5 h-3.5" />
               <span>Dense Table</span>
             </button>
+
             <button
               type="button"
               onClick={() => setViewMode('pitch')}
               className={`px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all ${
                 viewMode === 'pitch'
-                  ? 'bg-[#f2d39a] text-slate-950 shadow'
+                  ? 'bg-[#f2d39a] text-slate-950 shadow-md'
                   : 'text-white/60 hover:text-white'
               }`}
             >
-              <Users className="w-3.5 h-3.5" />
-              <span>Pitch XI</span>
+              <Sparkles className="w-3.5 h-3.5" />
+              <span>Turf XI</span>
             </button>
           </div>
         </div>
 
-        {/* Quick Filter Badges */}
-        <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-white/5 text-xs">
-          {/* Status Filters */}
-          <div className="flex flex-wrap items-center gap-1.5">
-            <span className="text-[10px] font-black uppercase tracking-wider text-white/40 mr-1">
-              2027 Status:
+        {/* Quick-Filter Chips */}
+        <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-white/5">
+          <div className="flex flex-wrap items-center gap-1.5 text-xs font-bold">
+            <span className="text-white/40 mr-1 text-[11px] uppercase tracking-wider flex items-center gap-1">
+              <Filter className="w-3 h-3" /> Status:
             </span>
             {[
-              { id: 'ALL', label: 'All Statuses' },
-              { id: 'RETAINED', label: '🟢 Retained (184)' },
+              { id: 'ALL', label: 'All Players' },
+              { id: 'RETAINED', label: '🟢 Retained' },
               { id: 'TRADED', label: '🔄 Traded' },
-              { id: 'RELEASED', label: '🔴 2027 Auction Pool' },
+              { id: 'RELEASED', label: '🔴 Auction Pool' },
               { id: 'OVERSEAS', label: '✈️ Overseas' },
-            ].map((f) => (
+              { id: 'MENTOR', label: '👑 Mentors' },
+            ].map((chip) => (
               <button
-                key={f.id}
+                key={chip.id}
                 type="button"
-                onClick={() => setStatusFilter(f.id)}
-                className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all ${
-                  statusFilter === f.id
-                    ? 'bg-white/20 text-white border border-white/30'
-                    : 'bg-slate-950/60 text-white/50 hover:text-white border border-transparent'
+                onClick={() => setStatusFilter(chip.id)}
+                className={`px-2.5 py-1 rounded-lg transition-all ${
+                  statusFilter === chip.id
+                    ? 'bg-white/20 text-white border border-white/30 shadow'
+                    : 'bg-white/5 text-white/50 hover:text-white hover:bg-white/10'
                 }`}
               >
-                {f.label}
+                {chip.label}
               </button>
             ))}
           </div>
 
-          {/* Role Filters */}
-          <div className="flex flex-wrap items-center gap-1.5">
-            <span className="text-[10px] font-black uppercase tracking-wider text-white/40 mr-1">
-              Role:
-            </span>
-            {['ALL', 'Batsman', 'All-Rounder', 'Bowler', 'Wicket-Keeper'].map((r) => (
+          <div className="flex flex-wrap items-center gap-1.5 text-xs font-bold">
+            <span className="text-white/40 mr-1 text-[11px] uppercase tracking-wider">Role:</span>
+            {[
+              { id: 'ALL', label: 'All Roles' },
+              { id: 'BATSMAN', label: '🏏 Batters' },
+              { id: 'BOWLER', label: '🎯 Bowlers' },
+              { id: 'ALLROUNDER', label: '⚡ All-Rounders' },
+              { id: 'KEEPER', label: '🧤 Keepers' },
+            ].map((chip) => (
               <button
-                key={r}
+                key={chip.id}
                 type="button"
-                onClick={() => setRoleFilter(r)}
-                className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all ${
-                  roleFilter === r
-                    ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
-                    : 'bg-slate-950/60 text-white/50 hover:text-white border border-transparent'
+                onClick={() => setRoleFilter(chip.id)}
+                className={`px-2.5 py-1 rounded-lg transition-all ${
+                  roleFilter === chip.id
+                    ? 'bg-[#f2d39a]/20 text-[#f2d39a] border border-[#f2d39a]/40 shadow'
+                    : 'bg-white/5 text-white/50 hover:text-white hover:bg-white/10'
                 }`}
               >
-                {r === 'ALL' ? 'All Roles' : r}
+                {chip.label}
               </button>
             ))}
           </div>
         </div>
       </div>
 
-      {/* Main Players Content */}
+      {/* Main Content Area */}
       {isLoading ? (
-        <div className="p-20 text-center text-white/50">
-          <RefreshCw className="w-8 h-8 animate-spin mx-auto mb-3 text-[#f2d39a]" />
-          <p className="text-sm font-bold text-white">Loading IPL 2027 Squad Intelligence...</p>
+        <div className="rounded-3xl border border-white/10 bg-slate-900/40 p-16 text-center">
+          <RefreshCw className="w-8 h-8 text-[#f2d39a] animate-spin mx-auto mb-3" />
+          <p className="text-sm font-bold text-white/70">Hydrating IPL 2027 Squad Registry...</p>
         </div>
       ) : filteredPlayers.length === 0 ? (
-        <div className="p-16 rounded-3xl border border-dashed border-white/10 bg-slate-900/30 text-center space-y-3">
+        <div className="rounded-3xl border border-white/10 bg-slate-900/40 p-16 text-center space-y-3">
           <Users className="w-10 h-10 text-white/30 mx-auto" />
-          <h3 className="text-base font-bold text-white">No squad records match your criteria</h3>
+          <h3 className="text-base font-bold text-white">No players found matching your criteria</h3>
           <p className="text-xs text-white/50 max-w-md mx-auto">
-            Try adjusting your search keywords, role selection, or franchise filter.
+            Try adjusting your search query, clearing status filters, or selecting a different franchise.
           </p>
           <button
             type="button"
             onClick={() => {
+              setSearchQuery('');
               setSelectedTeamId('all');
               setStatusFilter('ALL');
               setRoleFilter('ALL');
-              setSearchQuery('');
             }}
-            className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-[#f2d39a] text-xs font-bold inline-flex items-center gap-1.5"
+            className="px-4 py-2 rounded-xl bg-slate-800 text-xs font-bold text-white hover:bg-slate-700"
           >
             Reset All Filters
           </button>
@@ -440,10 +461,9 @@ export default function Ipl2027OpsPlayersPage() {
             <Player2027Card
               key={player.id}
               player={player}
-              teams={teams}
               onView={(p) => setDrawerPlayer(p)}
               onEdit={(p) => handleOpenEdit(p)}
-              onDelete={(id, name) => handleDeletePlayer(id, name)}
+              onDelete={(p) => handleDeletePlayer(p.id, p.name)}
             />
           ))}
         </div>
@@ -469,5 +489,28 @@ export default function Ipl2027OpsPlayersPage() {
         teams={teams}
       />
     </div>
+  );
+}
+
+function Ipl2027PlayersRouter() {
+  const searchParams = useSearchParams();
+  const view = searchParams.get('view');
+
+  if (view === 'batting') return <BattingStatsWorkspace />;
+  if (view === 'bowling') return <BowlingStatsWorkspace />;
+  return <Ipl2027OpsPlayersPage />;
+}
+
+export default function Ipl2027OpsPlayersDesk() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-slate-950 flex items-center justify-center text-white">
+          Loading players workspace...
+        </div>
+      }
+    >
+      <Ipl2027PlayersRouter />
+    </Suspense>
   );
 }

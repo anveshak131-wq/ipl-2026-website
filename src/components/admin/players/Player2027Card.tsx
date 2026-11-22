@@ -1,42 +1,37 @@
 'use client';
 
 import React from 'react';
-import type { Player, Team } from '@/types';
+import type { Player } from '@/types';
 import FlagImage from '@/components/ui/FlagImage';
-import { CustomEmoji } from '@/components/emoji/Emoji';
-import { Eye, Edit2, Trash2, Plane, Star, ExternalLink, RefreshCw } from 'lucide-react';
-import { getRoleDisplay, getBattingAverage, getBattingStrikeRate } from '@/lib/admin/playerAdminUtils';
+import {
+  Eye,
+  Edit2,
+  Trash2,
+  Plane,
+} from 'lucide-react';
 import { resolveIpl2027Team } from '@/lib/admin/ipl2027Teams';
+import PlayerMonogramAvatar from '@/components/admin/players/PlayerMonogramAvatar';
 
-interface Player2027CardProps {
+export interface Player2027CardProps {
   player: Player;
-  teams: Team[];
   onView: (player: Player) => void;
   onEdit: (player: Player) => void;
-  onDelete: (id: string, name: string) => void;
+  onDelete?: (player: Player) => void;
   onContextMenu?: (e: React.MouseEvent, player: Player) => void;
 }
 
-function Player2027CardComponent({
+export const Player2027Card = React.memo(function Player2027Card({
   player,
-  teams,
   onView,
   onEdit,
   onDelete,
   onContextMenu,
 }: Player2027CardProps) {
   const metaTeam = resolveIpl2027Team(player.teamShortName || player.teamId || player.team);
-  const team = teams.find((t) => String(t.id) === String(player.teamId)) || (metaTeam ? {
-    id: metaTeam.id,
-    name: metaTeam.name,
-    shortName: metaTeam.shortName,
-    colors: { primary: metaTeam.primaryColor, secondary: metaTeam.secondaryColor },
-  } as Team : undefined);
-
-  const role = getRoleDisplay(player);
-  const isOverseas = player.nationality && player.nationality.toLowerCase() !== 'india';
+  const nat = (player.nationality || 'India').toLowerCase().trim();
+  const isOverseas = nat !== '' && !['india', 'ind', 'indian'].includes(nat);
   const status = (player.squadStatus || 'Retained').toLowerCase();
-  const transferFee = (player as any).transferFee || (player as any).auction?.fee;
+  const transferFee = (player as any).transferFee || '';
   const transferNotes = (player as any).transferNotes || '';
 
   // Status Badge Rendering
@@ -76,10 +71,12 @@ function Player2027CardComponent({
     );
   };
 
+  const isBowler = String(player.role || '').toLowerCase().includes('bowl');
   const runs = (player as any).careerStats?.batting?.IPL?.Runs || player.stats?.runs || 0;
   const wickets = (player as any).careerStats?.bowling?.IPL?.Wkts || player.stats?.wickets || 0;
-  const avg = (player as any).careerStats?.batting?.IPL?.Avg || getBattingAverage(player);
-  const sr = (player as any).careerStats?.batting?.IPL?.SR || getBattingStrikeRate(player);
+  const avg = (player as any).careerStats?.batting?.IPL?.Avg || player.stats?.average || player.stats?.battingAverage || 0;
+  const sr = (player as any).careerStats?.batting?.IPL?.SR || player.stats?.strikeRate || player.stats?.battingStrikeRate || 0;
+  const econ = (player as any).careerStats?.bowling?.IPL?.Econ || player.stats?.economy || 0;
 
   return (
     <article
@@ -94,8 +91,8 @@ function Player2027CardComponent({
       <div
         className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r"
         style={{
-          backgroundImage: team
-            ? `linear-gradient(to right, ${team.colors.primary}, ${team.colors.secondary || '#1e293b'})`
+          backgroundImage: metaTeam
+            ? `linear-gradient(to right, ${metaTeam.primaryColor}, ${metaTeam.secondaryColor || '#1e293b'})`
             : undefined,
         }}
       />
@@ -115,26 +112,17 @@ function Player2027CardComponent({
           {/* Header Info */}
           <div className="mb-3 flex items-start gap-3">
             <div className="relative shrink-0">
-              <div
-                className="h-14 w-14 overflow-hidden rounded-2xl border border-white/15 bg-slate-800 shadow-md flex items-center justify-center"
-                style={{ borderColor: team?.colors.primary }}
-              >
-                {player.photoUrl ? (
-                  <img
-                    src={player.photoUrl}
-                    alt={player.name}
-                    className="h-full w-full object-cover"
-                    loading="lazy"
-                  />
-                ) : (
-                  <span className="text-lg font-black text-white">
-                    {player.name.charAt(0)}
-                  </span>
-                )}
-              </div>
+              <PlayerMonogramAvatar
+                name={player.name}
+                teamShortName={metaTeam?.shortName || player.teamShortName}
+                teamId={player.teamId}
+                team={player.team}
+                jerseyNumber={player.jerseyNumber}
+                size="md"
+              />
               {player.isCaptain && (
                 <div
-                  className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full border border-yellow-400 bg-yellow-500 text-[10px] font-black text-slate-950 shadow"
+                  className="absolute -bottom-1 -left-1 flex h-5 w-5 items-center justify-center rounded-full border border-yellow-400 bg-yellow-500 text-[10px] font-black text-slate-950 shadow z-20"
                   title="Team Captain"
                 >
                   C
@@ -165,84 +153,89 @@ function Player2027CardComponent({
               {/* Franchise Strip */}
               <div className="mt-2 flex items-center gap-1.5">
                 <span
-                  className="text-[10px] font-black px-2 py-0.5 rounded-md text-white"
-                  style={{ backgroundColor: team?.colors.primary || '#475569' }}
+                  className="text-[10px] font-black px-2 py-0.5 rounded-md text-white shadow"
+                  style={{ backgroundColor: metaTeam?.primaryColor || '#475569' }}
                 >
-                  {team?.shortName || 'Pool'}
+                  {metaTeam?.shortName || player.teamShortName || 'Pool'}
                 </span>
-                <span className="text-xs text-white/60 truncate">
-                  {team?.name || '2027 Auction Standby'}
+                <span className="text-xs font-medium text-white/70 truncate">
+                  {metaTeam?.name || player.team || 'Auction Standby'}
                 </span>
               </div>
             </div>
           </div>
 
-          {/* Role Pill */}
-          <div className="mb-3">
-            <span className={`inline-flex rounded-lg px-2.5 py-1 text-xs font-bold border ${role.badgeClass}`}>
-              {role.label}
+          {/* Cricket Role Tag */}
+          <div className="mb-3 flex items-center gap-1.5">
+            <span className="rounded-lg bg-white/5 px-2.5 py-1 text-xs font-semibold text-white/80 border border-white/5">
+              {player.role || 'Batsman'}
             </span>
           </div>
 
-          {/* Transfer Notes / Story if present */}
-          {transferNotes && (
-            <div className="mb-3 rounded-lg border border-white/5 bg-white/[0.02] p-2 text-[11px] text-white/60 line-clamp-2">
-              {transferNotes}
+          {/* Key Stats Grid */}
+          <div className="mb-4 grid grid-cols-4 gap-1.5 rounded-xl border border-white/5 bg-slate-950/60 p-2 text-center">
+            <div>
+              <div className="text-sm font-black text-[#f2d39a]">{runs}</div>
+              <div className="text-[9px] font-bold uppercase tracking-wider text-white/40">Runs</div>
             </div>
-          )}
-
-          {/* 4-KPIs Cricket Stats */}
-          <div className="grid grid-cols-4 gap-1.5 border-t border-white/10 pt-2.5 text-center">
-            <div className="rounded-lg bg-white/[0.03] p-1.5">
-              <p className="text-xs font-black text-[#f2d39a]">{runs}</p>
-              <p className="text-[9px] uppercase tracking-wider text-white/40">Runs</p>
+            <div>
+              <div className="text-sm font-black text-[#a8e9ef]">{wickets}</div>
+              <div className="text-[9px] font-bold uppercase tracking-wider text-white/40">Wkts</div>
             </div>
-            <div className="rounded-lg bg-white/[0.03] p-1.5">
-              <p className="text-xs font-black text-[#a8e9ef]">{wickets}</p>
-              <p className="text-[9px] uppercase tracking-wider text-white/40">Wkts</p>
+            <div>
+              <div className="text-sm font-black text-emerald-400">
+                {isBowler && Number(wickets) > 0 && Number(econ) > 0
+                  ? Number(econ).toFixed(1)
+                  : avg && avg !== '—'
+                  ? Number(avg).toFixed(1)
+                  : '—'}
+              </div>
+              <div className="text-[9px] font-bold uppercase tracking-wider text-white/40">
+                {isBowler && Number(wickets) > 0 && Number(econ) > 0 ? 'Econ' : 'Avg'}
+              </div>
             </div>
-            <div className="rounded-lg bg-white/[0.03] p-1.5">
-              <p className="text-xs font-black text-[#9cf2c8]">{avg}</p>
-              <p className="text-[9px] uppercase tracking-wider text-white/40">Avg</p>
-            </div>
-            <div className="rounded-lg bg-white/[0.03] p-1.5">
-              <p className="text-xs font-black text-white/80">{sr}</p>
-              <p className="text-[9px] uppercase tracking-wider text-white/40">SR</p>
+            <div>
+              <div className="text-sm font-black text-sky-400">
+                {sr && sr !== '—' ? Number(sr).toFixed(1) : '—'}
+              </div>
+              <div className="text-[9px] font-bold uppercase tracking-wider text-white/40">SR</div>
             </div>
           </div>
         </div>
 
-        {/* Action Buttons Row */}
-        <div className="mt-3.5 flex gap-2 border-t border-white/10 pt-2.5">
+        {/* Action Buttons */}
+        <div className="flex items-center gap-2 border-t border-white/5 pt-3">
           <button
             type="button"
             onClick={() => onView(player)}
-            className="flex-1 py-1.5 px-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-[#f2d39a] text-xs font-bold flex items-center justify-center gap-1 border border-white/10 transition-all hover:border-[#f2d39a]/40"
-            title="View 2027 Player Dossier"
+            className="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-slate-800/80 px-3 py-1.5 text-xs font-bold text-white/90 hover:bg-slate-700 hover:text-white transition-colors border border-white/5"
+            title="Open comprehensive Dossier"
           >
-            <Eye className="w-3.5 h-3.5" />
+            <Eye className="w-3.5 h-3.5 text-[#f2d39a]" />
             <span>Dossier</span>
           </button>
+
           <button
             type="button"
             onClick={() => onEdit(player)}
-            className="py-1.5 px-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-teal-300 text-xs font-bold flex items-center justify-center border border-white/10 transition-all hover:border-teal-500/40"
-            title="Edit Player Details"
+            className="flex items-center justify-center p-2 rounded-xl bg-teal-500/10 text-teal-400 hover:bg-teal-500 hover:text-white transition-colors border border-teal-500/20"
+            title="Edit player info and stats"
           >
             <Edit2 className="w-3.5 h-3.5" />
           </button>
-          <button
-            type="button"
-            onClick={() => onDelete(player.id, player.name)}
-            className="py-1.5 px-2.5 rounded-xl bg-slate-800 hover:bg-red-950/40 text-red-400 text-xs font-bold flex items-center justify-center border border-white/10 transition-all hover:border-red-500/40"
-            title="Delete / Release Player"
-          >
-            <Trash2 className="w-3.5 h-3.5" />
-          </button>
+
+          {onDelete && (
+            <button
+              type="button"
+              onClick={() => onDelete(player)}
+              className="flex items-center justify-center p-2 rounded-xl bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white transition-colors border border-red-500/20"
+              title="Release/Remove player"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+            </button>
+          )}
         </div>
       </div>
     </article>
   );
-}
-
-export const Player2027Card = React.memo(Player2027CardComponent);
+});

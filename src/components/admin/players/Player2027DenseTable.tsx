@@ -5,6 +5,7 @@ import type { Player, Team } from '@/types';
 import FlagImage from '@/components/ui/FlagImage';
 import { Table2, ChevronUp, ChevronDown, Eye, Edit2, Trash2, ChevronLeft, ChevronRight } from 'lucide-react';
 import { resolveIpl2027Team } from '@/lib/admin/ipl2027Teams';
+import PlayerMonogramAvatar from '@/components/admin/players/PlayerMonogramAvatar';
 
 interface Player2027DenseTableProps {
   players: Player[];
@@ -166,7 +167,13 @@ export default function Player2027DenseTable({
                     {player.jerseyNumber ? `#${player.jerseyNumber}` : startIndex + idx + 1}
                   </td>
                   <td className="py-3 px-4 font-bold text-white hover:text-[#f2d39a] cursor-pointer" onClick={() => onView(player)}>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2.5">
+                      <PlayerMonogramAvatar
+                        name={player.name}
+                        teamShortName={metaTeam?.shortName}
+                        teamId={player.teamId}
+                        size="sm"
+                      />
                       {player.nationality && <FlagImage nationality={player.nationality} size="sm" />}
                       <span>{player.name}</span>
                     </div>

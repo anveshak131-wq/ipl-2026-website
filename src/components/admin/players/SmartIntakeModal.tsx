@@ -2,8 +2,9 @@
 
 import React, { useState, useEffect } from 'react';
 import type { Player, Team } from '@/types';
-import { X, RefreshCw, Sparkles, User, Shield, DollarSign, Check, Award, MapPin, Ruler } from 'lucide-react';
+import { X, RefreshCw, Sparkles, User, Shield, DollarSign, Check, Award, MapPin, Ruler, Activity } from 'lucide-react';
 import { IPL_2027_TEAMS } from '@/lib/admin/ipl2027Teams';
+import PlayerMonogramAvatar from '@/components/admin/players/PlayerMonogramAvatar';
 
 interface SmartIntakeModalProps {
   isOpen: boolean;
@@ -49,7 +50,20 @@ export default function SmartIntakeModal({
     cricbuzzUrl: '',
     transferFee: '₹14.00 Cr',
     transferNotes: '',
-    stats: { matches: 0, runs: 0, wickets: 0, average: 0, strikeRate: 0 },
+    stats: {
+      matches: 0,
+      runs: 0,
+      wickets: 0,
+      average: 0,
+      strikeRate: 0,
+      highest: 0,
+      fifties: 0,
+      hundreds: 0,
+      fours: 0,
+      sixes: 0,
+      economy: 0,
+      bestBowling: '',
+    },
     careerStats: { batting: {}, bowling: {} },
     iccRankings: [],
   });
@@ -65,8 +79,27 @@ export default function SmartIntakeModal({
         transferFee: (editingPlayer as any).transferFee || '',
         transferNotes: (editingPlayer as any).transferNotes || '',
         iccRankings: (editingPlayer as any).iccRankings || [],
+        stats: {
+          matches: editingPlayer.stats?.matches || 0,
+          runs: editingPlayer.stats?.runs || 0,
+          wickets: editingPlayer.stats?.wickets || 0,
+          average: editingPlayer.stats?.average || 0,
+          strikeRate: editingPlayer.stats?.strikeRate || 0,
+          highest: editingPlayer.stats?.highest || 0,
+          fifties: editingPlayer.stats?.fifties || 0,
+          hundreds: editingPlayer.stats?.hundreds || 0,
+          fours: editingPlayer.stats?.fours || 0,
+          sixes: editingPlayer.stats?.sixes || 0,
+          economy: editingPlayer.stats?.economy || 0,
+          bestBowling: editingPlayer.stats?.bestBowling || '',
+        },
       });
-      setCricbuzzInput(editingPlayer.cricbuzzUrl || '');
+      const initialCricbuzz =
+        editingPlayer.cricbuzzUrl ||
+        ((editingPlayer as any).cricbuzzId ? `https://www.cricbuzz.com/profiles/${(editingPlayer as any).cricbuzzId}` : '') ||
+        editingPlayer.name ||
+        '';
+      setCricbuzzInput(initialCricbuzz);
     } else {
       setFormData({
         name: '',
@@ -89,7 +122,20 @@ export default function SmartIntakeModal({
         cricbuzzUrl: '',
         transferFee: '₹14.00 Cr',
         transferNotes: '',
-        stats: { matches: 0, runs: 0, wickets: 0, average: 0, strikeRate: 0 },
+        stats: {
+          matches: 0,
+          runs: 0,
+          wickets: 0,
+          average: 0,
+          strikeRate: 0,
+          highest: 0,
+          fifties: 0,
+          hundreds: 0,
+          fours: 0,
+          sixes: 0,
+          economy: 0,
+          bestBowling: '',
+        },
         careerStats: { batting: {}, bowling: {} },
         iccRankings: [],
       });
@@ -104,9 +150,19 @@ export default function SmartIntakeModal({
 
   // 1-Click Cricbuzz Scraping Handler
   const handleScrapeCricbuzz = async () => {
-    if (!cricbuzzInput.trim()) {
+    const cleanInput =
+      cricbuzzInput.trim() ||
+      formData.name?.trim() ||
+      editingPlayer?.name?.trim() ||
+      '';
+
+    if (!cleanInput) {
       setScrapeError('Please enter a Cricbuzz profile URL, ID, or player name.');
       return;
+    }
+
+    if (!cricbuzzInput.trim()) {
+      setCricbuzzInput(cleanInput);
     }
 
     setIsScraping(true);
@@ -114,7 +170,6 @@ export default function SmartIntakeModal({
     setScrapeSuccess(null);
 
     try {
-      const cleanInput = cricbuzzInput.trim();
       const res = await fetch('/api/admin/scrape-cricbuzz', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -135,7 +190,7 @@ export default function SmartIntakeModal({
       const iplBat = career.batting?.IPL || {};
       const iplBowl = career.bowling?.IPL || {};
 
-      setFormData((prev) => ({
+      setFormData((prev: any) => ({
         ...prev,
         name: bio.name || prev.name,
         role: bio.role || prev.role,
@@ -144,14 +199,13 @@ export default function SmartIntakeModal({
         dateOfBirth: bio.dateOfBirth || prev.dateOfBirth,
         age: bio.age ? parseInt(String(bio.age), 10) : prev.age,
         nationality: bio.nationality || prev.nationality,
-        birthPlace: bio.birthPlace || (prev as any).birthPlace,
-        height: bio.height || (prev as any).height,
-        teams: bio.teams || (prev as any).teams,
-        photoUrl: bio.imageUrl || prev.photoUrl,
+        birthPlace: bio.birthPlace || prev.birthPlace,
+        height: bio.height || prev.height,
+        teams: bio.teams || prev.teams,
         cricbuzzUrl: data.sourceUrl || prev.cricbuzzUrl,
         cricbuzzId: data.profileId || prev.cricbuzzId,
         careerStats: career,
-        iccRankings: career.iccRankings || (prev as any).iccRankings || [],
+        iccRankings: career.iccRankings || prev.iccRankings || [],
         stats: {
           ...prev.stats,
           runs: iplBat.Runs ? parseInt(String(iplBat.Runs), 10) : prev.stats?.runs || 0,
@@ -164,10 +218,14 @@ export default function SmartIntakeModal({
           hundreds: iplBat['100'] ? parseInt(String(iplBat['100']), 10) : prev.stats?.hundreds || 0,
           fours: iplBat['4s'] ? parseInt(String(iplBat['4s']), 10) : prev.stats?.fours || 0,
           sixes: iplBat['6s'] ? parseInt(String(iplBat['6s']), 10) : prev.stats?.sixes || 0,
+          economy: iplBowl.Econ ? parseFloat(String(iplBowl.Econ)) : prev.stats?.economy || 0,
+          bestBowling: iplBowl.BBI || iplBowl.BBM || prev.stats?.bestBowling || '',
         },
       }));
 
-      setScrapeSuccess(`✓ Verified stats & bio fetched: ${bio.name || 'player'} (${bio.birthPlace || 'Birthplace synced'}, ${bio.height || 'Height synced'})`);
+      setScrapeSuccess(
+        `✓ Verified: ${bio.name || 'player'} (${bio.birthPlace || 'Delhi'} · ${iplBat.Runs || 0} Runs · ${iplBowl.Wkts || 0} Wkts)`
+      );
     } catch (err: any) {
       setScrapeError(err.message || 'Scraping failed.');
     } finally {
@@ -199,9 +257,9 @@ export default function SmartIntakeModal({
         teamShortName: targetTeam?.shortName || formData.teamShortName || 'Pool',
         league: 'ipl',
         nationality: formData.nationality || 'India',
-        birthPlace: (formData as any).birthPlace || '',
-        height: (formData as any).height || '',
-        teams: (formData as any).teams || '',
+        birthPlace: formData.birthPlace || '',
+        height: formData.height || '',
+        teams: formData.teams || '',
         battingStyle: formData.battingStyle || 'Right-handed bat',
         bowlingStyle: formData.bowlingStyle || 'Right-arm medium',
         jerseyNumber: formData.jerseyNumber || '',
@@ -209,14 +267,13 @@ export default function SmartIntakeModal({
         dateOfBirth: formData.dateOfBirth || '',
         isCaptain: Boolean(formData.isCaptain),
         squadStatus: formData.squadStatus || 'Retained',
-        photoUrl: formData.photoUrl || '',
         cricbuzzUrl: formData.cricbuzzUrl || '',
         cricbuzzId: formData.cricbuzzId || '',
         stats: formData.stats || { runs: 0, wickets: 0, average: 0, strikeRate: 0 },
         careerStats: formData.careerStats || { batting: {}, bowling: {} },
-        iccRankings: (formData as any).iccRankings || [],
-        ...((formData as any).transferFee ? { transferFee: (formData as any).transferFee } : {}),
-        ...((formData as any).transferNotes ? { transferNotes: (formData as any).transferNotes } : {}),
+        iccRankings: formData.iccRankings || [],
+        ...(formData.transferFee ? { transferFee: formData.transferFee } : {}),
+        ...(formData.transferNotes ? { transferNotes: formData.transferNotes } : {}),
       };
 
       const token = typeof window !== 'undefined' ? localStorage.getItem('adminToken') : null;
@@ -249,16 +306,21 @@ export default function SmartIntakeModal({
         <div>
           {/* Header */}
           <div className="flex items-center justify-between border-b border-white/10 p-5 bg-slate-900/60 sticky top-0 z-10 backdrop-blur-md">
-            <div className="flex items-center gap-2">
-              <div className="h-8 w-8 rounded-xl bg-gradient-to-br from-[#f2d39a] to-amber-600 flex items-center justify-center text-slate-950 shadow">
-                <Sparkles className="w-4 h-4" />
-              </div>
+            <div className="flex items-center gap-3">
+              <PlayerMonogramAvatar
+                name={formData.name || 'IPL'}
+                teamShortName={formData.teamShortName}
+                teamId={formData.teamId}
+                team={formData.team}
+                jerseyNumber={formData.jerseyNumber}
+                size="sm"
+              />
               <div>
                 <h3 className="text-base font-black text-white">
-                  {editingPlayer ? 'Edit Squad Record' : 'Smart Player Intake (IPL 2027)'}
+                  {editingPlayer ? `Edit Squad Record: ${editingPlayer.name}` : 'Smart Player Intake (IPL 2027)'}
                 </h3>
                 <p className="text-xs text-white/50">
-                  {editingPlayer ? `Updating ${editingPlayer.name}` : '1-Click auto-fill from Cricbuzz or manual assignment'}
+                  {editingPlayer ? 'Review & update identity, contract, and career stats' : '1-Click auto-fill from Cricbuzz or manual squad entry'}
                 </p>
               </div>
             </div>
@@ -326,7 +388,7 @@ export default function SmartIntakeModal({
                 <label className="block text-xs font-bold text-white/70 mb-1">Primary Cricket Role</label>
                 <select
                   value={formData.role || 'Batsman'}
-                  onChange={(e) => setFormData({ ...formData, role: e.target.value as any })}
+                  onChange={(e) => setFormData({ ...formData, role: e.target.value })}
                   className="w-full px-3.5 py-2 rounded-xl bg-slate-900 border border-white/10 text-xs text-white focus:outline-none focus:border-[#f2d39a]"
                 >
                   <option value="Batsman">Batsman</option>
@@ -365,7 +427,7 @@ export default function SmartIntakeModal({
                 <label className="block text-xs font-bold text-white/70 mb-1">2027 Squad Status</label>
                 <select
                   value={formData.squadStatus || 'Retained'}
-                  onChange={(e) => setFormData({ ...formData, squadStatus: e.target.value as any })}
+                  onChange={(e) => setFormData({ ...formData, squadStatus: e.target.value })}
                   className="w-full px-3.5 py-2 rounded-xl bg-slate-900 border border-white/10 text-xs text-white focus:outline-none focus:border-[#f2d39a]"
                 >
                   <option value="Retained">Retained</option>
@@ -381,8 +443,8 @@ export default function SmartIntakeModal({
                 <label className="block text-xs font-bold text-white/70 mb-1">Contract Valuation / Fee</label>
                 <input
                   type="text"
-                  value={(formData as any).transferFee || ''}
-                  onChange={(e) => setFormData({ ...formData, transferFee: e.target.value } as any)}
+                  value={formData.transferFee || ''}
+                  onChange={(e) => setFormData({ ...formData, transferFee: e.target.value })}
                   placeholder="e.g. ₹18.00 Cr, ₹21.00 Cr, ₹50 Lakh"
                   className="w-full px-3.5 py-2 rounded-xl bg-slate-900 border border-white/10 text-xs text-white placeholder-white/30 focus:outline-none focus:border-[#f2d39a]"
                 />
@@ -393,7 +455,7 @@ export default function SmartIntakeModal({
                 <input
                   type="text"
                   value={formData.jerseyNumber || ''}
-                  onChange={(e) => setFormData({ ...formData, jerseyNumber: e.target.value as any })}
+                  onChange={(e) => setFormData({ ...formData, jerseyNumber: e.target.value })}
                   placeholder="e.g. 18, 45, 7"
                   className="w-full px-3.5 py-2 rounded-xl bg-slate-900 border border-white/10 text-xs text-white placeholder-white/30 focus:outline-none focus:border-[#f2d39a]"
                 />
@@ -425,8 +487,8 @@ export default function SmartIntakeModal({
                 <label className="block text-xs font-bold text-white/70 mb-1">Birth Place</label>
                 <input
                   type="text"
-                  value={(formData as any).birthPlace || ''}
-                  onChange={(e) => setFormData({ ...formData, birthPlace: e.target.value } as any)}
+                  value={formData.birthPlace || ''}
+                  onChange={(e) => setFormData({ ...formData, birthPlace: e.target.value })}
                   placeholder="e.g. Delhi, Mumbai, Ahmedabad"
                   className="w-full px-3.5 py-2 rounded-xl bg-slate-900 border border-white/10 text-xs text-white placeholder-white/30 focus:outline-none focus:border-[#f2d39a]"
                 />
@@ -436,8 +498,8 @@ export default function SmartIntakeModal({
                 <label className="block text-xs font-bold text-white/70 mb-1">Height</label>
                 <input
                   type="text"
-                  value={(formData as any).height || ''}
-                  onChange={(e) => setFormData({ ...formData, height: e.target.value } as any)}
+                  value={formData.height || ''}
+                  onChange={(e) => setFormData({ ...formData, height: e.target.value })}
                   placeholder="e.g. 5 ft 9 in (175 cm)"
                   className="w-full px-3.5 py-2 rounded-xl bg-slate-900 border border-white/10 text-xs text-white placeholder-white/30 focus:outline-none focus:border-[#f2d39a]"
                 />
@@ -471,11 +533,210 @@ export default function SmartIntakeModal({
               <label className="block text-xs font-bold text-white/70 mb-1">Domestic & International Teams</label>
               <input
                 type="text"
-                value={(formData as any).teams || ''}
-                onChange={(e) => setFormData({ ...formData, teams: e.target.value } as any)}
+                value={formData.teams || ''}
+                onChange={(e) => setFormData({ ...formData, teams: e.target.value })}
                 placeholder="e.g. India, Delhi, India Red, India U19, Royal Challengers Bengaluru..."
                 className="w-full px-3.5 py-2 rounded-xl bg-slate-900 border border-white/10 text-xs text-white placeholder-white/30 focus:outline-none focus:border-[#f2d39a]"
               />
+            </div>
+
+            {/* CAREER & SEASON STATS SECTION (Explicitly Requested) */}
+            <div className="p-4 rounded-2xl bg-slate-900/80 border border-white/10 space-y-3">
+              <div className="flex items-center justify-between border-b border-white/10 pb-2">
+                <div className="flex items-center gap-2">
+                  <Activity className="w-4 h-4 text-[#f2d39a]" />
+                  <h4 className="text-xs font-black text-white uppercase tracking-wider">
+                    IPL & Career Statistics Panel
+                  </h4>
+                </div>
+                <span className="text-[10px] text-white/50">Auto-filled via 1-Click Fetch or manual entry</span>
+              </div>
+
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <div>
+                  <label className="block text-[10px] font-bold text-white/70 mb-1">IPL Runs</label>
+                  <input
+                    type="number"
+                    value={formData.stats?.runs ?? 0}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        stats: { ...formData.stats, runs: parseInt(e.target.value, 10) || 0 },
+                      })
+                    }
+                    className="w-full px-3 py-1.5 rounded-xl bg-slate-950 border border-white/10 text-xs text-[#f2d39a] font-black focus:outline-none focus:border-[#f2d39a]"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[10px] font-bold text-white/70 mb-1">IPL Wickets</label>
+                  <input
+                    type="number"
+                    value={formData.stats?.wickets ?? 0}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        stats: { ...formData.stats, wickets: parseInt(e.target.value, 10) || 0 },
+                      })
+                    }
+                    className="w-full px-3 py-1.5 rounded-xl bg-slate-950 border border-white/10 text-xs text-[#a8e9ef] font-black focus:outline-none focus:border-[#f2d39a]"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[10px] font-bold text-white/70 mb-1">Batting Average</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    value={formData.stats?.average ?? 0}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        stats: { ...formData.stats, average: parseFloat(e.target.value) || 0 },
+                      })
+                    }
+                    className="w-full px-3 py-1.5 rounded-xl bg-slate-950 border border-white/10 text-xs text-emerald-400 font-bold focus:outline-none focus:border-[#f2d39a]"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[10px] font-bold text-white/70 mb-1">Strike Rate (SR)</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    value={formData.stats?.strikeRate ?? 0}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        stats: { ...formData.stats, strikeRate: parseFloat(e.target.value) || 0 },
+                      })
+                    }
+                    className="w-full px-3 py-1.5 rounded-xl bg-slate-950 border border-white/10 text-xs text-sky-400 font-bold focus:outline-none focus:border-[#f2d39a]"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[10px] font-bold text-white/70 mb-1">Matches Played</label>
+                  <input
+                    type="number"
+                    value={formData.stats?.matches ?? 0}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        stats: { ...formData.stats, matches: parseInt(e.target.value, 10) || 0 },
+                      })
+                    }
+                    className="w-full px-3 py-1.5 rounded-xl bg-slate-950 border border-white/10 text-xs text-white font-semibold focus:outline-none focus:border-[#f2d39a]"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[10px] font-bold text-white/70 mb-1">Highest Score</label>
+                  <input
+                    type="number"
+                    value={formData.stats?.highest ?? 0}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        stats: { ...formData.stats, highest: parseInt(e.target.value, 10) || 0 },
+                      })
+                    }
+                    className="w-full px-3 py-1.5 rounded-xl bg-slate-950 border border-white/10 text-xs text-white font-semibold focus:outline-none focus:border-[#f2d39a]"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[10px] font-bold text-white/70 mb-1">Fifties (50s)</label>
+                  <input
+                    type="number"
+                    value={formData.stats?.fifties ?? 0}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        stats: { ...formData.stats, fifties: parseInt(e.target.value, 10) || 0 },
+                      })
+                    }
+                    className="w-full px-3 py-1.5 rounded-xl bg-slate-950 border border-white/10 text-xs text-white font-semibold focus:outline-none focus:border-[#f2d39a]"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[10px] font-bold text-white/70 mb-1">Hundreds (100s)</label>
+                  <input
+                    type="number"
+                    value={formData.stats?.hundreds ?? 0}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        stats: { ...formData.stats, hundreds: parseInt(e.target.value, 10) || 0 },
+                      })
+                    }
+                    className="w-full px-3 py-1.5 rounded-xl bg-slate-950 border border-white/10 text-xs text-amber-400 font-bold focus:outline-none focus:border-[#f2d39a]"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[10px] font-bold text-white/70 mb-1">Fours (4s)</label>
+                  <input
+                    type="number"
+                    value={formData.stats?.fours ?? 0}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        stats: { ...formData.stats, fours: parseInt(e.target.value, 10) || 0 },
+                      })
+                    }
+                    className="w-full px-3 py-1.5 rounded-xl bg-slate-950 border border-white/10 text-xs text-white font-semibold focus:outline-none focus:border-[#f2d39a]"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[10px] font-bold text-white/70 mb-1">Sixes (6s)</label>
+                  <input
+                    type="number"
+                    value={formData.stats?.sixes ?? 0}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        stats: { ...formData.stats, sixes: parseInt(e.target.value, 10) || 0 },
+                      })
+                    }
+                    className="w-full px-3 py-1.5 rounded-xl bg-slate-950 border border-white/10 text-xs text-white font-semibold focus:outline-none focus:border-[#f2d39a]"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[10px] font-bold text-white/70 mb-1">Bowling Economy</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    value={formData.stats?.economy ?? 0}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        stats: { ...formData.stats, economy: parseFloat(e.target.value) || 0 },
+                      })
+                    }
+                    className="w-full px-3 py-1.5 rounded-xl bg-slate-950 border border-white/10 text-xs text-white font-semibold focus:outline-none focus:border-[#f2d39a]"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[10px] font-bold text-white/70 mb-1">Best Bowling (BBI)</label>
+                  <input
+                    type="text"
+                    value={formData.stats?.bestBowling || ''}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        stats: { ...formData.stats, bestBowling: e.target.value },
+                      })
+                    }
+                    placeholder="e.g. 5/10, 4/21"
+                    className="w-full px-3 py-1.5 rounded-xl bg-slate-950 border border-white/10 text-xs text-white font-semibold focus:outline-none focus:border-[#f2d39a]"
+                  />
+                </div>
+              </div>
             </div>
 
             {/* Notes / Trade Info */}
@@ -483,8 +744,8 @@ export default function SmartIntakeModal({
               <label className="block text-xs font-bold text-white/70 mb-1">2027 Acquisition & Trade Notes</label>
               <textarea
                 rows={2}
-                value={(formData as any).transferNotes || ''}
-                onChange={(e) => setFormData({ ...formData, transferNotes: e.target.value } as any)}
+                value={formData.transferNotes || ''}
+                onChange={(e) => setFormData({ ...formData, transferNotes: e.target.value })}
                 placeholder="e.g. Blockbuster Trade: MI ➔ PBKS (₹18.00 Cr player swap with Arshdeep Singh)"
                 className="w-full px-3.5 py-2 rounded-xl bg-slate-900 border border-white/10 text-xs text-white placeholder-white/30 focus:outline-none focus:border-[#f2d39a]"
               />

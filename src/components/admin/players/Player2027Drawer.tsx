@@ -19,6 +19,7 @@ import {
   Calendar,
 } from 'lucide-react';
 import { resolveIpl2027Team } from '@/lib/admin/ipl2027Teams';
+import PlayerMonogramAvatar from '@/components/admin/players/PlayerMonogramAvatar';
 
 interface Player2027DrawerProps {
   player: Player | null;
@@ -159,21 +160,14 @@ export default function Player2027Drawer({
           {/* Player Hero Section */}
           <div className="p-6 border-b border-white/10 bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950">
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5">
-              <div
-                className="h-24 w-24 overflow-hidden rounded-2xl border-2 bg-slate-800 shadow-xl flex items-center justify-center shrink-0 relative"
-                style={{ borderColor: metaTeam?.primaryColor || '#f2d39a' }}
-              >
-                {current.photoUrl ? (
-                  <img src={current.photoUrl} alt={current.name} className="h-full w-full object-cover" />
-                ) : (
-                  <span className="text-3xl font-black text-white">{current.name.charAt(0)}</span>
-                )}
-                {current.jerseyNumber && (
-                  <span className="absolute bottom-1 right-1 px-1.5 py-0.5 rounded bg-black/80 text-[10px] font-black text-[#f2d39a] border border-[#f2d39a]/30">
-                    #{current.jerseyNumber}
-                  </span>
-                )}
-              </div>
+              <PlayerMonogramAvatar
+                name={current.name}
+                teamShortName={metaTeam?.shortName || current.teamShortName}
+                teamId={current.teamId}
+                team={current.team}
+                jerseyNumber={current.jerseyNumber}
+                size="xl"
+              />
 
               <div className="flex-1 min-w-0">
                 <div className="flex flex-wrap items-center gap-2 mb-1.5">

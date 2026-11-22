@@ -7,18 +7,21 @@ import { Shield, Sparkles, Check, Users } from 'lucide-react';
 interface Franchise2027BarProps {
   selectedTeamId: string;
   onSelectTeam: (teamId: string) => void;
-  playersCountByTeam: Record<string, number>;
-  totalPlayersCount: number;
-  poolPlayersCount: number;
+  playersCountByTeam?: Record<string, number>;
+  totalPlayersCount?: number;
+  poolPlayersCount?: number;
+  totalCount?: number;
 }
 
 export default function Franchise2027Bar({
   selectedTeamId,
   onSelectTeam,
-  playersCountByTeam,
+  playersCountByTeam = {},
   totalPlayersCount,
-  poolPlayersCount,
+  poolPlayersCount = 0,
+  totalCount,
 }: Franchise2027BarProps) {
+  const displayTotal = totalPlayersCount ?? totalCount ?? 0;
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between text-xs text-white/60 px-1">
@@ -50,7 +53,7 @@ export default function Franchise2027Bar({
           </div>
           <div className="mt-2 flex items-center justify-between">
             <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-[#f2d39a]/20 text-[#f2d39a]">
-              {totalPlayersCount} Squad
+              {displayTotal} Squad
             </span>
             {selectedTeamId === 'all' && <Check className="w-3.5 h-3.5 text-[#f2d39a]" />}
           </div>
@@ -83,7 +86,7 @@ export default function Franchise2027Bar({
         {/* 10 Official IPL Franchises */}
         {IPL_2027_TEAMS.map((team) => {
           const isSelected = selectedTeamId === team.id || selectedTeamId === team.shortName;
-          const count = playersCountByTeam[team.id] || playersCountByTeam[team.shortName] || 0;
+          const count = playersCountByTeam?.[team.id] || playersCountByTeam?.[team.shortName] || 0;
 
           return (
             <button
