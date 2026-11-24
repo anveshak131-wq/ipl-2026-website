@@ -31,6 +31,85 @@ import BattingStatsWorkspace from '@/components/admin/player-stats/BattingStatsW
 import BowlingStatsWorkspace from '@/components/admin/player-stats/BowlingStatsWorkspace';
 import { IPL_2027_TEAMS, resolveIpl2027Team } from '@/lib/admin/ipl2027Teams';
 
+// Team Sort Rank: RCB Priority #1, followed by rest of IPL franchises, Standby Pool last
+function getTeamSortRank(p: Player): number {
+  const short = (p.teamShortName || '').toUpperCase();
+  const id = String(p.teamId || '');
+  const name = (p.team || '').toLowerCase();
+  const status = (p.squadStatus || '').toLowerCase();
+
+  if (name.includes('pool') || status.includes('release') || id === 'pool' || (!id && !short)) {
+    return 99;
+  }
+  if (short === 'RCB' || id === '1' || name.includes('bengaluru') || name.includes('bangalore')) return 1;
+  if (short === 'CSK' || id === '10' || name.includes('chennai')) return 2;
+  if (short === 'MI' || id === '2' || name.includes('mumbai')) return 3;
+  if (short === 'KKR' || id === '4' || name.includes('kolkata')) return 4;
+  if (short === 'SRH' || id === '3' || name.includes('hyderabad')) return 5;
+  if (short === 'DC' || id === '7' || name.includes('delhi')) return 6;
+  if (short === 'GT' || id === '4_gt' || name.includes('gujarat')) return 7;
+  if (short === 'LSG' || id === '9' || name.includes('lucknow')) return 8;
+  if (short === 'PBKS' || id === '5' || name.includes('punjab')) return 9;
+  if (short === 'RR' || id === '8' || name.includes('rajasthan')) return 10;
+  return 50;
+}
+
+// Role Sort Rank: Batters (1), Wicketkeepers (2), Batting All-rounders (3), Bowling All-rounders (4), Bowlers (5)
+function getRoleSortRank(p: Player): number {
+  const role = (p.role || '').toLowerCase().trim();
+  const arType = ((p as any).allRounderType || (p as any).allrounderType || '').toLowerCase().trim();
+
+  // 1. Wicketkeepers
+  if (role.includes('keeper') || role.includes('wk')) {
+    return 2;
+  }
+  // 2. All-rounders
+  if (role.includes('all') || arType.includes('all')) {
+    if (arType.includes('bat') || role.includes('batting all')) {
+      return 3; // Batting All-rounder
+    }
+    return 4; // Bowling All-rounder
+  }
+  // 3. Batters / Batsmen
+  if (role.includes('bat')) {
+    return 1;
+  }
+  // 4. Bowlers
+  if (role.includes('bowl')) {
+    return 5;
+  }
+  return 1;
+}
+
+function comparePlayersSquadOrder(a: Player, b: Player): number {
+  // 1. Primary Sort: Team Order (RCB First)
+  const teamA = getTeamSortRank(a);
+  const teamB = getTeamSortRank(b);
+  if (teamA !== teamB) return teamA - teamB;
+
+  // 2. Secondary Sort: Role Hierarchy (Batters -> WKs -> Batting AR -> Bowling AR -> Bowlers)
+  const roleA = getRoleSortRank(a);
+  const roleB = getRoleSortRank(b);
+  if (roleA !== roleB) return roleA - roleB;
+
+  // 3. Captain Priority
+  if (a.isCaptain !== b.isCaptain) return a.isCaptain ? -1 : 1;
+
+  // 4. Stat Performance Sorting within Role
+  const runsA = (a as any).careerStats?.batting?.IPL?.Runs || a.stats?.runs || 0;
+  const runsB = (b as any).careerStats?.batting?.IPL?.Runs || b.stats?.runs || 0;
+  if (roleA <= 3) {
+    if (Number(runsB) !== Number(runsA)) return Number(runsB) - Number(runsA);
+  } else {
+    const wktsA = (a as any).careerStats?.bowling?.IPL?.Wkts || a.stats?.wickets || 0;
+    const wktsB = (b as any).careerStats?.bowling?.IPL?.Wkts || b.stats?.wickets || 0;
+    if (Number(wktsB) !== Number(wktsA)) return Number(wktsB) - Number(wktsA);
+  }
+
+  // 5. Name Alphabetical Tie-Breaker
+  return a.name.localeCompare(b.name);
+}
+
 function Ipl2027OpsPlayersPage() {
   const [players, setPlayers] = useState<Player[]>([]);
   const [teams, setTeams] = useState<Team[]>([]);
@@ -86,9 +165,9 @@ function Ipl2027OpsPlayersPage() {
     loadData();
   }, []);
 
-  // Filter Pipeline with high-performance useMemo
+  // Filter and Sort Pipeline with high-performance useMemo (RCB First, Batters -> WKs -> ARs -> Bowlers)
   const filteredPlayers = useMemo(() => {
-    return players.filter((player) => {
+    const list = players.filter((player) => {
       // 1. Franchise Selector Filter
       if (selectedTeamId !== 'all') {
         if (selectedTeamId === 'STANDBY_2027') {
@@ -155,6 +234,8 @@ function Ipl2027OpsPlayersPage() {
 
       return true;
     });
+
+    return [...list].sort(comparePlayersSquadOrder);
   }, [players, selectedTeamId, debouncedSearch, statusFilter, roleFilter]);
 
   // Franchise counts for fast lookup
