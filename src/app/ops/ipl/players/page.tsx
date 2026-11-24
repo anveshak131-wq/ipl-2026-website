@@ -82,7 +82,7 @@ function getRoleSortRank(p: Player): number {
 }
 
 function comparePlayersSquadOrder(a: Player, b: Player): number {
-  // 1. Primary Sort: Team Order (RCB First)
+  // 1. Primary Sort: Team Order (RCB First, Standby Pool Last)
   const teamA = getTeamSortRank(a);
   const teamB = getTeamSortRank(b);
   if (teamA !== teamB) return teamA - teamB;
@@ -92,10 +92,15 @@ function comparePlayersSquadOrder(a: Player, b: Player): number {
   const roleB = getRoleSortRank(b);
   if (roleA !== roleB) return roleA - roleB;
 
-  // 3. Captain Priority
+  // 3. Tertiary Sort: Age (High to Low: Senior Veterans -> Young Emerging Talents)
+  const ageA = Number(a.age) || 0;
+  const ageB = Number(b.age) || 0;
+  if (ageB !== ageA) return ageB - ageA;
+
+  // 4. Captain Priority Tie-Breaker
   if (a.isCaptain !== b.isCaptain) return a.isCaptain ? -1 : 1;
 
-  // 4. Stat Performance Sorting within Role
+  // 5. Stat Performance Tie-Breaker (Runs for Batters/WK/Batting-AR, Wkts for Bowling-AR/Bowlers)
   const runsA = (a as any).careerStats?.batting?.IPL?.Runs || a.stats?.runs || 0;
   const runsB = (b as any).careerStats?.batting?.IPL?.Runs || b.stats?.runs || 0;
   if (roleA <= 3) {
@@ -106,7 +111,7 @@ function comparePlayersSquadOrder(a: Player, b: Player): number {
     if (Number(wktsB) !== Number(wktsA)) return Number(wktsB) - Number(wktsA);
   }
 
-  // 5. Name Alphabetical Tie-Breaker
+  // 6. Name Alphabetical Tie-Breaker
   return a.name.localeCompare(b.name);
 }
 

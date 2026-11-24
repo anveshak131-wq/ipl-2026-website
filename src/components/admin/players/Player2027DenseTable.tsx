@@ -25,7 +25,7 @@ export default function Player2027DenseTable({
   onDelete,
 }: Player2027DenseTableProps) {
   const [page, setPage] = useState(1);
-  const [sortField, setSortField] = useState<string>('name');
+  const [sortField, setSortField] = useState<string>('squad');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
 
   const handleSort = (field: string) => {
@@ -39,6 +39,10 @@ export default function Player2027DenseTable({
   };
 
   const sortedPlayers = useMemo(() => {
+    if (sortField === 'squad') {
+      return players;
+    }
+
     const list = [...players];
     list.sort((a, b) => {
       let aVal: any = '';
@@ -47,6 +51,9 @@ export default function Player2027DenseTable({
       if (sortField === 'name') {
         aVal = a.name.toLowerCase();
         bVal = b.name.toLowerCase();
+      } else if (sortField === 'age') {
+        aVal = Number(a.age) || 0;
+        bVal = Number(b.age) || 0;
       } else if (sortField === 'runs') {
         aVal = Number((a as any).careerStats?.batting?.IPL?.Runs || a.stats?.runs || 0);
         bVal = Number((b as any).careerStats?.batting?.IPL?.Runs || b.stats?.runs || 0);
@@ -137,6 +144,12 @@ export default function Player2027DenseTable({
               >
                 Role
               </th>
+              <th
+                onClick={() => handleSort('age')}
+                className="py-3 px-3 text-center cursor-pointer hover:text-white"
+              >
+                Age {sortField === 'age' && (sortOrder === 'asc' ? '▲' : '▼')}
+              </th>
               <th className="py-3 px-4">2027 Status</th>
               <th
                 onClick={() => handleSort('runs')}
@@ -187,6 +200,9 @@ export default function Player2027DenseTable({
                     </span>
                   </td>
                   <td className="py-3 px-4 text-white/70">{player.role}</td>
+                  <td className="py-3 px-3 text-center font-bold text-white/60">
+                    {player.age ? `${player.age}y` : '—'}
+                  </td>
                   <td className="py-3 px-4">
                     <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
                       {status} {transferFee ? `(${transferFee})` : ''}
