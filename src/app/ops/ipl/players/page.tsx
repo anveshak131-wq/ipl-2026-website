@@ -632,6 +632,7 @@ function Ipl2027OpsPlayersPage() {
       {showExportStudio && (
         <PlayerExportBar
           players={filteredPlayers}
+          league="IPL"
           selectedTeamName={currentTeamMeta?.name || 'All IPL Franchises'}
         />
       )}
@@ -814,6 +815,7 @@ function Ipl2027OpsPlayersPage() {
           players={filteredPlayers}
           selectedTeamId={selectedTeamId}
           onViewPlayer={(p) => setDrawerPlayer(p)}
+          onSelectTeam={(teamId) => setSelectedTeamId(teamId)}
         />
       ) : (
         /* Scout Cards Grid with CSS content-visibility */

@@ -5,24 +5,30 @@ import { FileText, FileSpreadsheet, FileDown, Database, Loader2 } from 'lucide-r
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import * as ExcelJS from 'exceljs';
+import { resolveIpl2027Team, IPL_2027_TEAMS } from '@/lib/admin/ipl2027Teams';
 
 interface PlayerExportBarProps {
   players: any[];
-  league: 'IPL' | 'WPL';
+  league?: 'IPL' | 'WPL';
   teams?: any[];
+  selectedTeamName?: string;
 }
 
 const IPL_TEAMS: Record<string, string> = {
-  '1': 'Chennai Super Kings',
+  '1': 'Royal Challengers Bengaluru',
   '2': 'Mumbai Indians',
-  '3': 'Royal Challengers Bengaluru',
+  '3': 'Sunrisers Hyderabad',
   '4': 'Kolkata Knight Riders',
-  '5': 'Sunrisers Hyderabad',
-  '6': 'Rajasthan Royals',
+  '4_gt': 'Gujarat Titans',
+  'gt': 'Gujarat Titans',
+  '5': 'Punjab Kings',
   '7': 'Delhi Capitals',
-  '8': 'Punjab Kings',
+  '8': 'Rajasthan Royals',
   '9': 'Lucknow Super Giants',
-  '10': 'Gujarat Titans',
+  '10': 'Chennai Super Kings',
+  'pool': '2027 Auction Standby',
+  'standby': '2027 Auction Standby',
+  'standby_2027': '2027 Auction Standby',
 };
 
 const WPL_TEAMS: Record<string, string> = {
@@ -38,7 +44,12 @@ const WPL_TEAMS: Record<string, string> = {
   'upw': 'UP Warriorz',
 };
 
-export default function PlayerExportBar({ players = [], league, teams = [] }: PlayerExportBarProps) {
+export default function PlayerExportBar({
+  players = [],
+  league = 'IPL',
+  teams = [],
+  selectedTeamName,
+}: PlayerExportBarProps) {
   const [exporting, setExporting] = useState<string | null>(null);
 
   const teamDict = React.useMemo(() => {
@@ -52,24 +63,33 @@ export default function PlayerExportBar({ players = [], league, teams = [] }: Pl
   }, [league, teams]);
 
   const resolveTeam = (p: any) => {
+    if (league === 'IPL') {
+      const meta = resolveIpl2027Team(p.teamShortName || p.teamId || p.team);
+      if (meta) return meta.name;
+      const tId = String(p.teamId || '').trim().toLowerCase();
+      if (tId === 'pool' || tId === 'standby_2027' || (p.team || '').toLowerCase().includes('standby')) {
+        return '2027 Auction Standby';
+      }
+    }
     const tId = String(p.teamId || p.team || '');
-    return teamDict[tId] || p.teamName || (tId ? `Team ${tId}` : 'Unassigned');
+    return teamDict[tId] || p.teamName || p.team || (tId ? `Team ${tId}` : 'Unassigned');
   };
 
   const getStats = (p: any) => {
-    const batIPL = p.careerStats?.batting?.[league] || p.careerStats?.batting?.IPL || {};
-    const bowlIPL = p.careerStats?.bowling?.[league] || p.careerStats?.bowling?.IPL || {};
+    const l = (league || 'IPL').toUpperCase();
+    const batIPL = p.careerStats?.batting?.[l] || p.careerStats?.batting?.IPL || p.careerStats?.batting?.T20 || {};
+    const bowlIPL = p.careerStats?.bowling?.[l] || p.careerStats?.bowling?.IPL || p.careerStats?.bowling?.T20 || {};
     return {
-      matches: p.matches ?? batIPL.Matches ?? 0,
-      runs: p.runs ?? batIPL.Runs ?? 0,
-      highest: p.highestScore ?? batIPL.Highest ?? 0,
-      average: p.average ?? batIPL.Average ?? 0,
-      strikeRate: p.strikeRate ?? batIPL.SR ?? 0,
-      hundreds: p.hundreds ?? batIPL['100s'] ?? 0,
-      fifties: p.fifties ?? batIPL['50s'] ?? 0,
-      wickets: p.wickets ?? bowlIPL.Wickets ?? 0,
-      economy: p.economy ?? bowlIPL.Eco ?? 0,
-      bbi: bowlIPL.BBI || p.bestBowling || '0/0',
+      matches: p.matches ?? batIPL.Matches ?? p.stats?.matches ?? 0,
+      runs: p.runs ?? batIPL.Runs ?? p.stats?.runs ?? 0,
+      highest: p.highestScore ?? batIPL.Highest ?? batIPL.HS ?? p.stats?.highestScore ?? 0,
+      average: p.average ?? batIPL.Average ?? batIPL.Avg ?? p.stats?.average ?? 0,
+      strikeRate: p.strikeRate ?? batIPL.SR ?? batIPL.StrikeRate ?? p.stats?.strikeRate ?? 0,
+      hundreds: p.hundreds ?? batIPL['100s'] ?? p.stats?.hundreds ?? 0,
+      fifties: p.fifties ?? batIPL['50s'] ?? p.stats?.fifties ?? 0,
+      wickets: p.wickets ?? bowlIPL.Wickets ?? bowlIPL.Wkts ?? p.stats?.wickets ?? 0,
+      economy: p.economy ?? bowlIPL.Eco ?? bowlIPL.Econ ?? p.stats?.economy ?? 0,
+      bbi: bowlIPL.BBI || p.bestBowling || p.stats?.bestBowling || '0/0',
     };
   };
 
@@ -259,7 +279,10 @@ export default function PlayerExportBar({ players = [], league, teams = [] }: Pl
       doc.setTextColor(255, 255, 255);
       doc.setFontSize(14);
       doc.setFont('helvetica', 'bold');
-      doc.text(`${league} 2026 OFFICIAL PLAYERS VAULT`, 14, 12);
+      const titlePrefix = selectedTeamName && selectedTeamName !== 'All IPL Franchises'
+        ? `${selectedTeamName.toUpperCase()} · `
+        : '';
+      doc.text(`${titlePrefix}${league} 2027 OFFICIAL PLAYERS VAULT`, 14, 12);
 
       doc.setFontSize(9);
       doc.setFont('helvetica', 'normal');
