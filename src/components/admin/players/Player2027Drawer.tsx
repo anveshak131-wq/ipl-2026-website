@@ -14,7 +14,6 @@ import {
   Award,
   User,
   MapPin,
-  Ruler,
   Target,
   Calendar,
 } from 'lucide-react';
@@ -90,7 +89,6 @@ export default function Player2027Drawer({
         ...current,
         name: bio.name || current.name,
         birthPlace: bio.birthPlace || current.birthPlace,
-        height: bio.height || current.height,
         teams: bio.teams || current.teams,
         role: bio.role || current.role,
         battingStyle: bio.battingStyle || current.battingStyle,
@@ -249,10 +247,10 @@ export default function Player2027Drawer({
 
               <div className="p-3 rounded-xl bg-slate-900/60 border border-white/5">
                 <span className="text-[10px] font-bold text-white/40 uppercase block mb-0.5 flex items-center gap-1">
-                  <Ruler className="w-3 h-3 text-emerald-400" />
-                  Height
+                  <Award className="w-3 h-3 text-emerald-400" />
+                  Jersey Number
                 </span>
-                <span className="text-xs font-bold text-white">{current.height || '—'}</span>
+                <span className="text-xs font-bold text-white">{current.jerseyNumber ? `#${current.jerseyNumber}` : '—'}</span>
               </div>
 
               <div className="p-3 rounded-xl bg-slate-900/60 border border-white/5">

@@ -38,7 +38,6 @@ export default function SmartIntakeModal({
     league: 'ipl',
     nationality: 'India',
     birthPlace: '',
-    height: '',
     teams: '',
     battingStyle: 'Right-handed bat',
     bowlingStyle: 'Right-arm medium',
@@ -73,7 +72,6 @@ export default function SmartIntakeModal({
       setFormData({
         ...editingPlayer,
         birthPlace: (editingPlayer as any).birthPlace || '',
-        height: (editingPlayer as any).height || '',
         teams: (editingPlayer as any).teams || '',
         squadStatus: editingPlayer.squadStatus || 'Retained',
         transferFee: (editingPlayer as any).transferFee || '',
@@ -110,7 +108,6 @@ export default function SmartIntakeModal({
         league: 'ipl',
         nationality: 'India',
         birthPlace: '',
-        height: '',
         teams: '',
         battingStyle: 'Right-handed bat',
         bowlingStyle: 'Right-arm medium',
@@ -200,7 +197,6 @@ export default function SmartIntakeModal({
         age: bio.age ? parseInt(String(bio.age), 10) : prev.age,
         nationality: bio.nationality || prev.nationality,
         birthPlace: bio.birthPlace || prev.birthPlace,
-        height: bio.height || prev.height,
         teams: bio.teams || prev.teams,
         cricbuzzUrl: data.sourceUrl || prev.cricbuzzUrl,
         cricbuzzId: data.profileId || prev.cricbuzzId,
@@ -258,7 +254,6 @@ export default function SmartIntakeModal({
         league: 'ipl',
         nationality: formData.nationality || 'India',
         birthPlace: formData.birthPlace || '',
-        height: formData.height || '',
         teams: formData.teams || '',
         battingStyle: formData.battingStyle || 'Right-handed bat',
         bowlingStyle: formData.bowlingStyle || 'Right-arm medium',
@@ -495,17 +490,6 @@ export default function SmartIntakeModal({
                   value={formData.birthPlace || ''}
                   onChange={(e) => setFormData({ ...formData, birthPlace: e.target.value })}
                   placeholder="e.g. Delhi, Mumbai, Ahmedabad"
-                  className="w-full px-3.5 py-2 rounded-xl bg-slate-900 border border-white/10 text-xs text-white placeholder-white/30 focus:outline-none focus:border-[#f2d39a]"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-white/70 mb-1">Height</label>
-                <input
-                  type="text"
-                  value={formData.height || ''}
-                  onChange={(e) => setFormData({ ...formData, height: e.target.value })}
-                  placeholder="e.g. 5 ft 9 in (175 cm)"
                   className="w-full px-3.5 py-2 rounded-xl bg-slate-900 border border-white/10 text-xs text-white placeholder-white/30 focus:outline-none focus:border-[#f2d39a]"
                 />
               </div>
