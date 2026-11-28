@@ -34,7 +34,7 @@ import BowlingStatsWorkspace from '@/components/admin/player-stats/BowlingStatsW
 import { IPL_2027_TEAMS, resolveIpl2027Team, IPL2027TeamMeta } from '@/lib/admin/ipl2027Teams';
 
 // Centralized check for 2027 Unassigned / Standby / Released Pool Players
-export function isUnassignedPoolPlayer(p: Player): boolean {
+function isUnassignedPoolPlayer(p: Player): boolean {
   if (!p) return false;
   const id = String(p.teamId || '').trim().toLowerCase();
   const short = String(p.teamShortName || '').trim().toUpperCase();

@@ -59,7 +59,7 @@ export default function SignReplacementModal({
   React.useEffect(() => {
     if (targetPlayer) {
       setSelectedPlayer(targetPlayer);
-      setCustomFee(targetPlayer.transferFee || '₹0.50 Cr');
+      setCustomFee((targetPlayer as any).transferFee || '₹0.50 Cr');
     }
     if (targetTeamId && targetTeamId !== 'all' && targetTeamId !== 'pool') {
       const meta = resolveIpl2027Team(targetTeamId);
@@ -194,7 +194,7 @@ export default function SignReplacementModal({
                 onChange={(e) => {
                   const p = availablePoolPlayers.find((x) => String(x.id) === e.target.value);
                   setSelectedPlayer(p || null);
-                  if (p) setCustomFee(p.transferFee || '₹0.50 Cr');
+                  if (p) setCustomFee((p as any).transferFee || '₹0.50 Cr');
                 }}
                 className="w-full px-3 py-2.5 rounded-xl bg-slate-900 border border-white/10 text-xs text-white focus:outline-none focus:border-[#f2d39a]"
               >

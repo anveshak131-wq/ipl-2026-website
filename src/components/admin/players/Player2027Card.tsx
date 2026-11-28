@@ -37,6 +37,18 @@ export const Player2027Card = React.memo(function Player2027Card({
   const transferFee = (player as any).transferFee || '';
   const transferNotes = (player as any).transferNotes || '';
 
+  const isPool =
+    !player.teamId ||
+    String(player.teamId).trim() === '' ||
+    String(player.teamId).toLowerCase() === 'pool' ||
+    String(player.teamId).toLowerCase() === 'standby_2027' ||
+    status.includes('release') ||
+    status.includes('draft pool') ||
+    (player.team || '').toLowerCase().includes('standby') ||
+    (player.team || '').toLowerCase().includes('auction pool') ||
+    (player.team || '').toLowerCase().includes('unassigned') ||
+    (player.teamShortName || '').toUpperCase() === 'POOL';
+
   // Status Badge Rendering
   const getStatusBadge = () => {
     if (status.includes('mentor')) {
@@ -53,16 +65,6 @@ export const Player2027Card = React.memo(function Player2027Card({
         </span>
       );
     }
-    const isPool =
-      !player.teamId ||
-      String(player.teamId).trim() === '' ||
-      String(player.teamId).toLowerCase() === 'pool' ||
-      status.includes('release') ||
-      status.includes('draft pool') ||
-      (player.team || '').toLowerCase().includes('standby') ||
-      (player.team || '').toLowerCase().includes('auction pool') ||
-      (player.team || '').toLowerCase().includes('unassigned') ||
-      (player.teamShortName || '').toUpperCase() === 'POOL';
 
     if (isPool) {
       return (
