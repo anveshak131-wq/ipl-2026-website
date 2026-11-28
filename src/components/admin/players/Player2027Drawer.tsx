@@ -16,6 +16,8 @@ import {
   MapPin,
   Target,
   Calendar,
+  Share2,
+  Check,
 } from 'lucide-react';
 import { resolveIpl2027Team } from '@/lib/admin/ipl2027Teams';
 import PlayerMonogramAvatar from '@/components/admin/players/PlayerMonogramAvatar';
@@ -34,6 +36,7 @@ export default function Player2027Drawer({
   onStatsUpdated,
 }: Player2027DrawerProps) {
   const [activePlayer, setActivePlayer] = useState<Player | null>(player);
+  const [copied, setCopied] = useState(false);
   const [isSyncingCricbuzz, setIsSyncingCricbuzz] = useState(false);
   const [syncMessage, setSyncMessage] = useState<{ text: string; error?: boolean } | null>(null);
 
@@ -146,13 +149,39 @@ export default function Player2027Drawer({
               <Shield className="w-4 h-4 text-[#f2d39a]" />
               IPL 2027 Player Dossier
             </div>
-            <button
-              type="button"
-              onClick={onClose}
-              className="p-1.5 rounded-lg text-white/60 hover:text-white hover:bg-white/10 transition-colors"
-            >
-              <X className="w-5 h-5" />
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  if (typeof window !== 'undefined') {
+                    navigator.clipboard.writeText(window.location.href);
+                    setCopied(true);
+                    setTimeout(() => setCopied(false), 2000);
+                  }
+                }}
+                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium text-white/70 hover:text-white hover:bg-white/10 border border-white/10 transition-colors"
+                title="Copy Direct Link to Dossier"
+              >
+                {copied ? (
+                  <>
+                    <Check className="w-3.5 h-3.5 text-emerald-400" />
+                    <span className="text-emerald-400 font-semibold">Copied Link!</span>
+                  </>
+                ) : (
+                  <>
+                    <Share2 className="w-3.5 h-3.5 text-[#f2d39a]" />
+                    <span>Share</span>
+                  </>
+                )}
+              </button>
+              <button
+                type="button"
+                onClick={onClose}
+                className="p-1.5 rounded-lg text-white/60 hover:text-white hover:bg-white/10 transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
           </div>
 
           {/* Player Hero Section */}

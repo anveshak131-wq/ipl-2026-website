@@ -135,22 +135,72 @@ function comparePlayersSquadOrder(a: Player, b: Player): number {
   return a.name.localeCompare(b.name);
 }
 
+// URL Parameter Parsing Helpers
+function parseTeamFromParam(param: string | null): string {
+  if (!param) return 'all';
+  const clean = param.trim().toLowerCase();
+  if (clean === 'all') return 'all';
+  if (clean === 'pool' || clean === 'standby' || clean === 'unassigned') return 'pool';
+  const team = IPL_2027_TEAMS.find(
+    (t) => t.id === clean || t.shortName.toLowerCase() === clean || t.name.toLowerCase().includes(clean)
+  );
+  return team ? team.id : 'all';
+}
+
+function parseRoleFromParam(param: string | null): string {
+  if (!param) return 'ALL';
+  const clean = param.trim().toUpperCase();
+  if (clean === 'BATSMAN' || clean === 'BATTER' || clean === 'BATTERS') return 'BATSMAN';
+  if (clean === 'BOWLER' || clean === 'BOWLERS') return 'BOWLER';
+  if (clean === 'ALLROUNDER' || clean === 'ALL-ROUNDER' || clean === 'ALL_ROUNDER' || clean === 'ALLROUNDERS') return 'ALLROUNDER';
+  if (clean === 'KEEPER' || clean === 'KEEPERS' || clean === 'WK' || clean === 'WICKETKEEPER') return 'KEEPER';
+  return 'ALL';
+}
+
+function parseStatusFromParam(param: string | null): string {
+  if (!param) return 'ALL';
+  const clean = param.trim().toUpperCase();
+  if (clean === 'RETAINED') return 'RETAINED';
+  if (clean === 'TRADED') return 'TRADED';
+  if (clean === 'RELEASED' || clean === 'POOL' || clean === 'AUCTION') return 'RELEASED';
+  if (clean === 'OVERSEAS') return 'OVERSEAS';
+  if (clean === 'MENTOR') return 'MENTOR';
+  return 'ALL';
+}
+
+function parseViewModeFromParam(param: string | null): 'grid' | 'table' | 'pitch' {
+  if (!param) return 'grid';
+  const clean = param.trim().toLowerCase();
+  if (clean === 'table' || clean === 'dense') return 'table';
+  if (clean === 'pitch' || clean === 'turf' || clean === 'xi') return 'pitch';
+  return 'grid';
+}
+
 function Ipl2027OpsPlayersPage() {
+  const searchParams = useSearchParams();
+
   const [players, setPlayers] = useState<Player[]>([]);
   const [teams, setTeams] = useState<Team[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // View & Filter States
-  const [selectedTeamId, setSelectedTeamId] = useState<string>('all');
-  const [viewMode, setViewMode] = useState<'grid' | 'table' | 'pitch'>('grid');
-  const [searchQuery, setSearchQuery] = useState<string>('');
-  const [debouncedSearch, setDebouncedSearch] = useState<string>('');
-  const [statusFilter, setStatusFilter] = useState<string>('ALL');
-  const [roleFilter, setRoleFilter] = useState<string>('ALL');
+  // Initialize View & Filter States directly from URL parameters
+  const initialTeam = useMemo(() => parseTeamFromParam(searchParams.get('team') || searchParams.get('franchise')), [searchParams]);
+  const initialRole = useMemo(() => parseRoleFromParam(searchParams.get('role')), [searchParams]);
+  const initialStatus = useMemo(() => parseStatusFromParam(searchParams.get('status')), [searchParams]);
+  const initialMode = useMemo(() => parseViewModeFromParam(searchParams.get('mode') || searchParams.get('tab')), [searchParams]);
+  const initialSearch = useMemo(() => searchParams.get('q') || searchParams.get('search') || '', [searchParams]);
+
+  const [selectedTeamId, setSelectedTeamId] = useState<string>(initialTeam);
+  const [viewMode, setViewMode] = useState<'grid' | 'table' | 'pitch'>(initialMode);
+  const [searchQuery, setSearchQuery] = useState<string>(initialSearch);
+  const [debouncedSearch, setDebouncedSearch] = useState<string>(initialSearch);
+  const [statusFilter, setStatusFilter] = useState<string>(initialStatus);
+  const [roleFilter, setRoleFilter] = useState<string>(initialRole);
   const [showExportStudio, setShowExportStudio] = useState<boolean>(false);
 
   // Modals & Drawer States
   const [drawerPlayer, setDrawerPlayer] = useState<Player | null>(null);
+  const [hasResolvedInitialPlayer, setHasResolvedInitialPlayer] = useState(false);
   const [modalOpen, setModalOpen] = useState<boolean>(false);
   const [editingPlayer, setEditingPlayer] = useState<Player | null>(null);
   const [, startTransition] = useTransition();
@@ -189,6 +239,96 @@ function Ipl2027OpsPlayersPage() {
   useEffect(() => {
     loadData();
   }, []);
+
+  // Auto-open Player Dossier from URL parameter (e.g. ?player=2 or ?player=1413 or ?player=virat-kohli)
+  useEffect(() => {
+    if (!hasResolvedInitialPlayer && players.length > 0) {
+      const playerParam = searchParams.get('player') || searchParams.get('playerId');
+      if (playerParam) {
+        const q = playerParam.trim().toLowerCase();
+        const found = players.find(
+          (p) =>
+            String(p.id).toLowerCase() === q ||
+            String(p.cricbuzzId || '').toLowerCase() === q ||
+            p.name.toLowerCase() === q ||
+            p.name.toLowerCase().replace(/[^a-z0-9]/g, '-') === q ||
+            p.name.toLowerCase().replace(/[^a-z0-9]/g, '') === q.replace(/[^a-z0-9]/g, '')
+        );
+        if (found) {
+          setDrawerPlayer(found);
+        }
+      }
+      setHasResolvedInitialPlayer(true);
+    }
+  }, [players, searchParams, hasResolvedInitialPlayer]);
+
+  // Real-time URL Synchronization without page reload
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const url = new URL(window.location.href);
+    const params = url.searchParams;
+
+    // Preserve subnav view (e.g. view=players) if present
+    const subnavView = searchParams.get('view');
+    if (subnavView) {
+      params.set('view', subnavView);
+    }
+
+    // 1. Franchise
+    if (selectedTeamId && selectedTeamId !== 'all') {
+      const teamMeta = resolveIpl2027Team(selectedTeamId);
+      params.set('team', teamMeta ? teamMeta.shortName.toLowerCase() : selectedTeamId);
+    } else {
+      params.delete('team');
+      params.delete('franchise');
+    }
+
+    // 2. Role
+    if (roleFilter && roleFilter !== 'ALL') {
+      params.set('role', roleFilter.toLowerCase());
+    } else {
+      params.delete('role');
+    }
+
+    // 3. Status
+    if (statusFilter && statusFilter !== 'ALL') {
+      params.set('status', statusFilter.toLowerCase());
+    } else {
+      params.delete('status');
+    }
+
+    // 4. Mode
+    if (viewMode && viewMode !== 'grid') {
+      params.set('mode', viewMode);
+    } else {
+      params.delete('mode');
+      params.delete('tab');
+    }
+
+    // 5. Search
+    if (debouncedSearch && debouncedSearch.trim()) {
+      params.set('q', debouncedSearch.trim());
+    } else {
+      params.delete('q');
+      params.delete('search');
+    }
+
+    // 6. Player Dossier Deep Link
+    if (drawerPlayer) {
+      params.set('player', String(drawerPlayer.id));
+    } else {
+      params.delete('player');
+      params.delete('playerId');
+    }
+
+    const newQueryString = params.toString();
+    const newRelativePathQuery = window.location.pathname + (newQueryString ? `?${newQueryString}` : '');
+
+    if (window.location.search !== (newQueryString ? `?${newQueryString}` : '')) {
+      window.history.replaceState(null, '', newRelativePathQuery);
+    }
+  }, [selectedTeamId, roleFilter, statusFilter, viewMode, debouncedSearch, drawerPlayer, searchParams]);
 
   // Filter and Sort Pipeline with high-performance useMemo (RCB First, Batters -> WKs -> ARs -> Bowlers)
   const filteredPlayers = useMemo(() => {
