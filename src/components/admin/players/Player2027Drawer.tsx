@@ -18,6 +18,11 @@ import {
   Calendar,
   Share2,
   Check,
+  ArrowRightLeft,
+  AlertCircle,
+  UserPlus,
+  Trash2,
+  PlusCircle,
 } from 'lucide-react';
 import { resolveIpl2027Team } from '@/lib/admin/ipl2027Teams';
 import PlayerMonogramAvatar from '@/components/admin/players/PlayerMonogramAvatar';
@@ -27,6 +32,10 @@ interface Player2027DrawerProps {
   onClose: () => void;
   onEdit: (player: Player) => void;
   onStatsUpdated?: (updatedPlayer: Player) => void;
+  onSignPlayer?: (player: Player) => void;
+  onReleasePlayer?: (player: Player) => void;
+  onMarkInjured?: (player: Player) => void;
+  onTradePlayer?: (player: Player) => void;
 }
 
 export default function Player2027Drawer({
@@ -34,6 +43,10 @@ export default function Player2027Drawer({
   onClose,
   onEdit,
   onStatsUpdated,
+  onSignPlayer,
+  onReleasePlayer,
+  onMarkInjured,
+  onTradePlayer,
 }: Player2027DrawerProps) {
   const [activePlayer, setActivePlayer] = useState<Player | null>(player);
   const [copied, setCopied] = useState(false);
@@ -58,6 +71,23 @@ export default function Player2027Drawer({
   const transferFee = (current as any).transferFee || (current as any).auction?.fee;
   const transferNotes = (current as any).transferNotes || '';
   const status = current.squadStatus || 'Retained';
+
+  const isPool =
+    !current.teamId ||
+    String(current.teamId).trim() === '' ||
+    String(current.teamId).toLowerCase() === 'pool' ||
+    String(current.teamId).toLowerCase() === 'standby_2027' ||
+    (current.squadStatus || '').toLowerCase().includes('release') ||
+    (current.squadStatus || '').toLowerCase().includes('draft pool') ||
+    (current.team || '').toLowerCase().includes('standby') ||
+    (current.team || '').toLowerCase().includes('auction pool') ||
+    (current.team || '').toLowerCase().includes('unassigned') ||
+    (current.teamShortName || '').toUpperCase() === 'POOL';
+
+  const isInjured =
+    (current.squadStatus || '').toLowerCase().includes('injur') ||
+    (current.squadStatus || '').toLowerCase().includes('withdrawn') ||
+    (current.squadStatus || '').toLowerCase().includes('ruled out');
 
   const formatList = ['Test', 'ODI', 'T20', 'IPL'];
 
@@ -223,14 +253,22 @@ export default function Player2027Drawer({
             </div>
 
             {/* 2027 Contract Status Card */}
-            <div className="mt-5 rounded-2xl border border-white/10 bg-slate-900/90 p-4 space-y-2">
+            <div className="mt-5 rounded-2xl border border-white/10 bg-slate-900/90 p-4 space-y-3">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-extrabold uppercase tracking-wider text-white/50 flex items-center gap-1.5">
                   <DollarSign className="w-3.5 h-3.5 text-emerald-400" />
                   IPL 2027 Contract Status
                 </span>
-                <span className="px-2.5 py-0.5 rounded-full text-xs font-black uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
-                  {status}
+                <span
+                  className={`px-2.5 py-0.5 rounded-full text-xs font-black uppercase tracking-wider border ${
+                    isPool
+                      ? 'bg-red-500/20 text-red-300 border-red-500/40'
+                      : isInjured
+                      ? 'bg-rose-500/20 text-rose-300 border-rose-500/40'
+                      : 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
+                  }`}
+                >
+                  {isPool ? '2027 Auction Standby' : isInjured ? 'Injured / Ruled Out' : status}
                 </span>
               </div>
 
@@ -244,6 +282,56 @@ export default function Player2027Drawer({
                   {transferNotes}
                 </p>
               )}
+
+              {/* BCCI In-Season Roster & Contract Actions */}
+              <div className="pt-3 border-t border-white/10">
+                <div className="text-[10px] font-extrabold uppercase tracking-wider text-white/40 mb-2 flex items-center justify-between">
+                  <span>BCCI Roster Compliance & Actions</span>
+                  <span className="text-[#f2d39a]">IPL 2027</span>
+                </div>
+                {isPool ? (
+                  <button
+                    type="button"
+                    onClick={() => onSignPlayer && onSignPlayer(current)}
+                    className="w-full py-2.5 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex items-center justify-center gap-2 transition-all shadow-md shadow-emerald-950/40"
+                  >
+                    <PlusCircle className="w-4 h-4" />
+                    <span>Sign as Injury Replacement / Assign to Franchise</span>
+                  </button>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                    <button
+                      type="button"
+                      onClick={() => onReleasePlayer && onReleasePlayer(current)}
+                      className="py-2 px-2.5 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-300 border border-red-500/30 text-xs font-bold flex items-center justify-center gap-1.5 transition-all"
+                      title="Release to Standby Pool & restore franchise purse"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                      <span>Release to Pool</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => onMarkInjured && onMarkInjured(current)}
+                      className="py-2 px-2.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 border border-rose-500/30 text-xs font-bold flex items-center justify-center gap-1.5 transition-all"
+                      title="Mark as Withdrawn/Injured to unlock replacement vacancy"
+                    >
+                      <AlertCircle className="w-3.5 h-3.5" />
+                      <span>{isInjured ? 'Injured (Ruled Out)' : 'Mark Ruled Out'}</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => onTradePlayer && onTradePlayer(current)}
+                      className="py-2 px-2.5 rounded-xl bg-purple-500/10 hover:bg-purple-500/20 text-purple-300 border border-purple-500/30 text-xs font-bold flex items-center justify-center gap-1.5 transition-all"
+                      title="Trade/Transfer to another franchise"
+                    >
+                      <ArrowRightLeft className="w-3.5 h-3.5" />
+                      <span>Trade Franchise</span>
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 

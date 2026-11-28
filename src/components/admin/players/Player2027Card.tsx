@@ -8,6 +8,7 @@ import {
   Edit2,
   Trash2,
   Plane,
+  UserPlus,
 } from 'lucide-react';
 import { resolveIpl2027Team } from '@/lib/admin/ipl2027Teams';
 import PlayerMonogramAvatar from '@/components/admin/players/PlayerMonogramAvatar';
@@ -17,6 +18,7 @@ export interface Player2027CardProps {
   onView: (player: Player) => void;
   onEdit: (player: Player) => void;
   onDelete?: (player: Player) => void;
+  onSign?: (player: Player) => void;
   onContextMenu?: (e: React.MouseEvent, player: Player) => void;
 }
 
@@ -25,6 +27,7 @@ export const Player2027Card = React.memo(function Player2027Card({
   onView,
   onEdit,
   onDelete,
+  onSign,
   onContextMenu,
 }: Player2027CardProps) {
   const metaTeam = resolveIpl2027Team(player.teamShortName || player.teamId || player.team);
@@ -216,15 +219,38 @@ export const Player2027Card = React.memo(function Player2027Card({
 
         {/* Action Buttons */}
         <div className="flex items-center gap-2 border-t border-white/5 pt-3">
-          <button
-            type="button"
-            onClick={() => onView(player)}
-            className="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-slate-800/80 px-3 py-1.5 text-xs font-bold text-white/90 hover:bg-slate-700 hover:text-white transition-colors border border-white/5"
-            title="Open comprehensive Dossier"
-          >
-            <Eye className="w-3.5 h-3.5 text-[#f2d39a]" />
-            <span>Dossier</span>
-          </button>
+          {isPool && onSign ? (
+            <button
+              type="button"
+              onClick={() => onSign(player)}
+              className="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-emerald-600/90 hover:bg-emerald-500 px-3 py-1.5 text-xs font-bold text-white transition-all shadow-sm"
+              title="Sign to an IPL franchise"
+            >
+              <UserPlus className="w-3.5 h-3.5" />
+              <span>Sign to Squad</span>
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={() => onView(player)}
+              className="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-slate-800/80 px-3 py-1.5 text-xs font-bold text-white/90 hover:bg-slate-700 hover:text-white transition-colors border border-white/5"
+              title="Open comprehensive Dossier"
+            >
+              <Eye className="w-3.5 h-3.5 text-[#f2d39a]" />
+              <span>Dossier</span>
+            </button>
+          )}
+
+          {isPool && onSign && (
+            <button
+              type="button"
+              onClick={() => onView(player)}
+              className="flex items-center justify-center p-2 rounded-xl bg-slate-800/80 text-white/80 hover:bg-slate-700 hover:text-white transition-colors border border-white/5"
+              title="View Dossier"
+            >
+              <Eye className="w-3.5 h-3.5 text-[#f2d39a]" />
+            </button>
+          )}
 
           <button
             type="button"

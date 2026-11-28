@@ -20,6 +20,8 @@ import {
   SlidersHorizontal,
 } from 'lucide-react';
 import Franchise2027Bar from '@/components/admin/players/Franchise2027Bar';
+import FranchiseRosterHealthMeter from '@/components/admin/players/FranchiseRosterHealthMeter';
+import SignReplacementModal from '@/components/admin/players/SignReplacementModal';
 import { Player2027Card } from '@/components/admin/players/Player2027Card';
 import Player2027Drawer from '@/components/admin/players/Player2027Drawer';
 import SmartIntakeModal from '@/components/admin/players/SmartIntakeModal';
@@ -29,7 +31,7 @@ import PlayerExportBar from '@/components/admin/players/PlayerExportBar';
 import PlayersStatsSubNav from '@/components/admin/PlayersStatsSubNav';
 import BattingStatsWorkspace from '@/components/admin/player-stats/BattingStatsWorkspace';
 import BowlingStatsWorkspace from '@/components/admin/player-stats/BowlingStatsWorkspace';
-import { IPL_2027_TEAMS, resolveIpl2027Team } from '@/lib/admin/ipl2027Teams';
+import { IPL_2027_TEAMS, resolveIpl2027Team, IPL2027TeamMeta } from '@/lib/admin/ipl2027Teams';
 
 // Centralized check for 2027 Unassigned / Standby / Released Pool Players
 export function isUnassignedPoolPlayer(p: Player): boolean {
@@ -439,6 +441,117 @@ function Ipl2027OpsPlayersPage() {
     });
   };
 
+  // In-Season & Post-Auction Signing & Roster Handlers
+  const [signModalOpen, setSignModalOpen] = useState(false);
+  const [signModalPlayer, setSignModalPlayer] = useState<Player | null>(null);
+
+  const handleOpenSignModal = (player?: Player | null) => {
+    setSignModalPlayer(player || null);
+    setSignModalOpen(true);
+  };
+
+  const handleConfirmSign = async (
+    player: Player,
+    targetTeam: IPL2027TeamMeta,
+    fee: string,
+    contractStatus: string
+  ) => {
+    const updated: Player = {
+      ...player,
+      teamId: targetTeam.id,
+      team: targetTeam.name,
+      teamShortName: targetTeam.shortName,
+      squadStatus: contractStatus,
+      transferFee: fee || player.transferFee || '₹0.50 Cr',
+      updatedAt: new Date().toISOString(),
+    };
+
+    // Update in-memory state immediately (0ms latency)
+    handlePlayerSaved(updated);
+    if (drawerPlayer && drawerPlayer.id === player.id) {
+      setDrawerPlayer(updated);
+    }
+
+    // Persist via PUT /api/players
+    try {
+      await fetch('/api/players', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updated),
+      });
+    } catch (e) {
+      console.error('Failed to persist player signing:', e);
+    }
+  };
+
+  const handleReleasePlayerToPool = async (player: Player) => {
+    if (
+      !confirm(
+        `Are you sure you want to release "${player.name}" to the 2027 Auction Standby Pool (RAPP)?\n\nThis will free up 1 squad slot (and 1 overseas slot if overseas) and restore their contract valuation to the franchise purse.`
+      )
+    ) {
+      return;
+    }
+
+    const updated: Player = {
+      ...player,
+      teamId: 'pool',
+      team: '2027 Auction Standby',
+      teamShortName: 'POOL',
+      squadStatus: 'Released',
+      updatedAt: new Date().toISOString(),
+    };
+
+    handlePlayerSaved(updated);
+    if (drawerPlayer && drawerPlayer.id === player.id) {
+      setDrawerPlayer(updated);
+    }
+
+    try {
+      await fetch('/api/players', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updated),
+      });
+    } catch (e) {
+      console.error('Failed to persist player release:', e);
+    }
+  };
+
+  const handleMarkPlayerInjured = async (player: Player) => {
+    const isCurrentlyInjured =
+      (player.squadStatus || '').toLowerCase().includes('injur') ||
+      (player.squadStatus || '').toLowerCase().includes('withdrawn');
+
+    const nextStatus = isCurrentlyInjured ? 'Retained' : 'Withdrawn';
+    const message = isCurrentlyInjured
+      ? `Reactivate "${player.name}" to active squad status (Retained)?`
+      : `Mark "${player.name}" as Ruled Out / Withdrawn?\n\nUnder BCCI rules, this unlocks 1 injury replacement vacancy for the franchise to sign an eligible player from the Standby Pool.`;
+
+    if (!confirm(message)) return;
+
+    const updated: Player = {
+      ...player,
+      squadStatus: nextStatus,
+      updatedAt: new Date().toISOString(),
+    };
+
+    handlePlayerSaved(updated);
+    if (drawerPlayer && drawerPlayer.id === player.id) {
+      setDrawerPlayer(updated);
+    }
+
+    try {
+      await fetch('/api/players', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updated),
+      });
+    } catch (e) {
+      console.error('Failed to persist injury status:', e);
+    }
+  };
+
   // Handler for delete/release player
   const handleDeletePlayer = async (id: string, name: string) => {
     if (!confirm(`Are you sure you want to release "${name}" to the 2027 Auction Standby Pool?`)) {
@@ -530,6 +643,14 @@ function Ipl2027OpsPlayersPage() {
         playersCountByTeam={playersCountByTeam}
         totalPlayersCount={players.length}
         poolPlayersCount={poolPlayersCount}
+      />
+
+      {/* Dynamic Franchise Roster Health & Purse Meter (BCCI IPL Compliance) */}
+      <FranchiseRosterHealthMeter
+        selectedTeamId={selectedTeamId}
+        players={players}
+        onOpenStandbyPool={() => setSelectedTeamId('pool')}
+        onOpenSignModal={() => handleOpenSignModal(null)}
       />
 
       {/* Search, Filter Chips & View Mode Controls */}
@@ -704,6 +825,7 @@ function Ipl2027OpsPlayersPage() {
               onView={(p) => setDrawerPlayer(p)}
               onEdit={(p) => handleOpenEdit(p)}
               onDelete={(p) => handleDeletePlayer(p.id, p.name)}
+              onSign={(p) => handleOpenSignModal(p)}
             />
           ))}
         </div>
@@ -718,6 +840,10 @@ function Ipl2027OpsPlayersPage() {
           handleOpenEdit(p);
         }}
         onStatsUpdated={(updated) => handlePlayerSaved(updated)}
+        onSignPlayer={(p) => handleOpenSignModal(p)}
+        onReleasePlayer={(p) => handleReleasePlayerToPool(p)}
+        onMarkInjured={(p) => handleMarkPlayerInjured(p)}
+        onTradePlayer={(p) => handleOpenSignModal(p)}
       />
 
       {/* 1-Click Cricbuzz Smart Intake Modal */}
@@ -727,6 +853,16 @@ function Ipl2027OpsPlayersPage() {
         editingPlayer={editingPlayer}
         onSaved={(saved) => handlePlayerSaved(saved)}
         teams={teams}
+      />
+
+      {/* RAPP Standby Player Signing & Transfer Modal */}
+      <SignReplacementModal
+        isOpen={signModalOpen}
+        onClose={() => setSignModalOpen(false)}
+        targetPlayer={signModalPlayer}
+        targetTeamId={selectedTeamId}
+        allPlayers={players}
+        onConfirmSign={handleConfirmSign}
       />
     </div>
   );

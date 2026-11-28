@@ -199,3 +199,170 @@ export function resolveIpl2027Team(teamIdOrName?: string | null): IPL2027TeamMet
     return false;
   });
 }
+
+export const IPL_2027_BASE_PURSE_CR = 130.0;
+export const IPL_2027_SQUAD_MIN = 18;
+export const IPL_2027_SQUAD_MAX = 25;
+export const IPL_2027_OVERSEAS_MAX = 8;
+
+export function parseFeeInCrores(feeStr?: string | number | null): number {
+  if (!feeStr) return 0;
+  if (typeof feeStr === 'number') {
+    if (feeStr < 500) return feeStr;
+    return feeStr / 10000000;
+  }
+  const str = String(feeStr).trim();
+  if (!str) return 0;
+  const crMatch = str.match(/([0-9]+(?:\.[0-9]+)?)\s*(?:cr|crore)/i);
+  if (crMatch) return parseFloat(crMatch[1]);
+  const lakhMatch = str.match(/([0-9]+(?:\.[0-9]+)?)\s*(?:lakh|l)/i);
+  if (lakhMatch) return parseFloat(lakhMatch[1]) / 100;
+  const plain = parseFloat(str.replace(/[^0-9.]/g, ''));
+  if (!isNaN(plain)) {
+    return plain < 500 ? plain : plain / 10000000;
+  }
+  return 0;
+}
+
+export function isPlayerOverseas(nationality?: string | null): boolean {
+  if (!nationality) return false;
+  const nat = nationality.trim().toLowerCase();
+  return nat !== '' && !['india', 'ind', 'indian'].includes(nat);
+}
+
+export interface FranchiseRosterHealth {
+  team: IPL2027TeamMeta;
+  squadCount: number;
+  squadMax: number;
+  squadMin: number;
+  squadOpenSlots: number;
+  squadStatus: 'ok' | 'below_min' | 'full' | 'overflow';
+  
+  overseasCount: number;
+  overseasMax: number;
+  overseasOpenSlots: number;
+  overseasStatus: 'ok' | 'full' | 'exceeded';
+
+  totalPurseCr: number;
+  spentPurseCr: number;
+  remainingPurseCr: number;
+  formattedRemainingPurse: string;
+  formattedSpentPurse: string;
+
+  roles: {
+    batters: { count: number; percentage: number };
+    keepers: { count: number; percentage: number };
+    allRounders: { count: number; percentage: number };
+    bowlers: { count: number; percentage: number };
+  };
+
+  injuredCount: number;
+  injuredPlayers: any[];
+}
+
+export function computeFranchiseRosterHealth(
+  teamIdOrMeta: string | IPL2027TeamMeta,
+  players: any[]
+): FranchiseRosterHealth | null {
+  const teamMeta = typeof teamIdOrMeta === 'string' ? resolveIpl2027Team(teamIdOrMeta) : teamIdOrMeta;
+  if (!teamMeta) return null;
+
+  // Active squad players in this franchise
+  const activePlayers = players.filter((p) => {
+    const isTeam =
+      String(p.teamId) === teamMeta.id ||
+      (p.teamShortName && p.teamShortName.toUpperCase() === teamMeta.shortName) ||
+      (p.team && p.team.toLowerCase().includes(teamMeta.name.toLowerCase()));
+    
+    const isReleased =
+      (p.squadStatus || '').toLowerCase().includes('release') ||
+      (p.team || '').toLowerCase().includes('standby') ||
+      p.teamId === 'pool' ||
+      p.teamId === 'STANDBY_2027';
+
+    return isTeam && !isReleased;
+  });
+
+  const squadCount = activePlayers.length;
+  const squadOpenSlots = Math.max(0, IPL_2027_SQUAD_MAX - squadCount);
+  let squadStatus: 'ok' | 'below_min' | 'full' | 'overflow' = 'ok';
+  if (squadCount < IPL_2027_SQUAD_MIN) squadStatus = 'below_min';
+  else if (squadCount === IPL_2027_SQUAD_MAX) squadStatus = 'full';
+  else if (squadCount > IPL_2027_SQUAD_MAX) squadStatus = 'overflow';
+
+  // Overseas count
+  const overseasCount = activePlayers.filter((p) => isPlayerOverseas(p.nationality)).length;
+  const overseasOpenSlots = Math.max(0, IPL_2027_OVERSEAS_MAX - overseasCount);
+  let overseasStatus: 'ok' | 'full' | 'exceeded' = 'ok';
+  if (overseasCount === IPL_2027_OVERSEAS_MAX) overseasStatus = 'full';
+  else if (overseasCount > IPL_2027_OVERSEAS_MAX) overseasStatus = 'exceeded';
+
+  // Role Breakdown
+  let batters = 0;
+  let keepers = 0;
+  let allRounders = 0;
+  let bowlers = 0;
+
+  activePlayers.forEach((p) => {
+    const role = (p.role || '').toUpperCase();
+    if (role.includes('KEEPER') || role.includes('WK')) keepers++;
+    else if (role.includes('ALLROUNDER') || role.includes('ALL-ROUNDER') || role.includes('ALL ROUNDER')) allRounders++;
+    else if (role.includes('BOWLER') || role.includes('BOWL')) bowlers++;
+    else batters++;
+  });
+
+  const totalForRoles = squadCount > 0 ? squadCount : 1;
+  const roles = {
+    batters: { count: batters, percentage: Math.round((batters / totalForRoles) * 100) },
+    keepers: { count: keepers, percentage: Math.round((keepers / totalForRoles) * 100) },
+    allRounders: { count: allRounders, percentage: Math.round((allRounders / totalForRoles) * 100) },
+    bowlers: { count: bowlers, percentage: Math.round((bowlers / totalForRoles) * 100) },
+  };
+
+  // Injured or Withdrawn players (creates injury replacement vacancy under BCCI rules)
+  const injuredPlayers = activePlayers.filter((p) => {
+    const st = (p.squadStatus || '').toLowerCase();
+    return st.includes('injur') || st.includes('withdrawn') || st.includes('ruled out');
+  });
+
+  // Dynamic Purse Computation
+  const baseSpent = IPL_2027_BASE_PURSE_CR - teamMeta.purseAmountCr;
+  let explicitFeesSum = 0;
+  let explicitCount = 0;
+  activePlayers.forEach((p) => {
+    const f = parseFeeInCrores(p.transferFee || p.auction?.fee);
+    if (f > 0) {
+      explicitFeesSum += f;
+      explicitCount++;
+    }
+  });
+
+  const unsetCount = squadCount - explicitCount;
+  const defaultPerUnset = unsetCount > 0
+    ? Math.max(0.5, (baseSpent - explicitFeesSum) / unsetCount)
+    : 0;
+
+  const dynamicSpentCr = explicitFeesSum + (unsetCount * defaultPerUnset);
+  const remainingPurseCr = Math.max(0, IPL_2027_BASE_PURSE_CR - dynamicSpentCr);
+
+  return {
+    team: teamMeta,
+    squadCount,
+    squadMax: IPL_2027_SQUAD_MAX,
+    squadMin: IPL_2027_SQUAD_MIN,
+    squadOpenSlots,
+    squadStatus,
+    overseasCount,
+    overseasMax: IPL_2027_OVERSEAS_MAX,
+    overseasOpenSlots,
+    overseasStatus,
+    totalPurseCr: IPL_2027_BASE_PURSE_CR,
+    spentPurseCr: Math.round(dynamicSpentCr * 100) / 100,
+    remainingPurseCr: Math.round(remainingPurseCr * 100) / 100,
+    formattedRemainingPurse: `₹${remainingPurseCr.toFixed(2)} Cr`,
+    formattedSpentPurse: `₹${dynamicSpentCr.toFixed(2)} Cr`,
+    roles,
+    injuredCount: injuredPlayers.length,
+    injuredPlayers,
+  };
+}
