@@ -31,16 +31,36 @@ import BattingStatsWorkspace from '@/components/admin/player-stats/BattingStatsW
 import BowlingStatsWorkspace from '@/components/admin/player-stats/BowlingStatsWorkspace';
 import { IPL_2027_TEAMS, resolveIpl2027Team } from '@/lib/admin/ipl2027Teams';
 
+// Centralized check for 2027 Unassigned / Standby / Released Pool Players
+export function isUnassignedPoolPlayer(p: Player): boolean {
+  if (!p) return false;
+  const id = String(p.teamId || '').trim().toLowerCase();
+  const short = String(p.teamShortName || '').trim().toUpperCase();
+  const team = String(p.team || '').trim().toLowerCase();
+  const status = String(p.squadStatus || '').trim().toLowerCase();
+
+  return (
+    !id ||
+    id === 'pool' ||
+    id === 'standby_2027' ||
+    id === 'unassigned' ||
+    short === 'POOL' ||
+    team.includes('standby') ||
+    team.includes('pool') ||
+    team.includes('unassigned') ||
+    status.includes('release') ||
+    status.includes('draft pool')
+  );
+}
+
 // Team Sort Rank: RCB Priority #1, followed by rest of IPL franchises, Standby Pool last
 function getTeamSortRank(p: Player): number {
+  if (isUnassignedPoolPlayer(p)) return 99;
+
   const short = (p.teamShortName || '').toUpperCase();
   const id = String(p.teamId || '');
   const name = (p.team || '').toLowerCase();
-  const status = (p.squadStatus || '').toLowerCase();
 
-  if (name.includes('pool') || status.includes('release') || id === 'pool' || (!id && !short)) {
-    return 99;
-  }
   if (short === 'RCB' || id === '1' || name.includes('bengaluru') || name.includes('bangalore')) return 1;
   if (short === 'CSK' || id === '10' || name.includes('chennai')) return 2;
   if (short === 'MI' || id === '2' || name.includes('mumbai')) return 3;
@@ -175,14 +195,13 @@ function Ipl2027OpsPlayersPage() {
     const list = players.filter((player) => {
       // 1. Franchise Selector Filter
       if (selectedTeamId !== 'all') {
-        if (selectedTeamId === 'STANDBY_2027') {
-          const isPool =
-            !player.teamId ||
-            String(player.teamId).trim() === '' ||
-            player.team === 'Auction Pool 2027' ||
-            (player.squadStatus || '').toLowerCase().includes('release');
-          if (!isPool) return false;
+        const isPoolSelected = selectedTeamId === 'pool' || selectedTeamId === 'STANDBY_2027';
+        if (isPoolSelected) {
+          if (!isUnassignedPoolPlayer(player)) return false;
         } else {
+          // If a franchise is selected (e.g. RCB), do NOT include unassigned/released players
+          if (isUnassignedPoolPlayer(player)) return false;
+
           const pTeamId = String(player.teamId || '');
           const pTeamShort = (player.teamShortName || '').toUpperCase();
           const targetMeta = resolveIpl2027Team(selectedTeamId);
@@ -215,11 +234,11 @@ function Ipl2027OpsPlayersPage() {
         const notes = (player as any).transferNotes || '';
 
         if (statusFilter === 'RETAINED') {
-          if (!s.includes('retained')) return false;
+          if (!s.includes('retained') || isUnassignedPoolPlayer(player)) return false;
         } else if (statusFilter === 'TRADED') {
           if (!s.includes('traded') && !notes.toLowerCase().includes('trade')) return false;
         } else if (statusFilter === 'RELEASED') {
-          if (!s.includes('release') && selectedTeamId !== 'STANDBY_2027') return false;
+          if (!isUnassignedPoolPlayer(player) && !s.includes('release')) return false;
         } else if (statusFilter === 'OVERSEAS') {
           const nat = (player.nationality || 'India').toLowerCase();
           if (nat === 'india' || nat === 'ind' || nat === 'indian') return false;
@@ -251,6 +270,7 @@ function Ipl2027OpsPlayersPage() {
   const playersCountByTeam = useMemo(() => {
     const counts: Record<string, number> = {};
     players.forEach((p) => {
+      if (isUnassignedPoolPlayer(p)) return;
       if (p.teamId) {
         counts[String(p.teamId)] = (counts[String(p.teamId)] || 0) + 1;
       }
@@ -265,13 +285,7 @@ function Ipl2027OpsPlayersPage() {
   }, [players]);
 
   const poolPlayersCount = useMemo(() => {
-    return players.filter(
-      (p) =>
-        p.squadStatus === 'Released' ||
-        p.squadStatus === 'Draft Pool' ||
-        !p.teamId ||
-        p.teamId === 'pool'
-    ).length;
+    return players.filter(isUnassignedPoolPlayer).length;
   }, [players]);
 
   // Handler for saving/updating player

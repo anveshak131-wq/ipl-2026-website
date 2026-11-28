@@ -6276,9 +6276,9 @@ export const fallbackIplPlayers = [
     "name": "Swapnil Singh",
     "role": "All-rounder",
     "allRounderType": "Bowling All-rounder",
-    "teamId": "1",
-    "team": "Royal Challengers Bangalore",
-    "teamShortName": "RCB",
+    "teamId": "",
+    "team": "2027 Auction Standby",
+    "teamShortName": "Pool",
     "league": "ipl",
     "age": 34,
     "dateOfBirth": "1991-01-22",
@@ -6289,7 +6289,7 @@ export const fallbackIplPlayers = [
     "bowlingStyle": "Left-arm orthodox",
     "transferAcquiredVia": "",
     "transferFee": "",
-    "transferNotes": "",
+    "transferNotes": "Released into 2027 Auction Standby Pool",
     "lastAuctionYear": null,
     "stats": {
       "matches": 14,
@@ -6317,8 +6317,8 @@ export const fallbackIplPlayers = [
       "bestBowling": "2/28",
       "fiveWickets": 0
     },
-    "isActiveInSquad": true,
-    "squadStatus": "Retained"
+    "isActiveInSquad": false,
+    "squadStatus": "Released"
   },
   {
     "id": "192",

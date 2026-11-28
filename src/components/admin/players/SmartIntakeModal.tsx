@@ -404,12 +404,17 @@ export default function SmartIntakeModal({
                 <select
                   value={formData.teamId || ''}
                   onChange={(e) => {
-                    const selTeam = IPL_2027_TEAMS.find((t) => t.id === e.target.value);
+                    const val = e.target.value;
+                    const selTeam = IPL_2027_TEAMS.find((t) => t.id === val);
+                    const isPool = !val || val === 'pool' || val === 'STANDBY_2027';
                     setFormData({
                       ...formData,
-                      teamId: e.target.value,
+                      teamId: isPool ? '' : val,
                       team: selTeam?.name || '2027 Auction Standby',
                       teamShortName: selTeam?.shortName || 'Pool',
+                      squadStatus: isPool
+                        ? 'Released'
+                        : (formData.squadStatus === 'Released' ? 'Retained' : formData.squadStatus || 'Retained'),
                     });
                   }}
                   className="w-full px-3.5 py-2 rounded-xl bg-slate-900 border border-white/10 text-xs text-white focus:outline-none focus:border-[#f2d39a]"

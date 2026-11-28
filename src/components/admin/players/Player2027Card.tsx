@@ -50,7 +50,18 @@ export const Player2027Card = React.memo(function Player2027Card({
         </span>
       );
     }
-    if (status.includes('release') || String(player.teamId || '').trim() === '' || player.team === 'Auction Pool 2027') {
+    const isPool =
+      !player.teamId ||
+      String(player.teamId).trim() === '' ||
+      String(player.teamId).toLowerCase() === 'pool' ||
+      status.includes('release') ||
+      status.includes('draft pool') ||
+      (player.team || '').toLowerCase().includes('standby') ||
+      (player.team || '').toLowerCase().includes('auction pool') ||
+      (player.team || '').toLowerCase().includes('unassigned') ||
+      (player.teamShortName || '').toUpperCase() === 'POOL';
+
+    if (isPool) {
       return (
         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-red-500/20 text-red-300 border border-red-500/40">
           🔴 2027 Auction Pool
