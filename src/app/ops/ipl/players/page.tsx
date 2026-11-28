@@ -226,8 +226,23 @@ function Ipl2027OpsPlayersPage() {
         fetch('/api/teams?league=ipl').then((r) => (r.ok ? r.json() : [])),
       ]);
 
-      const rawPlayers = Array.isArray(resPlayers) ? resPlayers : resPlayers?.data || [];
+      let rawPlayers = Array.isArray(resPlayers) ? resPlayers : resPlayers?.data || [];
       const rawTeams = Array.isArray(resTeams) ? resTeams : resTeams?.data || [];
+
+      // Auto-heal: If Cloudflare KV returned stale players without 2027 contract fees, auto-sync
+      if (rawPlayers.length > 0 && !rawPlayers.some((p: any) => p.transferFee)) {
+        try {
+          const syncRes = await fetch('/api/players?league=ipl&includeInactive=true&realign=true');
+          if (syncRes.ok) {
+            const healed = await syncRes.json();
+            if (Array.isArray(healed) && healed.length > 0 && healed.some((p: any) => p.transferFee)) {
+              rawPlayers = healed;
+            }
+          }
+        } catch (syncErr) {
+          console.warn('Auto-sync KV check:', syncErr);
+        }
+      }
 
       setPlayers(rawPlayers);
       setTeams(rawTeams);
@@ -569,6 +584,31 @@ function Ipl2027OpsPlayersPage() {
     }
   };
 
+  // Manual Action to Force Re-align and Sync Cloudflare KV with Official Retentions
+  const [isSyncingKv, setIsSyncingKv] = useState(false);
+  const handleSyncRetentions = async () => {
+    setIsSyncingKv(true);
+    try {
+      const res = await fetch('/api/players', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'realign', league: 'ipl', realign: true }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.players && Array.isArray(data.players)) {
+          setPlayers(data.players);
+        } else {
+          await loadData();
+        }
+      }
+    } catch (e) {
+      console.error('Failed to sync retentions:', e);
+    } finally {
+      setIsSyncingKv(false);
+    }
+  };
+
   // Handler for opening edit modal
   const handleOpenEdit = (player: Player) => {
     setEditingPlayer(player);
@@ -596,7 +636,7 @@ function Ipl2027OpsPlayersPage() {
                 <Shield className="w-3.5 h-3.5" />
                 IPL 2027 Season Verified
               </span>
-              <span className="text-xs font-bold text-white/50">· 255 Contracted Players</span>
+              <span className="text-xs font-bold text-white/50">· {players.length} Contracted Players</span>
             </div>
             <h1 className="text-3xl md:text-4xl font-black text-white tracking-tight">
               IPL 2027 Squad Intelligence & Players Ops
@@ -607,6 +647,17 @@ function Ipl2027OpsPlayersPage() {
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
+            <button
+              type="button"
+              onClick={handleSyncRetentions}
+              disabled={isSyncingKv}
+              className="px-4 py-2.5 rounded-2xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 text-xs font-bold flex items-center gap-2 border border-amber-500/30 shadow-lg transition-all disabled:opacity-50"
+              title="Force sync and flush Cloudflare KV cache with official 2027 valuations"
+            >
+              <RefreshCw className={`w-4 h-4 text-amber-400 ${isSyncingKv ? 'animate-spin' : ''}`} />
+              <span>{isSyncingKv ? 'Syncing...' : 'Sync 2027 Retentions'}</span>
+            </button>
+
             <button
               type="button"
               onClick={() => setShowExportStudio(!showExportStudio)}

@@ -79,9 +79,73 @@ export const onRequest = async (context) => {
             context.waitUntil(kv.put(kvKey, JSON.stringify(players)).catch(() => {}));
           }
         }
-      } else if (league === "ipl" && (!Array.isArray(players) || players.length === 0)) {
-        players = fallbackIplPlayers;
-        if (kv) context.waitUntil(kv.put(kvKey, JSON.stringify(fallbackIplPlayers)).catch(() => {}));
+      } else if (league === "ipl") {
+        const isStaleIpl =
+          !Array.isArray(players) ||
+          players.length === 0 ||
+          url.searchParams.get("realign") === "true" ||
+          players.length < fallbackIplPlayers.length ||
+          !players.some((p) => p.name === "Cameron Green") ||
+          players.every((p) => !p.transferFee);
+
+        if (isStaleIpl) {
+          players = fallbackIplPlayers;
+          if (kv) {
+            context.waitUntil(kv.put(kvKey, JSON.stringify(fallbackIplPlayers)).catch(() => {}));
+          }
+        } else {
+          // Seed merge: ensure every player has their 2027 transferFee, transferNotes, trades, and team assignments
+          const seedById = new Map(fallbackIplPlayers.map((sp) => [String(sp.id), sp]));
+          const seedByName = new Map(
+            fallbackIplPlayers.map((sp) => [String(sp.name || "").trim().toLowerCase(), sp])
+          );
+          let healedAny = false;
+
+          players = players.map((p) => {
+            const seed =
+              seedById.get(String(p.id)) ||
+              seedByName.get(String(p.name || "").trim().toLowerCase());
+            if (!seed) return p;
+
+            const needsFeeSync = !p.transferFee && Boolean(seed.transferFee);
+            const needsNotesSync = !p.transferNotes && Boolean(seed.transferNotes);
+            const needsStatusSync =
+              (!p.squadStatus || p.squadStatus === 'active') && Boolean(seed.squadStatus);
+            const needsTradeTeamSync =
+              seed.squadStatus === 'Traded' && String(p.teamId) !== String(seed.teamId);
+
+            if (needsFeeSync || needsNotesSync || needsStatusSync || needsTradeTeamSync) {
+              healedAny = true;
+              return {
+                ...p,
+                teamId: needsTradeTeamSync ? seed.teamId : (p.teamId || seed.teamId),
+                team: needsTradeTeamSync ? seed.team : (p.team || seed.team),
+                teamShortName: needsTradeTeamSync ? seed.teamShortName : (p.teamShortName || seed.teamShortName),
+                transferFee: p.transferFee || seed.transferFee || '',
+                transferNotes: p.transferNotes || seed.transferNotes || '',
+                transferAcquiredVia: p.transferAcquiredVia || seed.transferAcquiredVia || 'retention',
+                squadStatus: seed.squadStatus || p.squadStatus || 'Retained',
+              };
+            }
+            return p;
+          });
+
+          // Check if any missing players from seed need to be added to KV
+          const currentIds = new Set(players.map((p) => String(p.id)));
+          const currentNames = new Set(players.map((p) => String(p.name || "").trim().toLowerCase()));
+          const missingPlayers = fallbackIplPlayers.filter(
+            (sp) => !currentIds.has(String(sp.id)) && !currentNames.has(String(sp.name || "").trim().toLowerCase())
+          );
+
+          if (missingPlayers.length > 0) {
+            healedAny = true;
+            players = [...players, ...missingPlayers];
+          }
+
+          if (healedAny && kv) {
+            context.waitUntil(kv.put(kvKey, JSON.stringify(players)).catch(() => {}));
+          }
+        }
       }
 
       return new Response(JSON.stringify(players), {
