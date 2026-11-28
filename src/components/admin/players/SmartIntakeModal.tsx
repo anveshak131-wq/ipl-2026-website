@@ -187,41 +187,93 @@ export default function SmartIntakeModal({
       const iplBat = career.batting?.IPL || {};
       const iplBowl = career.bowling?.IPL || {};
 
-      setFormData((prev: any) => ({
-        ...prev,
-        name: bio.name || prev.name,
-        role: bio.role || prev.role,
-        battingStyle: bio.battingStyle || prev.battingStyle,
-        bowlingStyle: bio.bowlingStyle || prev.bowlingStyle,
-        dateOfBirth: bio.dateOfBirth || prev.dateOfBirth,
-        age: bio.age ? parseInt(String(bio.age), 10) : prev.age,
-        nationality: bio.nationality || prev.nationality,
-        birthPlace: bio.birthPlace || prev.birthPlace,
-        teams: bio.teams || prev.teams,
-        cricbuzzUrl: data.sourceUrl || prev.cricbuzzUrl,
-        cricbuzzId: data.profileId || prev.cricbuzzId,
+      const updatedFormData = {
+        ...formData,
+        name: bio.name || formData.name,
+        role: bio.role || formData.role,
+        battingStyle: bio.battingStyle || formData.battingStyle,
+        bowlingStyle: bio.bowlingStyle || formData.bowlingStyle,
+        dateOfBirth: bio.dateOfBirth || formData.dateOfBirth,
+        age: bio.age ? parseInt(String(bio.age), 10) : formData.age,
+        nationality: bio.nationality || formData.nationality,
+        birthPlace: bio.birthPlace || formData.birthPlace,
+        teams: bio.teams || formData.teams,
+        cricbuzzUrl: data.sourceUrl || formData.cricbuzzUrl,
+        cricbuzzId: data.profileId || formData.cricbuzzId,
         careerStats: career,
-        iccRankings: career.iccRankings || prev.iccRankings || [],
+        iccRankings: career.iccRankings || formData.iccRankings || [],
         stats: {
-          ...prev.stats,
-          runs: iplBat.Runs ? parseInt(String(iplBat.Runs), 10) : prev.stats?.runs || 0,
-          wickets: iplBowl.Wkts ? parseInt(String(iplBowl.Wkts), 10) : prev.stats?.wickets || 0,
-          average: iplBat.Avg ? parseFloat(String(iplBat.Avg)) : prev.stats?.average || 0,
-          strikeRate: iplBat.SR ? parseFloat(String(iplBat.SR)) : prev.stats?.strikeRate || 0,
-          matches: iplBat.Mat ? parseInt(String(iplBat.Mat), 10) : prev.stats?.matches || 0,
-          highest: iplBat.HS ? parseInt(String(iplBat.HS), 10) : prev.stats?.highest || 0,
-          fifties: iplBat['50'] ? parseInt(String(iplBat['50']), 10) : prev.stats?.fifties || 0,
-          hundreds: iplBat['100'] ? parseInt(String(iplBat['100']), 10) : prev.stats?.hundreds || 0,
-          fours: iplBat['4s'] ? parseInt(String(iplBat['4s']), 10) : prev.stats?.fours || 0,
-          sixes: iplBat['6s'] ? parseInt(String(iplBat['6s']), 10) : prev.stats?.sixes || 0,
-          economy: iplBowl.Econ ? parseFloat(String(iplBowl.Econ)) : prev.stats?.economy || 0,
-          bestBowling: iplBowl.BBI || iplBowl.BBM || prev.stats?.bestBowling || '',
+          ...formData.stats,
+          runs: iplBat.Runs ? parseInt(String(iplBat.Runs), 10) : formData.stats?.runs || 0,
+          wickets: iplBowl.Wkts ? parseInt(String(iplBowl.Wkts), 10) : formData.stats?.wickets || 0,
+          average: iplBat.Avg ? parseFloat(String(iplBat.Avg)) : formData.stats?.average || 0,
+          strikeRate: iplBat.SR ? parseFloat(String(iplBat.SR)) : formData.stats?.strikeRate || 0,
+          matches: iplBat.Mat ? parseInt(String(iplBat.Mat), 10) : formData.stats?.matches || 0,
+          highest: iplBat.HS ? parseInt(String(iplBat.HS), 10) : formData.stats?.highest || 0,
+          fifties: iplBat['50'] ? parseInt(String(iplBat['50']), 10) : formData.stats?.fifties || 0,
+          hundreds: iplBat['100'] ? parseInt(String(iplBat['100']), 10) : formData.stats?.hundreds || 0,
+          fours: iplBat['4s'] ? parseInt(String(iplBat['4s']), 10) : formData.stats?.fours || 0,
+          sixes: iplBat['6s'] ? parseInt(String(iplBat['6s']), 10) : formData.stats?.sixes || 0,
+          economy: iplBowl.Econ ? parseFloat(String(iplBowl.Econ)) : formData.stats?.economy || 0,
+          bestBowling: iplBowl.BBI || iplBowl.BBM || formData.stats?.bestBowling || '',
         },
-      }));
+      };
 
-      setScrapeSuccess(
-        `✓ Verified: ${bio.name || 'player'} (${bio.birthPlace || 'Delhi'} · ${iplBat.Runs || 0} Runs · ${iplBowl.Wkts || 0} Wkts)`
-      );
+      setFormData(updatedFormData);
+
+      // Auto-persist verified player to backend & parent state if editing an existing player
+      if (editingPlayer?.id) {
+        const targetTeam = IPL_2027_TEAMS.find((t) => t.id === updatedFormData.teamId) ||
+          teams.find((t) => String(t.id) === String(updatedFormData.teamId));
+
+        const autoSavePayload: Player = {
+          ...editingPlayer,
+          id: editingPlayer.id,
+          name: updatedFormData.name.trim(),
+          role: updatedFormData.role || editingPlayer.role || 'Batsman',
+          teamId: updatedFormData.teamId || editingPlayer.teamId || '',
+          team: targetTeam?.name || updatedFormData.team || editingPlayer.team || 'Auction Standby',
+          teamShortName: targetTeam?.shortName || updatedFormData.teamShortName || editingPlayer.teamShortName || 'Pool',
+          league: 'ipl',
+          nationality: updatedFormData.nationality || editingPlayer.nationality || 'India',
+          birthPlace: updatedFormData.birthPlace || (editingPlayer as any).birthPlace || '',
+          teams: updatedFormData.teams || (editingPlayer as any).teams || '',
+          battingStyle: updatedFormData.battingStyle || editingPlayer.battingStyle || 'Right-handed bat',
+          bowlingStyle: updatedFormData.bowlingStyle || editingPlayer.bowlingStyle || 'Right-arm medium',
+          jerseyNumber: updatedFormData.jerseyNumber || editingPlayer.jerseyNumber || '',
+          age: updatedFormData.age || editingPlayer.age || 25,
+          dateOfBirth: updatedFormData.dateOfBirth || editingPlayer.dateOfBirth || '',
+          isCaptain: Boolean(updatedFormData.isCaptain ?? editingPlayer.isCaptain),
+          squadStatus: updatedFormData.squadStatus || editingPlayer.squadStatus || 'Retained',
+          cricbuzzUrl: updatedFormData.cricbuzzUrl || editingPlayer.cricbuzzUrl || '',
+          cricbuzzId: updatedFormData.cricbuzzId || (editingPlayer as any).cricbuzzId || '',
+          stats: updatedFormData.stats,
+          careerStats: updatedFormData.careerStats,
+          iccRankings: updatedFormData.iccRankings,
+          ...((updatedFormData.transferFee || (editingPlayer as any).transferFee) ? { transferFee: updatedFormData.transferFee || (editingPlayer as any).transferFee } : {}),
+          ...((updatedFormData.transferNotes || (editingPlayer as any).transferNotes) ? { transferNotes: updatedFormData.transferNotes || (editingPlayer as any).transferNotes } : {}),
+        };
+
+        const token = typeof window !== 'undefined' ? localStorage.getItem('adminToken') : null;
+        await fetch('/api/players', {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          },
+          body: JSON.stringify(autoSavePayload),
+        });
+
+        onSaved(autoSavePayload);
+
+        setScrapeSuccess(
+          `✓ Verified & Auto-Saved to Squad: ${bio.name || autoSavePayload.name} (${bio.birthPlace || 'Delhi'} · ${iplBat.Runs || 0} Runs · ${iplBowl.Wkts || 0} Wkts)`
+        );
+      } else {
+        setScrapeSuccess(
+          `✓ Verified: ${bio.name || 'player'} (${bio.birthPlace || 'Delhi'} · ${iplBat.Runs || 0} Runs · ${iplBowl.Wkts || 0} Wkts)`
+        );
+      }
     } catch (err: any) {
       setScrapeError(err.message || 'Scraping failed.');
     } finally {

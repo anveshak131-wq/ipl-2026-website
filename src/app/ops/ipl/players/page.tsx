@@ -448,12 +448,19 @@ function Ipl2027OpsPlayersPage() {
   // Handler for saving/updating player
   const handlePlayerSaved = (savedPlayer: Player) => {
     setPlayers((prev) => {
-      const exists = prev.some((p) => p.id === savedPlayer.id);
+      const exists = prev.some((p) => String(p.id) === String(savedPlayer.id));
       if (exists) {
-        return prev.map((p) => (p.id === savedPlayer.id ? savedPlayer : p));
+        return prev.map((p) => (String(p.id) === String(savedPlayer.id) ? savedPlayer : p));
       }
       return [savedPlayer, ...prev];
     });
+
+    if (drawerPlayer && String(drawerPlayer.id) === String(savedPlayer.id)) {
+      setDrawerPlayer(savedPlayer);
+    }
+    if (editingPlayer && String(editingPlayer.id) === String(savedPlayer.id)) {
+      setEditingPlayer(savedPlayer);
+    }
   };
 
   // In-Season & Post-Auction Signing & Roster Handlers
@@ -611,7 +618,8 @@ function Ipl2027OpsPlayersPage() {
 
   // Handler for opening edit modal
   const handleOpenEdit = (player: Player) => {
-    setEditingPlayer(player);
+    const freshPlayer = players.find((p) => String(p.id) === String(player.id)) || player;
+    setEditingPlayer(freshPlayer);
     setModalOpen(true);
   };
 
@@ -902,7 +910,10 @@ function Ipl2027OpsPlayersPage() {
       {/* 1-Click Cricbuzz Smart Intake Modal */}
       <SmartIntakeModal
         isOpen={modalOpen}
-        onClose={() => setModalOpen(false)}
+        onClose={() => {
+          setModalOpen(false);
+          setEditingPlayer(null);
+        }}
         editingPlayer={editingPlayer}
         onSaved={(saved) => handlePlayerSaved(saved)}
         teams={teams}

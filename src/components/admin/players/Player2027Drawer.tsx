@@ -140,11 +140,14 @@ export default function Player2027Drawer({
           wickets: iplBowl.Wkts ? parseInt(String(iplBowl.Wkts), 10) : current.stats?.wickets || 0,
           average: iplBat.Avg ? parseFloat(String(iplBat.Avg)) : current.stats?.average || 0,
           strikeRate: iplBat.SR ? parseFloat(String(iplBat.SR)) : current.stats?.strikeRate || 0,
+          matches: iplBat.Mat ? parseInt(String(iplBat.Mat), 10) : current.stats?.matches || 0,
           highest: iplBat.HS ? parseInt(String(iplBat.HS), 10) : current.stats?.highest || 0,
           fifties: iplBat['50'] ? parseInt(String(iplBat['50']), 10) : current.stats?.fifties || 0,
           hundreds: iplBat['100'] ? parseInt(String(iplBat['100']), 10) : current.stats?.hundreds || 0,
           fours: iplBat['4s'] ? parseInt(String(iplBat['4s']), 10) : current.stats?.fours || 0,
           sixes: iplBat['6s'] ? parseInt(String(iplBat['6s']), 10) : current.stats?.sixes || 0,
+          economy: iplBowl.Econ ? parseFloat(String(iplBowl.Econ)) : current.stats?.economy || 0,
+          bestBowling: iplBowl.BBI || iplBowl.BBM || current.stats?.bestBowling || '',
         },
       };
 
